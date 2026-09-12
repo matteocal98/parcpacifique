@@ -282,6 +282,11 @@
   .track-mode-choice{display:flex;gap:20px;margin:8px 0 6px;}
   .track-mode-choice label{display:flex;align-items:center;gap:7px;font-weight:500;font-size:16px;margin:0;cursor:pointer;}
   .track-mode-choice input{width:17px;height:17px;accent-color:var(--primary);}
+  .password-wrap{position:relative;}
+  .password-wrap input{padding-right:76px;}
+  .toggle-pw-btn{position:absolute;right:6px;top:34px;background:none;border:none;color:var(--primary);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px;}
+  .signup-link-btn{width:100%;margin-top:10px;}
+  .upgrade-banner{background:var(--primary-soft);border:1px solid var(--primary-line);border-radius:var(--r-sm);padding:12px 14px;font-size:14px;color:var(--primary-dark);margin-bottom:16px;text-align:center;}
   .legal-footer{text-align:center;margin-top:26px;font-size:12.5px;color:var(--ink-soft);}
   .legal-footer a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px;}
   .legal-footer a:hover{color:var(--primary-dark);}
@@ -347,6 +352,7 @@ function renderLogin(errorMsg) {
         <button class="primary" type="submit">Se connecter</button>
         ${errorMsg ? `<div class="error">${errorMsg}</div>` : ''}
       </form>
+      <button type="button" class="secondary signup-link-btn" id="open-signup">Créer un compte</button>
       <div class="legal-footer">
         <a href="./mentions-legales.html" target="_blank">Mentions légales</a> ·
         <a href="./cgu.html" target="_blank">CGU</a> ·
@@ -362,6 +368,181 @@ function renderLogin(errorMsg) {
     if (error) { renderLogin(error.message); return; }
     boot();
   });
+  document.getElementById('open-signup').addEventListener('click', () => openSignupWizard());
+}
+
+const SIGNUP_ACTIVITIES = ['BTP / Travaux publics', 'Agriculture / Élevage', 'Espaces verts / Paysagisme', 'Transport / Logistique', 'Location de matériel', 'Industrie / Production', 'Collectivité / Secteur public', 'Autre'];
+
+function openSignupWizard() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const state = { structureType: 'company', name: '', activity: SIGNUP_ACTIVITIES[0], registrationNumber: '', phone: '', email: '', contactName: '', password: '' };
+
+  function shell(inner) { overlay.innerHTML = `<div class="modal">${inner}</div>`; }
+
+  function stepForm() {
+    shell(`
+      <h2>Créer un compte</h2>
+      <p class="sub">Gratuit jusqu'à 3 machines suivies, puis 20 €/mois.</p>
+      <form id="signup-form">
+        <label>Type de structure</label>
+        <div class="track-mode-choice">
+          <label><input type="radio" name="stype" value="company" ${state.structureType === 'company' ? 'checked' : ''}> Société</label>
+          <label><input type="radio" name="stype" value="individual" ${state.structureType === 'individual' ? 'checked' : ''}> Indépendant / Patenté</label>
+        </div>
+
+        <label for="su-name" id="su-name-label">${state.structureType === 'individual' ? 'Nom et prénom' : 'Nom de la société'}</label>
+        <input id="su-name" required value="${state.name}">
+
+        <label for="su-activity">Activité</label>
+        <select id="su-activity">
+          ${SIGNUP_ACTIVITIES.map(a => `<option value="${a}" ${a === state.activity ? 'selected' : ''}>${a}</option>`).join('')}
+        </select>
+
+        <label for="su-reg">N° RCS / RIDET (si disponible)</label>
+        <input id="su-reg" value="${state.registrationNumber}">
+
+        <div class="field-row">
+          <div>
+            <label for="su-phone">Téléphone</label>
+            <input id="su-phone" type="tel" required value="${state.phone}">
+          </div>
+          <div>
+            <label for="su-contact">Nom du contact</label>
+            <input id="su-contact" required value="${state.contactName}">
+          </div>
+        </div>
+
+        <label for="su-email">Email</label>
+        <input id="su-email" type="email" required value="${state.email}">
+
+        <label for="su-password">Mot de passe</label>
+        <div class="password-wrap">
+          <input id="su-password" type="password" required minlength="6">
+          <button type="button" class="toggle-pw-btn" id="toggle-pw">Afficher</button>
+        </div>
+        <div class="hint" id="su-error"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="su-cancel">Annuler</button>
+          <button type="submit" class="primary">Créer le compte</button>
+        </div>
+      </form>
+    `);
+
+    overlay.querySelector('#su-cancel').addEventListener('click', () => overlay.remove());
+    overlay.querySelectorAll('input[name=stype]').forEach(r => {
+      r.addEventListener('change', () => {
+        state.structureType = overlay.querySelector('input[name=stype]:checked').value;
+        overlay.querySelector('#su-name-label').textContent = state.structureType === 'individual' ? 'Nom et prénom' : 'Nom de la société';
+      });
+    });
+    overlay.querySelector('#toggle-pw').addEventListener('click', () => {
+      const pw = overlay.querySelector('#su-password');
+      const btn = overlay.querySelector('#toggle-pw');
+      if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Masquer'; }
+      else { pw.type = 'password'; btn.textContent = 'Afficher'; }
+    });
+
+    overlay.querySelector('#signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorEl = overlay.querySelector('#su-error');
+      const submitBtn = e.target.querySelector('button[type=submit]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Envoi du code…';
+
+      state.name = overlay.querySelector('#su-name').value.trim();
+      state.activity = overlay.querySelector('#su-activity').value;
+      state.registrationNumber = overlay.querySelector('#su-reg').value.trim();
+      state.phone = overlay.querySelector('#su-phone').value.trim();
+      state.contactName = overlay.querySelector('#su-contact').value.trim();
+      state.email = overlay.querySelector('#su-email').value.trim();
+      state.password = overlay.querySelector('#su-password').value;
+
+      try {
+        const { error } = await sb.auth.signUp({ email: state.email, password: state.password });
+        if (error) throw error;
+        stepVerify();
+      } catch (err) {
+        errorEl.textContent = "Erreur : " + err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Créer le compte';
+      }
+    });
+  }
+
+  function stepVerify() {
+    shell(`
+      <h2>Vérifie ton email</h2>
+      <p class="sub">Un code à 6 chiffres a été envoyé à ${state.email}. Saisis-le ci-dessous pour activer ton compte.</p>
+      <form id="verify-form">
+        <label for="su-code">Code de vérification</label>
+        <input id="su-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required style="letter-spacing:6px;font-size:20px;text-align:center;">
+        <div class="hint" id="verify-error"></div>
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="verify-cancel">Annuler</button>
+          <button type="submit" class="primary">Valider</button>
+        </div>
+      </form>
+    `);
+    overlay.querySelector('#verify-cancel').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#verify-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorEl = overlay.querySelector('#verify-error');
+      const submitBtn = e.target.querySelector('button[type=submit]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Vérification…';
+      const code = overlay.querySelector('#su-code').value.trim();
+      try {
+        const { data, error } = await sb.auth.verifyOtp({ email: state.email, token: code, type: 'signup' });
+        if (error) throw error;
+
+        const { data: company, error: companyErr } = await sb.from('companies').insert({
+          name: state.name,
+          activity: state.activity,
+          registration_number: state.registrationNumber || null,
+          phone: state.phone,
+          contact_name: state.contactName,
+          plan: 'free',
+        }).select('id').single();
+        if (companyErr) throw companyErr;
+
+        const { error: profileErr } = await sb.from('profiles').insert({
+          id: data.user.id,
+          company_id: company.id,
+        });
+        if (profileErr) throw profileErr;
+
+        overlay.remove();
+        boot();
+      } catch (err) {
+        errorEl.textContent = "Erreur : " + err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Valider';
+      }
+    });
+  }
+
+  stepForm();
+}
+
+function openUpgradeNotice() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Limite du plan gratuit atteinte</h2>
+      <p class="sub">Le plan gratuit permet de suivre jusqu'à 3 machines. Passe à l'abonnement (20 €/mois) pour ajouter davantage de matériel.</p>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="close-upgrade">Fermer</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#close-upgrade').addEventListener('click', () => overlay.remove());
 }
 
 function dueInfo(plan, machine) {
@@ -385,7 +566,7 @@ function dueInfo(plan, machine) {
   return { label: `Prochaine échéance dans ${days} j`, ok: true };
 }
 
-function renderMachines(companyName, companyId, machines, categories) {
+function renderMachines(companyName, companyId, machines, categories, companyPlan) {
   const alerts = machines.filter(m => !dueInfo(m.plan, m).ok).length;
 
   const rows = machines.length ? machines.map(m => {
@@ -440,7 +621,10 @@ function renderMachines(companyName, companyId, machines, categories) {
     await sb.auth.signOut();
     renderLogin();
   });
-  document.getElementById('open-add').addEventListener('click', () => openMachineModal(companyId, categories, null));
+  document.getElementById('open-add').addEventListener('click', () => {
+    if (companyPlan === 'free' && machines.length >= 3) { openUpgradeNotice(); return; }
+    openMachineModal(companyId, categories, null);
+  });
 
   app.querySelectorAll('.view-manual').forEach(btn => {
     btn.addEventListener('click', () => viewManual(btn.dataset.path, btn));
@@ -1553,7 +1737,7 @@ async function boot() {
 
   const { data: profile, error: profileErr } = await sb
     .from('profiles')
-    .select('company_id, companies(name)')
+    .select('company_id, companies(name, plan)')
     .eq('id', session.user.id)
     .single();
 
@@ -1592,7 +1776,8 @@ async function boot() {
     profile.companies?.name || profile.companies?.[0]?.name || 'Ta société',
     profile.company_id,
     normalized,
-    categories || []
+    categories || [],
+    profile.companies?.plan || profile.companies?.[0]?.plan || 'free'
   );
 }
 
