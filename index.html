@@ -500,19 +500,21 @@ function openSignupWizard() {
         const { data, error } = await sb.auth.verifyOtp({ email: state.email, token: code, type: 'signup' });
         if (error) throw error;
 
-        const { data: company, error: companyErr } = await sb.from('companies').insert({
+        const companyId = crypto.randomUUID();
+        const { error: companyErr } = await sb.from('companies').insert({
+          id: companyId,
           name: state.name,
           activity: state.activity,
           registration_number: state.registrationNumber || null,
           phone: state.phone,
           contact_name: state.contactName,
           plan: 'free',
-        }).select('id').single();
+        });
         if (companyErr) throw companyErr;
 
         const { error: profileErr } = await sb.from('profiles').insert({
           id: data.user.id,
-          company_id: company.id,
+          company_id: companyId,
         });
         if (profileErr) throw profileErr;
 
