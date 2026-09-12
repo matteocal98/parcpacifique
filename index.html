@@ -303,6 +303,7 @@
 
 <script>
 // ── Configuration ─────────────────────────────────────────────
+const __isPasswordRecovery = window.location.hash.includes('type=recovery');
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1883,7 +1884,7 @@ async function boot() {
   );
 }
 
-if (window.location.hash.includes('type=recovery')) {
+if (__isPasswordRecovery) {
   renderSetNewPassword();
 } else {
   boot();
