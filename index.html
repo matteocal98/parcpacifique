@@ -136,11 +136,21 @@
     background:var(--surface);color:var(--primary-dark);border-color:var(--primary-line);
   }
   .view-plan-btn:hover{background:var(--primary-soft);}
-  .edit-machine:not(.view-plan-btn):not(.log-intervention-btn){
+  .next-maint-btn{
+    background:var(--surface);color:var(--ok);border-color:var(--ok-line);
+  }
+  .next-maint-btn:hover{background:var(--ok-bg);}
+  .due-hero{
+    padding:16px 18px;border-radius:var(--r-md);margin-bottom:18px;
+    font-size:17px;font-weight:700;text-align:center;line-height:1.4;
+  }
+  .due-hero.ok{background:var(--ok-bg);color:var(--ok);}
+  .due-hero.alert{background:var(--alert-bg);color:var(--alert);}
+  .edit-machine:not(.view-plan-btn):not(.log-intervention-btn):not(.next-maint-btn){
     background:var(--surface);color:#B45309;padding:6px 13px;font-weight:700;
     border:1.5px solid #F59E0B;
   }
-  .edit-machine:not(.view-plan-btn):not(.log-intervention-btn):hover{background:#FFFBEB;}
+  .edit-machine:not(.view-plan-btn):not(.log-intervention-btn):not(.next-maint-btn):hover{background:#FFFBEB;}
 
   .plan-tasks{margin:6px 0 0;padding-left:18px;}
   .plan-tasks li{font-size:15.5px;margin-bottom:5px;line-height:1.5;}
@@ -389,6 +399,7 @@ function renderMachines(companyName, companyId, machines, categories) {
           <span class="badge ${info.ok ? 'ok' : 'alert'}">${m.status === 'en_service' ? 'En service' : m.status}</span>
           <div class="due">${info.label}</div>
           <button class="edit-machine log-intervention-btn btn-row-action" data-id="${m.id}">Enregistrer un entretien</button>
+          <button class="edit-machine next-maint-btn btn-row-action" data-id="${m.id}">Prochain entretien à réaliser</button>
           <button class="edit-machine view-plan-btn btn-row-action" data-id="${m.id}">Voir le plan</button>
           <button class="edit-machine btn-row-action" data-id="${m.id}">Modifier</button>
         </div>
@@ -421,7 +432,7 @@ function renderMachines(companyName, companyId, machines, categories) {
   app.querySelectorAll('.view-manual').forEach(btn => {
     btn.addEventListener('click', () => viewManual(btn.dataset.path, btn));
   });
-  app.querySelectorAll('.edit-machine:not(.view-plan-btn):not(.log-intervention-btn)').forEach(btn => {
+  app.querySelectorAll('.edit-machine:not(.view-plan-btn):not(.log-intervention-btn):not(.next-maint-btn)').forEach(btn => {
     btn.addEventListener('click', () => {
       const machine = machines.find(m => m.id === btn.dataset.id);
       openMachineModal(companyId, categories, machine);
@@ -437,6 +448,12 @@ function renderMachines(companyName, companyId, machines, categories) {
     btn.addEventListener('click', () => {
       const machine = machines.find(m => m.id === btn.dataset.id);
       openLogInterventionModal(machine);
+    });
+  });
+  app.querySelectorAll('.next-maint-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const machine = machines.find(m => m.id === btn.dataset.id);
+      openNextMaintenanceView(machine);
     });
   });
 }
@@ -814,6 +831,75 @@ function openAddWizard(companyId, categories) {
 
   stepIdentification();
 }
+function openNextMaintenanceView(machine) {
+  const info = dueInfo(machine.plan, machine);
+  const isHours = machine.plan?.tracking_mode === 'hours';
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const items = Array.isArray(machine.plan?.items) && machine.plan.items.length
+    ? machine.plan.items
+    : (machine.plan?.tasks || '').split(',').map(t => t.trim()).filter(Boolean).map(label => ({ label }));
+
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Prochain entretien à réaliser</h2>
+      <p class="sub">${machine.name}${machine.category?.name ? ' · ' + machine.category.name : ''}</p>
+
+      <div class="due-hero ${info.ok ? 'ok' : 'alert'}">${info.label}</div>
+
+      <div class="plan-field">
+        <div class="label">À faire</div>
+        ${items.length
+          ? `<ul class="plan-tasks">${items.map(it => `<li><strong>${it.label}</strong>${it.frequency ? ` — ${it.frequency}` : ''}</li>`).join('')}</ul>`
+          : `<div class="value" style="color:var(--ink-soft);">Aucune tâche détaillée dans le plan.</div>`}
+      </div>
+
+      <div class="plan-field" id="last-intervention-section">
+        <div class="label">Dernier entretien réalisé</div>
+        <div class="value" style="color:var(--ink-soft);">Chargement…</div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="close-next">Fermer</button>
+        <button type="button" class="primary" id="log-from-next">Enregistrer cet entretien</button>
+      </div>
+    </div>
+  `;
+
+  overlay.querySelector('#close-next').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#log-from-next').addEventListener('click', () => {
+    overlay.remove();
+    openLogInterventionModal(machine);
+  });
+
+  sb.from('interventions')
+    .select('performed_at, hours_at_intervention, description, items_done')
+    .eq('machine_id', machine.id)
+    .order('performed_at', { ascending: false })
+    .limit(1)
+    .then(({ data, error }) => {
+      const section = overlay.querySelector('#last-intervention-section');
+      if (!overlay.isConnected || !section) return;
+      const valueEl = section.querySelector('.value');
+      if (error) { if (valueEl) valueEl.textContent = "Erreur de chargement."; return; }
+      const last = (data || [])[0];
+      if (!last) {
+        if (valueEl) valueEl.textContent = "Aucun entretien enregistré pour l'instant — le plan initial s'applique.";
+        return;
+      }
+      const doneItems = Array.isArray(last.items_done) && last.items_done.length ? last.items_done.join(', ') : null;
+      if (valueEl) valueEl.outerHTML = `
+        <div class="value">
+          Le ${last.performed_at}${isHours && last.hours_at_intervention != null ? ` (compteur : ${last.hours_at_intervention} h)` : ''}
+          ${doneItems ? `<br>Éléments traités : ${doneItems}` : ''}
+          ${last.description ? `<br>Remarques : ${last.description}` : ''}
+        </div>`;
+    });
+}
+
 function openLogInterventionModal(machine) {
   const today = new Date().toISOString().slice(0, 10);
   const isHours = machine.plan?.tracking_mode === 'hours';
