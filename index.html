@@ -287,6 +287,9 @@
   .toggle-pw-btn{position:absolute;right:6px;top:34px;background:none;border:none;color:var(--primary);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px;}
   .signup-link-btn{width:100%;margin-top:10px;}
   .upgrade-banner{background:var(--primary-soft);border:1px solid var(--primary-line);border-radius:var(--r-sm);padding:12px 14px;font-size:14px;color:var(--primary-dark);margin-bottom:16px;text-align:center;}
+  .forgot-pw-row{text-align:right;margin-top:10px;}
+  .link-inline{background:none;border:none;color:var(--primary);font-size:13.5px;font-weight:700;cursor:pointer;padding:0;font-family:inherit;}
+  .link-inline:hover{text-decoration:underline;}
   .legal-footer{text-align:center;margin-top:26px;font-size:12.5px;color:var(--ink-soft);}
   .legal-footer a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px;}
   .legal-footer a:hover{color:var(--primary-dark);}
@@ -339,6 +342,99 @@ async function uploadMachinePhoto(companyId, machineId, blob) {
   return data.publicUrl;
 }
 
+function renderSetNewPassword() {
+  app.innerHTML = `
+    <div class="login-box">
+      <h1>ParcPacific</h1>
+      <p>Choisis un nouveau mot de passe.</p>
+      <form id="reset-form">
+        <label for="new-password">Nouveau mot de passe</label>
+        <div class="password-wrap">
+          <input id="new-password" type="password" minlength="6" required>
+          <button type="button" class="toggle-pw-btn" id="toggle-new-pw">Afficher</button>
+        </div>
+        <button class="primary" type="submit">Enregistrer le mot de passe</button>
+        <div class="error" id="reset-error"></div>
+      </form>
+    </div>
+  `;
+  document.getElementById('toggle-new-pw').addEventListener('click', () => {
+    const pw = document.getElementById('new-password');
+    const btn = document.getElementById('toggle-new-pw');
+    if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Masquer'; }
+    else { pw.type = 'password'; btn.textContent = 'Afficher'; }
+  });
+  document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('reset-error');
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enregistrement…';
+    const password = document.getElementById('new-password').value;
+    const { error } = await sb.auth.updateUser({ password });
+    if (error) {
+      errorEl.textContent = "Erreur : " + error.message;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enregistrer le mot de passe';
+      return;
+    }
+    boot();
+  });
+}
+
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') { renderSetNewPassword(); }
+});
+
+function openForgotPasswordModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Mot de passe oublié</h2>
+      <p class="sub">Indique ton email de connexion : on t'envoie un lien pour définir un nouveau mot de passe.</p>
+      <form id="forgot-form">
+        <label for="forgot-email">Email</label>
+        <input id="forgot-email" type="email" required>
+        <div class="hint" id="forgot-error"></div>
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="forgot-cancel">Annuler</button>
+          <button type="submit" class="primary">Envoyer le lien</button>
+        </div>
+      </form>
+    </div>
+  `;
+  overlay.querySelector('#forgot-cancel').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#forgot-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = overlay.querySelector('#forgot-error');
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    const email = overlay.querySelector('#forgot-email').value.trim();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi…';
+    try {
+      const redirectTo = window.location.href.split('?')[0].split('#')[0];
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+      overlay.innerHTML = `
+        <div class="modal">
+          <h2>Email envoyé</h2>
+          <p class="sub">Si un compte existe pour ${email}, un lien de réinitialisation vient d'être envoyé. Ouvre-le depuis ta boîte mail pour définir un nouveau mot de passe.</p>
+          <div class="modal-actions">
+            <button type="button" class="primary" id="forgot-close">Fermer</button>
+          </div>
+        </div>`;
+      overlay.querySelector('#forgot-close').addEventListener('click', () => overlay.remove());
+    } catch (err) {
+      errorEl.textContent = "Erreur : " + err.message;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Envoyer le lien';
+    }
+  });
+}
+
 function renderLogin(errorMsg) {
   app.innerHTML = `
     <div class="login-box">
@@ -349,6 +445,9 @@ function renderLogin(errorMsg) {
         <input id="email" type="email" autocomplete="username" required>
         <label for="password">Mot de passe</label>
         <input id="password" type="password" autocomplete="current-password" required>
+        <div class="forgot-pw-row">
+          <button type="button" class="link-inline" id="open-forgot">Mot de passe oublié ?</button>
+        </div>
         <button class="primary" type="submit">Se connecter</button>
         ${errorMsg ? `<div class="error">${errorMsg}</div>` : ''}
       </form>
@@ -369,6 +468,7 @@ function renderLogin(errorMsg) {
     boot();
   });
   document.getElementById('open-signup').addEventListener('click', () => openSignupWizard());
+  document.getElementById('open-forgot').addEventListener('click', () => openForgotPasswordModal());
 }
 
 const SIGNUP_ACTIVITIES = ['BTP / Travaux publics', 'Agriculture / Élevage', 'Espaces verts / Paysagisme', 'Transport / Logistique', 'Location de matériel', 'Industrie / Production', 'Collectivité / Secteur public', 'Autre'];
