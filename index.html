@@ -1883,7 +1883,11 @@ async function boot() {
   );
 }
 
-boot();
+if (window.location.hash.includes('type=recovery')) {
+  renderSetNewPassword();
+} else {
+  boot();
+}
 </script>
 </body>
 </html>
