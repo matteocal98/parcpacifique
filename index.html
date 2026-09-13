@@ -632,17 +632,21 @@ function openSignupWizard() {
   stepForm();
 }
 
-function openUpgradeNotice() {
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/8x28wO8cZ7MA1En494t3a00";
+
+function openUpgradeNotice(companyId) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const paymentUrl = STRIPE_PAYMENT_LINK + "?client_reference_id=" + encodeURIComponent(companyId);
   overlay.innerHTML = `
     <div class="modal">
       <h2>Limite du plan gratuit atteinte</h2>
       <p class="sub">Le plan gratuit permet de suivre jusqu'à 3 machines. Passe à l'abonnement (20 €/mois) pour ajouter davantage de matériel.</p>
       <div class="modal-actions">
         <button type="button" class="secondary" id="close-upgrade">Fermer</button>
+        <a href="${paymentUrl}" target="_blank" class="primary" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Passer à l'abonnement</a>
       </div>
     </div>`;
   overlay.querySelector('#close-upgrade').addEventListener('click', () => overlay.remove());
@@ -725,7 +729,7 @@ function renderMachines(companyName, companyId, machines, categories, companyPla
     renderLogin();
   });
   document.getElementById('open-add').addEventListener('click', () => {
-    if (companyPlan === 'free' && machines.length >= 3) { openUpgradeNotice(); return; }
+    if (companyPlan === 'free' && machines.length >= 3) { openUpgradeNotice(companyId); return; }
     openMachineModal(companyId, categories, null);
   });
 
