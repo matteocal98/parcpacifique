@@ -293,6 +293,39 @@
   .legal-footer{text-align:center;margin-top:26px;font-size:12.5px;color:var(--ink-soft);}
   .legal-footer a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px;}
   .legal-footer a:hover{color:var(--primary-dark);}
+
+  /* --- Direction "Signal" : composants additionnels --- */
+  .avatar-badge{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--primary);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:800;margin:0 auto 14px;
+    box-shadow:0 8px 18px rgba(91,75,245,.28);
+  }
+  .avatar-badge.sm{width:40px;height:40px;font-size:15px;margin:0;box-shadow:none;flex-shrink:0;}
+  .login-box{border-radius:28px;}
+  .login-box h1{justify-content:center;text-align:center;}
+  .login-box h1::before{display:none;}
+  input{border-color:transparent;background:var(--surface-soft);}
+  input:focus{background:var(--surface);}
+
+  header.top{align-items:center;gap:14px;}
+  .header-id{display:flex;align-items:center;gap:14px;}
+  .greeting{color:var(--ink-soft);font-size:13.5px;font-weight:600;margin:0;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 20px;}
+  .stat-card{
+    background:var(--surface);border-radius:var(--r-md);padding:16px 18px;
+    box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px;
+  }
+  .stat-card .num{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1;}
+  .stat-card .num.ok{color:var(--ok);}
+  .stat-card .num.alert{color:var(--alert);}
+  .stat-card .lbl{font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+
+  .machine{border-left:4px solid var(--line);border-radius:var(--r-md);}
+  .machine.is-alert{border-left-color:var(--alert);}
+  .machine.is-ok{border-left-color:var(--ok);}
 </style>
 </head>
 <body>
@@ -439,6 +472,7 @@ function openForgotPasswordModal() {
 function renderLogin(errorMsg) {
   app.innerHTML = `
     <div class="login-box">
+      <div class="avatar-badge">✦</div>
       <h1>ParcPacific</h1>
       <p>Connecte-toi pour voir tes machines.</p>
       <form id="login-form">
@@ -679,7 +713,7 @@ function renderMachines(companyName, companyId, machines, categories, companyPla
   const rows = machines.length ? machines.map(m => {
     const info = dueInfo(m.plan, m);
     return `
-      <div class="machine">
+      <div class="machine ${info.ok ? 'is-ok' : 'is-alert'}">
         <div class="m-main">
           <div class="name">${m.name}</div>
           <div class="meta">${(() => {
@@ -702,20 +736,24 @@ function renderMachines(companyName, companyId, machines, categories, companyPla
       </div>`;
   }).join('') : `<div class="empty">Aucune machine enregistrée pour l'instant. Clique sur « Ajouter une machine » pour créer la première.</div>`;
 
+  const initials = (companyName || 'PP').trim().split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase() || 'PP';
   app.innerHTML = `
     <header class="top">
-      <div>
-        <h1>ParcPacific</h1>
-        <div class="company">${companyName}</div>
+      <div class="header-id">
+        <div class="avatar-badge sm">${initials}</div>
+        <div>
+          <h1>ParcPacific</h1>
+          <div class="company">${companyName}</div>
+        </div>
       </div>
       <div class="actions">
         <button class="add" id="open-add">+ Ajouter une machine</button>
         <button class="link" id="logout">Se déconnecter</button>
       </div>
     </header>
-    <div class="summary">
-      <span class="chip"><strong>${machines.length}</strong> machine${machines.length > 1 ? 's' : ''} suivie${machines.length > 1 ? 's' : ''}</span>
-      ${alerts ? `<span class="chip alert-chip">${alerts} échéance${alerts > 1 ? 's' : ''} à traiter</span>` : ''}
+    <div class="stat-grid">
+      <div class="stat-card"><span class="num ok">${machines.length - alerts}</span><span class="lbl">Machine${(machines.length - alerts) > 1 ? 's' : ''} à jour</span></div>
+      <div class="stat-card"><span class="num alert">${alerts}</span><span class="lbl">Échéance${alerts > 1 ? 's' : ''} à traiter</span></div>
     </div>
     ${rows}
     <div class="legal-footer">
