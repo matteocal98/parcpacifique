@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-jcpKm+qk3zdewHq7wbCilHwuktjH64zxNsdxdnUJ1gA=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-4UcBEFo3ljSrMf+Dio5EF0Rgr2jqfgyULu7NeqQZ52Y=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -731,6 +731,42 @@ const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const app = document.getElementById('app');
 
 // ── Utilitaires ───────────────────────────────────────────────
+// ── Langues ───────────────────────────────────────────────────
+// La chaîne FRANÇAISE sert de CLÉ : t('Ajouter une machine') renvoie la
+// traduction si elle existe, et le français sinon.
+//
+// Ce choix a trois conséquences, toutes voulues :
+//   • un dictionnaire incomplet n'affiche JAMAIS de clé technique — au pire, du
+//     français, ce qui reste lisible ;
+//   • ajouter une langue est purement additif : on remplit un objet, on ne
+//     touche à aucun appel ;
+//   • tant que le dictionnaire est vide, l'application est strictement
+//     identique à ce qu'elle était — c'est ce qui rend cette étape sans risque.
+//
+// Les dictionnaires sont écrits par `signal/i18n.mjs` entre les deux marques
+// ci-dessous : c'est le SEUL endroit à remplir pour une nouvelle langue.
+//
+// Ce bloc vit dans la section « Utilitaires » et non au tout début du script :
+// le harnais de test en découpe des tranches par ancres, et une fonction
+// définie ailleurs lui échapperait.
+let LANGUE = 'fr';
+
+// DICTIONNAIRES_DEBUT
+const TEXTES = {};
+// DICTIONNAIRES_FIN
+
+function t(texte) {
+  const table = TEXTES[LANGUE];
+  if (!table) return texte;
+  return Object.prototype.hasOwnProperty.call(table, texte) ? table[texte] : texte;
+}
+
+// Bascule la langue à chaud. Le sélecteur de l'étape B s'en servira ; elle est
+// posée dès maintenant parce que c'est par elle que la fonction est vérifiable.
+function changerLangue(code) {
+  LANGUE = code;
+}
+
 // Valeurs par défaut du plan « inactif » : on stocke toujours un intervalle
 // cohérent dans les deux unités, même si la machine ne suit qu'un seul mode.
 const FALLBACK_INTERVAL_DAYS = 90;
@@ -1115,8 +1151,8 @@ function forcerMajuscules(input) {
 }
 
 const COUNTER_UNITS = {
-  hours: { word: 'heures', short: 'h', field: 'Heures compteur actuelles', placeholder: 'Ex. 245', step: '0.1' },
-  km: { word: 'kilomètres', short: 'km', field: 'Kilométrage actuel', placeholder: 'Ex. 19 240', step: '1' },
+  hours: { word: 'heures', short: 'h', field: t('Heures compteur actuelles'), placeholder: t('Ex. 245'), step: '0.1' },
+  km: { word: t('kilomètres'), short: 'km', field: t('Kilométrage actuel'), placeholder: t('Ex. 19 240'), step: '1' },
 };
 
 function counterUnitFromMode(mode) { return mode === 'km' ? 'km' : 'hours'; }
@@ -1215,7 +1251,7 @@ try {
       <strong>Impossible de charger l'application.</strong><br>
       ${esc(err.message)}<br><br>
       Vérifie ta connexion internet puis recharge la page.<br><br>
-      <button type="button" class="primary" id="fatal-retry" style="max-width:220px;margin:0 auto;">Réessayer</button>
+      <button type="button" class="primary" id="fatal-retry" style="max-width:220px;margin:0 auto;">${t('Réessayer')}</button>
     </div>`;
   const retryBtn = document.getElementById('fatal-retry');
   if (retryBtn) retryBtn.addEventListener('click', () => window.location.reload());
@@ -1247,7 +1283,7 @@ function ensurePdfWorker() {
     const p = loadPdfLib()
       .then(() => fetch(PDFJS_WORKER_URL))
       .then(resp => {
-        if (!resp.ok) throw new Error("worker pdf.js introuvable");
+        if (!resp.ok) throw new Error(t('worker pdf.js introuvable'));
         return resp.text();
       })
       .then(code => {
@@ -1285,14 +1321,14 @@ function renderSetNewPassword() {
   app.innerHTML = `
     <div class="login-box">
       <h1>ParcPacific</h1>
-      <p>Choisis un nouveau mot de passe.</p>
+      <p>${t('Choisis un nouveau mot de passe.')}</p>
       <form id="reset-form">
-        <label for="new-password">Nouveau mot de passe</label>
+        <label for="new-password">${t('Nouveau mot de passe')}</label>
         <div class="password-wrap" style="margin-bottom:16px;">
           <input id="new-password" type="password" minlength="6" required>
-          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">${t('Afficher')}</button>
         </div>
-        <button class="primary" type="submit">Enregistrer le mot de passe</button>
+        <button class="primary" type="submit">${t('Enregistrer le mot de passe')}</button>
         <div class="error" id="reset-error"></div>
       </form>
     </div>
@@ -1329,15 +1365,15 @@ function openForgotPasswordModal() {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
     <div class="modal">
-      <h2>Mot de passe oublié</h2>
+      <h2>${t('Mot de passe oublié')}</h2>
       <p class="sub">Indique ton email de connexion : on t'envoie un lien pour définir un nouveau mot de passe.</p>
       <form id="forgot-form">
-        <label for="forgot-email">Email</label>
+        <label for="forgot-email">${t('Email')}</label>
         <input id="forgot-email" type="email" required>
         <div class="hint" id="forgot-error"></div>
         <div class="modal-actions">
-          <button type="button" class="secondary" id="forgot-cancel">Annuler</button>
-          <button type="submit" class="primary">Envoyer le lien</button>
+          <button type="button" class="secondary" id="forgot-cancel">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Envoyer le lien')}</button>
         </div>
       </form>
     </div>
@@ -1356,10 +1392,10 @@ function openForgotPasswordModal() {
       if (error) throw error;
       overlay.innerHTML = `
         <div class="modal">
-          <h2>Email envoyé</h2>
+          <h2>${t('Email envoyé')}</h2>
           <p class="sub">Si un compte existe pour ${esc(email)}, un lien de réinitialisation vient d'être envoyé. Ouvre-le depuis ta boîte mail pour définir un nouveau mot de passe.</p>
           <div class="modal-actions">
-            <button type="button" class="primary" id="forgot-close">Fermer</button>
+            <button type="button" class="primary" id="forgot-close">${t('Fermer')}</button>
           </div>
         </div>`;
       overlay.querySelector('#forgot-close').addEventListener('click', () => overlay.remove());
@@ -1376,26 +1412,26 @@ function renderLogin(errorMsg) {
     <div class="login-box">
       <div class="avatar-badge">✦</div>
       <h1>ParcPacific</h1>
-      <p>Connecte-toi pour voir tes machines.</p>
+      <p>${t('Connecte-toi pour voir tes machines.')}</p>
       <form id="login-form">
-        <label for="email">Email</label>
+        <label for="email">${t('Email')}</label>
         <input id="email" type="email" autocomplete="username" required>
-        <label for="password">Mot de passe</label>
+        <label for="password">${t('Mot de passe')}</label>
         <div class="password-wrap">
           <input id="password" type="password" autocomplete="current-password" required>
-          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">${t('Afficher')}</button>
         </div>
         <div class="forgot-pw-row">
-          <button type="button" class="link-inline" id="open-forgot">Mot de passe oublié ?</button>
+          <button type="button" class="link-inline" id="open-forgot">${t('Mot de passe oublié ?')}</button>
         </div>
-        <button class="primary" type="submit">Se connecter</button>
+        <button class="primary" type="submit">${t('Se connecter')}</button>
         ${errorMsg ? `<div class="error">${esc(errorMsg)}</div>` : ''}
       </form>
-      <button type="button" class="secondary signup-link-btn" id="open-signup">Créer un compte</button>
+      <button type="button" class="secondary signup-link-btn" id="open-signup">${t('Créer un compte')}</button>
       <div class="legal-footer">
-        <a href="./mentions-legales.html" target="_blank">Mentions légales</a> ·
+        <a href="./mentions-legales.html" target="_blank">${t('Mentions légales')}</a> ·
         <a href="./cgu.html" target="_blank">CGU</a> ·
-        <a href="./politique-confidentialite.html" target="_blank">Confidentialité</a>
+        <a href="./politique-confidentialite.html" target="_blank">${t('Confidentialité')}</a>
       </div>
     </div>
   `;
@@ -1429,19 +1465,19 @@ function openSignupWizard() {
 
   function stepForm() {
     shell(`
-      <h2>Créer un compte</h2>
+      <h2>${t('Créer un compte')}</h2>
       <p class="sub">Gratuit jusqu'à 3 machines suivies, puis 20 €/mois.</p>
       <form id="signup-form">
-        <label>Type de structure</label>
+        <label>${t('Type de structure')}</label>
         <div class="track-mode-choice">
-          <label><input type="radio" name="stype" value="company" ${state.structureType === 'company' ? 'checked' : ''}> Société</label>
-          <label><input type="radio" name="stype" value="individual" ${state.structureType === 'individual' ? 'checked' : ''}> Indépendant / Patenté</label>
+          <label><input type="radio" name="stype" value="company" ${state.structureType === 'company' ? 'checked' : ''}> ${t('Société')}</label>
+          <label><input type="radio" name="stype" value="individual" ${state.structureType === 'individual' ? 'checked' : ''}> ${t('Indépendant / Patenté')}</label>
         </div>
 
         <label for="su-name" id="su-name-label">${state.structureType === 'individual' ? 'Nom et prénom' : 'Nom de la société'}</label>
         <input id="su-name" required value="${esc(state.name)}">
 
-        <label for="su-activity">Activité</label>
+        <label for="su-activity">${t('Activité')}</label>
         <select id="su-activity">
           ${SIGNUP_ACTIVITIES.map(a => `<option value="${a}" ${a === state.activity ? 'selected' : ''}>${a}</option>`).join('')}
         </select>
@@ -1449,32 +1485,32 @@ function openSignupWizard() {
         <label for="su-reg">N° RCS / RIDET (si disponible)</label>
         <input id="su-reg" value="${esc(state.registrationNumber)}">
 
-        ${champTelephoneHtml('su-phone', state.phone, { label: 'Téléphone', required: true, aide: "Sert aux rappels d'échéance par WhatsApp et par e-mail." })}
+        ${champTelephoneHtml('su-phone', state.phone, { label: t('Téléphone'), required: true, aide: "Sert aux rappels d'échéance par WhatsApp et par e-mail." })}
 
         <div class="field-row">
           <div>
-            <label for="su-contact-first">Prénom du contact</label>
+            <label for="su-contact-first">${t('Prénom du contact')}</label>
             <input id="su-contact-first" required value="${esc(state.contactFirstName)}">
           </div>
           <div>
-            <label for="su-contact-last">Nom du contact</label>
+            <label for="su-contact-last">${t('Nom du contact')}</label>
             <input id="su-contact-last" required value="${esc(state.contactLastName)}">
           </div>
         </div>
 
-        <label for="su-email">Email</label>
+        <label for="su-email">${t('Email')}</label>
         <input id="su-email" type="email" required value="${esc(state.email)}">
 
-        <label for="su-password">Mot de passe</label>
+        <label for="su-password">${t('Mot de passe')}</label>
         <div class="password-wrap">
           <input id="su-password" type="password" required minlength="6">
-          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">${t('Afficher')}</button>
         </div>
         <div class="hint" id="su-error"></div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="su-cancel">Annuler</button>
-          <button type="submit" class="primary">Créer le compte</button>
+          <button type="button" class="secondary" id="su-cancel">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Créer le compte')}</button>
         </div>
       </form>
     `);
@@ -1521,19 +1557,19 @@ function openSignupWizard() {
 
   function stepVerify() {
     shell(`
-      <h2>Vérifie ton email</h2>
+      <h2>${t('Vérifie ton email')}</h2>
       <p class="sub">Un code à 6 chiffres a été envoyé à ${esc(state.email)}. Saisis-le ci-dessous pour activer ton compte.</p>
       <form id="verify-form">
-        <label for="su-code">Code de vérification</label>
+        <label for="su-code">${t('Code de vérification')}</label>
         <input id="su-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required autofocus style="letter-spacing:6px;font-size:20px;text-align:center;">
         <div class="hint" id="verify-error"></div>
         <div class="resend-row">
-          <button type="button" class="link-inline" id="verify-resend">Renvoyer le code</button>
+          <button type="button" class="link-inline" id="verify-resend">${t('Renvoyer le code')}</button>
           <span class="hint" id="verify-resend-msg" role="status" aria-live="polite"></span>
         </div>
         <div class="modal-actions">
-          <button type="button" class="secondary" id="verify-cancel">Annuler</button>
-          <button type="submit" class="primary">Valider</button>
+          <button type="button" class="secondary" id="verify-cancel">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Valider')}</button>
         </div>
       </form>
     `);
@@ -1629,10 +1665,10 @@ function openUpgradeNotice(companyId) {
   const paymentUrl = STRIPE_PAYMENT_LINK + "?client_reference_id=" + encodeURIComponent(companyId);
   overlay.innerHTML = `
     <div class="modal">
-      <h2>Limite du plan gratuit atteinte</h2>
+      <h2>${t('Limite du plan gratuit atteinte')}</h2>
       <p class="sub">Le plan gratuit permet de suivre jusqu'à 3 machines. Passe à l'abonnement (20 €/mois) pour ajouter davantage de matériel.</p>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="close-upgrade">Fermer</button>
+        <button type="button" class="secondary" id="close-upgrade">${t('Fermer')}</button>
         <a href="${paymentUrl}" target="_blank" class="primary" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Passer à l'abonnement</a>
       </div>
     </div>`;
@@ -1717,7 +1753,7 @@ function bandeauHorsLigneHtml() {
   return `
     <div class="offline-banner" role="status">
       <span>Hors connexion — dernières données reçues ${esc(age)}. Les modifications sont impossibles tant que la connexion n'est pas rétablie.</span>
-      <button type="button" class="link-inline" id="offline-retry">Réessayer</button>
+      <button type="button" class="link-inline" id="offline-retry">${t('Réessayer')}</button>
     </div>`;
 }
 
@@ -1775,7 +1811,7 @@ function rappelsAProgrammer(machines, maintenant) {
         rappels.push({
           id: idNotification(machine.id, 1),
           quand: veille,
-          titre: 'Entretien à prévoir',
+          titre: t('Entretien à prévoir'),
           corps: `${nom} — échéance dans ${joursAvant} jours (${formatShortDate(plan.next_due_at)})`,
         });
       }
@@ -1896,21 +1932,21 @@ const UI = {
 };
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Tableau de bord', short: 'Accueil', icon: '◈' },
-  { id: 'machines', label: 'Machines', short: 'Parc', icon: '▤' },
-  { id: 'manuals', label: 'Manuels & IA', short: 'Manuels', icon: '✦' },
-  { id: 'agenda', label: 'Agenda', short: 'Agenda', icon: '◔' },
-  { id: 'reminders', label: 'Rappels', short: 'Rappels', icon: '☰' },
-  { id: 'account', label: 'Mon compte', short: 'Compte', icon: '◉' },
+  { id: 'dashboard', label: t('Tableau de bord'), short: t('Accueil'), icon: '◈' },
+  { id: 'machines', label: t('Machines'), short: t('Parc'), icon: '▤' },
+  { id: 'manuals', label: 'Manuels & IA', short: t('Manuels'), icon: '✦' },
+  { id: 'agenda', label: t('Agenda'), short: t('Agenda'), icon: '◔' },
+  { id: 'reminders', label: t('Rappels'), short: t('Rappels'), icon: '☰' },
+  { id: 'account', label: t('Mon compte'), short: t('Compte'), icon: '◉' },
 ];
 
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
 const TABS = [
-  { id: 'dashboard', short: 'Accueil', icon: '◈' },
-  { id: 'machines', short: 'Parc', icon: '▤' },
+  { id: 'dashboard', short: t('Accueil'), icon: '◈' },
+  { id: 'machines', short: t('Parc'), icon: '▤' },
   { id: 'fab' },
-  { id: 'manuals', short: 'Manuels', icon: '✦' },
-  { id: 'plus', short: 'Plus', icon: '☰' },
+  { id: 'manuals', short: t('Manuels'), icon: '✦' },
+  { id: 'plus', short: t('Plus'), icon: '☰' },
 ];
 
 function loadReminders() {
@@ -1956,14 +1992,14 @@ function firstNameFrom(label) {
 // compteur et au calendrier, sans convertir des heures en jours.
 function dueInfo(plan, machine) {
   if (!plan) {
-    return { state: 'unknown', label: 'Pas de plan de maintenance', short: 'Plan à définir', sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: null };
+    return { state: 'unknown', label: t('Pas de plan de maintenance'), short: t('Plan à définir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: null };
   }
   if (planIsCounter(plan)) {
     const unit = counterUnitOf(machine);
     const current = machineCounter(machine);
     const nextDue = planNextDueCounter(plan);
     if (nextDue == null || current == null) {
-      return { state: 'unknown', label: `Renseigner le ${unit === 'km' ? 'kilométrage' : 'compteur horaire'}`, short: 'Compteur à saisir', sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit };
+      return { state: 'unknown', label: `Renseigner le ${unit === 'km' ? 'kilométrage' : 'compteur horaire'}`, short: t('Compteur à saisir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit };
     }
     const remaining = nextDue - current;
     const horizon = planReminderCounter(plan);
@@ -1975,7 +2011,7 @@ function dueInfo(plan, machine) {
     return { state: 'ok', label: `Prochaine échéance dans ${formatCounter(remaining, unit)} (${ctx})`, short, sortKey: remaining, urgency, unit };
   }
   if (!plan.next_due_at) {
-    return { state: 'unknown', label: 'Pas de plan de maintenance', short: 'Plan à définir', sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: 'days' };
+    return { state: 'unknown', label: t('Pas de plan de maintenance'), short: t('Plan à définir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: 'days' };
   }
   const days = daysUntil(plan.next_due_at);
   if (days == null) {
@@ -2050,7 +2086,7 @@ function sidebarHtml() {
     <span class="wordmark">Parc<em>Pacific</em></span>
     ${NAV_ITEMS.map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}">${esc(item.label)}</button>`).join('')}
     <div class="sidebar-foot">
-      <button type="button" id="logout-btn">Se déconnecter</button>
+      <button type="button" id="logout-btn">${t('Se déconnecter')}</button>
     </div>`;
 }
 
@@ -2098,9 +2134,9 @@ function renderApp() {
             <div id="view-root">${view.render()}</div>
           </div>
           <div class="legal-footer">
-            <a href="./mentions-legales.html" target="_blank">Mentions légales</a> ·
+            <a href="./mentions-legales.html" target="_blank">${t('Mentions légales')}</a> ·
             <a href="./cgu.html" target="_blank">CGU</a> ·
-            <a href="./politique-confidentialite.html" target="_blank">Confidentialité</a>
+            <a href="./politique-confidentialite.html" target="_blank">${t('Confidentialité')}</a>
           </div>
         </div>
       </div>
@@ -2334,7 +2370,7 @@ function dropzoneHtml(id) {
   return `
     <div class="dropzone" id="${id}">
       <span class="dz-icon">⤒</span>
-      <span class="dz-title">Déposer un manuel PDF</span>
+      <span class="dz-title">${t('Déposer un manuel PDF')}</span>
       <span class="dz-help">L'IA extrait les échéances (heures, mois) et crée le plan d'entretien. Tu valides avant activation.</span>
     </div>`;
 }
@@ -2365,7 +2401,7 @@ function remindersCardHtml() {
     </div>`;
   return `
     <section class="card">
-      <div class="card-head"><span class="card-title-sm">Rappels</span></div>
+      <div class="card-head"><span class="card-title-sm">${t('Rappels')}</span></div>
       ${row('whatsapp', 'WhatsApp · J-7')}
       ${row('email', 'E-mail · la veille')}
       ${row('escalate', 'Relance si non coché')}
@@ -2409,7 +2445,7 @@ function wireAlertRows(root) {
 const VIEWS = {};
 
 VIEWS.dashboard = {
-  title: 'Tableau de bord',
+  title: t('Tableau de bord'),
   subtitle: () => `${UI.companyName} · ${UI.machines.length} machine${UI.machines.length > 1 ? 's' : ''} suivie${UI.machines.length > 1 ? 's' : ''}`,
   render() {
     const c = UI.counts;
@@ -2419,10 +2455,10 @@ VIEWS.dashboard = {
       ${first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml()}
 
       <div class="stat-grid">
-        <div class="stat-card"><span class="num late">${c.late}</span><span class="lbl">En retard</span></div>
+        <div class="stat-card"><span class="num late">${c.late}</span><span class="lbl">${t('En retard')}</span></div>
         <div class="stat-card"><span class="num soon">${c.soon}</span><span class="lbl">Sous ${SOON_DAYS} jours</span></div>
-        <div class="stat-card"><span class="num ok">${c.ok}</span><span class="lbl">À jour</span></div>
-        <div class="stat-card"><span class="num primary">${c.analysed}</span><span class="lbl">Manuels analysés</span></div>
+        <div class="stat-card"><span class="num ok">${c.ok}</span><span class="lbl">${t('À jour')}</span></div>
+        <div class="stat-card"><span class="num primary">${c.analysed}</span><span class="lbl">${t('Manuels analysés')}</span></div>
       </div>
 
       ${aiCardHtml()}
@@ -2430,9 +2466,9 @@ VIEWS.dashboard = {
       <div class="dash-grid">
         <section class="card">
           <div class="card-head">
-            <h2 class="card-title">Échéances à venir</h2>
+            <h2 class="card-title">${t('Échéances à venir')}</h2>
             <span class="spacer"></span>
-            <button type="button" class="link-inline" data-nav="agenda">Tout voir</button>
+            <button type="button" class="link-inline" data-nav="agenda">${t('Tout voir')}</button>
           </div>
           ${alerts.length
             ? `<div class="alert-list">${alerts.slice(0, 6).map(x => alertRowHtml(x.machine, x.info)).join('')}</div>`
@@ -2483,7 +2519,7 @@ function priorityCardHtml(machine, info) {
     <section class="priority">
       <div class="priority-body">
         <div class="priority-top">
-          <span class="eyebrow">PROCHAIN ENTRETIEN</span>
+          <span class="eyebrow">${t('PROCHAIN ENTRETIEN')}</span>
           <span class="${late ? 'pill-late' : 'pill-soon'}">${late ? 'EN RETARD' : 'BIENTÔT'}</span>
         </div>
         <h2>${esc(nextTaskLabel(machine))}</h2>
@@ -2494,8 +2530,8 @@ function priorityCardHtml(machine, info) {
         </div>
       </div>
       <div class="priority-actions">
-        <button type="button" class="do" id="priority-done">Marquer fait</button>
-        <button type="button" class="see" id="priority-details">Détails</button>
+        <button type="button" class="do" id="priority-done">${t('Marquer fait')}</button>
+        <button type="button" class="see" id="priority-details">${t('Détails')}</button>
       </div>
     </section>`;
 }
@@ -2504,12 +2540,12 @@ function emptyPriorityCardHtml() {
   return `
     <section class="priority" style="background:var(--dark);">
       <div class="priority-body">
-        <div class="priority-top"><span class="eyebrow" style="color:var(--dark-ink);">PROCHAIN ENTRETIEN</span></div>
-        <h2>Rien à signaler</h2>
+        <div class="priority-top"><span class="eyebrow" style="color:var(--dark-ink);">${t('PROCHAIN ENTRETIEN')}</span></div>
+        <h2>${t('Rien à signaler')}</h2>
         <span class="machine-name" style="color:var(--dark-ink);">${UI.machines.length ? 'Aucune échéance dans les prochaines semaines.' : 'Aucune machine suivie pour l\'instant.'}</span>
       </div>
       <div class="priority-actions">
-        <button type="button" class="do" id="priority-add">Ajouter une machine</button>
+        <button type="button" class="do" id="priority-add">${t('Ajouter une machine')}</button>
       </div>
     </section>`;
 }
@@ -2529,7 +2565,7 @@ function aiCardHtml() {
           <span class="card-title-sm">Manuel &amp; IA</span>
         </div>
         <p class="muted-text">Aucun carnet déposé. Dépose le PDF du fabricant : l'IA en extrait les échéances et propose le plan d'entretien.</p>
-        <button type="button" class="btn-tint" id="ai-cta">Déposer un manuel PDF</button>
+        <button type="button" class="btn-tint" id="ai-cta">${t('Déposer un manuel PDF')}</button>
       </section>`;
   }
   const items = normalizeItems(target.plan?.items);
@@ -2537,13 +2573,13 @@ function aiCardHtml() {
     <section class="card mobile-only">
       <div class="card-head">
         <span class="chip-icon">✦</span>
-        <span class="card-title-sm">Manuel analysé</span>
+        <span class="card-title-sm">${t('Manuel analysé')}</span>
         <span class="spacer"></span>
         <span class="pill ${items.length ? 'ok' : 'soon'}">${items.length ? 'PRÊT' : 'À VALIDER'}</span>
       </div>
       <p class="muted-text">${esc(target.name)} · carnet d'entretien${items.length ? ` · ${items.length} échéance(s) détectée(s)` : ''}</p>
       ${items.slice(0, 2).map(it => `<div class="ai-row"><span>${esc(it.label || '—')}</span><span>${esc(it.frequency || '—')}</span></div>`).join('')}
-      <button type="button" class="link-inline" id="ai-cta" style="align-self:flex-start;">Valider le plan →</button>
+      <button type="button" class="link-inline" id="ai-cta" style="align-self:flex-start;">${t('Valider le plan →')}</button>
     </section>`;
 }
 
@@ -2610,7 +2646,7 @@ function fleetListHtml() {
   const matches = fleetSorted(fleetMatches());
   if (!matches.length) {
     return `<div class="empty">Aucune machine ne correspond à cette recherche.
-      <div style="margin-top:12px;"><button type="button" class="link-inline" id="fleet-reset">Réinitialiser les filtres</button></div>
+      <div style="margin-top:12px;"><button type="button" class="link-inline" id="fleet-reset">${t('Réinitialiser les filtres')}</button></div>
     </div>`;
   }
   const limit = fleetFilters().limit;
@@ -2665,7 +2701,7 @@ function refreshFleetList() {
 }
 
 VIEWS.machines = {
-  title: 'Machines',
+  title: t('Machines'),
   subtitle: () => `${UI.machines.length} machine${UI.machines.length > 1 ? 's' : ''} · ${UI.companyName}`,
   render() {
     if (!UI.machines.length) {
@@ -2684,7 +2720,7 @@ VIEWS.machines = {
                    placeholder="Rechercher un nom, une marque, un n° de série…"
                    aria-label="Rechercher dans le parc">
           </div>
-          <button type="button" class="btn-primary" id="fleet-add">Ajouter une machine</button>
+          <button type="button" class="btn-primary" id="fleet-add">${t('Ajouter une machine')}</button>
         </div>
         <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="Filtrer par état">
@@ -2694,11 +2730,11 @@ VIEWS.machines = {
           ${chipHtml('ok', 'À jour', c.ok)}
         </div>
         <div class="sort-wrap">
-          <label class="sr-only" for="fleet-sort">Trier par</label>
+          <label class="sr-only" for="fleet-sort">${t('Trier par')}</label>
           <select id="fleet-sort">
-            <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>Urgence</option>
+            <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${t('Urgence')}</option>
             <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>Nom (A → Z)</option>
-            <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>Compteur décroissant</option>
+            <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${t('Compteur décroissant')}</option>
           </select>
         </div>
         </div>
@@ -2767,10 +2803,10 @@ function machineCardHtml(m) {
         <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
         <div class="due">${esc(info.short)}</div>
         <div class="m-actions">
-          <button class="btn-row-action log-intervention-btn" data-open="log" data-id="${esc(m.id)}">Enregistrer un entretien</button>
-          <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">Prochain entretien</button>
-          <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">Voir le plan</button>
-          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">Modifier</button>
+          <button class="btn-row-action log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${t('Enregistrer un entretien')}</button>
+          <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${t('Prochain entretien')}</button>
+          <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${t('Voir le plan')}</button>
+          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${t('Modifier')}</button>
         </div>
       </div>
     </article>`;
@@ -2962,12 +2998,12 @@ function preparationHtml() {
   return `
     <section class="card">
       <div class="card-head">
-        <h2 class="card-title">Préparation</h2>
+        <h2 class="card-title">${t('Préparation')}</h2>
         <div class="prep-horizon">${chips}</div>
       </div>
       <p class="muted-text">${esc(resume)}${liste.auCompteur ? ` · ${liste.auCompteur} machine(s) au compteur, sans date d'échéance` : ''}</p>
       ${rien
-        ? `<p class="muted-text">Rien à prévoir sur cette période.</p>`
+        ? `<p class="muted-text">${t('Rien à prévoir sur cette période.')}</p>`
         : `${produits}${sansItems}`}
       ${(liste.produits.length || liste.sansItems.length) ? `
         <div class="hint">Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.</div>
@@ -3021,9 +3057,9 @@ function preparationResumeHtml() {
   return `
     <section class="card">
       <div class="card-head">
-        <h2 class="card-title">Préparation</h2>
+        <h2 class="card-title">${t('Préparation')}</h2>
         <span class="spacer"></span>
-        <button type="button" class="link-inline" data-nav="agenda">Voir la liste</button>
+        <button type="button" class="link-inline" data-nav="agenda">${t('Voir la liste')}</button>
       </div>
       <p class="muted-text">${esc(resume)}</p>
     </section>`;
@@ -3050,7 +3086,7 @@ function wirePreparation(root) {
 }
 
 VIEWS.agenda = {
-  title: 'Agenda',
+  title: t('Agenda'),
   subtitle: () => 'Échéances datées et compteurs à surveiller',
   render() {
     const dated = UI.machines
@@ -3097,13 +3133,13 @@ VIEWS.agenda = {
 
 // ── Vue : Rappels ─────────────────────────────────────────────
 VIEWS.reminders = {
-  title: 'Rappels',
+  title: t('Rappels'),
   subtitle: () => 'Canaux et délais de notification',
   render() {
     return `
       ${remindersCardHtml()}
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Comment ça marchera</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Comment ça marchera')}</h2></div>
         <p class="muted-text">ParcPacific prévoit d'envoyer un message WhatsApp et un e-mail avant chaque échéance, puis une relance si l'entretien n'a pas été coché dans l'application.</p>
         <p class="muted-text"><strong>Ces réglages sont enregistrés sur cet appareil mais l'envoi automatique n'est pas encore actif :</strong> il nécessite un service d'envoi côté serveur (WhatsApp Business / e-mail transactionnel) qui n'est pas branché à ce jour.</p>
       </section>`;
@@ -3115,7 +3151,7 @@ VIEWS.reminders = {
 
 // ── Vue : Mon compte ──────────────────────────────────────────
 VIEWS.account = {
-  title: 'Mon compte',
+  title: t('Mon compte'),
   subtitle: () => UI.company.name || UI.companyName || 'Société',
   render() {
     const c = UI.company;
@@ -3123,21 +3159,21 @@ VIEWS.account = {
     const bloque = modifiable ? '' : ' disabled';
     return `
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Société</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Société')}</h2></div>
         <div class="plan-field">
-          <div class="label">Raison sociale</div>
+          <div class="label">${t('Raison sociale')}</div>
           <div class="value">${esc(c.name || UI.companyName || '—')}</div>
         </div>
         <div class="plan-field">
-          <div class="label">Activité</div>
+          <div class="label">${t('Activité')}</div>
           <div class="value">${esc(c.activity || 'Non renseignée')}</div>
         </div>
         <div class="plan-field">
-          <div class="label">N° RCS / RIDET</div>
+          <div class="label">${t('N° RCS / RIDET')}</div>
           <div class="value">${esc(c.registrationNumber || 'Non renseigné')}</div>
         </div>
         <div class="plan-field" style="margin-bottom:0;">
-          <div class="label">Formule</div>
+          <div class="label">${t('Formule')}</div>
           <div class="value">
             ${c.plan === 'free'
               ? `Gratuite — 3 machines suivies
@@ -3148,47 +3184,47 @@ VIEWS.account = {
       </section>
 
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Contact et notifications</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Contact et notifications')}</h2></div>
         <p class="muted-text">Ces coordonnées serviront aux rappels d'échéance (WhatsApp et e-mail).</p>
         <div class="field-row">
           <div>
-            <label for="acc-first">Prénom</label>
+            <label for="acc-first">${t('Prénom')}</label>
             <input id="acc-first" value="${esc(companyFirstName(c))}"${bloque}>
           </div>
           <div>
-            <label for="acc-last">Nom</label>
+            <label for="acc-last">${t('Nom')}</label>
             <input id="acc-last" value="${esc(companyLastName(c))}"${bloque}>
           </div>
         </div>
         ${champTelephoneHtml('acc-phone', c.phone || '', {
-          label: 'Téléphone',
+          label: t('Téléphone'),
           disabled: !modifiable,
           aide: "Ce numéro servira aux rappels d'échéance par WhatsApp.",
         })}
         <div class="hint" id="acc-contact-msg" role="status" aria-live="polite"></div>
         <div class="modal-actions">
-          <button type="button" class="primary" id="acc-save-contact"${bloque}>Enregistrer</button>
+          <button type="button" class="primary" id="acc-save-contact"${bloque}>${t('Enregistrer')}</button>
         </div>
-        ${modifiable ? '' : `<div class="hint">Mise à jour indisponible : exécute <strong>migration-compte.sql</strong> dans le SQL Editor de Supabase.</div>`}
+        ${modifiable ? '' : `<div class="hint">${t('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${t('dans le SQL Editor de Supabase.')}</div>`}
       </section>
 
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Rappels sur ce téléphone</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Rappels sur ce téléphone')}</h2></div>
         ${blocRappelsHtml()}
       </section>
 
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Adresse de connexion</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Adresse de connexion')}</h2></div>
         <div class="plan-field">
-          <div class="label">Email actuel</div>
+          <div class="label">${t('Email actuel')}</div>
           <div class="value">${esc(UI.email || '—')}</div>
         </div>
-        <label for="acc-email">Nouvel email</label>
+        <label for="acc-email">${t('Nouvel email')}</label>
         <input id="acc-email" type="email" autocomplete="email" placeholder="nouvelle@adresse.nc">
-        <label for="acc-password">Mot de passe actuel</label>
+        <label for="acc-password">${t('Mot de passe actuel')}</label>
         <div class="password-wrap">
           <input id="acc-password" type="password" autocomplete="current-password">
-          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">${t('Afficher')}</button>
         </div>
         <div class="hint">Le changement est confirmé par email : la nouvelle adresse ne devient active qu'après validation. Le mot de passe est demandé pour qu'une session ouverte ne suffise pas à détourner le compte.</div>
         <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
@@ -3296,7 +3332,7 @@ VIEWS.account = {
       try {
         // Ré-authentification obligatoire avant un changement sensible.
         const { error: authErr } = await sb.auth.signInWithPassword({ email: UI.email, password: motDePasse });
-        if (authErr) throw new Error('Mot de passe incorrect.');
+        if (authErr) throw new Error(t('Mot de passe incorrect.'));
 
         btn.textContent = 'Envoi du lien…';
         const { error } = await sb.auth.updateUser({ email: nouvelEmail });
@@ -3322,13 +3358,13 @@ function openPlusSheet() {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
     <div class="sheet">
-      <div class="sheet-title">Navigation</div>
+      <div class="sheet-title">${t('Navigation')}</div>
       <button type="button" class="sheet-item" data-nav="manuals">✦&nbsp; Manuels &amp; IA</button>
       <button type="button" class="sheet-item" data-nav="agenda">◔&nbsp; Agenda</button>
       <button type="button" class="sheet-item" data-nav="reminders">☰&nbsp; Rappels</button>
-      <div class="sheet-title" style="padding-top:10px;">Compte</div>
+      <div class="sheet-title" style="padding-top:10px;">${t('Compte')}</div>
       <button type="button" class="sheet-item" data-nav="account">◉&nbsp; Mon compte</button>
-      <button type="button" class="sheet-item" id="sheet-logout">Se déconnecter</button>
+      <button type="button" class="sheet-item" id="sheet-logout">${t('Se déconnecter')}</button>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => {
@@ -3364,28 +3400,28 @@ function openManualUploadModal(presetMachine, presetFile) {
   function stepPick() {
     if (!UI.machines.length) {
       shell(`
-        <h2>Déposer un manuel</h2>
+        <h2>${t('Déposer un manuel')}</h2>
         <p class="sub">Ajoute d'abord une machine : le carnet d'entretien vient compléter sa fiche.</p>
         <div class="modal-actions">
-          <button type="button" class="secondary" id="mu-close">Fermer</button>
-          <button type="button" class="primary" id="mu-add">Ajouter une machine</button>
+          <button type="button" class="secondary" id="mu-close">${t('Fermer')}</button>
+          <button type="button" class="primary" id="mu-add">${t('Ajouter une machine')}</button>
         </div>`);
       overlay.querySelector('#mu-close').addEventListener('click', close);
       overlay.querySelector('#mu-add').addEventListener('click', () => { close(); handleAddMachine(); });
       return;
     }
     shell(`
-      <h2>Déposer un manuel PDF</h2>
+      <h2>${t('Déposer un manuel PDF')}</h2>
       <p class="sub">L'IA lit le manuel, en extrait les échéances et propose le plan d'entretien. Tu valides avant activation.</p>
-      <label for="mu-machine">Machine concernée</label>
+      <label for="mu-machine">${t('Machine concernée')}</label>
       <select id="mu-machine">
         ${UI.machines.map(m => `<option value="${esc(m.id)}"${machine && m.id === machine.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}
       </select>
       ${dropzoneHtml('mu-drop')}
       <div class="hint" id="mu-status">${file ? `Fichier sélectionné : ${esc(file.name)}` : ''}</div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-cancel">Annuler</button>
-        <button type="button" class="primary" id="mu-start">Analyser le PDF</button>
+        <button type="button" class="secondary" id="mu-cancel">${t('Annuler')}</button>
+        <button type="button" class="primary" id="mu-start">${t('Analyser le PDF')}</button>
       </div>`);
     const statusEl = overlay.querySelector('#mu-status');
     attachDropzone(overlay.querySelector('#mu-drop'), (f) => {
@@ -3405,17 +3441,17 @@ function openManualUploadModal(presetMachine, presetFile) {
 
   async function run() {
     shell(`
-      <h2>Analyse en cours…</h2>
+      <h2>${t('Analyse en cours…')}</h2>
       <p class="sub">${esc(file.name)} · ${esc(machine.name)}</p>
-      <div class="hint" id="mu-progress">Téléversement du carnet…</div>
+      <div class="hint" id="mu-progress">${t('Téléversement du carnet…')}</div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-cancel">Fermer</button>
+        <button type="button" class="secondary" id="mu-cancel">${t('Fermer')}</button>
       </div>`);
     overlay.querySelector('#mu-cancel').addEventListener('click', close);
     const progress = () => overlay.querySelector('#mu-progress');
 
     try {
-      if (file.size > 15 * 1024 * 1024) throw new Error('Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.');
+      if (file.size > 15 * 1024 * 1024) throw new Error(t('Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.'));
 
       const path = `${UI.companyId}/${machine.id}.pdf`;
       const { error: upErr } = await sb.storage.from('manuals').upload(path, file, { upsert: true, contentType: 'application/pdf' });
@@ -3445,12 +3481,12 @@ function openManualUploadModal(presetMachine, presetFile) {
       stepReview(analysis);
     } catch (err) {
       shell(`
-        <h2>Analyse interrompue</h2>
+        <h2>${t('Analyse interrompue')}</h2>
         <p class="sub">${esc(err.message)}</p>
         <div class="hint">Le carnet n'a peut-être pas été enregistré. Tu peux réessayer, ou renseigner le plan à la main depuis la fiche de la machine.</div>
         <div class="modal-actions">
-          <button type="button" class="secondary" id="mu-close">Fermer</button>
-          <button type="button" class="primary" id="mu-retry">Réessayer</button>
+          <button type="button" class="secondary" id="mu-close">${t('Fermer')}</button>
+          <button type="button" class="primary" id="mu-retry">${t('Réessayer')}</button>
         </div>`);
       overlay.querySelector('#mu-close').addEventListener('click', close);
       overlay.querySelector('#mu-retry').addEventListener('click', () => { analysis = null; stepPick(); });
@@ -3472,9 +3508,9 @@ function openManualUploadModal(presetMachine, presetFile) {
         <label for="mu-interval">Échéance ${mode === 'days' ? 'toutes les (jours)' : `tous les (${COUNTER_UNITS[unit].word})`}</label>
         <input id="mu-interval" type="number" min="1" value="${esc(suggested)}">
         ${items.length ? `
-          <label>Échéances détectées dans le manuel</label>
+          <label>${t('Échéances détectées dans le manuel')}</label>
           <table class="ref-table">
-            <thead><tr><th>Élément</th><th>Fréquence</th></tr></thead>
+            <thead><tr><th>${t('Élément')}</th><th>${t('Fréquence')}</th></tr></thead>
             <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
           </table>` : ''}
         <label for="mu-tasks">Tâches de maintenance</label>
@@ -3485,7 +3521,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       `}
       <div class="hint" id="mu-error"></div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-cancel">Annuler</button>
+        <button type="button" class="secondary" id="mu-cancel">${t('Annuler')}</button>
         <button type="button" class="primary" id="mu-activate">${result ? 'Activer le plan' : 'Terminer'}</button>
       </div>`);
 
@@ -3622,17 +3658,17 @@ function openAddWizard(companyId, categories) {
 
   function stepIdentification() {
     shell(`
-      <h2>Ajouter une machine</h2>
-      <p class="sub">Étape 1 sur 2 — identification</p>
+      <h2>${t('Ajouter une machine')}</h2>
+      <p class="sub">${t('Étape 1 sur 2 — identification')}</p>
       <form id="step-form">
-        <label for="f-name">Nom de la machine</label>
+        <label for="f-name">${t('Nom de la machine')}</label>
         <input id="f-name" required placeholder="Ex. Orec 4x4 - Atelier" value="${esc(state.name)}">
 
-        <label for="f-category">Catégorie</label>
+        <label for="f-category">${t('Catégorie')}</label>
         <input id="f-category" list="cat-list" required placeholder="Ex. Motoculture" value="${esc(state.category)}">
         <datalist id="cat-list">${categories.map(c => `<option value="${esc(c.name)}">`).join('')}</datalist>
 
-        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
+        ${SCHEMA.hasKind ? `<label for="f-kind">${t('Type')}</label>
         <select id="f-kind">
           <option value="machine" ${state.kind === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
           <option value="vehicle" ${state.kind === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
@@ -3640,11 +3676,11 @@ function openAddWizard(companyId, categories) {
 
         <div class="field-row">
           <div>
-            <label for="f-brand">Marque</label>
+            <label for="f-brand">${t('Marque')}</label>
             <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${esc(state.brand)}">
           </div>
           <div>
-            <label for="f-model">Modèle</label>
+            <label for="f-model">${t('Modèle')}</label>
             <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${esc(state.model)}">
           </div>
         </div>
@@ -3652,10 +3688,10 @@ function openAddWizard(companyId, categories) {
         <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
         <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
 
-        <label for="f-service-date">Date de mise en service</label>
+        <label for="f-service-date">${t('Date de mise en service')}</label>
         <input id="f-service-date" type="date" value="${esc(state.serviceDate)}" required>
 
-        <label>Mode de suivi de la maintenance</label>
+        <label>${t('Mode de suivi de la maintenance')}</label>
         <div class="track-mode-choice">
           <label><input type="radio" name="tm" value="days" ${state.trackingMode === 'days' ? 'checked' : ''}> Calendaire (jours)</label>
           <label><input type="radio" name="tm" value="hours" ${state.trackingMode === 'hours' ? 'checked' : ''}> Compteur horaire (heures)</label>
@@ -3674,8 +3710,8 @@ function openAddWizard(companyId, categories) {
         <div class="hint">Utilisée seulement si aucun carnet PDF n'est fourni : sinon, la première page du carnet sert de photo.</div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel">Annuler</button>
-          <button type="submit" class="primary">Suivant →</button>
+          <button type="button" class="secondary" id="cancel">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Suivant →')}</button>
         </div>
       </form>
     `);
@@ -3735,12 +3771,12 @@ function openAddWizard(companyId, categories) {
 
   function stepChoice() {
     shell(`
-      <button type="button" class="step-back" id="back">← Retour</button>
+      <button type="button" class="step-back" id="back">${t('← Retour')}</button>
       <h2>Carnet d'entretien</h2>
       <p class="sub">As-tu le carnet d'entretien du fabricant pour « ${esc(state.name)} » ?</p>
       <div class="step-options">
         <button type="button" class="option-tile" id="opt-have">Oui, je l'ai en PDF<span class="opt-sub">L'IA lit le document et propose le plan de maintenance.</span></button>
-        <button type="button" class="option-tile" id="opt-search">Non, mais je peux le trouver en ligne<span class="opt-sub">On lance une recherche, tu le télécharges puis on l'analyse.</span></button>
+        <button type="button" class="option-tile" id="opt-search">${t('Non, mais je peux le trouver en ligne')}<span class="opt-sub">On lance une recherche, tu le télécharges puis on l'analyse.</span></button>
         <button type="button" class="option-tile" id="opt-none">Non, je n'ai pas de carnet<span class="opt-sub">On construit un plan simple à partir de ce que tu veux suivre.</span></button>
       </div>
     `);
@@ -3754,7 +3790,7 @@ function openAddWizard(companyId, categories) {
     const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
     const isCounter = state.trackingMode !== 'days';
     shell(`
-      <button type="button" class="step-back" id="back">← Retour</button>
+      <button type="button" class="step-back" id="back">${t('← Retour')}</button>
       <h2>Carnet d'entretien</h2>
       ${withSearchHelper ? `
         <p class="sub">Cherche le manuel du fabricant, télécharge-le, puis ajoute-le ci-dessous.</p>
@@ -3776,13 +3812,13 @@ function openAddWizard(companyId, categories) {
           </div>
         </div>
 
-        <label for="f-tasks">Tâches de maintenance</label>
+        <label for="f-tasks">${t('Tâches de maintenance')}</label>
         <textarea id="f-tasks" placeholder="Ex. Vidange, contrôle lame, graissage">${esc(state.tasks)}</textarea>
         <div class="hint" id="f-error"></div>
 
         <div class="modal-actions">
           <button type="button" class="secondary" id="no-manual">Je n'ai pas de carnet</button>
-          <button type="submit" class="primary">Enregistrer</button>
+          <button type="submit" class="primary">${t('Enregistrer')}</button>
         </div>
       </form>
     `);
@@ -3822,8 +3858,8 @@ function openAddWizard(companyId, categories) {
     const commonTasks = ['Graissage', 'Vidange (huile/carburant)', 'Nettoyage', "Contrôle/changement de pièces d'usure", 'Contrôle des niveaux', 'Contrôle visuel général'];
     const isCounter = state.trackingMode !== 'days';
     shell(`
-      <button type="button" class="step-back" id="back">← Retour</button>
-      <h2>Suivi simplifié</h2>
+      <button type="button" class="step-back" id="back">${t('← Retour')}</button>
+      <h2>${t('Suivi simplifié')}</h2>
       <p class="sub">Sélectionne ce que tu veux suivre pour « ${esc(state.name)} ». Pas de carnet constructeur : ce plan reste modifiable ensuite.</p>
       <form id="checklist-form">
         <div class="checklist">
@@ -3845,8 +3881,8 @@ function openAddWizard(companyId, categories) {
         <div class="hint" id="f-error"></div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel">Annuler</button>
-          <button type="submit" class="primary">Enregistrer</button>
+          <button type="button" class="secondary" id="cancel">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Enregistrer')}</button>
         </div>
       </form>
     `);
@@ -3928,7 +3964,7 @@ function openAddWizard(companyId, categories) {
       } catch (imgErr) { console.warn('Photo de la machine :', imgErr); }
 
       if (state.pendingFile) {
-        if (state.pendingFile.size > 15 * 1024 * 1024) throw new Error("Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.");
+        if (state.pendingFile.size > 15 * 1024 * 1024) throw new Error(t('Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.'));
         const path = `${companyId}/${machine.id}.pdf`;
         const { error: uploadErr } = await sb.storage.from('manuals').upload(path, state.pendingFile, { upsert: true, contentType: 'application/pdf' });
         if (uploadErr) throw uploadErr;
@@ -3994,26 +4030,26 @@ function openNextMaintenanceView(machine) {
 
   overlay.innerHTML = `
     <div class="modal">
-      <h2>Prochain entretien à réaliser</h2>
+      <h2>${t('Prochain entretien à réaliser')}</h2>
       <p class="sub">${esc(machine.name)}${machine.category?.name ? ' · ' + esc(machine.category.name) : ''}</p>
 
       <div class="due-hero ${heroClass(info.state)}">${esc(info.label)}</div>
 
       <div class="plan-field">
-        <div class="label">À faire</div>
+        <div class="label">${t('À faire')}</div>
         ${items.length
           ? `<ul class="plan-tasks">${items.map(it => `<li><strong>${esc(it.label)}</strong>${it.frequency ? ` — ${esc(it.frequency)}` : ''}</li>`).join('')}</ul>`
-          : `<div class="value" style="color:var(--ink-soft);">Aucune tâche détaillée dans le plan.</div>`}
+          : `<div class="value" style="color:var(--ink-soft);">${t('Aucune tâche détaillée dans le plan.')}</div>`}
       </div>
 
       <div class="plan-field" id="last-intervention-section">
-        <div class="label">Dernier entretien réalisé</div>
-        <div class="value" style="color:var(--ink-soft);">Chargement…</div>
+        <div class="label">${t('Dernier entretien réalisé')}</div>
+        <div class="value" style="color:var(--ink-soft);">${t('Chargement…')}</div>
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="secondary" id="close-next">Fermer</button>
-        <button type="button" class="primary" id="log-from-next">Enregistrer un entretien</button>
+        <button type="button" class="secondary" id="close-next">${t('Fermer')}</button>
+        <button type="button" class="primary" id="log-from-next">${t('Enregistrer un entretien')}</button>
       </div>
     </div>
   `;
@@ -4065,7 +4101,7 @@ function openLogInterventionModal(machine) {
 
   overlay.innerHTML = `
     <div class="modal">
-      <h2>Enregistrer un entretien</h2>
+      <h2>${t('Enregistrer un entretien')}</h2>
       <p class="sub">${esc(machine.name)} — coche ce qui a été fait, ça met à jour la prochaine échéance.</p>
       <form id="log-form">
         <label for="log-date">Date de l'entretien</label>
@@ -4088,8 +4124,8 @@ function openLogInterventionModal(machine) {
         <div class="hint" id="log-error"></div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel-log">Annuler</button>
-          <button type="submit" class="primary">Enregistrer</button>
+          <button type="button" class="secondary" id="cancel-log">${t('Annuler')}</button>
+          <button type="submit" class="primary">${t('Enregistrer')}</button>
         </div>
       </form>
     </div>
@@ -4191,7 +4227,7 @@ function openPlanView(machine, companyId, categories) {
 
   const tableHtml = hasItemDetail ? `
     <table class="ref-table">
-      <thead><tr><th>Élément</th><th>Fréquence</th><th>Huile / graisse / pièce</th><th>Quantité</th><th>Remarque</th></tr></thead>
+      <thead><tr><th>${t('Élément')}</th><th>${t('Fréquence')}</th><th>${t('Huile / graisse / pièce')}</th><th>${t('Quantité')}</th><th>${t('Remarque')}</th></tr></thead>
       <tbody>
         ${items.map(it => `
           <tr>
@@ -4213,12 +4249,12 @@ function openPlanView(machine, companyId, categories) {
       <p class="sub">${esc(machine.category?.name) || 'Sans catégorie'}${machine.brand_model ? ' · ' + esc(machine.brand_model) : ''}${identifiantAffiche(machine) ? ' · ' + esc(identifiantAffiche(machine)) : ''}</p>
 
       <div class="plan-field">
-        <div class="label">Statut</div>
+        <div class="label">${t('Statut')}</div>
         <div class="value"><span class="badge ${badgeClass(info.state)}">${machine.status === 'en_service' ? 'En service' : esc(machine.status)}</span></div>
       </div>
 
       <div class="plan-field">
-        <div class="label">Échéance</div>
+        <div class="label">${t('Échéance')}</div>
         <div class="value">${esc(info.label)}${machine.plan?.next_due_at ? ` (le ${esc(machine.plan.next_due_at)})` : ''}</div>
       </div>
 
@@ -4243,24 +4279,24 @@ function openPlanView(machine, companyId, categories) {
             <div class="attention-box">${esc(machine.plan.notes)}</div>
           </div>
         ` : ''}
-      ` : `<div class="plan-field"><div class="value" style="color:var(--ink-soft);">Aucun plan de maintenance défini pour cette machine.</div></div>`}
+      ` : `<div class="plan-field"><div class="value" style="color:var(--ink-soft);">${t('Aucun plan de maintenance défini pour cette machine.')}</div></div>`}
 
       ${machine.manual_url ? `<button type="button" class="view-manual" id="plan-view-manual">Voir le carnet d'entretien (PDF)</button>` : ''}
 
       <div class="plan-field" id="history-section">
         <div class="history-head">
-          <div class="label">Historique des entretiens</div>
+          <div class="label">${t('Historique des entretiens')}</div>
           <div class="history-actions">
-            <button type="button" class="icon-btn" id="export-history-csv" disabled>Exporter en CSV</button>
-            <button type="button" class="icon-btn" id="share-history-email" disabled>Partager par email</button>
+            <button type="button" class="icon-btn" id="export-history-csv" disabled>${t('Exporter en CSV')}</button>
+            <button type="button" class="icon-btn" id="share-history-email" disabled>${t('Partager par email')}</button>
           </div>
         </div>
-        <div class="value" style="color:var(--ink-soft);">Chargement…</div>
+        <div class="value" style="color:var(--ink-soft);">${t('Chargement…')}</div>
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="secondary" id="close-plan">Fermer</button>
-        <button type="button" class="primary" id="edit-from-plan">Modifier</button>
+        <button type="button" class="secondary" id="close-plan">${t('Fermer')}</button>
+        <button type="button" class="primary" id="edit-from-plan">${t('Modifier')}</button>
       </div>
     </div>
   `;
@@ -4348,7 +4384,7 @@ function openPlanView(machine, companyId, categories) {
     const hidden = historyData.length - shown.length;
     section.insertAdjacentHTML('beforeend', `
       <table class="ref-table">
-        <thead><tr><th>Date</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>Éléments traités</th><th>Remarques</th></tr></thead>
+        <thead><tr><th>${t('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${t('Éléments traités')}</th><th>${t('Remarques')}</th></tr></thead>
         <tbody>
           ${shown.map(h => `
             <tr>
@@ -4390,16 +4426,16 @@ function openMachineModal(companyId, categories, existing) {
       <h2>${isEdit ? `Modifier ${esc(existing.name)}` : 'Ajouter une machine'}</h2>
       <p class="sub">${isEdit ? 'Les modifications sont appliquées immédiatement.' : 'Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.'}</p>
       <form id="add-form">
-        <label for="f-name">Nom de la machine</label>
+        <label for="f-name">${t('Nom de la machine')}</label>
         <input id="f-name" required placeholder="Ex. Orec 4x4 - Atelier" value="${isEdit ? esc(existing.name) : ''}">
 
-        <label for="f-category">Catégorie</label>
+        <label for="f-category">${t('Catégorie')}</label>
         <input id="f-category" list="cat-list" required placeholder="Ex. Motoculture" value="${isEdit ? esc(existing.category?.name || '') : ''}">
         <datalist id="cat-list">
           ${categories.map(c => `<option value="${esc(c.name)}">`).join('')}
         </datalist>
 
-        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
+        ${SCHEMA.hasKind ? `<label for="f-kind">${t('Type')}</label>
         <select id="f-kind">
           <option value="machine" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
           <option value="vehicle" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
@@ -4407,11 +4443,11 @@ function openMachineModal(companyId, categories, existing) {
 
         <div class="field-row">
           <div>
-            <label for="f-brand">Marque</label>
+            <label for="f-brand">${t('Marque')}</label>
             <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
           </div>
           <div>
-            <label for="f-model">Modèle</label>
+            <label for="f-model">${t('Modèle')}</label>
             <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
           </div>
         </div>
@@ -4419,10 +4455,10 @@ function openMachineModal(companyId, categories, existing) {
         <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[isEdit ? machineKind(existing) : TYPE_MACHINE]}</label>
         <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[isEdit ? machineKind(existing) : TYPE_MACHINE]}" value="${isEdit ? esc(machineIdentifiant(existing)) : ''}">
 
-        <label for="f-service-date">Date de mise en service</label>
+        <label for="f-service-date">${t('Date de mise en service')}</label>
         <input id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
 
-        <label>Mode de suivi de la maintenance</label>
+        <label>${t('Mode de suivi de la maintenance')}</label>
         <div class="track-mode-choice">
           <label><input type="radio" name="tm" value="days" ${editMode === 'days' ? 'checked' : ''}> Calendaire (jours)</label>
           <label><input type="radio" name="tm" value="hours" ${editMode === 'hours' ? 'checked' : ''}> Compteur horaire (heures)</label>
@@ -4444,10 +4480,10 @@ function openMachineModal(companyId, categories, existing) {
           </div>
         </div>
 
-        <label for="f-tasks">Tâches de maintenance</label>
+        <label for="f-tasks">${t('Tâches de maintenance')}</label>
         <textarea id="f-tasks" placeholder="Ex. Vidange, contrôle lame, graissage">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
 
-        <label>Photo de la machine</label>
+        <label>${t('Photo de la machine')}</label>
         <div id="photo-preview">
           ${isEdit && safeUrl(existing.image_url) ? `<img class="machine-photo" src="${esc(safeUrl(existing.image_url))}" alt="${esc(existing.name)}">` : ''}
         </div>
@@ -4464,10 +4500,10 @@ function openMachineModal(companyId, categories, existing) {
         <div class="hint" id="f-error"></div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel-add">Annuler</button>
+          <button type="button" class="secondary" id="cancel-add">${t('Annuler')}</button>
           <button type="submit" class="primary" id="submit-add">${isEdit ? 'Enregistrer les modifications' : 'Enregistrer'}</button>
         </div>
-        ${isEdit ? `<button type="button" class="delete-link" id="delete-machine">Supprimer cette machine</button>` : ''}
+        ${isEdit ? `<button type="button" class="delete-link" id="delete-machine">${t('Supprimer cette machine')}</button>` : ''}
       </form>
     </div>
   `;
@@ -4594,7 +4630,7 @@ function openMachineModal(companyId, categories, existing) {
       if (error) throw new Error(await functionErrorMessage(error, 'recherche de photo impossible'));
       if (data?.error) throw new Error(data.error);
       const foundUrl = safeUrl(data.imageUrl);
-      if (!foundUrl) throw new Error("URL de photo invalide");
+      if (!foundUrl) throw new Error(t('URL de photo invalide'));
       overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${esc(foundUrl)}" alt="${esc(name)}">`;
       overlay._newImageUrl = foundUrl;
       overlay._pendingPhotoBlob = null;
@@ -4710,7 +4746,7 @@ function openMachineModal(companyId, categories, existing) {
       const fileInput = overlay.querySelector('#f-manual');
       const file = fileInput.files[0];
       if (file) {
-        if (file.size > 15 * 1024 * 1024) throw new Error("Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.");
+        if (file.size > 15 * 1024 * 1024) throw new Error(t('Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.'));
         const path = `${companyId}/${machineId}.pdf`;
         const { error: uploadErr } = await sb.storage.from('manuals').upload(path, file, { upsert: true, contentType: 'application/pdf' });
         if (uploadErr) throw uploadErr;
@@ -4864,7 +4900,7 @@ async function boot(toastMessage) {
   if (profileErr || !profile) {
     // Un réseau absent ne doit pas ressembler à un compte mal rattaché.
     if (cache && estErreurReseau(profileErr)) { afficherDepuisCache(cache); return; }
-    renderLogin("Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.");
+    renderLogin(t('Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.'));
     return;
   }
 
