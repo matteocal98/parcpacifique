@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lkpjfZJsyuMI1ULw1cQdaCZL2ohqBIHJ3TUCdTqUk/g=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-yTY0ipXp0JgPwAkSX+pgUhXuVF+wnh0scFp3g7g/WZU=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -612,6 +612,21 @@
   .search-wrap input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
 
   .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+  /* Préparation des entretiens : ce qu'il faut se procurer, et pour quand. */
+  .prep-horizon{display:flex;gap:6px;margin-left:auto;}
+  .prep-horizon .chip{min-height:32px;padding:5px 12px;font-size:12.5px;}
+  .prep-produit{padding:12px 0;border-top:1px solid var(--line-2);}
+  .prep-produit:first-child{border-top:none;padding-top:4px;}
+  .prep-nom{font-size:14.5px;font-weight:700;line-height:1.4;}
+  .prep-spec{font-weight:600;color:var(--ink-2);}
+  .prep-total{
+    font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
+    font-size:12.5px;font-weight:700;color:var(--ok);
+    background:var(--ok-bg);border-radius:var(--r-pill);padding:2px 9px;margin-left:6px;
+  }
+  .prep-besoins{font-size:13px;color:var(--ink-2);line-height:1.6;margin-top:4px;}
+  .prep-quand{color:var(--ink-3);}
+
   .chips::-webkit-scrollbar{display:none;}
   .chip{
     flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;cursor:pointer;
@@ -2806,6 +2821,203 @@ VIEWS.manuals = {
 };
 
 // ── Vue : Agenda ──────────────────────────────────────────────
+// ── Préparation des entretiens ────────────────────────────────
+// Ce que les entretiens à venir vont demander d'acheter, et pour quand.
+//
+// AUCUNE GESTION DE STOCK ICI, volontairement. La question du terrain est
+// « qu'est-ce que je commande avant d'aller chez le fournisseur ? », et elle se
+// répond avec ce que l'application sait déjà : les plans de maintenance et les
+// « items » extraits du carnet constructeur par l'IA (libellé, spécification,
+// quantité). Tenir un stock demande une discipline de saisie que peu de clients
+// auront ; prévoir les besoins, non.
+const PREPARATION_HORIZON = [30, 90, 180];
+
+function dateDansHorizon(iso, jours, base) {
+  if (!iso) return false;
+  const echeance = new Date(`${iso}T00:00:00`);
+  if (isNaN(echeance.getTime())) return false;
+  const limite = new Date(base.getTime() + jours * 86400000);
+  return echeance <= limite;
+}
+
+// Lecture d'une quantité écrite en texte libre (« 6,5 L », « 2 », « 1 filtre »).
+// Renvoie null dès que le texte n'est pas un nombre suivi d'une unité simple :
+// on ne devine JAMAIS une quantité.
+function lireQuantite(texte) {
+  if (texte == null) return null;
+  const propre = String(texte).trim().replace(',', '.');
+  const trouve = propre.match(/^([0-9]+(?:\.[0-9]+)?)\s*([^\s0-9]*)$/);
+  if (!trouve) return null;
+  const nombre = Number(trouve[1]);
+  if (!isFinite(nombre)) return null;
+  return { nombre, unite: trouve[2].toLowerCase() };
+}
+
+// Total d'un ensemble de quantités — UNIQUEMENT si toutes sont lisibles et
+// partagent la même unité. Sur une liste d'achat, un total faux coûte plus cher
+// que pas de total du tout : dans le doute, on n'affiche rien.
+function totalQuantites(quantites) {
+  const lues = (quantites || []).map(lireQuantite);
+  if (!lues.length || lues.some((q) => !q)) return null;
+  const unite = lues[0].unite;
+  if (lues.some((q) => q.unite !== unite)) return null;
+  const total = lues.reduce((somme, q) => somme + q.nombre, 0);
+  return { nombre: Math.round(total * 100) / 100, unite };
+}
+
+function formatteTotal(total) {
+  if (!total) return '';
+  const nombre = total.nombre.toLocaleString('fr-FR');
+  return total.unite ? `${nombre} ${total.unite}` : nombre;
+}
+
+// Rassemble ce que les entretiens retenus vont consommer.
+//
+// Les machines suivies au compteur y figurent aussi : leur entretien n'a pas de
+// date, donc rien à commander « pour le 12 octobre » — mais les pièces du
+// prochain entretien se commandent, elles, dès maintenant.
+function listePreparation(machines, jours, maintenant) {
+  const base = maintenant ? new Date(maintenant) : new Date();
+  const besoins = [];
+  const sansItems = [];
+  let entretiens = 0;
+  let auCompteur = 0;
+
+  for (const machine of machines || []) {
+    const plan = machine && machine.plan;
+    if (!plan) continue;
+    const compteur = planIsCounter(plan);
+    const date = compteur ? null : (plan.next_due_at || null);
+    if (compteur) {
+      auCompteur++;
+    } else {
+      if (!dateDansHorizon(date, jours, base)) continue;
+      entretiens++;
+    }
+
+    const items = Array.isArray(plan.items) ? plan.items : [];
+    if (!items.length) {
+      // Plan sans liste de produits (carnet jamais analysé) : on rappellera ses
+      // tâches, faute de mieux.
+      if (!compteur) sansItems.push({ machine, date, taches: (plan.tasks || '').trim() });
+      continue;
+    }
+    for (const item of items) {
+      const label = item && item.label ? String(item.label).trim() : '';
+      if (!label) continue;
+      const spec = item && item.spec ? String(item.spec).trim() : '';
+      besoins.push({
+        cle: `${label.toLowerCase()}|${spec.toLowerCase()}`,
+        label, spec, machine,
+        quantite: item && item.qty ? String(item.qty).trim() : '',
+        date,
+      });
+    }
+  }
+
+  const parCle = new Map();
+  for (const besoin of besoins) {
+    if (!parCle.has(besoin.cle)) parCle.set(besoin.cle, { label: besoin.label, spec: besoin.spec, besoins: [] });
+    parCle.get(besoin.cle).besoins.push(besoin);
+  }
+  const produits = [...parCle.values()].map((produit) => ({
+    ...produit,
+    total: totalQuantites(produit.besoins.map((b) => b.quantite)),
+    premiereDate: produit.besoins.map((b) => b.date).filter(Boolean).sort()[0] || null,
+  }));
+  produits.sort((a, b) => String(a.premiereDate || '9999').localeCompare(String(b.premiereDate || '9999')));
+
+  return { entretiens, auCompteur, produits, sansItems };
+}
+
+function preparationHtml() {
+  const jours = UI.preparationJours || 90;
+  const liste = listePreparation(UI.machines, jours);
+  const chips = PREPARATION_HORIZON
+    .map((j) => `<button type="button" class="chip${j === jours ? ' is-active' : ''}" data-horizon="${j}">${j} j</button>`)
+    .join('');
+
+  const produits = liste.produits.map((produit) => {
+    const besoins = produit.besoins.map((besoin) => {
+      const quand = besoin.date ? formatShortDate(besoin.date) : 'au compteur';
+      return `<div>${esc(besoin.machine.name)}${besoin.quantite ? ` — ${esc(besoin.quantite)}` : ''} <span class="prep-quand">(${esc(quand)})</span></div>`;
+    }).join('');
+    return `<div class="prep-produit">
+      <div class="prep-nom">${esc(produit.label)}${produit.spec ? ` <span class="prep-spec">${esc(produit.spec)}</span>` : ''}${produit.total ? `<span class="prep-total">total ${esc(formatteTotal(produit.total))}</span>` : ''}</div>
+      <div class="prep-besoins">${besoins}</div>
+    </div>`;
+  }).join('');
+
+  const sansItems = liste.sansItems.map((entree) => `<div class="prep-produit">
+      <div class="prep-nom">${esc(entree.machine.name)}${entree.date ? ` <span class="prep-quand">— ${esc(formatShortDate(entree.date))}</span>` : ''}</div>
+      <div class="prep-besoins">${entree.taches ? esc(entree.taches) : 'Tâches non renseignées'}</div>
+    </div>`).join('');
+
+  const rien = !liste.produits.length && !liste.sansItems.length;
+  const resume = liste.entretiens
+    ? `${liste.entretiens} entretien${liste.entretiens > 1 ? 's' : ''} daté${liste.entretiens > 1 ? 's' : ''} dans les ${jours} prochains jours`
+    : `Aucun entretien daté dans les ${jours} prochains jours`;
+
+  return `
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">Préparation</h2>
+        <div class="prep-horizon">${chips}</div>
+      </div>
+      <p class="muted-text">${esc(resume)}${liste.auCompteur ? ` · ${liste.auCompteur} machine(s) au compteur, sans date d'échéance` : ''}</p>
+      ${rien
+        ? `<p class="muted-text">Rien à prévoir sur cette période.</p>`
+        : `${produits}${sansItems}`}
+      ${(liste.produits.length || liste.sansItems.length) ? `
+        <div class="hint">Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.</div>
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="prep-copier">Copier la liste</button>
+        </div>` : ''}
+    </section>`;
+}
+
+// Version en clair, à coller dans un message au fournisseur : c'est l'usage
+// réel de cette liste.
+function preparationTexte() {
+  const jours = UI.preparationJours || 90;
+  const liste = listePreparation(UI.machines, jours);
+  const lignes = [`Préparation des entretiens — ${jours} prochains jours`, ''];
+  for (const produit of liste.produits) {
+    const total = produit.total ? ` — total ${formatteTotal(produit.total)}` : '';
+    lignes.push(`${produit.label}${produit.spec ? ` (${produit.spec})` : ''}${total}`);
+    for (const besoin of produit.besoins) {
+      const quand = besoin.date ? formatShortDate(besoin.date) : 'au compteur';
+      lignes.push(`   ${besoin.machine.name}${besoin.quantite ? ` : ${besoin.quantite}` : ''} — ${quand}`);
+    }
+  }
+  for (const entree of liste.sansItems) {
+    lignes.push(`${entree.machine.name}${entree.date ? ` — ${formatShortDate(entree.date)}` : ''}`);
+    lignes.push(`   ${entree.taches || 'Tâches non renseignées'}`);
+  }
+  if (!liste.produits.length && !liste.sansItems.length) lignes.push('Rien à prévoir sur cette période.');
+  return lignes.join('\n');
+}
+
+function wirePreparation(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-horizon]').forEach((bouton) => {
+    bouton.addEventListener('click', () => {
+      UI.preparationJours = Number(bouton.dataset.horizon) || 90;
+      renderApp();
+    });
+  });
+  root.querySelector('#prep-copier')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(preparationTexte());
+      showToast('Liste copiée');
+    } catch (err) {
+      // Presse-papiers refusé (permission, contexte non sécurisé) : on le dit
+      // plutôt que de laisser croire que la copie a réussi.
+      showToast('Copie impossible — sélectionne la liste à la main');
+    }
+  });
+}
+
 VIEWS.agenda = {
   title: 'Agenda',
   subtitle: () => 'Échéances datées et compteurs à surveiller',
@@ -2835,6 +3047,7 @@ VIEWS.agenda = {
     }).join('');
 
     return `
+      ${preparationHtml()}
       ${dated.length ? `<section class="card">
         <div class="card-head"><h2 class="card-title">Échéances datées</h2></div>
         ${datedHtml}
@@ -2845,7 +3058,9 @@ VIEWS.agenda = {
       </section>` : ''}`;
   },
   mount() {
-    wireAlertRows(document.getElementById('view-root'));
+    const racine = document.getElementById('view-root');
+    wireAlertRows(racine);
+    wirePreparation(racine);
   },
 };
 
