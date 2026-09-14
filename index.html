@@ -2,9 +2,21 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-QOkbkbZcjfYC5a5PxcB5RVANzzZgYIyURoy3n8AXXII=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ApgEdHzgGjHuBjYWZ/0QuuTKm7zB4/rDxe287hW2cvI=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
+     marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Couleur de la barre d'état : le noir de la barre latérale de l'application. -->
+<meta name="theme-color" content="#0D1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ParcPacific">
 <title>ParcPacific — Liste des machines</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icones/favicon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -67,11 +79,20 @@
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html{
+    /* Le navigateur du téléphone ne réécrit pas la taille des textes. */
+    -webkit-text-size-adjust:100%;
+    /* Dans l'application Android, la page vit dans une vue qui occupe tout
+       l'écran : sans cela, tirer vers le bas déclenche le rafraîchissement. */
+    overscroll-behavior-y:contain;
+  }
   body{
     background:var(--bg);
     color:var(--ink);
     font-family:'Figtree',system-ui,-apple-system,sans-serif;
     -webkit-font-smoothing:antialiased;
+    /* Pas de halo gris au toucher : l'interface signale déjà ses états. */
+    -webkit-tap-highlight-color:transparent;
   }
   h1,h2,h3{font-family:inherit;letter-spacing:-0.02em;}
   button{font-family:inherit;}
@@ -84,9 +105,20 @@
   /* ------------------------------------------------------------
      Coquille : sidebar (desktop) / barre d'onglets (mobile)
      ------------------------------------------------------------ */
-  .shell{display:flex;min-height:100vh;align-items:stretch;}
+  /* 100dvh suit la hauteur réellement visible quand la barre d'adresse du
+     navigateur se replie. Dans l'application Android, les deux sont égaux ;
+     100vh reste écrit avant, en repli pour les navigateurs qui ignorent dvh. */
+  .shell{display:flex;min-height:100vh;min-height:100dvh;align-items:stretch;}
   .main{flex:1;min-width:0;display:flex;flex-direction:column;}
-  .content{width:100%;max-width:1180px;margin:0 auto;padding:18px 16px 104px;}
+  /* Les marges de sécurité épousent l'encoche, l'horloge et la barre de gestes.
+     Dans un navigateur de bureau, toutes ces valeurs valent zéro. */
+  .content{
+    width:100%;max-width:1180px;margin:0 auto;
+    padding:calc(18px + env(safe-area-inset-top,0px))
+            calc(16px + env(safe-area-inset-right,0px))
+            104px
+            calc(16px + env(safe-area-inset-left,0px));
+  }
   .view{display:flex;flex-direction:column;gap:16px;}
 
   .sidebar{display:none;}
@@ -99,10 +131,12 @@
   }
   .tab{
     flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-    background:none;border:none;padding:4px 0;cursor:pointer;
+    background:none;border:none;padding:7px 0;cursor:pointer;
     font-size:10.5px;font-weight:600;color:var(--ink-4);
+    /* Cible tactile confortable au pouce : la zone utile dépasse 44 px. */
+    min-height:48px;
   }
-  .tab .tab-icon{font-size:15px;line-height:1;}
+  .tab .tab-icon{font-size:16px;line-height:1;}
   .tab.is-active{color:var(--primary);font-weight:700;}
   .tab-fab{
     flex:0 0 58px;display:flex;justify-content:center;background:none;border:none;cursor:pointer;
@@ -385,8 +419,13 @@
     outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-tint);background:var(--surface);
   }
   textarea{resize:vertical;min-height:64px;}
-  .field-row{display:flex;gap:12px;}
-  .field-row > div{flex:1;}
+  /* Deux champs côte à côte n'ont pas toujours des étiquettes de même hauteur :
+     « Échéance toutes les (jours) » tient sur deux lignes quand « Rappel avant
+     (jours) » n'en occupe qu'une, et les deux champs se retrouvaient décalés
+     verticalement. En alignant les colonnes par le BAS, les champs restent
+     alignés quelle que soit la longueur des étiquettes. */
+  .field-row{display:flex;gap:12px;align-items:flex-end;}
+  .field-row > div{flex:1;min-width:0;}
   .hint{font-size:13.5px;color:var(--ink-2);margin-top:6px;line-height:1.5;}
   .error{color:var(--late);font-size:14px;margin-top:12px;font-weight:600;}
 
@@ -721,7 +760,7 @@ function normalizeItems(raw) {
 // tracking_mode ∈ {days, hours, km}.
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
-const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false };
+const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false };
 
 // --- Contact de la société --------------------------------------------------
 // Le schéma d'origine ne stockait qu'une chaîne « nom du contact ». La migration
@@ -979,6 +1018,57 @@ function brandModelPatch(brand, model) {
   return SCHEMA.hasBrandModel
     ? { brand_model: complet, brand: brand || null, model: model || null }
     : { brand_model: complet };
+}
+
+// --- Machines et véhicules ---------------------------------------------------
+// Une machine s'identifie par son numéro de série, un véhicule par sa plaque
+// d'immatriculation : c'est ce que l'équipe lit sur le terrain. Une seule
+// colonne porte l'identifiant selon le type, et l'affichage comme la recherche
+// suivent le type.
+const TYPE_MACHINE = 'machine';
+const TYPE_VEHICULE = 'vehicle';
+const IDENTIFIANT_LIBELLE = {
+  [TYPE_MACHINE]: 'N° de série',
+  [TYPE_VEHICULE]: "Plaque d'immatriculation",
+};
+const IDENTIFIANT_PLACEHOLDER = {
+  [TYPE_MACHINE]: 'Ex. 123456789',
+  [TYPE_VEHICULE]: 'Ex. 123456',
+};
+// Intervalle proposé par défaut : 100 heures pour un moteur, 10 000 kilomètres
+// pour un véhicule. Le basculer évite d'enregistrer un plan à 100 km.
+const INTERVALLE_DEFAUT = { [TYPE_MACHINE]: 100, [TYPE_VEHICULE]: 10000 };
+
+function machineKind(m) {
+  return m && m.kind === TYPE_VEHICULE ? TYPE_VEHICULE : TYPE_MACHINE;
+}
+function isVehicle(m) { return machineKind(m) === TYPE_VEHICULE; }
+
+function kindPatch(kind) {
+  return SCHEMA.hasKind ? { kind: kind === TYPE_VEHICULE ? TYPE_VEHICULE : TYPE_MACHINE } : {};
+}
+
+// L'identifiant est écrit dans la colonne de son type. L'autre colonne n'est
+// jamais effacée : transformer une machine en véhicule ne fait pas perdre son
+// numéro de série, il redevient simplement visible si l'on revient en arrière.
+function identifiantPatch(kind, valeur) {
+  const v = valeur || null;
+  if (kind === TYPE_VEHICULE && SCHEMA.hasPlate) return { plate: v };
+  return { serial_number: v };
+}
+
+// L'identifiant à AFFICHER : la plaque d'un véhicule, le numéro de série sinon.
+// Le repli sur l'autre colonne couvre les fiches saisies avant cette version.
+function machineIdentifiant(m) {
+  if (!m) return '';
+  return isVehicle(m)
+    ? (m.plate || m.serial_number || '')
+    : (m.serial_number || m.plate || '');
+}
+function identifiantAffiche(m) {
+  const valeur = machineIdentifiant(m);
+  if (!valeur) return '';
+  return `${isVehicle(m) ? 'Plaque' : 'N° série'} ${valeur}`;
 }
 // Force la saisie en majuscules, au fur et à mesure de la frappe, en préservant
 // la position du curseur (utile quand on corrige au milieu du champ).
@@ -2202,7 +2292,7 @@ function fleetMatches() {
     if (f.status === 'soon' && state !== 'soon') return false;
     if (f.status === 'ok' && (state === 'late' || state === 'soon')) return false;
     if (!q) return true;
-    const hay = [m.name, m.brand_model, m.brand, m.model, m.serial_number, m.category?.name]
+    const hay = [m.name, m.brand_model, m.brand, m.model, m.serial_number, m.plate, m.category?.name]
       .filter(Boolean).join(' ').toLowerCase();
     return hay.includes(q);
   });
@@ -2385,7 +2475,8 @@ VIEWS.machines = {
 
 function machineCardHtml(m) {
   const info = dueInfo(m.plan, m);
-  const line1 = [esc(machineBrandModel(m)), m.serial_number ? `N° série ${esc(m.serial_number)}` : null].filter(Boolean).join(' · ');
+  const identifiant = identifiantAffiche(m);
+  const line1 = [esc(machineBrandModel(m)), identifiant ? esc(identifiant) : null].filter(Boolean).join(' · ');
   const cat = esc(m.category?.name) || 'Sans catégorie';
   const meta = line1 ? `${line1}<br>${cat}` : cat;
   const photo = safeUrl(m.image_url);
@@ -2979,7 +3070,7 @@ function openAddWizard(companyId, categories) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
   const state = {
-    name: '', category: '', brand: '', serial: '', serviceDate: today,
+    name: '', category: '', brand: '', serial: '', serviceDate: today, kind: TYPE_MACHINE,
     intervalDays: 90, reminderDays: 7, tasks: '', pendingFile: null, pendingPhotoBlob: null,
     items: null, notes: '',
     trackingMode: 'days', currentHours: null, intervalHours: 100, reminderHoursBefore: 10,
@@ -3003,6 +3094,12 @@ function openAddWizard(companyId, categories) {
         <input id="f-category" list="cat-list" required placeholder="Ex. Motoculture" value="${esc(state.category)}">
         <datalist id="cat-list">${categories.map(c => `<option value="${esc(c.name)}">`).join('')}</datalist>
 
+        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
+        <select id="f-kind">
+          <option value="machine" ${state.kind === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
+          <option value="vehicle" ${state.kind === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
+        </select>` : ''}
+
         <div class="field-row">
           <div>
             <label for="f-brand">Marque</label>
@@ -3014,8 +3111,8 @@ function openAddWizard(companyId, categories) {
           </div>
         </div>
 
-        <label for="f-serial">N° de série</label>
-        <input id="f-serial" value="${esc(state.serial)}">
+        <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
+        <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
 
         <label for="f-service-date">Date de mise en service</label>
         <input id="f-service-date" type="date" value="${esc(state.serviceDate)}" required>
@@ -3047,6 +3144,28 @@ function openAddWizard(companyId, categories) {
     overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
     forcerMajuscules(overlay.querySelector('#f-brand'));
     forcerMajuscules(overlay.querySelector('#f-model'));
+    const champType = overlay.querySelector('#f-kind');
+    if (champType) {
+      const ancienType = champType.value;
+      champType.addEventListener('change', () => {
+        const kind = champType.value;
+        const label = overlay.querySelector('#f-identifiant-label');
+        if (label) label.textContent = IDENTIFIANT_LIBELLE[kind];
+        const champ = overlay.querySelector('#f-serial');
+        if (champ) champ.placeholder = IDENTIFIANT_PLACEHOLDER[kind];
+        // Véhicule : kilométrage. Machine : compteur horaire. L'utilisateur
+        // reste libre de choisir autrement juste après.
+        if (SCHEMA.hasCounter) {
+          const mode = kind === TYPE_VEHICULE ? 'km' : 'hours';
+          const radio = overlay.querySelector(`input[name=tm][value=${mode}]`);
+          if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+        }
+        // L'intervalle suit l'unité, tant que l'utilisateur n'a pas saisi le sien.
+        if (Number(state.intervalHours) === INTERVALLE_DEFAUT[ancienType]) {
+          state.intervalHours = INTERVALLE_DEFAUT[kind];
+        }
+      });
+    }
     overlay.querySelectorAll('input[name=tm]').forEach(r => {
       r.addEventListener('change', () => {
         const mode = overlay.querySelector('input[name=tm]:checked').value;
@@ -3065,6 +3184,7 @@ function openAddWizard(companyId, categories) {
       state.brand = overlay.querySelector('#f-brand').value.trim();
       state.model = overlay.querySelector('#f-model').value.trim();
       state.serial = overlay.querySelector('#f-serial').value.trim();
+      state.kind = champType ? champType.value : TYPE_MACHINE;
       state.serviceDate = overlay.querySelector('#f-service-date').value;
       state.trackingMode = overlay.querySelector('input[name=tm]:checked').value;
       state.currentHours = state.trackingMode !== 'days'
@@ -3242,7 +3362,8 @@ function openAddWizard(companyId, categories) {
         .from('machines')
         .insert({
           company_id: companyId, category_id: categoryId, name: state.name,
-          serial_number: state.serial || null,
+          ...identifiantPatch(state.kind, state.serial),
+          ...kindPatch(state.kind),
           service_date: state.serviceDate, status: 'en_service',
           ...brandModelPatch(state.brand, state.model),
           ...machineCounterPatch(
@@ -3551,7 +3672,7 @@ function openPlanView(machine, companyId, categories) {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${esc(machine.name)}</h2>
-      <p class="sub">${esc(machine.category?.name) || 'Sans catégorie'}${machine.brand_model ? ' · ' + esc(machine.brand_model) : ''}${machine.serial_number ? ' · N° série ' + esc(machine.serial_number) : ''}</p>
+      <p class="sub">${esc(machine.category?.name) || 'Sans catégorie'}${machine.brand_model ? ' · ' + esc(machine.brand_model) : ''}${identifiantAffiche(machine) ? ' · ' + esc(identifiantAffiche(machine)) : ''}</p>
 
       <div class="plan-field">
         <div class="label">Statut</div>
@@ -3740,6 +3861,12 @@ function openMachineModal(companyId, categories, existing) {
           ${categories.map(c => `<option value="${esc(c.name)}">`).join('')}
         </datalist>
 
+        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
+        <select id="f-kind">
+          <option value="machine" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
+          <option value="vehicle" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
+        </select>` : ''}
+
         <div class="field-row">
           <div>
             <label for="f-brand">Marque</label>
@@ -3751,8 +3878,8 @@ function openMachineModal(companyId, categories, existing) {
           </div>
         </div>
 
-        <label for="f-serial">N° de série</label>
-        <input id="f-serial" value="${isEdit ? esc(existing.serial_number || '') : ''}">
+        <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[isEdit ? machineKind(existing) : TYPE_MACHINE]}</label>
+        <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[isEdit ? machineKind(existing) : TYPE_MACHINE]}" value="${isEdit ? esc(machineIdentifiant(existing)) : ''}">
 
         <label for="f-service-date">Date de mise en service</label>
         <input id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
@@ -3813,6 +3940,25 @@ function openMachineModal(companyId, categories, existing) {
 
   forcerMajuscules(overlay.querySelector('#f-brand'));
   forcerMajuscules(overlay.querySelector('#f-model'));
+
+  const champType = overlay.querySelector('#f-kind');
+  if (champType) {
+    const ancienType = champType.value;
+    champType.addEventListener('change', () => {
+      const kind = champType.value;
+      overlay.querySelector('#f-identifiant-label').textContent = IDENTIFIANT_LIBELLE[kind];
+      overlay.querySelector('#f-serial').placeholder = IDENTIFIANT_PLACEHOLDER[kind];
+      if (SCHEMA.hasCounter) {
+        const mode = kind === TYPE_VEHICULE ? 'km' : 'hours';
+        const radio = overlay.querySelector(`input[name=tm][value=${mode}]`);
+        if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+      }
+      const champIntervalle = overlay.querySelector('#f-interval');
+      if (champIntervalle && Number(champIntervalle.value) === INTERVALLE_DEFAUT[ancienType]) {
+        champIntervalle.value = INTERVALLE_DEFAUT[kind];
+      }
+    });
+  }
 
   overlay.querySelectorAll('input[name=tm]').forEach(r => {
     r.addEventListener('change', () => {
@@ -3957,6 +4103,7 @@ function openMachineModal(companyId, categories, existing) {
     const brand = overlay.querySelector('#f-brand').value.trim();
     const model = overlay.querySelector('#f-model').value.trim();
     const serial = overlay.querySelector('#f-serial').value.trim();
+    const kind = overlay.querySelector('#f-kind') ? overlay.querySelector('#f-kind').value : machineKind(existing);
     const serviceDate = overlay.querySelector('#f-service-date').value;
     const trackingMode = overlay.querySelector('input[name=tm]:checked').value;
     const isCounterMode = trackingMode !== 'days';
@@ -4007,7 +4154,9 @@ function openMachineModal(companyId, categories, existing) {
       }
       const updatePayload = {
         category_id: categoryId,
-        name, serial_number: serial || null,
+        name,
+        ...identifiantPatch(kind, serial),
+        ...kindPatch(kind),
         service_date: serviceDate,
       };
       Object.assign(updatePayload, brandModelPatch(brand, model));
@@ -4150,12 +4299,15 @@ async function boot(toastMessage) {
   // Capacités du schéma, détectées par deux requêtes minuscules (une ligne,
   // aucune donnée lue). Cela remplace l'ancienne cascade de repli, qui devenait
   // ingérable à mesure que des colonnes optionnelles s'ajoutaient.
-  const [sondeCompteur, sondeMarque] = await Promise.all([
+  const [sondeCompteur, sondeMarque, sondeType] = await Promise.all([
     sb.from('machines').select('counter_unit').limit(1),
     sb.from('machines').select('brand, model').limit(1),
+    sb.from('machines').select('kind, plate').limit(1),
   ]);
   SCHEMA.hasCounter = !sondeCompteur.error;
   SCHEMA.hasBrandModel = !sondeMarque.error;
+  SCHEMA.hasKind = !sondeType.error;
+  SCHEMA.hasPlate = !sondeType.error;
 
   const colonnesMachine = [
     'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
@@ -4163,6 +4315,8 @@ async function boot(toastMessage) {
     SCHEMA.hasCounter ? 'counter_unit' : 'current_hours',
     ...(SCHEMA.hasCounter ? ['counter_value'] : []),
     ...(SCHEMA.hasBrandModel ? ['brand', 'model'] : []),
+    ...(SCHEMA.hasKind ? ['kind'] : []),
+    ...(SCHEMA.hasPlate ? ['plate'] : []),
   ].join(', ');
   const colonnesPlan = [
     'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
