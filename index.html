@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lsPYwK05nvV+Uxu37t4gdrROCBoWKc1DYcUXmTiwZYI=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Be4lLJrJZJLVKpe1ekoSDayQKPOsL9XT6aVwlBXEEbM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ParcPacific — Liste des machines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -770,6 +770,20 @@ function heroClass(state) { return state === 'late' ? 'alert' : (state === 'soon
 function isQuotaError(err) {
   const message = String(err && err.message ? err.message : err || '');
   return /limite du plan gratuit/i.test(message);
+}
+
+// supabase-js ne remonte qu'un « Edge Function returned a non-2xx status code »
+// quand une fonction Edge répond 401, 403, 429… Or c'est justement là que se
+// trouve le message utile (quota atteint, session expirée). Le corps de la
+// réponse est accessible via error.context.
+async function functionErrorMessage(error, defaut = 'appel impossible') {
+  if (error && error.context && typeof error.context.json === 'function') {
+    try {
+      const corps = await error.context.clone().json();
+      if (corps && corps.error) return String(corps.error);
+    } catch (e) { /* corps absent, déjà consommé ou non JSON */ }
+  }
+  return (error && error.message) || defaut;
 }
 
 // ── Initialisation Supabase ───────────────────────────────────
@@ -2292,7 +2306,7 @@ function openManualUploadModal(presetMachine, presetFile) {
           serviceDate: machine.service_date ?? null,
         },
       });
-      if (error) throw new Error(error.message || 'appel IA impossible');
+      if (error) throw new Error(await functionErrorMessage(error, 'analyse IA impossible'));
       if (data?.error) throw new Error(data.error);
       analysis = data;
       stepReview(analysis);
@@ -3363,7 +3377,7 @@ function openMachineModal(companyId, categories, existing) {
     statusEl.textContent = 'Recherche en cours…';
     try {
       const { data, error } = await sb.functions.invoke('fetch-machine-image', { body: { query } });
-      if (error) throw new Error(error.message || 'appel impossible');
+      if (error) throw new Error(await functionErrorMessage(error, 'recherche de photo impossible'));
       if (data?.error) throw new Error(data.error);
       const foundUrl = safeUrl(data.imageUrl);
       if (!foundUrl) throw new Error("URL de photo invalide");
