@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kTGO31IKQbM0TEgS531mSvLBZ6IVQXBbi8KLk5utZB0=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-QOkbkbZcjfYC5a5PxcB5RVANzzZgYIyURoy3n8AXXII=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ParcPacific — Liste des machines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -594,6 +594,11 @@
      filet visuel pour le collage et le remplissage automatique. */
   input.majuscules{text-transform:uppercase;}
 
+  /* Téléphone : indicatif du pays + masque de saisie adapté */
+  .tel-champ{display:flex;gap:8px;align-items:stretch;}
+  .tel-champ .tel-pays{flex:0 1 auto;max-width:62%;}
+  .tel-champ input{flex:1 1 38%;min-width:0;}
+
   /* Case à cocher isolée (option de l'assistant) */
   .check-row{
     display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;
@@ -738,6 +743,205 @@ function companyLastName(c) {
 // Adresse email : contrôle volontairement simple, le serveur reste juge.
 function emailValide(v) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(String(v || '').trim());
+}
+
+// --- Téléphone : pays, indicatif et masque de saisie ------------------------
+// « groupes » décrit le découpage du numéro national : [2,2,2] donne 81 54 44.
+// Le nombre total de chiffres attendus en découle.
+// Nouvelle-Calédonie en tête (marché principal), puis Pacifique, francophonie,
+// et les principaux pays. Ajouter un pays = ajouter une ligne.
+const PAYS_TEL = [
+  { code: 'NC', nom: 'Nouvelle-Calédonie', indicatif: '687', groupes: [2, 2, 2] },
+  { code: 'PF', nom: 'Polynésie française', indicatif: '689', groupes: [2, 2, 2, 2] },
+  { code: 'WF', nom: 'Wallis-et-Futuna', indicatif: '681', groupes: [2, 2, 2] },
+  { code: 'VU', nom: 'Vanuatu', indicatif: '678', groupes: [3, 4] },
+  { code: 'FJ', nom: 'Fidji', indicatif: '679', groupes: [3, 4] },
+  { code: 'WS', nom: 'Samoa', indicatif: '685', groupes: [3, 4] },
+  { code: 'TO', nom: 'Tonga', indicatif: '676', groupes: [3, 4] },
+  { code: 'PG', nom: 'Papouasie-Nouvelle-Guinée', indicatif: '675', groupes: [4, 4] },
+  { code: 'SB', nom: 'Îles Salomon', indicatif: '677', groupes: [3, 4] },
+  { code: 'KI', nom: 'Kiribati', indicatif: '686', groupes: [2, 3] },
+  { code: 'NR', nom: 'Nauru', indicatif: '674', groupes: [3, 4] },
+  { code: 'TV', nom: 'Tuvalu', indicatif: '688', groupes: [2, 3] },
+  { code: 'CK', nom: 'Îles Cook', indicatif: '682', groupes: [2, 3] },
+  { code: 'AU', nom: 'Australie', indicatif: '61', groupes: [3, 3, 3] },
+  { code: 'NZ', nom: 'Nouvelle-Zélande', indicatif: '64', groupes: [2, 3, 4] },
+  { code: 'FR', nom: 'France', indicatif: '33', groupes: [1, 2, 2, 2, 2] },
+  { code: 'RE', nom: 'La Réunion', indicatif: '262', groupes: [3, 2, 2, 2] },
+  { code: 'BE', nom: 'Belgique', indicatif: '32', groupes: [3, 2, 2, 2] },
+  { code: 'CH', nom: 'Suisse', indicatif: '41', groupes: [2, 3, 2, 2] },
+  { code: 'LU', nom: 'Luxembourg', indicatif: '352', groupes: [3, 3, 3] },
+  { code: 'MC', nom: 'Monaco', indicatif: '377', groupes: [2, 2, 2, 2] },
+  { code: 'CA', nom: 'Canada', indicatif: '1', groupes: [3, 3, 4] },
+  { code: 'US', nom: 'États-Unis', indicatif: '1', groupes: [3, 3, 4] },
+  { code: 'GB', nom: 'Royaume-Uni', indicatif: '44', groupes: [4, 6] },
+  { code: 'IE', nom: 'Irlande', indicatif: '353', groupes: [2, 3, 4] },
+  { code: 'DE', nom: 'Allemagne', indicatif: '49', groupes: [4, 4, 4] },
+  { code: 'ES', nom: 'Espagne', indicatif: '34', groupes: [3, 3, 3] },
+  { code: 'IT', nom: 'Italie', indicatif: '39', groupes: [3, 3, 4] },
+  { code: 'PT', nom: 'Portugal', indicatif: '351', groupes: [3, 3, 3] },
+  { code: 'NL', nom: 'Pays-Bas', indicatif: '31', groupes: [2, 3, 4] },
+  { code: 'AT', nom: 'Autriche', indicatif: '43', groupes: [3, 3, 4] },
+  { code: 'GR', nom: 'Grèce', indicatif: '30', groupes: [3, 3, 4] },
+  { code: 'PL', nom: 'Pologne', indicatif: '48', groupes: [3, 3, 3] },
+  { code: 'SE', nom: 'Suède', indicatif: '46', groupes: [2, 3, 4] },
+  { code: 'NO', nom: 'Norvège', indicatif: '47', groupes: [3, 2, 3] },
+  { code: 'DK', nom: 'Danemark', indicatif: '45', groupes: [2, 2, 2, 2] },
+  { code: 'FI', nom: 'Finlande', indicatif: '358', groupes: [2, 3, 4] },
+  { code: 'MA', nom: 'Maroc', indicatif: '212', groupes: [3, 2, 2, 2] },
+  { code: 'DZ', nom: 'Algérie', indicatif: '213', groupes: [3, 2, 2, 2] },
+  { code: 'TN', nom: 'Tunisie', indicatif: '216', groupes: [2, 3, 3] },
+  { code: 'SN', nom: 'Sénégal', indicatif: '221', groupes: [2, 3, 2, 2] },
+  { code: 'CI', nom: "Côte d'Ivoire", indicatif: '225', groupes: [2, 2, 2, 2] },
+  { code: 'CM', nom: 'Cameroun', indicatif: '237', groupes: [3, 3, 3] },
+  { code: 'MG', nom: 'Madagascar', indicatif: '261', groupes: [2, 2, 3, 2] },
+  { code: 'MU', nom: 'Maurice', indicatif: '230', groupes: [4, 4] },
+  { code: 'BR', nom: 'Brésil', indicatif: '55', groupes: [2, 5, 4] },
+  { code: 'MX', nom: 'Mexique', indicatif: '52', groupes: [3, 3, 4] },
+  { code: 'AR', nom: 'Argentine', indicatif: '54', groupes: [2, 4, 4] },
+  { code: 'CL', nom: 'Chili', indicatif: '56', groupes: [1, 4, 4] },
+  { code: 'JP', nom: 'Japon', indicatif: '81', groupes: [2, 4, 4] },
+  { code: 'CN', nom: 'Chine', indicatif: '86', groupes: [3, 4, 4] },
+  { code: 'IN', nom: 'Inde', indicatif: '91', groupes: [5, 5] },
+  { code: 'SG', nom: 'Singapour', indicatif: '65', groupes: [4, 4] },
+  { code: 'TH', nom: 'Thaïlande', indicatif: '66', groupes: [2, 3, 4] },
+  { code: 'ID', nom: 'Indonésie', indicatif: '62', groupes: [3, 4, 4] },
+  { code: 'PH', nom: 'Philippines', indicatif: '63', groupes: [3, 3, 4] },
+  { code: 'MY', nom: 'Malaisie', indicatif: '60', groupes: [2, 4, 4] },
+  { code: 'VN', nom: 'Viêt Nam', indicatif: '84', groupes: [3, 3, 3] },
+  { code: 'AE', nom: 'Émirats arabes unis', indicatif: '971', groupes: [2, 3, 4] },
+  { code: 'ZA', nom: 'Afrique du Sud', indicatif: '27', groupes: [2, 3, 4] },
+];
+
+const PAYS_TEL_DEFAUT = PAYS_TEL[0];
+
+function paysTel(code) {
+  return PAYS_TEL.find((p) => p.code === code) || PAYS_TEL_DEFAUT;
+}
+function chiffresMax(pays) {
+  return pays.groupes.reduce((total, n) => total + n, 0);
+}
+// Drapeau dérivé du code ISO : les lettres A-Z deviennent des indicateurs
+// régionaux Unicode. Évite de saisir soixante emoji à la main.
+function drapeauDe(iso) {
+  return String(iso).toUpperCase().replace(/[A-Z]/g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+function exempleNational(pays) {
+  return pays.groupes.map((n) => '0'.repeat(n)).join(' ');
+}
+// Applique le découpage du pays, sans jamais dépasser le nombre de chiffres.
+function formatNational(chiffres, pays) {
+  const brut = String(chiffres || '').replace(/\D/g, '');
+  if (!brut) return '';
+  if (brut.length > chiffresMax(pays)) {
+    // Valeur plus longue que le format du pays (donnée ancienne) : on la
+    // conserve intégralement, groupée par paires, plutôt que de la tronquer.
+    return brut.replace(/(\d{2})(?=\d)/g, '$1 ');
+  }
+  const morceaux = [];
+  let position = 0;
+  for (const taille of pays.groupes) {
+    if (position >= brut.length) break;
+    morceaux.push(brut.slice(position, position + taille));
+    position += taille;
+  }
+  return morceaux.join(' ');
+}
+// Reconstitue pays + numéro national à partir de ce qui est stocké.
+function parserTelephone(valeur) {
+  const brut = String(valeur || '').trim();
+  const chiffres = brut.replace(/\D/g, '');
+  if (!chiffres) return { pays: PAYS_TEL_DEFAUT, national: '' };
+
+  const parIndicatif = (liste) =>
+    liste.slice().sort((a, b) => b.indicatif.length - a.indicatif.length)[0];
+
+  if (brut.startsWith('+')) {
+    const candidats = PAYS_TEL.filter((p) => chiffres.startsWith(p.indicatif));
+    if (candidats.length) {
+      const pays = parIndicatif(candidats);
+      return { pays, national: chiffres.slice(pays.indicatif.length) };
+    }
+  } else {
+    // Sans « + » : on ne reconnaît un indicatif que si la longueur totale
+    // correspond EXACTEMENT au format du pays. Une condition plus souple
+    // (« le reste tient dans le format ») ferait passer « 81 54 44 » pour un
+    // numéro japonais (+81) suivi de 5444, au lieu d'un numéro calédonien.
+    const candidats = PAYS_TEL.filter(
+      (p) => chiffres.startsWith(p.indicatif) && chiffres.length - p.indicatif.length === chiffresMax(p)
+    );
+    if (candidats.length) {
+      const pays = parIndicatif(candidats);
+      return { pays, national: chiffres.slice(pays.indicatif.length) };
+    }
+  }
+  return { pays: PAYS_TEL_DEFAUT, national: chiffres };
+}
+// Format de stockage : E.164 (« +687815444 »), celui qu'attendent les services
+// de notification.
+function telephoneE164(pays, national) {
+  const chiffres = String(national || '').replace(/\D/g, '');
+  return chiffres ? `+${pays.indicatif}${chiffres}` : '';
+}
+// Format lisible : « +687 81 54 44 ».
+function telephoneLisible(valeur) {
+  const { pays, national } = parserTelephone(valeur);
+  return national ? `+${pays.indicatif} ${formatNational(national, pays)}` : '';
+}
+
+// Champ téléphone réutilisable : sélecteur de pays + saisie masquée.
+function champTelephoneHtml(id, valeur, opts = {}) {
+  const { pays, national } = parserTelephone(valeur);
+  const desactive = opts.disabled ? ' disabled' : '';
+  const requis = opts.required ? ' required' : '';
+  return `
+    <label for="${id}">${esc(opts.label || 'Téléphone')}</label>
+    <div class="tel-champ">
+      <select id="${id}-pays" class="tel-pays" aria-label="Pays de l'indicatif"${desactive}>
+        ${PAYS_TEL.map((p) => `<option value="${esc(p.code)}"${p.code === pays.code ? ' selected' : ''}>${drapeauDe(p.code)} +${esc(p.indicatif)} — ${esc(p.nom)}</option>`).join('')}
+      </select>
+      <input id="${id}" type="tel" inputmode="tel" autocomplete="tel-national"
+             value="${esc(formatNational(national, pays))}"
+             placeholder="${esc(exempleNational(pays))}"${desactive}${requis}>
+    </div>
+    ${opts.aide ? `<div class="hint">${esc(opts.aide)}</div>` : ''}`;
+}
+
+// Applique le masque à la frappe et tient le sélecteur et le champ cohérents.
+function wireChampTelephone(root, id) {
+  const select = root.querySelector(`#${id}-pays`);
+  const input = root.querySelector(`#${id}`);
+  if (!select || !input) return;
+
+  const courant = () => paysTel(select.value);
+  const reformater = (tronquer) => {
+    const pays = courant();
+    let chiffres = input.value.replace(/\D/g, '');
+    if (tronquer) chiffres = chiffres.slice(0, chiffresMax(pays));
+    input.value = formatNational(chiffres, pays);
+    input.placeholder = exempleNational(pays);
+    input.maxLength = chiffresMax(pays) + pays.groupes.length - 1;
+  };
+
+  input.addEventListener('input', () => reformater(true));
+  input.addEventListener('blur', () => reformater(false));
+  select.addEventListener('change', () => {
+    // On conserve les chiffres saisis et on les redécoupe selon le nouveau pays.
+    reformater(true);
+    input.focus();
+  });
+  reformater(false);
+}
+
+// Lit la valeur saisie et la renvoie au format E.164.
+function lireChampTelephone(root, id) {
+  const select = root.querySelector(`#${id}-pays`);
+  const input = root.querySelector(`#${id}`);
+  if (!select || !input) return null;
+  const pays = paysTel(select.value);
+  const national = input.value.replace(/\D/g, '').slice(0, chiffresMax(pays));
+  if (!national) return null;
+  return { pays, national, e164: telephoneE164(pays, national), lisible: `+${pays.indicatif} ${formatNational(national, pays)}` };
 }
 
 // --- Marque et modèle -------------------------------------------------------
@@ -1128,19 +1332,18 @@ function openSignupWizard() {
         <label for="su-reg">N° RCS / RIDET (si disponible)</label>
         <input id="su-reg" value="${esc(state.registrationNumber)}">
 
+        ${champTelephoneHtml('su-phone', state.phone, { label: 'Téléphone', required: true, aide: "Sert aux rappels d'échéance par WhatsApp et par e-mail." })}
+
         <div class="field-row">
-          <div>
-            <label for="su-phone">Téléphone</label>
-            <input id="su-phone" type="tel" required value="${esc(state.phone)}">
-          </div>
           <div>
             <label for="su-contact-first">Prénom du contact</label>
             <input id="su-contact-first" required value="${esc(state.contactFirstName)}">
           </div>
+          <div>
+            <label for="su-contact-last">Nom du contact</label>
+            <input id="su-contact-last" required value="${esc(state.contactLastName)}">
+          </div>
         </div>
-
-        <label for="su-contact-last">Nom du contact</label>
-        <input id="su-contact-last" required value="${esc(state.contactLastName)}">
 
         <label for="su-email">Email</label>
         <input id="su-email" type="email" required value="${esc(state.email)}">
@@ -1172,6 +1375,7 @@ function openSignupWizard() {
       if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Masquer'; }
       else { pw.type = 'password'; btn.textContent = 'Afficher'; }
     });
+    wireChampTelephone(overlay, 'su-phone');
 
     overlay.querySelector('#signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1183,7 +1387,8 @@ function openSignupWizard() {
       state.name = overlay.querySelector('#su-name').value.trim();
       state.activity = overlay.querySelector('#su-activity').value;
       state.registrationNumber = overlay.querySelector('#su-reg').value.trim();
-      state.phone = overlay.querySelector('#su-phone').value.trim();
+      const telSaisi = lireChampTelephone(overlay, 'su-phone');
+      state.phone = telSaisi ? telSaisi.e164 : '';
       state.contactFirstName = overlay.querySelector('#su-contact-first').value.trim();
       state.contactLastName = overlay.querySelector('#su-contact-last').value.trim();
       state.contactName = contactFullName(state.contactFirstName, state.contactLastName);
@@ -2360,8 +2565,11 @@ VIEWS.account = {
             <input id="acc-last" value="${esc(companyLastName(c))}"${bloque}>
           </div>
         </div>
-        <label for="acc-phone">Téléphone</label>
-        <input id="acc-phone" type="tel" autocomplete="tel" placeholder="Ex. +687 81 54 44" value="${esc(c.phone || '')}"${bloque}>
+        ${champTelephoneHtml('acc-phone', c.phone || '', {
+          label: 'Téléphone',
+          disabled: !modifiable,
+          aide: "Ce numéro servira aux rappels d'échéance par WhatsApp.",
+        })}
         <div class="hint" id="acc-contact-msg" role="status" aria-live="polite"></div>
         <div class="modal-actions">
           <button type="button" class="primary" id="acc-save-contact"${bloque}>Enregistrer</button>
@@ -2391,6 +2599,7 @@ VIEWS.account = {
     if (!root) return;
 
     root.querySelector('#account-upgrade')?.addEventListener('click', () => openUpgradeNotice(UI.companyId));
+    wireChampTelephone(root, 'acc-phone');
 
     const message = (el, texte, erreur) => {
       if (!el) return;
@@ -2403,7 +2612,8 @@ VIEWS.account = {
       const msg = root.querySelector('#acc-contact-msg');
       const prenom = root.querySelector('#acc-first').value.trim();
       const nom = root.querySelector('#acc-last').value.trim();
-      const telephone = root.querySelector('#acc-phone').value.trim();
+      const telSaisi = lireChampTelephone(root, 'acc-phone');
+      const telephone = telSaisi ? telSaisi.e164 : '';
       btn.disabled = true;
       btn.textContent = 'Enregistrement…';
       try {
@@ -3985,6 +4195,8 @@ async function boot(toastMessage) {
     name: company?.name || '',
     activity: company?.activity || '',
     registrationNumber: company?.registration_number || '',
+    // Conservé tel quel : la mise en forme se fait à l'affichage, ce qui permet
+    // de lire aussi bien un ancien numéro libre qu'un E.164.
     phone: company?.phone || '',
     plan: company?.plan || 'free',
     contact_name: company?.contact_name || '',
