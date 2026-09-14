@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PDZhWEndArJxI98/DNGyxlL3zT94jJ7W7q2B8kWGQ+c=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ENjB+bfHirneEoy7jUHF0lTv4CUGiLziafkiRFXASnM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -762,23 +762,15 @@ const app = document.getElementById('app');
 // Ce bloc vit dans la section « Utilitaires » et non au tout début du script :
 // le harnais de test en découpe des tranches par ancres, et une fonction
 // définie ailleurs lui échapperait.
-let LANGUE = 'fr';
-
-// DICTIONNAIRES_DEBUT
-const TEXTES = {"en":{"← Retour":"← Back","À faire":"To do","À jour":"Up to date","Accueil":"Home","Activité":"Activity","Adresse de connexion":"Sign-in address","Afficher":"Show","Agenda":"Schedule","Ajouter une machine":"Add a machine","Analyse en cours…":"Analysing…","Analyse interrompue":"Analysis interrupted","Analyser le PDF":"Analyse the PDF","Annuler":"Cancel","Aucun plan de maintenance défini pour cette machine.":"No maintenance plan set for this machine.","Aucune tâche détaillée dans le plan.":"No detailed tasks in the plan.","Catégorie":"Category","Chargement…":"Loading…","Choisis un nouveau mot de passe.":"Choose a new password.","Code de vérification":"Verification code","Comment ça marchera":"How it will work","Compte":"Account","Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.":"Signed in, but not linked to a company yet. Check the profiles table.","Compteur à saisir":"Counter to enter","Compteur décroissant":"Countdown counter","Confidentialité":"Privacy","Connecte-toi pour voir tes machines.":"Sign in to see your machines.","Contact et notifications":"Contact and notifications","Créer le compte":"Create account","Créer un compte":"Create an account","dans le SQL Editor de Supabase.":"in the Supabase SQL Editor.","Date":"Date","Date de mise en service":"Commissioning date","Déposer un manuel":"Upload a manual","Déposer un manuel PDF":"Upload a PDF manual","Dernier entretien réalisé":"Last service performed","Détails":"Details","Échéance":"Due date","Échéances à venir":"Upcoming due dates","Échéances détectées dans le manuel":"Due dates found in the manual","Élément":"Item","Éléments traités":"Items handled","Email":"Email","Email actuel":"Current email","Email envoyé":"Email sent","En retard":"Overdue","Enregistrer":"Save","Enregistrer le mot de passe":"Save password","Enregistrer un entretien":"Log a service","Entretien à prévoir":"Service due soon","Envoyer le lien":"Send the link","Étape 1 sur 2 — identification":"Step 1 of 2 — identification","Ex. 19 240":"e.g. 19,240","Ex. 245":"e.g. 245","Exporter en CSV":"Export as CSV","Fermer":"Close","Formule":"Plan","Fréquence":"Frequency","Heures compteur actuelles":"Current hour meter","Historique des entretiens":"Service history","Huile / graisse / pièce":"Oil / grease / part","Indépendant / Patenté":"Sole trader / Licensed","Kilométrage actuel":"Current odometer","kilomètres":"kilometres","Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.":"The PDF is over 15 MB — reduce its size and try again.","Limite du plan gratuit atteinte":"Free plan limit reached","Machine concernée":"Machine","Machines":"Machines","Manuel analysé":"Manual analysed","Manuels":"Manuals","Manuels analysés":"Manuals analysed","Marque":"Make","Marquer fait":"Mark as done","Mentions légales":"Legal notice","Mise à jour indisponible : exécute":"Update unavailable: run","Mode de suivi de la maintenance":"Maintenance tracking","Modèle":"Model","Modifier":"Edit","Mon compte":"My account","Mot de passe":"Password","Mot de passe actuel":"Current password","Mot de passe incorrect.":"Incorrect password.","Mot de passe oublié":"Forgot password","Mot de passe oublié ?":"Forgot your password?","N° RCS / RIDET":"Company reg. no.","Navigation":"Navigation","Nom":"Last name","Nom de la machine":"Machine name","Nom du contact":"Contact last name","Non, mais je peux le trouver en ligne":"No, but I can find it online","Nouveau mot de passe":"New password","Nouvel email":"New email","Partager par email":"Share by email","Pas de plan de maintenance":"No maintenance plan","Photo de la machine":"Machine photo","Plan à définir":"Plan to be defined","Plus":"More","Prénom":"First name","Prénom du contact":"Contact first name","Préparation":"Preparation","Prochain entretien":"Next service","PROCHAIN ENTRETIEN":"NEXT SERVICE","Prochain entretien à réaliser":"Next service due","Quantité":"Quantity","Raison sociale":"Company name","Rappels":"Reminders","Rappels sur ce téléphone":"Reminders on this phone","Réessayer":"Try again","Réinitialiser les filtres":"Reset filters","Remarque":"Note","Remarques":"Notes","Renvoyer le code":"Resend code","Rien à prévoir sur cette période.":"Nothing to prepare for this period.","Rien à signaler":"Nothing to report","Se connecter":"Sign in","Se déconnecter":"Sign out","Société":"Company","Statut":"Status","Suivant →":"Next →","Suivi simplifié":"Simple tracking","Supprimer cette machine":"Delete this machine","Tableau de bord":"Dashboard","Tâches de maintenance":"Maintenance tasks","Téléphone":"Phone","Téléversement du carnet…":"Uploading manual…","Tout voir":"View all","Trier par":"Sort by","Type":"Type","Type de structure":"Organisation type","Urgence":"Urgency","URL de photo invalide":"Invalid photo URL","Valider":"Confirm","Valider le plan →":"Approve the plan →","Vérifie ton email":"Check your email","Voir la liste":"View the list","Voir le plan":"View the plan","worker pdf.js introuvable":"pdf.js worker not found","Entretien à faire aujourd'hui":"Service due today","Langue de l'interface sur cet appareil.":"Language of the interface on this device.","échéance dans {n} jours ({date})":"due in {n} days ({date})","échéance du {date}":"due on {date}","au compteur":"on the counter","{n} machine(s)":"{n} machine(s)"}};
-// DICTIONNAIRES_FIN
-
-function t(texte) {
-  const table = TEXTES[LANGUE];
-  if (!table) return texte;
-  return Object.prototype.hasOwnProperty.call(table, texte) ? table[texte] : texte;
-}
-
 const LANGUE_CLE = 'parcpacific.langue';
 const LANGUES = [
   { code: 'fr', drapeau: '🇫🇷', nom: 'Français' },
   { code: 'en', drapeau: '🇬🇧', nom: 'English' },
 ];
+
+// DICTIONNAIRES_DEBUT
+const TEXTES = {"en":{"← Retour":"← Back","À faire":"To do","À jour":"Up to date","Accueil":"Home","Activité":"Activity","Adresse de connexion":"Sign-in address","Afficher":"Show","Agenda":"Schedule","Ajouter une machine":"Add a machine","Analyse en cours…":"Analysing…","Analyse interrompue":"Analysis interrupted","Analyser le PDF":"Analyse the PDF","Annuler":"Cancel","Aucun plan de maintenance défini pour cette machine.":"No maintenance plan set for this machine.","Aucune tâche détaillée dans le plan.":"No detailed tasks in the plan.","Catégorie":"Category","Chargement…":"Loading…","Choisis un nouveau mot de passe.":"Choose a new password.","Code de vérification":"Verification code","Comment ça marchera":"How it will work","Compte":"Account","Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.":"Signed in, but not linked to a company yet. Check the profiles table.","Compteur à saisir":"Counter to enter","Compteur décroissant":"Countdown counter","Confidentialité":"Privacy","Connecte-toi pour voir tes machines.":"Sign in to see your machines.","Contact et notifications":"Contact and notifications","Créer le compte":"Create account","Créer un compte":"Create an account","dans le SQL Editor de Supabase.":"in the Supabase SQL Editor.","Date":"Date","Date de mise en service":"Commissioning date","Déposer un manuel":"Upload a manual","Déposer un manuel PDF":"Upload a PDF manual","Dernier entretien réalisé":"Last service performed","Détails":"Details","Échéance":"Due date","Échéances à venir":"Upcoming due dates","Échéances détectées dans le manuel":"Due dates found in the manual","Élément":"Item","Éléments traités":"Items handled","Email":"Email","Email actuel":"Current email","Email envoyé":"Email sent","En retard":"Overdue","Enregistrer":"Save","Enregistrer le mot de passe":"Save password","Enregistrer un entretien":"Log a service","Entretien à prévoir":"Service due soon","Envoyer le lien":"Send the link","Étape 1 sur 2 — identification":"Step 1 of 2 — identification","Ex. 19 240":"e.g. 19,240","Ex. 245":"e.g. 245","Exporter en CSV":"Export as CSV","Fermer":"Close","Formule":"Plan","Fréquence":"Frequency","Heures compteur actuelles":"Current hour meter","Historique des entretiens":"Service history","Huile / graisse / pièce":"Oil / grease / part","Indépendant / Patenté":"Sole trader / Licensed","Kilométrage actuel":"Current odometer","kilomètres":"kilometres","Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.":"The PDF is over 15 MB — reduce its size and try again.","Limite du plan gratuit atteinte":"Free plan limit reached","Machine concernée":"Machine","Machines":"Machines","Manuel analysé":"Manual analysed","Manuels":"Manuals","Manuels analysés":"Manuals analysed","Marque":"Make","Marquer fait":"Mark as done","Mentions légales":"Legal notice","Mise à jour indisponible : exécute":"Update unavailable: run","Mode de suivi de la maintenance":"Maintenance tracking","Modèle":"Model","Modifier":"Edit","Mon compte":"My account","Mot de passe":"Password","Mot de passe actuel":"Current password","Mot de passe incorrect.":"Incorrect password.","Mot de passe oublié":"Forgot password","Mot de passe oublié ?":"Forgot your password?","N° RCS / RIDET":"Company reg. no.","Navigation":"Navigation","Nom":"Last name","Nom de la machine":"Machine name","Nom du contact":"Contact last name","Non, mais je peux le trouver en ligne":"No, but I can find it online","Nouveau mot de passe":"New password","Nouvel email":"New email","Partager par email":"Share by email","Pas de plan de maintenance":"No maintenance plan","Photo de la machine":"Machine photo","Plan à définir":"Plan to be defined","Plus":"More","Prénom":"First name","Prénom du contact":"Contact first name","Préparation":"Preparation","Prochain entretien":"Next service","PROCHAIN ENTRETIEN":"NEXT SERVICE","Prochain entretien à réaliser":"Next service due","Quantité":"Quantity","Raison sociale":"Company name","Rappels":"Reminders","Rappels sur ce téléphone":"Reminders on this phone","Réessayer":"Try again","Réinitialiser les filtres":"Reset filters","Remarque":"Note","Remarques":"Notes","Renvoyer le code":"Resend code","Rien à prévoir sur cette période.":"Nothing to prepare for this period.","Rien à signaler":"Nothing to report","Se connecter":"Sign in","Se déconnecter":"Sign out","Société":"Company","Statut":"Status","Suivant →":"Next →","Suivi simplifié":"Simple tracking","Supprimer cette machine":"Delete this machine","Tableau de bord":"Dashboard","Tâches de maintenance":"Maintenance tasks","Téléphone":"Phone","Téléversement du carnet…":"Uploading manual…","Tout voir":"View all","Trier par":"Sort by","Type":"Type","Type de structure":"Organisation type","Urgence":"Urgency","URL de photo invalide":"Invalid photo URL","Valider":"Confirm","Valider le plan →":"Approve the plan →","Vérifie ton email":"Check your email","Voir la liste":"View the list","Voir le plan":"View the plan","worker pdf.js introuvable":"pdf.js worker not found","Entretien à faire aujourd'hui":"Service due today","Ajoute d'abord une machine : le carnet d'entretien vient compléter sa fiche.":"Add a machine first: the service manual completes its record.","Ajoute le PDF : l'IA propose l'intervalle et les tâches à partir de son contenu.":"Add the PDF: the AI suggests the interval and the tasks from its content.","Aucun carnet déposé. Dépose le PDF du fabricant : l'IA en extrait les échéances et propose le plan d'entretien.":"No manual uploaded. Drop the manufacturer's PDF: the AI extracts the intervals and suggests the maintenance plan.","Carnet d'entretien":"Service manual","Carnet d'entretien (PDF)":"Service manual (PDF)","Carnets d'entretien":"Service manuals","Ces coordonnées serviront aux rappels d'échéance (WhatsApp et e-mail).":"These details will be used for due-date reminders (WhatsApp and email).","Ces réglages sont enregistrés sur cet appareil mais l'envoi automatique n'est pas encore actif :":"These settings are stored on this device, but automatic sending is not active yet:","Changer l'email":"Change email","Date de l'entretien":"Service date","Ex. Contrôle courroie":"e.g. Belt check","Ex. KUBOTA":"e.g. KUBOTA","Ex. Motoculture":"e.g. Grounds care","Ex. Orec 4x4 - Atelier":"e.g. Orec 4x4 - Workshop","Ex. Pièce X remplacée, RAS sinon":"e.g. Part X replaced, otherwise nothing to report","Ex. U17-3":"e.g. U17-3","Ex. Vidange, contrôle lame, graissage":"e.g. Oil change, blade check, greasing","Filtrer par état":"Filter by status","Gratuit jusqu'à 3 machines suivies, puis 20 €/mois.":"Free for up to 3 machines, then EUR 20 / month.","il nécessite un service d'envoi côté serveur (WhatsApp Business / e-mail transactionnel) qui n'est pas branché à ce jour.":"it requires a server-side sending service (WhatsApp Business / transactional email) that is not connected at this point.","Impossible de charger l'application.":"The application could not be loaded.","Indique ton email de connexion : on t'envoie un lien pour définir un nouveau mot de passe.":"Enter your sign-in email: we will send you a link to set a new password.","Je n'ai pas de carnet":"I have no manual","L'IA extrait les échéances (heures, mois) et crée le plan d'entretien. Tu valides avant activation.":"The AI extracts the intervals (hours, months) and builds the maintenance plan. You approve it before activation.","L'IA lit le document et propose le plan de maintenance.":"The AI reads the document and suggests the maintenance plan.","L'IA lit le manuel, en extrait les échéances et propose le plan d'entretien. Tu valides avant activation.":"The AI reads the manual, extracts the intervals and suggests the maintenance plan. You approve it before activation.","Le carnet n'a peut-être pas été enregistré. Tu peux réessayer, ou renseigner le plan à la main depuis la fiche de la machine.":"The manual may not have been saved. Try again, or enter the plan by hand from the machine's record.","Le changement est confirmé par email : la nouvelle adresse ne devient active qu'après validation. Le mot de passe est demandé pour qu'une session ouverte ne suffise pas à détourner le compte.":"The change is confirmed by email: the new address only becomes active after validation. The password is required so that an open session is not enough to hijack the account.","Le PDF du fabricant reste attaché à la fiche, consultable par n'importe quel technicien. S'il est fourni, l'IA propose un intervalle et des tâches à partir de son contenu.":"The manufacturer's PDF stays attached to the record, readable by any technician. If provided, the AI suggests an interval and tasks from its content.","Le plan gratuit permet de suivre jusqu'à 3 machines. Passe à l'abonnement (20 €/mois) pour ajouter davantage de matériel.":"The free plan tracks up to 3 machines. Subscribe (EUR 20 / month) to add more equipment.","Non, je n'ai pas de carnet":"No, I have no manual","nouvelle@adresse.nc":"new@address.nc","On construit un plan simple à partir de ce que tu veux suivre.":"We build a simple plan from what you want to track.","On lance une recherche, tu le télécharges puis on l'analyse.":"We search for it, you download it, then we analyse it.","Oui, je l'ai en PDF":"Yes, I have it as a PDF","ParcPacific prévoit d'envoyer un message WhatsApp et un e-mail avant chaque échéance, puis une relance si l'entretien n'a pas été coché dans l'application.":"ParcPacific plans to send a WhatsApp message and an email before each due date, then a follow-up if the service has not been checked off in the application.","Passer à l'abonnement":"Subscribe","Pays de l'indicatif":"Country code","Points d'attention":"Points of note","Rechercher dans le parc":"Search the fleet","Rechercher un nom, une marque, un n° de série…":"Search a name, a make, a serial number…","Un rappel avant chaque échéance — le délai se règle sur le plan de maintenance, 7 jours par défaut — puis un rappel le jour même, à 9 h. Les machines suivies au compteur (heures ou kilomètres) n'ont pas de date d'échéance : elles n'ont donc pas de rappel.":"One reminder before each due date — the lead time is set on the maintenance plan, 7 days by default — then one on the day itself, at 9 am. Machines tracked by the hour meter or odometer have no due date, so they get no reminder.","Utilisée seulement si aucun carnet PDF n'est fourni : sinon, la première page du carnet sert de photo.":"Used only if no PDF manual is provided: otherwise the first page of the manual serves as the photo.","Langue de l'interface sur cet appareil.":"Language of the interface on this device.","bibliothèque Supabase non chargée (CDN inaccessible)":"Supabase library not loaded (CDN unreachable)","N° RCS / RIDET (si disponible)":"Company reg. no. (if available)","Manuels & IA":"Manuals & AI","Nom (A → Z)":"Name (A → Z)","Calendaire (jours)":"Calendar (days)","Compteur horaire (heures)":"Hour meter (hours)","Kilométrage (km)":"Odometer (km)","Compteur horaire pour les moteurs thermiques (BTP, agricole, motoculture), kilométrage pour les véhicules.":"Hour meter for combustion engines (construction, farming, grounds care), odometer for vehicles.","Autre (optionnel)":"Other (optional)","Remarques (optionnel)":"Notes (optional)","EN RETARD":"OVERDUE","BIENTÔT":"DUE SOON","Bientôt":"Due soon","PRÊT":"READY","À VALIDER":"TO CONFIRM","En service":"In service","Sans catégorie":"No category","Non renseigné":"Not provided","Non renseignée":"Not provided","Plaque":"Plate","N° série":"Serial no.","compteur horaire":"hour meter","kilométrage":"odometer","Kilométrage":"Odometer","Compteur horaire":"Hour meter","Tableau de référence entretien":"Maintenance reference table","Nom de la société":"Company name","Nom et prénom":"First and last name","Carnet attaché":"Manual attached","Tâches non renseignées":"No tasks entered","Relance si non coché":"Follow-up if not checked","WhatsApp · J-7":"WhatsApp · D-7","E-mail · la veille":"Email · the day before","Chercher plutôt sur le web":"Search the web instead","Chercher une photo sur le web":"Find a photo on the web","Terminer":"Finish","Remplacer":"Replace","Déposer":"Upload","Activer le plan":"Activate the plan","Ajoute une machine pour commencer le suivi.":"Add a machine to start tracking.","Aucune échéance dans les prochaines semaines.":"No due dates in the coming weeks.","Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.":"It will appear in the list straight away, with its maintenance plan.","Les modifications sont appliquées immédiatement.":"Changes are applied immediately.","Enregistrer les modifications":"Save changes","— laisser vide pour ne pas changer":"— leave empty to keep unchanged",", optionnel":", optional","Toutes":"All","tous les":"every","toutes les":"every","échéance dans {n} jours ({date})":"due in {n} days ({date})","échéance du {date}":"due on {date}","au compteur":"on the counter","En retard de {valeur} ({contexte})":"Overdue by {valeur} ({contexte})","Échéance dans {valeur} ({contexte})":"Due in {valeur} ({contexte})","Prochaine échéance dans {valeur} ({contexte})":"Next due in {valeur} ({contexte})","En retard de {n} j (échéance le {date})":"Overdue by {n} d (due on {date})","Échéance dans {n} j (le {date})":"Due in {n} d (on {date})","Prochaine échéance dans {n} j (le {date})":"Next due in {n} d (on {date})","Sous {n} jours":"Within {n} days","{n} machine(s)":"{n} machine(s)"}};
+// DICTIONNAIRES_FIN
 
 function langueDisponible(code) {
   return LANGUES.some((l) => l.code === code) && !!TEXTES[code];
@@ -794,6 +786,20 @@ function langueInitiale() {
   } catch (err) { /* stockage indisponible */ }
   const appareil = (navigator.language || '').slice(0, 2).toLowerCase();
   return langueDisponible(appareil) ? appareil : 'fr';
+}
+
+// ⚠️ LA LANGUE EST ARRÊTÉE ICI, ET PAS PLUS BAS.
+// Plusieurs libellés sont construits une seule fois, au chargement du script —
+// libellés de navigation, titres de vues, unités de compteur : `t()` y est
+// appelé à la construction des objets. Initialiser la langue à la fin du script
+// les laissait donc en français pour toujours, y compris après un rechargement.
+// C'est exactement ce qui s'est produit, et ce que l'utilisateur a vu.
+let LANGUE = langueInitiale();
+
+function t(texte) {
+  const table = TEXTES[LANGUE];
+  if (!table) return texte;
+  return Object.prototype.hasOwnProperty.call(table, texte) ? table[texte] : texte;
 }
 
 // Applique la langue partout : la fonction t(), l'attribut lang du document
@@ -1074,7 +1080,7 @@ function champTelephoneHtml(id, valeur, opts = {}) {
   return `
     <label for="${id}">${esc(opts.label || 'Téléphone')}</label>
     <div class="tel-champ">
-      <select id="${id}-pays" class="tel-pays" aria-label="Pays de l'indicatif"${desactive}>
+      <select id="${id}-pays" class="tel-pays" aria-label="${t('Pays de l\'indicatif')}"${desactive}>
         ${PAYS_TEL.map((p) => `<option value="${esc(p.code)}"${p.code === pays.code ? ' selected' : ''}>${drapeauDe(p.code)} +${esc(p.indicatif)} — ${esc(p.nom)}</option>`).join('')}
       </select>
       <input id="${id}" type="tel" inputmode="tel" autocomplete="tel-national"
@@ -1315,13 +1321,13 @@ async function functionErrorMessage(error, defaut = 'appel impossible') {
 let sb = null;
 try {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-    throw new Error("bibliothèque Supabase non chargée (CDN inaccessible)");
+    throw new Error(t('bibliothèque Supabase non chargée (CDN inaccessible)'));
   }
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (err) {
   app.innerHTML = `
     <div class="empty">
-      <strong>Impossible de charger l'application.</strong><br>
+      <strong>${t('Impossible de charger l\'application.')}</strong><br>
       ${esc(err.message)}<br><br>
       Vérifie ta connexion internet puis recharge la page.<br><br>
       <button type="button" class="primary" id="fatal-retry" style="max-width:220px;margin:0 auto;">${t('Réessayer')}</button>
@@ -1439,7 +1445,7 @@ function openForgotPasswordModal() {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${t('Mot de passe oublié')}</h2>
-      <p class="sub">Indique ton email de connexion : on t'envoie un lien pour définir un nouveau mot de passe.</p>
+      <p class="sub">${t('Indique ton email de connexion : on t\'envoie un lien pour définir un nouveau mot de passe.')}</p>
       <form id="forgot-form">
         <label for="forgot-email">${t('Email')}</label>
         <input id="forgot-email" type="email" required>
@@ -1540,7 +1546,7 @@ function openSignupWizard() {
   function stepForm() {
     shell(`
       <h2>${t('Créer un compte')}</h2>
-      <p class="sub">Gratuit jusqu'à 3 machines suivies, puis 20 €/mois.</p>
+      <p class="sub">${t('Gratuit jusqu\'à 3 machines suivies, puis 20 €/mois.')}</p>
       <form id="signup-form">
         <label>${t('Type de structure')}</label>
         <div class="track-mode-choice">
@@ -1548,7 +1554,7 @@ function openSignupWizard() {
           <label><input type="radio" name="stype" value="individual" ${state.structureType === 'individual' ? 'checked' : ''}> ${t('Indépendant / Patenté')}</label>
         </div>
 
-        <label for="su-name" id="su-name-label">${state.structureType === 'individual' ? 'Nom et prénom' : 'Nom de la société'}</label>
+        <label for="su-name" id="su-name-label">${state.structureType === 'individual' ? t('Nom et prénom') : t('Nom de la société')}</label>
         <input id="su-name" required value="${esc(state.name)}">
 
         <label for="su-activity">${t('Activité')}</label>
@@ -1556,7 +1562,7 @@ function openSignupWizard() {
           ${SIGNUP_ACTIVITIES.map(a => `<option value="${a}" ${a === state.activity ? 'selected' : ''}>${a}</option>`).join('')}
         </select>
 
-        <label for="su-reg">N° RCS / RIDET (si disponible)</label>
+        <label for="su-reg">${t('N° RCS / RIDET (si disponible)')}</label>
         <input id="su-reg" value="${esc(state.registrationNumber)}">
 
         ${champTelephoneHtml('su-phone', state.phone, { label: t('Téléphone'), required: true, aide: "Sert aux rappels d'échéance par WhatsApp et par e-mail." })}
@@ -1740,10 +1746,10 @@ function openUpgradeNotice(companyId) {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${t('Limite du plan gratuit atteinte')}</h2>
-      <p class="sub">Le plan gratuit permet de suivre jusqu'à 3 machines. Passe à l'abonnement (20 €/mois) pour ajouter davantage de matériel.</p>
+      <p class="sub">${t('Le plan gratuit permet de suivre jusqu\'à 3 machines. Passe à l\'abonnement (20 €/mois) pour ajouter davantage de matériel.')}</p>
       <div class="modal-actions">
         <button type="button" class="secondary" id="close-upgrade">${t('Fermer')}</button>
-        <a href="${paymentUrl}" target="_blank" class="primary" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Passer à l'abonnement</a>
+        <a href="${paymentUrl}" target="_blank" class="primary" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">${t('Passer à l\'abonnement')}</a>
       </div>
     </div>`;
   overlay.querySelector('#close-upgrade').addEventListener('click', () => overlay.remove());
@@ -1978,7 +1984,7 @@ function blocRappelsHtml() {
       <input type="checkbox" id="acc-rappels" ${rappelsActifs() ? 'checked' : ''}>
       Me rappeler les échéances datées
     </label>
-    <div class="hint">Un rappel avant chaque échéance — le délai se règle sur le plan de maintenance, 7 jours par défaut — puis un rappel le jour même, à 9 h. Les machines suivies au compteur (heures ou kilomètres) n'ont pas de date d'échéance : elles n'ont donc pas de rappel.</div>
+    <div class="hint">${t('Un rappel avant chaque échéance — le délai se règle sur le plan de maintenance, 7 jours par défaut — puis un rappel le jour même, à 9 h. Les machines suivies au compteur (heures ou kilomètres) n\'ont pas de date d\'échéance : elles n\'ont donc pas de rappel.')}</div>
     <div class="hint" id="acc-rappels-msg" role="status" aria-live="polite"></div>`;
 }
 
@@ -2022,7 +2028,7 @@ const UI = {
 const NAV_ITEMS = [
   { id: 'dashboard', label: t('Tableau de bord'), short: t('Accueil'), icon: '◈' },
   { id: 'machines', label: t('Machines'), short: t('Parc'), icon: '▤' },
-  { id: 'manuals', label: 'Manuels & IA', short: t('Manuels'), icon: '✦' },
+  { id: 'manuals', label: t('Manuels & IA'), short: t('Manuels'), icon: '✦' },
   { id: 'agenda', label: t('Agenda'), short: t('Agenda'), icon: '◔' },
   { id: 'reminders', label: t('Rappels'), short: t('Rappels'), icon: '☰' },
   { id: 'account', label: t('Mon compte'), short: t('Compte'), icon: '◉' },
@@ -2087,16 +2093,19 @@ function dueInfo(plan, machine) {
     const current = machineCounter(machine);
     const nextDue = planNextDueCounter(plan);
     if (nextDue == null || current == null) {
-      return { state: 'unknown', label: `Renseigner le ${unit === 'km' ? 'kilométrage' : 'compteur horaire'}`, short: t('Compteur à saisir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit };
+      return { state: 'unknown', label: `Renseigner le ${unit === 'km' ? t('kilométrage') : t('compteur horaire')}`, short: t('Compteur à saisir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit };
     }
     const remaining = nextDue - current;
     const horizon = planReminderCounter(plan);
     const ctx = `compteur ${formatCounter(current, unit)} · échéance ${formatCounter(nextDue, unit)}`;
     const urgency = horizon > 0 ? remaining / horizon : 0;
     const short = remaining < 0 ? `+${formatCounter(Math.abs(remaining), unit)}` : formatCounter(remaining, unit);
-    if (remaining < 0) return { state: 'late', label: `En retard de ${formatCounter(Math.abs(remaining), unit)} (${ctx})`, short, sortKey: remaining, urgency, unit };
-    if (remaining <= horizon) return { state: 'soon', label: `Échéance dans ${formatCounter(remaining, unit)} (${ctx})`, short, sortKey: remaining, urgency, unit };
-    return { state: 'ok', label: `Prochaine échéance dans ${formatCounter(remaining, unit)} (${ctx})`, short, sortKey: remaining, urgency, unit };
+    // Phrases CONSTRUITES : le texte et les valeurs sont mêlés, donc t() ne peut
+    // pas les prendre au moment de l'extraction. Elles passent par tR(), avec la
+    // phrase entière comme clé et des {emplacements} pour les valeurs.
+    if (remaining < 0) return { state: 'late', label: tR('En retard de {valeur} ({contexte})', { valeur: formatCounter(Math.abs(remaining), unit), contexte: ctx }), short, sortKey: remaining, urgency, unit };
+    if (remaining <= horizon) return { state: 'soon', label: tR('Échéance dans {valeur} ({contexte})', { valeur: formatCounter(remaining, unit), contexte: ctx }), short, sortKey: remaining, urgency, unit };
+    return { state: 'ok', label: tR('Prochaine échéance dans {valeur} ({contexte})', { valeur: formatCounter(remaining, unit), contexte: ctx }), short, sortKey: remaining, urgency, unit };
   }
   if (!plan.next_due_at) {
     return { state: 'unknown', label: t('Pas de plan de maintenance'), short: t('Plan à définir'), sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: 'days' };
@@ -2106,9 +2115,9 @@ function dueInfo(plan, machine) {
     return { state: 'unknown', label: 'Date d\'échéance illisible', short: '—', sortKey: Number.POSITIVE_INFINITY, urgency: Number.POSITIVE_INFINITY, unit: 'days' };
   }
   const urgency = days / SOON_DAYS;
-  if (days < 0) return { state: 'late', label: `En retard de ${Math.abs(days)} j (échéance le ${formatShortDate(plan.next_due_at)})`, short: `+${Math.abs(days)} j`, sortKey: days, urgency, unit: 'days' };
-  if (days <= SOON_DAYS) return { state: 'soon', label: `Échéance dans ${days} j (le ${formatShortDate(plan.next_due_at)})`, short: formatShortDate(plan.next_due_at), sortKey: days, urgency, unit: 'days' };
-  return { state: 'ok', label: `Prochaine échéance dans ${days} j (le ${formatShortDate(plan.next_due_at)})`, short: formatShortDate(plan.next_due_at), sortKey: days, urgency, unit: 'days' };
+  if (days < 0) return { state: 'late', label: tR('En retard de {n} j (échéance le {date})', { n: Math.abs(days), date: formatShortDate(plan.next_due_at) }), short: `+${Math.abs(days)} j`, sortKey: days, urgency, unit: 'days' };
+  if (days <= SOON_DAYS) return { state: 'soon', label: tR('Échéance dans {n} j (le {date})', { n: days, date: formatShortDate(plan.next_due_at) }), short: formatShortDate(plan.next_due_at), sortKey: days, urgency, unit: 'days' };
+  return { state: 'ok', label: tR('Prochaine échéance dans {n} j (le {date})', { n: days, date: formatShortDate(plan.next_due_at) }), short: formatShortDate(plan.next_due_at), sortKey: days, urgency, unit: 'days' };
 }
 
 // Tâche suivante : premier item du plan, sinon première tâche de la liste.
@@ -2155,8 +2164,8 @@ function badgeClass(state) {
   return 'neutral';
 }
 function badgeLabel(state) {
-  if (state === 'late') return 'En retard';
-  if (state === 'soon') return 'Bientôt';
+  if (state === 'late') return t('En retard');
+  if (state === 'soon') return t('Bientôt');
   if (state === 'ok') return 'À jour';
   return 'Plan à définir';
 }
@@ -2467,7 +2476,7 @@ function dropzoneHtml(id) {
     <div class="dropzone" id="${id}">
       <span class="dz-icon">⤒</span>
       <span class="dz-title">${t('Déposer un manuel PDF')}</span>
-      <span class="dz-help">L'IA extrait les échéances (heures, mois) et crée le plan d'entretien. Tu valides avant activation.</span>
+      <span class="dz-help">${t('L\'IA extrait les échéances (heures, mois) et crée le plan d\'entretien. Tu valides avant activation.')}</span>
     </div>`;
 }
 
@@ -2552,7 +2561,7 @@ VIEWS.dashboard = {
 
       <div class="stat-grid">
         <div class="stat-card"><span class="num late">${c.late}</span><span class="lbl">${t('En retard')}</span></div>
-        <div class="stat-card"><span class="num soon">${c.soon}</span><span class="lbl">Sous ${SOON_DAYS} jours</span></div>
+        <div class="stat-card"><span class="num soon">${c.soon}</span><span class="lbl">${tR('Sous {n} jours', { n: SOON_DAYS })}</span></div>
         <div class="stat-card"><span class="num ok">${c.ok}</span><span class="lbl">${t('À jour')}</span></div>
         <div class="stat-card"><span class="num primary">${c.analysed}</span><span class="lbl">${t('Manuels analysés')}</span></div>
       </div>
@@ -2568,7 +2577,7 @@ VIEWS.dashboard = {
           </div>
           ${alerts.length
             ? `<div class="alert-list">${alerts.slice(0, 6).map(x => alertRowHtml(x.machine, x.info)).join('')}</div>`
-            : `<div class="empty-soft">${UI.machines.length ? 'Aucune échéance dans les prochaines semaines.' : 'Ajoute une machine pour commencer le suivi.'}</div>`}
+            : `<div class="empty-soft">${UI.machines.length ? t('Aucune échéance dans les prochaines semaines.') : t('Ajoute une machine pour commencer le suivi.')}</div>`}
         </section>
 
         ${preparationResumeHtml()}
@@ -2616,7 +2625,7 @@ function priorityCardHtml(machine, info) {
       <div class="priority-body">
         <div class="priority-top">
           <span class="eyebrow">${t('PROCHAIN ENTRETIEN')}</span>
-          <span class="${late ? 'pill-late' : 'pill-soon'}">${late ? 'EN RETARD' : 'BIENTÔT'}</span>
+          <span class="${late ? 'pill-late' : 'pill-soon'}">${late ? t('EN RETARD') : t('BIENTÔT')}</span>
         </div>
         <h2>${esc(nextTaskLabel(machine))}</h2>
         <span class="machine-name">${esc(machine.name)}</span>
@@ -2638,7 +2647,7 @@ function emptyPriorityCardHtml() {
       <div class="priority-body">
         <div class="priority-top"><span class="eyebrow" style="color:var(--dark-ink);">${t('PROCHAIN ENTRETIEN')}</span></div>
         <h2>${t('Rien à signaler')}</h2>
-        <span class="machine-name" style="color:var(--dark-ink);">${UI.machines.length ? 'Aucune échéance dans les prochaines semaines.' : 'Aucune machine suivie pour l\'instant.'}</span>
+        <span class="machine-name" style="color:var(--dark-ink);">${UI.machines.length ? t('Aucune échéance dans les prochaines semaines.') : 'Aucune machine suivie pour l\'instant.'}</span>
       </div>
       <div class="priority-actions">
         <button type="button" class="do" id="priority-add">${t('Ajouter une machine')}</button>
@@ -2660,7 +2669,7 @@ function aiCardHtml() {
           <span class="chip-icon">✦</span>
           <span class="card-title-sm">Manuel &amp; IA</span>
         </div>
-        <p class="muted-text">Aucun carnet déposé. Dépose le PDF du fabricant : l'IA en extrait les échéances et propose le plan d'entretien.</p>
+        <p class="muted-text">${t('Aucun carnet déposé. Dépose le PDF du fabricant : l\'IA en extrait les échéances et propose le plan d\'entretien.')}</p>
         <button type="button" class="btn-tint" id="ai-cta">${t('Déposer un manuel PDF')}</button>
       </section>`;
   }
@@ -2671,7 +2680,7 @@ function aiCardHtml() {
         <span class="chip-icon">✦</span>
         <span class="card-title-sm">${t('Manuel analysé')}</span>
         <span class="spacer"></span>
-        <span class="pill ${items.length ? 'ok' : 'soon'}">${items.length ? 'PRÊT' : 'À VALIDER'}</span>
+        <span class="pill ${items.length ? 'ok' : 'soon'}">${items.length ? t('PRÊT') : t('À VALIDER')}</span>
       </div>
       <p class="muted-text">${esc(target.name)} · carnet d'entretien${items.length ? ` · ${items.length} échéance(s) détectée(s)` : ''}</p>
       ${items.slice(0, 2).map(it => `<div class="ai-row"><span>${esc(it.label || '—')}</span><span>${esc(it.frequency || '—')}</span></div>`).join('')}
@@ -2813,23 +2822,23 @@ VIEWS.machines = {
             <!-- Pas d'autofocus : sur téléphone il ouvrirait le clavier à chaque
                  venue sur l'onglet Parc. -->
             <input id="fleet-search" type="search" value="${esc(f.q)}"
-                   placeholder="Rechercher un nom, une marque, un n° de série…"
-                   aria-label="Rechercher dans le parc">
+                   placeholder="${t('Rechercher un nom, une marque, un n° de série…')}"
+                   aria-label="${t('Rechercher dans le parc')}">
           </div>
           <button type="button" class="btn-primary" id="fleet-add">${t('Ajouter une machine')}</button>
         </div>
         <div class="toolbar-bottom">
-        <div class="chips" role="group" aria-label="Filtrer par état">
-          ${chipHtml('all', 'Toutes', UI.machines.length)}
-          ${chipHtml('late', 'En retard', c.late)}
-          ${chipHtml('soon', 'Bientôt', c.soon)}
-          ${chipHtml('ok', 'À jour', c.ok)}
+        <div class="chips" role="group" aria-label="${t('Filtrer par état')}">
+          ${chipHtml('all', t('Toutes'), UI.machines.length)}
+          ${chipHtml('late', t('En retard'), c.late)}
+          ${chipHtml('soon', t('Bientôt'), c.soon)}
+          ${chipHtml('ok', t('À jour'), c.ok)}
         </div>
         <div class="sort-wrap">
           <label class="sr-only" for="fleet-sort">${t('Trier par')}</label>
           <select id="fleet-sort">
             <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${t('Urgence')}</option>
-            <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>Nom (A → Z)</option>
+            <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${t('Nom (A → Z)')}</option>
             <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${t('Compteur décroissant')}</option>
           </select>
         </div>
@@ -2883,7 +2892,7 @@ function machineCardHtml(m) {
   const info = dueInfo(m.plan, m);
   const identifiant = identifiantAffiche(m);
   const line1 = [esc(machineBrandModel(m)), identifiant ? esc(identifiant) : null].filter(Boolean).join(' · ');
-  const cat = esc(m.category?.name) || 'Sans catégorie';
+  const cat = esc(m.category?.name) || t('Sans catégorie');
   const meta = line1 ? `${line1}<br>${cat}` : cat;
   const photo = safeUrl(m.image_url);
   return `
@@ -2910,7 +2919,7 @@ function machineCardHtml(m) {
 
 // ── Vue : Manuels & IA ────────────────────────────────────────
 VIEWS.manuals = {
-  title: 'Manuels & IA',
+  title: t('Manuels & IA'),
   subtitle: () => `${UI.counts.analysed} plan(s) extrait(s) par l'IA sur ${UI.machines.length} machine(s)`,
   render() {
     if (!UI.machines.length) {
@@ -2919,7 +2928,7 @@ VIEWS.manuals = {
     return `
       ${dropzoneHtml('manuals-drop')}
       <section class="card">
-        <div class="card-head"><h2 class="card-title">Carnets d'entretien</h2></div>
+        <div class="card-head"><h2 class="card-title">${t('Carnets d\'entretien')}</h2></div>
         ${UI.machines.map(m => {
           const items = normalizeItems(m.plan?.items);
           const hasManual = !!m.manual_url;
@@ -2936,7 +2945,7 @@ VIEWS.manuals = {
                 <span class="mr-sub">${esc(sub)}</span>
               </span>
               <span class="pill ${state}">${label}</span>
-              <button type="button" class="btn-row-action" data-manual="${esc(m.id)}">${hasManual ? 'Remplacer' : 'Déposer'}</button>
+              <button type="button" class="btn-row-action" data-manual="${esc(m.id)}">${hasManual ? t('Remplacer') : t('Déposer')}</button>
               ${hasManual ? `<button type="button" class="btn-row-action view-manual" data-path="${esc(m.manual_url)}">Ouvrir</button>` : ''}
             </div>`;
         }).join('')}
@@ -3125,7 +3134,7 @@ function preparationTexte() {
   }
   for (const entree of liste.sansItems) {
     lignes.push(`${entree.machine.name}${entree.date ? ` — ${formatShortDate(entree.date)}` : ''}`);
-    lignes.push(`   ${entree.taches || 'Tâches non renseignées'}`);
+    lignes.push(`   ${entree.taches || t('Tâches non renseignées')}`);
   }
   if (!liste.produits.length && !liste.sansItems.length) lignes.push('Rien à prévoir sur cette période.');
   return lignes.join('\n');
@@ -3236,8 +3245,8 @@ VIEWS.reminders = {
       ${remindersCardHtml()}
       <section class="card">
         <div class="card-head"><h2 class="card-title">${t('Comment ça marchera')}</h2></div>
-        <p class="muted-text">ParcPacific prévoit d'envoyer un message WhatsApp et un e-mail avant chaque échéance, puis une relance si l'entretien n'a pas été coché dans l'application.</p>
-        <p class="muted-text"><strong>Ces réglages sont enregistrés sur cet appareil mais l'envoi automatique n'est pas encore actif :</strong> il nécessite un service d'envoi côté serveur (WhatsApp Business / e-mail transactionnel) qui n'est pas branché à ce jour.</p>
+        <p class="muted-text">${t('ParcPacific prévoit d\'envoyer un message WhatsApp et un e-mail avant chaque échéance, puis une relance si l\'entretien n\'a pas été coché dans l\'application.')}</p>
+        <p class="muted-text"><strong>${t('Ces réglages sont enregistrés sur cet appareil mais l\'envoi automatique n\'est pas encore actif :')}</strong> ${t('il nécessite un service d\'envoi côté serveur (WhatsApp Business / e-mail transactionnel) qui n\'est pas branché à ce jour.')}</p>
       </section>`;
   },
   mount() {
@@ -3273,7 +3282,7 @@ VIEWS.account = {
           <div class="value">
             ${c.plan === 'free'
               ? `Gratuite — 3 machines suivies
-                 <div style="margin-top:8px;"><button type="button" class="link-inline" id="account-upgrade">Passer à l'abonnement</button></div>`
+                 <div style="margin-top:8px;"><button type="button" class="link-inline" id="account-upgrade">${t('Passer à l\'abonnement')}</button></div>`
               : 'Abonnement — machines illimitées'}
           </div>
         </div>
@@ -3281,7 +3290,7 @@ VIEWS.account = {
 
       <section class="card">
         <div class="card-head"><h2 class="card-title">${t('Contact et notifications')}</h2></div>
-        <p class="muted-text">Ces coordonnées serviront aux rappels d'échéance (WhatsApp et e-mail).</p>
+        <p class="muted-text">${t('Ces coordonnées serviront aux rappels d\'échéance (WhatsApp et e-mail).')}</p>
         <div class="field-row">
           <div>
             <label for="acc-first">${t('Prénom')}</label>
@@ -3301,7 +3310,7 @@ VIEWS.account = {
         <div class="modal-actions">
           <button type="button" class="primary" id="acc-save-contact"${bloque}>${t('Enregistrer')}</button>
         </div>
-        ${modifiable ? '' : `<div class="hint">${t('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${t('dans le SQL Editor de Supabase.')}</div>`}
+        ${modifiable ? '' : `<div class="hint">Mise à jour indisponible : exécute <strong>migration-compte.sql</strong> dans le SQL Editor de Supabase.</div>`}
       </section>
 
       <section class="card">
@@ -3322,16 +3331,16 @@ VIEWS.account = {
           <div class="value">${esc(UI.email || '—')}</div>
         </div>
         <label for="acc-email">${t('Nouvel email')}</label>
-        <input id="acc-email" type="email" autocomplete="email" placeholder="nouvelle@adresse.nc">
+        <input id="acc-email" type="email" autocomplete="email" placeholder="${t('nouvelle@adresse.nc')}">
         <label for="acc-password">${t('Mot de passe actuel')}</label>
         <div class="password-wrap">
           <input id="acc-password" type="password" autocomplete="current-password">
           <button type="button" class="toggle-pw-btn" aria-pressed="false">${t('Afficher')}</button>
         </div>
-        <div class="hint">Le changement est confirmé par email : la nouvelle adresse ne devient active qu'après validation. Le mot de passe est demandé pour qu'une session ouverte ne suffise pas à détourner le compte.</div>
+        <div class="hint">${t('Le changement est confirmé par email : la nouvelle adresse ne devient active qu\'après validation. Le mot de passe est demandé pour qu\'une session ouverte ne suffise pas à détourner le compte.')}</div>
         <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
         <div class="modal-actions">
-          <button type="button" class="primary" id="acc-save-email">Changer l'email</button>
+          <button type="button" class="primary" id="acc-save-email">${t('Changer l\'email')}</button>
         </div>
       </section>`;
   },
@@ -3503,7 +3512,7 @@ function openManualUploadModal(presetMachine, presetFile) {
     if (!UI.machines.length) {
       shell(`
         <h2>${t('Déposer un manuel')}</h2>
-        <p class="sub">Ajoute d'abord une machine : le carnet d'entretien vient compléter sa fiche.</p>
+        <p class="sub">${t('Ajoute d\'abord une machine : le carnet d\'entretien vient compléter sa fiche.')}</p>
         <div class="modal-actions">
           <button type="button" class="secondary" id="mu-close">${t('Fermer')}</button>
           <button type="button" class="primary" id="mu-add">${t('Ajouter une machine')}</button>
@@ -3514,7 +3523,7 @@ function openManualUploadModal(presetMachine, presetFile) {
     }
     shell(`
       <h2>${t('Déposer un manuel PDF')}</h2>
-      <p class="sub">L'IA lit le manuel, en extrait les échéances et propose le plan d'entretien. Tu valides avant activation.</p>
+      <p class="sub">${t('L\'IA lit le manuel, en extrait les échéances et propose le plan d\'entretien. Tu valides avant activation.')}</p>
       <label for="mu-machine">${t('Machine concernée')}</label>
       <select id="mu-machine">
         ${UI.machines.map(m => `<option value="${esc(m.id)}"${machine && m.id === machine.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}
@@ -3585,7 +3594,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       shell(`
         <h2>${t('Analyse interrompue')}</h2>
         <p class="sub">${esc(err.message)}</p>
-        <div class="hint">Le carnet n'a peut-être pas été enregistré. Tu peux réessayer, ou renseigner le plan à la main depuis la fiche de la machine.</div>
+        <div class="hint">${t('Le carnet n\'a peut-être pas été enregistré. Tu peux réessayer, ou renseigner le plan à la main depuis la fiche de la machine.')}</div>
         <div class="modal-actions">
           <button type="button" class="secondary" id="mu-close">${t('Fermer')}</button>
           <button type="button" class="primary" id="mu-retry">${t('Réessayer')}</button>
@@ -3604,7 +3613,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       : (result?.interval_hours || planIntervalCounter(machine.plan) || FALLBACK_INTERVAL_HOURS);
 
     shell(`
-      <h2>${result ? 'Plan proposé par l\'IA' : 'Carnet attaché'}</h2>
+      <h2>${result ? 'Plan proposé par l\'IA' : t('Carnet attaché')}</h2>
       <p class="sub">${esc(machine.name)} · ${esc(file.name)}</p>
       ${result ? `
         <label for="mu-interval">Échéance ${mode === 'days' ? 'toutes les (jours)' : `tous les (${COUNTER_UNITS[unit].word})`}</label>
@@ -3624,7 +3633,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       <div class="hint" id="mu-error"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="mu-cancel">${t('Annuler')}</button>
-        <button type="button" class="primary" id="mu-activate">${result ? 'Activer le plan' : 'Terminer'}</button>
+        <button type="button" class="primary" id="mu-activate">${result ? t('Activer le plan') : t('Terminer')}</button>
       </div>`);
 
     overlay.querySelector('#mu-cancel').addEventListener('click', close);
@@ -3764,13 +3773,13 @@ function openAddWizard(companyId, categories) {
       <p class="sub">${t('Étape 1 sur 2 — identification')}</p>
       <form id="step-form">
         <label for="f-name">${t('Nom de la machine')}</label>
-        <input id="f-name" required placeholder="Ex. Orec 4x4 - Atelier" value="${esc(state.name)}">
+        <input id="f-name" required placeholder="${t('Ex. Orec 4x4 - Atelier')}" value="${esc(state.name)}">
 
         <label for="f-category">${t('Catégorie')}</label>
-        <input id="f-category" list="cat-list" required placeholder="Ex. Motoculture" value="${esc(state.category)}">
+        <input id="f-category" list="cat-list" required placeholder="${t('Ex. Motoculture')}" value="${esc(state.category)}">
         <datalist id="cat-list">${categories.map(c => `<option value="${esc(c.name)}">`).join('')}</datalist>
 
-        ${SCHEMA.hasKind ? `<label for="f-kind">${t('Type')}</label>
+        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
         <select id="f-kind">
           <option value="machine" ${state.kind === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
           <option value="vehicle" ${state.kind === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
@@ -3779,11 +3788,11 @@ function openAddWizard(companyId, categories) {
         <div class="field-row">
           <div>
             <label for="f-brand">${t('Marque')}</label>
-            <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${esc(state.brand)}">
+            <input id="f-brand" class="majuscules" placeholder="${t('Ex. KUBOTA')}" autocapitalize="characters" value="${esc(state.brand)}">
           </div>
           <div>
             <label for="f-model">${t('Modèle')}</label>
-            <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${esc(state.model)}">
+            <input id="f-model" class="majuscules" placeholder="${t('Ex. U17-3')}" autocapitalize="characters" value="${esc(state.model)}">
           </div>
         </div>
 
@@ -3795,11 +3804,11 @@ function openAddWizard(companyId, categories) {
 
         <label>${t('Mode de suivi de la maintenance')}</label>
         <div class="track-mode-choice">
-          <label><input type="radio" name="tm" value="days" ${state.trackingMode === 'days' ? 'checked' : ''}> Calendaire (jours)</label>
-          <label><input type="radio" name="tm" value="hours" ${state.trackingMode === 'hours' ? 'checked' : ''}> Compteur horaire (heures)</label>
+          <label><input type="radio" name="tm" value="days" ${state.trackingMode === 'days' ? 'checked' : ''}> ${t('Calendaire (jours)')}</label>
+          <label><input type="radio" name="tm" value="hours" ${state.trackingMode === 'hours' ? 'checked' : ''}> ${t('Compteur horaire (heures)')}</label>
           ${SCHEMA.hasCounter ? `<label><input type="radio" name="tm" value="km" ${state.trackingMode === 'km' ? 'checked' : ''}> Kilométrage (km)</label>` : ''}
         </div>
-        <div class="hint" style="margin:-4px 0 10px;">Compteur horaire pour les moteurs thermiques (BTP, agricole, motoculture), kilométrage pour les véhicules.</div>
+        <div class="hint" style="margin:-4px 0 10px;">${t('Compteur horaire pour les moteurs thermiques (BTP, agricole, motoculture), kilométrage pour les véhicules.')}</div>
         <div id="hours-field" style="display:${state.trackingMode === 'days' ? 'none' : 'block'};">
           <label for="f-current-hours" id="f-current-hours-label">${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].field}</label>
           <input id="f-current-hours" type="number" min="0" step="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].step}" value="${state.currentHours ?? ''}" placeholder="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].placeholder}">
@@ -3809,7 +3818,7 @@ function openAddWizard(companyId, categories) {
           <input type="checkbox" id="f-search-photo" ${state.searchPhoto ? 'checked' : ''}>
           Chercher automatiquement une photo sur le web
         </label>
-        <div class="hint">Utilisée seulement si aucun carnet PDF n'est fourni : sinon, la première page du carnet sert de photo.</div>
+        <div class="hint">${t('Utilisée seulement si aucun carnet PDF n\'est fourni : sinon, la première page du carnet sert de photo.')}</div>
 
         <div class="modal-actions">
           <button type="button" class="secondary" id="cancel">${t('Annuler')}</button>
@@ -3874,12 +3883,12 @@ function openAddWizard(companyId, categories) {
   function stepChoice() {
     shell(`
       <button type="button" class="step-back" id="back">${t('← Retour')}</button>
-      <h2>Carnet d'entretien</h2>
+      <h2>${t('Carnet d\'entretien')}</h2>
       <p class="sub">As-tu le carnet d'entretien du fabricant pour « ${esc(state.name)} » ?</p>
       <div class="step-options">
-        <button type="button" class="option-tile" id="opt-have">Oui, je l'ai en PDF<span class="opt-sub">L'IA lit le document et propose le plan de maintenance.</span></button>
-        <button type="button" class="option-tile" id="opt-search">${t('Non, mais je peux le trouver en ligne')}<span class="opt-sub">On lance une recherche, tu le télécharges puis on l'analyse.</span></button>
-        <button type="button" class="option-tile" id="opt-none">Non, je n'ai pas de carnet<span class="opt-sub">On construit un plan simple à partir de ce que tu veux suivre.</span></button>
+        <button type="button" class="option-tile" id="opt-have">${t('Oui, je l\'ai en PDF')}<span class="opt-sub">${t('L\'IA lit le document et propose le plan de maintenance.')}</span></button>
+        <button type="button" class="option-tile" id="opt-search">${t('Non, mais je peux le trouver en ligne')}<span class="opt-sub">${t('On lance une recherche, tu le télécharges puis on l\'analyse.')}</span></button>
+        <button type="button" class="option-tile" id="opt-none">${t('Non, je n\'ai pas de carnet')}<span class="opt-sub">${t('On construit un plan simple à partir de ce que tu veux suivre.')}</span></button>
       </div>
     `);
     overlay.querySelector('#back').addEventListener('click', stepIdentification);
@@ -3893,19 +3902,19 @@ function openAddWizard(companyId, categories) {
     const isCounter = state.trackingMode !== 'days';
     shell(`
       <button type="button" class="step-back" id="back">${t('← Retour')}</button>
-      <h2>Carnet d'entretien</h2>
+      <h2>${t('Carnet d\'entretien')}</h2>
       ${withSearchHelper ? `
         <p class="sub">Cherche le manuel du fabricant, télécharge-le, puis ajoute-le ci-dessous.</p>
         <a class="option-tile" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">🔍 Chercher « ${esc(designation(state.brand, state.model, state.name))} » sur le web</a><br>
-      ` : `<p class="sub">Ajoute le PDF : l'IA propose l'intervalle et les tâches à partir de son contenu.</p>`}
+      ` : `<p class="sub">${t('Ajoute le PDF : l\'IA propose l\'intervalle et les tâches à partir de son contenu.')}</p>`}
       <form id="upload-form">
-        <label for="f-manual">Carnet d'entretien (PDF)</label>
+        <label for="f-manual">${t('Carnet d\'entretien (PDF)')}</label>
         <input id="f-manual" type="file" accept="application/pdf" required>
         <div class="hint" id="f-analysis"></div>
 
         <div class="field-row" style="margin-top:14px;">
           <div>
-            <label for="f-interval">Échéance ${isCounter ? 'tous les' : 'toutes les'} (${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].word})</label>
+            <label for="f-interval">Échéance ${isCounter ? t('tous les') : t('toutes les')} (${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].word})</label>
             <input id="f-interval" type="number" min="1" value="${isCounter ? state.intervalHours : state.intervalDays}" required>
           </div>
           <div>
@@ -3915,11 +3924,11 @@ function openAddWizard(companyId, categories) {
         </div>
 
         <label for="f-tasks">${t('Tâches de maintenance')}</label>
-        <textarea id="f-tasks" placeholder="Ex. Vidange, contrôle lame, graissage">${esc(state.tasks)}</textarea>
+        <textarea id="f-tasks" placeholder="${t('Ex. Vidange, contrôle lame, graissage')}">${esc(state.tasks)}</textarea>
         <div class="hint" id="f-error"></div>
 
         <div class="modal-actions">
-          <button type="button" class="secondary" id="no-manual">Je n'ai pas de carnet</button>
+          <button type="button" class="secondary" id="no-manual">${t('Je n\'ai pas de carnet')}</button>
           <button type="submit" class="primary">${t('Enregistrer')}</button>
         </div>
       </form>
@@ -3967,12 +3976,12 @@ function openAddWizard(companyId, categories) {
         <div class="checklist">
           ${commonTasks.map(t => `<label><input type="checkbox" value="${t}"> ${t}</label>`).join('')}
         </div>
-        <label for="f-other-task">Autre (optionnel)</label>
-        <input id="f-other-task" placeholder="Ex. Contrôle courroie">
+        <label for="f-other-task">${t('Autre (optionnel)')}</label>
+        <input id="f-other-task" placeholder="${t('Ex. Contrôle courroie')}">
 
         <div class="field-row" style="margin-top:14px;">
           <div>
-            <label for="f-interval">Échéance ${isCounter ? 'tous les' : 'toutes les'} (${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].word})</label>
+            <label for="f-interval">Échéance ${isCounter ? t('tous les') : t('toutes les')} (${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].word})</label>
             <input id="f-interval" type="number" min="1" value="${isCounter ? state.intervalHours : state.intervalDays}" required>
           </div>
           <div>
@@ -4206,7 +4215,7 @@ function openLogInterventionModal(machine) {
       <h2>${t('Enregistrer un entretien')}</h2>
       <p class="sub">${esc(machine.name)} — coche ce qui a été fait, ça met à jour la prochaine échéance.</p>
       <form id="log-form">
-        <label for="log-date">Date de l'entretien</label>
+        <label for="log-date">${t('Date de l\'entretien')}</label>
         <input id="log-date" type="date" value="${today}" required>
 
         ${isCounter ? `
@@ -4221,8 +4230,8 @@ function openLogInterventionModal(machine) {
           </div>
         ` : ''}
 
-        <label for="log-notes">Remarques (optionnel)</label>
-        <textarea id="log-notes" placeholder="Ex. Pièce X remplacée, RAS sinon"></textarea>
+        <label for="log-notes">${t('Remarques (optionnel)')}</label>
+        <textarea id="log-notes" placeholder="${t('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
         <div class="hint" id="log-error"></div>
 
         <div class="modal-actions">
@@ -4352,7 +4361,7 @@ function openPlanView(machine, companyId, categories) {
 
       <div class="plan-field">
         <div class="label">${t('Statut')}</div>
-        <div class="value"><span class="badge ${badgeClass(info.state)}">${machine.status === 'en_service' ? 'En service' : esc(machine.status)}</span></div>
+        <div class="value"><span class="badge ${badgeClass(info.state)}">${machine.status === 'en_service' ? t('En service') : esc(machine.status)}</span></div>
       </div>
 
       <div class="plan-field">
@@ -4372,12 +4381,12 @@ function openPlanView(machine, companyId, categories) {
             : `Tous les ${machine.plan.interval_days} jours — rappel ${machine.plan.reminder_days_before} jour(s) avant`}</div>
         </div>
         <div class="plan-field">
-          <div class="label">${hasItemDetail ? 'Tableau de référence entretien' : 'Tâches de maintenance'}</div>
+          <div class="label">${hasItemDetail ? t('Tableau de référence entretien') : t('Tâches de maintenance')}</div>
           ${tableHtml}
         </div>
         ${machine.plan.notes ? `
           <div class="plan-field">
-            <div class="label">Points d'attention</div>
+            <div class="label">${t('Points d\'attention')}</div>
             <div class="attention-box">${esc(machine.plan.notes)}</div>
           </div>
         ` : ''}
@@ -4526,18 +4535,18 @@ function openMachineModal(companyId, categories, existing) {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${isEdit ? `Modifier ${esc(existing.name)}` : 'Ajouter une machine'}</h2>
-      <p class="sub">${isEdit ? 'Les modifications sont appliquées immédiatement.' : 'Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.'}</p>
+      <p class="sub">${isEdit ? t('Les modifications sont appliquées immédiatement.') : t('Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.')}</p>
       <form id="add-form">
         <label for="f-name">${t('Nom de la machine')}</label>
-        <input id="f-name" required placeholder="Ex. Orec 4x4 - Atelier" value="${isEdit ? esc(existing.name) : ''}">
+        <input id="f-name" required placeholder="${t('Ex. Orec 4x4 - Atelier')}" value="${isEdit ? esc(existing.name) : ''}">
 
         <label for="f-category">${t('Catégorie')}</label>
-        <input id="f-category" list="cat-list" required placeholder="Ex. Motoculture" value="${isEdit ? esc(existing.category?.name || '') : ''}">
+        <input id="f-category" list="cat-list" required placeholder="${t('Ex. Motoculture')}" value="${isEdit ? esc(existing.category?.name || '') : ''}">
         <datalist id="cat-list">
           ${categories.map(c => `<option value="${esc(c.name)}">`).join('')}
         </datalist>
 
-        ${SCHEMA.hasKind ? `<label for="f-kind">${t('Type')}</label>
+        ${SCHEMA.hasKind ? `<label for="f-kind">Type</label>
         <select id="f-kind">
           <option value="machine" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_MACHINE ? 'selected' : ''}>Machine — engin, outil (suivi en heures)</option>
           <option value="vehicle" ${(isEdit ? machineKind(existing) : TYPE_MACHINE) === TYPE_VEHICULE ? 'selected' : ''}>Véhicule — camion, utilitaire (suivi en kilomètres)</option>
@@ -4546,11 +4555,11 @@ function openMachineModal(companyId, categories, existing) {
         <div class="field-row">
           <div>
             <label for="f-brand">${t('Marque')}</label>
-            <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
+            <input id="f-brand" class="majuscules" placeholder="${t('Ex. KUBOTA')}" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
           </div>
           <div>
             <label for="f-model">${t('Modèle')}</label>
-            <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
+            <input id="f-model" class="majuscules" placeholder="${t('Ex. U17-3')}" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
           </div>
         </div>
 
@@ -4562,8 +4571,8 @@ function openMachineModal(companyId, categories, existing) {
 
         <label>${t('Mode de suivi de la maintenance')}</label>
         <div class="track-mode-choice">
-          <label><input type="radio" name="tm" value="days" ${editMode === 'days' ? 'checked' : ''}> Calendaire (jours)</label>
-          <label><input type="radio" name="tm" value="hours" ${editMode === 'hours' ? 'checked' : ''}> Compteur horaire (heures)</label>
+          <label><input type="radio" name="tm" value="days" ${editMode === 'days' ? 'checked' : ''}> ${t('Calendaire (jours)')}</label>
+          <label><input type="radio" name="tm" value="hours" ${editMode === 'hours' ? 'checked' : ''}> ${t('Compteur horaire (heures)')}</label>
           ${SCHEMA.hasCounter ? `<label><input type="radio" name="tm" value="km" ${editMode === 'km' ? 'checked' : ''}> Kilométrage (km)</label>` : ''}
         </div>
         <div id="hours-field" style="display:${editMode === 'days' ? 'none' : 'block'};">
@@ -4583,29 +4592,29 @@ function openMachineModal(companyId, categories, existing) {
         </div>
 
         <label for="f-tasks">${t('Tâches de maintenance')}</label>
-        <textarea id="f-tasks" placeholder="Ex. Vidange, contrôle lame, graissage">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
+        <textarea id="f-tasks" placeholder="${t('Ex. Vidange, contrôle lame, graissage')}">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
 
         <label>${t('Photo de la machine')}</label>
         <div id="photo-preview">
           ${isEdit && safeUrl(existing.image_url) ? `<img class="machine-photo" src="${esc(safeUrl(existing.image_url))}" alt="${esc(existing.name)}">` : ''}
         </div>
-        <button type="button" class="view-manual" id="fetch-photo-btn">${isEdit && existing.image_url ? 'Chercher plutôt sur le web' : 'Chercher une photo sur le web'}</button>
+        <button type="button" class="view-manual" id="fetch-photo-btn">${isEdit && existing.image_url ? t('Chercher plutôt sur le web') : t('Chercher une photo sur le web')}</button>
         <div class="hint" id="photo-status"></div>
 
-        <label for="f-manual">Carnet d'entretien (PDF${isEdit ? ' — laisser vide pour ne pas changer' : ', optionnel'})</label>
+        <label for="f-manual">Carnet d'entretien (PDF${isEdit ? ' — laisser vide pour ne pas changer' : t(', optionnel')})</label>
         ${isEdit && existing.manual_url ? `
           <button type="button" class="view-manual" id="modal-view-manual">Voir le carnet actuel (PDF)</button>
           <button type="button" class="view-manual" id="modal-analyze-manual">Analyser ce carnet avec l'IA</button>
         ` : ''}
         <input id="f-manual" type="file" accept="application/pdf">
-        <div class="hint" id="f-analysis">Le PDF du fabricant reste attaché à la fiche, consultable par n'importe quel technicien. S'il est fourni, l'IA propose un intervalle et des tâches à partir de son contenu.</div>
+        <div class="hint" id="f-analysis">${t('Le PDF du fabricant reste attaché à la fiche, consultable par n\'importe quel technicien. S\'il est fourni, l\'IA propose un intervalle et des tâches à partir de son contenu.')}</div>
         <div class="hint" id="f-error"></div>
 
         <div class="modal-actions">
           <button type="button" class="secondary" id="cancel-add">${t('Annuler')}</button>
-          <button type="submit" class="primary" id="submit-add">${isEdit ? 'Enregistrer les modifications' : 'Enregistrer'}</button>
+          <button type="submit" class="primary" id="submit-add">${isEdit ? t('Enregistrer les modifications') : t('Enregistrer')}</button>
         </div>
-        ${isEdit ? `<button type="button" class="delete-link" id="delete-machine">${t('Supprimer cette machine')}</button>` : ''}
+        ${isEdit ? `<button type="button" class="delete-link" id="delete-machine">Supprimer cette machine</button>` : ''}
       </form>
     </div>
   `;
@@ -4642,7 +4651,7 @@ function openMachineModal(companyId, categories, existing) {
       const u = COUNTER_UNITS[counterUnitFromMode(mode)];
       const word = mode === 'days' ? 'jours' : u.word;
       overlay.querySelector('#hours-field').style.display = mode === 'days' ? 'none' : 'block';
-      overlay.querySelector('#f-interval-label').textContent = `Échéance ${mode === 'days' ? 'toutes les' : 'tous les'} (${word})`;
+      overlay.querySelector('#f-interval-label').textContent = `Échéance ${mode === 'days' ? t('toutes les') : t('tous les')} (${word})`;
       overlay.querySelector('#f-reminder-label').textContent = `Rappel avant (${word})`;
       const counterLabelEl = overlay.querySelector('#f-current-hours-label');
       if (counterLabelEl) counterLabelEl.textContent = u.field;
