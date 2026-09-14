@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZmTZpw7CDBmwpmzXAQCwJW/OYMO8w+L3gkfCkZVxhaY=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lkpjfZJsyuMI1ULw1cQdaCZL2ohqBIHJ3TUCdTqUk/g=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -119,6 +119,15 @@
             104px
             calc(16px + env(safe-area-inset-left,0px));
   }
+  /* Bandeau « hors connexion » : l'application montre les dernières données
+     connues et le dit clairement, plutôt que d'afficher un écran d'erreur. */
+  .offline-banner{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    background:var(--soon-bg);color:#8A5A00;
+    border:1px solid #F0D6A0;border-radius:var(--r-chip);
+    padding:10px 12px;font-size:13px;font-weight:600;
+  }
+  .offline-banner .link-inline{color:inherit;text-decoration:underline;font-weight:700;}
   .view{display:flex;flex-direction:column;gap:16px;}
 
   .sidebar{display:none;}
@@ -1627,6 +1636,227 @@ function openUpgradeNotice(companyId) {
 // on utilise alors la fenêtre de rappel du plan.
 const SOON_DAYS = 15;
 
+// ── Consultation hors connexion ───────────────────────────────
+// L'application Android embarque ses fichiers : elle DÉMARRE sans réseau. Reste
+// à pouvoir consulter quelque chose — d'où cette copie des dernières données
+// reçues. Sans elle, l'utilisateur hors connexion verrait un écran de chargement
+// puis une erreur, alors que sa tournée de machines est déjà sur son téléphone.
+//
+// Les modifications, elles, continuent d'exiger la connexion : le bandeau le
+// dit, et aucun écrit n'est tenté puis perdu.
+const CACHE_CLE = 'parcpacific.derniere-donnees.v1';
+
+function enregistrerCache(donnees) {
+  try {
+    localStorage.setItem(CACHE_CLE, JSON.stringify({ ...donnees, schema: { ...SCHEMA }, savedAt: Date.now() }));
+  } catch (err) {
+    // Espace plein ou mode privé : ce n'est pas un motif d'échec pour le
+    // chargement, la copie est un confort.
+    console.warn('Copie hors connexion impossible :', err && err.message);
+  }
+}
+
+function lireCache() {
+  try {
+    const brut = localStorage.getItem(CACHE_CLE);
+    if (!brut) return null;
+    const donnees = JSON.parse(brut);
+    // Une copie sans machines n'a aucun intérêt : on la considère comme absente.
+    return donnees && Array.isArray(donnees.machines) && donnees.machines.length >= 0 ? donnees : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function effacerCache() {
+  try { localStorage.removeItem(CACHE_CLE); } catch (err) { /* sans conséquence */ }
+}
+
+// Âge de la copie, en français courant : c'est ce qui indique à l'utilisateur si
+// ce qu'il regarde date de ce matin ou de la semaine dernière.
+function ageLisible(horodatage) {
+  if (!horodatage) return '';
+  const minutes = Math.max(0, Math.round((Date.now() - horodatage) / 60000));
+  if (minutes < 2) return "à l'instant";
+  if (minutes < 60) return `il y a ${minutes} minutes`;
+  const heures = Math.round(minutes / 60);
+  if (heures < 24) return `il y a ${heures} h`;
+  const jours = Math.round(heures / 24);
+  return jours <= 1 ? 'hier' : `il y a ${jours} jours`;
+}
+
+// Une erreur de réseau se distingue d'un refus du serveur : seule la première
+// justifie de se rabattre sur la copie locale. Un « profil introuvable » ou une
+// règle d'accès refusée doivent rester visibles, sinon on masquerait un vrai
+// problème de compte derrière des données périmées.
+function estErreurReseau(erreur) {
+  if (!erreur) return false;
+  if (navigator && navigator.onLine === false) return true;
+  const texte = String(erreur.message || erreur || '');
+  return /failed to fetch|networkerror|network request failed|load failed|timeout|timed out|offline|err_internet|fetch failed/i.test(texte);
+}
+
+function bandeauHorsLigneHtml() {
+  if (!UI.horsLigne) return '';
+  const age = ageLisible(UI.horsLigne.depuis);
+  return `
+    <div class="offline-banner" role="status">
+      <span>Hors connexion — dernières données reçues ${esc(age)}. Les modifications sont impossibles tant que la connexion n'est pas rétablie.</span>
+      <button type="button" class="link-inline" id="offline-retry">Réessayer</button>
+    </div>`;
+}
+
+// ── Rappels d'échéance sur le téléphone ───────────────────────
+// L'application Android programme elle-même ses notifications : ni service
+// tiers, ni compte Google, ni réseau. Sur le web, tout ce bloc reste inerte
+// (window.Capacitor n'existe pas) — la rubrique « Mon compte » le dit alors.
+const RAPPELS_PREF = 'parcpacific.rappels-echeances.v1';
+const RAPPELS_MAX = 40;
+
+function pluginRappels() {
+  const cap = window.Capacitor;
+  return (cap && cap.Plugins && cap.Plugins.LocalNotifications) || null;
+}
+function rappelsDisponibles() { return !!pluginRappels(); }
+
+function rappelsActifs() {
+  try { return localStorage.getItem(RAPPELS_PREF) !== 'non'; } catch (err) { return true; }
+}
+function activerRappels(actif) {
+  try { localStorage.setItem(RAPPELS_PREF, actif ? 'oui' : 'non'); } catch (err) { /* sans conséquence */ }
+}
+
+// Le greffon n'accepte que des identifiants entiers, et il faut retrouver les
+// mêmes d'une programmation à l'autre, sinon les rappels s'empileraient en
+// doublons. L'identifiant est donc dérivé de la machine, de façon stable.
+function idNotification(machineId, rang) {
+  const texte = `${machineId}:${rang}`;
+  let empreinte = 7;
+  for (let i = 0; i < texte.length; i++) empreinte = (empreinte * 31 + texte.charCodeAt(i)) % 2000000000;
+  return empreinte + 1;
+}
+
+// Ce qui doit être annoncé, et quand. Fonction PURE : elle ne parle ni au
+// greffon ni au réseau, ce qui la rend vérifiable.
+//
+// Seules les échéances DATÉES sont concernées. Une machine suivie au compteur
+// (heures ou kilomètres) n'a pas de date d'échéance : on ne peut pas l'annoncer
+// à l'avance sans connaître son rythme d'utilisation. Mieux vaut ne rien
+// annoncer que d'annoncer une date fausse.
+function rappelsAProgrammer(machines, maintenant) {
+  const base = maintenant ? new Date(maintenant) : new Date();
+  const rappels = [];
+  for (const machine of machines || []) {
+    const plan = machine && machine.plan;
+    if (!plan || planIsCounter(plan) || !plan.next_due_at) continue;
+    const echeance = new Date(`${plan.next_due_at}T09:00:00`);
+    if (isNaN(echeance.getTime())) continue;
+    const modele = machineBrandModel(machine);
+    const nom = modele ? `${machine.name} (${modele})` : machine.name;
+    const joursAvant = Number(plan.reminder_days_before ?? FALLBACK_REMINDER_DAYS);
+    if (joursAvant > 0) {
+      const veille = new Date(echeance.getTime() - joursAvant * 86400000);
+      if (veille > base) {
+        rappels.push({
+          id: idNotification(machine.id, 1),
+          quand: veille,
+          titre: 'Entretien à prévoir',
+          corps: `${nom} — échéance dans ${joursAvant} jours (${formatShortDate(plan.next_due_at)})`,
+        });
+      }
+    }
+    if (echeance > base) {
+      rappels.push({
+        id: idNotification(machine.id, 2),
+        quand: echeance,
+        titre: "Entretien à faire aujourd'hui",
+        corps: `${nom} — échéance du ${formatShortDate(plan.next_due_at)}`,
+      });
+    }
+  }
+  rappels.sort((a, b) => a.quand - b.quand);
+  return rappels.slice(0, RAPPELS_MAX);
+}
+
+async function annulerRappels(plugin) {
+  const cible = plugin || pluginRappels();
+  if (!cible) return;
+  try {
+    const enAttente = await cible.getPending();
+    const liste = (enAttente && enAttente.notifications) || [];
+    if (liste.length) await cible.cancel({ notifications: liste.map((n) => ({ id: n.id })) });
+  } catch (err) {
+    console.warn('Annulation des rappels :', err && err.message);
+  }
+}
+
+// Reprogramme tout, à chaque ouverture : dès qu'un entretien est validé,
+// l'échéance suivante change et les notifications déjà posées annonceraient une
+// date fausse.
+//
+// `demander: false` évite de réclamer l'autorisation au démarrage de
+// l'application : elle n'est demandée que lorsque l'utilisateur active les
+// rappels depuis « Mon compte ». Une demande surgie sans raison au premier
+// lancement se solde presque toujours par un refus.
+async function programmerRappels(options) {
+  const plugin = pluginRappels();
+  if (!plugin) return { natif: false };
+  const demander = !options || options.demander !== false;
+  if (!rappelsActifs()) { await annulerRappels(plugin); return { desactives: true }; }
+  try {
+    const etat = await plugin.checkPermissions();
+    if (!etat || etat.display !== 'granted') {
+      if (!demander) return { sansPermission: true };
+      const demande = await plugin.requestPermissions();
+      if (!demande || demande.display !== 'granted') return { refuse: true };
+    }
+    try {
+      await plugin.createChannel({
+        id: 'echeances',
+        name: "Échéances d'entretien",
+        description: 'Rappels avant chaque entretien planifié.',
+        importance: 4,
+      });
+    } catch (err) { /* canal déjà créé, ou Android antérieur aux canaux */ }
+
+    await annulerRappels(plugin);
+    const rappels = rappelsAProgrammer(UI.machines);
+    if (!rappels.length) return { programmees: 0 };
+    await plugin.schedule({
+      notifications: rappels.map((rappel) => ({
+        id: rappel.id,
+        title: rappel.titre,
+        body: rappel.corps,
+        channelId: 'echeances',
+        // Inexact assumé : une alarme exacte exigerait la permission
+        // SCHEDULE_EXACT_ALARM, et Android ouvrirait son écran de réglages à la
+        // première programmation. Celle-ci traverse le mode veille, ce qui
+        // suffit largement pour un rappel d'entretien.
+        isExactNotification: false,
+        allowWhileIdle: true,
+        schedule: { at: rappel.quand },
+      })),
+    });
+    return { programmees: rappels.length };
+  } catch (err) {
+    console.warn('Programmation des rappels :', err && err.message);
+    return { erreur: (err && err.message) || 'erreur inconnue' };
+  }
+}
+
+function blocRappelsHtml() {
+  if (!rappelsDisponibles()) {
+    return `<p class="muted-text">Les rappels d'échéance sont programmés par l'application Android : sur le web, ils n'existent pas. Installe l'application sur ton téléphone pour les recevoir.</p>`;
+  }
+  return `
+    <label class="check-row">
+      <input type="checkbox" id="acc-rappels" ${rappelsActifs() ? 'checked' : ''}>
+      Me rappeler les échéances datées
+    </label>
+    <div class="hint">Un rappel avant chaque échéance — le délai se règle sur le plan de maintenance, 7 jours par défaut — puis un rappel le jour même, à 9 h. Les machines suivies au compteur (heures ou kilomètres) n'ont pas de date d'échéance : elles n'ont donc pas de rappel.</div>
+    <div class="hint" id="acc-rappels-msg" role="status" aria-live="polite"></div>`;
+}
+
 const REMINDERS_KEY = 'parcpacific.reminders.v1';
 const DEFAULT_REMINDERS = { whatsapp: true, email: true, escalate: false };
 
@@ -1849,6 +2079,7 @@ function renderApp() {
       <div class="main">
         <div class="content">
           <div class="view">
+            ${bandeauHorsLigneHtml()}
             <div class="page-head">${pageHeadHtml()}</div>
             <div id="view-root">${view.render()}</div>
           </div>
@@ -1880,9 +2111,13 @@ function wireShell() {
   document.getElementById('head-add')?.addEventListener('click', () => openManualUploadModal());
   document.getElementById('open-plus')?.addEventListener('click', openPlusSheet);
   document.getElementById('logout-btn')?.addEventListener('click', doLogout);
+  document.getElementById('offline-retry')?.addEventListener('click', () => boot());
 }
 
 async function doLogout() {
+  // La copie locale contient les données de la société : elle ne doit pas
+  // survivre à une déconnexion, surtout sur un appareil partagé.
+  effacerCache();
   await sb.auth.signOut();
   renderLogin();
 }
@@ -2692,6 +2927,11 @@ VIEWS.account = {
       </section>
 
       <section class="card">
+        <div class="card-head"><h2 class="card-title">Rappels sur ce téléphone</h2></div>
+        ${blocRappelsHtml()}
+      </section>
+
+      <section class="card">
         <div class="card-head"><h2 class="card-title">Adresse de connexion</h2></div>
         <div class="plan-field">
           <div class="label">Email actuel</div>
@@ -2716,6 +2956,32 @@ VIEWS.account = {
     if (!root) return;
 
     root.querySelector('#account-upgrade')?.addEventListener('click', () => openUpgradeNotice(UI.companyId));
+
+    root.querySelector('#acc-rappels')?.addEventListener('change', async (e) => {
+      const case_ = e.currentTarget;
+      const msg = root.querySelector('#acc-rappels-msg');
+      const actif = case_.checked;
+      activerRappels(actif);
+      if (msg) msg.textContent = actif ? 'Programmation…' : '';
+      // Désactiver n'appelle pas programmerRappels : celui-ci se contenterait
+      // d'annuler, mais autant le dire explicitement ici.
+      const resultat = actif ? await programmerRappels({ demander: true })
+        : await (async () => { await annulerRappels(); return { desactives: true }; })();
+      if (!msg) return;
+      if (resultat.erreur) {
+        msg.textContent = `Rappels non programmés : ${resultat.erreur}`;
+      } else if (resultat.refuse) {
+        msg.textContent = "Autorisation refusée : Android n'affichera aucun rappel. Tu peux l'accorder dans les réglages de l'application.";
+        case_.checked = false;
+        activerRappels(false);
+      } else if (resultat.programmees === 0) {
+        msg.textContent = 'Aucune échéance datée à annoncer pour le moment.';
+      } else if (resultat.programmees) {
+        msg.textContent = `${resultat.programmees} rappel(s) programmé(s).`;
+      } else {
+        msg.textContent = 'Rappels désactivés.';
+      }
+    });
     wireChampTelephone(root, 'acc-phone');
 
     const message = (el, texte, erreur) => {
@@ -4282,9 +4548,43 @@ function openMachineModal(companyId, categories, existing) {
   });
 }
 
+// Affiche les dernières données connues, avec le bandeau qui l'annonce.
+// Le schéma est restauré lui aussi : sans cela, l'affichage retomberait sur les
+// anciennes colonnes et le kilométrage, par exemple, disparaîtrait.
+function afficherDepuisCache(cache) {
+  if (cache.schema) Object.assign(SCHEMA, cache.schema);
+  UI.companyId = cache.companyId;
+  UI.companyName = cache.companyName;
+  UI.companyPlan = cache.companyPlan;
+  UI.company = cache.company || {};
+  UI.contactName = cache.contactName || '';
+  UI.email = cache.email || '';
+  UI.categories = cache.categories || [];
+  UI.machines = cache.machines || [];
+  UI.reminders = loadReminders();
+  UI.horsLigne = { depuis: cache.savedAt };
+  renderApp();
+}
+
 async function boot(toastMessage) {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { renderLogin(); return; }
+  // La copie locale est lue AVANT tout appel réseau : si le réseau manque, on
+  // veut pouvoir l'afficher sans attendre l'expiration des délais.
+  const cache = lireCache();
+  UI.horsLigne = null;
+
+  let session = null;
+  try {
+    ({ data: { session } } = await sb.auth.getSession());
+  } catch (err) {
+    session = null;
+  }
+  if (!session) {
+    // Sans session utilisable, l'écran de connexion donnerait l'impression
+    // d'avoir été déconnecté. Si l'on a des données, on les montre.
+    if (cache) { afficherDepuisCache(cache); return; }
+    renderLogin();
+    return;
+  }
 
   app.innerHTML = `<div class="loading">Chargement des machines…</div>`;
 
@@ -4316,6 +4616,8 @@ async function boot(toastMessage) {
   }
 
   if (profileErr || !profile) {
+    // Un réseau absent ne doit pas ressembler à un compte mal rattaché.
+    if (cache && estErreurReseau(profileErr)) { afficherDepuisCache(cache); return; }
     renderLogin("Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.");
     return;
   }
@@ -4359,6 +4661,9 @@ async function boot(toastMessage) {
     .order('name');
 
   if (machinesErr) {
+    // Le cas le plus fréquent de très loin : plus de réseau. On montre la
+    // dernière liste connue plutôt qu'un message d'erreur.
+    if (cache && estErreurReseau(machinesErr)) { afficherDepuisCache(cache); return; }
     app.innerHTML = `<div class="empty">Erreur de chargement : ${esc(machinesErr.message)}</div>`;
     return;
   }
@@ -4393,9 +4698,28 @@ async function boot(toastMessage) {
     category: Array.isArray(m.category) ? m.category[0] : m.category,
   }));
   UI.reminders = loadReminders();
+  UI.horsLigne = null;
+
+  // Copie des données fraîches : c'est elle qui servira hors connexion.
+  enregistrerCache({
+    companyId: UI.companyId,
+    companyName: UI.companyName,
+    companyPlan: UI.companyPlan,
+    company: UI.company,
+    contactName: UI.contactName,
+    email: UI.email,
+    categories: UI.categories,
+    machines: UI.machines,
+  });
 
   renderApp();
   if (toastMessage) showToast(toastMessage);
+
+  // Reprogrammation des rappels à chaque ouverture, sans réclamer
+  // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.
+  // Hors connexion, l'appel échoue sans conséquence — les rappels déjà
+  // programmés restent valides.
+  programmerRappels({ demander: false });
 }
 
 if (sb) {
