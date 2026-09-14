@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-usMfjrf5p5BxBfdZV17zZQ6845xKdPs7VegBR3sRNR0=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kTGO31IKQbM0TEgS531mSvLBZ6IVQXBbi8KLk5utZB0=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ParcPacific — Liste des machines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -716,7 +716,29 @@ function normalizeItems(raw) {
 // tracking_mode ∈ {days, hours, km}.
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
-const SCHEMA = { hasCounter: false, hasBrandModel: false };
+const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false };
+
+// --- Contact de la société --------------------------------------------------
+// Le schéma d'origine ne stockait qu'une chaîne « nom du contact ». La migration
+// « compte » ajoute prénom et nom séparés ; sans elle, tout continue de
+// fonctionner à partir de contact_name.
+function contactFullName(first, last, secours = '') {
+  const parts = [first, last].filter(Boolean);
+  return parts.length ? parts.join(' ') : (secours || '');
+}
+function companyFirstName(c) {
+  if (!c) return '';
+  if (SCHEMA.hasContactNames && c.contact_first_name) return c.contact_first_name;
+  return c.contact_name || '';
+}
+function companyLastName(c) {
+  if (!c || !SCHEMA.hasContactNames || !c.contact_first_name) return '';
+  return c.contact_last_name || '';
+}
+// Adresse email : contrôle volontairement simple, le serveur reste juge.
+function emailValide(v) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(String(v || '').trim());
+}
 
 // --- Marque et modèle -------------------------------------------------------
 // Le schéma d'origine ne stockait qu'une chaîne « marque / modèle ». La
@@ -1076,7 +1098,11 @@ function openSignupWizard() {
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
-  const state = { structureType: 'company', name: '', activity: SIGNUP_ACTIVITIES[0], registrationNumber: '', phone: '', email: '', contactName: '', password: '' };
+  const state = {
+    structureType: 'company', name: '', activity: SIGNUP_ACTIVITIES[0],
+    registrationNumber: '', phone: '', email: '', password: '',
+    contactName: '', contactFirstName: '', contactLastName: '',
+  };
 
   function shell(inner) { overlay.innerHTML = `<div class="modal">${inner}</div>`; }
 
@@ -1108,10 +1134,13 @@ function openSignupWizard() {
             <input id="su-phone" type="tel" required value="${esc(state.phone)}">
           </div>
           <div>
-            <label for="su-contact">Nom du contact</label>
-            <input id="su-contact" required value="${esc(state.contactName)}">
+            <label for="su-contact-first">Prénom du contact</label>
+            <input id="su-contact-first" required value="${esc(state.contactFirstName)}">
           </div>
         </div>
+
+        <label for="su-contact-last">Nom du contact</label>
+        <input id="su-contact-last" required value="${esc(state.contactLastName)}">
 
         <label for="su-email">Email</label>
         <input id="su-email" type="email" required value="${esc(state.email)}">
@@ -1155,7 +1184,9 @@ function openSignupWizard() {
       state.activity = overlay.querySelector('#su-activity').value;
       state.registrationNumber = overlay.querySelector('#su-reg').value.trim();
       state.phone = overlay.querySelector('#su-phone').value.trim();
-      state.contactName = overlay.querySelector('#su-contact').value.trim();
+      state.contactFirstName = overlay.querySelector('#su-contact-first').value.trim();
+      state.contactLastName = overlay.querySelector('#su-contact-last').value.trim();
+      state.contactName = contactFullName(state.contactFirstName, state.contactLastName);
       state.email = overlay.querySelector('#su-email').value.trim();
       state.password = overlay.querySelector('#su-password').value;
 
@@ -1232,6 +1263,13 @@ function openSignupWizard() {
         const { data, error } = await sb.auth.verifyOtp({ email: state.email, token: code, type: 'signup' });
         if (error) throw error;
 
+        // Les colonnes prénom/nom n'existent qu'après migration-compte.sql :
+        // on les ajoute à l'insertion seulement si elles sont là.
+        const { error: sondeContact } = await sb.from('companies').select('contact_first_name').limit(1);
+        const colonnesContact = sondeContact
+          ? {}
+          : { contact_first_name: state.contactFirstName || null, contact_last_name: state.contactLastName || null };
+
         const companyId = crypto.randomUUID();
         const { error: companyErr } = await sb.from('companies').insert({
           id: companyId,
@@ -1239,7 +1277,8 @@ function openSignupWizard() {
           activity: state.activity,
           registration_number: state.registrationNumber || null,
           phone: state.phone,
-          contact_name: state.contactName,
+          contact_name: state.contactName || null,
+          ...colonnesContact,
           plan: 'free',
         });
         if (companyErr) throw companyErr;
@@ -1308,6 +1347,9 @@ const UI = {
   companyName: '',
   companyPlan: 'free',
   contactName: '',
+  contactFirstName: '',
+  // Fiche société complète (rubrique « Mon compte »)
+  company: {},
   email: '',
   machines: [],
   categories: [],
@@ -1321,6 +1363,7 @@ const NAV_ITEMS = [
   { id: 'manuals', label: 'Manuels & IA', short: 'Manuels', icon: '✦' },
   { id: 'agenda', label: 'Agenda', short: 'Agenda', icon: '◔' },
   { id: 'reminders', label: 'Rappels', short: 'Rappels', icon: '☰' },
+  { id: 'account', label: 'Mon compte', short: 'Compte', icon: '◉' },
 ];
 
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
@@ -1458,7 +1501,9 @@ function badgeLabel(state) {
 
 // ── Coquille ──────────────────────────────────────────────────
 function greetingLabel() {
-  const who = firstNameFrom(UI.contactName) || firstNameFrom(UI.companyName);
+  // Le prénom est saisi séparément depuis la rubrique « Mon compte » ; le repli
+  // sur le contact historique garde les bases non migrées fonctionnelles.
+  const who = UI.contactFirstName || firstNameFrom(UI.contactName) || firstNameFrom(UI.companyName);
   return who ? `Bonjour ${esc(who)}` : 'Bonjour';
 }
 
@@ -2268,6 +2313,168 @@ VIEWS.reminders = {
   },
 };
 
+// ── Vue : Mon compte ──────────────────────────────────────────
+VIEWS.account = {
+  title: 'Mon compte',
+  subtitle: () => UI.company.name || UI.companyName || 'Société',
+  render() {
+    const c = UI.company;
+    const modifiable = SCHEMA.hasContactNames;
+    const bloque = modifiable ? '' : ' disabled';
+    return `
+      <section class="card">
+        <div class="card-head"><h2 class="card-title">Société</h2></div>
+        <div class="plan-field">
+          <div class="label">Raison sociale</div>
+          <div class="value">${esc(c.name || UI.companyName || '—')}</div>
+        </div>
+        <div class="plan-field">
+          <div class="label">Activité</div>
+          <div class="value">${esc(c.activity || 'Non renseignée')}</div>
+        </div>
+        <div class="plan-field">
+          <div class="label">N° RCS / RIDET</div>
+          <div class="value">${esc(c.registrationNumber || 'Non renseigné')}</div>
+        </div>
+        <div class="plan-field" style="margin-bottom:0;">
+          <div class="label">Formule</div>
+          <div class="value">
+            ${c.plan === 'free'
+              ? `Gratuite — 3 machines suivies
+                 <div style="margin-top:8px;"><button type="button" class="link-inline" id="account-upgrade">Passer à l'abonnement</button></div>`
+              : 'Abonnement — machines illimitées'}
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2 class="card-title">Contact et notifications</h2></div>
+        <p class="muted-text">Ces coordonnées serviront aux rappels d'échéance (WhatsApp et e-mail).</p>
+        <div class="field-row">
+          <div>
+            <label for="acc-first">Prénom</label>
+            <input id="acc-first" value="${esc(companyFirstName(c))}"${bloque}>
+          </div>
+          <div>
+            <label for="acc-last">Nom</label>
+            <input id="acc-last" value="${esc(companyLastName(c))}"${bloque}>
+          </div>
+        </div>
+        <label for="acc-phone">Téléphone</label>
+        <input id="acc-phone" type="tel" autocomplete="tel" placeholder="Ex. +687 81 54 44" value="${esc(c.phone || '')}"${bloque}>
+        <div class="hint" id="acc-contact-msg" role="status" aria-live="polite"></div>
+        <div class="modal-actions">
+          <button type="button" class="primary" id="acc-save-contact"${bloque}>Enregistrer</button>
+        </div>
+        ${modifiable ? '' : `<div class="hint">Mise à jour indisponible : exécute <strong>migration-compte.sql</strong> dans le SQL Editor de Supabase.</div>`}
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2 class="card-title">Adresse de connexion</h2></div>
+        <div class="plan-field">
+          <div class="label">Email actuel</div>
+          <div class="value">${esc(UI.email || '—')}</div>
+        </div>
+        <label for="acc-email">Nouvel email</label>
+        <input id="acc-email" type="email" autocomplete="email" placeholder="nouvelle@adresse.nc">
+        <label for="acc-password">Mot de passe actuel</label>
+        <input id="acc-password" type="password" autocomplete="current-password">
+        <div class="hint">Le changement est confirmé par email : la nouvelle adresse ne devient active qu'après validation. Le mot de passe est demandé pour qu'une session ouverte ne suffise pas à détourner le compte.</div>
+        <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
+        <div class="modal-actions">
+          <button type="button" class="primary" id="acc-save-email">Changer l'email</button>
+        </div>
+      </section>`;
+  },
+  mount() {
+    const root = document.getElementById('view-root');
+    if (!root) return;
+
+    root.querySelector('#account-upgrade')?.addEventListener('click', () => openUpgradeNotice(UI.companyId));
+
+    const message = (el, texte, erreur) => {
+      if (!el) return;
+      el.textContent = texte;
+      el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+    };
+
+    root.querySelector('#acc-save-contact')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const msg = root.querySelector('#acc-contact-msg');
+      const prenom = root.querySelector('#acc-first').value.trim();
+      const nom = root.querySelector('#acc-last').value.trim();
+      const telephone = root.querySelector('#acc-phone').value.trim();
+      btn.disabled = true;
+      btn.textContent = 'Enregistrement…';
+      try {
+        // Passe par une fonction dédiée plutôt que par un UPDATE direct : une
+        // politique RLS de mise à jour sur companies laisserait aussi modifier
+        // la colonne « plan », donc contourner la limite du plan gratuit.
+        const { error } = await sb.rpc('update_my_company', {
+          p_phone: telephone || null,
+          p_contact_first_name: prenom || null,
+          p_contact_last_name: nom || null,
+        });
+        if (error) throw error;
+
+        UI.company.phone = telephone;
+        UI.company.contact_first_name = prenom || null;
+        UI.company.contact_last_name = nom || null;
+        UI.contactFirstName = prenom;
+        UI.contactName = contactFullName(prenom, nom, UI.contactName);
+        showToast('Coordonnées enregistrées');
+        renderApp();
+      } catch (err) {
+        message(msg, 'Erreur : ' + (err.message || err), true);
+        btn.disabled = false;
+        btn.textContent = 'Enregistrer';
+      }
+    });
+
+    root.querySelector('#acc-save-email')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const msg = root.querySelector('#acc-email-msg');
+      const champEmail = root.querySelector('#acc-email');
+      const champMotDePasse = root.querySelector('#acc-password');
+      const nouvelEmail = champEmail.value.trim();
+      const motDePasse = champMotDePasse.value;
+
+      if (!emailValide(nouvelEmail)) {
+        message(msg, 'Adresse email invalide.', true);
+        return;
+      }
+      if (nouvelEmail.toLowerCase() === String(UI.email).toLowerCase()) {
+        message(msg, "C'est déjà l'adresse actuelle.", true);
+        return;
+      }
+      if (!motDePasse) {
+        message(msg, 'Saisis ton mot de passe actuel pour confirmer.', true);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Vérification…';
+      try {
+        // Ré-authentification obligatoire avant un changement sensible.
+        const { error: authErr } = await sb.auth.signInWithPassword({ email: UI.email, password: motDePasse });
+        if (authErr) throw new Error('Mot de passe incorrect.');
+
+        btn.textContent = 'Envoi du lien…';
+        const { error } = await sb.auth.updateUser({ email: nouvelEmail });
+        if (error) throw error;
+
+        message(msg, 'Demande envoyée. Ouvre le lien de confirmation reçu par email : la nouvelle adresse ne sera active qu\'après validation.', false);
+        champEmail.value = '';
+        champMotDePasse.value = '';
+      } catch (err) {
+        message(msg, 'Erreur : ' + (err.message || err), true);
+      }
+      btn.disabled = false;
+      btn.textContent = "Changer l'email";
+    });
+  },
+};
+
 // ── Feuille « Plus » (mobile) ─────────────────────────────────
 function openPlusSheet() {
   const overlay = document.createElement('div');
@@ -2281,6 +2488,7 @@ function openPlusSheet() {
       <button type="button" class="sheet-item" data-nav="agenda">◔&nbsp; Agenda</button>
       <button type="button" class="sheet-item" data-nav="reminders">☰&nbsp; Rappels</button>
       <div class="sheet-title" style="padding-top:10px;">Compte</div>
+      <button type="button" class="sheet-item" data-nav="account">◉&nbsp; Mon compte</button>
       <button type="button" class="sheet-item" id="sheet-logout">Se déconnecter</button>
     </div>`;
   document.body.appendChild(overlay);
@@ -3695,22 +3903,31 @@ async function boot(toastMessage) {
 
   app.innerHTML = `<div class="loading">Chargement des machines…</div>`;
 
-  // contact_name sert au message d'accueil « Bonjour … ». On retente sans lui
-  // si la base est plus ancienne et que la colonne n'existe pas.
+  // Colonnes prénom/nom du contact : présentes seulement après migration-compte.
+  const { error: sondeContact } = await sb.from('companies').select('contact_first_name').limit(1);
+  SCHEMA.hasContactNames = !sondeContact;
+
+  // Chargement de la société, avec repli en cascade si des colonnes
+  // optionnelles manquent sur une base plus ancienne.
+  const colonnesBase = ['name', 'plan', 'contact_name'];
+  const colonnesEtendues = [...colonnesBase, 'activity', 'registration_number', 'phone'];
+  const colonnesContact = SCHEMA.hasContactNames ? ['contact_first_name', 'contact_last_name'] : [];
+  const tentatives = [
+    [...colonnesEtendues, ...colonnesContact],
+    colonnesEtendues,
+    colonnesBase,
+    ['name', 'plan'],
+  ];
+
   let profile = null;
   let profileErr = null;
-  ({ data: profile, error: profileErr } = await sb
-    .from('profiles')
-    .select('company_id, companies(name, plan, contact_name)')
-    .eq('id', session.user.id)
-    .single());
-
-  if (profileErr) {
+  for (const colonnes of tentatives) {
     ({ data: profile, error: profileErr } = await sb
       .from('profiles')
-      .select('company_id, companies(name, plan)')
+      .select(`company_id, companies(${colonnes.join(', ')})`)
       .eq('id', session.user.id)
       .single());
+    if (!profileErr) break;
   }
 
   if (profileErr || !profile) {
@@ -3764,7 +3981,18 @@ async function boot(toastMessage) {
   UI.companyId = profile.company_id;
   UI.companyName = company?.name || 'Ta société';
   UI.companyPlan = company?.plan || 'free';
+  UI.company = {
+    name: company?.name || '',
+    activity: company?.activity || '',
+    registrationNumber: company?.registration_number || '',
+    phone: company?.phone || '',
+    plan: company?.plan || 'free',
+    contact_name: company?.contact_name || '',
+    contact_first_name: company?.contact_first_name || null,
+    contact_last_name: company?.contact_last_name || null,
+  };
   UI.contactName = company?.contact_name || '';
+  UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
   UI.categories = categories || [];
   UI.machines = (machines || []).map(m => ({
