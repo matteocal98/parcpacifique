@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-4UcBEFo3ljSrMf+Dio5EF0Rgr2jqfgyULu7NeqQZ52Y=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PDZhWEndArJxI98/DNGyxlL3zT94jJ7W7q2B8kWGQ+c=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -668,6 +668,19 @@
   .tel-champ input{flex:1 1 38%;min-width:0;}
 
   /* Case à cocher isolée (option de l'assistant) */
+  /* Choix de la langue : deux drapeaux, avec leur nom à côté — un drapeau est
+     un pays, pas une langue, et le nom lève l'ambiguïté pour tout le monde. */
+  .lang-switch{display:flex;gap:8px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .lang-btn{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--surface);border:1.5px solid var(--line);color:var(--ink-2);
+    border-radius:var(--r-pill);padding:6px 13px;min-height:36px;
+    font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .lang-btn:hover{border-color:var(--primary-line);color:var(--primary-dark);}
+  .lang-btn.is-active{background:var(--primary-tint);border-color:var(--primary-line);color:var(--primary-dark);}
+  .lang-drapeau{font-size:15px;line-height:1;}
+
   .check-row{
     display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;
     font-size:14.5px;font-weight:600;color:var(--ink);
@@ -752,7 +765,7 @@ const app = document.getElementById('app');
 let LANGUE = 'fr';
 
 // DICTIONNAIRES_DEBUT
-const TEXTES = {};
+const TEXTES = {"en":{"← Retour":"← Back","À faire":"To do","À jour":"Up to date","Accueil":"Home","Activité":"Activity","Adresse de connexion":"Sign-in address","Afficher":"Show","Agenda":"Schedule","Ajouter une machine":"Add a machine","Analyse en cours…":"Analysing…","Analyse interrompue":"Analysis interrupted","Analyser le PDF":"Analyse the PDF","Annuler":"Cancel","Aucun plan de maintenance défini pour cette machine.":"No maintenance plan set for this machine.","Aucune tâche détaillée dans le plan.":"No detailed tasks in the plan.","Catégorie":"Category","Chargement…":"Loading…","Choisis un nouveau mot de passe.":"Choose a new password.","Code de vérification":"Verification code","Comment ça marchera":"How it will work","Compte":"Account","Compte connecté mais pas encore rattaché à une société. Vérifie la table profiles.":"Signed in, but not linked to a company yet. Check the profiles table.","Compteur à saisir":"Counter to enter","Compteur décroissant":"Countdown counter","Confidentialité":"Privacy","Connecte-toi pour voir tes machines.":"Sign in to see your machines.","Contact et notifications":"Contact and notifications","Créer le compte":"Create account","Créer un compte":"Create an account","dans le SQL Editor de Supabase.":"in the Supabase SQL Editor.","Date":"Date","Date de mise en service":"Commissioning date","Déposer un manuel":"Upload a manual","Déposer un manuel PDF":"Upload a PDF manual","Dernier entretien réalisé":"Last service performed","Détails":"Details","Échéance":"Due date","Échéances à venir":"Upcoming due dates","Échéances détectées dans le manuel":"Due dates found in the manual","Élément":"Item","Éléments traités":"Items handled","Email":"Email","Email actuel":"Current email","Email envoyé":"Email sent","En retard":"Overdue","Enregistrer":"Save","Enregistrer le mot de passe":"Save password","Enregistrer un entretien":"Log a service","Entretien à prévoir":"Service due soon","Envoyer le lien":"Send the link","Étape 1 sur 2 — identification":"Step 1 of 2 — identification","Ex. 19 240":"e.g. 19,240","Ex. 245":"e.g. 245","Exporter en CSV":"Export as CSV","Fermer":"Close","Formule":"Plan","Fréquence":"Frequency","Heures compteur actuelles":"Current hour meter","Historique des entretiens":"Service history","Huile / graisse / pièce":"Oil / grease / part","Indépendant / Patenté":"Sole trader / Licensed","Kilométrage actuel":"Current odometer","kilomètres":"kilometres","Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.":"The PDF is over 15 MB — reduce its size and try again.","Limite du plan gratuit atteinte":"Free plan limit reached","Machine concernée":"Machine","Machines":"Machines","Manuel analysé":"Manual analysed","Manuels":"Manuals","Manuels analysés":"Manuals analysed","Marque":"Make","Marquer fait":"Mark as done","Mentions légales":"Legal notice","Mise à jour indisponible : exécute":"Update unavailable: run","Mode de suivi de la maintenance":"Maintenance tracking","Modèle":"Model","Modifier":"Edit","Mon compte":"My account","Mot de passe":"Password","Mot de passe actuel":"Current password","Mot de passe incorrect.":"Incorrect password.","Mot de passe oublié":"Forgot password","Mot de passe oublié ?":"Forgot your password?","N° RCS / RIDET":"Company reg. no.","Navigation":"Navigation","Nom":"Last name","Nom de la machine":"Machine name","Nom du contact":"Contact last name","Non, mais je peux le trouver en ligne":"No, but I can find it online","Nouveau mot de passe":"New password","Nouvel email":"New email","Partager par email":"Share by email","Pas de plan de maintenance":"No maintenance plan","Photo de la machine":"Machine photo","Plan à définir":"Plan to be defined","Plus":"More","Prénom":"First name","Prénom du contact":"Contact first name","Préparation":"Preparation","Prochain entretien":"Next service","PROCHAIN ENTRETIEN":"NEXT SERVICE","Prochain entretien à réaliser":"Next service due","Quantité":"Quantity","Raison sociale":"Company name","Rappels":"Reminders","Rappels sur ce téléphone":"Reminders on this phone","Réessayer":"Try again","Réinitialiser les filtres":"Reset filters","Remarque":"Note","Remarques":"Notes","Renvoyer le code":"Resend code","Rien à prévoir sur cette période.":"Nothing to prepare for this period.","Rien à signaler":"Nothing to report","Se connecter":"Sign in","Se déconnecter":"Sign out","Société":"Company","Statut":"Status","Suivant →":"Next →","Suivi simplifié":"Simple tracking","Supprimer cette machine":"Delete this machine","Tableau de bord":"Dashboard","Tâches de maintenance":"Maintenance tasks","Téléphone":"Phone","Téléversement du carnet…":"Uploading manual…","Tout voir":"View all","Trier par":"Sort by","Type":"Type","Type de structure":"Organisation type","Urgence":"Urgency","URL de photo invalide":"Invalid photo URL","Valider":"Confirm","Valider le plan →":"Approve the plan →","Vérifie ton email":"Check your email","Voir la liste":"View the list","Voir le plan":"View the plan","worker pdf.js introuvable":"pdf.js worker not found","Entretien à faire aujourd'hui":"Service due today","Langue de l'interface sur cet appareil.":"Language of the interface on this device.","échéance dans {n} jours ({date})":"due in {n} days ({date})","échéance du {date}":"due on {date}","au compteur":"on the counter","{n} machine(s)":"{n} machine(s)"}};
 // DICTIONNAIRES_FIN
 
 function t(texte) {
@@ -761,10 +774,70 @@ function t(texte) {
   return Object.prototype.hasOwnProperty.call(table, texte) ? table[texte] : texte;
 }
 
-// Bascule la langue à chaud. Le sélecteur de l'étape B s'en servira ; elle est
-// posée dès maintenant parce que c'est par elle que la fonction est vérifiable.
-function changerLangue(code) {
-  LANGUE = code;
+const LANGUE_CLE = 'parcpacific.langue';
+const LANGUES = [
+  { code: 'fr', drapeau: '🇫🇷', nom: 'Français' },
+  { code: 'en', drapeau: '🇬🇧', nom: 'English' },
+];
+
+function langueDisponible(code) {
+  return LANGUES.some((l) => l.code === code) && !!TEXTES[code];
+}
+
+// Langue de départ : celle choisie précédemment, sinon celle de l'appareil.
+// Un utilisateur dont le téléphone est en anglais ne doit pas avoir à chercher
+// le sélecteur pour comprendre l'écran de connexion.
+function langueInitiale() {
+  try {
+    const choisie = localStorage.getItem(LANGUE_CLE);
+    if (choisie && langueDisponible(choisie)) return choisie;
+  } catch (err) { /* stockage indisponible */ }
+  const appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+  return langueDisponible(appareil) ? appareil : 'fr';
+}
+
+// Applique la langue partout : la fonction t(), l'attribut lang du document
+// (lecteurs d'écran et césure), et un rechargement.
+//
+// POURQUOI RECHARGER plutôt que re-rendre : plusieurs libellés sont construits
+// UNE FOIS au chargement du script — libellés de navigation, titres de vues,
+// unités de compteur — parce que t() y est appelé à la construction des objets.
+// Un simple re-rendu laisserait donc ces libellés dans l'ancienne langue, et il
+// faudrait traquer chaque valeur figée, aujourd'hui et à chaque ajout. Le
+// rechargement garantit que TOUT repasse par t(), pour un coût nul : les
+// fichiers sont embarqués dans l'application.
+function changerLangue(code, options) {
+  const choisie = langueDisponible(code) ? code : 'fr';
+  const change = choisie !== LANGUE;
+  LANGUE = choisie;
+  try { localStorage.setItem(LANGUE_CLE, choisie); } catch (err) { /* sans conséquence */ }
+  try { document.documentElement.lang = choisie; } catch (err) { /* document absent */ }
+  if (options && options.silencieux) return;
+  if (change && window.location && typeof window.location.reload === 'function') {
+    window.location.reload();
+    return;
+  }
+  if (UI && UI.view) renderApp();
+  else renderLogin();
+}
+
+// Deux drapeaux, comme demandé. Le nom accompagne le drapeau : un drapeau est
+// un pays, pas une langue, et « 🇬🇧 » seul ne dit pas « English » à tout le monde.
+function basculeLangueHtml() {
+  return `<div class="lang-switch" role="group" aria-label="${LANGUE === 'en' ? 'Language' : 'Langue'}">
+      ${LANGUES.map((l) => `<button type="button" class="lang-btn${l.code === LANGUE ? ' is-active' : ''}"
+        data-langue="${l.code}" aria-pressed="${l.code === LANGUE}" title="${esc(l.nom)}">
+        <span class="lang-drapeau" aria-hidden="true">${l.drapeau}</span><span>${esc(l.nom)}</span>
+      </button>`).join('')}
+    </div>`;
+}
+
+// Interpolation pour les phrases construites : « échéance dans {n} jours ».
+// Les chaînes purement dynamiques ne peuvent pas passer par t() au moment de
+// l'extraction ; elles passent par ici, avec la phrase complète comme clé.
+function tR(cle, valeurs) {
+  const modele = t(cle);
+  return modele.replace(/\{(\w+)\}/g, (tout, nom) => (valeurs && nom in valeurs ? String(valeurs[nom]) : tout));
 }
 
 // Valeurs par défaut du plan « inactif » : on stocke toujours un intervalle
@@ -1172,7 +1245,7 @@ function formatCounter(value, unit) {
   const n = Number(value);
   if (!isFinite(n)) return '—';
   const u = COUNTER_UNITS[unit] ? unit : 'hours';
-  const text = u === 'km' ? Math.round(n).toLocaleString('fr-FR') : (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const text = u === 'km' ? Math.round(n).toLocaleString(localeActive()) : (Number.isInteger(n) ? String(n) : n.toFixed(1));
   return `${text} ${COUNTER_UNITS[u].short}`;
 }
 function machineCounter(machine) {
@@ -1410,6 +1483,7 @@ function openForgotPasswordModal() {
 function renderLogin(errorMsg) {
   app.innerHTML = `
     <div class="login-box">
+      ${basculeLangueHtml()}
       <div class="avatar-badge">✦</div>
       <h1>ParcPacific</h1>
       <p>${t('Connecte-toi pour voir tes machines.')}</p>
@@ -1812,7 +1886,7 @@ function rappelsAProgrammer(machines, maintenant) {
           id: idNotification(machine.id, 1),
           quand: veille,
           titre: t('Entretien à prévoir'),
-          corps: `${nom} — échéance dans ${joursAvant} jours (${formatShortDate(plan.next_due_at)})`,
+          corps: `${nom} — ${tR('échéance dans {n} jours ({date})', { n: joursAvant, date: formatShortDate(plan.next_due_at) })}`,
         });
       }
     }
@@ -1821,7 +1895,7 @@ function rappelsAProgrammer(machines, maintenant) {
         id: idNotification(machine.id, 2),
         quand: echeance,
         titre: "Entretien à faire aujourd'hui",
-        corps: `${nom} — échéance du ${formatShortDate(plan.next_due_at)}`,
+        corps: `${nom} — ${tR('échéance du {date}', { date: formatShortDate(plan.next_due_at) })}`,
       });
     }
   }
@@ -1911,8 +1985,22 @@ function blocRappelsHtml() {
 const REMINDERS_KEY = 'parcpacific.reminders.v1';
 const DEFAULT_REMINDERS = { whatsapp: true, email: true, escalate: false };
 
-const MOIS_COURT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-const MOIS_LONG = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+// Les noms de mois suivent la langue : sans cela, l'anglais afficherait
+// « 21 septembre » au milieu d'une phrase anglaise.
+const MOIS_COURT = {
+  fr: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+};
+const MOIS_LONG = {
+  fr: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+const LOCALES = { fr: 'fr-FR', en: 'en-GB' };
+
+function moisCourt(index) { return (MOIS_COURT[LANGUE] || MOIS_COURT.fr)[index]; }
+function moisLong(index) { return (MOIS_LONG[LANGUE] || MOIS_LONG.fr)[index]; }
+// Les nombres suivent la langue eux aussi : 19 240 en français, 19,240 en anglais.
+function localeActive() { return LOCALES[LANGUE] || LOCALES.fr; }
 
 // ── État applicatif ───────────────────────────────────────────
 const UI = {
@@ -1965,12 +2053,12 @@ function saveReminders(r) {
 function formatShortDate(iso) {
   const [y, m, d] = String(iso).split('-').map(Number);
   if (!y || !m || !d) return '—';
-  return `${d} ${MOIS_COURT[m - 1]}`;
+  return `${d} ${moisCourt(m - 1)}`;
 }
 function formatLongDate(iso) {
   const [y, m, d] = String(iso).split('-').map(Number);
   if (!y || !m || !d) return '—';
-  return `${d} ${MOIS_LONG[m - 1]} ${y}`;
+  return `${d} ${moisLong(m - 1)} ${y}`;
 }
 function formatHours(n) {
   const v = Number(n);
@@ -2310,6 +2398,14 @@ document.addEventListener('click', (e) => {
 // de frappe coûte le plus cher, puisque rien ne laisse voir ce qu'on a tapé.
 // Le bouton agit sur le champ de son propre groupe : aucune identification à
 // maintenir, et tout nouveau champ ajouté en hérite.
+// Choix de la langue : un seul gestionnaire pour les deux écrans qui le
+// proposent (connexion et « Mon compte »), comme pour l'affichage du mot de passe.
+document.addEventListener('click', (e) => {
+  const bouton = e.target && e.target.closest ? e.target.closest('.lang-btn') : null;
+  if (!bouton) return;
+  changerLangue(bouton.dataset.langue);
+});
+
 document.addEventListener('click', (e) => {
   const bouton = e.target && e.target.closest ? e.target.closest('.toggle-pw-btn') : null;
   if (!bouton) return;
@@ -2904,7 +3000,7 @@ function totalQuantites(quantites) {
 
 function formatteTotal(total) {
   if (!total) return '';
-  const nombre = total.nombre.toLocaleString('fr-FR');
+  const nombre = total.nombre.toLocaleString(localeActive());
   return total.unite ? `${nombre} ${total.unite}` : nombre;
 }
 
@@ -3107,7 +3203,7 @@ VIEWS.agenda = {
     const datedHtml = dated.map(({ m, info }) => {
       const iso = String(m.plan.next_due_at);
       const monthIndex = Number(iso.slice(5, 7)) - 1;
-      const month = MOIS_LONG[monthIndex] ? `${MOIS_LONG[monthIndex]} ${iso.slice(0, 4)}` : 'Date inconnue';
+      const month = moisLong(monthIndex) ? `${moisLong(monthIndex)} ${iso.slice(0, 4)}` : 'Date inconnue';
       const header = month !== currentMonth ? `<div class="agenda-month">${esc(month)}</div>` : '';
       currentMonth = month;
       return header + alertRowHtml(m, info);
@@ -3211,6 +3307,12 @@ VIEWS.account = {
       <section class="card">
         <div class="card-head"><h2 class="card-title">${t('Rappels sur ce téléphone')}</h2></div>
         ${blocRappelsHtml()}
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2 class="card-title">${t('Navigation')}</h2></div>
+        <p class="muted-text">${t("Langue de l'interface sur cet appareil.")}</p>
+        ${basculeLangueHtml()}
       </section>
 
       <section class="card">
@@ -5003,6 +5105,10 @@ async function boot(toastMessage) {
   // programmés restent valides.
   programmerRappels({ demander: false });
 }
+
+// La langue est arrêtée AVANT tout rendu : le premier écran affiché doit déjà
+// être dans la bonne langue, sans clignotement.
+changerLangue(langueInitiale(), { silencieux: true });
 
 if (sb) {
   if (__isPasswordRecovery) {
