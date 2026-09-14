@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Be4lLJrJZJLVKpe1ekoSDayQKPOsL9XT6aVwlBXEEbM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-usMfjrf5p5BxBfdZV17zZQ6845xKdPs7VegBR3sRNR0=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ParcPacific — Liste des machines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -545,6 +545,8 @@
      Ergonomie : barre d'outils du parc
      ------------------------------------------------------------ */
   .toolbar{display:flex;flex-direction:column;gap:10px;}
+  .toolbar-top{display:flex;flex-direction:column;gap:10px;}
+  .toolbar-bottom{display:flex;flex-direction:column;gap:10px;}
   .search-wrap{position:relative;display:flex;align-items:center;}
   .search-wrap .search-icon{
     position:absolute;left:14px;font-size:17px;color:var(--ink-3);pointer-events:none;
@@ -587,6 +589,19 @@
   .resend-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap;}
   .resend-row .hint{margin:0;}
 
+  /* Marque et modèle sont saisis en majuscules : la transformation est aussi
+     appliquée à la valeur elle-même (voir forcerMajuscules), ceci n'est qu'un
+     filet visuel pour le collage et le remplissage automatique. */
+  input.majuscules{text-transform:uppercase;}
+
+  /* Case à cocher isolée (option de l'assistant) */
+  .check-row{
+    display:flex;align-items:center;gap:10px;margin-top:18px;cursor:pointer;
+    font-size:14.5px;font-weight:600;color:var(--ink);
+  }
+  .check-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);flex:0 0 auto;}
+  .check-row + .hint{margin-top:6px;}
+
   /* ------------------------------------------------------------
      Confirmations d'action (toasts)
      ------------------------------------------------------------ */
@@ -606,8 +621,11 @@
 
   @media (min-width:900px){
     .toast-host{bottom:24px;}
-    .toolbar{flex-direction:row;align-items:center;gap:12px;}
-    .search-wrap{flex:1;min-width:220px;}
+    .toolbar{gap:12px;}
+    .toolbar-top{flex-direction:row;align-items:center;gap:12px;}
+    .toolbar-top .search-wrap{flex:1;min-width:220px;}
+    .toolbar-top .btn-primary{flex:0 0 auto;}
+    .toolbar-bottom{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;}
     .chips{overflow:visible;}
   }
 
@@ -698,7 +716,58 @@ function normalizeItems(raw) {
 // tracking_mode ∈ {days, hours, km}.
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
-const SCHEMA = { hasCounter: false };
+const SCHEMA = { hasCounter: false, hasBrandModel: false };
+
+// --- Marque et modèle -------------------------------------------------------
+// Le schéma d'origine ne stockait qu'une chaîne « marque / modèle ». La
+// migration ajoute deux colonnes distinctes ; en attendant, l'application
+// reconstitue la chaîne et tout continue de fonctionner à l'identique.
+function designation(brand, model, secours = '') {
+  const parts = [brand, model].filter(Boolean);
+  return parts.length ? parts.join(' ') : (secours || '');
+}
+// Chaîne affichée : brand_model reste la référence, avec repli sur les colonnes
+// séparées si elle n'est pas renseignée.
+function machineBrandModel(m) {
+  if (!m) return null;
+  if (m.brand_model) return m.brand_model;
+  const parts = [m.brand, m.model].filter(Boolean);
+  return parts.length ? parts.join(' ') : null;
+}
+// Valeur à préremplir dans le champ « Marque ».
+function machineBrand(m) {
+  if (!m) return '';
+  if (SCHEMA.hasBrandModel && m.brand) return m.brand;
+  return m.brand_model || '';
+}
+// Valeur à préremplir dans le champ « Modèle » : vide tant que la ligne
+// historique n'a pas été répartie par l'utilisateur.
+function machineModel(m) {
+  if (!m || !SCHEMA.hasBrandModel || !m.brand) return '';
+  return m.model || '';
+}
+// Colonnes à écrire selon le schéma détecté. brand_model est toujours
+// renseigné : c'est lui que lisent l'affichage, la recherche et l'export.
+function brandModelPatch(brand, model) {
+  const complet = designation(brand, model) || null;
+  return SCHEMA.hasBrandModel
+    ? { brand_model: complet, brand: brand || null, model: model || null }
+    : { brand_model: complet };
+}
+// Force la saisie en majuscules, au fur et à mesure de la frappe, en préservant
+// la position du curseur (utile quand on corrige au milieu du champ).
+function forcerMajuscules(input) {
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const position = input.selectionStart;
+    const haut = input.value.toUpperCase();
+    if (haut === input.value) return;
+    input.value = haut;
+    if (position != null) {
+      try { input.setSelectionRange(position, position); } catch (e) { /* type sans sélection */ }
+    }
+  });
+}
 
 const COUNTER_UNITS = {
   hours: { word: 'heures', short: 'h', field: 'Heures compteur actuelles', placeholder: 'Ex. 245', step: '0.1' },
@@ -1883,7 +1952,7 @@ function fleetMatches() {
     if (f.status === 'soon' && state !== 'soon') return false;
     if (f.status === 'ok' && (state === 'late' || state === 'soon')) return false;
     if (!q) return true;
-    const hay = [m.name, m.brand_model, m.serial_number, m.category?.name]
+    const hay = [m.name, m.brand_model, m.brand, m.model, m.serial_number, m.category?.name]
       .filter(Boolean).join(' ').toLowerCase();
     return hay.includes(q);
   });
@@ -1992,12 +2061,18 @@ VIEWS.machines = {
     const f = fleetFilters();
     return `
       <div class="toolbar">
-        <div class="search-wrap">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input id="fleet-search" type="search" autofocus value="${esc(f.q)}"
-                 placeholder="Rechercher un nom, une marque, un n° de série…"
-                 aria-label="Rechercher dans le parc">
+        <div class="toolbar-top">
+          <div class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <!-- Pas d'autofocus : sur téléphone il ouvrirait le clavier à chaque
+                 venue sur l'onglet Parc. -->
+            <input id="fleet-search" type="search" value="${esc(f.q)}"
+                   placeholder="Rechercher un nom, une marque, un n° de série…"
+                   aria-label="Rechercher dans le parc">
+          </div>
+          <button type="button" class="btn-primary" id="fleet-add">Ajouter une machine</button>
         </div>
+        <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="Filtrer par état">
           ${chipHtml('all', 'Toutes', UI.machines.length)}
           ${chipHtml('late', 'En retard', c.late)}
@@ -2012,22 +2087,31 @@ VIEWS.machines = {
             <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>Compteur décroissant</option>
           </select>
         </div>
+        </div>
       </div>
       <div id="fleet-list"></div>`;
   },
   mount() {
     const root = document.getElementById('view-root');
+    if (!root) return;
+    // Chaque branchement est tolérant : un élément absent ne doit pas empêcher
+    // l'affichage de la liste, qui est l'essentiel de cette vue.
+    root.querySelector('#fleet-add')?.addEventListener('click', handleAddMachine);
+
     const search = root.querySelector('#fleet-search');
-    search.addEventListener('input', () => {
-      fleetFilters().q = search.value;
-      fleetFilters().limit = FLEET_PAGE_SIZE;
-      refreshFleetList();
-    });
-    // La croix native du champ de recherche ne déclenche pas toujours « input ».
-    search.addEventListener('search', () => {
-      fleetFilters().q = search.value;
-      refreshFleetList();
-    });
+    if (search) {
+      search.addEventListener('input', () => {
+        fleetFilters().q = search.value;
+        fleetFilters().limit = FLEET_PAGE_SIZE;
+        refreshFleetList();
+      });
+      // La croix native du champ ne déclenche pas toujours « input ».
+      search.addEventListener('search', () => {
+        fleetFilters().q = search.value;
+        refreshFleetList();
+      });
+    }
+
     root.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
       fleetFilters().status = chip.dataset.status;
       fleetFilters().limit = FLEET_PAGE_SIZE;
@@ -2038,18 +2122,20 @@ VIEWS.machines = {
       });
       refreshFleetList();
     }));
-    root.querySelector('#fleet-sort').addEventListener('change', (e) => {
+
+    root.querySelector('#fleet-sort')?.addEventListener('change', (e) => {
       fleetFilters().sort = e.target.value;
       fleetFilters().limit = FLEET_PAGE_SIZE;
       refreshFleetList();
     });
+
     refreshFleetList();
   },
 };
 
 function machineCardHtml(m) {
   const info = dueInfo(m.plan, m);
-  const line1 = [esc(m.brand_model), m.serial_number ? `N° série ${esc(m.serial_number)}` : null].filter(Boolean).join(' · ');
+  const line1 = [esc(machineBrandModel(m)), m.serial_number ? `N° série ${esc(m.serial_number)}` : null].filter(Boolean).join(' · ');
   const cat = esc(m.category?.name) || 'Sans catégorie';
   const meta = line1 ? `${line1}<br>${cat}` : cat;
   const photo = safeUrl(m.image_url);
@@ -2479,6 +2565,10 @@ function openAddWizard(companyId, categories) {
     intervalDays: 90, reminderDays: 7, tasks: '', pendingFile: null, pendingPhotoBlob: null,
     items: null, notes: '',
     trackingMode: 'days', currentHours: null, intervalHours: 100, reminderHoursBefore: 10,
+    // Recherche d'une photo sur le web : desactivee par defaut, car elle
+    // consomme un credit et n'a de sens que sans carnet PDF a scanner.
+    searchPhoto: false,
+    model: '',
   };
 
   function shell(inner) { overlay.innerHTML = `<div class="modal">${inner}</div>`; }
@@ -2497,14 +2587,17 @@ function openAddWizard(companyId, categories) {
 
         <div class="field-row">
           <div>
-            <label for="f-brand">Marque / modèle</label>
-            <input id="f-brand" placeholder="Ex. Orec 4x4" value="${esc(state.brand)}">
+            <label for="f-brand">Marque</label>
+            <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${esc(state.brand)}">
           </div>
           <div>
-            <label for="f-serial">N° de série</label>
-            <input id="f-serial" value="${esc(state.serial)}">
+            <label for="f-model">Modèle</label>
+            <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${esc(state.model)}">
           </div>
         </div>
+
+        <label for="f-serial">N° de série</label>
+        <input id="f-serial" value="${esc(state.serial)}">
 
         <label for="f-service-date">Date de mise en service</label>
         <input id="f-service-date" type="date" value="${esc(state.serviceDate)}" required>
@@ -2521,6 +2614,12 @@ function openAddWizard(companyId, categories) {
           <input id="f-current-hours" type="number" min="0" step="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].step}" value="${state.currentHours ?? ''}" placeholder="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].placeholder}">
         </div>
 
+        <label class="check-row" for="f-search-photo">
+          <input type="checkbox" id="f-search-photo" ${state.searchPhoto ? 'checked' : ''}>
+          Chercher automatiquement une photo sur le web
+        </label>
+        <div class="hint">Utilisée seulement si aucun carnet PDF n'est fourni : sinon, la première page du carnet sert de photo.</div>
+
         <div class="modal-actions">
           <button type="button" class="secondary" id="cancel">Annuler</button>
           <button type="submit" class="primary">Suivant →</button>
@@ -2528,6 +2627,8 @@ function openAddWizard(companyId, categories) {
       </form>
     `);
     overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
+    forcerMajuscules(overlay.querySelector('#f-brand'));
+    forcerMajuscules(overlay.querySelector('#f-model'));
     overlay.querySelectorAll('input[name=tm]').forEach(r => {
       r.addEventListener('change', () => {
         const mode = overlay.querySelector('input[name=tm]:checked').value;
@@ -2544,12 +2645,14 @@ function openAddWizard(companyId, categories) {
       state.name = overlay.querySelector('#f-name').value.trim();
       state.category = overlay.querySelector('#f-category').value.trim();
       state.brand = overlay.querySelector('#f-brand').value.trim();
+      state.model = overlay.querySelector('#f-model').value.trim();
       state.serial = overlay.querySelector('#f-serial').value.trim();
       state.serviceDate = overlay.querySelector('#f-service-date').value;
       state.trackingMode = overlay.querySelector('input[name=tm]:checked').value;
       state.currentHours = state.trackingMode !== 'days'
         ? parseFloat(overlay.querySelector('#f-current-hours').value) || 0
         : null;
+      state.searchPhoto = !!overlay.querySelector('#f-search-photo').checked;
       stepChoice();
     });
   }
@@ -2572,14 +2675,14 @@ function openAddWizard(companyId, categories) {
   }
 
   function stepUpload(withSearchHelper) {
-    const query = encodeURIComponent(`${state.brand || state.name} manuel entretien filetype:pdf`);
+    const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
     const isCounter = state.trackingMode !== 'days';
     shell(`
       <button type="button" class="step-back" id="back">← Retour</button>
       <h2>Carnet d'entretien</h2>
       ${withSearchHelper ? `
         <p class="sub">Cherche le manuel du fabricant, télécharge-le, puis ajoute-le ci-dessous.</p>
-        <a class="option-tile" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">🔍 Chercher « ${esc(state.brand || state.name)} » sur le web</a><br>
+        <a class="option-tile" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">🔍 Chercher « ${esc(designation(state.brand, state.model, state.name))} » sur le web</a><br>
       ` : `<p class="sub">Ajoute le PDF : l'IA propose l'intervalle et les tâches à partir de son contenu.</p>`}
       <form id="upload-form">
         <label for="f-manual">Carnet d'entretien (PDF)</label>
@@ -2721,8 +2824,9 @@ function openAddWizard(companyId, categories) {
         .from('machines')
         .insert({
           company_id: companyId, category_id: categoryId, name: state.name,
-          brand_model: state.brand || null, serial_number: state.serial || null,
+          serial_number: state.serial || null,
           service_date: state.serviceDate, status: 'en_service',
+          ...brandModelPatch(state.brand, state.model),
           ...machineCounterPatch(
             state.trackingMode !== 'days' ? state.currentHours : null,
             { counter_unit: counterUnitFromMode(state.trackingMode) }
@@ -2736,14 +2840,15 @@ function openAddWizard(companyId, categories) {
         if (state.pendingPhotoBlob) {
           const url = await uploadMachinePhoto(companyId, machine.id, state.pendingPhotoBlob);
           await sb.from('machines').update({ image_url: url }).eq('id', machine.id);
-        } else {
-          const query = `${state.brand || state.name} ${state.category}`.trim();
-          const { data: imgData } = await sb.functions.invoke('fetch-machine-image', { body: { query } });
-          if (imgData?.imageUrl) {
-            await sb.from('machines').update({ image_url: imgData.imageUrl }).eq('id', machine.id);
-          }
+        } else if (state.searchPhoto) {
+          // Uniquement sur demande explicite : l'appel consomme un credit et
+          // n'a d'interet que si le carnet PDF n'a pas fourni de photo.
+          const query = `${designation(state.brand, state.model, state.name)} ${state.category}`.trim();
+          const { data: imgData, error: imgErr } = await sb.functions.invoke('fetch-machine-image', { body: { query } });
+          if (imgErr) console.warn('Recherche de photo :', await functionErrorMessage(imgErr));
+          else if (imgData?.imageUrl) await sb.from('machines').update({ image_url: imgData.imageUrl }).eq('id', machine.id);
         }
-      } catch (imgErr) { }
+      } catch (imgErr) { console.warn('Photo de la machine :', imgErr); }
 
       if (state.pendingFile) {
         if (state.pendingFile.size > 15 * 1024 * 1024) throw new Error("Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.");
@@ -3219,14 +3324,17 @@ function openMachineModal(companyId, categories, existing) {
 
         <div class="field-row">
           <div>
-            <label for="f-brand">Marque / modèle</label>
-            <input id="f-brand" placeholder="Ex. Orec 4x4" value="${isEdit ? esc(existing.brand_model || '') : ''}">
+            <label for="f-brand">Marque</label>
+            <input id="f-brand" class="majuscules" placeholder="Ex. KUBOTA" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
           </div>
           <div>
-            <label for="f-serial">N° de série</label>
-            <input id="f-serial" value="${isEdit ? esc(existing.serial_number || '') : ''}">
+            <label for="f-model">Modèle</label>
+            <input id="f-model" class="majuscules" placeholder="Ex. U17-3" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
           </div>
         </div>
+
+        <label for="f-serial">N° de série</label>
+        <input id="f-serial" value="${isEdit ? esc(existing.serial_number || '') : ''}">
 
         <label for="f-service-date">Date de mise en service</label>
         <input id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
@@ -3284,6 +3392,9 @@ function openMachineModal(companyId, categories, existing) {
 
   overlay.querySelector('#cancel-add').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  forcerMajuscules(overlay.querySelector('#f-brand'));
+  forcerMajuscules(overlay.querySelector('#f-model'));
 
   overlay.querySelectorAll('input[name=tm]').forEach(r => {
     r.addEventListener('change', () => {
@@ -3371,8 +3482,9 @@ function openMachineModal(companyId, categories, existing) {
     const statusEl = overlay.querySelector('#photo-status');
     const name = overlay.querySelector('#f-name').value.trim();
     const brand = overlay.querySelector('#f-brand').value.trim();
+    const model = overlay.querySelector('#f-model').value.trim();
     const category = overlay.querySelector('#f-category').value.trim();
-    const query = `${brand || name} ${category}`.trim();
+    const query = `${designation(brand, model, name)} ${category}`.trim();
     btn.disabled = true;
     statusEl.textContent = 'Recherche en cours…';
     try {
@@ -3425,6 +3537,7 @@ function openMachineModal(companyId, categories, existing) {
     const name = overlay.querySelector('#f-name').value.trim();
     const categoryName = overlay.querySelector('#f-category').value.trim();
     const brand = overlay.querySelector('#f-brand').value.trim();
+    const model = overlay.querySelector('#f-model').value.trim();
     const serial = overlay.querySelector('#f-serial').value.trim();
     const serviceDate = overlay.querySelector('#f-service-date').value;
     const trackingMode = overlay.querySelector('input[name=tm]:checked').value;
@@ -3476,9 +3589,10 @@ function openMachineModal(companyId, categories, existing) {
       }
       const updatePayload = {
         category_id: categoryId,
-        name, brand_model: brand || null, serial_number: serial || null,
+        name, serial_number: serial || null,
         service_date: serviceDate,
       };
+      Object.assign(updatePayload, brandModelPatch(brand, model));
       Object.assign(updatePayload, machineCounterPatch(currentHours, { counter_unit: counterUnit }));
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb
@@ -3606,24 +3720,36 @@ async function boot(toastMessage) {
 
   const company = Array.isArray(profile.companies) ? profile.companies[0] : profile.companies;
 
-  const BASE_COLUMNS = `id, name, brand_model, serial_number, status, manual_url, service_date, image_url,
-      category:machine_categories(id, name)`;
-  const SELECT_COUNTER = `${BASE_COLUMNS},
-      counter_unit, counter_value,
-      plan:maintenance_plans(id, interval_days, tasks, items, notes, reminder_days_before, next_due_at, tracking_mode, interval_counter, next_due_counter, reminder_counter_before)`;
-  const SELECT_LEGACY = `${BASE_COLUMNS}, current_hours,
-      plan:maintenance_plans(id, interval_days, tasks, items, notes, reminder_days_before, next_due_at, tracking_mode, interval_hours, next_due_hours, reminder_hours_before)`;
+  // Capacités du schéma, détectées par deux requêtes minuscules (une ligne,
+  // aucune donnée lue). Cela remplace l'ancienne cascade de repli, qui devenait
+  // ingérable à mesure que des colonnes optionnelles s'ajoutaient.
+  const [sondeCompteur, sondeMarque] = await Promise.all([
+    sb.from('machines').select('counter_unit').limit(1),
+    sb.from('machines').select('brand, model').limit(1),
+  ]);
+  SCHEMA.hasCounter = !sondeCompteur.error;
+  SCHEMA.hasBrandModel = !sondeMarque.error;
 
-  // Schéma cible d'abord, repli sur les colonnes historiques si la migration
-  // « compteur » n'a pas encore été exécutée.
-  let machines = null;
-  let machinesErr = null;
-  SCHEMA.hasCounter = true;
-  ({ data: machines, error: machinesErr } = await sb.from('machines').select(SELECT_COUNTER).eq('company_id', profile.company_id).order('name'));
-  if (machinesErr) {
-    SCHEMA.hasCounter = false;
-    ({ data: machines, error: machinesErr } = await sb.from('machines').select(SELECT_LEGACY).eq('company_id', profile.company_id).order('name'));
-  }
+  const colonnesMachine = [
+    'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
+    'service_date', 'image_url',
+    SCHEMA.hasCounter ? 'counter_unit' : 'current_hours',
+    ...(SCHEMA.hasCounter ? ['counter_value'] : []),
+    ...(SCHEMA.hasBrandModel ? ['brand', 'model'] : []),
+  ].join(', ');
+  const colonnesPlan = [
+    'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
+    'next_due_at', 'tracking_mode',
+    ...(SCHEMA.hasCounter
+      ? ['interval_counter', 'next_due_counter', 'reminder_counter_before']
+      : ['interval_hours', 'next_due_hours', 'reminder_hours_before']),
+  ].join(', ');
+
+  const { data: machines, error: machinesErr } = await sb
+    .from('machines')
+    .select(`${colonnesMachine}, category:machine_categories(id, name), plan:maintenance_plans(${colonnesPlan})`)
+    .eq('company_id', profile.company_id)
+    .order('name');
 
   if (machinesErr) {
     app.innerHTML = `<div class="empty">Erreur de chargement : ${esc(machinesErr.message)}</div>`;
