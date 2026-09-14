@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ApgEdHzgGjHuBjYWZ/0QuuTKm7zB4/rDxe287hW2cvI=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZmTZpw7CDBmwpmzXAQCwJW/OYMO8w+L3gkfCkZVxhaY=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -466,7 +466,12 @@
   .toggle-pw-btn{
     position:absolute;right:6px;top:50%;transform:translateY(-50%);
     background:none;border:none;color:var(--primary);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px;
+    border-radius:8px;
   }
+  .toggle-pw-btn:hover{background:var(--surface-soft);}
+  /* Une fois le mot de passe affiché, le bouton s'efface : c'est l'état du champ
+     qui compte, pas le bouton. */
+  .toggle-pw-btn[aria-pressed="true"]{color:var(--ink-2);}
   .signup-link-btn{width:100%;margin-top:10px;flex:none;}
   .forgot-pw-row{text-align:right;margin-top:10px;}
   .legal-footer{text-align:center;margin-top:24px;font-size:12.5px;color:var(--ink-2);}
@@ -1261,19 +1266,14 @@ function renderSetNewPassword() {
         <label for="new-password">Nouveau mot de passe</label>
         <div class="password-wrap" style="margin-bottom:16px;">
           <input id="new-password" type="password" minlength="6" required>
-          <button type="button" class="toggle-pw-btn" id="toggle-new-pw">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
         </div>
         <button class="primary" type="submit">Enregistrer le mot de passe</button>
         <div class="error" id="reset-error"></div>
       </form>
     </div>
   `;
-  document.getElementById('toggle-new-pw').addEventListener('click', () => {
-    const pw = document.getElementById('new-password');
-    const btn = document.getElementById('toggle-new-pw');
-    if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Masquer'; }
-    else { pw.type = 'password'; btn.textContent = 'Afficher'; }
-  });
+
   document.getElementById('reset-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const errorEl = document.getElementById('reset-error');
@@ -1357,7 +1357,10 @@ function renderLogin(errorMsg) {
         <label for="email">Email</label>
         <input id="email" type="email" autocomplete="username" required>
         <label for="password">Mot de passe</label>
-        <input id="password" type="password" autocomplete="current-password" required>
+        <div class="password-wrap">
+          <input id="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+        </div>
         <div class="forgot-pw-row">
           <button type="button" class="link-inline" id="open-forgot">Mot de passe oublié ?</button>
         </div>
@@ -1441,7 +1444,7 @@ function openSignupWizard() {
         <label for="su-password">Mot de passe</label>
         <div class="password-wrap">
           <input id="su-password" type="password" required minlength="6">
-          <button type="button" class="toggle-pw-btn" id="toggle-pw">Afficher</button>
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
         </div>
         <div class="hint" id="su-error"></div>
 
@@ -1459,12 +1462,7 @@ function openSignupWizard() {
         overlay.querySelector('#su-name-label').textContent = state.structureType === 'individual' ? 'Nom et prénom' : 'Nom de la société';
       });
     });
-    overlay.querySelector('#toggle-pw').addEventListener('click', () => {
-      const pw = overlay.querySelector('#su-password');
-      const btn = overlay.querySelector('#toggle-pw');
-      if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Masquer'; }
-      else { pw.type = 'password'; btn.textContent = 'Afficher'; }
-    });
+
     wireChampTelephone(overlay, 'su-phone');
 
     overlay.querySelector('#signup-form').addEventListener('submit', async (e) => {
@@ -2017,6 +2015,31 @@ document.addEventListener('click', (e) => {
     e.stopPropagation();
   }
 }, true);
+
+// Afficher / masquer le mot de passe : UN SEUL gestionnaire pour tous les champs
+// concernés, y compris ceux des modales créées plus tard.
+//
+// Avant, chaque écran branchait son propre bouton : celui du nouveau mot de
+// passe, celui de l'inscription… et l'écran de connexion n'en avait aucun, alors
+// que c'est là qu'on saisit un mot de passe le plus souvent — et là qu'une faute
+// de frappe coûte le plus cher, puisque rien ne laisse voir ce qu'on a tapé.
+// Le bouton agit sur le champ de son propre groupe : aucune identification à
+// maintenir, et tout nouveau champ ajouté en hérite.
+document.addEventListener('click', (e) => {
+  const bouton = e.target && e.target.closest ? e.target.closest('.toggle-pw-btn') : null;
+  if (!bouton) return;
+  const enveloppe = bouton.closest('.password-wrap');
+  const champ = enveloppe ? enveloppe.querySelector('input') : null;
+  if (!champ) return;
+  const visible = champ.type === 'text';
+  champ.type = visible ? 'password' : 'text';
+  bouton.textContent = visible ? 'Afficher' : 'Masquer';
+  bouton.setAttribute('aria-pressed', String(!visible));
+  // Le focus revient au champ, curseur à la fin : on continue sa saisie sans
+  // avoir à recliquer dedans.
+  champ.focus();
+  try { champ.setSelectionRange(champ.value.length, champ.value.length); } catch (err) { /* type sans sélection */ }
+});
 
 // Chaque apparition de modale (et chaque changement d'étape) est équipée.
 const modalObserver = new MutationObserver((records) => {
@@ -2677,7 +2700,10 @@ VIEWS.account = {
         <label for="acc-email">Nouvel email</label>
         <input id="acc-email" type="email" autocomplete="email" placeholder="nouvelle@adresse.nc">
         <label for="acc-password">Mot de passe actuel</label>
-        <input id="acc-password" type="password" autocomplete="current-password">
+        <div class="password-wrap">
+          <input id="acc-password" type="password" autocomplete="current-password">
+          <button type="button" class="toggle-pw-btn" aria-pressed="false">Afficher</button>
+        </div>
         <div class="hint">Le changement est confirmé par email : la nouvelle adresse ne devient active qu'après validation. Le mot de passe est demandé pour qu'une session ouverte ne suffise pas à détourner le compte.</div>
         <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
         <div class="modal-actions">
