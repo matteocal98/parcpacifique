@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-yTY0ipXp0JgPwAkSX+pgUhXuVF+wnh0scFp3g7g/WZU=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-up1XPypB7b1z4TAMioIVZiW63Qcto1DWn3HllkpMM8c=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2440,6 +2440,8 @@ VIEWS.dashboard = {
             : `<div class="empty-soft">${UI.machines.length ? 'Aucune échéance dans les prochaines semaines.' : 'Ajoute une machine pour commencer le suivi.'}</div>`}
         </section>
 
+        ${preparationResumeHtml()}
+
         <div class="dash-side">
           ${dropzoneHtml('dash-drop')}
           ${remindersCardHtml()}
@@ -2996,6 +2998,36 @@ function preparationTexte() {
   }
   if (!liste.produits.length && !liste.sansItems.length) lignes.push('Rien à prévoir sur cette période.');
   return lignes.join('\n');
+}
+
+// Version courte, pour le TABLEAU DE BORD.
+//
+// POURQUOI ELLE EXISTE : la liste complète vit dans l'Agenda, qui n'est même pas
+// dans la barre d'onglets du téléphone (il faut passer par « Plus »). Une
+// fonctionnalité que l'utilisateur ne trouve pas ne sert à rien — constat fait
+// en usage réel, l'utilisateur ayant demandé où elle était. Cette carte annonce
+// donc l'essentiel dès l'accueil, et renvoie à la liste détaillée.
+function preparationResumeHtml() {
+  const jours = UI.preparationJours || 90;
+  const liste = listePreparation(UI.machines, jours);
+  const nombre = liste.produits.length;
+  if (!nombre && !liste.sansItems.length) return '';
+
+  const noms = liste.produits.slice(0, 3).map((p) => p.label).join(', ');
+  const reste = nombre > 3 ? `, + ${nombre - 3} autre${nombre - 3 > 1 ? 's' : ''}` : '';
+  const resume = nombre
+    ? `${nombre} produit${nombre > 1 ? 's' : ''} à prévoir pour les ${jours} prochains jours : ${noms}${reste}.`
+    : `Rien à commander pour l'instant, mais ${liste.sansItems.length} plan${liste.sansItems.length > 1 ? 's' : ''} sans liste de produits.`;
+
+  return `
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">Préparation</h2>
+        <span class="spacer"></span>
+        <button type="button" class="link-inline" data-nav="agenda">Voir la liste</button>
+      </div>
+      <p class="muted-text">${esc(resume)}</p>
+    </section>`;
 }
 
 function wirePreparation(root) {
