@@ -22,58 +22,171 @@
   h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
   p, li{font-size:15px;color:var(--ink);}
   ul{padding-left:20px;}
+
+  /* Sélecteur de langue : la page s'ouvre dans la langue choisie dans
+     l'application (même clé de stockage), et se change ici sans revenir. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:#C7CBF7;color:var(--primary-dark);}
+  .lang-btn.is-active{background:#EEF0FE;border-color:#C7CBF7;color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <a class="back" href="./index.html">← Retour à l'application</a>
-    <h1>Conditions Générales d'Utilisation</h1>
-    <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
+    <div class="top">
+      <a class="back" href="./index.html" id="retour">← Retour à l'application</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
+    </div>
 
-    <h2>1. Objet</h2>
-    <p>Les présentes Conditions Générales d'Utilisation (CGU) définissent les modalités et conditions d'utilisation de l'application ParcPacific (ci-après « le Service »), outil de suivi de maintenance de parc matériel destiné à un usage professionnel.</p>
+    <section class="fr" lang="fr">
+      <h1>Conditions Générales d'Utilisation</h1>
+      <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
 
-    <h2>2. Éditeur</h2>
-    <p>Le Service est édité par Matthieu Courtois, entrepreneur individuel (voir <a href="./mentions-legales.html">mentions légales</a>).</p>
+      <h2>1. Objet</h2>
+      <p>Les présentes Conditions Générales d'Utilisation (CGU) définissent les modalités et conditions d'utilisation de l'application ParcPacific (ci-après « le Service »), outil de suivi de maintenance de parc matériel destiné à un usage professionnel.</p>
 
-    <h2>3. Accès au service</h2>
-    <p>L'accès au Service se fait via un compte utilisateur créé par l'éditeur ou par un administrateur habilité de la société utilisatrice. Chaque utilisateur est responsable de la confidentialité de ses identifiants de connexion et de toute activité effectuée depuis son compte.</p>
+      <h2>2. Éditeur</h2>
+      <p>Le Service est édité par Matthieu Courtois, entrepreneur individuel (voir <a href="./mentions-legales.html">mentions légales</a>).</p>
 
-    <h2>4. Description du service</h2>
-    <p>Le Service permet à une entreprise de suivre l'entretien de son parc de matériel : enregistrement des machines, plans de maintenance, historique des interventions, gestion de documents (carnets d'entretien) et suivi des échéances.</p>
+      <h2>3. Accès au service</h2>
+      <p>L'accès au Service se fait via un compte utilisateur créé par l'éditeur ou par un administrateur habilité de la société utilisatrice. Chaque utilisateur est responsable de la confidentialité de ses identifiants de connexion et de toute activité effectuée depuis son compte.</p>
 
-    <h2>5. Obligations de l'utilisateur</h2>
-    <ul>
-      <li>Fournir des informations exactes et à jour ;</li>
-      <li>Ne pas utiliser le Service à des fins illicites ou détournées de son objet ;</li>
-      <li>Ne pas tenter de contourner les mesures de sécurité du Service ;</li>
-      <li>Ne pas reproduire, copier ou exploiter commercialement le Service sans autorisation préalable.</li>
-    </ul>
+      <h2>4. Description du service</h2>
+      <p>Le Service permet à une entreprise de suivre l'entretien de son parc de matériel : enregistrement des machines, plans de maintenance, historique des interventions, gestion de documents (carnets d'entretien) et suivi des échéances.</p>
 
-    <h2>6. Disponibilité du service</h2>
-    <p>L'éditeur s'efforce d'assurer un accès continu au Service mais ne peut garantir une disponibilité permanente. Des interruptions peuvent survenir, notamment pour des opérations de maintenance ou en cas de force majeure.</p>
+      <h2>5. Obligations de l'utilisateur</h2>
+      <ul>
+        <li>Fournir des informations exactes et à jour ;</li>
+        <li>Ne pas utiliser le Service à des fins illicites ou détournées de son objet ;</li>
+        <li>Ne pas tenter de contourner les mesures de sécurité du Service ;</li>
+        <li>Ne pas reproduire, copier ou exploiter commercialement le Service sans autorisation préalable.</li>
+      </ul>
 
-    <h2>7. Responsabilité</h2>
-    <p>Le Service est fourni « en l'état ». L'éditeur ne saurait être tenu responsable des dommages directs ou indirects résultant de l'utilisation du Service, notamment en cas de perte de données, sous réserve des dispositions d'ordre public applicables. Le Service constitue un outil d'aide au suivi de maintenance : il ne remplace pas le jugement professionnel d'un technicien qualifié, et l'utilisateur reste seul responsable des décisions de maintenance prises.</p>
-    <p><strong>Caractère purement informatif des données de suivi.</strong> Les informations issues du Service — notamment les plans de maintenance, les rappels d'échéance, l'historique des interventions et tout élément de suivi affiché — sont fournies à titre purement informatif et ne constituent ni une garantie, ni une certification de l'état ou du bon fonctionnement du matériel suivi. Elles ont pour seule vocation d'aider l'utilisateur à organiser le suivi de son parc de matériel, sur la base des informations qu'il a lui-même saisies.</p>
-    <p>En conséquence, ces données ne pourront en aucun cas être invoquées ou opposées à l'éditeur en cas de panne, dysfonctionnement, accident ou dommage lié au matériel suivi, y compris lorsque celui-ci fait l'objet d'un plan de maintenance renseigné dans le Service. Il appartient exclusivement à l'utilisateur et à l'entreprise utilisatrice de s'assurer de la bonne exécution des opérations de maintenance nécessaires, indépendamment des informations affichées par le Service, et de faire appel à un professionnel qualifié pour toute intervention sur le matériel. Cette limitation ne saurait exclure la responsabilité de l'éditeur en cas de faute lourde, de dol, ou dans les cas où la loi l'interdit expressément.</p>
+      <h2>6. Disponibilité du service</h2>
+      <p>L'éditeur s'efforce d'assurer un accès continu au Service mais ne peut garantir une disponibilité permanente. Des interruptions peuvent survenir, notamment pour des opérations de maintenance ou en cas de force majeure.</p>
 
-    <h2>8. Propriété intellectuelle</h2>
-    <p>Le Service, son code source, son interface et sa documentation sont protégés par le droit de la propriété intellectuelle et demeurent la propriété exclusive de l'éditeur.</p>
+      <h2>7. Responsabilité</h2>
+      <p>Le Service est fourni « en l'état ». L'éditeur ne saurait être tenu responsable des dommages directs ou indirects résultant de l'utilisation du Service, notamment en cas de perte de données, sous réserve des dispositions d'ordre public applicables. Le Service constitue un outil d'aide au suivi de maintenance : il ne remplace pas le jugement professionnel d'un technicien qualifié, et l'utilisateur reste seul responsable des décisions de maintenance prises.</p>
+      <p><strong>Caractère purement informatif des données de suivi.</strong> Les informations issues du Service — notamment les plans de maintenance, les rappels d'échéance, l'historique des interventions et tout élément de suivi affiché — sont fournies à titre purement informatif et ne constituent ni une garantie, ni une certification de l'état ou du bon fonctionnement du matériel suivi. Elles ont pour seule vocation d'aider l'utilisateur à organiser le suivi de son parc de matériel, sur la base des informations qu'il a lui-même saisies.</p>
+      <p>En conséquence, ces données ne pourront en aucun cas être invoquées ou opposées à l'éditeur en cas de panne, dysfonctionnement, accident ou dommage lié au matériel suivi, y compris lorsque celui-ci fait l'objet d'un plan de maintenance renseigné dans le Service. Il appartient exclusivement à l'utilisateur et à l'entreprise utilisatrice de s'assurer de la bonne exécution des opérations de maintenance nécessaires, indépendamment des informations affichées par le Service, et de faire appel à un professionnel qualifié pour toute intervention sur le matériel. Cette limitation ne saurait exclure la responsabilité de l'éditeur en cas de faute lourde, de dol, ou dans les cas où la loi l'interdit expressément.</p>
 
-    <h2>9. Données personnelles</h2>
-    <p>Le traitement des données personnelles est décrit dans la <a href="./politique-confidentialite.html">Politique de confidentialité</a>, accessible depuis l'application.</p>
+      <h2>8. Propriété intellectuelle</h2>
+      <p>Le Service, son code source, son interface et sa documentation sont protégés par le droit de la propriété intellectuelle et demeurent la propriété exclusive de l'éditeur.</p>
 
-    <h2>10. Modification des CGU</h2>
-    <p>L'éditeur se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés de toute modification substantielle.</p>
+      <h2>9. Données personnelles</h2>
+      <p>Le traitement des données personnelles est décrit dans la <a href="./politique-confidentialite.html">Politique de confidentialité</a>, accessible depuis l'application.</p>
 
-    <h2>11. Droit applicable</h2>
-    <p>Les présentes CGU sont soumises au droit français. Tout litige relatif à leur interprétation ou à leur exécution relève de la compétence des tribunaux compétents.</p>
+      <h2>10. Modification des CGU</h2>
+      <p>L'éditeur se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés de toute modification substantielle.</p>
 
-    <h2>12. Contact</h2>
-    <p>Pour toute question : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+      <h2>11. Droit applicable</h2>
+      <p>Les présentes CGU sont soumises au droit français. Tout litige relatif à leur interprétation ou à leur exécution relève de la compétence des tribunaux compétents.</p>
+
+      <h2>12. Contact</h2>
+      <p>Pour toute question : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+    </section>
+
+    <section class="en" lang="en">
+      <h1>Terms of Service</h1>
+      <div class="updated">Last updated: 12 September 2026</div>
+
+      <h2>1. Purpose</h2>
+      <p>These Terms of Service (the “Terms”) set out the terms and conditions of use of the ParcPacific application (the “Service”), a fleet maintenance tracking tool intended for professional use.</p>
+
+      <h2>2. Publisher</h2>
+      <p>The Service is published by Matthieu Courtois, sole trader (see the <a href="./mentions-legales.html">legal notice</a>).</p>
+
+      <h2>3. Access to the service</h2>
+      <p>The Service is accessed through a user account created by the publisher or by an authorised administrator of the customer company. Each user is responsible for keeping their sign-in credentials confidential and for any activity carried out from their account.</p>
+
+      <h2>4. Description of the service</h2>
+      <p>The Service lets a company track the maintenance of its equipment fleet: recording machines, maintenance plans, service history, document management (service manuals) and due-date tracking.</p>
+
+      <h2>5. User obligations</h2>
+      <ul>
+        <li>Provide accurate, up-to-date information;</li>
+        <li>Do not use the Service for unlawful purposes or purposes other than its intended use;</li>
+        <li>Do not attempt to circumvent the security measures of the Service;</li>
+        <li>Do not reproduce, copy or commercially exploit the Service without prior authorisation.</li>
+      </ul>
+
+      <h2>6. Availability of the service</h2>
+      <p>The publisher endeavours to keep the Service continuously available but cannot guarantee permanent availability. Interruptions may occur, in particular for maintenance operations or in the event of force majeure.</p>
+
+      <h2>7. Liability</h2>
+      <p>The Service is provided “as is”. The publisher cannot be held liable for direct or indirect damage resulting from use of the Service, in particular in the event of data loss, subject to the mandatory provisions of applicable law. The Service is a maintenance tracking aid: it does not replace the professional judgement of a qualified technician, and the user remains solely responsible for the maintenance decisions taken.</p>
+      <p><strong>Purely informative nature of the tracking data.</strong> The information produced by the Service — in particular maintenance plans, due-date reminders, service history and any tracking item displayed — is provided for information only and constitutes neither a guarantee nor a certification of the condition or proper working order of the equipment tracked. Its sole purpose is to help the user organise the tracking of their equipment fleet, on the basis of the information they have entered themselves.</p>
+      <p>Accordingly, this data may under no circumstances be relied upon or held against the publisher in the event of a breakdown, malfunction, accident or damage relating to the equipment tracked, including where that equipment is covered by a maintenance plan entered in the Service. It is exclusively for the user and the customer company to ensure that the necessary maintenance operations are properly carried out, independently of the information displayed by the Service, and to call on a qualified professional for any work on the equipment. This limitation shall not exclude the liability of the publisher in the event of gross negligence or wilful misconduct, or in cases where the law expressly prohibits it.</p>
+
+      <h2>8. Intellectual property</h2>
+      <p>The Service, its source code, its interface and its documentation are protected by intellectual property law and remain the exclusive property of the publisher.</p>
+
+      <h2>9. Personal data</h2>
+      <p>The processing of personal data is described in the <a href="./politique-confidentialite.html">Privacy policy</a>, accessible from the application.</p>
+
+      <h2>10. Changes to the Terms</h2>
+      <p>The publisher reserves the right to amend these Terms at any time. Users will be informed of any substantial change.</p>
+
+      <h2>11. Governing law</h2>
+      <p>These Terms are governed by French law. Any dispute relating to their interpretation or their performance falls within the jurisdiction of the competent courts.</p>
+
+      <h2>12. Contact</h2>
+      <p>For any question: <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+    </section>
   </div>
 </div>
+<script>
+// La langue vient de la même clé que l'application : la page légale s'ouvre donc
+// dans la langue que l'utilisateur a choisie, sans réglage à refaire. Le choix
+// ici est conservé pour l'application, et inversement.
+(function () {
+  var CLE = 'parcpacific.langue';
+  var TITRES = {
+    fr: "Conditions Générales d'Utilisation — ParcPacific",
+    en: 'Terms of Service — ParcPacific'
+  };
+  var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
+
+  function lire() {
+    try {
+      var choisie = localStorage.getItem(CLE);
+      if (choisie === 'fr' || choisie === 'en') return choisie;
+    } catch (err) { /* stockage indisponible */ }
+    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+    return appareil === 'en' ? 'en' : 'fr';
+  }
+
+  function appliquer(code) {
+    document.documentElement.lang = code;
+    document.title = TITRES[code];
+    var retour = document.getElementById('retour');
+    if (retour) retour.textContent = RETOUR[code];
+    var boutons = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < boutons.length; i++) {
+      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+    }
+    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
+  }
+
+  appliquer(lire());
+  var boutons = document.querySelectorAll('.lang-btn');
+  for (var i = 0; i < boutons.length; i++) {
+    boutons[i].addEventListener('click', function (e) {
+      appliquer(e.currentTarget.getAttribute('data-langue'));
+    });
+  }
+})();
+</script>
 </body>
 </html>

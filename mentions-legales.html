@@ -25,47 +25,144 @@
   .box{background:#F6F8FC;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
   .box p{margin:4px 0;}
   strong{color:var(--ink);}
+
+  /* Sélecteur de langue : même clé de stockage que l'application. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:#C7CBF7;color:var(--primary-dark);}
+  .lang-btn.is-active{background:#EEF0FE;border-color:#C7CBF7;color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <a class="back" href="./index.html">← Retour à l'application</a>
-    <h1>Mentions légales</h1>
-    <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
-
-    <h2>Éditeur</h2>
-    <div class="box">
-      <p><strong>Matthieu Courtois</strong>, entrepreneur individuel (en nom propre)</p>
-      <p>Adresse : Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, Nouvelle-Calédonie</p>
-      <p>Téléphone : +687 81 54 44</p>
-      <p>Email : parcpacificnc@gmail.com</p>
-      <p>Immatriculation : en cours (RIDET à venir)</p>
+    <div class="top">
+      <a class="back" href="./index.html" id="retour">← Retour à l'application</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
     </div>
 
-    <h2>Directeur de la publication</h2>
-    <p>Matthieu Courtois</p>
+    <section class="fr" lang="fr">
+      <h1>Mentions légales</h1>
+      <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
 
-    <h2>Hébergement</h2>
-    <p>L'application (interface et code) est hébergée par :</p>
-    <div class="box">
-      <p><strong>GitHub, Inc.</strong> (GitHub Pages)</p>
-      <p>88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis</p>
-      <p>https://github.com</p>
-    </div>
-    <p>La base de données, l'authentification et le stockage de fichiers sont hébergés par :</p>
-    <div class="box">
-      <p><strong>Supabase Pte. Ltd.</strong></p>
-      <p>65 Chulia Street, #38-02/03, OCBC Centre, Singapour 049513</p>
-      <p>https://supabase.com</p>
-    </div>
+      <h2>Éditeur</h2>
+      <div class="box">
+        <p><strong>Matthieu Courtois</strong>, entrepreneur individuel (en nom propre)</p>
+        <p>Adresse : Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, Nouvelle-Calédonie</p>
+        <p>Téléphone : +687 81 54 44</p>
+        <p>Email : parcpacificnc@gmail.com</p>
+        <p>Immatriculation : en cours (RIDET à venir)</p>
+      </div>
 
-    <h2>Propriété intellectuelle</h2>
-    <p>L'ensemble des éléments composant l'application ParcPacific (structure, code source, textes, identité visuelle) est la propriété exclusive de l'éditeur, sauf mention contraire. Toute reproduction, représentation ou exploitation non autorisée, totale ou partielle, est interdite.</p>
+      <h2>Directeur de la publication</h2>
+      <p>Matthieu Courtois</p>
 
-    <h2>Contact</h2>
-    <p>Pour toute question relative aux présentes mentions légales : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+      <h2>Hébergement</h2>
+      <p>L'application (interface et code) est hébergée par :</p>
+      <div class="box">
+        <p><strong>GitHub, Inc.</strong> (GitHub Pages)</p>
+        <p>88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis</p>
+        <p>https://github.com</p>
+      </div>
+      <p>La base de données, l'authentification et le stockage de fichiers sont hébergés par :</p>
+      <div class="box">
+        <p><strong>Supabase Pte. Ltd.</strong></p>
+        <p>65 Chulia Street, #38-02/03, OCBC Centre, Singapour 049513</p>
+        <p>https://supabase.com</p>
+      </div>
+
+      <h2>Propriété intellectuelle</h2>
+      <p>L'ensemble des éléments composant l'application ParcPacific (structure, code source, textes, identité visuelle) est la propriété exclusive de l'éditeur, sauf mention contraire. Toute reproduction, représentation ou exploitation non autorisée, totale ou partielle, est interdite.</p>
+
+      <h2>Contact</h2>
+      <p>Pour toute question relative aux présentes mentions légales : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+    </section>
+
+    <section class="en" lang="en">
+      <h1>Legal notice</h1>
+      <div class="updated">Last updated: 12 September 2026</div>
+
+      <h2>Publisher</h2>
+      <div class="box">
+        <p><strong>Matthieu Courtois</strong>, sole trader (in his own name)</p>
+        <p>Address: Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, New Caledonia</p>
+        <p>Phone: +687 81 54 44</p>
+        <p>Email: parcpacificnc@gmail.com</p>
+        <p>Registration: pending (RIDET to come)</p>
+      </div>
+
+      <h2>Publication director</h2>
+      <p>Matthieu Courtois</p>
+
+      <h2>Hosting</h2>
+      <p>The application (interface and code) is hosted by:</p>
+      <div class="box">
+        <p><strong>GitHub, Inc.</strong> (GitHub Pages)</p>
+        <p>88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, United States</p>
+        <p>https://github.com</p>
+      </div>
+      <p>The database, authentication and file storage are hosted by:</p>
+      <div class="box">
+        <p><strong>Supabase Pte. Ltd.</strong></p>
+        <p>65 Chulia Street, #38-02/03, OCBC Centre, Singapore 049513</p>
+        <p>https://supabase.com</p>
+      </div>
+
+      <h2>Intellectual property</h2>
+      <p>All the elements making up the ParcPacific application (structure, source code, texts, visual identity) are the exclusive property of the publisher, unless stated otherwise. Any unauthorised reproduction, representation or exploitation, in whole or in part, is prohibited.</p>
+
+      <h2>Contact</h2>
+      <p>For any question relating to this legal notice: <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
+    </section>
   </div>
 </div>
+<script>
+// La langue vient de la même clé que l'application : la page légale s'ouvre donc
+// dans la langue que l'utilisateur a choisie, sans réglage à refaire.
+(function () {
+  var CLE = 'parcpacific.langue';
+  var TITRES = { fr: 'Mentions légales — ParcPacific', en: 'Legal notice — ParcPacific' };
+  var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
+
+  function lire() {
+    try {
+      var choisie = localStorage.getItem(CLE);
+      if (choisie === 'fr' || choisie === 'en') return choisie;
+    } catch (err) { /* stockage indisponible */ }
+    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+    return appareil === 'en' ? 'en' : 'fr';
+  }
+
+  function appliquer(code) {
+    document.documentElement.lang = code;
+    document.title = TITRES[code];
+    var retour = document.getElementById('retour');
+    if (retour) retour.textContent = RETOUR[code];
+    var boutons = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < boutons.length; i++) {
+      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+    }
+    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
+  }
+
+  appliquer(lire());
+  var boutons = document.querySelectorAll('.lang-btn');
+  for (var i = 0; i < boutons.length; i++) {
+    boutons[i].addEventListener('click', function (e) {
+      appliquer(e.currentTarget.getAttribute('data-langue'));
+    });
+  }
+})();
+</script>
 </body>
 </html>

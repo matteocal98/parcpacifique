@@ -24,64 +24,181 @@
   ul{padding-left:20px;}
   .box{background:#F6F8FC;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
   .box p{margin:4px 0;}
+
+  /* Sélecteur de langue : même clé de stockage que l'application. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:#C7CBF7;color:var(--primary-dark);}
+  .lang-btn.is-active{background:#EEF0FE;border-color:#C7CBF7;color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <a class="back" href="./index.html">← Retour à l'application</a>
-    <h1>Politique de confidentialité</h1>
-    <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
-
-    <h2>1. Responsable du traitement</h2>
-    <div class="box">
-      <p><strong>Matthieu Courtois</strong>, entrepreneur individuel</p>
-      <p>Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, Nouvelle-Calédonie</p>
-      <p>Contact : parcpacificnc@gmail.com</p>
+    <div class="top">
+      <a class="back" href="./index.html" id="retour">← Retour à l'application</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
     </div>
 
-    <h2>2. Données collectées</h2>
-    <p>Dans le cadre de l'utilisation de l'application ParcPacific (ci-après « le Service »), les données suivantes sont collectées :</p>
-    <ul>
-      <li><strong>Données de compte :</strong> adresse email, mot de passe (stocké de façon chiffrée), société de rattachement ;</li>
-      <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines.</li>
-    </ul>
+    <section class="fr" lang="fr">
+      <h1>Politique de confidentialité</h1>
+      <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
 
-    <h2>3. Finalités du traitement</h2>
-    <p>Ces données sont collectées pour :</p>
-    <ul>
-      <li>permettre l'authentification et l'accès sécurisé au Service ;</li>
-      <li>assurer le suivi de maintenance du parc matériel de l'entreprise utilisatrice ;</li>
-      <li>générer des rappels et alertes d'échéance d'entretien.</li>
-    </ul>
+      <h2>1. Responsable du traitement</h2>
+      <div class="box">
+        <p><strong>Matthieu Courtois</strong>, entrepreneur individuel</p>
+        <p>Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, Nouvelle-Calédonie</p>
+        <p>Contact : parcpacificnc@gmail.com</p>
+      </div>
 
-    <h2>4. Base légale</h2>
-    <p>Le traitement repose sur l'exécution du service demandé par l'utilisateur (base contractuelle) et, le cas échéant, sur l'intérêt légitime de l'éditeur à assurer le bon fonctionnement et la sécurité du Service.</p>
+      <h2>2. Données collectées</h2>
+      <p>Dans le cadre de l'utilisation de l'application ParcPacific (ci-après « le Service »), les données suivantes sont collectées :</p>
+      <ul>
+        <li><strong>Données de compte :</strong> adresse email, mot de passe (stocké de façon chiffrée), société de rattachement ;</li>
+        <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines.</li>
+      </ul>
 
-    <h2>5. Destinataires des données</h2>
-    <p>Les données sont hébergées et traitées par les sous-traitants techniques suivants, dans le seul cadre du fonctionnement du Service :</p>
-    <ul>
-      <li><strong>Supabase Pte. Ltd.</strong> — base de données, authentification, stockage de fichiers ;</li>
-      <li><strong>GitHub, Inc.</strong> — hébergement de l'interface de l'application.</li>
-    </ul>
-    <p>Ces prestataires n'utilisent pas les données à des fins autres que l'exécution du Service. Aucune donnée n'est vendue ni partagée à des fins commerciales avec des tiers.</p>
-    <p>Certaines fonctionnalités ponctuelles (recherche automatique d'une photo de machine, analyse d'un carnet d'entretien par intelligence artificielle) transmettent une requête contenant une description de la machine ou le contenu d'un document à des prestataires tiers spécialisés, dans la seule finalité de fournir la fonctionnalité demandée par l'utilisateur au moment où il l'active.</p>
+      <h2>3. Finalités du traitement</h2>
+      <p>Ces données sont collectées pour :</p>
+      <ul>
+        <li>permettre l'authentification et l'accès sécurisé au Service ;</li>
+        <li>assurer le suivi de maintenance du parc matériel de l'entreprise utilisatrice ;</li>
+        <li>générer des rappels et alertes d'échéance d'entretien.</li>
+      </ul>
 
-    <h2>6. Durée de conservation</h2>
-    <p>Les données sont conservées pendant toute la durée d'utilisation du compte, puis supprimées dans un délai raisonnable après la clôture du compte ou sur demande de l'utilisateur.</p>
+      <h2>4. Base légale</h2>
+      <p>Le traitement repose sur l'exécution du service demandé par l'utilisateur (base contractuelle) et, le cas échéant, sur l'intérêt légitime de l'éditeur à assurer le bon fonctionnement et la sécurité du Service.</p>
 
-    <h2>7. Droits des utilisateurs</h2>
-    <p>Conformément au Règlement Général sur la Protection des Données (RGPD), chaque utilisateur dispose d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de ses données personnelles. Ces droits peuvent être exercés en écrivant à : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a>.</p>
+      <h2>5. Destinataires des données</h2>
+      <p>Les données sont hébergées et traitées par les sous-traitants techniques suivants, dans le seul cadre du fonctionnement du Service :</p>
+      <ul>
+        <li><strong>Supabase Pte. Ltd.</strong> — base de données, authentification, stockage de fichiers ;</li>
+        <li><strong>GitHub, Inc.</strong> — hébergement de l'interface de l'application.</li>
+      </ul>
+      <p>Ces prestataires n'utilisent pas les données à des fins autres que l'exécution du Service. Aucune donnée n'est vendue ni partagée à des fins commerciales avec des tiers.</p>
+      <p>Certaines fonctionnalités ponctuelles (recherche automatique d'une photo de machine, analyse d'un carnet d'entretien par intelligence artificielle) transmettent une requête contenant une description de la machine ou le contenu d'un document à des prestataires tiers spécialisés, dans la seule finalité de fournir la fonctionnalité demandée par l'utilisateur au moment où il l'active.</p>
 
-    <h2>8. Sécurité</h2>
-    <p>Le Service met en œuvre des mesures techniques raisonnables (authentification sécurisée, cloisonnement des données par entreprise cliente) pour protéger les données contre tout accès non autorisé.</p>
+      <h2>6. Durée de conservation</h2>
+      <p>Les données sont conservées pendant toute la durée d'utilisation du compte, puis supprimées dans un délai raisonnable après la clôture du compte ou sur demande de l'utilisateur.</p>
 
-    <h2>9. Cookies et traceurs</h2>
-    <p>Le Service n'utilise aucun cookie de mesure d'audience, de publicité ou de traçage. Seul un mécanisme de stockage technique local, strictement nécessaire au maintien de la connexion de l'utilisateur, est utilisé.</p>
+      <h2>7. Droits des utilisateurs</h2>
+      <p>Conformément au Règlement Général sur la Protection des Données (RGPD), chaque utilisateur dispose d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de ses données personnelles. Ces droits peuvent être exercés en écrivant à : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a>.</p>
 
-    <h2>10. Modification de la politique</h2>
-    <p>La présente politique peut être mise à jour. La date de dernière mise à jour figure en haut de cette page.</p>
+      <h2>8. Sécurité</h2>
+      <p>Le Service met en œuvre des mesures techniques raisonnables (authentification sécurisée, cloisonnement des données par entreprise cliente) pour protéger les données contre tout accès non autorisé.</p>
+
+      <h2>9. Cookies et traceurs</h2>
+      <p>Le Service n'utilise aucun cookie de mesure d'audience, de publicité ou de traçage. Seul un mécanisme de stockage technique local, strictement nécessaire au maintien de la connexion de l'utilisateur, est utilisé.</p>
+
+      <h2>10. Modification de la politique</h2>
+      <p>La présente politique peut être mise à jour. La date de dernière mise à jour figure en haut de cette page.</p>
+    </section>
+
+    <section class="en" lang="en">
+      <h1>Privacy policy</h1>
+      <div class="updated">Last updated: 12 September 2026</div>
+
+      <h2>1. Data controller</h2>
+      <div class="box">
+        <p><strong>Matthieu Courtois</strong>, sole trader</p>
+        <p>Chemin de la Haute Couvelée — BP 490 — 98836 Dumbéa Mairie Cedex, New Caledonia</p>
+        <p>Contact: parcpacificnc@gmail.com</p>
+      </div>
+
+      <h2>2. Data collected</h2>
+      <p>When using the ParcPacific application (the “Service”), the following data is collected:</p>
+      <ul>
+        <li><strong>Account data:</strong> email address, password (stored in encrypted form), company the account is linked to;</li>
+        <li><strong>Professional data entered by the user:</strong> information about the equipment tracked (name, brand, model, serial number), maintenance plans, service history, attached documents (service manuals in PDF format) and machine photos.</li>
+      </ul>
+
+      <h2>3. Purposes of the processing</h2>
+      <p>This data is collected in order to:</p>
+      <ul>
+        <li>enable authentication and secure access to the Service;</li>
+        <li>ensure maintenance tracking of the customer company's equipment fleet;</li>
+        <li>generate maintenance due-date reminders and alerts.</li>
+      </ul>
+
+      <h2>4. Legal basis</h2>
+      <p>The processing is based on the performance of the service requested by the user (contractual basis) and, where applicable, on the legitimate interest of the publisher in ensuring the proper functioning and security of the Service.</p>
+
+      <h2>5. Recipients of the data</h2>
+      <p>The data is hosted and processed by the following technical processors, solely for the purpose of operating the Service:</p>
+      <ul>
+        <li><strong>Supabase Pte. Ltd.</strong> — database, authentication, file storage;</li>
+        <li><strong>GitHub, Inc.</strong> — hosting of the application interface.</li>
+      </ul>
+      <p>These providers do not use the data for any purpose other than providing the Service. No data is sold or shared for commercial purposes with third parties.</p>
+      <p>Certain occasional features (automatic search for a machine photo, analysis of a service manual by artificial intelligence) send a request containing a description of the machine or the content of a document to specialised third-party providers, for the sole purpose of providing the feature requested by the user at the moment they activate it.</p>
+
+      <h2>6. Retention period</h2>
+      <p>The data is kept for as long as the account is used, then deleted within a reasonable period after the account is closed or at the user's request.</p>
+
+      <h2>7. User rights</h2>
+      <p>In accordance with the General Data Protection Regulation (GDPR), each user has the right to access, rectify, erase, restrict, object to and port their personal data. These rights may be exercised by writing to: <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a>.</p>
+
+      <h2>8. Security</h2>
+      <p>The Service implements reasonable technical measures (secure authentication, data segregation per customer company) to protect the data against any unauthorised access.</p>
+
+      <h2>9. Cookies and trackers</h2>
+      <p>The Service uses no audience measurement, advertising or tracking cookies. Only a local technical storage mechanism, strictly necessary to keep the user signed in, is used.</p>
+
+      <h2>10. Changes to the policy</h2>
+      <p>This policy may be updated. The date of the last update appears at the top of this page.</p>
+    </section>
   </div>
 </div>
+<script>
+// La langue vient de la même clé que l'application : la page légale s'ouvre donc
+// dans la langue que l'utilisateur a choisie, sans réglage à refaire.
+(function () {
+  var CLE = 'parcpacific.langue';
+  var TITRES = {
+    fr: 'Politique de confidentialité — ParcPacific',
+    en: 'Privacy policy — ParcPacific'
+  };
+  var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
+
+  function lire() {
+    try {
+      var choisie = localStorage.getItem(CLE);
+      if (choisie === 'fr' || choisie === 'en') return choisie;
+    } catch (err) { /* stockage indisponible */ }
+    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+    return appareil === 'en' ? 'en' : 'fr';
+  }
+
+  function appliquer(code) {
+    document.documentElement.lang = code;
+    document.title = TITRES[code];
+    var retour = document.getElementById('retour');
+    if (retour) retour.textContent = RETOUR[code];
+    var boutons = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < boutons.length; i++) {
+      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+    }
+    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
+  }
+
+  appliquer(lire());
+  var boutons = document.querySelectorAll('.lang-btn');
+  for (var i = 0; i < boutons.length; i++) {
+    boutons[i].addEventListener('click', function (e) {
+      appliquer(e.currentTarget.getAttribute('data-langue'));
+    });
+  }
+})();
+</script>
 </body>
 </html>
