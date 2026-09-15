@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bj8/xl7NvmJNR29axdcxrikvftIpSs9tvG9qXdhB1Ng=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-6+qtJ4WfK0Qe5O38Emee7tnI8Clj3Nda3zku1e7Oxq8=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -4918,13 +4918,20 @@ function openMachineModal(companyId, categories, existing) {
     const model = overlay.querySelector('#f-model').value.trim();
     const category = overlay.querySelector('#f-category').value.trim();
     const champKind = overlay.querySelector('#f-kind');
-    const demande = requetePhoto({
-      brand, model, name, category, annee,
-      kind: champKind ? champKind.value : machineKind(existing),
-    });
     btn.disabled = true;
     statusEl.textContent = trad('Recherche en cours…');
     try {
+      // L'ANNÉE EST LUE ICI, dans le formulaire. Se fier à la variable du
+      // gestionnaire d'enregistrement ne pouvait pas marcher : elle n'existe pas
+      // dans cette fonction, et l'erreur était avalée par la fonction async —
+      // le bouton ne faisait donc plus RIEN. Construire la requête DANS le try
+      // garantit qu'une erreur éventuelle s'affiche au lieu de rester muette.
+      const champAnnee = overlay.querySelector('#f-year');
+      const demande = requetePhoto({
+        brand, model, name, category,
+        annee: champAnnee ? champAnnee.value.trim() : '',
+        kind: champKind ? champKind.value : machineKind(existing),
+      });
       const { data, error } = await sb.functions.invoke('fetch-machine-image', { body: demande });
       if (error) throw new Error(await functionErrorMessage(error, trad('recherche de photo impossible')));
       if (data?.error) throw new Error(data.error);
