@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mentions légales — ParcPacific</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Mentions légales — KEEVA</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0D1424">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EEF1F8; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#64748B;
-    --line:#E4E9F2; --primary:#4F46E5; --primary-dark:#4338CA; --r-lg:22px; --r-sm:10px;
-    --shadow-lg:0 24px 60px rgba(15,23,42,0.12);
+    /* Jetons de la charte KEEVA. Les surfaces et les bordures sont ces mêmes
+       teintes en transparence : aucune autre couleur n'est employée. */
+    --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0E1333; --ink-soft:rgba(14,19,51,.74);
+    --line:rgba(14,19,51,.14); --primary:#6366F1; --primary-dark:#5B52DF; --r-lg:22px; --r-sm:10px;
+    --shadow-lg:0 24px 60px rgba(13,20,36,.16);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins',sans-serif;line-height:1.6;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
   .wrap{max-width:720px;margin:0 auto;padding:40px 20px 90px;}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px;}
   a.back{display:inline-block;margin-bottom:18px;color:var(--primary);font-weight:700;text-decoration:none;font-size:14px;}
@@ -22,7 +26,7 @@
   h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
   p, li{font-size:15px;color:var(--ink);}
   ul{padding-left:20px;}
-  .box{background:#F6F8FC;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
+  .box{background:rgba(14,19,51,.03);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
   .box p{margin:4px 0;}
   strong{color:var(--ink);}
 
@@ -35,8 +39,8 @@
     font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
     cursor:pointer;display:inline-flex;align-items:center;gap:6px;
   }
-  .lang-btn:hover{border-color:#C7CBF7;color:var(--primary-dark);}
-  .lang-btn.is-active{background:#EEF0FE;border-color:#C7CBF7;color:var(--primary-dark);}
+  .lang-btn:hover{border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  .lang-btn.is-active{background:rgba(99,102,241,.10);border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
   html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
 </style>
 </head>
@@ -82,7 +86,7 @@
       </div>
 
       <h2>Propriété intellectuelle</h2>
-      <p>L'ensemble des éléments composant l'application ParcPacific (structure, code source, textes, identité visuelle) est la propriété exclusive de l'éditeur, sauf mention contraire. Toute reproduction, représentation ou exploitation non autorisée, totale ou partielle, est interdite.</p>
+      <p>L'ensemble des éléments composant l'application KEEVA (structure, code source, textes, identité visuelle) est la propriété exclusive de l'éditeur, sauf mention contraire. Toute reproduction, représentation ou exploitation non autorisée, totale ou partielle, est interdite.</p>
 
       <h2>Contact</h2>
       <p>Pour toute question relative aux présentes mentions légales : <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
@@ -119,7 +123,7 @@
       </div>
 
       <h2>Intellectual property</h2>
-      <p>All the elements making up the ParcPacific application (structure, source code, texts, visual identity) are the exclusive property of the publisher, unless stated otherwise. Any unauthorised reproduction, representation or exploitation, in whole or in part, is prohibited.</p>
+      <p>All the elements making up the KEEVA application (structure, source code, texts, visual identity) are the exclusive property of the publisher, unless stated otherwise. Any unauthorised reproduction, representation or exploitation, in whole or in part, is prohibited.</p>
 
       <h2>Contact</h2>
       <p>For any question relating to this legal notice: <a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></p>
@@ -131,7 +135,7 @@
 // dans la langue que l'utilisateur a choisie, sans réglage à refaire.
 (function () {
   var CLE = 'parcpacific.langue';
-  var TITRES = { fr: 'Mentions légales — ParcPacific', en: 'Legal notice — ParcPacific' };
+  var TITRES = { fr: 'Mentions légales — KEEVA', en: 'Legal notice — KEEVA' };
   var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
 
   function lire() {

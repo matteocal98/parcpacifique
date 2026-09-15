@@ -3,426 +3,663 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ParcPacific — le carnet d'entretien de votre parc, tenu par l'IA</title>
-<meta name="description" content="Suivez l'entretien de vos engins et véhicules : échéances en dates ou au compteur, carnet constructeur lu par l'IA, rappels sur le téléphone et liste de produits à commander. Gratuit jusqu'à 3 machines.">
+<title>KEEVA — La juste mesure de votre parc | Precise tracking for your fleet</title>
+<meta name="description" content="KEEVA transforme vos manuels constructeur en plans de maintenance : suivi par calendrier, heures ou kilomètres, rappels d'échéance et liste de pièces à commander. Gratuit jusqu'à 3 machines.">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#5B4BF5">
+<meta name="theme-color" content="#0D1424">
 <link rel="canonical" href="https://matteocal98.github.io/parcpacifique/decouvrir.html">
-<link rel="icon" href="./icones/favicon-64.png">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="./icones/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icones/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ParcPacific">
+<meta property="og:site_name" content="KEEVA">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:locale:alternate" content="en_GB">
-<meta property="og:title" content="ParcPacific — le carnet d'entretien de votre parc, tenu par l'IA">
-<meta property="og:description" content="Échéances en dates ou au compteur, carnet constructeur lu par l'IA, rappels sur le téléphone et liste de produits à commander. Gratuit jusqu'à 3 machines.">
+<meta property="og:title" content="KEEVA — La juste mesure de votre parc">
+<meta property="og:description" content="Vos manuels constructeur deviennent des plans de maintenance. Suivi par calendrier, heures ou kilomètres, rappels et liste de pièces prête à commander.">
 <meta property="og:url" content="https://matteocal98.github.io/parcpacifique/decouvrir.html">
 <meta property="og:image" content="https://matteocal98.github.io/parcpacifique/icones/icone-512.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ParcPacific — le carnet d'entretien de votre parc, tenu par l'IA">
-<meta name="twitter:description" content="Échéances, compteurs, carnet constructeur lu par l'IA, rappels et liste de commande. Gratuit jusqu'à 3 machines.">
+<meta name="twitter:title" content="KEEVA — Precise tracking for your fleet">
+<meta name="twitter:description" content="Manuals become maintenance plans. Track by calendar, hours or kilometres, get reminders and an order list.">
 <meta name="twitter:image" content="https://matteocal98.github.io/parcpacifique/icones/icone-512.png">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#f7f7fb; --surface:#FFFFFF; --surface-soft:#F4F3FA;
-    --ink:#0D1117; --ink-2:#5A6172; --ink-3:#5B6478;
-    --line:#E7E7F0; --line-2:#F0F0F6;
-    --primary:#5B4BF5; --primary-dark:#4638C9; --primary-tint:#ECEAFE;
-    --ok-ink:#0A6B4A; --ok-bg:#E3F6ED; --late-ink:#A32A1F; --late-bg:#FFEBE8;
-    --r-card:16px; --r-md:12px; --r-pill:20px;
-    --shadow-card:0 1px 3px rgba(13,17,23,.06);
-    --shadow-lg:0 24px 60px rgba(13,17,23,.10);
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
-  h1,h2,h3,.num{font-family:'Space Grotesk','Inter',sans-serif;font-variant-numeric:tabular-nums;}
-  a{color:var(--primary-dark);}
-  .wrap{max-width:1060px;margin:0 auto;padding:0 20px;}
-  header.top{border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5;}
-  .top-in{display:flex;align-items:center;gap:16px;padding:12px 0;flex-wrap:wrap;}
-  .wordmark{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:500;letter-spacing:-.01em;}
-  .wordmark em{font-style:normal;font-weight:700;color:var(--primary);}
-  .top .spacer{flex:1;}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-pill);padding:11px 20px;font-size:14.5px;font-weight:700;text-decoration:none;border:1.5px solid transparent;cursor:pointer;font-family:inherit;min-height:44px;}
-  .btn.primary{background:var(--primary);color:#fff;box-shadow:0 8px 18px rgba(91,75,245,.28);}
-  .btn.primary:hover{background:var(--primary-dark);}
-  .btn.ghost{background:var(--surface);color:var(--primary-dark);border-color:var(--line);}
-  .btn.ghost:hover{border-color:var(--primary);}
-  .lang-switch{display:flex;gap:8px;}
-  .lang-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font:inherit;font-size:13px;font-weight:700;padding:8px 12px;border-radius:var(--r-pill);cursor:pointer;min-height:38px;}
-  .lang-btn.is-active{background:var(--primary-tint);border-color:#C7CBF7;color:var(--primary-dark);}
-  section{padding:56px 0;}
-  .hero{padding:56px 0 40px;}
-  .hero .cols{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center;}
-  .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-dark);}
-  h1{font-size:clamp(28px,4.4vw,44px);line-height:1.12;margin:12px 0 14px;letter-spacing:-.02em;}
-  .lead{font-size:17px;color:var(--ink-2);margin:0 0 22px;max-width:52ch;}
-  .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-  .cta-row .note{font-size:13px;color:var(--ink-2);}
-  h2{font-size:clamp(21px,2.6vw,28px);margin:0 0 8px;letter-spacing:-.01em;}
-  .sub{color:var(--ink-2);margin:0 0 26px;max-width:70ch;}
-  .grid{display:grid;gap:16px;}
-  .grid.g3{grid-template-columns:repeat(3,1fr);}
-  .grid.g2{grid-template-columns:repeat(2,1fr);}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px;box-shadow:var(--shadow-card);}
-  .card h3{margin:0 0 6px;font-size:16.5px;}
-  .card p{margin:0;color:var(--ink-2);font-size:14.5px;}
-  .icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:var(--primary-tint);color:var(--primary-dark);font-size:18px;margin-bottom:12px;}
-  .steps{counter-reset:s;display:grid;gap:16px;grid-template-columns:repeat(3,1fr);}
-  .step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px;}
-  .step .n{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif;}
-  /* Aperçu de l'interface : maquette HTML, pas une capture d'écran. Elle est
-     annoncée comme telle pour ne pas induire en erreur. */
-  .mock{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);padding:16px;max-width:460px;margin-inline:auto;}
-  .mock-bar{display:flex;gap:6px;margin-bottom:12px;}
-  .mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block;}
-  .mock-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);margin-bottom:8px;}
-  .mock-row .name{font-weight:600;font-size:13.5px;}
-  .mock-row .meta{font-size:12px;color:var(--ink-2);}
-  .pill{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);white-space:nowrap;}
-  .pill.late{background:var(--late-bg);color:var(--late-ink);}
-  .pill.ok{background:var(--ok-bg);color:var(--ok-ink);}
-  .pill.soon{background:#FDF3E0;color:#6E5A08;}
-  .legend{font-size:12px;color:var(--ink-3);text-align:center;margin-top:10px;}
-  .price{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-  .plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px;}
-  .plan.best{border-color:var(--primary);box-shadow:0 12px 30px rgba(91,75,245,.14);}
-  .plan .amount{font-size:30px;font-weight:700;margin:6px 0 2px;font-family:'Space Grotesk',sans-serif;}
-  .plan ul{margin:14px 0 0;padding-left:18px;color:var(--ink-2);font-size:14.5px;}
-  .plan li{margin-bottom:6px;}
-  .badge-soon{display:inline-block;font-size:11.5px;font-weight:700;background:var(--surface-soft);color:var(--ink-2);border-radius:var(--r-pill);padding:3px 9px;margin-left:6px;}
-  details.faq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:10px;overflow:hidden;}
-  details.faq summary{cursor:pointer;padding:14px 16px;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:12px;}
-  details.faq summary::-webkit-details-marker{display:none;}
-  details.faq summary::after{content:'▾';color:var(--ink-3);}
-  details.faq[open] summary{border-bottom:1px solid var(--line-2);}
-  details.faq .reponse{padding:12px 16px 16px;color:var(--ink-2);font-size:14.5px;}
-  footer.site{border-top:1px solid var(--line);background:var(--surface);padding:28px 0 40px;}
-  footer.site .in{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
-  footer.site a{color:var(--ink-2);text-decoration:none;font-size:13.5px;}
-  footer.site a:hover{color:var(--primary-dark);text-decoration:underline;}
-  .final{background:var(--primary);color:#fff;border-radius:20px;padding:32px;text-align:center;}
-  .final h2{color:#fff;}
-  .final p{color:#E7E4FF;margin:0 auto 20px;max-width:56ch;}
-  .final .btn{background:#fff;color:var(--primary-dark);}
-  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
-  :focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:6px;}
-  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
-  @media (max-width: 860px){
-    .hero .cols,.grid.g3,.grid.g2,.steps,.price{grid-template-columns:1fr;}
-    section{padding:40px 0;}
-  }
-</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "ParcPacific",
+  "name": "KEEVA",
+  "slogan": "La juste mesure de votre parc",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web, Android",
   "inLanguage": ["fr", "en"],
-  "description": "Suivi d'entretien de parc matériel : échéances en dates ou au compteur, carnet constructeur lu par IA, rappels sur téléphone, liste de produits à commander.",
+  "description": "Suivi d'entretien de parc matériel : le manuel constructeur devient un plan de maintenance, échéances en dates ou au compteur, rappels et liste de pièces à commander.",
   "url": "https://matteocal98.github.io/parcpacifique/decouvrir.html",
   "offers": [
-    { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "EUR", "description": "Jusqu'à 3 machines." },
-    { "@type": "Offer", "name": "Abonnement", "price": "20", "priceCurrency": "EUR", "description": "Machines illimitées." }
+    { "@type": "Offer", "name": "Démarrage", "price": "0", "priceCurrency": "EUR", "description": "Jusqu'à 3 machines suivies." },
+    { "@type": "Offer", "name": "Flotte Pro", "price": "20", "priceCurrency": "EUR", "description": "Machines illimitées." }
   ],
   "featureList": [
-    "Plans de maintenance issus du carnet constructeur (IA)",
-    "Échéances calendaires ou au compteur (heures, kilomètres)",
-    "Rappels sur le téléphone",
-    "Liste de préparation groupée par famille de produits",
+    "Lecture des manuels constructeur par IA",
+    "Plans de maintenance automatiques",
+    "Suivi calendaire, horaire ou kilométrique",
+    "Rappels d'échéance",
+    "Liste de pièces détachées prête à commander",
     "Historique des interventions et export CSV",
     "Consultation hors connexion",
     "Français et anglais"
   ]
 }
 </script>
+<style>
+  /* ==========================================================================
+     KEEVA — jetons de la charte. AUCUNE autre couleur n'est employée : les
+     surfaces et les bordures sont ces mêmes teintes en transparence, jamais des
+     gris inventés. La page suit le mode clair et le mode sombre du système.
+     ========================================================================== */
+  :root{
+    --nuit:#0D1424;        /* fond mode sombre */
+    --blanc:#FFFFFF;       /* fond mode clair */
+    --encre:#0E1333;       /* texte KEEVA (clair) + ligne verticale */
+    --cyan:#24B5A8;        /* aile supérieure du pictogramme */
+    --ambre:#DE7A16;       /* aile inférieure du pictogramme */
+    --indigo:#6366F1;      /* puce centrale */
+    --roi:#236FE0;         /* dégradé de l'hexagone : côté gauche */
+    --turquoise:#14B8A6;   /* dégradé : côté droit */
+    --olive:#8B9B37;       /* dégradé : base */
+    --tagline-fr:#5B52DF;  /* « LA JUSTE MESURE DE VOTRE PARC » */
+    --tagline-en:#009BDE;  /* « PRECISE TRACKING FOR YOUR FLEET » */
+    --slate:#94A3B8;       /* légendes du bas */
+
+    /* Surfaces dérivées : la teinte de base, en transparence. */
+    --trait:rgba(14,19,51,.12);
+    --trait-fort:rgba(14,19,51,.22);
+    --surface-douce:rgba(14,19,51,.03);
+    --texte-doux:rgba(14,19,51,.72);
+    --ombre:0 1px 2px rgba(14,19,51,.06), 0 12px 32px rgba(14,19,51,.08);
+    --r-sm:10px; --r-md:14px; --r-lg:20px;
+    --grad:linear-gradient(135deg, var(--roi), var(--turquoise) 58%, var(--olive));
+    --fond:var(--blanc);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fond:var(--nuit);
+      --encre:var(--blanc);
+      --trait:rgba(255,255,255,.14);
+      --trait-fort:rgba(255,255,255,.26);
+      --surface-douce:rgba(255,255,255,.05);
+      --texte-doux:rgba(255,255,255,.72);
+      --ombre:0 0 0 1px rgba(255,255,255,.10);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--fond);color:var(--encre);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px;}
+  @media(min-width:640px){.wrap{padding:0 24px;}}
+  @media(min-width:1024px){.wrap{padding:0 32px;}}
+  section{padding:80px 0;}
+  @media(min-width:1024px){section{padding:96px 0;}}
+  :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:8px;}
+
+  /* --- Marque : hexagone en dégradé + puce centrale (pictogramme de la charte) */
+  .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
+  .marque svg{display:block;flex:0 0 auto;}
+  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--encre);}
+
+  /* --- Boutons ------------------------------------------------------------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;min-height:46px;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
+  .btn svg{flex:0 0 auto;}
+  .btn-primaire{background:var(--encre);color:var(--fond);box-shadow:var(--ombre);}
+  .btn-primaire:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(14,19,51,.22);}
+  .btn-secondaire{background:transparent;color:var(--encre);border-color:var(--trait-fort);}
+  .btn-secondaire:hover{background:var(--surface-douce);}
+  .btn-clair{background:var(--blanc);color:var(--nuit);}
+  .btn-contour{background:transparent;color:var(--blanc);border:2px solid rgba(255,255,255,.35);}
+  .btn-contour:hover{background:rgba(255,255,255,.10);}
+
+  /* --- En-tête sticky ------------------------------------------------------ */
+  header{position:sticky;top:0;z-index:50;background:var(--fond);border-bottom:1px solid var(--trait);}
+  @supports (backdrop-filter: blur(12px)){
+    header{background:rgba(255,255,255,.82);backdrop-filter:blur(12px);}
+  }
+  @media (prefers-color-scheme: dark){
+    @supports (backdrop-filter: blur(12px)){ header{background:rgba(13,20,36,.82);} }
+  }
+  .entete{display:flex;align-items:center;gap:14px;height:64px;}
+  .entete nav{display:none;gap:4px;}
+  @media(min-width:900px){.entete nav{display:flex;margin-left:14px;}}
+  .entete nav a{padding:8px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--texte-doux);text-decoration:none;}
+  .entete nav a:hover{color:var(--encre);background:var(--surface-douce);}
+  .entete .pousse{flex:1;}
+  .lang{display:none;gap:2px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-sm);padding:3px;}
+  @media(min-width:640px){.lang{display:flex;}}
+  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;}
+  .lang button.actif{background:var(--fond);color:var(--encre);box-shadow:0 1px 2px rgba(14,19,51,.10);}
+  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:8px;}
+  @media(min-width:640px){.lien-connexion{display:inline-flex;}}
+  .lien-connexion:hover{color:var(--encre);}
+
+  /* --- Héros --------------------------------------------------------------- */
+  .heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
+  @media(min-width:1024px){.heros{grid-template-columns:1.05fr .95fr;gap:56px;padding-top:72px;}}
+  .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
+  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--cyan);flex:0 0 auto;}
+  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--cyan);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
+  @keyframes ping{75%,100%{transform:scale(2.4);opacity:0;}}
+  h1{font-size:clamp(30px,5.2vw,58px);font-weight:800;margin:20px 0 0;}
+  .tagline{display:block;font-size:clamp(13px,1.6vw,16px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
+  .tagline.fr{color:var(--tagline-fr);}
+  .tagline.en{color:var(--tagline-en);}
+  .accroche-gras{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sous-titre{font-size:clamp(16px,1.6vw,19px);color:var(--texte-doux);margin:20px 0 30px;max-width:56ch;}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--slate);margin-top:18px;}
+  .note svg{color:var(--cyan);flex:0 0 auto;}
+
+  /* Maquette d'interface : dessinée en HTML, et annoncée comme telle. */
+  .visuel{position:relative;}
+  .halo{position:absolute;inset:-18px;background:var(--grad);filter:blur(46px);opacity:.28;border-radius:28px;}
+  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;animation:flotte 6s ease-in-out infinite;}
+  @keyframes flotte{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  @media (prefers-reduced-motion: reduce){
+    .maquette{animation:none;} .point::after{animation:none;} html{scroll-behavior:auto;}
+  }
+  .barre{display:flex;gap:6px;margin-bottom:14px;}
+  .barre i{width:9px;height:9px;border-radius:50%;display:block;background:var(--trait-fort);}
+  .barre i:nth-child(1){background:var(--ambre);}
+  .barre i:nth-child(2){background:var(--cyan);}
+  .barre i:nth-child(3){background:var(--indigo);}
+  .ligne-machine{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 13px;border:1px solid var(--trait);border-radius:var(--r-md);margin-bottom:8px;}
+  .ligne-machine .nom{font-weight:600;font-size:13.5px;}
+  .ligne-machine .meta{font-size:12px;color:var(--slate);}
+  .etat{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;color:var(--blanc);}
+  .etat.retard{background:var(--ambre);}
+  .etat.bientot{background:var(--indigo);}
+  .etat.ajour{background:var(--cyan);}
+  .maquette .legende{font-size:11.5px;color:var(--slate);text-align:center;margin-top:10px;}
+  .maquette .bloc-pieces{border:1px solid var(--trait);border-radius:var(--r-md);padding:11px 13px;margin-top:12px;}
+  .maquette .bloc-pieces .titre{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);}
+  .maquette .bloc-pieces ul{margin:8px 0 0;padding-left:16px;font-size:13px;color:var(--texte-doux);}
+
+  /* --- Fonctionnalités ----------------------------------------------------- */
+  .section-tete{max-width:60ch;margin-bottom:40px;}
+  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tagline-fr);}
+  h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;margin-top:10px;}
+  .section-tete p{color:var(--texte-doux);font-size:17px;margin:14px 0 0;}
+  .cartes{display:grid;gap:26px;}
+  @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
+  .carte{background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;transition:border-color .3s,box-shadow .3s,transform .3s;}
+  .carte:hover{border-color:var(--indigo);box-shadow:0 18px 40px rgba(99,102,241,.14);transform:translateY(-2px);}
+  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--grad);color:var(--blanc);}
+  .carte h3{font-size:20px;font-weight:700;margin-bottom:10px;}
+  .carte p{margin:0;color:var(--texte-doux);}
+
+  /* --- Comment ça marche : trois étapes ------------------------------------ */
+  .etapes{list-style:none;margin:0;padding:0;display:grid;gap:26px;}
+  @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
+  .etape{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:30px;}
+  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--grad);color:var(--blanc);font-weight:800;font-size:16px;margin-bottom:18px;}
+  .etape h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+  .etape p{margin:0;color:var(--texte-doux);font-size:15.5px;}
+
+  /* --- Engagements sur les données ---------------------------------------- */
+  .confiance{display:grid;gap:24px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:36px 32px;}
+  @media(min-width:768px){.confiance{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
+  .confiance h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0 0 7px;}
+  .confiance h3 svg{color:var(--cyan);flex:0 0 auto;}
+  .confiance p{margin:0;font-size:14.5px;color:var(--texte-doux);}
+  .confiance .suite{margin-top:22px;font-size:14.5px;}
+  .confiance .suite a{color:var(--tagline-fr);font-weight:600;}
+
+  /* --- Tarifs -------------------------------------------------------------- */
+  .tarifs{display:grid;gap:26px;}
+  @media(min-width:900px){.tarifs{grid-template-columns:repeat(2,1fr);}}
+  .offre{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
+  .offre.pro{border:2px solid var(--indigo);overflow:hidden;}
+  .recommande{position:absolute;top:0;right:0;background:var(--indigo);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);}
+  .offre h3{font-size:20px;font-weight:700;}
+  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 6px;}
+  .prix .montant{font-size:38px;font-weight:800;letter-spacing:-.03em;}
+  .prix .periode{color:var(--texte-doux);font-size:15px;}
+  .offre .pour{color:var(--texte-doux);margin:0 0 20px;}
+  .avantages{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:11px;}
+  .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
+  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--cyan);}
+  .offre .btn{width:100%;margin-top:24px;}
+  .offre.pro .avantages svg{color:var(--blanc);}
+
+  .faq{margin-top:56px;display:grid;gap:12px;}
+  details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
+  details[open]{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;font-weight:600;font-size:15.5px;}
+  summary::-webkit-details-marker{display:none;}
+  summary svg{flex:0 0 auto;color:var(--texte-doux);transition:transform .2s ease;}
+  details[open] summary svg{transform:rotate(180deg);}
+  details .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:15px;}
+
+  /* --- Appel final + pied de page ----------------------------------------- */
+  .final{background:var(--nuit);color:var(--blanc);border-radius:var(--r-lg);padding:64px 28px;text-align:center;}
+  .final h2{color:var(--blanc);}
+  .final p{color:rgba(255,255,255,.72);margin:16px auto 30px;max-width:56ch;}
+  .final .actions{justify-content:center;}
+  footer{background:var(--nuit);color:var(--slate);padding:56px 0 28px;margin-top:80px;}
+  .pied{display:grid;gap:32px;}
+  @media(min-width:768px){.pied{grid-template-columns:2fr 1fr 1fr 1fr;}}
+  footer .marque .mot{color:var(--blanc);}
+  footer p{color:var(--slate);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
+  footer h3{color:var(--blanc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;}
+  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+  footer a{color:var(--slate);text-decoration:none;font-size:14.5px;}
+  footer a:hover{color:var(--blanc);}
+  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--slate);}
+  footer .lang button{color:var(--slate);}
+  footer .lang button.actif{background:rgba(255,255,255,.12);color:var(--blanc);box-shadow:none;}
+
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
+  @media(max-width:600px){section{padding:56px 0;}}
+</style>
 </head>
 <body>
 
-<header class="top">
-  <div class="wrap top-in">
-    <span class="wordmark">Parc<em>Pacific</em></span>
-    <span class="spacer"></span>
-    <div class="lang-switch" role="group" aria-label="Langue / Language">
-      <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
-      <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+<!-- ================= PICTOGRAMME (défini une fois, réutilisé) ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="hexa" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#236FE0"/>
+      <stop offset="58%" stop-color="#14B8A6"/>
+      <stop offset="100%" stop-color="#8B9B37"/>
+    </linearGradient>
+    <symbol id="picto-keeva" viewBox="0 0 40 40">
+      <path d="M20 3 34.7 11.5v17L20 37 5.3 28.5v-17z" fill="url(#hexa)"/>
+      <path d="M13.6 12.4c3.2 1 5.1 3.4 6.4 7.6-1.3 4.2-3.2 6.6-6.4 7.6z" fill="#24B5A8"/>
+      <path d="M26.4 12.4c-3.2 1-5.1 3.4-6.4 7.6 1.3 4.2 3.2 6.6 6.4 7.6z" fill="#DE7A16"/>
+      <rect x="17.4" y="17.6" width="5.2" height="4.8" rx="1.2" fill="#6366F1"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="wrap entete">
+    <a class="marque" href="./decouvrir.html" aria-label="KEEVA">
+      <svg width="30" height="30" aria-hidden="true"><use href="#picto-keeva"/></svg>
+      <span class="mot">KEEVA</span>
+    </a>
+    <nav aria-label="Navigation principale">
+      <a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a>
+      <a href="#comment"><span class="fr">Comment ça marche</span><span class="en">How it works</span></a>
+      <a href="#tarifs"><span class="fr">Tarifs</span><span class="en">Pricing</span></a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <span class="pousse"></span>
+    <div class="lang" role="group" aria-label="Langue / Language">
+      <button type="button" data-langue="fr">FR</button>
+      <button type="button" data-langue="en">EN</button>
     </div>
-    <a class="btn primary" href="./index.html" id="cta-haut">Essayer gratuitement</a>
+    <a class="lien-connexion" href="./index.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a>
+    <a class="btn btn-primaire" href="./index.html"><span class="fr">Essai gratuit</span><span class="en">Start free</span></a>
   </div>
 </header>
 
 <main>
 
-<section class="hero">
-  <div class="wrap cols">
-    <div>
-      <span class="eyebrow fr">Suivi d'entretien de parc</span>
-      <span class="eyebrow en">Fleet maintenance tracking</span>
-      <h1 class="fr">Le carnet d'entretien de votre parc, tenu par l'IA.</h1>
-      <h1 class="en">Your fleet's service logbook, kept by AI.</h1>
-      <p class="lead fr">Déposez le carnet du fabricant : l'application en tire le plan d'entretien, suit les échéances en dates <strong>et</strong> en heures ou kilomètres, vous rappelle quoi faire, et prépare la liste de produits à commander.</p>
-      <p class="lead en">Upload the manufacturer's manual: the app turns it into a maintenance plan, tracks due dates <strong>and</strong> hour or kilometre counters, reminds you what to do, and prepares the shopping list.</p>
-      <div class="cta-row">
-        <a class="btn primary" href="./index.html">Créer un compte gratuit</a>
-        <a class="btn ghost" href="#tarifs">Voir les tarifs</a>
-        <span class="note fr">Gratuit jusqu'à 3 machines · sans carte bancaire</span>
-        <span class="note en">Free up to 3 machines · no credit card</span>
-      </div>
+<!-- ================= HERO ================= -->
+<section class="heros wrap">
+  <div>
+    <span class="pastille"><span class="point" aria-hidden="true"></span>
+      <span class="fr">Lecture des manuels par IA — disponible</span>
+      <span class="en">AI manual reading — live</span>
+    </span>
+    <h1>
+      <span class="tagline fr">La juste mesure de votre parc</span>
+      <span class="tagline en">Precise tracking for your fleet</span>
+      <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-gras">piloté par l'IA</span>.</span>
+      <span class="en">Your fleet's service logbook, <span class="accroche-gras">driven by AI</span>.</span>
+    </h1>
+    <p class="sous-titre">
+      <span class="fr">Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
+      <span class="en">Import your manufacturer manuals: KEEVA extracts the intervals and builds the maintenance plan. Track by calendar, hours or kilometres — then send the parts list straight to your suppliers.</span>
+    </p>
+    <div class="actions">
+      <a class="btn btn-primaire" href="./index.html">
+        <span class="fr">Commencer gratuitement</span><span class="en">Start for free</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn-secondaire" href="#comment">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/></svg>
+        <span class="fr">Voir comment ça marche</span><span class="en">See how it works</span>
+      </a>
     </div>
-    <div>
-      <div class="mock" role="img" aria-label="Aperçu de l'écran Agenda : échéances des machines">
-        <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="mock-row"><span><span class="name">KUBOTA U17-3</span><br><span class="meta">Vidange, filtre à huile · 250 h</span></span><span class="pill late">+3 j</span></div>
-        <div class="mock-row"><span><span class="name">PEUGEOT 208</span><br><span class="meta">Révision 20 000 km</span></span><span class="pill soon">dans 12 j</span></div>
-        <div class="mock-row"><span><span class="name">JOHN DEERE 6120M</span><br><span class="meta">Graissage, filtres</span></span><span class="pill ok">à jour</span></div>
-        <div class="mock-row"><span><span class="name fr">À prévoir — Filtres</span><span class="name en">To order — Filters</span><br><span class="meta fr">2 références · dès le 12/10</span><span class="meta en">2 items · from 12/10</span></span><span class="pill ok fr">4 unités</span><span class="pill ok en">4 units</span></div>
-        <div class="legend fr">Maquette de l'interface — l'application reprend cette mise en page.</div>
-        <div class="legend en">Interface mock-up — the app uses this layout.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="benefices" style="padding-top:0;">
-  <div class="wrap">
-    <h2 class="fr">Ce que ça change, concrètement</h2>
-    <h2 class="en">What it changes, in practice</h2>
-    <p class="sub fr">Cinq problèmes de terrain, cinq réponses. Rien de plus.</p>
-    <p class="sub en">Five field problems, five answers. Nothing more.</p>
-    <div class="grid g3">
-      <article class="card">
-        <span class="icon" aria-hidden="true">📄</span>
-        <h3 class="fr">Le carnet devient un plan</h3>
-        <h3 class="en">The manual becomes a plan</h3>
-        <p class="fr">Déposez le PDF du fabricant : l'IA propose l'intervalle, les tâches et les produits avec leurs quantités. Vous vérifiez, vous enregistrez.</p>
-        <p class="en">Drop the manufacturer's PDF: the AI suggests the interval, the tasks and the products with quantities. You check, you save.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">⏱</span>
-        <h3 class="fr">Les heures et les kilomètres comptent aussi</h3>
-        <h3 class="en">Hours and kilometres count too</h3>
-        <p class="fr">Une machine se suit au compteur, un véhicule au kilométrage, un autre au calendrier. Le rappel s'adapte au mode de suivi.</p>
-        <p class="en">One machine runs on hours, a vehicle on kilometres, another on the calendar. The reminder adapts to the tracking mode.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">🔔</span>
-        <h3 class="fr">On est prévenu avant la panne</h3>
-        <h3 class="en">Warned before the breakdown</h3>
-        <p class="fr">Un rappel sur le téléphone avant l'échéance, puis le jour même. <span class="badge-soon">WhatsApp et e-mail : en préparation</span></p>
-        <p class="en">A phone reminder before the due date, then on the day. <span class="badge-soon">WhatsApp and email: coming soon</span></p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">🧾</span>
-        <h3 class="fr">La commande se prépare toute seule</h3>
-        <h3 class="en">The order prepares itself</h3>
-        <p class="fr">Les produits à prévoir, regroupés par famille — filtres, huiles, graisses, liquides, pièces d'usure — avec les machines et les dates. Un bouton copie la liste pour le fournisseur.</p>
-        <p class="en">Products to plan, grouped by family — filters, oils, greases, fluids, wear parts — with machines and dates. One button copies the list for your supplier.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">📱</span>
-        <h3 class="fr">Ça marche sur le terrain</h3>
-        <h3 class="en">It works in the field</h3>
-        <p class="fr">Application Android et site installable : les machines déjà consultées restent lisibles sans réseau, avec un bandeau qui dit la fraîcheur des données.</p>
-        <p class="en">Android app and installable website: machines you have already opened stay readable offline, with a banner showing how fresh the data is.</p>
-      </article>
-      <article class="card">
-        <span class="icon" aria-hidden="true">🌍</span>
-        <h3 class="fr">Français et anglais, sans traceur</h3>
-        <h3 class="en">French and English, no trackers</h3>
-        <p class="fr">Toute l'interface et les pages légales existent dans les deux langues. Aucun cookie de mesure d'audience, aucune publicité, aucune donnée revendue.</p>
-        <p class="en">The whole interface and the legal pages exist in both languages. No analytics cookies, no advertising, no data resold.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section id="fonctionnement" style="padding-top:0;">
-  <div class="wrap">
-    <h2 class="fr">Comment ça marche</h2>
-    <h2 class="en">How it works</h2>
-    <p class="sub fr">Trois étapes, une seule saisie au départ : le carnet.</p>
-    <p class="sub en">Three steps, one input at the start: the manual.</p>
-    <div class="steps">
-      <div class="step">
-        <span class="n" aria-hidden="true">1</span>
-        <h3 class="fr">Décrivez la machine</h3>
-        <h3 class="en">Describe the machine</h3>
-        <p class="fr">Nom, type (engin ou véhicule), marque, modèle, année, numéro de série ou plaque, date de mise en service.</p>
-        <p class="en">Name, type (machine or vehicle), brand, model, year, serial number or plate, commissioning date.</p>
-      </div>
-      <div class="step">
-        <span class="n" aria-hidden="true">2</span>
-        <h3 class="fr">Déposez le carnet</h3>
-        <h3 class="en">Upload the manual</h3>
-        <p class="fr">Le PDF du fabricant est lu et transformé en plan de maintenance : intervalle, tâches, produits, quantités. Tout reste modifiable.</p>
-        <p class="en">The manufacturer's PDF is read and turned into a maintenance plan: interval, tasks, products, quantities. Everything stays editable.</p>
-      </div>
-      <div class="step">
-        <span class="n" aria-hidden="true">3</span>
-        <h3 class="fr">Suivez et commandez</h3>
-        <h3 class="en">Track and order</h3>
-        <p class="fr">L'Agenda montre ce qui arrive, la liste de préparation dit quoi acheter, et chaque entretien réalisé se coche en quelques secondes.</p>
-        <p class="en">The schedule shows what is coming, the preparation list says what to buy, and each completed service is ticked off in seconds.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="tarifs" style="padding-top:0;">
-  <div class="wrap">
-    <h2 class="fr">Tarifs, sans surprise</h2>
-    <h2 class="en">Pricing, no surprises</h2>
-    <p class="sub fr">Le prix est public, la limite du plan gratuit aussi.</p>
-    <p class="sub en">The price is public, and so is the free plan's limit.</p>
-    <div class="price">
-      <div class="plan">
-        <h3 class="fr">Gratuit</h3>
-        <h3 class="en">Free</h3>
-        <div class="amount">0 €</div>
-        <p class="fr">Pour démarrer, ou pour un petit parc.</p>
-        <p class="en">To get started, or for a small fleet.</p>
-        <ul>
-          <li class="fr">Jusqu'à <strong>3 machines ou véhicules</strong></li>
-          <li class="en">Up to <strong>3 machines or vehicles</strong></li>
-          <li class="fr">Plans, échéances, historique, export CSV</li>
-          <li class="en">Plans, due dates, history, CSV export</li>
-          <li class="fr">20 recherches de photo et 30 lectures de carnet par mois</li>
-          <li class="en">20 photo searches and 30 manual analyses per month</li>
-        </ul>
-      </div>
-      <div class="plan best">
-        <h3 class="fr">Abonnement</h3>
-        <h3 class="en">Subscription</h3>
-        <div class="amount">20 €<span style="font-size:15px;font-weight:600;color:var(--ink-2);"> / mois</span></div>
-        <p class="fr">Pour un parc qui vit et grandit.</p>
-        <p class="en">For a fleet that lives and grows.</p>
-        <ul>
-          <li class="fr"><strong>Machines illimitées</strong></li>
-          <li class="en"><strong>Unlimited machines</strong></li>
-          <li class="fr">Tout le plan gratuit, sans plafond</li>
-          <li class="en">Everything in the free plan, uncapped</li>
-          <li class="fr">Sans engagement, résiliable</li>
-          <li class="en">No commitment, cancel anytime</li>
-        </ul>
-      </div>
-    </div>
-    <p class="sub" style="margin-top:18px;">
-      <span class="fr">Un crédit d'IA n'est décompté que si le résultat est utile : une recherche de photo qui ne trouve rien est remboursée.</span>
-      <span class="en">An AI credit is only counted when the result is useful: a photo search that finds nothing is refunded.</span>
+    <p class="note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+      <span class="fr">Gratuit jusqu'à 3 machines · sans carte bancaire · français et anglais</span>
+      <span class="en">Free up to 3 machines · no credit card · French and English</span>
     </p>
   </div>
-</section>
 
-<section id="confidentialite" style="padding-top:0;">
-  <div class="wrap">
-    <h2 class="fr">Vos données, et ce qu'on en fait</h2>
-    <h2 class="en">Your data, and what we do with it</h2>
-    <div class="grid g2">
-      <article class="card">
-        <h3 class="fr">Cloisonné par entreprise</h3>
-        <h3 class="en">Isolated per company</h3>
-        <p class="fr">Chaque société ne voit que son parc : les règles d'accès sont appliquées côté serveur, pas seulement dans l'interface.</p>
-        <p class="en">Each company only sees its own fleet: access rules are enforced server-side, not just in the interface.</p>
-      </article>
-      <article class="card">
-        <h3 class="fr">Aucun traceur</h3>
-        <h3 class="en">No trackers</h3>
-        <p class="fr">Pas de cookie de mesure d'audience, pas de publicité, pas de revente. Le service n'utilise qu'un stockage technique pour garder la session.</p>
-        <p class="en">No analytics cookies, no advertising, no resale. The service only uses technical storage to keep you signed in.</p>
-      </article>
-      <article class="card">
-        <h3 class="fr">Hors connexion, sous votre contrôle</h3>
-        <h3 class="en">Offline, under your control</h3>
-        <p class="fr">La copie locale qui permet la consultation hors réseau expire au bout de 7 jours, s'efface à la déconnexion, ne s'affiche jamais sans session ni accord explicite, et peut être désactivée.</p>
-        <p class="en">The local copy that enables offline reading expires after 7 days, is cleared on sign-out, is never shown without a session or explicit consent, and can be disabled.</p>
-      </article>
-      <article class="card">
-        <h3 class="fr">L'IA, uniquement quand vous la sollicitez</h3>
-        <h3 class="en">AI, only when you ask</h3>
-        <p class="fr">La lecture du carnet et la recherche de photo partent d'une action de votre part et envoient au prestataire le document ou la description concernée — jamais votre parc entier. Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</p>
-        <p class="en">Reading a manual or searching a photo starts with an action of yours and sends the provider the document or description concerned — never your whole fleet. Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</p>
-      </article>
+  <div class="visuel">
+    <div class="halo" aria-hidden="true"></div>
+    <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KEEVA">
+      <div class="barre" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="ligne-machine">
+        <span><span class="nom">KUBOTA U17-3</span><br><span class="meta">Vidange, filtre à huile · 250 h</span></span>
+        <span class="etat retard">+3 j</span>
+      </div>
+      <div class="ligne-machine">
+        <span><span class="nom">PEUGEOT 208</span><br><span class="meta fr">Révision 20 000 km</span><span class="meta en">20,000 km service</span></span>
+        <span class="etat bientot fr">dans 12 j</span><span class="etat bientot en">in 12 d</span>
+      </div>
+      <div class="ligne-machine">
+        <span><span class="nom">JOHN DEERE 6120M</span><br><span class="meta fr">Graissage, filtres</span><span class="meta en">Greasing, filters</span></span>
+        <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
+      </div>
+      <div class="bloc-pieces">
+        <span class="titre fr">À prévoir — Filtres</span>
+        <span class="titre en">To order — Filters</span>
+        <ul>
+          <li class="fr">2 références · 4 unités · dès le 12/10</li>
+          <li class="en">2 items · 4 units · from 12/10</li>
+        </ul>
+      </div>
+      <p class="legende fr">Aperçu de l'interface — l'application reprend cette mise en page.</p>
+      <p class="legende en">Interface preview — the app uses this layout.</p>
     </div>
   </div>
 </section>
 
-<section id="faq" style="padding-top:0;">
-  <div class="wrap">
-    <h2 class="fr">Questions fréquentes</h2>
-    <h2 class="en">Frequently asked questions</h2>
-    <div style="margin-top:22px;">
-      <details class="faq">
-        <summary><span class="fr">Faut-il un carnet PDF pour commencer ?</span><span class="en">Do I need a PDF manual to start?</span></summary>
-        <div class="reponse fr">Non. Vous pouvez créer une machine et saisir le plan à la main. Le carnet sert à aller plus vite : l'IA pré-remplit l'intervalle, les tâches et les produits.</div>
-        <div class="reponse en">No. You can add a machine and enter the plan by hand. The manual is there to save time: the AI pre-fills the interval, tasks and products.</div>
-      </details>
-      <details class="faq">
-        <summary><span class="fr">Est-ce que ça remplace un technicien ?</span><span class="en">Does it replace a technician?</span></summary>
-        <div class="reponse fr">Non, et c'est écrit noir sur blanc dans les conditions générales. L'application est un aide-mémoire de suivi : elle ne remplace ni le jugement d'un professionnel, ni une intervention.</div>
-        <div class="reponse en">No, and the terms of service say so plainly. The app is a tracking aid: it replaces neither a professional's judgement nor a service visit.</div>
-      </details>
-      <details class="faq">
-        <summary><span class="fr">Et si je n'ai pas de réseau dans mon atelier ?</span><span class="en">What if there is no signal in my workshop?</span></summary>
-        <div class="reponse fr">Les dernières données reçues sont conservées sur l'appareil : vous consultez les machines et leurs échéances hors connexion. Les modifications, elles, demandent le réseau — et l'application le dit au lieu de perdre la saisie.</div>
-        <div class="reponse en">The last received data is kept on the device: you can read machines and due dates offline. Changes do need a connection — and the app says so instead of losing your input.</div>
-      </details>
-      <details class="faq">
-        <summary><span class="fr">Mes données sont-elles revendues ?</span><span class="en">Is my data sold?</span></summary>
-        <div class="reponse fr">Non. Aucune donnée n'est vendue ni partagée à des fins commerciales. Les sous-traitants techniques (hébergement, base de données, IA à la demande) sont listés dans la politique de confidentialité.</div>
-        <div class="reponse en">No. No data is sold or shared for commercial purposes. The technical processors (hosting, database, on-demand AI) are listed in the privacy policy.</div>
-      </details>
-      <details class="faq">
-        <summary><span class="fr">Puis-je l'utiliser en anglais ?</span><span class="en">Can I use it in English?</span></summary>
-        <div class="reponse fr">Oui. L'interface, les messages et les pages légales existent en français et en anglais ; la langue suit celle de votre appareil et reste modifiable.</div>
-        <div class="reponse en">Yes. The interface, messages and legal pages exist in French and English; the language follows your device and can be changed.</div>
-      </details>
-      <details class="faq">
-        <summary><span class="fr">Quelles fonctions ne sont pas encore actives ?</span><span class="en">Which features are not live yet?</span></summary>
-        <div class="reponse fr">L'envoi automatique des rappels par WhatsApp et par e-mail est en préparation : les rappels fonctionnent aujourd'hui sur le téléphone (application Android). Les réglages concernés sont affichés comme « à venir » dans l'application, jamais comme actifs.</div>
-        <div class="reponse en">Automatic WhatsApp and email reminders are still being built: reminders currently work on the phone (Android app). The settings concerned are shown as “coming soon” in the app, never as active.</div>
-      </details>
-    </div>
+<!-- ================= FONCTIONNALITÉS ================= -->
+<section id="fonctionnalites" class="wrap">
+  <div class="section-tete">
+    <span class="sur-titre fr">Fonctionnalités</span>
+    <span class="sur-titre en">Features</span>
+    <h2>
+      <span class="fr">Trois gestes, et le suivi se tient tout seul</span>
+      <span class="en">Three moves, and the tracking holds itself</span>
+    </h2>
+    <p>
+      <span class="fr">Rien à paramétrer pendant des heures : le manuel fait le travail, vous validez.</span>
+      <span class="en">Nothing to configure for hours: the manual does the work, you approve it.</span>
+    </p>
+  </div>
+  <div class="cartes">
+    <article class="carte">
+      <span class="icone" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v12a3 3 0 013-3h7z"/></svg>
+      </span>
+      <h3><span class="fr">Manuels intelligents</span><span class="en">Smart manuals</span></h3>
+      <p>
+        <span class="fr">Importez le manuel constructeur (PDF). L'IA en extrait les échéances et les tâches pour créer un plan de maintenance structuré — premier entretien compris.</span>
+        <span class="en">Import the manufacturer's manual (PDF). The AI extracts intervals and tasks to build a structured maintenance plan — including the first service.</span>
+      </p>
+    </article>
+    <article class="carte">
+      <span class="icone" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      </span>
+      <h3><span class="fr">Suivi flexible</span><span class="en">Flexible tracking</span></h3>
+      <p>
+        <span class="fr">Alertes fondées sur le calendrier, les heures moteur ou le kilométrage. Le mode se déduit du carnet ; vous gardez la main.</span>
+        <span class="en">Alerts based on the calendar, engine hours or mileage. The mode is inferred from the manual; you stay in control.</span>
+      </p>
+    </article>
+    <article class="carte">
+      <span class="icone" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
+      </span>
+      <h3><span class="fr">Commandes simplifiées</span><span class="en">Simplified ordering</span></h3>
+      <p>
+        <span class="fr">Les pièces et consommables à prévoir sont regroupés par famille, avec quantités et dates — prêts à envoyer au fournisseur.</span>
+        <span class="en">Parts and consumables are grouped by family, with quantities and dates — ready to send to your supplier.</span>
+      </p>
+    </article>
   </div>
 </section>
 
-<section style="padding-top:0;">
-  <div class="wrap">
-    <div class="final">
-      <h2 class="fr">Essayez : c'est gratuit jusqu'à 3 machines</h2>
-      <h2 class="en">Try it: free up to 3 machines</h2>
-      <p class="fr">Un compte, le carnet d'une machine, et vous verrez si ça tient la route sur votre parc.</p>
-      <p class="en">One account, one machine's manual, and you will see whether it holds up on your fleet.</p>
-      <a class="btn" href="./index.html">Créer un compte gratuit</a>
+<!-- ================= COMMENT ÇA MARCHE ================= -->
+<section id="comment" class="wrap" style="padding-top:0;">
+  <div class="section-tete">
+    <span class="sur-titre fr">Comment ça marche</span>
+    <span class="sur-titre en">How it works</span>
+    <h2><span class="fr">Du PDF au carnet d'entretien, en trois étapes</span><span class="en">From PDF to service logbook, in three steps</span></h2>
+    <p>
+      <span class="fr">Aucun paramétrage interminable : vous importez, vous validez, vous suivez.</span>
+      <span class="en">No endless setup: you import, you approve, you track.</span>
+    </p>
+  </div>
+  <ol class="etapes">
+    <li class="etape">
+      <span class="num" aria-hidden="true">1</span>
+      <h3><span class="fr">Importez le manuel</span><span class="en">Import the manual</span></h3>
+      <p>
+        <span class="fr">Déposez le PDF constructeur de la machine. Une photo de la plaque ou du carnet suffit à retrouver le bon document, et le modèle comme l'année peuvent être précisés.</span>
+        <span class="en">Drop the machine's manufacturer PDF. A photo of the plate or the logbook is enough to find the right document, and model and year can be specified.</span>
+      </p>
+    </li>
+    <li class="etape">
+      <span class="num" aria-hidden="true">2</span>
+      <h3><span class="fr">Validez le plan proposé</span><span class="en">Approve the proposed plan</span></h3>
+      <p>
+        <span class="fr">KEEVA en tire les tâches, les échéances et l'unité de suivi (heures, kilomètres ou mois), premier entretien compris. Vous relisez, vous corrigez si besoin, puis vous confirmez.</span>
+        <span class="en">KEEVA derives the tasks, the intervals and the tracking unit (hours, kilometres or months), first service included. You review, adjust if needed, then confirm.</span>
+      </p>
+    </li>
+    <li class="etape">
+      <span class="num" aria-hidden="true">3</span>
+      <h3><span class="fr">Suivez, puis commandez</span><span class="en">Track, then order</span></h3>
+      <p>
+        <span class="fr">Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.</span>
+        <span class="en">Log the meter whenever you like: the schedule updates, reminders go out ahead of the date, and the parts list groups itself by family.</span>
+      </p>
+    </li>
+  </ol>
+</section>
+
+<!-- ================= ENGAGEMENTS SUR LES DONNÉES ================= -->
+<section id="confidentialite" class="wrap" style="padding-top:0;">
+  <div class="section-tete">
+    <span class="sur-titre fr">Vos données</span>
+    <span class="sur-titre en">Your data</span>
+    <h2><span class="fr">Quatre engagements, vérifiables dans le produit</span><span class="en">Four commitments, verifiable in the product</span></h2>
+  </div>
+  <div class="confiance">
+    <div>
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6z"/><path d="M9.5 12.2l1.8 1.8 3.4-3.6"/></svg><span class="fr">Parc cloisonné</span><span class="en">Isolated fleet</span></h3>
+      <p>
+        <span class="fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
+        <span class="en">Access rules are enforced server-side: your fleet is readable only by your company's accounts.</span>
+      </p>
+    </div>
+    <div>
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg><span class="fr">IA sur votre action</span><span class="en">AI on your action</span></h3>
+      <p>
+        <span class="fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
+        <span class="en">Reading a manual starts only when you import it, and the document is used only to build your maintenance plan.</span>
+      </p>
+    </div>
+    <div>
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0112 6c5 0 9 4.5 9 6a11 11 0 01-2.6 3.4M6.2 7.6C4 9 3 11 3 12a12 12 0 003.4 3.5"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg><span class="fr">Aucun traceur publicitaire</span><span class="en">No advertising tracker</span></h3>
+      <p>
+        <span class="fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
+        <span class="en">No ad network, no resale. Language and session are the only things the browser keeps.</span>
+      </p>
+    </div>
+    <div>
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20h16"/></svg><span class="fr">Emporter et effacer</span><span class="en">Export and erase</span></h3>
+      <p>
+        <span class="fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
+        <span class="en">History exports to CSV, and deleting the account takes the related documents with it.</span>
+      </p>
+    </div>
+  </div>
+  <p class="suite" style="margin-top:22px;font-size:14.5px;">
+    <span class="fr">Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
+    <span class="en">Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</span>
+  </p>
+</section>
+
+<!-- ================= TARIFS + FAQ ================= -->
+<section id="tarifs" class="wrap" style="padding-top:0;">
+  <div class="section-tete">
+    <span class="sur-titre fr">Tarifs</span>
+    <span class="sur-titre en">Pricing</span>
+    <h2><span class="fr">Un prix public, une limite annoncée</span><span class="en">A public price, a clear limit</span></h2>
+    <p>
+      <span class="fr">Commencez gratuitement. Passez à l'offre Pro quand votre parc grandit — sans engagement.</span>
+      <span class="en">Start free. Move to Pro when your fleet grows — no commitment.</span>
+    </p>
+  </div>
+  <div class="tarifs">
+    <article class="offre">
+      <h3><span class="fr">Démarrage</span><span class="en">Starter</span></h3>
+      <div class="prix"><span class="montant">0 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="pour fr">Pour essayer sur un vrai parc, ou pour une petite flotte.</p>
+      <p class="pour en">To try on a real fleet, or for a small one.</p>
+      <ul class="avantages">
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Jusqu'à 3 machines suivies</span><span class="en">Up to 3 machines tracked</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Numérisation IA des manuels constructeur</span><span class="en">AI reading of manufacturer manuals</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Liste de pièces générée automatiquement</span><span class="en">Automatically generated parts list</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Rappels d'échéance sur le téléphone</span><span class="en">Due-date reminders on your phone</span></li>
+      </ul>
+      <a class="btn btn-secondaire" href="./index.html"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
+    </article>
+
+    <article class="offre pro">
+      <span class="recommande fr">RECOMMANDÉ</span>
+      <span class="recommande en">RECOMMENDED</span>
+      <h3><span class="fr">Flotte Pro</span><span class="en">Fleet Pro</span></h3>
+      <div class="prix"><span class="montant">20 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="pour fr">Pour un parc qui vit, s'entretient et grandit.</p>
+      <p class="pour en">For a fleet that lives, is serviced and grows.</p>
+      <ul class="avantages">
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Machines illimitées</span><span class="en">Unlimited machines</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Démarrage</span><span class="en">Everything in Starter</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Rappels multi-canaux <em>(WhatsApp et e-mail : en préparation)</em></span><span class="en">Multi-channel reminders <em>(WhatsApp and email: coming soon)</em></span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Export des rapports (PDF / CSV)</span><span class="en">Report export (PDF / CSV)</span></li>
+      </ul>
+      <a class="btn btn-primaire" href="./index.html"><span class="fr">Passer à Pro</span><span class="en">Upgrade to Pro</span></a>
+    </article>
+  </div>
+
+  <div class="faq" id="faq">
+    <details class="faq">
+      <summary><span class="fr">Qu'est-ce qui compte comme une machine ?</span><span class="en">What counts as a machine?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite du plan gratuit porte sur le nombre suivi en même temps.</div>
+      <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — the free plan limits how many are tracked at once.</div>
+    </details>
+    <details class="faq">
+      <summary><span class="fr">Puis-je passer de l'offre gratuite à l'offre Pro à tout moment ?</span><span class="en">Can I move from free to Pro at any time?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">Oui, sans engagement : le changement prend effet immédiatement et la facturation se fait au prorata le mois suivant. Vos données et vos manuels restent en place.</div>
+      <div class="reponse en">Yes, with no commitment: the change takes effect immediately and billing is prorated the following month. Your data and manuals stay in place.</div>
+    </details>
+    <details class="faq">
+      <summary><span class="fr">Mes données et mes manuels sont-ils en sécurité ?</span><span class="en">Are my data and manuals safe?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">Chaque société ne voit que son parc : les règles d'accès sont appliquées côté serveur. Les documents servent uniquement à construire votre plan de maintenance, et la lecture par IA ne part que d'une action de votre part. Aucun traceur publicitaire, aucune revente. Détail dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</div>
+      <div class="reponse en">Each company only sees its own fleet: access rules are enforced server-side. Documents are used only to build your maintenance plan, and AI reading starts with an action of yours. No advertising trackers, no resale. Details in the <a href="./politique-confidentialite.html">privacy policy</a>.</div>
+    </details>
+    <details class="faq">
+      <summary><span class="fr">Est-ce utilisable sur le terrain, sans réseau ?</span><span class="en">Can I use it on site, with no signal?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">Oui. La consultation hors connexion s'active sur l'appareil : le dernier état connu du parc reste lisible, et les relevés faits sans réseau sont repris à la reconnexion. Les rappels d'échéance sont locaux, donc ils ne dépendent pas du réseau.</div>
+      <div class="reponse en">Yes. Offline viewing is enabled on the device: the last known state of the fleet stays readable, and readings taken without a network are picked up again on reconnection. Due-date reminders are local, so they do not depend on the network.</div>
+    </details>
+    <details class="faq">
+      <summary><span class="fr">Faut-il forcément un manuel au format PDF ?</span><span class="en">Do I need a manual in PDF format?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">C'est le cas le plus courant et le mieux pris en charge. À défaut, l'analyse d'une photo de la plaque ou du carnet permet de retrouver le bon document en ligne, et un plan peut aussi être saisi à la main : aucune machine n'est bloquée faute de notice.</div>
+      <div class="reponse en">That is the most common and best supported case. Failing that, analysing a photo of the plate or the logbook finds the right document online, and a plan can also be entered by hand: no machine is blocked for lack of a manual.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ================= CTA FINALE ================= -->
+<section class="wrap" style="padding-top:0;">
+  <div class="final">
+    <h2><span class="fr">La juste mesure de votre parc commence aujourd'hui</span><span class="en">Precise tracking starts today</span></h2>
+    <p>
+      <span class="fr">Un compte, un manuel, et vous saurez si KEEVA tient la route sur vos machines. C'est gratuit jusqu'à 3 machines.</span>
+      <span class="en">One account, one manual, and you will know whether KEEVA holds up on your machines. Free up to 3 machines.</span>
+    </p>
+    <div class="actions">
+      <a class="btn btn-clair" href="./index.html"><span class="fr">Commencer gratuitement</span><span class="en">Start for free</span></a>
+      <a class="btn btn-contour" href="mailto:parcpacificnc@gmail.com"><span class="fr">Poser une question</span><span class="en">Ask a question</span></a>
     </div>
   </div>
 </section>
 
 </main>
 
-<footer class="site">
-  <div class="wrap in">
-    <span class="wordmark">Parc<em>Pacific</em></span>
-    <a href="./index.html">Application</a>
-    <a href="./mentions-legales.html">Mentions légales</a>
-    <a href="./cgu.html">CGU</a>
-    <a href="./politique-confidentialite.html">Confidentialité</a>
-    <a href="mailto:parcpacificnc@gmail.com">Contact</a>
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="pied">
+      <div>
+        <span class="marque">
+          <svg width="28" height="28" aria-hidden="true"><use href="#picto-keeva"/></svg>
+          <span class="mot">KEEVA</span>
+        </span>
+        <p><span class="fr">La juste mesure de votre parc : suivi d'entretien des engins et véhicules, plans issus des manuels constructeur, rappels et listes de pièces.</span>
+        <span class="en">Precise tracking for your fleet: maintenance of machines and vehicles, plans from manufacturer manuals, reminders and parts lists.</span></p>
+      </div>
+      <div>
+        <h3><span class="fr">Produit</span><span class="en">Product</span></h3>
+        <ul>
+          <li><a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a></li>
+          <li><a href="#tarifs"><span class="fr">Tarification</span><span class="en">Pricing</span></a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="./index.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="fr">Légal</span><span class="en">Legal</span></h3>
+        <ul>
+          <li><a href="./mentions-legales.html"><span class="fr">Mentions légales</span><span class="en">Legal notice</span></a></li>
+          <li><a href="./cgu.html"><span class="fr">CGU</span><span class="en">Terms</span></a></li>
+          <li><a href="./politique-confidentialite.html"><span class="fr">Confidentialité</span><span class="en">Privacy</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="mailto:parcpacificnc@gmail.com">parcpacificnc@gmail.com</a></li>
+          <li><span class="fr">Une question, un manuel qui résiste ? Écrivez-nous.</span><span class="en">A question, a stubborn manual? Write to us.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bas">
+      <span>© <span id="annee">2026</span> KEEVA</span>
+      <div class="lang" style="display:flex" role="group" aria-label="Langue / Language">
+        <button type="button" data-langue="fr">FR</button>
+        <button type="button" data-langue="en">EN</button>
+      </div>
+    </div>
   </div>
 </footer>
 
 <script>
 // Même clé de stockage que l'application : la langue choisie ici est celle de
-// l'app, et inversement. La page est publique et indexable, donc tout son texte
-// existe en clair dans les deux langues (pas de traduction à l'exécution).
+// l'app, et inversement. Le texte des deux langues est écrit en clair dans la
+// page (aucune traduction à l'exécution) : la page reste indexable.
 (function () {
   var CLE = 'parcpacific.langue';
   var TITRES = {
-    fr: "ParcPacific — le carnet d'entretien de votre parc, tenu par l'IA",
-    en: 'ParcPacific — your fleet service logbook, kept by AI'
+    fr: 'KEEVA — La juste mesure de votre parc | Precise tracking for your fleet',
+    en: 'KEEVA — Precise tracking for your fleet | La juste mesure de votre parc'
   };
-  var CTA = { fr: 'Essayer gratuitement', en: 'Try it free' };
 
   function lire() {
     try {
@@ -436,17 +673,18 @@
   function appliquer(code) {
     document.documentElement.lang = code;
     document.title = TITRES[code];
-    var haut = document.getElementById('cta-haut');
-    if (haut) haut.textContent = CTA[code];
-    var boutons = document.querySelectorAll('.lang-btn');
+    var boutons = document.querySelectorAll('.lang button');
     for (var i = 0; i < boutons.length; i++) {
-      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+      var actif = boutons[i].getAttribute('data-langue') === code;
+      boutons[i].classList.toggle('actif', actif);
+      boutons[i].setAttribute('aria-pressed', actif ? 'true' : 'false');
     }
     try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
   }
 
   appliquer(lire());
-  var boutons = document.querySelectorAll('.lang-btn');
+  document.getElementById('annee').textContent = String(new Date().getFullYear());
+  var boutons = document.querySelectorAll('.lang button');
   for (var i = 0; i < boutons.length; i++) {
     boutons[i].addEventListener('click', function (e) {
       appliquer(e.currentTarget.getAttribute('data-langue'));

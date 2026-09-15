@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Politique de confidentialité — ParcPacific</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Politique de confidentialité — KEEVA</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0D1424">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EEF1F8; --surface:#FFFFFF; --ink:#0F172A; --ink-soft:#64748B;
-    --line:#E4E9F2; --primary:#4F46E5; --primary-dark:#4338CA; --r-lg:22px; --r-sm:10px;
-    --shadow-lg:0 24px 60px rgba(15,23,42,0.12);
+    /* Jetons de la charte KEEVA. Les surfaces et les bordures sont ces mêmes
+       teintes en transparence : aucune autre couleur n'est employée. */
+    --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0E1333; --ink-soft:rgba(14,19,51,.74);
+    --line:rgba(14,19,51,.14); --primary:#6366F1; --primary-dark:#5B52DF; --r-lg:22px; --r-sm:10px;
+    --shadow-lg:0 24px 60px rgba(13,20,36,.16);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins',sans-serif;line-height:1.6;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
   .wrap{max-width:720px;margin:0 auto;padding:40px 20px 90px;}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px;}
   a.back{display:inline-block;margin-bottom:18px;color:var(--primary);font-weight:700;text-decoration:none;font-size:14px;}
@@ -22,7 +26,7 @@
   h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
   p, li{font-size:15px;color:var(--ink);}
   ul{padding-left:20px;}
-  .box{background:#F6F8FC;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
+  .box{background:rgba(14,19,51,.03);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
   .box p{margin:4px 0;}
 
   /* Sélecteur de langue : même clé de stockage que l'application. */
@@ -34,8 +38,8 @@
     font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
     cursor:pointer;display:inline-flex;align-items:center;gap:6px;
   }
-  .lang-btn:hover{border-color:#C7CBF7;color:var(--primary-dark);}
-  .lang-btn.is-active{background:#EEF0FE;border-color:#C7CBF7;color:var(--primary-dark);}
+  .lang-btn:hover{border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  .lang-btn.is-active{background:rgba(99,102,241,.10);border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
   html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
 </style>
 </head>
@@ -62,7 +66,7 @@
       </div>
 
       <h2>2. Données collectées</h2>
-      <p>Dans le cadre de l'utilisation de l'application ParcPacific (ci-après « le Service »), les données suivantes sont collectées :</p>
+      <p>Dans le cadre de l'utilisation de l'application KEEVA (ci-après « le Service »), les données suivantes sont collectées :</p>
       <ul>
         <li><strong>Données de compte :</strong> adresse email, mot de passe (stocké de façon chiffrée), société de rattachement ;</li>
         <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines.</li>
@@ -116,7 +120,7 @@
       </div>
 
       <h2>2. Data collected</h2>
-      <p>When using the ParcPacific application (the “Service”), the following data is collected:</p>
+      <p>When using the KEEVA application (the “Service”), the following data is collected:</p>
       <ul>
         <li><strong>Account data:</strong> email address, password (stored in encrypted form), company the account is linked to;</li>
         <li><strong>Professional data entered by the user:</strong> information about the equipment tracked (name, brand, model, serial number), maintenance plans, service history, attached documents (service manuals in PDF format) and machine photos.</li>
@@ -165,8 +169,8 @@
 (function () {
   var CLE = 'parcpacific.langue';
   var TITRES = {
-    fr: 'Politique de confidentialité — ParcPacific',
-    en: 'Privacy policy — ParcPacific'
+    fr: 'Politique de confidentialité — KEEVA',
+    en: 'Privacy policy — KEEVA'
   };
   var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
 
