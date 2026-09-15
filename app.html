@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bQ6UaNeBkor/HAO+UWNvshkg2bWMVZ2n5CPU2FBaWoQ=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1+LfTZ3dcL6Tojx+Dw7gGtKGdaDaQVwFMFxmcIZ/hM4=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -404,13 +404,15 @@
   /* ------------------------------------------------------------
      Vue Parc : cartes machine (compat. avec le JS existant)
      ------------------------------------------------------------ */
+  /* Un cadre unique, sur les quatre côtés. L'ancien liseré de statut n'était posé
+     qu'à gauche, et seulement pour les classes is-alert / is-soon / is-ok : une
+     carte « en retard » — la vue émet is-late — n'en avait donc aucun, d'où des
+     cadres différents d'une machine à l'autre. Le statut est déjà annoncé par la
+     pastille, en haut à droite, et par la phrase d'échéance. */
   .machine{
-    background:var(--surface);border-radius:14px;box-shadow:var(--shadow-soft);
-    padding:16px 18px;display:flex;flex-direction:column;gap:14px;
+    background:var(--surface);border:2.5px solid var(--ink);border-radius:14px;
+    box-shadow:var(--shadow-soft);padding:16px 18px;display:flex;flex-direction:column;gap:14px;
   }
-  .machine.is-alert{border-left:4px solid var(--late);}
-  .machine.is-soon{border-left:4px solid var(--soon);}
-  .machine.is-ok,.machine.is-unknown{border-left:4px solid var(--ok);}
   .m-main .name{font-size:17px;font-weight:700;}
   .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
   .m-side{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
@@ -4824,6 +4826,52 @@ async function fetchAllInterventions(machineId) {
   return all;
 }
 
+// Les « points d'attention » viennent de l'analyse du carnet : l'IA les a écrits
+// au moment où le compteur était vide. Une fois le compteur renseigné, une phrase
+// comme « La machine ayant 0 heure » contredit le haut de la fiche, qui affiche
+// « compteur 22 h ». On retire donc les phrases qui AFFIRMENT l'état du compteur
+// ou son unité — l'application les affiche déjà, et mieux — en gardant tout ce
+// qui vient du manuel : jalons, pages, opérations. Rien n'est inventé.
+function notesUtiles(notes, compteur) {
+  if (notes == null) return notes;
+  const texte = String(notes).trim();
+  // Sans compteur connu, l'affirmation n'est pas contredite : on garde le texte.
+  if (compteur == null || !(Number(compteur) > 0)) return texte;
+  const AFFIRME_L_ETAT = [
+    /^(la|le)\s+(machine|v[ée]hicule|tracteur|engin|chariot|v[ée]lo)\b[^.]*\b(0\s?h|neuf|neuve|affiche|indique|compteur|heures?|km|kilom[èe]tres)/i,
+    /^(comme|lorsque|puisque|[ée]tant donn[ée] que)\b[^.]*\b(\d[\d\s]*\s?(h|heures?|km|kilom[èe]tres)|compteur)/i,
+    /\b(le suivi doit se faire|suivi par compteur|compteur horaire|compteur kilom[ée]trique)\b/i,
+    /^(the|as|since)\b[^.]*\b(0\s?h(ours?)?|new|shows|reads|counter|hours?|km)\b/i,
+  ];
+  const phrases = texte.match(/[^.!?]+[.!?]?/g) || [texte];
+  // L'application calcule elle-même la prochaine échéance : une phrase qui décrit
+  // ce calcul vieillit avec le compteur, même une fois la prémisse retirée.
+  const CALCUL = /(échéance|echeance|prochaine|jalon)[^.]*\b(fix[ée]e?|calcul[ée]e?|de plus)\b/i;
+  const nettoyer = (phrase) => {
+    let reste = phrase;
+    // Une phrase peut commencer par la prémisse fausse puis donner du manuel :
+    // « La machine ayant 0 heure, le premier jalon obligatoire est l'entretien
+    // des 20 premières heures (page 17). » On retire la prémisse, on garde le
+    // reste — c'est là qu'est l'information utile.
+    const coupe = phrase.match(/^([^,]{0,140}?),\s*([\s\S]+)$/);
+    if (coupe && AFFIRME_L_ETAT.some((motif) => motif.test(coupe[1]))) reste = coupe[2].trim();
+    else if (AFFIRME_L_ETAT.some((motif) => motif.test(phrase))) return '';
+    if (CALCUL.test(reste)) return '';
+    if (reste !== phrase) {
+      if (reste.length < 30) return '';
+      return reste.charAt(0).toUpperCase() + reste.slice(1);
+    }
+    return phrase;
+  };
+  const gardees = phrases
+    .map((phrase) => phrase.trim())
+    .map(nettoyer)
+    .filter((phrase) => phrase && phrase.length > 2);
+  const resultat = gardees.join(' ').trim();
+  // Si tout a été retiré, mieux vaut le texte d'origine que rien du tout.
+  return resultat.length >= 40 ? resultat : texte;
+}
+
 function openPlanView(machine, companyId, categories) {
   const info = dueInfo(machine.plan, machine);
   const isCounterMode = planIsCounter(machine.plan);
@@ -4896,7 +4944,7 @@ function openPlanView(machine, companyId, categories) {
         ${machine.plan.notes ? `
           <div class="plan-field">
             <div class="label">${trad('Points d\'attention')}</div>
-            <div class="attention-box">${esc(machine.plan.notes)}</div>
+            <div class="attention-box">${esc(notesUtiles(machine.plan.notes, machineCounter(machine)))}</div>
           </div>
         ` : ''}
       ` : `<div class="plan-field"><div class="value" style="color:var(--ink-soft);">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></div>`}
