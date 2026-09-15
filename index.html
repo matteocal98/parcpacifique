@@ -6,12 +6,12 @@
     <title>ParcPacific - Le carnet d'entretien de votre flotte, piloté par l'IA</title>
     <meta name="description" content="Transformez vos manuels constructeur en plans de maintenance intelligents. Suivi par calendrier, heures ou kilomètres.">
     
-    <!-- Police Inter (Moderne et lisible) -->
+    <!-- Police Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS (via CDN pour un test rapide) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Configuration des couleurs personnalisées -->
@@ -24,10 +24,12 @@
                     },
                     colors: {
                         pacific: {
-                            900: '#0F4C75', // Bleu profond
+                            900: '#0F4C75',
                             800: '#1B5D8B',
-                            600: '#3282B8', // Bleu moyen
-                            400: '#74B9FF', // Accent clair
+                            600: '#3282B8',
+                            400: '#74B9FF',
+                            200: '#BAE6FD',
+                            100: '#E0F2FE',
                         }
                     }
                 }
@@ -39,7 +41,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        /* Animation subtile pour le mockup */
         .float-animation {
             animation: float 6s ease-in-out infinite;
         }
@@ -64,7 +65,7 @@
                     <span class="text-xl font-bold text-pacific-900 tracking-tight">ParcPacific</span>
                 </div>
 
-                <!-- Navigation (cachée sur mobile, visible sur desktop) -->
+                <!-- Navigation -->
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="#fonctionnalites" class="text-sm font-medium text-slate-600 hover:text-pacific-900 transition-colors">Fonctionnalités</a>
                     <a href="#tarifs" class="text-sm font-medium text-slate-600 hover:text-pacific-900 transition-colors">Tarifs</a>
@@ -79,7 +80,7 @@
                         <button class="px-2 py-1 text-xs font-medium text-slate-500 hover:text-pacific-900">EN</button>
                     </div>
                     
-                    <a href="/login.html" class="hidden sm:block text-sm font-medium text-slate-700 hover:text-pacific-900 px-3 py-2">
+                    <a href="login.html" class="hidden sm:block text-sm font-medium text-slate-700 hover:text-pacific-900 px-3 py-2">
                         Se connecter
                     </a>
                     <a href="#" class="bg-pacific-900 hover:bg-pacific-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all shadow-md hover:shadow-lg">
@@ -130,18 +131,16 @@
                     </p>
                 </div>
 
-                <!-- Mockup Visuel (Remplacez par une vraie capture d'écran plus tard) -->
+                <!-- Mockup Visuel -->
                 <div class="relative float-animation">
                     <div class="absolute -inset-4 bg-gradient-to-r from-pacific-400 to-blue-300 rounded-2xl blur-2xl opacity-30"></div>
                     <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-                        <!-- Fausse barre de titre -->
                         <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-2">
                             <div class="w-3 h-3 rounded-full bg-red-400"></div>
                             <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
                             <div class="w-3 h-3 rounded-full bg-green-400"></div>
                             <div class="ml-4 bg-slate-200 h-4 w-48 rounded-md"></div>
                         </div>
-                        <!-- Faux contenu d'application -->
                         <div class="p-6 grid gap-4">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -227,19 +226,150 @@
         </div>
     </section>
 
-    <!-- ================= CTA SECTION ================= -->
+    <!-- ================= PRICING SECTION ================= -->
+    <section id="tarifs" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Une tarification simple et transparente</h2>
+                <p class="text-slate-600 text-lg">Pas de frais cachés, pas d'engagement. Commencez gratuitement et passez à la vitesse supérieure quand votre flotte grandit.</p>
+            </div>
+
+            <!-- Cartes de prix -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
+                <!-- Offre Gratuite -->
+                <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-slate-900">Démarrage</h3>
+                        <p class="text-slate-500 text-sm mt-1">Parfait pour tester ou gérer un petit atelier.</p>
+                    </div>
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span class="text-4xl font-bold text-slate-900">0 €</span>
+                        <span class="text-slate-500">/ mois</span>
+                    </div>
+                    <a href="#" class="block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-3 rounded-xl transition-colors mb-8">
+                        Commencer gratuitement
+                    </a>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 text-sm text-slate-600">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500 flex-shrink-0"></i>
+                            <span>Jusqu'à <strong>3 machines</strong> suivies</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-slate-600">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500 flex-shrink-0"></i>
+                            <span>Numérisation IA des manuels constructeur</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-slate-600">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500 flex-shrink-0"></i>
+                            <span>Rappels par e-mail basiques</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-slate-600">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500 flex-shrink-0"></i>
+                            <span>Liste de pièces générée automatiquement</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Offre Pro -->
+                <div class="bg-pacific-900 rounded-2xl p-8 border-2 border-pacific-400 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-pacific-400 text-pacific-900 text-xs font-bold px-3 py-1 rounded-bl-lg">
+                        RECOMMANDÉ
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-white">Flotte Pro</h3>
+                        <p class="text-pacific-200 text-sm mt-1">Pour les gestionnaires de parc qui veulent automatiser.</p>
+                    </div>
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span class="text-4xl font-bold text-white">20 €</span>
+                        <span class="text-pacific-200">/ mois</span>
+                    </div>
+                    <a href="#" class="block w-full text-center bg-white hover:bg-slate-100 text-pacific-900 font-bold py-3 rounded-xl transition-colors mb-8 shadow-lg">
+                        Passer à l'offre Pro
+                    </a>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 text-sm text-pacific-100">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-pacific-400 flex-shrink-0"></i>
+                            <span><strong>Machines illimitées</strong></span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-pacific-100">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-pacific-400 flex-shrink-0"></i>
+                            <span>Tout ce qui est inclus dans l'offre Démarrage</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-pacific-100">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-pacific-400 flex-shrink-0"></i>
+                            <span>Alertes multi-canaux (E-mail + SMS)</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-pacific-100">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-pacific-400 flex-shrink-0"></i>
+                            <span>Export des rapports de maintenance (PDF/CSV)</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-pacific-100">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-pacific-400 flex-shrink-0"></i>
+                            <span>Support prioritaire par e-mail</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="max-w-3xl mx-auto mt-20">
+                <h3 class="text-2xl font-bold text-slate-900 text-center mb-8">Questions fréquentes</h3>
+                <div class="space-y-4">
+                    
+                    <details class="group bg-white rounded-xl border border-slate-200 open:ring-2 open:ring-pacific-100 transition-all">
+                        <summary class="flex justify-between items-center cursor-pointer p-5 font-medium text-slate-900 list-none">
+                            <span>Qu'est-ce qui compte comme une "machine" ?</span>
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500"></i>
+                            </span>
+                        </summary>
+                        <div class="px-5 pb-5 text-slate-600 text-sm leading-relaxed">
+                            Une machine correspond à un équipement unique suivi dans l'application (ex: une pelleteuse, un tracteur, un groupe électrogène). Vous pouvez ajouter ou retirer des machines à tout moment depuis votre tableau de bord.
+                        </div>
+                    </details>
+
+                    <details class="group bg-white rounded-xl border border-slate-200 open:ring-2 open:ring-pacific-100 transition-all">
+                        <summary class="flex justify-between items-center cursor-pointer p-5 font-medium text-slate-900 list-none">
+                            <span>Puis-je passer de l'offre Gratuite à l'offre Pro à tout moment ?</span>
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500"></i>
+                            </span>
+                        </summary>
+                        <div class="px-5 pb-5 text-slate-600 text-sm leading-relaxed">
+                            Absolument. Il n'y a aucun engagement. Vous pouvez mettre à niveau votre compte en un clic. La facturation de 20 € ne s'appliquera qu'à partir du mois suivant la mise à niveau, au prorata si nécessaire.
+                        </div>
+                    </details>
+
+                    <details class="group bg-white rounded-xl border border-slate-200 open:ring-2 open:ring-pacific-100 transition-all">
+                        <summary class="flex justify-between items-center cursor-pointer p-5 font-medium text-slate-900 list-none">
+                            <span>Mes données et mes manuels sont-ils en sécurité ?</span>
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500"></i>
+                            </span>
+                        </summary>
+                        <div class="px-5 pb-5 text-slate-600 text-sm leading-relaxed">
+                            Oui. Nous utilisons un chiffrement de bout en bout pour vos documents. Vos manuels constructeur servent uniquement à alimenter l'IA pour votre plan de maintenance et ne sont jamais partagés avec des tiers.
+                        </div>
+                    </details>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FINAL CTA SECTION ================= -->
     <section class="py-20 bg-pacific-900 text-white">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl sm:text-4xl font-bold mb-6">Prêt à optimiser la maintenance de votre flotte ?</h2>
-            <p class="text-pacific-400 text-lg mb-8 max-w-2xl mx-auto">
+            <p class="text-pacific-200 text-lg mb-8 max-w-2xl mx-auto">
                 Rejoignez les gestionnaires de parc qui gagnent du temps et réduisent les pannes imprévues. Configuration en moins de 2 minutes.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="#" class="bg-white text-pacific-900 hover:bg-slate-100 font-bold px-8 py-4 rounded-xl transition-all shadow-lg">
                     Créer un compte gratuit (3 machines)
                 </a>
-                <a href="#" class="bg-transparent border-2 border-pacific-400 text-white hover:bg-pacific-800 font-semibold px-8 py-4 rounded-xl transition-all">
-                    Contacter l'équipe commerciale
+                <a href="mailto:contact@parcpacifique.com" class="bg-transparent border-2 border-pacific-400 text-white hover:bg-pacific-800 font-semibold px-8 py-4 rounded-xl transition-all">
+                    Nous contacter
                 </a>
             </div>
         </div>
@@ -261,8 +391,8 @@
                 <div>
                     <h4 class="text-white font-semibold mb-4">Produit</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-white transition-colors">Fonctionnalités</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Tarification</a></li>
+                        <li><a href="#fonctionnalites" class="hover:text-white transition-colors">Fonctionnalités</a></li>
+                        <li><a href="#tarifs" class="hover:text-white transition-colors">Tarification</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Mises à jour</a></li>
                     </ul>
                 </div>
