@@ -105,6 +105,15 @@
   @media(min-width:1024px){.wrap{padding:0 32px;}}
   section{padding:80px 0;}
   @media(min-width:1024px){section{padding:96px 0;}}
+  /* ATTENTION : .wrap ne porte que les marges latérales, mais une classe l'emporte
+     sur le sélecteur de type. Posé sur une <section>, il annulait donc aussi
+     l'espacement vertical — les sections se touchaient. On le rétablit ici, et les
+     déclarations en ligne « padding-top:0 » continuent de gagner quand une section
+     doit coller à la précédente. */
+  section.wrap{padding-top:80px;padding-bottom:80px;}
+  @media(min-width:640px){section.wrap{padding-left:24px;padding-right:24px;}}
+  @media(min-width:1024px){section.wrap{padding-top:96px;padding-bottom:96px;padding-left:32px;padding-right:32px;}}
+  @media(max-width:600px){section.wrap{padding-top:56px;padding-bottom:56px;}}
   :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:8px;}
 
   /* --- Marque : hexagone en dégradé + puce centrale (pictogramme de la charte) */
@@ -146,8 +155,8 @@
   .lien-connexion:hover{color:var(--encre);}
 
   /* --- Héros --------------------------------------------------------------- */
-  .heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
-  @media(min-width:1024px){.heros{grid-template-columns:1.05fr .95fr;gap:56px;padding-top:72px;}}
+  section.heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
+  @media(min-width:1024px){section.heros{grid-template-columns:1.05fr .95fr;gap:56px;padding-top:72px;}}
   .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
   .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--cyan);flex:0 0 auto;}
   .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--cyan);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
