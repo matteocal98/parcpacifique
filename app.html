@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hz3d3hOuNDI8FJgXpPXsocA0QGLn+Kj7oZb5Kl1h2as=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bQ6UaNeBkor/HAO+UWNvshkg2bWMVZ2n5CPU2FBaWoQ=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -549,17 +549,20 @@
   .pres-points li{margin-bottom:3px;}
   .pres-lien{font-size:13.5px;font-weight:700;color:var(--primary-dark);text-decoration:none;}
   .pres-lien:hover{text-decoration:underline;}
+  /* 380 px ne laissaient pas tenir « Se connecter » et « Créer un compte » côte
+     à côte : les deux boutons passaient l'un sous l'autre. */
   .login-box{
-    max-width:380px;margin:10vh auto 0;padding:32px 28px;border:1px solid var(--line);
+    max-width:460px;margin:10vh auto 0;padding:32px 28px;border:1px solid var(--line);
     background:var(--surface);border-radius:20px;box-shadow:0 24px 60px rgba(13,20,36,.16);
   }
   .login-box h1{margin:0 0 6px;font-size:24px;font-weight:800;text-align:center;display:block;}
   .login-box p{color:var(--ink-2);font-size:14.5px;margin-top:0;margin-bottom:20px;text-align:center;}
-  .avatar-badge{
-    width:52px;height:52px;border-radius:50%;background:var(--primary);color:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
-    margin:0 auto 14px;box-shadow:0 8px 18px rgba(99,102,241,.28);
+  /* La marque KEEVA remplace l'ancien rond indigo à étoile : c'est le logo du
+     produit, et il se lit à cette taille. */
+  .marque-connexion{
+    display:flex;justify-content:center;align-items:center;margin:0 auto 10px;
   }
+  .marque-connexion svg{display:block;}
   .password-wrap{position:relative;}
   .password-wrap input{padding-right:76px;}
   .toggle-pw-btn{
@@ -571,7 +574,10 @@
   /* Une fois le mot de passe affiché, le bouton s'efface : c'est l'état du champ
      qui compte, pas le bouton. */
   .toggle-pw-btn[aria-pressed="true"]{color:var(--ink-2);}
-  .signup-link-btn{width:100%;margin-top:10px;flex:none;}
+  /* Les deux chemins côte à côte : se connecter (action principale) et créer un
+     compte (l'autre chemin), à largeur égale. */
+  .login-actions{display:flex;gap:10px;margin-top:18px;}
+  .login-actions button{flex:1;min-width:0;}
   .forgot-pw-row{text-align:right;margin-top:10px;}
   .legal-footer{text-align:center;margin-top:24px;font-size:12.5px;color:var(--ink-2);}
   .legal-footer a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;}
@@ -1726,7 +1732,22 @@ function renderLogin(errorMsg, horsLigne) {
   app.innerHTML = `
     <div class="login-box">
       ${basculeLangueHtml()}
-      <div class="avatar-badge" aria-hidden="true">✦</div>
+      <div class="marque-connexion" aria-hidden="true">
+        <svg viewBox="0 0 1 1" width="68" height="68" focusable="false">
+          <defs>
+            <linearGradient id="keeva-connexion" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#236FE0"/>
+              <stop offset="58%" stop-color="#14B8A6"/>
+              <stop offset="100%" stop-color="#8B9B37"/>
+            </linearGradient>
+          </defs>
+          <path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#keeva-connexion)"/>
+          <path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/>
+          <path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/>
+          <path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/>
+          <path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="#0E1333"/>
+        </svg>
+      </div>
       <h1>KEEVA</h1>
       <p>${trad('Connecte-toi pour voir tes machines.')}</p>
       <form id="login-form">
@@ -1740,10 +1761,12 @@ function renderLogin(errorMsg, horsLigne) {
         <div class="forgot-pw-row">
           <button type="button" class="link-inline" id="open-forgot">${trad('Mot de passe oublié ?')}</button>
         </div>
-        <button class="primary" type="submit">${trad('Se connecter')}</button>
+        <div class="login-actions">
+          <button class="primary" type="submit">${trad('Se connecter')}</button>
+          <button type="button" class="secondary" id="open-signup">${trad('Créer un compte')}</button>
+        </div>
         ${errorMsg ? `<div class="error">${esc(errorMsg)}</div>` : ''}
       </form>
-      <button type="button" class="primary signup-link-btn" id="open-signup">${trad('Créer un compte')} — ${trad('gratuit')}</button>
       <div class="presentation-publique">
         <p class="pres-promesse">${trad('Le carnet d\'entretien de votre parc, tenu par l\'IA : échéances en dates ou au compteur, rappels, et liste de produits à commander.')}</p>
         <ul class="pres-points">
