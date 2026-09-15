@@ -69,6 +69,9 @@
     --primary-tint:rgba(99,102,241,.10);
     --primary-tint-2:rgba(99,102,241,.30);
     --primary-line:rgba(99,102,241,.45);
+    /* Texte discret posé sur la couleur d'action : du blanc, pas un indigo
+       translucide (qui disparaissait sur l'indigo). */
+    --sur-primaire:rgba(255,255,255,.92);
     --gold:#DE7A16;
     --gold-dark:#DE7A16;
     --cyan:#24B5A8;
@@ -136,7 +139,7 @@
   }
   h1,h2,h3{font-family:inherit;letter-spacing:-0.02em;}
   button{font-family:inherit;}
-  a{color:var(--primary);text-decoration:none;}
+  a{color:var(--primary-dark);text-decoration:none;}
   a:hover{color:var(--primary-dark);text-decoration:underline;}
 
   /* Chiffres techniques : Space Grotesk + tabular nums (spec README) */
@@ -201,7 +204,7 @@
     min-height:48px;
   }
   .tab .tab-icon{font-size:16px;line-height:1;}
-  .tab.is-active{color:var(--primary);font-weight:700;}
+  .tab.is-active{color:var(--primary-dark);font-weight:700;}
   .tab-fab{
     flex:0 0 58px;display:flex;justify-content:center;background:none;border:none;cursor:pointer;
   }
@@ -276,7 +279,7 @@
   .btn-tint:hover{background:var(--primary-tint-2);}
   .link-inline{
     background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
-    color:var(--primary);font-size:13.5px;font-weight:700;
+    color:var(--primary-dark);font-size:13.5px;font-weight:700;
   }
   .link-inline:hover{color:var(--primary-dark);text-decoration:underline;}
 
@@ -309,11 +312,13 @@
 
   /* Carte prioritaire (violette) */
   .priority{
-    background:var(--primary);border-radius:14px;padding:16px;color:#fff;
+    /* La signature FR plutôt que l'indigo : du texte blanc sur #6366F1 ne
+       donne que 4,47:1, sous la barre des 4,5:1 pour du petit texte. */
+    background:var(--primary-dark);border-radius:14px;padding:16px;color:#fff;
     display:flex;flex-direction:column;gap:12px;
   }
   .priority-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--primary-tint-2);}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--sur-primaire);}
   .pill-late{font-size:11px;font-weight:800;background:var(--late);color:#fff;padding:4px 8px;border-radius:var(--r-pill);}
   .pill-soon{font-size:11px;font-weight:800;background:var(--soon);color:#fff;padding:4px 8px;border-radius:var(--r-pill);}
   .priority h2{margin:0;font-size:22px;font-weight:800;line-height:1.15;}
@@ -321,12 +326,12 @@
   .priority-stats{display:flex;gap:20px;padding-top:10px;border-top:1px solid rgba(255,255,255,.22);}
   .priority-stats .stat{display:flex;flex-direction:column;gap:2px;}
   .priority-stats .val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;}
-  .priority-stats .key{font-size:11px;font-weight:600;color:var(--primary-tint-2);}
+  .priority-stats .key{font-size:11px;font-weight:600;color:var(--sur-primaire);}
   .priority-actions{display:flex;gap:8px;}
   .priority-actions button{
     flex:1;font-size:13px;font-weight:700;padding:11px 0;border-radius:12px;cursor:pointer;
   }
-  .priority-actions .do{background:#fff;color:var(--primary);border:none;}
+  .priority-actions .do{background:#fff;color:var(--primary-dark);border:none;}
   .priority-actions .see{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}
   @media (min-width:900px){
     .priority{flex-direction:row;align-items:center;gap:28px;flex-wrap:wrap;}
@@ -357,7 +362,7 @@
 
   /* Bloc IA */
   .chip-icon{
-    width:30px;height:30px;border-radius:9px;background:var(--primary-tint);color:var(--primary);
+    width:30px;height:30px;border-radius:9px;background:var(--primary-tint);color:var(--primary-dark);
     font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .pill{font-size:11px;font-weight:700;padding:4px 8px;border-radius:var(--r-pill);}
@@ -547,7 +552,7 @@
   .password-wrap input{padding-right:76px;}
   .toggle-pw-btn{
     position:absolute;right:6px;top:50%;transform:translateY(-50%);
-    background:none;border:none;color:var(--primary);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px;
+    background:none;border:none;color:var(--primary-dark);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 8px;
     border-radius:8px;
   }
   .toggle-pw-btn:hover{background:var(--surface-soft);}
