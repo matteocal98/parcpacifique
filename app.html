@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MehohbetX0OMBJh0M7mQkbTs6Qb5a5PesoQrHWLxkvA=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DUnnxlcOSLPcpheEPkgDD3B3obe2E1suJsii76Liol4=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2501,7 +2501,10 @@ const BIOMETRIE_SERVEUR = 'keeva.work';
 // Le verrou est LOCAL et ne dépend PAS du réseau : un appareil hors connexion avec
 // une session valide se déverrouille, puis affiche la copie locale comme avant.
 const VERROU_CLE = 'parcpacific.verrou.v1';
-const VERROU_ARRIERE_PLAN_MS = 60 * 1000;   // 1 minute : délai à ajuster ici
+// Durée d'absence tolérée avant de redemander la vérification. En deçà, revenir
+// d'une autre application ne doit rien changer : 30 secondes couvrent la lecture
+// d'un message ou la prise d'une photo, et referment l'écran au-delà.
+const VERROU_ARRIERE_PLAN_MS = 30 * 1000;
 
 // Modes d'enregistrement du jeton (option séparée, dite « reconnexion
 // automatique »). Valeurs de l'énumération AccessControl du greffon, relevées dans
@@ -2663,6 +2666,22 @@ async function sortirDuVerrou() {
 // Retour au premier plan : on redemande la vérification SEULEMENT si l'absence a
 // duré au moins VERROU_ARRIERE_PLAN_MS. En deçà, rien : basculer vers une autre
 // application et revenir ne doit pas être puni.
+//
+// Il ne s'agit QUE d'un reverrouillage d'AFFICHAGE : ni la session, ni la copie
+// hors connexion ne sont touchées, et l'application reste utilisable sans réseau.
+// Aucune déconnexion n'est déclenchée ici — jamais.
+//
+// POURQUOI @capacitor/app : dans le WebView Android, visibilitychange et focus
+// sont intermittents — constaté sur le terrain, le verrou ne revenait pas. Le
+// greffon officiel expose l'état réel de l'application (onStop / onResume du
+// système). Comme LocalNotifications et NativeBiometric, il s'annonce sur
+// window.Capacitor.Plugins.App : aucun import npm, aucun greffon à charger.
+function pluginApplication() {
+  const cap = window.Capacitor;
+  const greffon = cap && cap.Plugins ? cap.Plugins.App : null;
+  return greffon && typeof greffon.addListener === 'function' ? greffon : null;
+}
+
 function verrouEcouterArrierePlan() {
   if (verrouEcoute || !dansApplication()) return;
   verrouEcoute = true;
@@ -2674,13 +2693,35 @@ function verrouEcouterArrierePlan() {
     if (verrouActif || !verrouNecessaire()) return;
     if (ecoule >= VERROU_ARRIERE_PLAN_MS) verrouiller();
   };
+  // Un `blur` alors que la page reste visible vient d'une fenêtre système (invite
+  // biométrique, clavier) : ce n'est pas un départ en arrière-plan, et cela ne doit
+  // pas armer le verrou — sinon le temps passé à s'authentifier le refermerait.
+  const masqueFenetre = () => {
+    if (document.visibilityState && document.visibilityState !== 'hidden') return;
+    noterMasque();
+  };
+
+  const application = pluginApplication();
+  if (application) {
+    // Voie normale : l'état remonté par le système. addListener rend une promesse
+    // d'écouteur, mais l'écoute est posée dès l'appel : on n'attend rien.
+    try {
+      application.addListener('appStateChange', (etat) => {
+        if (etat && etat.isActive === false) noterMasque();
+        else revenir();
+      });
+      return;
+    } catch (err) { /* greffon muet : le secours ci-dessous prend le relais */ }
+  }
+
+  // Secours — application installée AVANT @capacitor/app : les événements du
+  // WebView, moins fiables, mais sans dépendance.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') noterMasque();
     else revenir();
   });
-  // Secours : certains WebView ne remontent pas visibilitychange.
   window.addEventListener('focus', revenir);
-  window.addEventListener('blur', noterMasque);
+  window.addEventListener('blur', masqueFenetre);
 }
 
 // La connexion sans mot de passe de l'ÉCRAN DE CONNEXION prouve déjà l'identité :
