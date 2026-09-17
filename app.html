@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-c7pCDqipgPW7vYgPYpbhtPjyyHiiqo6Awx7aWslkFRY=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HmUs1bPxt3phEShfEWmNfQzqmN4hCvnDECLymmyimZU=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -448,6 +448,14 @@
     border-radius:var(--r-pill);cursor:pointer;font-family:inherit;
   }
   .view-manual:hover{background:var(--primary-tint-2);}
+  /* Dans la fiche machine, « Voir le carnet actuel (PDF) » et « Analyser ce
+     carnet » étaient collés l'un à l'autre : on leur donne l'écart qui manque,
+     y compris quand ils passent l'un sous l'autre sur un écran étroit. */
+  .view-manual + .view-manual{margin-left:8px;}
+  @media (max-width:520px){
+    .view-manual{width:100%;}
+    .view-manual + .view-manual{margin-left:0;margin-top:8px;}
+  }
   .machine-photo{
     display:block;width:100%;max-width:220px;aspect-ratio:16/9;object-fit:contain;
     border-radius:var(--r-chip);margin-top:12px;border:1px solid var(--line);background:var(--surface-soft);
@@ -655,6 +663,15 @@
     background:var(--soon-bg);border:1px solid rgba(222,122,22,.35);border-radius:var(--r-chip);
     padding:13px 15px;font-size:14px;line-height:1.6;margin-top:4px;color:var(--soon-ink);
   }
+  /* Un tableau de référence se lit sur un écran large, mais il ne doit JAMAIS
+     être tronqué sur un téléphone : il défile horizontalement dans son cadre,
+     toutes les colonnes restant accessibles. Le tableau lui-même garde une
+     largeur minimale confortable (colonnes lisibles, pas écrasées). */
+  .ref-scroll{
+    max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border:1px solid var(--line);border-radius:var(--r-chip);margin-top:8px;
+  }
+  .ref-scroll > .ref-table{margin-top:0;border:0;border-radius:0;min-width:640px;}
   .ref-table{
     width:100%;border-collapse:separate;border-spacing:0;margin-top:8px;font-size:14px;
     border:1px solid var(--line);border-radius:var(--r-chip);overflow:hidden;
@@ -1569,6 +1586,21 @@ function planCounterPatch(interval, reminder) {
 }
 function planNextDueCounterPatch(nextDue) {
   return SCHEMA.hasCounter ? { next_due_counter: nextDue } : { next_due_hours: nextDue };
+}
+// L'échéance du plan n'avance QUE si au moins un élément de CE plan a réellement
+// été coché. Règle volontairement prudente : enregistrer un entretien sans rien
+// cocher (graissage, réparation, autre travail) ne doit pas effacer une échéance
+// déjà dépassée qu'on n'a pas faite. Un plan sans aucun élément détaillé garde
+// le comportement d'avant : on ne peut rien cocher, l'entretien porte donc sur
+// le plan et l'échéance avance.
+//
+// LIMITE CONNUE, à dire telle quelle : le modèle ne mémorise qu'UNE échéance par
+// plan (next_due_counter / next_due_hours), pas une échéance par tâche. Cocher
+// une seule tâche fait donc avancer l'échéance de tout le plan — c'est le
+// comportement d'origine, inchangé ici.
+function journalAvanceEcheance(items, checked) {
+  if (!items.length) return true;
+  return checked.length > 0;
 }
 // Classe d'habillage du bandeau d'échéance selon l'état.
 function heroClass(state) { return state === 'late' ? 'alert' : (state === 'soon' ? 'soon' : 'ok'); }
@@ -6559,11 +6591,16 @@ function openLogInterventionModal(machine) {
 
       if (machine.plan?.id) {
         const planUpdate = {};
-        if (isCounter) {
-          const interval = planIntervalCounter(machine.plan) || FALLBACK_INTERVAL_HOURS;
-          Object.assign(planUpdate, planNextDueCounterPatch((hoursValue || 0) + interval));
-        } else {
-          planUpdate.next_due_at = addDaysIso(performedAt, machine.plan.interval_days || FALLBACK_INTERVAL_DAYS);
+        // Cas réel : l'huile était due à 20 h et le compteur est à 22 h (donc
+        // « en retard de 2 h ») ; un graissage saisi à 25 h effaçait ce retard
+        // alors que la vidange n'avait jamais été faite. C'est corrigé ici.
+        if (journalAvanceEcheance(items, checkedItems)) {
+          if (isCounter) {
+            const interval = planIntervalCounter(machine.plan) || FALLBACK_INTERVAL_HOURS;
+            Object.assign(planUpdate, planNextDueCounterPatch((hoursValue || 0) + interval));
+          } else {
+            planUpdate.next_due_at = addDaysIso(performedAt, machine.plan.interval_days || FALLBACK_INTERVAL_DAYS);
+          }
         }
         const { error: planErr } = await sb.from('maintenance_plans').update(planUpdate).eq('id', machine.plan.id);
         if (planErr) throw planErr;
@@ -6666,7 +6703,7 @@ function openPlanView(machine, companyId, categories) {
   const cell = (v) => (v || v === 0) ? esc(v) : '<span class="muted">—</span>';
 
   const tableHtml = hasItemDetail ? `
-    <table class="ref-table">
+    <div class="ref-scroll"><table class="ref-table">
       <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th></tr></thead>
       <tbody>
         ${items.map(it => `
@@ -6678,7 +6715,7 @@ function openPlanView(machine, companyId, categories) {
             <td>${cell(it.note)}</td>
           </tr>`).join('')}
       </tbody>
-    </table>
+    </table></div>
   ` : (simpleItems.length
       ? `<ul class="plan-tasks">${simpleItems.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
       : `<div class="value" style="color:var(--ink-soft);">${trad('Aucune tâche détaillée')}</div>`);
@@ -6823,7 +6860,7 @@ function openPlanView(machine, companyId, categories) {
     const shown = historyData.slice(0, HISTORY_ROWS_IN_MODAL);
     const hidden = historyData.length - shown.length;
     section.insertAdjacentHTML('beforeend', `
-      <table class="ref-table">
+      <div class="ref-scroll"><table class="ref-table">
         <thead><tr><th>${trad('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${trad('Éléments traités')}</th><th>${trad('Remarques')}</th></tr></thead>
         <tbody>
           ${shown.map(h => `
@@ -6834,7 +6871,7 @@ function openPlanView(machine, companyId, categories) {
               <td>${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
             </tr>`).join('')}
         </tbody>
-      </table>
+      </table></div>
       ${hidden > 0 ? `<div class="hint">tR('{caches} entretien(s) plus ancien(s) non affiché(s) ici — l\'export CSV contient bien les {total} entretiens.', { caches: hidden, total: historyData.length })</div>` : ''}
       <div class="hint">${tR('{n} entretien(s) enregistré(s).', { n: historyData.length })}</div>`);
   })();
