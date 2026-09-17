@@ -228,22 +228,30 @@
   .confiance .suite{margin-top:22px;font-size:14.5px;}
   .confiance .suite a{color:var(--tagline-fr);font-weight:600;}
 
-  /* --- Tarifs -------------------------------------------------------------- */
-  .tarifs{display:grid;gap:26px;}
-  @media(min-width:900px){.tarifs{grid-template-columns:repeat(2,1fr);}}
-  .offre{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
-  .offre.pro{border:2px solid var(--indigo);overflow:hidden;}
+  /* --- Tarifs : trois offres côte à côte, largeurs égales ------------------ */
+  /* Une seule ligne sur écran large ; en dessous, l'empilement (une colonne)
+     parce que trois colonnes ne tiennent pas sur un téléphone. */
+  .tarifs{display:grid;gap:26px;align-items:stretch;}
+  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(3,1fr);}}
+  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
+  /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
+     une couleur inventée : encre pour les deux, indigo pour le badge. */
+  .offre.pro{border:2px solid var(--encre);overflow:hidden;}
   .recommande{position:absolute;top:0;right:0;background:var(--indigo);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);}
   .offre h3{font-size:20px;font-weight:700;}
-  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 6px;}
-  .prix .montant{font-size:38px;font-weight:800;letter-spacing:-.03em;}
+  /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
+  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 0;}
+  .prix .montant{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;}
   .prix .periode{color:var(--texte-doux);font-size:15px;}
-  .offre .pour{color:var(--texte-doux);margin:0 0 20px;}
-  .avantages{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:11px;}
+  .offre .limite{margin:8px 0 0;font-size:17px;font-weight:700;}
+  .offre .pour{color:var(--texte-doux);margin:16px 0 0;}
+  .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
   .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
   .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--cyan);}
-  .offre .btn{width:100%;margin-top:24px;}
-  .offre.pro .avantages svg{color:var(--blanc);}
+  /* Le bouton est poussé en BAS de la carte : les trois boutons s'alignent,
+     quelle que soit la longueur des listes. */
+  .offre .btn{width:100%;margin-top:auto;}
+  .offre.pro .avantages svg{color:var(--encre);}
 
   .faq{display:grid;gap:12px;}
   details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
@@ -581,10 +589,10 @@
     <article class="offre">
       <h3><span class="fr">Gratuit</span><span class="en">Free</span></h3>
       <div class="prix"><span class="montant">0 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">1 machine</span><span class="en">1 machine</span></p>
       <p class="pour fr">Pour un particulier, ou pour essayer KEEVA.</p>
       <p class="pour en">For an individual, or to try KEEVA.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">1 machine suivie</span><span class="en">1 machine tracked</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Lecture automatique des manuels constructeur</span><span class="en">Automatic reading of manufacturer manuals</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Liste de pièces générée automatiquement</span><span class="en">Automatically generated parts list</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Rappels d'échéance sur le téléphone</span><span class="en">Due-date reminders on your phone</span></li>
@@ -595,10 +603,10 @@
     <article class="offre">
       <h3><span class="fr">Éco</span><span class="en">Eco</span></h3>
       <div class="prix"><span class="montant">5 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">Jusqu'à 5 machines</span><span class="en">Up to 5 machines</span></p>
       <p class="pour fr">Pour un petit parc qu'il faut suivre de près.</p>
       <p class="pour en">For a small fleet that needs close tracking.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Jusqu'à 5 machines suivies</span><span class="en">Up to 5 machines tracked</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit</span><span class="en">Everything included in Free</span></li>
       </ul>
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Éco</span><span class="en">Move to Eco</span></a>
@@ -609,13 +617,11 @@
       <span class="recommande en">RECOMMENDED</span>
       <h3><span class="fr">Pro</span><span class="en">Pro</span></h3>
       <div class="prix"><span class="montant">20 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">Machines illimitées</span><span class="en">Unlimited machines</span></p>
       <p class="pour fr">Au-delà de cinq machines, sans limite.</p>
       <p class="pour en">Beyond five machines, with no limit.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Machines illimitées</span><span class="en">Unlimited machines</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Éco</span><span class="en">Everything included in Eco</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Rappels multi-canaux <em>(WhatsApp et e-mail : en préparation)</em></span><span class="en">Multi-channel reminders <em>(WhatsApp and email: coming soon)</em></span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Export des rapports (PDF / CSV)</span><span class="en">Report export (PDF / CSV)</span></li>
       </ul>
       <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Pro</span><span class="en">Upgrade to Pro</span></a>
     </article>
@@ -666,6 +672,13 @@
       </summary>
       <div class="reponse fr">C'est le cas le plus courant et le mieux pris en charge. À défaut, l'analyse d'une photo de la plaque ou du carnet permet de retrouver le bon document en ligne, et un plan peut aussi être saisi à la main : aucune machine n'est bloquée faute de notice.</div>
       <div class="reponse en">That is the most common and best supported case. Failing that, analysing a photo of the plate or the logbook finds the right document online, and a plan can also be entered by hand: no machine is blocked for lack of a manual.</div>
+    </details>
+    <details class="faq">
+      <summary><span class="fr">Les rappels partent-ils aussi par WhatsApp ?</span><span class="en">Are reminders also sent by WhatsApp?</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
+      <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
     </details>
   </div>
 </section>
