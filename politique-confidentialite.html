@@ -56,7 +56,7 @@
 
     <section class="fr" lang="fr">
       <h1>Politique de confidentialité</h1>
-      <div class="updated">Dernière mise à jour : 12 septembre 2026</div>
+      <div class="updated">Dernière mise à jour : 17 septembre 2026</div>
 
       <h2>1. Responsable du traitement</h2>
       <div class="box">
@@ -68,7 +68,7 @@
       <h2>2. Données collectées</h2>
       <p>Dans le cadre de l'utilisation de l'application KEEVA (ci-après « le Service »), les données suivantes sont collectées :</p>
       <ul>
-        <li><strong>Données de compte :</strong> adresse email, mot de passe (stocké de façon chiffrée), société de rattachement ;</li>
+        <li><strong>Données de compte :</strong> adresse email, mot de passe conservé sous forme d'empreinte (hachage bcrypt : le mot de passe n'est jamais enregistré en clair et ne peut pas être reconstitué à partir de l'empreinte), société de rattachement ;</li>
         <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines.</li>
       </ul>
 
@@ -87,13 +87,18 @@
       <p>Les données sont hébergées et traitées par les sous-traitants techniques suivants, dans le seul cadre du fonctionnement du Service :</p>
       <ul>
         <li><strong>Supabase Pte. Ltd.</strong> — base de données, authentification, stockage de fichiers ;</li>
-        <li><strong>GitHub, Inc.</strong> — hébergement de l'interface de l'application.</li>
+        <li><strong>GitHub, Inc.</strong> — hébergement de l'interface de l'application ;</li>
+        <li><strong>Resend</strong> — envoi des e-mails du Service (codes de connexion, réinitialisation de mot de passe, rappels d'échéance) ;</li>
+        <li><strong>Stripe</strong> — traitement des paiements des offres payantes. Les données de carte bancaire ne transitent pas par KEEVA et n'y sont pas conservées : elles sont saisies et conservées par Stripe ;</li>
+        <li><strong>Google (API Gemini)</strong> — analyse des carnets d'entretien déposés et recherche automatique de photos de machines.</li>
       </ul>
       <p>Ces prestataires n'utilisent pas les données à des fins autres que l'exécution du Service. Aucune donnée n'est vendue ni partagée à des fins commerciales avec des tiers.</p>
-      <p>Certaines fonctionnalités ponctuelles (recherche automatique d'une photo de machine, analyse d'un carnet d'entretien par intelligence artificielle) transmettent une requête contenant une description de la machine ou le contenu d'un document à des prestataires tiers spécialisés, dans la seule finalité de fournir la fonctionnalité demandée par l'utilisateur au moment où il l'active.</p>
+      <p>Certaines fonctionnalités ponctuelles (recherche automatique d'une photo de machine, analyse d'un carnet d'entretien par intelligence artificielle) transmettent une requête à des prestataires tiers spécialisés — Google (API Gemini) pour l'analyse. Cette requête contient la description de la machine, le contenu du carnet d'entretien déposé et, le cas échéant, la photo de la machine. Elle a pour seule finalité de fournir la fonctionnalité demandée par l'utilisateur au moment où il l'active ; ces prestataires n'utilisent pas les données à d'autres fins.</p>
+      <p>Ces prestataires peuvent héberger les données hors de Nouvelle-Calédonie, notamment dans l'Union européenne, aux États-Unis et en Asie. Les transferts s'appuient sur les garanties contractuelles prévues par ces prestataires, notamment les clauses contractuelles types de la Commission européenne lorsqu'elles s'appliquent.</p>
 
       <h2>6. Durée de conservation</h2>
-      <p>Les données sont conservées pendant toute la durée d'utilisation du compte, puis supprimées dans un délai raisonnable après la clôture du compte ou sur demande de l'utilisateur.</p>
+      <p>Les données de compte et les données métier sont conservées pendant toute la durée d'utilisation du Service, puis supprimées dans un délai de 30 jours suivant la demande de suppression ou la clôture du compte. Les journaux d'envoi des rappels sont conservés 12 mois. Les documents joints et les photos sont supprimés avec la machine concernée ou avec le compte. La copie locale enregistrée sur l'appareil pour la consultation hors connexion est conservée 7 jours au maximum et effacée à la déconnexion.</p>
+      <p>Les rappels par e-mail envoient le nom de la machine et sa prochaine échéance à l'adresse configurée dans l'application. Cette adresse peut être modifiée et les rappels désactivés à tout moment depuis la rubrique « Mon compte ».</p>
 
       <h2>7. Droits des utilisateurs</h2>
       <p>Conformément au Règlement Général sur la Protection des Données (RGPD), chaque utilisateur dispose d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de ses données personnelles. Ces droits peuvent être exercés en écrivant à : <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
@@ -110,7 +115,7 @@
 
     <section class="en" lang="en">
       <h1>Privacy policy</h1>
-      <div class="updated">Last updated: 12 September 2026</div>
+      <div class="updated">Last updated: 17 September 2026</div>
 
       <h2>1. Data controller</h2>
       <div class="box">
@@ -122,7 +127,7 @@
       <h2>2. Data collected</h2>
       <p>When using the KEEVA application (the “Service”), the following data is collected:</p>
       <ul>
-        <li><strong>Account data:</strong> email address, password (stored in encrypted form), company the account is linked to;</li>
+        <li><strong>Account data:</strong> email address, password kept as a hash (bcrypt hashing: the password is never stored in clear text and cannot be recovered from the hash), company the account is linked to;</li>
         <li><strong>Professional data entered by the user:</strong> information about the equipment tracked (name, brand, model, serial number), maintenance plans, service history, attached documents (service manuals in PDF format) and machine photos.</li>
       </ul>
 
@@ -141,13 +146,18 @@
       <p>The data is hosted and processed by the following technical processors, solely for the purpose of operating the Service:</p>
       <ul>
         <li><strong>Supabase Pte. Ltd.</strong> — database, authentication, file storage;</li>
-        <li><strong>GitHub, Inc.</strong> — hosting of the application interface.</li>
+        <li><strong>GitHub, Inc.</strong> — hosting of the application interface;</li>
+        <li><strong>Resend</strong> — sending the Service's emails (sign-in codes, password resets, due-date reminders);</li>
+        <li><strong>Stripe</strong> — processing payments for the paid plans. Card details do not pass through KEEVA and are not stored by it: they are entered and kept by Stripe;</li>
+        <li><strong>Google (Gemini API)</strong> — analysis of uploaded service manuals and automatic search for machine photos.</li>
       </ul>
       <p>These providers do not use the data for any purpose other than providing the Service. No data is sold or shared for commercial purposes with third parties.</p>
-      <p>Certain occasional features (automatic search for a machine photo, analysis of a service manual by artificial intelligence) send a request containing a description of the machine or the content of a document to specialised third-party providers, for the sole purpose of providing the feature requested by the user at the moment they activate it.</p>
+      <p>Certain occasional features (automatic search for a machine photo, analysis of a service manual by artificial intelligence) send a request to specialised third-party providers — Google (Gemini API) for the analysis. That request contains the description of the machine, the content of the uploaded service manual and, where applicable, the machine photo. Its sole purpose is to provide the feature requested by the user at the moment they activate it; these providers do not use the data for any other purpose.</p>
+      <p>These providers may host the data outside New Caledonia, in particular in the European Union, the United States and Asia. Such transfers rely on the contractual safeguards offered by these providers, in particular the European Commission's standard contractual clauses where they apply.</p>
 
       <h2>6. Retention period</h2>
-      <p>The data is kept for as long as the account is used, then deleted within a reasonable period after the account is closed or at the user's request.</p>
+      <p>Account data and business data are kept for as long as the Service is used, then deleted within 30 days of a deletion request or of the account being closed. Reminder delivery logs are kept for 12 months. Attached documents and photos are deleted together with the machine concerned or with the account. The local copy stored on the device for offline viewing is kept for a maximum of 7 days and erased on sign-out.</p>
+      <p>Email reminders send the machine name and its next due date to the address configured in the application. That address can be changed and reminders can be disabled at any time from the “My account” section.</p>
 
       <h2>7. User rights</h2>
       <p>In accordance with the General Data Protection Regulation (GDPR), each user has the right to access, rectify, erase, restrict, object to and port their personal data. These rights may be exercised by writing to: <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
