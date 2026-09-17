@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Gx9of5vDdtWtnjrFbcDo4ErldmNBiuvhV87jmEmtj8E=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-47nvHxbrGA9rxyquBlagk047W0V6jCOhh9kj/aGl+uk=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2349,6 +2349,9 @@ function openUpgradeNotice(companyId) {
   // dans des chaînes, que l'extraction automatique ne peut pas atteindre (elle ne
   // voit que le texte des gabarits, pas ce qui est entre guillemets).
   const tonOffre = `<div class="hint">${trad('Ton offre actuelle')}</div>`;
+  // Adresse de paiement retenue par offre : gardée de côté pour que le clic
+  // puisse ouvrir exactement le lien affiché, après relecture du palier.
+  const urlPaiement = {};
   const lignes = OFFRES_PAYANTES.map((offre) => {
     if (offre.cle === UI.companyPlan) return ligneOffre(offre.ligne, tonOffre);
     if (dejaAbonne) {
@@ -2359,7 +2362,8 @@ function openUpgradeNotice(companyId) {
     const lien = STRIPE_LIENS[offre.cle];
     if (!lien) return ligneOffre(offre.ligne, `<div class="hint">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@keeva.work.')}</div>`);
     const url = lien + '?client_reference_id=' + encodeURIComponent(companyId);
-    return ligneOffre(offre.ligne, `<div style="margin-top:8px;"><a href="${url}" target="_blank" rel="noopener" class="primary" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${offre.bouton}</a></div>`);
+    urlPaiement[offre.cle] = url;
+    return ligneOffre(offre.ligne, `<div style="margin-top:8px;"><a id="forfait-payer-${offre.cle}" href="${url}" target="_blank" rel="noopener" class="primary" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${offre.bouton}</a></div>`);
   }).join('');
 
   overlay.innerHTML = `
@@ -2378,6 +2382,28 @@ function openUpgradeNotice(companyId) {
   // reste ouverte pour pouvoir dire ce qui s'est mal passé, le cas échéant.
   const changeur = document.getElementById('forfait-changer');
   if (changeur) changeur.addEventListener('click', () => ouvrirPortailAbonnement('forfait-msg', 'forfait-changer'));
+  // DERNIER REMPART CONTRE LE DOUBLE ABONNEMENT : un compte vu « gratuit » peut
+  // être devenu payant dans l'intervalle (le webhook Stripe écrit quelques
+  // secondes après le paiement). On RELIT donc le palier en base au moment du
+  // clic — une seule requête — avant d'ouvrir un lien de paiement. S'il est
+  // payant, on ouvre le portail à la place : le client changera d'offre au
+  // prorata au lieu de souscrire un second abonnement.
+  OFFRES_PAYANTES.forEach((offre) => {
+    const lien = document.getElementById('forfait-payer-' + offre.cle);
+    if (!lien || !urlPaiement[offre.cle]) return;
+    lien.addEventListener('click', async (evenement) => {
+      evenement.preventDefault();
+      let palier = null;
+      try { palier = await relirePalier(); } catch (err) { /* réseau : on laisse payer */ }
+      if (palier && palier !== 'free') {
+        overlay.remove();
+        openUpgradeNotice(companyId);
+        ouvrirPortailAbonnement('forfait-msg', 'forfait-changer');
+        return;
+      }
+      ouvrirLienExterne(urlPaiement[offre.cle]);
+    });
+  });
 }
 
 // ============================================================
