@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-OvN6XJTPpgRto0+Y0nSVNh6X5+mqES0JnvNohZFt5eo=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1k12KOnW4JFwT8i6WcmSHOLHqUJL3wJoBqvp4Kf72Cc=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -145,6 +145,13 @@
   }
   h1,h2,h3{font-family:inherit;letter-spacing:-0.02em;}
   button{font-family:inherit;}
+  /* CAUSE des polices qui semblaient différentes d'un élément à l'autre : les
+     navigateurs donnent aux CHAMPS et aux BOUTONS leur propre police système
+     (et leur propre taille) au lieu d'hériter de la page — d'où une fenêtre de
+     saisie écrite dans une autre police que le texte autour. On la leur fait
+     hériter UNE fois pour toutes, ici, avant les règles de composants qui
+     fixent leurs tailles et leurs graisses. */
+  button,input,select,textarea,optgroup,option,dialog{font:inherit;}
   a{color:var(--primary-dark);text-decoration:none;}
   a:hover{color:var(--primary-dark);text-decoration:underline;}
 
@@ -674,13 +681,20 @@
   .plan-tasks li{font-size:15px;margin-bottom:8px;line-height:1.5;}
   .plan-tasks li:last-child{margin-bottom:0;}
   /* Choix de fréquence d'une tâche : les options du carnet une par ligne, puis
-     le choix libre. Écarts repris de l'échelle employée ailleurs (4 à 12 px). */
-  .choix-options{margin:8px 0 0;padding-left:18px;}
-  .choix-options li{font-size:14px;line-height:1.5;margin-bottom:6px;}
+     le choix libre. Écarts repris de l'échelle employée ailleurs (8 à 18 px) :
+     options entre elles, options vers « Autre », champs vers les boutons. */
+  .choix-contenu{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .choix-options{margin:0;padding-left:18px;}
+  .choix-options li{font-size:14px;line-height:1.5;margin-bottom:8px;}
+  .choix-options li:last-child{margin-bottom:0;}
   .choix-frequence-bloc{margin-top:12px;}
+  .choix-frequence-bloc .nom{font-size:14px;font-weight:700;line-height:1.5;}
   .choix-frequence-bloc .view-manual{margin-top:8px;}
-  .choix-option-ligne{margin-bottom:10px;}
+  .choix-option-ligne{margin-bottom:12px;}
+  .choix-option-ligne:last-child{margin-bottom:0;}
   .choix-option-ligne .hint{margin-top:4px;}
+  .choix-actions{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+  #choix-erreur{margin-top:12px;}
   .attention-box{
     background:var(--soon-bg);border:1px solid rgba(222,122,22,.35);border-radius:var(--r-chip);
     padding:13px 15px;font-size:14px;line-height:1.6;margin-top:4px;color:var(--soon-ink);
@@ -703,6 +717,14 @@
     letter-spacing:.05em;text-align:left;padding:9px 10px;font-weight:800;
   }
   .ref-table td{padding:9px 10px;border-top:1px solid var(--line-2);vertical-align:top;}
+  /* Colonne « Échéance » : pastille, valeur, mention « Retenu : … » et bouton
+     doivent suivre UNE SEULE ligne de conduite — tout à gauche et empilé, comme
+     le reste du tableau. La pastille centrée au-dessus d'un texte à gauche
+     donnait l'impression de trois alignements différents. */
+  .ref-table th,.ref-table td{text-align:left;}
+  .cell-echeance{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;}
+  .cell-echeance .badge{align-self:flex-start;}
+  .cell-echeance .view-manual{margin-top:4px;}
   .ref-table tr:nth-child(even) td{background:var(--surface-soft);}
   .ref-table td.item-label{font-weight:700;}
   .ref-table td.muted,.muted{color:var(--ink-4);}
@@ -1991,29 +2013,33 @@ function infoTache(item, plan, machine) {
   return inconnu;
 }
 
-// Cellule d'affichage de l'échéance d'une tâche, dans la vue du plan.
+// Cellule d'affichage de l'échéance d'une tâche, dans la vue du plan. Tout est
+// empilé dans un même cadre aligné à gauche : la pastille, la valeur, la mention
+// « Retenu : … » et le bouton suivent donc une seule ligne de conduite.
 function etatTacheHtml(item, plan, machine) {
   const info = infoTache(item, plan, machine);
   const bouton = (texte, classe) =>
     `<button type="button" class="${classe}" data-tache="${esc(item.label || '')}">${esc(texte)}</button>`;
+  const cellule = (contenu) => `<div class="cell-echeance">${contenu}</div>`;
   if (info.state === 'choix') {
-    return `<span class="muted">${esc(info.short)}</span> ${bouton(trad('Choisir'), 'choisir-frequence')}`;
+    return cellule(`<span class="muted">${esc(info.short)}</span>${bouton(trad('Choisir'), 'choisir-frequence')}`);
   }
   if (info.state === 'controle') {
     // Un point de contrôle peut être revenu en arrière : si le carnet proposait
     // des options (ou si l'utilisateur en avait choisi une), on laisse modifier.
     const peutModifier = item && (item.interval_choisi || optionsTache(item, plan, machine).length);
-    return `<span class="muted">${esc(info.short)}</span>`
-      + (peutModifier ? ' ' + bouton(trad('Modifier'), 'choisir-frequence') : '');
+    return cellule(`<span class="muted">${esc(info.short)}</span>`
+      + (peutModifier ? bouton(trad('Modifier'), 'choisir-frequence') : ''));
   }
-  if (info.state === 'unknown') return `<span class="muted">${esc(info.short)}</span>`;
+  if (info.state === 'unknown') return cellule(`<span class="muted">${esc(info.short)}</span>`);
   const retenu = item && item.interval_choisi
-    ? ` <span class="muted">${esc(tR('Retenu : {choix}', { choix: item.interval_choisi }))}</span>`
+    ? `<span class="muted">${esc(tR('Retenu : {choix}', { choix: item.interval_choisi }))}</span>`
     : '';
   const modifier = item && (item.interval_choisi || item.point_de_controle)
-    ? ' ' + bouton(trad('Modifier'), 'choisir-frequence')
+    ? bouton(trad('Modifier'), 'choisir-frequence')
     : '';
-  return `<span class="badge ${badgeClass(info.state)}">${esc(badgeLabel(info.state))}</span> <span class="muted">${esc(info.short)}</span>${retenu}${modifier}`;
+  return cellule(`<span class="badge ${badgeClass(info.state)}">${esc(badgeLabel(info.state))}</span>`
+    + `<span class="muted">${esc(info.short)}</span>${retenu}${modifier}`);
 }
 
 // Bloc de choix d'une tâche ambiguë : la phrase, les options du carnet (une par
@@ -2027,7 +2053,7 @@ function blocChoixTache(item, plan, machine) {
   }).join('');
   return `
     <div class="plan-field choix-frequence-bloc" data-tache="${esc(item.label || '')}">
-      <div class="label">${esc(item.label || '')}</div>
+      <div class="nom">${esc(item.label || '')}</div>
       <div class="value">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</div>
       ${lignes ? `<ul class="choix-options">${lignes}</ul>` : ''}
       <button type="button" class="view-manual choisir-frequence" data-tache="${esc(item.label || '')}">${trad('Choisir la fréquence')}</button>
@@ -7239,22 +7265,28 @@ function openChoixFrequence(machine, item, companyId, categories) {
       <h2>${esc(item.label || '')}</h2>
       <p class="sub">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</p>
       ${item.interval_choisi ? `<div class="hint">${esc(tR('Retenu : {choix}', { choix: item.interval_choisi }))}</div>` : ''}
-      ${options.length ? `<div class="label">${trad('Ce que dit le carnet')}</div>${lignes}` : ''}
-      <div class="label">${trad('Autre (valeur libre)')}</div>
-      <div class="field-row">
+      <div class="choix-contenu">
+        ${options.length ? `<div><div class="label">${trad('Ce que dit le carnet')}</div>${lignes}</div>` : ''}
         <div>
-          <label for="choix-valeur">${trad('Valeur')}</label>
-          <input id="choix-valeur" type="number" min="1" step="1" value="">
-        </div>
-        <div>
-          <label for="choix-unite">${trad('Unité')}</label>
-          <select id="choix-unite">
-            ${[trad('heures'), trad('km'), trad('jours'), trad('mois')].map(u => `<option value="${u}"${u === unitePlan ? ' selected' : ''}>${esc(uniteMot(u))}</option>`).join('')}
-          </select>
+          <div class="label">${trad('Autre (valeur libre)')}</div>
+          <div class="field-row">
+            <div>
+              <label for="choix-valeur">${trad('Valeur')}</label>
+              <input id="choix-valeur" type="number" min="1" step="1" value="">
+            </div>
+            <div>
+              <label for="choix-unite">${trad('Unité')}</label>
+              <select id="choix-unite">
+                ${[trad('heures'), trad('km'), trad('jours'), trad('mois')].map(u => `<option value="${u}"${u === unitePlan ? ' selected' : ''}>${esc(uniteMot(u))}</option>`).join('')}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
-      <button type="button" class="view-manual" id="choix-enregistrer">${trad('Enregistrer ce choix')}</button>
-      <button type="button" class="view-manual" id="choix-controle">${trad('Garder comme point de contrôle (sans échéance)')}</button>
+      <div class="choix-actions">
+        <button type="button" class="view-manual" id="choix-enregistrer">${trad('Enregistrer ce choix')}</button>
+        <button type="button" class="view-manual" id="choix-controle">${trad('Garder comme point de contrôle (sans échéance)')}</button>
+      </div>
       <div class="hint" id="choix-erreur"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="choix-annuler">${trad('Annuler')}</button>
