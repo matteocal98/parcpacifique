@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1k12KOnW4JFwT8i6WcmSHOLHqUJL3wJoBqvp4Kf72Cc=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5UkVyCJ5etF7BlVrpSiXKY1qEiU3PkMED3MdVQChBKo=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -707,25 +707,65 @@
     max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
     border:1px solid var(--line);border-radius:var(--r-chip);margin-top:8px;
   }
-  .ref-scroll > .ref-table{margin-top:0;border:0;border-radius:0;min-width:640px;}
+  /* Largeur minimale franche : à six colonnes, 640 px écrasaient la colonne
+     « Remarque ». Le cadre défile, la colonne n'est plus rognée. */
+  .ref-scroll > .ref-table{margin-top:0;border:0;border-radius:0;min-width:780px;}
   .ref-table{
     width:100%;border-collapse:separate;border-spacing:0;margin-top:8px;font-size:14px;
-    border:1px solid var(--line);border-radius:var(--r-chip);overflow:hidden;
+    border:1px solid var(--line);border-radius:var(--r-chip);
   }
   .ref-table th{
     background:var(--primary-tint);color:var(--primary-dark);font-size:11.5px;text-transform:uppercase;
     letter-spacing:.05em;text-align:left;padding:9px 10px;font-weight:800;
   }
   .ref-table td{padding:9px 10px;border-top:1px solid var(--line-2);vertical-align:top;}
-  /* Colonne « Échéance » : pastille, valeur, mention « Retenu : … » et bouton
-     doivent suivre UNE SEULE ligne de conduite — tout à gauche et empilé, comme
-     le reste du tableau. La pastille centrée au-dessus d'un texte à gauche
-     donnait l'impression de trois alignements différents. */
+  /* Colonne « Échéance » : le centrage doit être IMPOSSIBLE. Cellule et en-tête
+     sont explicitement à gauche, et le cadre est une colonne flex dont les
+     enfants se collent au bord gauche (aucun `margin:auto`, aucune marge
+     héritée de `.badge`). Règle ÉCRITE : elle ne se vérifie qu'à l'œil sur un
+     appareil — c'est dit dans le compte rendu. */
   .ref-table th,.ref-table td{text-align:left;}
-  .cell-echeance{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;}
-  .cell-echeance .badge{align-self:flex-start;}
-  .cell-echeance .view-manual{margin-top:4px;}
+  .cell-echeance{
+    display:flex;flex-direction:column;flex-wrap:nowrap;
+    align-items:flex-start;justify-content:flex-start;
+    gap:4px;text-align:left;margin:0;
+  }
+  .cell-echeance .badge{display:block;align-self:flex-start;margin:0;text-align:left;}
+  .cell-echeance .view-manual{align-self:flex-start;margin:4px 0 0;}
+  .cell-echeance .muted{text-align:left;}
   .ref-table tr:nth-child(even) td{background:var(--surface-soft);}
+
+  /* ------------------------------------------------------------
+     Écran étroit : le tableau cède la place à des CARTES, une tâche par bloc.
+     Chaque information garde sa ligne et son libellé : plus rien ne peut être
+     coupé, et la pastille d'échéance est sur SA ligne, à gauche du texte.
+     ------------------------------------------------------------ */
+  .taches-cartes{display:none;flex-direction:column;gap:12px;margin-top:8px;}
+  .tache-carte{
+    border:1px solid var(--line);border-radius:var(--r-chip);background:var(--surface);
+    padding:13px 15px;text-align:left;
+  }
+  .tache-titre{font-size:14px;font-weight:700;margin-bottom:8px;text-align:left;}
+  .tache-ligne{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-bottom:8px;text-align:left;}
+  .tache-ligne:last-child{margin-bottom:0;}
+  .tache-libelle{
+    font-size:12px;font-weight:800;color:var(--primary-dark);
+    text-transform:uppercase;letter-spacing:.06em;text-align:left;
+  }
+  .tache-valeur{font-size:14px;line-height:1.5;text-align:left;overflow-wrap:anywhere;}
+  /* La pastille sur la ligne de l'échéance, à gauche du texte : disposition en
+     rangée, donc plus aucun conflit entre une pastille et un texte. */
+  .cell-echeance-ligne{
+    display:flex;flex-direction:row;flex-wrap:wrap;
+    align-items:center;justify-content:flex-start;
+    gap:8px;text-align:left;margin:0;
+  }
+  .cell-echeance-ligne .badge{display:block;margin:0;text-align:left;}
+  .cell-echeance-ligne .view-manual{margin:0;}
+  @media (max-width:720px){
+    .ref-scroll-plan{display:none;}
+    .taches-cartes{display:flex;}
+  }
   .ref-table td.item-label{font-weight:700;}
   .ref-table td.muted,.muted{color:var(--ink-4);}
   .history-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
@@ -2013,14 +2053,16 @@ function infoTache(item, plan, machine) {
   return inconnu;
 }
 
-// Cellule d'affichage de l'échéance d'une tâche, dans la vue du plan. Tout est
-// empilé dans un même cadre aligné à gauche : la pastille, la valeur, la mention
-// « Retenu : … » et le bouton suivent donc une seule ligne de conduite.
-function etatTacheHtml(item, plan, machine) {
+// Échéance d'une tâche, prête à afficher. Deux dispositions, une seule source :
+//   • 'colonne' (défaut) : le tableau, sur écran large — tout empilé à gauche ;
+//   • 'ligne' : les cartes du téléphone — la pastille se pose SUR la ligne de
+//     l'échéance, à gauche du texte, et aucun conflit d'alignement n'est possible.
+function etatTacheHtml(item, plan, machine, disposition) {
   const info = infoTache(item, plan, machine);
   const bouton = (texte, classe) =>
     `<button type="button" class="${classe}" data-tache="${esc(item.label || '')}">${esc(texte)}</button>`;
-  const cellule = (contenu) => `<div class="cell-echeance">${contenu}</div>`;
+  const classe = disposition === 'ligne' ? 'cell-echeance-ligne' : 'cell-echeance';
+  const cellule = (contenu) => `<div class="${classe}">${contenu}</div>`;
   if (info.state === 'choix') {
     return cellule(`<span class="muted">${esc(info.short)}</span>${bouton(trad('Choisir'), 'choisir-frequence')}`);
   }
@@ -7404,21 +7446,37 @@ function openPlanView(machine, companyId, categories) {
   // intervalle) : elles sont présentées à part, pour que l'utilisateur tranche.
   const tachesAChoisir = items.filter(it => tacheAttendUnChoix(it, machine.plan, machine));
 
-  const tableHtml = hasItemDetail ? `
-    <div class="ref-scroll"><table class="ref-table">
-      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th></tr></thead>
-      <tbody>
-        ${items.map(it => `
+  // Deux présentations des mêmes données, une seule source :
+  //   • un tableau sur écran large (colonnes côte à côte) ;
+  //   • une CARTE par tâche sur écran étroit : un tableau à six colonnes ne tient
+  //     pas dans un téléphone, et la dernière colonne finissait rognée par la
+  //     bordure. Dans une carte, chaque information a sa ligne et son libellé,
+  //     et la pastille d'échéance se pose sur SA ligne, à gauche du texte.
+  const ligneTableau = (it) => `
           <tr>
             <td class="item-label">${esc(it.label || '')}</td>
             <td>${cell(it.frequency)}</td>
-            <td>${etatTacheHtml(it, machine.plan, machine)}</td>
+            <td>${etatTacheHtml(it, machine.plan, machine, 'colonne')}</td>
             <td>${cell(it.spec)}</td>
             <td>${cell(it.qty)}</td>
             <td>${cell(it.note)}</td>
-          </tr>`).join('')}
-      </tbody>
+          </tr>`;
+  const carteTache = (it) => `
+        <div class="tache-carte">
+          <div class="tache-titre">${esc(it.label || '')}</div>
+          <div class="tache-ligne"><span class="tache-libelle">${trad('Fréquence')}</span><span class="tache-valeur">${cell(it.frequency)}</span></div>
+          <div class="tache-ligne"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
+          <div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>
+          <div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>
+          <div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>
+        </div>`;
+
+  const tableHtml = hasItemDetail ? `
+    <div class="ref-scroll ref-scroll-plan"><table class="ref-table">
+      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th></tr></thead>
+      <tbody>${items.map(ligneTableau).join('')}</tbody>
     </table></div>
+    <div class="taches-cartes">${items.map(carteTache).join('')}</div>
   ` : (simpleItems.length
       ? `<ul class="plan-tasks">${simpleItems.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
       : `<div class="value" style="color:var(--ink-soft);">${trad('Aucune tâche détaillée')}</div>`);
