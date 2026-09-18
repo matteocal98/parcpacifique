@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-sZHNi66rSBf0u/VXmdmn0Z6CqUwhOkZURArAAvBGGSU=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MWOQunQdEeHYL0rWlPQ4mdZu/BmYJDHJ6vfnO7PnbQM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -322,6 +322,22 @@
   .stat-card .num.primary{color:var(--primary);}
   .stat-card .lbl{font-size:12.5px;font-weight:600;color:var(--ink-2);}
   @media (min-width:900px){ .stat-grid{grid-template-columns:repeat(4,1fr);gap:14px;} }
+
+  /* Le bandeau du haut : UN BLOC PAR TÂCHE EN RETARD.
+     Règle de disposition demandée : les blocs vont par paires, et un bloc seul
+     sur sa ligne occupe toute la largeur. Elle s'exprime en deux lignes :
+       • base de 50 % (moins la gouttière) et croissance autorisée — deux blocs
+         remplissent donc la ligne, et un bloc resté seul la remplit aussi ;
+       • le dernier bloc en position impaire est explicitement mis à 100 %, pour
+         que la règle reste vraie même si la croissance changeait.
+     Sur téléphone, une seule colonne : deux demi-bandes sur 390 px seraient
+     illisibles. */
+  .priorities{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
+  .priorities > .priority{flex:1 1 calc(50% - 6px);min-width:0;margin-bottom:0;}
+  .priorities > .priority:last-child:nth-child(odd){flex-basis:100%;}
+  @media (max-width:720px){
+    .priorities > .priority{flex-basis:100%;}
+  }
 
   /* Carte prioritaire (violette) */
   .priority{
@@ -5183,8 +5199,11 @@ VIEWS.dashboard = {
     const c = UI.counts;
     const alerts = openAlerts();
     const first = alerts[0];
+    const retards = tachesEnRetard();
     return `
-      ${first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml()}
+      ${retards.length
+        ? prioritiesHtml(retards)
+        : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}
 
       <div class="stat-grid">
         <div class="stat-card"><span class="num late">${c.late}</span><span class="lbl">${trad('En retard')}</span></div>
@@ -5232,6 +5251,18 @@ VIEWS.dashboard = {
     });
     root.querySelector('#priority-add')?.addEventListener('click', handleAddMachine);
 
+    // Un bloc par tâche en retard : chaque bouton agit sur SA machine, retrouvée
+    // par son identifiant (l'ordre d'affichage ne sert jamais d'indice).
+    const machineDe = (btn) => UI.machines.find(m => m.id === btn.dataset.priorityDone || m.id === btn.dataset.priorityDetails);
+    root.querySelectorAll('[data-priority-done]').forEach(btn => btn.addEventListener('click', () => {
+      const machine = machineDe(btn);
+      if (machine) openLogInterventionModal(machine);
+    }));
+    root.querySelectorAll('[data-priority-details]').forEach(btn => btn.addEventListener('click', () => {
+      const machine = machineDe(btn);
+      if (machine) openPlanView(machine, UI.companyId, UI.categories);
+    }));
+
     const cta = root.querySelector('#ai-cta');
     if (cta) cta.addEventListener('click', () => {
       const target = aiTargetMachine();
@@ -5240,6 +5271,56 @@ VIEWS.dashboard = {
     });
   },
 };
+
+// ── Toutes les tâches EN RETARD, toutes machines confondues ────
+// Le bandeau violet ne montrait que l'entretien le plus urgent : le deuxième, le
+// troisième… n'étaient visibles qu'en descendant dans la liste. Chaque tâche en
+// retard a maintenant SON bloc. Les tâches « bientôt » ne sont pas concernées :
+// quand rien n'est en retard, le bandeau reste celui d'avant.
+function tachesEnRetard() {
+  const liste = [];
+  (UI.machines || []).forEach(machine => {
+    normalizeItems(machine.plan?.items).forEach(item => {
+      const info = infoTache(item, machine.plan, machine);
+      if (info.state === 'late') liste.push({ machine, item, info });
+    });
+  });
+  // La plus dépassée d'abord, comme le tri des alertes.
+  return liste.sort((a, b) => a.info.sortKey - b.info.sortKey);
+}
+
+// Un bloc de retard : tâche, machine, compteur et dépassement, puis les deux
+// actions. Mêmes classes que la carte prioritaire d'origine, donc même style.
+function priorityTaskCardHtml(machine, item, info) {
+  const enCompteur = info.unit === 'hours' || info.unit === 'km';
+  const depart = enCompteur
+    ? formatCounter(machineCounter(machine), counterUnitOf(machine))
+    : formatShortDate(item.due_at || machine.plan?.next_due_at);
+  return `
+    <section class="priority">
+      <div class="priority-body">
+        <div class="priority-top">
+          <span class="eyebrow">${trad('EN RETARD')}</span>
+          <span class="pill-late">${esc(info.short)}</span>
+        </div>
+        <h2>${esc(item.label || '')}</h2>
+        <span class="machine-name">${esc(machine.name)}</span>
+        <div class="priority-stats">
+          <div class="stat"><span class="val">${esc(depart)}</span><span class="key">${enCompteur ? trad('Compteur') : trad('Échéance')}</span></div>
+          <div class="stat"><span class="val">${esc(info.short)}</span><span class="key">${trad('de dépassement')}</span></div>
+        </div>
+      </div>
+      <div class="priority-actions">
+        <button type="button" class="do" data-priority-done="${esc(machine.id)}">${trad('Marquer fait')}</button>
+        <button type="button" class="see" data-priority-details="${esc(machine.id)}">${trad('Détails')}</button>
+      </div>
+    </section>`;
+}
+
+// Les blocs vont par PAIRES ; un bloc seul sur sa ligne prend toute la largeur.
+function prioritiesHtml(retards) {
+  return `<div class="priorities">${retards.map(({ machine, item, info }) => priorityTaskCardHtml(machine, item, info)).join('')}</div>`;
+}
 
 function priorityCardHtml(machine, info) {
   const late = info.state === 'late';
