@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MWOQunQdEeHYL0rWlPQ4mdZu/BmYJDHJ6vfnO7PnbQM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EM14PgjMyF53wqE8IzQiTYlx+sIWA8cmc8zTc/5sTjY=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -5251,12 +5251,13 @@ VIEWS.dashboard = {
     });
     root.querySelector('#priority-add')?.addEventListener('click', handleAddMachine);
 
-    // Un bloc par tâche en retard : chaque bouton agit sur SA machine, retrouvée
-    // par son identifiant (l'ordre d'affichage ne sert jamais d'indice).
+    // Un bloc par TÂCHE en retard : le bouton retrouve SA machine par identifiant
+    // (l'ordre d'affichage ne sert jamais d'indice) et coche d'avance SA tâche,
+    // même quand deux blocs portent la même machine.
     const machineDe = (btn) => UI.machines.find(m => m.id === btn.dataset.priorityDone || m.id === btn.dataset.priorityDetails);
     root.querySelectorAll('[data-priority-done]').forEach(btn => btn.addEventListener('click', () => {
       const machine = machineDe(btn);
-      if (machine) openLogInterventionModal(machine);
+      if (machine) openLogInterventionModal(machine, btn.dataset.priorityTache || null);
     }));
     root.querySelectorAll('[data-priority-details]').forEach(btn => btn.addEventListener('click', () => {
       const machine = machineDe(btn);
@@ -5272,30 +5273,47 @@ VIEWS.dashboard = {
   },
 };
 
-// ── Toutes les tâches EN RETARD, toutes machines confondues ────
+// ── Toutes les tâches EN RETARD : une entrée par TÂCHE ─────────
 // Le bandeau violet ne montrait que l'entretien le plus urgent : le deuxième, le
-// troisième… n'étaient visibles qu'en descendant dans la liste. Chaque tâche en
-// retard a maintenant SON bloc. Les tâches « bientôt » ne sont pas concernées :
-// quand rien n'est en retard, le bandeau reste celui d'avant.
+// troisième… n'étaient visibles qu'en descendant dans la liste.
+//
+// AUCUN dédoublonnage par machine, AUCUN plafond, aucun `slice` : deux tâches en
+// retard sur la même machine font DEUX blocs, et sept en font sept. En revanche,
+// une machine que le compteur annonce « en retard » alors qu'aucune de ses tâches
+// n'est datable (intervalle non déduit, point de contrôle, compteur non saisi)
+// recevait ZÉRO bloc — c'est ainsi que le compteur a pu annoncer 3 retards quand
+// le bandeau n'en montrait que 2. Elle reçoit donc un bloc portant sa tâche la
+// plus urgente : le chiffre du haut ne peut plus annoncer un retard invisible.
 function tachesEnRetard() {
-  const liste = [];
+  const entrees = [];
   (UI.machines || []).forEach(machine => {
-    normalizeItems(machine.plan?.items).forEach(item => {
-      const info = infoTache(item, machine.plan, machine);
-      if (info.state === 'late') liste.push({ machine, item, info });
-    });
+    const items = normalizeItems(machine.plan?.items);
+    const suivies = items
+      .map(item => ({ item, info: infoTache(item, machine.plan, machine) }))
+      .filter(x => x.info.state === 'late');
+    if (suivies.length) {
+      suivies.forEach(x => entrees.push({ machine, item: x.item, info: x.info }));
+      return;
+    }
+    const info = dueInfo(machine.plan, machine);
+    if (info.state !== 'late') return;
+    const urgente = tacheLaPlusUrgente(items, machine.plan, machine);
+    entrees.push({ machine, item: urgente ? urgente.item : null, info });
   });
   // La plus dépassée d'abord, comme le tri des alertes.
-  return liste.sort((a, b) => a.info.sortKey - b.info.sortKey);
+  return entrees.sort((a, b) => a.info.sortKey - b.info.sortKey);
 }
 
 // Un bloc de retard : tâche, machine, compteur et dépassement, puis les deux
 // actions. Mêmes classes que la carte prioritaire d'origine, donc même style.
+// `data-priority-tache` porte la TÂCHE visée : deux blocs de la même machine
+// restent distincts, et « Marquer fait » coche d'avance la bonne ligne.
 function priorityTaskCardHtml(machine, item, info) {
   const enCompteur = info.unit === 'hours' || info.unit === 'km';
   const depart = enCompteur
     ? formatCounter(machineCounter(machine), counterUnitOf(machine))
-    : formatShortDate(item.due_at || machine.plan?.next_due_at);
+    : formatShortDate((item && item.due_at) || machine.plan?.next_due_at);
+  const tache = (item && item.label) ? item.label : nextTaskLabel(machine);
   return `
     <section class="priority">
       <div class="priority-body">
@@ -5303,7 +5321,7 @@ function priorityTaskCardHtml(machine, item, info) {
           <span class="eyebrow">${trad('EN RETARD')}</span>
           <span class="pill-late">${esc(info.short)}</span>
         </div>
-        <h2>${esc(item.label || '')}</h2>
+        <h2>${esc(tache)}</h2>
         <span class="machine-name">${esc(machine.name)}</span>
         <div class="priority-stats">
           <div class="stat"><span class="val">${esc(depart)}</span><span class="key">${enCompteur ? trad('Compteur') : trad('Échéance')}</span></div>
@@ -5311,8 +5329,8 @@ function priorityTaskCardHtml(machine, item, info) {
         </div>
       </div>
       <div class="priority-actions">
-        <button type="button" class="do" data-priority-done="${esc(machine.id)}">${trad('Marquer fait')}</button>
-        <button type="button" class="see" data-priority-details="${esc(machine.id)}">${trad('Détails')}</button>
+        <button type="button" class="do" data-priority-done="${esc(machine.id)}" data-priority-tache="${esc(tache)}">${trad('Marquer fait')}</button>
+        <button type="button" class="see" data-priority-details="${esc(machine.id)}" data-priority-tache="${esc(tache)}">${trad('Détails')}</button>
       </div>
     </section>`;
 }
@@ -7285,9 +7303,10 @@ function openNextMaintenanceView(machine) {
     });
 }
 
-function openLogInterventionModal(machine) {
+function openLogInterventionModal(machine, tache) {
   // « Marquer fait » / enregistrer un entretien écrit dans l'historique et
-  // recalcule l'échéance.
+  // recalcule l'échéance. `tache` (optionnel) pré-coche la ligne du bandeau
+  // cliqué, pour que « Marquer fait » porte bien sur CETTE tâche.
   if (refuserSiNonCouverte(machine)) return;
   const today = todayIso();
   const isCounter = planIsCounter(machine.plan);
@@ -7318,7 +7337,7 @@ function openLogInterventionModal(machine) {
         ${items.length ? `
           <label>${trad('Éléments traités')}</label>
           <div class="checklist">
-            ${items.map(t => `<label><input type="checkbox" value="${esc(t)}"> ${esc(t)}</label>`).join('')}
+            ${items.map(t => `<label><input type="checkbox" value="${esc(t)}"${t === tache ? ' checked' : ''}> ${esc(t)}</label>`).join('')}
           </div>
         ` : ''}
 
