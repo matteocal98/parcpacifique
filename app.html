@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-reCTOwTV2GlB6o89rXnHwVLTv2H3gFK0DUYGteaJXfE=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Srf0Z894Oyr9gAUO6wk53MAXhRxo54gPDOKKzqlV/nk=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2184,7 +2184,10 @@ function tachesSuivies(items, plan) {
 
 // Tâche la plus urgente : c'est elle qui porte l'état affiché pour la machine.
 function tacheLaPlusUrgente(items, plan, machine) {
-  const suivies = tachesSuivies(items, plan);
+  // Les tâches sont PROJETÉES avant d'être classées : l'état de la machine vient
+  // donc du même classement que celui qu'un enregistrement écrirait (voir
+  // projectionTaches), et une consultation ne peut pas raconter autre chose.
+  const suivies = tachesSuivies(projectionTaches(items, plan, machine), plan);
   let meilleure = null;
   let meilleureInfo = null;
   suivies.forEach(it => {
@@ -2381,6 +2384,31 @@ function preparerTaches(items, plan, machine, duePlan, unite) {
     delete t.point_de_controle; delete t.due_at; delete t.due_counter;
     return t;
   });
+}
+
+// ── LE CLASSEMENT PROJETÉ POUR L'AFFICHAGE ────────────────────
+// Une consultation ne doit JAMAIS montrer une information périmée : un plan
+// jamais réenregistré se lit donc COMME S'IL VENAIT d'être enregistré. Le
+// classement d'une fréquence est une fonction pure de son texte (et de sa
+// structure) : il n'a aucune raison d'attendre une écriture en base.
+//
+// `projectionTaches` réemploie `preparerTaches` — EXACTEMENT la passe de
+// l'écriture. Il n'existe donc pas de seconde règle côté affichage : ce que
+// l'utilisateur voit et ce qui sera enregistré ne peuvent pas diverger.
+// Elle ne MODIFIE rien : les éléments rendus sont des copies, et la base n'est
+// touchée que sur une action de l'utilisateur (enregistrement, choix, entretien).
+function projectionTaches(items, plan, machine) {
+  const liste = normalizeItems(items);
+  if (!liste.length) return liste;
+  const duePlan = planIsCounter(plan) ? planNextDueCounter(plan) : (plan ? plan.next_due_at : null);
+  return preparerTaches(liste, plan, machine, duePlan, uniteSuivi(plan, machine)) || liste;
+}
+
+// Le même classement, à partir du plan : c'est LA fonction qu'emploient les
+// écrans qui affichent des échéances (fiche du plan, prochain entretien,
+// journal d'intervention, bandeau des retards, tâche la plus urgente).
+function tachesAffichees(plan, machine) {
+  return projectionTaches(plan && plan.items, plan, machine);
 }
 
 // Entretien enregistré : SEULES les tâches cochées avancent (leur échéance = le
@@ -5431,7 +5459,9 @@ VIEWS.dashboard = {
 function tachesEnRetard() {
   const entrees = [];
   (UI.machines || []).forEach(machine => {
-    const items = normalizeItems(machine.plan?.items);
+    // Classement PROJETÉ au rendu : un plan jamais réenregistré est lu comme s'il
+    // venait de l'être — même règle que l'enregistrement, rien d'écrit.
+    const items = tachesAffichees(machine.plan, machine);
     const suivies = items
       .map(item => ({ item, info: infoTache(item, machine.plan, machine) }))
       .filter(x => x.info.state === 'late');
@@ -7444,7 +7474,10 @@ function openNextMaintenanceView(machine) {
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
-  const planItems = normalizeItems(machine.plan?.items);
+  // Les tâches sont classées AU RENDU, par la même règle que l'enregistrement :
+  // un plan jamais réenregistré se lit donc comme s'il venait de l'être, et cette
+  // consultation n'écrit rien.
+  const planItems = tachesAffichees(machine.plan, machine);
   const items = planItems.length
     ? planItems
     : (machine.plan?.tasks || '').split(',').map(t => t.trim()).filter(Boolean).map(label => ({ label }));
@@ -7521,7 +7554,9 @@ function openLogInterventionModal(machine, tache) {
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
-  const planItems = normalizeItems(machine.plan?.items);
+  // Idem ici : le classement est projeté au rendu (même règle que l'écriture),
+  // sans rien enregistrer. Les libellés cochés restent ceux du plan.
+  const planItems = tachesAffichees(machine.plan, machine);
   const items = planItems.length
     ? planItems.map(it => it.label).filter(Boolean)
     : (machine.plan?.tasks || '').split(',').map(t => t.trim()).filter(Boolean);
@@ -7818,7 +7853,10 @@ function openPlanView(machine, companyId, categories) {
   // Les items peuvent être des objets (extraction automatique) ou de simples libellés
   // (anciens enregistrements) : on n'affiche le tableau détaillé que s'il y a
   // réellement des colonnes à remplir.
-  const items = normalizeItems(machine.plan?.items);
+  // Ils sont CLASSÉS AU RENDU (même règle que l'enregistrement, voir
+  // tachesAffichees) : un plan jamais réenregistré montre ici ce qu'il montrera
+  // après enregistrement — et cette consultation n'écrit rien en base.
+  const items = tachesAffichees(machine.plan, machine);
   const hasItemDetail = items.some(it => it.frequency || it.spec || it.qty || it.note);
   const taskItems = (machine.plan?.tasks || '')
     .split(',')
