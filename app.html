@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EM14PgjMyF53wqE8IzQiTYlx+sIWA8cmc8zTc/5sTjY=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g1ZAKvXntsiCsJeKQM9b3XnJ9lAfSMdDXoAdEj9TpPM=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2205,38 +2205,173 @@ function echeancePlanPatch(valeur, plan) {
   return planIsCounter(plan) ? planNextDueCounterPatch(valeur) : { next_due_at: valeur };
 }
 
-// Reprise + préparation : chaque élément reçoit son intervalle (s'il se déduit
-// SANS ambiguïté) ou les OPTIONS du carnet quand la fréquence en propose
-// plusieurs — c'est la passe unique qui équipe les plans déjà extraits. Puis,
-// s'il n'en a pas encore, l'échéance du plan fournie par l'appelant.
-function preparerTaches(items, contreur, duePlan, unite) {
+// ── CLASSEMENT D'UNE FRÉQUENCE : UNE SEULE RÈGLE ─────────────
+// L'utilisateur a constaté dix tâches « en retard » de +970 km ou +125 h alors
+// que la plupart n'ont AUCUN rythme propre : elles héritaient l'échéance du plan.
+// Un « contrôle à chaque utilisation » n'a rien à faire en retard de 970 km.
+//
+// Trois natures, décidées ICI et nulle part ailleurs :
+//   'conditionnelle'  la fréquence dépend d'un ÉVÉNEMENT, pas du temps ni de
+//                     l'usage (« à chaque utilisation », « avant chaque long
+//                     trajet », « au besoin », « selon le manuel », « si
+//                     contamination ») → point de contrôle, JAMAIS d'échéance ;
+//   'periodique'      un rythme explicite et unique, même dans une unité qui
+//                     n'est pas celle du plan (« toutes les 250 heures », « tous
+//                     les 90 jours », « chaque mois ») → intervalle propre ;
+//   'a_choisir'       PLUSIEURS possibilités incompatibles (« 3 mois / 6 mois /
+//                     1 an », « 1 à 2 ans », « 100 heures ou 2 ans ») → c'est
+//                     l'utilisateur qui tranche.
+// Un texte qui mêle rythme et condition (« chaque mois ou avant chaque long
+// trajet ») est PÉRIODIQUE : le rythme existe, on ne le perd pas.
+//
+// DEUX ENTRÉES, UNE SEULE RÈGLE :
+//   · les champs STRUCTURÉS renvoyés par l'analyse du carnet (extract-maintenance-plan) :
+//     la fonction a lu le PDF, elle sait de quoi elle parle — l'application ne
+//     devine plus rien à partir d'une phrase française ;
+//   · le TEXTE, pour les plans déjà en base : c'est le repli déterministe, et le
+//     seul dont dispose la passe de rattrapage.
+// Les deux chemins appellent `classerFrequence`, donc ils ne peuvent pas diverger.
+const NATURES_FREQUENCE = ['conditionnelle', 'periodique', 'a_choisir', 'inconnue'];
+
+function classementVide(nature) {
+  return { nature, interval: null, unite: null, options: [] };
+}
+
+function classerDepuisStructure(frequence) {
+  if (!frequence || typeof frequence !== 'object') return null;
+  const nature = String(frequence.nature || '').toLowerCase();
+  if (nature === 'conditionnelle') return classementVide('conditionnelle');
+  if (nature === 'periodique') {
+    const interval = Number(frequence.interval);
+    const unite = frequence.unite ? String(frequence.unite) : null;
+    if (!Number.isFinite(interval) || interval <= 0) return null;
+    if (!unite || !UNITES_INTERVALLE[unite]) return null;
+    return { nature: 'periodique', interval, unite, options: [] };
+  }
+  if (nature === 'a_choisir') {
+    const options = (Array.isArray(frequence.options) ? frequence.options : [])
+      .map(o => ({
+        libelle: o && o.libelle ? String(o.libelle) : null,
+        interval: Number(o && o.interval),
+        unite: o && o.unite ? String(o.unite) : null,
+      }))
+      .filter(o => Number.isFinite(o.interval) && o.interval > 0 && UNITES_INTERVALLE[o.unite]);
+    if (!options.length) return null;
+    return { nature: 'a_choisir', interval: null, unite: null, options };
+  }
+  return null;
+}
+
+// « chaque mois », « tous les ans » : le rythme EXISTE, même sans nombre écrit.
+// Sans cela, « chaque mois ou avant chaque long trajet » passerait pour un
+// contrôle purement conditionnel et perdrait son rythme mensuel.
+function intervalleUnitaireDepuisTexte(texte) {
+  const t = String(texte || '').toLowerCase();
+  if (/\b(chaque|tous les|toutes les|par)\s+mois\b|\bmensuel/.test(t)) return { interval: 1, unite: trad('mois') };
+  if (/\b(chaque|tous les|toutes les|par)\s+semaines?\b|\bhebdomadaire/.test(t)) return { interval: 1, unite: trad('semaines') };
+  if (/\b(chaque|tous les|toutes les|par)\s+(ans?|ann[ée]es?)\b|\bannuel/.test(t)) return { interval: 1, unite: trad('ans') };
+  if (/\b(chaque|tous les|toutes les|par)\s+jours?\b|\bquotidien/.test(t)) return { interval: 1, unite: trad('jours') };
+  if (/\b(chaque|tous les|toutes les|par)\s+heures?\b/.test(t)) return { interval: 1, unite: trad('heures') };
+  return null;
+}
+
+function classerDepuisTexte(frequency) {
+  const texte = String(frequency || '').trim();
+  if (!texte) return classementVide('inconnue');
+  // 1. Plusieurs possibilités : on demande, on ne devine pas.
+  const options = choixDepuisTexte(texte);
+  if (options && options.length) return { nature: 'a_choisir', interval: null, unite: null, options };
+  // 2. Purement conditionnelle : un motif de contrôle ET aucun rythme lisible.
+  const enMois = intervalleEnMoisDepuisTexte(texte);
+  const enHeures = intervalleDepuisTexte(texte, 'hours');
+  const enKm = intervalleDepuisTexte(texte, trad('km'));
+  const enJours = intervalleDepuisTexte(texte, 'days');
+  const unitaire = intervalleUnitaireDepuisTexte(texte);
+  if (estPointDeControle(texte) && enMois == null && enHeures == null && enKm == null
+    && enJours == null && !unitaire) {
+    return classementVide('conditionnelle');
+  }
+  // 3. Rythme explicite : l'unité écrite dans le carnet fait foi.
+  if (enMois) return { nature: 'periodique', interval: enMois.interval, unite: enMois.unite, options: [] };
+  if (enHeures) return { nature: 'periodique', interval: enHeures, unite: trad('heures'), options: [] };
+  if (enKm) return { nature: 'periodique', interval: enKm, unite: trad('km'), options: [] };
+  if (enJours) return { nature: 'periodique', interval: enJours, unite: trad('jours'), options: [] };
+  if (unitaire) return { nature: 'periodique', interval: unitaire.interval, unite: unitaire.unite, options: [] };
+  // 4. Rien d'exploitable : ni rythme, ni choix à proposer.
+  return classementVide('inconnue');
+}
+
+// L'ENTRÉE UNIQUE : les champs structurés s'ils sont exploitables, sinon le texte.
+function classerFrequence(item) {
+  return classerDepuisStructure(item && item.frequence)
+    || classerDepuisTexte(item && item.frequency);
+}
+
+// Échéance PROPRE d'une tâche, calculée dans SON unité : une date pour les unités
+// calendaires, un relevé de compteur sinon. Une seule implémentation, employée
+// par la passe de préparation ET par le choix de l'utilisateur.
+function echeancePropreTacheAppliquee(t, machine) {
+  const info = UNITES_INTERVALLE[t.interval_unite] || {};
+  if (info.genre === 'date') {
+    const depart = t.last_done_at || todayIso();
+    t.due_at = ajouterIntervalleIso(depart, t.interval, t.interval_unite);
+    delete t.due_counter;
+  } else {
+    const depart = Number.isFinite(Number(t.last_done_counter))
+      ? Number(t.last_done_counter)
+      : (Number(machineCounter(machine)) || 0);
+    t.due_counter = depart + Number(t.interval);
+    delete t.due_at;
+  }
+  return t;
+}
+
+// LA PASSE, sur les éléments déjà en base comme sur ceux qui arrivent d'une
+// analyse. Idempotente, et elle ne touche JAMAIS un choix déjà fait.
+function preparerTaches(items, plan, machine, duePlan, unite) {
   const liste = normalizeItems(items);
   if (!liste.length) return null;
-  const uniteIntervalle = uniteIntervalleDepuisSuivi(unite);
+  const contreur = planIsCounter(plan);
   return liste.map(it => {
     const t = { ...it };
-    const dejaIntervalle = Number(t.interval) > 0;
-    const dejaOptions = Array.isArray(t.interval_choices) && t.interval_choices.length > 0;
-    if (!dejaIntervalle && !dejaOptions) {
-      const options = choixDepuisTexte(t.frequency);
-      const ambigu = options && (options.length > 1
-        || options.filter(o => uniteCompatibleAvecPlanSuivi(contreur, unite, o.unite)).length === 0);
-      if (ambigu) {
-        // Le carnet laisse un choix : on mémorise ses options, on ne devine pas.
-        t.interval_choices = options;
-      } else {
-        const resolu = resolutionIntervalleDepuisTexte(t.frequency, uniteIntervalle);
-        if (resolu) { t.interval = resolu.interval; t.interval_unite = resolu.unite; }
+    // Un choix de l'utilisateur est sa parole : on n'y touche pas.
+    if (t.interval_choisi) return t;
+    const classement = classerFrequence(t);
+    if (classement.nature === 'conditionnelle') {
+      // Un rythme conditionnel n'a AUCUNE échéance : il ne doit plus hériter de
+      // celle du plan (c'était toute la cause des alertes à +970 km).
+      delete t.interval; delete t.interval_unite; delete t.interval_choices;
+      delete t.due_at; delete t.due_counter;
+      t.point_de_controle = true;
+      return t;
+    }
+    if (classement.nature === 'a_choisir') {
+      delete t.interval; delete t.interval_unite;
+      delete t.due_at; delete t.due_counter; delete t.point_de_controle;
+      t.interval_choices = classement.options;
+      return t;
+    }
+    if (classement.nature === 'periodique') {
+      t.interval = classement.interval;
+      t.interval_unite = classement.unite;
+      delete t.interval_choices; delete t.point_de_controle;
+      if (uniteCompatiblePlan(classement.unite, plan, machine)) {
+        // Même unité que le plan : l'échéance de reprise porte le retard réel.
+        if (contreur) {
+          if (!Number.isFinite(Number(t.due_counter)) && duePlan != null) t.due_counter = duePlan;
+        } else if (!t.due_at && duePlan) {
+          t.due_at = duePlan;
+        }
+        return t;
       }
+      // Autre unité : sa propre échéance, dans son unité, hors du minimum du plan.
+      delete t.due_at; delete t.due_counter;
+      return echeancePropreTacheAppliquee(t, machine);
     }
-    if (contreur) {
-      // Une échéance en JOURS sur un plan au compteur est l'échéance PROPRE de la
-      // tâche (valeur libre dans une autre unité) : la reprise ne doit pas y
-      // ajouter celle du plan, sinon la tâche perdrait la sienne.
-      if (!t.due_at && !Number.isFinite(Number(t.due_counter)) && duePlan != null) t.due_counter = duePlan;
-    } else if (!t.due_at && !Number.isFinite(Number(t.due_counter)) && duePlan) {
-      t.due_at = duePlan;
-    }
+    // 'inconnue' : aucun rythme établi, donc aucune échéance — surtout pas celle
+    // du plan, qui faisait passer une tâche sans rythme pour en retard.
+    delete t.interval; delete t.interval_unite; delete t.interval_choices;
+    delete t.point_de_controle; delete t.due_at; delete t.due_counter;
     return t;
   });
 }
@@ -2249,7 +2384,7 @@ function tachesApresEntretien(items, plan, machine, cochees, releve, dateEntreti
   const unite = uniteSuivi(plan, machine);
   const contreur = planIsCounter(plan);
   const duePlan = contreur ? planNextDueCounter(plan) : (plan ? plan.next_due_at : null);
-  const taches = preparerTaches(items, contreur, duePlan, unite);
+  const taches = preparerTaches(items, plan, machine, duePlan, unite);
   if (!taches) return null;
   const faites = Array.isArray(cochees) ? cochees : [];
   const apres = taches.map(t => {
@@ -2312,18 +2447,11 @@ function appliquerChoixTache(items, label, choix, plan, machine) {
     t.interval_unite = choix.unite;
     t.interval_choisi = choix.libelle || libelleOption({ interval: choix.interval, unite: choix.unite });
     delete t.point_de_controle;
-    if (UNITES_INTERVALLE[choix.unite] && UNITES_INTERVALLE[choix.unite].genre === 'date') {
-      const depart = t.last_done_at || todayIso();
-      t.due_at = ajouterIntervalleIso(depart, t.interval, choix.unite);
-      delete t.due_counter;
-    } else {
-      const depart = Number.isFinite(Number(t.last_done_counter))
-        ? Number(t.last_done_counter)
-        : (Number(machineCounter(machine)) || 0);
-      t.due_counter = depart + t.interval;
-      delete t.due_at;
-    }
-    return t;
+    delete t.interval_choices;
+    // MÊME calcul d'échéance propre que la passe de préparation : une seule
+    // implémentation, donc un choix de l'utilisateur et une fréquence lue dans un
+    // carnet ne peuvent pas produire deux échéances différentes.
+    return echeancePropreTacheAppliquee(t, machine);
   });
 }
 
@@ -4820,7 +4948,12 @@ const LIMITES_OFFRES = { free: 1, eco: 5 };
 // inaperçues — l'application dirait « couverte » et le rappel partirait, ou
 // l'inverse.
 function limiteOffre() {
-  const limite = LIMITES_OFFRES[UI.companyPlan];
+  // MÊME REPLI que la fonction de rappels : une offre absente ou illisible vaut
+  // « gratuit » (1 machine), jamais « illimité ». Sans ce repli, un compte dont
+  // la colonne plan est nulle se croyait illimité côté application alors que les
+  // rappels n'en couvraient qu'une — c'est ce que le contrôle croisé a montré.
+  const offre = String(UI.companyPlan || 'free').toLowerCase();
+  const limite = LIMITES_OFFRES[offre];
   return limite == null ? null : limite;
 }
 
@@ -7193,9 +7326,12 @@ function openAddWizard(companyId, categories) {
         Object.assign(planPayload,
           planCounterPatch(intervalCounter, reminderCounter),
           planNextDueCounterPatch(dueCounter));
-        // Une échéance par tâche : les éléments créés reçoivent l'échéance du
-        // plan (règle de reprise), et leur intervalle quand il se déduit.
-        planPayload.items = preparerTaches(state.items, true, dueCounter, counterUnitFromMode(state.trackingMode));
+        // Une échéance par tâche : la passe CLASSE chaque fréquence (conditionnelle,
+        // périodique, à choisir) et ne donne l'échéance du plan qu'aux tâches qui
+        // ont un vrai rythme dans l'unité du plan.
+        planPayload.items = preparerTaches(state.items, planPayload,
+          { counter_unit: counterUnitFromMode(state.trackingMode), counter_value: state.currentHours },
+          dueCounter, counterUnitFromMode(state.trackingMode));
         // On conserve aussi un intervalle calendaire cohérent : il servira si la
         // machine bascule plus tard en suivi calendaire.
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
@@ -7204,9 +7340,9 @@ function openAddWizard(companyId, categories) {
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
         planPayload.reminder_days_before = state.reminderDays ?? FALLBACK_REMINDER_DAYS;
         planPayload.next_due_at = addDaysIso(state.serviceDate, planPayload.interval_days);
-        // Une échéance par tâche : les éléments créés reçoivent l'échéance du plan
-        // (règle de reprise), et leur intervalle quand il se déduit du texte.
-        planPayload.items = preparerTaches(state.items, false, planPayload.next_due_at, 'days');
+        // Une échéance par tâche : même passe, même classement (mode calendaire).
+        planPayload.items = preparerTaches(state.items, planPayload,
+          { counter_unit: 'hours', counter_value: null }, planPayload.next_due_at, 'days');
         planPayload.interval_hours = state.intervalHours || FALLBACK_INTERVAL_HOURS;
         planPayload.reminder_hours_before = state.reminderHoursBefore ?? FALLBACK_REMINDER_HOURS;
       }
@@ -8251,13 +8387,13 @@ function openMachineModal(companyId, categories, existing) {
           planUpdate.next_due_at = addDaysIso(serviceDate, intervalDays);
         }
 
-        // Une échéance par tâche : les éléments qui n'en ont pas encore reçoivent
-        // l'échéance qui vient d'être calculée pour le plan (règle de reprise) ;
-        // ceux qui en ont déjà une la gardent telle quelle.
+        // Une échéance par tâche : même passe de classement pour la modification
+        // d'un plan (les éléments qui ont déjà une échéance la gardent).
         const duePlanMaj = isCounterMode
           ? planNextDueCounter({ ...existing.plan, ...planUpdate })
           : (planUpdate.next_due_at || existing.plan.next_due_at);
-        const itemsMaj = preparerTaches(overlay._aiItems || existing.plan.items, isCounterMode, duePlanMaj, counterUnit);
+        const itemsMaj = preparerTaches(overlay._aiItems || existing.plan.items,
+          { ...existing.plan, ...planUpdate }, existing, duePlanMaj, counterUnit);
         if (itemsMaj) planUpdate.items = itemsMaj;
 
         const { error: planErr } = await sb
@@ -8284,9 +8420,10 @@ function openMachineModal(companyId, categories, existing) {
         } else {
           planPayload.next_due_at = duePlanNouveau;
         }
-        // Une échéance par tâche : les éléments créés reçoivent l'échéance du plan
-        // (règle de reprise), et leur intervalle quand il se déduit du texte.
-        planPayload.items = preparerTaches(overlay._aiItems, isCounterMode, duePlanNouveau, counterUnit);
+        // Une échéance par tâche : la passe CLASSE chaque fréquence et ne donne
+        // l'échéance du plan qu'aux tâches qui ont un vrai rythme dans son unité.
+        planPayload.items = preparerTaches(overlay._aiItems, planPayload,
+          { counter_unit: counterUnit, counter_value: currentHours }, duePlanNouveau, counterUnit);
         const { error: planErr } = await sb
           .from('maintenance_plans')
           .insert(planPayload);
