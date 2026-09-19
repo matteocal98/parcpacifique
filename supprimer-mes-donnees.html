@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supprimer mes données — KEEVA</title>
+<meta name="description" content="Comment supprimer une partie de tes données KEEVA sans supprimer ton compte : une machine (plan, entretiens, relevés, photo), une photo, la copie locale de l'appareil, tes coordonnées.">
+<link rel="canonical" href="https://keeva.work/supprimer-mes-donnees.html">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0D1424">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Jetons de la charte KEEVA. Les surfaces et les bordures sont ces mêmes
+       teintes en transparence : aucune autre couleur n'est employée. */
+    --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0E1333; --ink-soft:rgba(14,19,51,.74);
+    --line:rgba(14,19,51,.14); --primary:#6366F1; --primary-dark:#5B52DF; --r-lg:22px; --r-sm:10px;
+    --shadow-lg:0 24px 60px rgba(13,20,36,.16);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 90px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px;}
+  a.back{display:inline-block;margin-bottom:18px;color:var(--primary);font-weight:700;text-decoration:none;font-size:14px;}
+  a.back:hover{text-decoration:underline;}
+  h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .updated{color:var(--ink-soft);font-size:13px;margin-bottom:28px;}
+  h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
+  p, li{font-size:15px;color:var(--ink);}
+  ul{padding-left:20px;}
+  .box{background:rgba(14,19,51,.03);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
+  .box p{margin:4px 0;}
+
+  /* Sélecteur de langue : même clé de stockage que l'application. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  .lang-btn.is-active{background:rgba(99,102,241,.10);border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <a class="back" href="./app.html" id="retour">← Retour à l'application</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
+    </div>
+
+    <section class="fr" lang="fr">
+      <h1>Supprimer mes données</h1>
+      <div class="updated">Dernière mise à jour : 19 septembre 2026</div>
+
+      <p>Tu peux supprimer une partie de tes données <strong>toi-même, dans l'application</strong>, sans supprimer ton compte ni perdre le reste. Cette page décrit exactement ce que chaque geste efface. Pour la suppression <strong>totale</strong> du compte, voir la page <a href="./suppression-compte.html">Suppression de compte</a>.</p>
+
+      <h2>1. Supprimer une machine — immédiat et irréversible</h2>
+      <p>Dans le parc, ouvre la fiche de la machine, puis <strong>Modifier</strong>, et descends jusqu'au bouton <strong>« Supprimer cette machine »</strong>. Une confirmation te rappelle ce qui sera effacé ; elle n'est pas là pour décorer : l'action est <strong>immédiate et sans retour</strong>.</p>
+      <p>Partent avec la machine, dans la même opération :</p>
+      <ul>
+        <li>la <strong>fiche</strong> de la machine : nom, catégorie, marque, modèle, année, n° de série ou plaque, date de mise en service, et le <strong>relevé de compteur</strong> en cours ;</li>
+        <li>son <strong>plan d'entretien</strong> : tâches, fréquences, intervalles, échéances, choix retenus et notes ;</li>
+        <li>tout son <strong>historique d'entretiens</strong> (les interventions enregistrées, avec le relevé de compteur de chacune) ;</li>
+        <li>les <strong>journaux d'envoi des rappels</strong> rattachés à son plan ;</li>
+        <li>son <strong>carnet d'entretien</strong> au format PDF, s'il avait été déposé ;</li>
+        <li>sa <strong>photo</strong>, effacée du stockage en même temps que la fiche.</li>
+      </ul>
+      <div class="box">
+        <p><strong>Rien n'est conservé « au cas où »</strong> : ni la fiche, ni le plan, ni l'historique, ni la photo, ni le carnet. Si tu veux garder une trace, exporte l'historique en CSV <em>avant</em> de supprimer.</p>
+      </div>
+      <p>Les autres machines du parc et ton compte ne sont pas touchés.</p>
+
+      <h2>2. Remplacer ou supprimer une photo</h2>
+      <p><strong>Remplacer</strong> : dans la fiche de la machine, <strong>Modifier</strong>, puis « Choisir une photo » ou « Prendre une photo ». La nouvelle photo <strong>remplace</strong> l'ancienne au même emplacement — l'ancienne n'est plus conservée nulle part. Le reste de la fiche (plan, historique, relevés) n'est pas modifié.</p>
+      <p><strong>Supprimer seulement la photo</strong>, sans supprimer la machine, ne se fait pas encore depuis l'application : demande-le par e-mail, à l'adresse indiquée au point 5. Le geste est fait par une personne, et la photo disparaît du stockage — la machine, son plan et son historique restent en place.</p>
+
+      <h2>3. Supprimer la copie gardée sur ton appareil</h2>
+      <p>Pour consulter le parc sans réseau, l'application garde sur ton appareil une copie des dernières données reçues. Tu peux la supprimer toi-même : <strong>« Mon compte » → « Données sur cet appareil »</strong>, puis refuse la copie hors connexion — elle est <strong>effacée immédiatement</strong>.</p>
+      <p>Ce que cela change : sans cette copie, l'application demandera le réseau à chaque ouverture, et un compteur ne pourra plus être relevé hors connexion (la valeur attendra le retour du réseau). Ce que cela ne change pas : aucune donnée de nos serveurs n'est supprimée par ce geste. La copie s'efface aussi à la déconnexion, et au plus tard au bout de sept (7) jours.</p>
+
+      <h2>4. Modifier ou retirer tes coordonnées</h2>
+      <ul>
+        <li><strong>Société</strong> (raison sociale, activité, n° RCS / RIDET) et <strong>contact</strong> (prénom, nom, téléphone) : dans « Mon compte », rubriques correspondantes — la correction est enregistrée aussitôt.</li>
+        <li><strong>Adresse des rappels</strong> : dans « Mon compte » → « Rappels ». Tu peux la changer ou <strong>désactiver les rappels</strong> ; quand le champ est vide, c'est l'adresse de ton compte qui sert de repli, et l'application le dit.</li>
+        <li><strong>Retirer complètement une coordonnée</strong> (par exemple le numéro de téléphone) : si le formulaire exige une valeur, demande-le par e-mail (point 5).</li>
+        <li><strong>Adresse de connexion</strong> : elle se change dans « Mon compte », avec confirmation par e-mail et saisie du mot de passe.</li>
+      </ul>
+
+      <h2>5. Si tu ne peux plus accéder à l'application</h2>
+      <p>Écris à <a href="mailto:support@keeva.work">support@keeva.work</a> en décrivant ce que tu veux supprimer (une machine ? une photo ? toutes tes données ?). Parce que ces suppressions sont irréversibles, nous <strong>vérifions l'identité du demandeur</strong> avant d'y donner suite, et nous répondons à toutes les demandes.</p>
+      <div class="box">
+        <p>Le délai appliqué est simple :</p>
+        <p><strong>Dans l'application : immédiat.</strong> La suppression d'une machine, d'une photo remplacée ou de la copie locale est faite à l'instant où tu confirmes.</p>
+        <p><strong>Par e-mail : au plus tard trente (30) jours</strong> après la vérification d'identité — le même engagement que pour la suppression d'un compte, et la même exigence : rien n'est supprimé avant cette vérification.</p>
+      </div>
+      <p>Pour toute question sur tes données : <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
+
+      <h2>6. Supprimer tout le compte</h2>
+      <p>Supprimer son compte, c'est autre chose : partent alors la société, toutes les machines, tous les plans, tout l'historique, les carnets, les photos, les catégories et les rappels, ainsi que ton compte et ton adresse de connexion. La marche à suivre, ce qui est conservé (les factures, dix ans) et le délai sont décrits sur la page <a href="./suppression-compte.html">Suppression de compte</a>.</p>
+    </section>
+
+    <section class="en" lang="en">
+      <h1>Delete my data</h1>
+      <div class="updated">Last updated: 19 September 2026</div>
+
+      <p>You can delete part of your data <strong>yourself, inside the application</strong>, without deleting your account or losing the rest. This page describes exactly what each action erases. For <strong>full</strong> account deletion, see the <a href="./suppression-compte.html">Account deletion</a> page.</p>
+
+      <h2>1. Delete a machine — immediate and irreversible</h2>
+      <p>In your fleet, open the machine record, then <strong>Edit</strong>, and scroll down to the <strong>“Delete this machine”</strong> button. A confirmation reminds you what will be erased; it is not decorative: the action is <strong>immediate and cannot be undone</strong>.</p>
+      <p>Deleted together with the machine, in the same operation:</p>
+      <ul>
+        <li>the machine <strong>record</strong>: name, category, brand, model, year, serial number or plate, commissioning date, and the current <strong>counter reading</strong>;</li>
+        <li>its <strong>maintenance plan</strong>: tasks, frequencies, intervals, due dates, selected choices and notes;</li>
+        <li>its entire <strong>service history</strong> (the recorded interventions, each with its counter reading);</li>
+        <li>the <strong>reminder delivery logs</strong> attached to its plan;</li>
+        <li>its <strong>service manual</strong> in PDF format, if one had been uploaded;</li>
+        <li>its <strong>photo</strong>, erased from storage together with the record.</li>
+      </ul>
+      <div class="box">
+        <p><strong>Nothing is kept “just in case”</strong>: neither the record, nor the plan, nor the history, nor the photo, nor the manual. If you want a copy, export the history as CSV <em>before</em> deleting.</p>
+      </div>
+      <p>The other machines in your fleet and your account are not affected.</p>
+
+      <h2>2. Replace or delete a photo</h2>
+      <p><strong>Replace</strong>: in the machine record, <strong>Edit</strong>, then “Choose a photo” or “Take a photo”. The new photo <strong>replaces</strong> the previous one at the same location — the old one is no longer kept anywhere. The rest of the record (plan, history, readings) is unchanged.</p>
+      <p><strong>Deleting only the photo</strong>, without deleting the machine, is not yet available inside the application: ask by email, at the address given in point 5. It is done by a person, and the photo disappears from storage — the machine, its plan and its history stay in place.</p>
+
+      <h2>3. Delete the copy kept on your device</h2>
+      <p>To let you view your fleet without a network, the application keeps a copy of the last data received on your device. You can delete it yourself: <strong>“My account” → “Data on this device”</strong>, then decline the offline copy — it is <strong>erased immediately</strong>.</p>
+      <p>What it changes: without that copy, the application will need the network on every launch, and a counter can no longer be read offline (the value will wait for the network to return). What it does not change: no data on our servers is deleted by this action. The copy is also erased when you sign out, and at the latest after seven (7) days.</p>
+
+      <h2>4. Change or remove your details</h2>
+      <ul>
+        <li><strong>Company</strong> (registered name, activity, registration number) and <strong>contact</strong> (first name, last name, phone): in “My account”, in the matching sections — the correction is saved straight away.</li>
+        <li><strong>Reminder address</strong>: in “My account” → “Reminders”. You can change it or <strong>turn reminders off</strong>; when the field is empty, your account address is used as a fallback, and the application says so.</li>
+        <li><strong>Removing a detail completely</strong> (for instance the phone number): if the form requires a value, ask by email (point 5).</li>
+        <li><strong>Sign-in address</strong>: changed in “My account”, confirmed by email and by entering your password.</li>
+      </ul>
+
+      <h2>5. If you can no longer access the application</h2>
+      <p>Write to <a href="mailto:support@keeva.work">support@keeva.work</a> describing what you want deleted (a machine? a photo? all your data?). Because these deletions cannot be undone, we <strong>check the identity of the requester</strong> before acting, and we answer every request.</p>
+      <div class="box">
+        <p>The time it takes is simple:</p>
+        <p><strong>Inside the application: immediate.</strong> Deleting a machine, replacing a photo or clearing the local copy happens the moment you confirm.</p>
+        <p><strong>By email: at the latest thirty (30) days</strong> after the identity check — the same commitment as for deleting an account, and the same rule: nothing is deleted before that check.</p>
+      </div>
+      <p>For any question about your data: <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
+
+      <h2>6. Delete the whole account</h2>
+      <p>Deleting your account is something else: it takes away the company, every machine, every plan, the entire history, the manuals, the photos, the categories and the reminders, as well as your account and your sign-in address. The procedure, what is kept (invoices, ten years) and how long it takes are described on the <a href="./suppression-compte.html">Account deletion</a> page.</p>
+    </section>
+  </div>
+</div>
+<script>
+// La langue vient de la même clé que l'application : la page s'ouvre donc dans la
+// langue choisie dans l'application, sans réglage à refaire.
+(function () {
+  var CLE = 'parcpacific.langue';
+  var TITRES = {
+    fr: 'Supprimer mes données — KEEVA',
+    en: 'Delete my data — KEEVA'
+  };
+  var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
+
+  function lire() {
+    try {
+      var choisie = localStorage.getItem(CLE);
+      if (choisie === 'fr' || choisie === 'en') return choisie;
+    } catch (err) { /* stockage indisponible */ }
+    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+    return appareil === 'en' ? 'en' : 'fr';
+  }
+
+  function appliquer(code) {
+    document.documentElement.lang = code;
+    document.title = TITRES[code];
+    var retour = document.getElementById('retour');
+    if (retour) retour.textContent = RETOUR[code];
+    var boutons = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < boutons.length; i++) {
+      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+    }
+    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
+  }
+
+  appliquer(lire());
+  var boutons = document.querySelectorAll('.lang-btn');
+  for (var i = 0; i < boutons.length; i++) {
+    boutons[i].addEventListener('click', function (e) {
+      appliquer(e.currentTarget.getAttribute('data-langue'));
+    });
+  }
+})();
+</script>
+</body>
+</html>
