@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FFwmBwB8g4wQTEUkOwDaUmEW041Ltqs46BpNSEvQp6U=' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co https://cdnjs.cloudflare.com; worker-src blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-y6K7q1s9mn5ft0KdNHcHR/oPfSkjRpJ+NGQrwION8gM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- viewport-fit=cover : la page occupe tout l'écran, encoche comprise. Les
      marges correspondantes sont posées en CSS via env(safe-area-inset-*). -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -504,12 +504,28 @@
     background:var(--surface-soft);
   }
   .pages-utiles .reperage-titre{font-weight:700;font-size:14px;color:var(--ink);}
+  /* CHAQUE LIGNE : case à cocher, numéro de page, aperçu — DANS le cadre.
+     La première version utilisait flex sans `min-width: 0` : l'aperçu, long,
+     refusait de se réduire, poussait tout vers la droite HORS du panneau, et il
+     ne restait que la case à cocher à gauche — l'utilisateur croyait alors que
+     rien n'avait été trouvé. Une grille avec `minmax(0, 1fr)` garantit que
+     l'aperçu se replie À L'INTÉRIEUR de sa colonne, sur ordinateur comme sur
+     téléphone. */
   .pages-utiles .page-utile{
-    display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);
+    display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:start;
+    gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);max-width:100%;
   }
-  .pages-utiles .page-utile input{margin-top:2px;flex:0 0 auto;}
+  .pages-utiles .page-utile input{margin:3px 0 0;flex:0 0 auto;}
   .pages-utiles .page-num{font-weight:600;color:var(--ink);white-space:nowrap;}
-  .pages-utiles .page-apercu{line-height:1.4;}
+  .pages-utiles .page-apercu{
+    line-height:1.4;min-width:0;overflow-wrap:anywhere;word-break:break-word;white-space:normal;
+  }
+  /* Sur téléphone, la colonne d'aperçu serait trop étroite à côté du numéro :
+     l'aperçu passe SOUS le numéro, toujours dans le cadre. */
+  @media (max-width:719px){
+    .pages-utiles .page-utile{grid-template-columns:auto minmax(0,1fr);}
+    .pages-utiles .page-apercu{grid-column:2;}
+  }
   .pages-utiles .ajout-page{display:flex;align-items:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap;}
   .pages-utiles .ajout-page input{max-width:120px;}
   #photo-preview .machine-photo{margin-bottom:12px;}
@@ -2574,9 +2590,14 @@ try {
   if (retryBtn) retryBtn.addEventListener('click', () => window.location.reload());
 }
 
-// ── pdf.js chargé à la demande ────────────────────────────────
-const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+// ── pdf.js EMBARQUÉ, chargé en local ──────────────────────────────────
+// POURQUOI EN LOCAL : l'application promet de fonctionner HORS CONNEXION, et le
+// repérage des pages d'un carnet en dépend. Chargée depuis un CDN, la
+// bibliothèque manquait dès que le réseau manquait — et la panne était muette.
+// Les deux fichiers vivent à côté de la page (`vendor/`), copiés tels quels
+// depuis la version 3.11.174 (licence Apache 2.0, voir vendor/pdf.js.LICENSE.txt).
+const PDFJS_URL = "vendor/pdf.min.js";
+const PDFJS_WORKER_URL = "vendor/pdf.worker.min.js";
 
 let pdfLibPromise = null;
 function loadPdfLib() {
@@ -7276,40 +7297,65 @@ function blobEnBase64(blob) {
 // dans la politique de sécurité. Elle vient de la même source qu'aujourd'hui.
 const REPERAGE_PAGES_MAX = 200;      // au-delà : on lit les 200 premières, et on le dit
 const REPERAGE_PAGES_RETENUES = 6;   // le plafond du chemin photo : 6 pages, 1 crédit
-const REPERAGE_SEUIL = 3;            // en dessous : page NON retenue (aucun hasard)
+// Un vrai tableau d'entretien, c'est une FORME, pas un mot : plusieurs périodicités
+// alignées. On exige donc les deux à la fois — plusieurs nombres avec unité, ET au
+// moins un mot SPÉCIFIQUE d'entretien. Sans ces deux conditions, aucune page n'est
+// proposée : mieux vaut « aucune page repérée » que six pages hors sujet.
+const REPERAGE_MIN_NOMBRES = 2;      // « plusieurs » : un seul nombre n'est pas un tableau
+const REPERAGE_SEUIL = 6;
 
-// Mots du tableau d'entretien, en français ET en anglais : un manuel anglais ne
-// doit pas être moins bien servi qu'un manuel français.
-const REPERAGE_MOTS = [
-  'entretien', 'maintenance', 'périodicité', 'periodicite', 'periodicity', 'intervalle', 'interval',
-  trad('toutes les'), 'every', 'vidange', 'oil change', 'graissage', 'grease', 'lubrification', 'lubrication',
-  'contrôle', 'controle', 'check', 'inspection', 'filtre', 'filter', 'courroie', 'belt', 'bougie',
-  'spark plug', 'huile', 'hydraulique', 'hydraulic', 'remplacement', 'replace', 'preventive',
-  'plan de maintenance', 'maintenance schedule', 'tableau d\'entretien', 'carnet d\'entretien',
-  'heures de service', 'service hours', 'service interval',
+// MOTS SPÉCIFIQUES (poids 3) : ils n'apparaissent pas par hasard dans un manuel.
+// Un paragraphe sur les ceintures de sécurité dit « every », « interval » et même
+// « belt » (« seat belt ») — d'où des formes précises plutôt que des mots nus.
+const REPERAGE_MOTS_FORTS = [
+  'vidange', 'oil change', 'engine oil', 'huile moteur', 'graissage', 'graisser', 'grease', 'greasing',
+  'lubrification', 'lubrication', 'courroie', 'drive belt', 'v-belt', 'belt tension', 'belt replacement',
+  'filtre a air', 'filtre à air', 'air filter', 'filtre a huile', 'filtre à huile', 'oil filter',
+  'filtre hydraulique', 'hydraulic filter', 'bougie', 'spark plug', 'plan de maintenance',
+  'tableau d\'entretien', 'carnet d\'entretien', 'maintenance schedule', 'maintenance table',
+  'service interval', 'service schedule', 'heures de service', 'service hours', 'périodicité',
+  'periodicite', 'periodicity',
+];
+// MOTS BANALS (poids 1) : utiles comme indice, jamais suffisants à eux seuls.
+// « every », « toutes les », « interval », « check », « replace » sont VOLONTAIREMENT
+// absents : on les trouve dans n'importe quel mode d'emploi.
+const REPERAGE_MOTS_FAIBLES = [
+  'entretien', 'maintenance', 'intervalle', 'interval', 'contrôle', 'controle', 'inspection',
+  'filtre', 'filter', 'hydraulique', 'hydraulic', 'huile', 'oil',
 ];
 // LA FORME D'UN TABLEAU : un nombre associé à une unité (heures, km, mois, ans…).
-// Une page qui dit « toutes les 100 heures » ET « vidange » est presque
-// certainement la bonne ; c'est ce que ce score mesure.
-const REPERAGE_UNITES = /\b\d[\d\s.,]*\s*(h|hrs?|heures?|hours?|km|kilom[èe]tres?|miles?|mois|months?|ans?|ann[ée]es?|years?|jours?|days?|semaines?|weeks?)\b/i;
+const REPERAGE_UNITES = /\b\d[\d\s.,]*\s*(h|hrs?|heures?|hours?|km|kilom[èe]tres?|miles?|mois|months?|ans?|ann[ée]es?|years?|jours?|days?|semaines?|weeks?)\b/gi;
+
+function occurrencesDe(texte, motif) {
+  let position = texte.indexOf(motif);
+  let occurrences = 0;
+  while (position >= 0 && occurrences < 5) {
+    occurrences++;
+    position = texte.indexOf(motif, position + motif.length);
+  }
+  return occurrences;
+}
 
 function scorePageCarnet(texte) {
   const normalise = String(texte || '').toLowerCase();
   let score = 0;
   const trouves = [];
-  for (const mot of REPERAGE_MOTS) {
-    const motif = mot.toLowerCase();
-    let position = normalise.indexOf(motif);
-    let occurrences = 0;
-    while (position >= 0 && occurrences < 5) {
-      occurrences++;
-      position = normalise.indexOf(motif, position + motif.length);
-    }
+  for (const mot of REPERAGE_MOTS_FORTS) {
+    const occurrences = occurrencesDe(normalise, mot);
+    if (occurrences) { score += occurrences * 3; trouves.push(mot); }
+  }
+  for (const mot of REPERAGE_MOTS_FAIBLES) {
+    const occurrences = occurrencesDe(normalise, mot);
     if (occurrences) { score += occurrences; trouves.push(mot); }
   }
-  const nombres = (normalise.match(new RegExp(REPERAGE_UNITES.source, 'gi')) || []).length;
+  const nombres = (normalise.match(REPERAGE_UNITES) || []).length;
   score += nombres * 2;
-  return { score, trouves, nombres };
+  // LES DEUX CONDITIONS QUI FONT LA DIFFÉRENCE : la forme (plusieurs périodicités)
+  // ET un mot spécifique. Une page qui n'a que des mots banals, ou un seul nombre,
+  // n'est PAS un tableau d'entretien.
+  const motsForts = trouves.filter((m) => REPERAGE_MOTS_FORTS.includes(m)).length;
+  const tableau = nombres >= REPERAGE_MIN_NOMBRES && motsForts >= 1 && score >= REPERAGE_SEUIL;
+  return { score, trouves, nombres, motsForts, tableau };
 }
 
 // Aperçu COURT et lisible : on part du premier mot-clé (ou du premier nombre avec
@@ -7346,12 +7392,19 @@ async function repererPagesCarnet(file, surProgres) {
     } catch (err) { texte = ''; }
     const caracteres = texte.replace(/\s+/g, '').length;
     if (caracteres) {
-      const { score, trouves, nombres } = scorePageCarnet(texte);
-      lues.push({ numero, score, trouves, nombres, apercu: apercuPageCarnet(texte, trouves) });
+      const resultat = scorePageCarnet(texte);
+      lues.push({
+        numero, score: resultat.score, nombres: resultat.nombres, motsForts: resultat.motsForts,
+        tableau: resultat.tableau, trouves: resultat.trouves,
+        apercu: apercuPageCarnet(texte, resultat.trouves),
+      });
     }
     if (typeof surProgres === 'function') surProgres(numero, aLire);
   }
-  const retenues = lues.filter((p) => p.score >= REPERAGE_SEUIL)
+  // SEULES LES PAGES QUI ONT LA FORME D'UN TABLEAU sont proposées. Si aucune ne
+  // l'a, on ne retient RIEN : « aucune page repérée » est une réponse honnête, six
+  // pages hors sujet n'en sont pas une.
+  const retenues = lues.filter((p) => p.tableau)
     .sort((a, b) => b.score - a.score)
     .slice(0, REPERAGE_PAGES_RETENUES)
     .sort((a, b) => a.numero - b.numero);
