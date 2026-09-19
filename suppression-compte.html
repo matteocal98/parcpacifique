@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suppression de compte — KEEVA</title>
+<meta name="description" content="Comment supprimer ton compte KEEVA et tes données : ce qui est effacé, ce qui est conservé (factures), le délai appliqué, et la marche à suivre si tu ne peux plus te connecter.">
+<link rel="canonical" href="https://keeva.work/suppression-compte.html">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0D1424">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Jetons de la charte KEEVA. Les surfaces et les bordures sont ces mêmes
+       teintes en transparence : aucune autre couleur n'est employée. */
+    --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0E1333; --ink-soft:rgba(14,19,51,.74);
+    --line:rgba(14,19,51,.14); --primary:#6366F1; --primary-dark:#5B52DF; --r-lg:22px; --r-sm:10px;
+    --shadow-lg:0 24px 60px rgba(13,20,36,.16);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 90px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px;}
+  a.back{display:inline-block;margin-bottom:18px;color:var(--primary);font-weight:700;text-decoration:none;font-size:14px;}
+  a.back:hover{text-decoration:underline;}
+  h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .updated{color:var(--ink-soft);font-size:13px;margin-bottom:28px;}
+  h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
+  p, li{font-size:15px;color:var(--ink);}
+  ul{padding-left:20px;}
+  .box{background:rgba(14,19,51,.03);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
+  .box p{margin:4px 0;}
+
+  /* Sélecteur de langue : même clé de stockage que l'application. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  .lang-btn.is-active{background:rgba(99,102,241,.10);border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <a class="back" href="./app.html" id="retour">← Retour à l'application</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
+    </div>
+
+    <section class="fr" lang="fr">
+      <h1>Suppression de compte</h1>
+      <div class="updated">Dernière mise à jour : 19 septembre 2026</div>
+
+      <h2>1. Comment demander la suppression</h2>
+      <p>La suppression du compte et des données se demande par e-mail. Elle est traitée par une personne, jamais automatiquement : c'est ce qui permet de vérifier que la demande vient bien du titulaire avant d'effacer quoi que ce soit. L'application ne comporte pas encore de bouton « Supprimer mon compte » dans la rubrique « Mon compte » : cette page décrit donc le seul canal de suppression en vigueur aujourd'hui.</p>
+      <div class="box">
+        <p>Pour demander la suppression, écris à :</p>
+        <p><a href="mailto:support@keeva.work">support@keeva.work</a> — objet conseillé : « Suppression de compte ».</p>
+      </div>
+
+      <h2>2. Ce qui est supprimé</h2>
+      <p>La suppression porte sur l'ensemble de ce que le Service détient sur le compte. Rien n'est conservé « au cas où » :</p>
+      <ul>
+        <li>le compte utilisateur et son adresse e-mail de connexion ;</li>
+        <li>la société rattachée au compte et ses coordonnées (raison sociale, activité, numéro RCS / RIDET, téléphone, contact) ;</li>
+        <li>les machines et véhicules suivis : fiche, marque, modèle, année, identifiant et photo ;</li>
+        <li>les plans d'entretien : tâches, intervalles, échéances, choix retenus et notes ;</li>
+        <li>l'historique des entretiens enregistrés, les relevés de compteur et les documents joints (carnets d'entretien au format PDF) ;</li>
+        <li>les rappels en attente, les journaux d'envoi des rappels et les catégories de machines créées.</li>
+      </ul>
+
+      <h2>3. Ce qui est conservé, et pourquoi</h2>
+      <p>Une seule catégorie de données survit à la suppression, parce que la loi nous oblige à la garder :</p>
+      <ul>
+        <li>les factures liées à un abonnement payant sont conservées dix ans, durée légale de conservation des pièces comptables, puis supprimées ;</li>
+        <li>ces factures ne contiennent aucune donnée de maintenance : nom de la société, montant, date et moyen de paiement. Les données de carte bancaire ne sont jamais conservées par KEEVA : elles restent chez le prestataire de paiement, Stripe.</li>
+      </ul>
+      <p>Rien d'autre n'est conservé : ni machine, ni plan d'entretien, ni historique, ni photo, ni carnet. Aucune donnée n'est vendue, ni transmise à un tiers après la suppression.</p>
+
+      <h2>4. Le délai</h2>
+      <p>La suppression est exécutée à la main, sur nos serveurs : compte, société, machines, plans, historique, photos et carnets sont effacés dans un délai maximum de trente (30) jours à compter de la demande. C'est l'engagement écrit dans notre <a href="./politique-confidentialite.html">politique de confidentialité</a>.</p>
+      <p>La copie gardée sur ton appareil pour la consultation hors connexion ne dépend pas de nous : elle est effacée à la déconnexion, et au plus tard au bout de sept (7) jours.</p>
+
+      <h2>5. Si tu ne peux plus accéder au compte</h2>
+      <p>Écris à <a href="mailto:support@keeva.work">support@keeva.work</a> depuis n'importe quelle adresse : une suppression reste possible même si tu as perdu l'accès à la boîte du compte. Parce que l'opération est irréversible, nous vérifions l'identité du demandeur avant d'y donner suite.</p>
+      <ul>
+        <li>si tu as encore accès à l'adresse du compte : une demande envoyée depuis cette adresse suffit ;</li>
+        <li>sinon : indique le nom exact de la société, son numéro RCS / RIDET, et une facture ou la date de création du compte ;</li>
+        <li>aucune donnée n'est supprimée sans cette vérification, et nous répondons à toutes les demandes.</li>
+      </ul>
+      <p>Pour toute question relative à tes données : <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
+    </section>
+
+    <section class="en" lang="en">
+      <h1>Account deletion</h1>
+      <div class="updated">Last updated: 19 September 2026</div>
+
+      <h2>1. How to request deletion</h2>
+      <p>Deleting the account and its data is requested by email. It is handled by a person, never automatically: that is what makes it possible to check that the request really comes from the account holder before anything is erased. The application does not yet offer a “Delete my account” button in the “My account” section: this page therefore describes the only deletion channel in force today.</p>
+      <div class="box">
+        <p>To request deletion, write to:</p>
+        <p><a href="mailto:support@keeva.work">support@keeva.work</a> — suggested subject: “Account deletion”.</p>
+      </div>
+
+      <h2>2. What is deleted</h2>
+      <p>Deletion covers everything the Service holds about the account. Nothing is kept “just in case”:</p>
+      <ul>
+        <li>the user account and its sign-in email address;</li>
+        <li>the company linked to the account and its details (registered name, activity, registration number, phone, contact);</li>
+        <li>the machines and vehicles tracked: record, brand, model, year, identifier and photo;</li>
+        <li>the maintenance plans: tasks, intervals, due dates, selected choices and notes;</li>
+        <li>the history of recorded maintenance, counter readings and attached documents (service manuals in PDF format);</li>
+        <li>pending reminders, reminder delivery logs and the machine categories created.</li>
+      </ul>
+
+      <h2>3. What is kept, and why</h2>
+      <p>One single category of data survives deletion, because the law requires us to keep it:</p>
+      <ul>
+        <li>invoices relating to a paid subscription are kept for ten years, the legal retention period for accounting records, and are then deleted;</li>
+        <li>those invoices contain no maintenance data: company name, amount, date and payment method. Card details are never stored by KEEVA: they remain with the payment provider, Stripe.</li>
+      </ul>
+      <p>Nothing else is kept: no machine, no maintenance plan, no history, no photo, no manual. No data is sold or passed to a third party after deletion.</p>
+
+      <h2>4. How long it takes</h2>
+      <p>Deletion is carried out by hand, on our servers: account, company, machines, plans, history, photos and manuals are erased within a maximum of thirty (30) days from the request. That is the written commitment in our <a href="./politique-confidentialite.html">privacy policy</a>.</p>
+      <p>The copy kept on your device for offline viewing does not depend on us: it is erased when you sign out, and at the latest after seven (7) days.</p>
+
+      <h2>5. If you can no longer sign in</h2>
+      <p>Write to <a href="mailto:support@keeva.work">support@keeva.work</a> from any address: deletion remains possible even if you have lost access to the account mailbox. Because the operation is irreversible, we check the identity of the requester before acting on it.</p>
+      <ul>
+        <li>if you still have access to the account address: a request sent from that address is enough;</li>
+        <li>otherwise: give the exact company name, its registration number, and an invoice or the creation date of the account;</li>
+        <li>no data is deleted without that check, and we answer every request.</li>
+      </ul>
+      <p>For any question about your data: <a href="mailto:support@keeva.work">support@keeva.work</a>.</p>
+    </section>
+  </div>
+</div>
+<script>
+// La langue vient de la même clé que l'application : la page s'ouvre donc dans la
+// langue choisie dans l'application, sans réglage à refaire.
+(function () {
+  var CLE = 'parcpacific.langue';
+  var TITRES = {
+    fr: 'Suppression de compte — KEEVA',
+    en: 'Account deletion — KEEVA'
+  };
+  var RETOUR = { fr: "← Retour à l'application", en: '← Back to the app' };
+
+  function lire() {
+    try {
+      var choisie = localStorage.getItem(CLE);
+      if (choisie === 'fr' || choisie === 'en') return choisie;
+    } catch (err) { /* stockage indisponible */ }
+    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
+    return appareil === 'en' ? 'en' : 'fr';
+  }
+
+  function appliquer(code) {
+    document.documentElement.lang = code;
+    document.title = TITRES[code];
+    var retour = document.getElementById('retour');
+    if (retour) retour.textContent = RETOUR[code];
+    var boutons = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < boutons.length; i++) {
+      boutons[i].classList.toggle('is-active', boutons[i].getAttribute('data-langue') === code);
+    }
+    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
+  }
+
+  appliquer(lire());
+  var boutons = document.querySelectorAll('.lang-btn');
+  for (var i = 0; i < boutons.length; i++) {
+    boutons[i].addEventListener('click', function (e) {
+      appliquer(e.currentTarget.getAttribute('data-langue'));
+    });
+  }
+})();
+</script>
+</body>
+</html>
