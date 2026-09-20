@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kTO9UMNSLeq0IFbOiO/lbezYlIfocATL44OcUKdvZK4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-m4Z8SPrDLAiHVN+AvDKALn4fBNisha5EsIMHMwqEMgc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -228,6 +228,20 @@
   .erreur-globale .fermer{
     position:absolute;top:6px;right:8px;border:none;background:transparent;
     font-size:18px;line-height:1;cursor:pointer;color:var(--ink-2);padding:6px;
+  }
+  /* NOUVELLE VERSION PUBLIÉE : bandeau DISCRET, jamais automatique. Un
+     rechargement qui arrive pendant qu'on saisit un compteur ferait perdre la
+     saisie ; c'est donc le gérant qui décide, et il peut aussi fermer l'avis. */
+  .depassement-version{
+    position:fixed;left:12px;right:12px;bottom:12px;z-index:9998;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line);color:var(--ink);
+    border-radius:var(--r-md);padding:10px 12px;font-size:13px;line-height:1.4;
+    box-shadow:0 10px 30px rgba(13,20,36,.18);
+  }
+  .depassement-version .fermer{
+    margin-left:auto;border:none;background:transparent;font-size:18px;line-height:1;
+    cursor:pointer;color:var(--ink-2);padding:4px 6px;
   }
   .offline-banner{
     display:flex;flex-wrap:wrap;align-items:center;gap:8px;
@@ -1739,6 +1753,67 @@ async function lireVersionDuPaquet() {
 // donc déjà affiché quand l'écran « Mon compte » s'ouvre (voir la fonction).
 if (typeof window !== 'undefined' && window.Capacitor) demanderVersionDuPaquet();
 
+// ════════════════════════════════════════════════════════════════════════════
+// L'EMPREINTE DE LA PAGE, ET L'AVIS DE NOUVELLE VERSION
+// ════════════════════════════════════════════════════════════════════════════
+// POURQUOI. GitHub Pages sert la page avec un cache : après une publication, un
+// navigateur peut continuer à faire tourner l'ANCIENNE version. Un bêta-testeur
+// signale alors un défaut déjà corrigé — c'est arrivé en vrai, sur « Cannot
+// access 'identiteDe' before initialization », vu à l'écran alors que la
+// correction était livrée.
+//
+// La page récupère donc `version.json`, un fichier JAMAIS mis en cache, qui porte
+// l'empreinte du script publié. Si elle diffère de celle qui tourne, un bandeau
+// discret propose de recharger. RIEN d'automatique : on ne recharge jamais sous
+// les doigts de quelqu'un qui est en train de saisir un compteur.
+function empreintePage() {
+  const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+  const trouve = meta ? /'sha256-([A-Za-z0-9+/=]+)'/.exec(meta.getAttribute('content') || '') : null;
+  return trouve ? trouve[1].toLowerCase() : '';
+}
+
+// L'empreinte affichée est celle du SCRIPT INLINE, la même que celle de la CSP :
+// c'est elle que `publier-site.mjs` écrit dans `version.json`, et c'est donc la
+// seule qui permette de comparer. Huit caractères suffisent à un testeur.
+function empreinteCourte() {
+  const empreinte = empreintePage();
+  return empreinte ? empreinte.slice(0, 8) : trad('inconnue');
+}
+
+function retirerAvisVersion() {
+  const avis = document.getElementById('depassement-version');
+  if (avis) avis.remove();
+}
+
+async function verifierVersionPubliee() {
+  try {
+    // `fetch` peut manquer (vieil environnement) : on ne casse rien pour ça.
+    if (typeof fetch !== 'function') return;
+    const reponse = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!reponse || !reponse.ok) return;
+    const publiee = await reponse.json();
+    const ici = empreintePage();
+    // Rien à dire si la version publiée est illisible, ou si c'est la nôtre.
+    if (!publiee || !publiee.empreinte || !ici || publiee.empreinte === ici) return;
+    if (document.getElementById('depassement-version')) return;
+    const bloc = document.createElement('div');
+    bloc.className = 'depassement-version';
+    bloc.id = 'depassement-version';
+    bloc.setAttribute('role', 'status');
+    bloc.innerHTML = `<span>${trad('Une nouvelle version est disponible.')}</span>`
+      + `<button type="button" class="secondary" id="depassement-recharger">${trad('Recharger')}</button>`
+      + `<button type="button" class="fermer" aria-label="${esc(trad('Fermer'))}">×</button>`;
+    document.body.appendChild(bloc);
+    const recharger = document.getElementById('depassement-recharger');
+    if (recharger) recharger.addEventListener('click', () => location.reload());
+    const fermer = bloc.querySelector('.fermer');
+    if (fermer) fermer.addEventListener('click', retirerAvisVersion);
+  } catch (err) {
+    // Hors connexion, ou `version.json` absent : c'est un CONFORT, pas une
+    // fonction. On ne dit rien, et surtout on n'affiche pas d'erreur globale.
+  }
+}
+
 // ERREURS SILENCIEUSES : une erreur non rattrapée ne doit JAMAIS se traduire par
 // « le bouton ne fait rien ». C'est exactement le défaut qui a coûté plusieurs
 // allers-retours : on l'affiche donc à l'écran, avec le message brut — c'est ce
@@ -1910,8 +1985,15 @@ function parserTelephone(valeur) {
   const parIndicatif = (liste) =>
     liste.slice().sort((a, b) => b.indicatif.length - a.indicatif.length)[0];
 
+  // ⚠️ UN INDICATIF SEUL N'EST PAS UN NUMÉRO ÉTRANGER. « +61 » collé sans
+  //   numéro faisait reconnaître l'AUSTRALIE : le sélecteur affichait « +61
+  //   Australie » sur un compte calédonien, et le client croyait que
+  //   l'application ne connaissait pas son pays. Un indicatif n'est donc reconnu
+  //   que s'il RESTE au moins un chiffre de numéro derrière.
   if (brut.startsWith('+')) {
-    const candidats = PAYS_TEL.filter((p) => chiffres.startsWith(p.indicatif));
+    const candidats = PAYS_TEL.filter(
+      (p) => chiffres.startsWith(p.indicatif) && chiffres.length > p.indicatif.length
+    );
     if (candidats.length) {
       const pays = parIndicatif(candidats);
       return { pays, national: chiffres.slice(pays.indicatif.length) };
@@ -1922,7 +2004,11 @@ function parserTelephone(valeur) {
     // (« le reste tient dans le format ») ferait passer « 81 54 44 » pour un
     // numéro japonais (+81) suivi de 5444, au lieu d'un numéro calédonien.
     const candidats = PAYS_TEL.filter(
-      (p) => chiffres.startsWith(p.indicatif) && chiffres.length - p.indicatif.length === chiffresMax(p)
+      (p) => chiffres.startsWith(p.indicatif)
+        && chiffres.length - p.indicatif.length === chiffresMax(p)
+        // Le format doit être COMPLET : un numéro plus court que le format du
+        // pays ne suffit pas à décider que c'est ce pays-là.
+        && chiffresMax(p) > 0
     );
     if (candidats.length) {
       const pays = parIndicatif(candidats);
@@ -3778,6 +3864,9 @@ function renderLogin(errorMsg, horsLigne) {
     // raison et le code restent dans « Mon compte ».
     await proposerAccesSansMotDePasse(email);
     boot();
+    // Une nouvelle version a-t-elle été publiée pendant que cette page était
+    // ouverte ? Le contrôle est DISCRET et ne recharge rien tout seul.
+    verifierVersionPubliee();
   });
 
   // L'invite et le bouton n'apparaissent que dans l'application native, et
@@ -3851,6 +3940,110 @@ function oublierInvitation() {
 // Le bloc affiché sur l'écran de connexion, et le chemin de l'acceptation.
 // Quatre issues, toutes DITES : acceptée, expirée, déjà membre, adresse qui ne
 // correspond pas — le message d'échec vient du SERVEUR, on ne le réécrit pas.
+// ════════════════════════════════════════════════════════════════════════════
+// UNE INVITATION DÉJÀ CONNECTÉ : LE BLOC SE POSE SUR L'APPLICATION
+// ════════════════════════════════════════════════════════════════════════════
+// POURQUOI. Le bloc d'invitation était FABRIQUÉ POUR L'ÉCRAN DE CONNEXION : sa
+// zone s'ajoutait à `.login-box`, qui n'existe que là. Un utilisateur DÉJÀ
+// CONNECTÉ qui ouvrait un lien `?invitation=CODE` arrivait donc sur son tableau
+// de bord, la zone ne pouvait pas s'attacher… et RIEN n'était dit. C'est le
+// défaut signalé : « j'ai cliqué, rien ne s'est passé ».
+//
+// Le bloc se pose maintenant là où l'application s'affiche, et il dit sur quel
+// compte on est connecté. La DÉCISION, elle, reste au SERVEUR : `accepter_invitation`
+// refuse une invitation destinée à une autre adresse, et refuse de DÉPLACER un
+// compte déjà rattaché à une autre société (migration-invitations.sql). L'écran
+// ne fait que rapprocher les deux adresses pour que la personne comprenne.
+function invitationConnecteeHtml(code, options = {}) {
+  const ici = String(options.email || '').trim();
+  const invite = String(options.invite || '').trim();
+  const memeAdresse = !!ici && !!invite && ici.toLowerCase() === invite.toLowerCase();
+  const ligne = (libelle, valeur, classe) =>
+    `<div class="${classe || 'hint'}" style="font-size:13px;">${esc(libelle)} <strong>${esc(valeur || '—')}</strong></div>`;
+  return `
+    <div class="label">${trad('Invitation à rejoindre une société')}</div>
+    ${ligne(trad('Connecté en tant que'), ici)}
+    ${options.invite ? ligne(trad('Invitation destinée à'), invite,
+      memeAdresse ? 'hint' : 'hint is-late') : ''}
+    ${memeAdresse
+      ? `<div class="hint">${trad('Accepte pour rejoindre la société de cette invitation.')}</div>`
+      : ''}
+    <div class="modal-actions" style="margin-top:8px;">
+      <button type="button" class="primary" id="invitation-accepter">${trad('Accepter l\'invitation')}</button>
+    </div>
+    <div class="hint" id="invitation-msg" role="status" aria-live="polite"></div>`;
+}
+
+// Ce que fait le clic, dans les deux situations (connecté ou non) : on appelle le
+// SERVEUR, et c'est SON message qui s'affiche — refus compris.
+function brancherAcceptationInvitation(code, racine) {
+  const msg = racine.querySelector('#invitation-msg');
+  const bouton = racine.querySelector('#invitation-accepter');
+  if (!bouton) return;
+  bouton.addEventListener('click', async () => {
+    if (msg) msg.textContent = trad('Vérification de l\'invitation…');
+    try {
+      const { data, error } = await sb.rpc('accepter_invitation', { p_code: code });
+      if (error) throw error;
+      const ligne = Array.isArray(data) ? data[0] : data;
+      oublierInvitation();
+      if (msg) msg.textContent = tR('Invitation acceptée : tu rejoins {societe} comme {role}.', { societe: ligne && ligne.societe ? ligne.societe : '', role: ligne && ligne.role ? ligne.role : '' });
+      setTimeout(() => boot(), 1200);
+    } catch (err) {
+      if (msg) msg.textContent = String((err && err.message) || err);
+    }
+  });
+}
+
+// La zone d'invitation SUR L'APPLICATION CONNECTÉE. Elle est créée ici, au
+// moment où on en a besoin, et posée sur la vue : aucun gabarit d'écran n'est
+// touché (c'est ce qui avait cassé l'ancre d'un autre correctif).
+function afficherInvitationConnectee(code) {
+  const racine = document.getElementById('view-root') || document.getElementById('app');
+  if (!racine) return;
+  if (document.getElementById('invitation-connectee')) return;
+  const zone = document.createElement('section');
+  zone.className = 'card';
+  zone.id = 'invitation-connectee';
+  zone.innerHTML = invitationConnecteeHtml(code, { email: UI.email || '' });
+  racine.insertBefore(zone, racine.firstChild || null);
+  brancherAcceptationInvitation(code, zone);
+}
+
+// ★ LE CONTRÔLE D'UNE INVITATION QUAND ON EST CONNECTÉ. Il est défini ici (et non
+//   dans boot()) pour que le harnais puisse l'éprouver, et il ne fait que des
+//   lectures refusées proprement : si la table n'est pas lisible, on n'affiche
+//   simplement rien de plus que l'adresse connectée.
+async function verifierInvitationConnectee() {
+  const code = invitationDemandee();
+  // Sans code dans l'adresse, ou sur l'écran de connexion (son bloc existe), rien.
+  if (!code || !sb || !sb.auth || !sb.auth.getSession) return;
+  let session = null;
+  try {
+    ({ data: { session } } = await sb.auth.getSession());
+  } catch (err) {
+    session = null;
+  }
+  if (!session) return;
+  let invite = '';
+  try {
+    const { data, error } = await sb
+      .from('invitations')
+      .select('email')
+      .eq('code', code)
+      .maybeSingle();
+    if (!error && data && data.email) invite = data.email;
+  } catch (err) {
+    invite = '';
+  }
+  afficherInvitationConnectee(code);
+  const zone = document.getElementById('invitation-connectee');
+  if (zone) {
+    zone.innerHTML = invitationConnecteeHtml(code, { email: session.user?.email || '', invite });
+    brancherAcceptationInvitation(code, zone);
+  }
+}
+
 function afficherBlocInvitation(code) {
   // La zone est CRÉÉE ici, et non dans le gabarit de l'écran de connexion : ce
   // gabarit est touché par d'autres correctifs (la marque, les actions de
@@ -8135,7 +8328,7 @@ VIEWS.account = {
         </div>
         <div class="plan-field">
           <div class="label">${trad('Version de l\'application')}</div>
-          <div class="value" id="version-application" style="font-size:13px;">${esc(versionAffichee())}</div>
+          <div class="value" id="version-application" style="font-size:13px;" title="${esc(empreinteCourte())}">${esc(versionAffichee())}</div>
           <div class="hint" style="margin-top:2px;">${trad('Ce numéro permet de vérifier que tu utilises bien la dernière version.')}</div>
         </div>
         <div class="plan-field" style="margin-bottom:0;">
@@ -8399,24 +8592,58 @@ VIEWS.account = {
             </div>`).join('')}
         </div>`;
 
-      // ── LA REVUE DE L'ÉQUIPE EST RETIRÉE À CHAQUE RELECTURE ────────────────
-      //    Sans cela, les gestionnaires posés au passage précédent resteraient
-      //    attachés aux boutons qui viennent d'être remplacés — et « Créer le
-      //    membre » ne ferait plus rien après un premier essai.
-      if (racine._equipeBranchee) racine._equipeBranchee();
-      racine._equipeBranchee = () => {
-        racine.querySelector('#acc-membre-creer')?.removeEventListener('click', creerLeMembre);
-        racine.querySelectorAll('#acc-equipe-liste [data-pw-reset]').forEach((bouton) => {
-          bouton.removeEventListener('click', relancerLeMotDePasse);
-        });
-        racine.querySelector('#acc-invite-envoyer')?.removeEventListener('click', creerLInvitation);
-        racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
-          bouton.removeEventListener('click', changerLeRole);
-        });
-        racine.querySelectorAll('[data-equipe-retirer]').forEach((bouton) => {
-          bouton.removeEventListener('click', retirerLeMembre);
-        });
+      // ★ LES BOUTONS SONT ÉCOUTÉS SUR LEUR ZONE, JAMAIS UN PAR UN.
+      //
+      //   LE DÉFAUT QUE CELA CORRIGE, ET QUI ÉTAIT RÉEL. La liste des membres est
+      //   réécrite EN ENTIER (`liste.innerHTML = …`) à chaque relecture, et une
+      //   relecture suit chaque création, chaque changement de rôle, chaque
+      //   retrait. Les boutons étaient câblés un par un, juste après la relecture
+      //   qui les avait fabriqués : les boutons nés d'une relecture ULTÉRIEURE
+      //   n'avaient donc AUCUN écouteur —
+      //
+      //     · « Générer un nouveau mot de passe » ne faisait plus rien ;
+      //     · le second clic sur « Créer le membre » ne rappelait plus le serveur
+      //       (le bouton avait été remplacé, avec son écouteur).
+      //
+      //   Un écouteur posé sur la ZONE survit à toutes les réécritures de son
+      //   contenu : le clic remonte du bouton vers la zone, qui regarde ce qui a
+      //   été touché. On ne câble donc plus des boutons, mais les trois zones que
+      //   la carte ne remplace pas (elles sont écrites une seule fois).
+      const boutonTouche = (evenement, selecteur) => {
+        const cible = evenement && evenement.target;
+        if (!cible || typeof cible.closest !== 'function') return null;
+        const bouton = cible.closest(selecteur);
+        return bouton && racine.contains(bouton) ? bouton : null;
       };
+      const cabler = (zone, cle, selecteur, action) => {
+        if (!zone) return;
+        const ancien = racine[cle];
+        if (ancien && ancien.gestionnaire) ancien.zone.removeEventListener('click', ancien.gestionnaire);
+        const gestionnaire = (evenement) => {
+          const bouton = boutonTouche(evenement, selecteur);
+          // APPEL PROTÉGÉ : un écouteur qui survit ne doit jamais jeter — une
+          // exception ici emporterait tout le câblage qui suit.
+          if (bouton) action?.(bouton, evenement);
+        };
+        zone.addEventListener('click', gestionnaire);
+        racine[cle] = { zone, gestionnaire };
+      };
+      // ⚠️ LE SÉLECTEUR EST « button », ET RIEN DE PLUS. Un sélecteur de
+      //   DESCENDANCE (« [data-membre] button ») désignerait la même chose dans un
+      //   navigateur, mais le DOM simulé des tests ne remonte la chaîne que
+      //   lorsque les éléments sont DIRECTEMENT imbriqués : avec la `div`
+      //   `modal-actions` interposée par le gabarit, le bouton n'était pas
+      //   reconnu, et le clic ne faisait rien — un défaut du harnais, pas de la
+      //   page, mais qui masquait le vrai. Ce sont les attributs `data-…` du
+      //   bouton lui-même qui disent lequel des trois gestes a été touché.
+      // La garde de rôle est relue À CHAQUE CLIC : un écouteur survivant ne doit
+      // jamais laisser passer une action que l'écran vient de retirer.
+      cabler(liste, '_equipeListeCablee', 'button', (bouton) => {
+        if (!peutGererEquipe()) return;
+        if (bouton.hasAttribute('data-pw-reset')) relancerLeMotDePasse.call(bouton);
+        else if (bouton.hasAttribute('data-equipe-role')) changerLeRole.call(bouton);
+        else if (bouton.hasAttribute('data-equipe-retirer')) retirerLeMembre.call(bouton);
+      });
 
       // ── LA CRÉATION DIRECTE, EN PREMIER ───────────────────────────────────
       //    Un mécanicien d'atelier n'a pas d'e-mail : l'invitation par lien est
@@ -8530,8 +8757,19 @@ VIEWS.account = {
 
       // ── GÉNÉRER UN NOUVEAU MOT DE PASSE ───────────────────────────────────
       //    Indispensable : un mécanicien n'a pas d'e-mail, donc pas de « mot de
-      //    passe oublié ». Le nouveau mot de passe s'affiche DANS la ligne du
-      //    membre, à sa place : le gérant le lit à la personne devant l'atelier.
+      //    passe oublié ». Le gérant lit le nouveau mot de passe à la personne,
+      //    devant l'atelier : il doit donc l'avoir SOUS LES YEUX.
+      //
+      //    ⚠️ L'ORDRE COMPTE, ET C'EST LE MÊME DÉFAUT QUE POUR LA CRÉATION. La
+      //    liste des membres est réécrite EN ENTIER à chaque relecture : écrire
+      //    le mot de passe dans une ligne AVANT `preparerCarteEquipe` le faisait
+      //    disparaître avec la ligne remplacée — le gérant ne voyait rien, alors
+      //    que le mot de passe venait d'être changé et n'existe plus nulle part.
+      //    Un gérant qui ne l'a pas lu doit donc en régénérer un autre, sans
+      //    jamais savoir pourquoi. On relit D'ABORD, on affiche ENSUITE — dans la
+      //    zone des identifiants, qui est HORS de la liste et survit à la
+      //    relecture. La ligne du membre garde, elle, un rappel visible pour que
+      //    le gérant sache OÙ le mot de passe a été régénéré.
       async function relancerLeMotDePasse() {
         const bouton = this;
         const membre = bouton.getAttribute('data-pw-reset');
@@ -8545,11 +8783,21 @@ VIEWS.account = {
           });
           if (error) throw new Error(await functionErrorMessage(error, trad('réinitialisation impossible')));
           if (!data || data.ok !== true) throw new Error((data && data.error) || trad('réinitialisation impossible'));
-          if (ligne) {
-            ligne.innerHTML = identifiantsMembre(data, tR('Nouveau mot de passe de {login}', { login: data.login || '' }));
-          }
           dire(trad('Nouveau mot de passe généré.'));
           await preparerCarteEquipe(racine);
+          // La zone des identifiants est RELUE après le re-rendu (le noeud d'avant
+          // a pu être remplacé) : on écrit donc dans le noeud VIVANT.
+          const zone = racine.querySelector('#acc-membre-acces');
+          if (zone) {
+            afficherIdentifiants(zone, data, tR('Nouveau mot de passe de {login}', { login: data.login || '' }));
+          }
+          // Le rappel, DANS la ligne du membre : le gérant voit tout de suite de
+          // qui l'on parle. Il ne contient PAS le mot de passe — celui-ci n'est
+          // écrit qu'une fois, dans la zone ci-dessus.
+          const ligneVive = racine.querySelector(`[data-membre="${membre}"]`);
+          if (ligneVive) {
+            ligneVive.innerHTML = `<p class="hint">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessus.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
+          }
         } catch (err) {
           dire(String((err && err.message) || err), true);
           await preparerCarteEquipe(racine);
@@ -8660,16 +8908,18 @@ VIEWS.account = {
       //    Le formulaire de création n'existe QUE pour un gérant (garde ci-dessus
       //    avec retour) : son écouteur est donc PROTÉGÉ. Les autres boutons
       //    existent à cette ligne, dans le même gabarit que leurs données.
-      racine.querySelector('#acc-membre-creer')?.addEventListener('click', creerLeMembre);
-      racine.querySelector('#acc-invite-envoyer')?.addEventListener('click', creerLInvitation);
-      racine.querySelectorAll('#acc-equipe-liste [data-pw-reset]').forEach((bouton) => {
-        bouton.addEventListener('click', relancerLeMotDePasse);
+      // Le formulaire est réécrit à chaque relecture : on écoute donc sa ZONE, pas
+      // le bouton. `cabler` sort sans rien faire si la zone est absente : elle
+      // n'existe QUE pour un gérant (garde ci-dessus, avec retour), et
+      // `verifier-ecouteurs-orphelins` refuse un écouteur nu sur un élément rendu
+      // conditionnellement.
+      cabler(zoneCreation, '_equipeCreationCablee', '#acc-membre-creer', () => {
+        if (peutGererEquipe()) creerLeMembre();
       });
-      racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
-        bouton.addEventListener('click', changerLeRole);
-      });
-      racine.querySelectorAll('[data-equipe-retirer]').forEach((bouton) => {
-        bouton.addEventListener('click', retirerLeMembre);
+      // L'invitation par e-mail : la zone est réécrite à chaque relecture, et
+      // vidée pour un non-gérant — même traitement.
+      cabler(zoneInvitation, '_equipeInvitationCablee', '#acc-invite-envoyer', () => {
+        if (peutGererEquipe()) creerLInvitation();
       });
     }
 
@@ -12472,6 +12722,11 @@ async function boot(toastMessage) {
   // jamais bloqué. Le palier est relu avant de l'annoncer.
   annoncerForfait();
 
+  // ★ UNE INVITATION DÉJÀ CONNECTÉ : le bloc se pose sur l'application. Sans ce
+  //   contrôle, un lien d'invitation ouvert par une personne connectée ne
+  //   produisait RIEN — le bloc n'existait que sur l'écran de connexion.
+  verifierInvitationConnectee();
+
   // Reprogrammation des rappels à chaque ouverture, sans réclamer
   // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.
   // Hors connexion, l'appel échoue sans conséquence — les rappels déjà
@@ -12488,6 +12743,10 @@ if (sb) {
     renderSetNewPassword();
   } else {
     boot();
+    // L'avis « une nouvelle version est disponible » est vérifié à CHAQUE
+    // ouverture : c'est là que le risque de tourner sur une version dépassée est
+    // le plus grand. Le contrôle ne bloque rien et ne recharge rien.
+    verifierVersionPubliee();
   }
 }
 </script>
