@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-m4Z8SPrDLAiHVN+AvDKALn4fBNisha5EsIMHMwqEMgc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-wmy6OrogSRW8sbizDYFBMdpdLn/Ji8aXOp5PlgSCT4g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8534,6 +8534,44 @@ VIEWS.account = {
       }
 
       const nomAffiche = (m) => (m.email ? String(m.email).split('@')[0] : trad('Membre'));
+
+      // ★ LA VUE DE L'ENSEMBLE DE L'ÉQUIPE EST RÉSERVÉE AU GÉRANT.
+      //
+      //   Demandé mot pour mot : « seul le gérant a cette vue de l'ensemble de son
+      //   équipe ». Ce n'est PAS qu'une politesse d'écran : le serveur refuse
+      //   désormais la liste à tout autre rôle (migration-gerant-membres.sql), et
+      //   un écran qui appellerait quand même afficherait une ERREUR au milieu de
+      //   la carte — une panne apparente, pour une interdiction voulue. On ne
+      //   demande donc RIEN, et on écrit la raison : jamais un écran muet.
+      //
+      //   Ce garde est placé APRÈS la relecture du rôle (juste au-dessus) : c'est
+      //   le rôle FRAIS qui décide, jamais celui du démarrage.
+      if (!peutGererEquipe()) {
+        if (zoneInvitation) {
+          zoneInvitation.innerHTML = `<p class="hint">${trad('L\'équipe, ses accès et ses invitations ne sont visibles que du gérant.')}</p>`;
+        }
+        // ⚠️ La zone de création est écrite PLUS BAS dans cette fonction : on la
+        //    vide par le DOM, pas par une `const` déclarée après ce point — la
+        //    lire ici jetterait (« Cannot access before initialization »).
+        const zoneCreationInterdite = racine.querySelector('#acc-equipe-creation');
+        if (zoneCreationInterdite) zoneCreationInterdite.innerHTML = '';
+        const blocInvitation = racine.querySelector('#acc-equipe-invitation-bloc');
+        if (blocInvitation) blocInvitation.hidden = true;
+        // Ce que la personne PEUT faire, elle, reste dit : son propre droit.
+        // ⚠️ ON NE LIT ICI NI `roleDe` NI `ceQuIlPeutFaire` : ces `const` sont
+        //   déclarées PLUS BAS dans cette fonction, et les lire avant leur ligne
+        //   jetait « Cannot access 'roleDe' before initialization ». `ROLE_DROITS`,
+        //   lui, est déclaré avant la fonction — on s'en sert directement.
+        const monLibelle = (ROLE_DROITS[UI.role] || {}).libelle || UI.role || '';
+        const mesDroits = UI.role === 'gerant'
+          ? trad('Tout, y compris l\'équipe et l\'abonnement')
+          : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : trad('Les compteurs'));
+        liste.innerHTML = `<p class="hint">${tR('Ton rôle : {role}. {droits}', {
+          role: esc(monLibelle),
+          droits: esc(mesDroits),
+        })}</p>`;
+        return;
+      }
       // Pas de classe de plus pour la liste ni pour chaque membre : les enfants
       // (`value`, `hint`, `modal-actions`) portent DÉJÀ la mise en forme de la
       // charte. Une classe sans style est refusée par `check-classes.mjs`, et à
@@ -8548,6 +8586,13 @@ VIEWS.account = {
       //    ferait perdre du temps au gérant.
       const plafond = plafondUtilisateurs(UI.companyPlan || 'free');
       const placesRestantes = plafond == null ? null : Math.max(0, plafond - membres.length);
+      // Les invitations en attente occupent une place : le décompte doit le dire,
+      // sinon l'écran annonce de la place alors que le serveur refusera.
+      const invitationsVivantes = membres.filter((m) => m.invitation_en_attente).length;
+      const placesOccupees = membres.filter((m) => !m.invitation_en_attente).length + invitationsVivantes;
+      if (placesRestantes !== null && placesRestantes <= 0) {
+        dire(tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe en occupe déjà {occupees}. Passe à une offre supérieure pour ajouter quelqu\'un.', { plafond, occupees: placesOccupees }));
+      }
 
       // ── QUI FAIT QUOI, EN UNE LIGNE, ET SOUS QUEL NOM ON LE MONTRE ─────────
       //    Le gérant a demandé « qui fait quoi » : chaque membre porte donc, sous
@@ -8571,26 +8616,91 @@ VIEWS.account = {
       const estMembreCree = (m) => !!m.login || /@membres\.keeva\.work$/i.test(String(m.email || ''));
       const identiteDe = (m) => m.login || (m.email ? String(m.email).split('@')[0] : trad('Membre'));
 
-      // ── LA LISTE DES MEMBRES ──────────────────────────────────────────────
-      // Pas de classe de plus pour la liste ni pour chaque membre : les enfants
-      // (`value`, `hint`, `modal-actions`) portent DÉJÀ la mise en forme de la
-      // charte. Une classe sans style est refusée par `check-classes.mjs`, et à
-      // juste titre : elle ne dit rien et vieillit toute seule.
-      liste.innerHTML = `
-        <div>
-          ${membres.map((m) => `
-            <div data-membre="${esc(m.id)}">
-              <div class="value">${esc(nomAffiche(m))}${m.est_moi ? ' ' + trad('(toi)') : ''}</div>
-              <div class="hint">${esc(identiteDe(m))} · ${esc(roleDe(m.role))}${estMembreCree(m) ? '' : ' · ' + esc(m.email || '—')}</div>
-              <div class="hint">${trad('Ce qu\'il a le droit de faire :')} ${esc(ceQuIlPeutFaire(m.role))}</div>
-              ${peutGererEquipe() && !m.est_moi && m.role !== 'gerant' ? `
+      // ── ★ L'ÉQUIPE, GROUPÉE PAR RÔLE : gérant → mécanicien → chauffeur ─────
+      //
+      //    Demandé mot pour mot : « séparer pour plus de clarté les membres de
+      //    l'équipe ». Chaque groupe porte donc un EN-TÊTE, et sous chaque
+      //    personne : son nom en titre, ses droits en une ligne, et — pour ceux
+      //    qui ont un accès créé par le gérant — son login.
+      //
+      //    ⚠️ LE MOT DE PASSE N'EST PAS AFFICHÉ, ET C'EST UN CHOIX. La base n'en
+      //    garde qu'une EMPREINTE : personne — pas même le gérant, pas même nous —
+      //    ne peut le relire. Afficher un champ masqué ferait croire le contraire
+      //    et ferait perdre du temps à tout le monde. On écrit donc la vérité
+      //    (« non conservé ») et on propose le seul geste qui existe : en générer
+      //    un nouveau, qui s'affiche alors UNE fois, dans la zone « Accès ».
+      const LIBELLES = {
+        gerant: trad('Gérant'),
+        mecanicien: trad('Mécanicien'),
+        chauffeur: trad('Chauffeur'),
+        autre: trad('Autre'),
+      };
+      const ORDRE = ['gerant', 'mecanicien', 'chauffeur', 'autre'];
+      const libelleDe = (role) => LIBELLES[role] || roleDe(role);
+      // Le nom affiché : `prenom`/`nom` quand la base les porte, le login ou
+      // l'adresse sinon. Les sièges créés AVANT la migration n'ont pas encore
+      // leur prénom et leur nom : on ne les invente pas, on montre ce qu'on a.
+      const morceauxDe = (m) => ({
+        prenom: String(m.prenom || '').trim(),
+        nom: String(m.nom || '').trim(),
+      });
+      const estInvitation = (m) => m.invitation_en_attente === true;
+      const droitsResumes = (role) => {
+        if (role === 'mecanicien') return trad('Le parc et les compteurs');
+        if (role === 'chauffeur') return trad('Les compteurs');
+        if (role === 'gerant') return trad('Tout, y compris l\'équipe et l\'abonnement');
+        return trad('À confirmer');
+      };
+      const ligneMembre = (m) => {
+        const { prenom, nom } = morceauxDe(m);
+        // LE NOM DE FAMILLE EN MAJUSCULES — demandé, et appliqué ici AUSSI : la
+        // valeur stockée l'est à la création, mais un siège plus ancien peut
+        // encore porter un nom en minuscules. L'affichage ne le laisse pas passer.
+        // ⚠️ LA LANGUE SE LIT DANS LE DOCUMENT, PAS DANS LA VARIABLE `LANGUE` :
+        //   les harnais extraient `preparerCarteEquipe` seule et n'emportent pas
+        //   cette variable. `documentElement.lang` est posé par `changerLangue()`,
+        //   il vaut « fr » par défaut, et il ne dépend de rien.
+        const langueCourante = (document.documentElement && document.documentElement.lang) || 'fr';
+        const titre = [prenom, nom.toLocaleUpperCase(langueCourante === 'en' ? 'en' : 'fr')].filter(Boolean).join(' ')
+          || nomAffiche(m);
+        const role = m.role || '';
+        const acces = estMembreCree(m) ? identiteDe(m) : String(m.email || trad('Invitation en attente'));
+        const metier = String(m.metier || '').trim();
+        const actions = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
               <div class="modal-actions" style="margin-top:6px;">
                 <button type="button" class="link-inline" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
-                <button type="button" class="link-inline" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(m.role)}">${trad('Changer le rôle')}</button>
+                <button type="button" class="link-inline" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le rôle')}</button>
                 <button type="button" class="link-inline" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>
-              </div>` : ''}
-            </div>`).join('')}
+              </div>` : '';
+        // Personne n'a de bouton sur SA PROPRE ligne : on ne se rétrograde pas
+        // soi-même, et le retrait de son propre compte est un autre sujet.
+        const motDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
+              <div class="hint">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</div>` : '';
+        return `
+            <div data-membre="${esc(m.id)}">
+              <div class="value">${esc(titre)}${m.est_moi ? ' ' + trad('(toi)') : ''}</div>
+              <div class="hint">${trad('Ce qu\'il a le droit de faire :')} ${esc(droitsResumes(role))}</div>
+              <div class="hint">${trad('Login :')} ${esc(acces)}</div>
+              ${metier ? `<div class="hint">${trad('Métier :')} ${esc(metier)}</div>` : ''}
+              ${estInvitation(m) ? `<div class="hint">${trad('Invitation en attente : cette personne n\'a pas encore créé son compte.')}</div>` : ''}
+              ${motDePasse}${actions}
+            </div>`;
+      };
+      const sections = ORDRE
+        .map((role) => {
+          const duGroupe = membres.filter((m) => (m.role || 'autre') === role);
+          if (!duGroupe.length) return '';
+          const titre = role === 'autre'
+            ? tR('Autre rôle ({n})', { n: duGroupe.length })
+            : tR('{role} ({n})', { role: libelleDe(role), n: duGroupe.length });
+          return `
+        <div data-groupe="${esc(role)}">
+          <div class="label">${esc(titre)}</div>
+          ${duGroupe.map(ligneMembre).join('')}
         </div>`;
+        })
+        .join('');
+      liste.innerHTML = sections || `<p class="hint">${trad('Personne pour l\'instant : ajoute un membre ci-dessous, ou invite-le par e-mail.')}</p>`;
 
       // ★ LES BOUTONS SONT ÉCOUTÉS SUR LEUR ZONE, JAMAIS UN PAR UN.
       //
@@ -8615,18 +8725,22 @@ VIEWS.account = {
         const bouton = cible.closest(selecteur);
         return bouton && racine.contains(bouton) ? bouton : null;
       };
-      const cabler = (zone, cle, selecteur, action) => {
+      // `type` vaut « click » par défaut. Le formulaire en a besoin d'un autre :
+      // « change », pour le choix « Autre » qui dévoile ses deux options. On
+      // RETIRE le type qu'on avait posé, pas « click » en dur — sinon un écouteur
+      // « change » resterait accroché à une zone réécrite, à chaque relecture.
+      const cabler = (zone, cle, selecteur, action, type = 'click') => {
         if (!zone) return;
         const ancien = racine[cle];
-        if (ancien && ancien.gestionnaire) ancien.zone.removeEventListener('click', ancien.gestionnaire);
+        if (ancien && ancien.gestionnaire) ancien.zone.removeEventListener(ancien.type || 'click', ancien.gestionnaire);
         const gestionnaire = (evenement) => {
           const bouton = boutonTouche(evenement, selecteur);
           // APPEL PROTÉGÉ : un écouteur qui survit ne doit jamais jeter — une
           // exception ici emporterait tout le câblage qui suit.
           if (bouton) action?.(bouton, evenement);
         };
-        zone.addEventListener('click', gestionnaire);
-        racine[cle] = { zone, gestionnaire };
+        zone.addEventListener(type, gestionnaire);
+        racine[cle] = { zone, gestionnaire, type };
       };
       // ⚠️ LE SÉLECTEUR EST « button », ET RIEN DE PLUS. Un sélecteur de
       //   DESCENDANCE (« [data-membre] button ») désignerait la même chose dans un
@@ -8665,12 +8779,26 @@ VIEWS.account = {
             <label for="acc-membre-prenom">${trad('Prénom')}</label>
             <input id="acc-membre-prenom" autocomplete="off" placeholder="${trad('Jean')}">
             <label for="acc-membre-nom">${trad('Nom')}</label>
-            <input id="acc-membre-nom" autocomplete="off" placeholder="${trad('Dupont')}">
-            <label for="acc-membre-role">${trad('Rôle')}</label>
-            <select id="acc-membre-role">
+            <input id="acc-membre-nom" class="majuscules" autocapitalize="characters" autocomplete="off" placeholder="${trad('DUPONT')}">
+            <div class="hint">${trad('Le nom de famille est écrit en MAJUSCULES sur la fiche. Le login, lui, reste en minuscules : c\'est un identifiant.')}</div>
+            <label for="acc-membre-metier">${trad('Métier (facultatif)')}</label>
+            <input id="acc-membre-metier" autocomplete="off" placeholder="${trad('Chef d\'atelier, soudeur, comptable…')}">
+            <div class="hint">${trad('Le métier est un libellé libre : il s\'affiche sur la fiche, et il ne change AUCUN droit.')}</div>
+            <label for="acc-membre-role">${trad('Ce qu\'il peut faire dans l\'application')}</label>
+            <select id="acc-membre-role" data-equipe-role-select>
               <option value="mecanicien">${trad('Mécanicien')}</option>
               <option value="chauffeur">${trad('Chauffeur')}</option>
+              <option value="autre">${trad('Autre')}</option>
             </select>
+            <div id="acc-membre-droits-autre" hidden>
+              <p class="hint">${trad('Un autre métier ? Dis seulement ce que la personne a le droit de faire : l\'application n\'a que ces deux niveaux de droits, et le métier se note juste au-dessus.')}</p>
+              <label for="acc-membre-droits-entretiens">
+                <input type="radio" name="acc-membre-droits" id="acc-membre-droits-entretiens" value="mecanicien"> ${trad('Peut saisir les entretiens et les compteurs')}
+              </label>
+              <label for="acc-membre-droits-compteurs">
+                <input type="radio" name="acc-membre-droits" id="acc-membre-droits-compteurs" value="chauffeur"> ${trad('Peut seulement consulter et saisir les compteurs')}
+              </label>
+            </div>
             <div class="hint">${trad('Ce que le rôle permet : un mécanicien tient le parc et les entretiens, un chauffeur lit le parc, relève le compteur et prend la photo de sa machine. Ni l\'un ni l\'autre ne gère l\'équipe.')}</div>
             <div class="modal-actions" style="margin-top:10px;">
               <button type="button" class="primary" id="acc-membre-creer">${trad('Créer le membre')}</button>
@@ -8718,8 +8846,23 @@ VIEWS.account = {
       //    jamais recomposée à la main à partir de ce qu'on croit avoir créé.
       async function creerLeMembre() {
         const prenom = (racine.querySelector('#acc-membre-prenom')?.value || '').trim();
-        const nom = (racine.querySelector('#acc-membre-nom')?.value || '').trim();
-        const role = racine.querySelector('#acc-membre-role')?.value || 'mecanicien';
+        // LE NOM DE FAMILLE PART EN MAJUSCULES. Le champ les affiche déjà
+        // (`class="majuscules"`), mais une valeur COLLÉE dans le champ ne passe
+        // par aucune frappe : la normalisation se fait donc ici, à l'envoi, comme
+        // pour la marque et le modèle d'une machine. Le serveur, lui, la refait —
+        // c'est lui qui a le dernier mot.
+        const nom = (racine.querySelector('#acc-membre-nom')?.value || '').trim().toUpperCase();
+        const metier = (racine.querySelector('#acc-membre-metier')?.value || '').trim();
+        // ★ LES DROITS, ET EUX SEULS, DÉCIDENT DU RÔLE ENREGISTRÉ. L'application
+        //   n'a que DEUX niveaux de droits (`mecanicien`, `chauffeur`) : le choix
+        //   « Autre » n'invente donc pas un troisième rôle — il demande lequel des
+        //   deux, en clair, et c'est celui-là qui part. Le MÉTIER, lui, est un
+        //   libellé noté à part, qui ne change rien aux droits.
+        const choix = racine.querySelector('#acc-membre-role')?.value || 'mecanicien';
+        const droitsAutre = racine.querySelector('input[name="acc-membre-droits"]:checked');
+        const role = choix === 'autre'
+          ? ((droitsAutre && droitsAutre.value) || 'mecanicien')
+          : choix;
         // La zone des identifiants est HORS du formulaire de création : la relecture
         // de la carte ne l'efface donc pas, et le mot de passe — qui n'existe
         // qu'à cet instant — reste lisible par le gérant.
@@ -8730,7 +8873,7 @@ VIEWS.account = {
         try {
           const { data, error } = await sb.functions.invoke('creer-membre', {
             method: 'POST',
-            body: { prenom, nom, role },
+            body: { prenom, nom, metier, role },
           });
           if (error) throw new Error(await functionErrorMessage(error, trad('création impossible')));
           if (!data || data.ok !== true) throw new Error((data && data.error) || trad('création impossible'));
@@ -8783,8 +8926,13 @@ VIEWS.account = {
           });
           if (error) throw new Error(await functionErrorMessage(error, trad('réinitialisation impossible')));
           if (!data || data.ok !== true) throw new Error((data && data.error) || trad('réinitialisation impossible'));
-          dire(trad('Nouveau mot de passe généré.'));
           await preparerCarteEquipe(racine);
+          // ★ ON PARLE APRÈS LA RELECTURE, ET PAS AVANT. `preparerCarteEquipe`
+          //   annonce lui-même le plafond atteint, et ce message ÉCRASE celui
+          //   qu'on venait de poser : le gérant lisait « ton offre est pleine »
+          //   au lieu de « nouveau mot de passe généré ». C'est la même règle que
+          //   pour l'affichage — relire d'abord, parler ensuite.
+          dire(trad('Nouveau mot de passe généré.'));
           // La zone des identifiants est RELUE après le re-rendu (le noeud d'avant
           // a pu être remplacé) : on écrit donc dans le noeud VIVANT.
           const zone = racine.querySelector('#acc-membre-acces');
@@ -8799,8 +8947,10 @@ VIEWS.account = {
             ligneVive.innerHTML = `<p class="hint">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessus.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
           }
         } catch (err) {
-          dire(String((err && err.message) || err), true);
           await preparerCarteEquipe(racine);
+          // Même raison que ci-dessus : le refus du SERVEUR est dit APRÈS la
+          // relecture, sinon il serait recouvert par le message du plafond.
+          dire(String((err && err.message) || err), true);
         }
       }
 
@@ -8916,6 +9066,16 @@ VIEWS.account = {
       cabler(zoneCreation, '_equipeCreationCablee', '#acc-membre-creer', () => {
         if (peutGererEquipe()) creerLeMembre();
       });
+      // ★ LE CHOIX « AUTRE » MONTRE SES DEUX OPTIONS, ET RIEN D'AUTRE. Le
+      //   formulaire est réécrit à chaque relecture : on écoute donc la ZONE (le
+      //   `change` remonte du `select` vers elle), jamais le `select` lui-même —
+      //   c'est la même règle que pour les boutons de la liste.
+      cabler(zoneCreation, '_equipeCreationCableeChange', '#acc-membre-role', () => {
+        const choix = racine.querySelector('#acc-membre-role');
+        const blocAutre = racine.querySelector('#acc-membre-droits-autre');
+        if (!choix || !blocAutre) return;
+        blocAutre.hidden = choix.value !== 'autre';
+      }, 'change');
       // L'invitation par e-mail : la zone est réécrite à chaque relecture, et
       // vidée pour un non-gérant — même traitement.
       cabler(zoneInvitation, '_equipeInvitationCablee', '#acc-invite-envoyer', () => {
@@ -8936,7 +9096,13 @@ VIEWS.account = {
     // l'application est `app.html` (voir signal/README.md) ; en local, le fichier
     // s'appelle index.html — on prend le nom réellement servi.
     function lienInvitation(code) {
-      const fichier = /app\.html$/.test(location.pathname) ? 'app.html' : 'index.html';
+      // ⚠️ LE REPLI NE SUPPOSE PLUS « index.html ». L'adresse servie est
+      //   `app.html` (voir signal/README.md) : annoncer « index.html » à un gérant
+      //   qui copie le lien lui ferait envoyer une adresse qui n'existe pas sur le
+      //   site publié. Le nom réellement servi reste prioritaire ; à défaut de
+      //   pouvoir le lire, on retombe sur `app.html`.
+      const chemin = (location && location.pathname) || '';
+      const fichier = /app\.html$/.test(chemin) ? 'app.html' : (/(^|\/)index\.html$/.test(chemin) ? 'index.html' : 'app.html');
       return new URL(fichier + '?invitation=' + encodeURIComponent(code), location.href).href;
     }
 
