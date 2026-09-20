@@ -1296,6 +1296,42 @@
     .modal-actions button{padding:14px;}
     .delete-link{padding:12px;}
   }
+
+  /* ============================================================
+     LES CADRES — UNE SEULE RÈGLE, POUR TOUS (essai visuel)
+     ============================================================
+     Demande : « appliquer à tous les cadres un border:2px solid var(--ink) ».
+     La règle est ÉCRITE UNE FOIS, à la fin de la feuille, pour deux raisons :
+       • elle gagne le conflit d'égalité par ORDRE (même spécificité qu'un
+         « .card{…} », mais déclarée après) : une seule ligne à retirer pour
+         revenir en arrière, et aucune exception dispersée dans le fichier ;
+       • elle ne touche ni les boutons (pas de `.btn-*`, `.tab`, `.chip`,
+         `.switch`, `.option-tile`, `.compteur-photo`…), ni les champs, ni la
+         barre d'onglets, ni les infobulles, ni les toasts : ce ne sont pas des
+         cadres, et la liste ci-dessous ne les nomme donc pas.
+     `--ink` est bien la teinte d'encre de la charte (#0E1333), définie au bloc
+     :root de cette feuille : la règle n'est pas ignorée en silence.
+     Les lignes de liste gardent, pour la DERNIÈRE, leur filet bas et pas de
+     bordure : le filet de séparation de la liste n'est pas un cadre. */
+  :is(.card, .stat-card, .machine, .modal, .sheet, .login-box, .offre-plan, .chemin,
+      .page-carnet, .ref-scroll, .tache-carte, .prep-groupe, .attention-box,
+      .dropzone, .empty, .erreur-globale, .offline-banner, .copie-locale,
+      .suppr-alerte, .compteur, .pages-utiles, .tache-ligne,
+      .alert-row:not(:last-child), .manual-row:not(:last-child),
+      .switch-row:not(:last-child), .check-row:not(:last-child),
+      .compteur-lire:not(:last-child), .prep-produit:not(:last-child),
+      .page-utile:not(:last-child)){
+    border:2px solid var(--ink);
+  }
+  /* La carte des machines portait DÉJÀ une bordure d'encre, en 2,5 px : même
+     intention, épaisseur différente. On l'harmonise à 2 px. */
+  .machine{border:2px solid var(--ink);}
+  /* DEUX LIGNES N'AVAIENT AUCUN REMBOURRAGE LATÉRAL : leur bordure serait
+     venue toucher le texte (le défaut exact que l'essai doit éviter). 8 px en
+     haut et en bas laissent le filet de séparation des autres lignes à sa
+     place — sans quoi la liste doublerait de hauteur. */
+  .alert-row{padding:8px 12px;}
+  .manual-row{padding:8px 12px;}
 </style>
 </head>
 <body>
