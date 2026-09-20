@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YjaYDrTC4Lej9T+afAzOKvjNg9nQp/WAcnn4N93EDQY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-oO2SfA2YZE5g/8NIKbIGzb52pEAQn0KLqVwUedN1Y7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11095,7 +11095,13 @@ function openPlanView(machine, companyId, categories) {
     });
   });
   if (machine.manual_url) {
-    overlay.querySelector('#plan-view-manual').addEventListener('click', (e) => viewManual(machine.manual_url, e.target));
+    // ⚠️ `?.` N'EST PAS UNE PRÉCAUTION DE STYLE. Ce bouton n'est rendu QUE si la
+    // machine a un carnet (`${machine.manual_url ? … : ''}`) : sans le `?.`, la
+    // ligne jette sur un `null` pour toute machine sans carnet, et l'exception
+    // interrompt la fonction — donc TOUT ce qui est câblé plus bas ne l'est
+    // jamais. C'est le même défaut que sur la fiche de modification, et il est
+    // invisible tant qu'on n'ouvre que des machines qui ont un carnet.
+    overlay.querySelector('#plan-view-manual')?.addEventListener('click', (e) => viewManual(machine.manual_url, e.target));
   }
 
   let historyData = [];
@@ -11391,7 +11397,10 @@ function openMachineModal(companyId, categories, existing) {
   }
 
   if (isEdit) {
-    overlay.querySelector('#delete-machine').addEventListener('click', async (e) => {
+    // ⚠️ MÊME RÈGLE : le bouton n'est rendu que pour un gérant. Sans le `?.`, un
+    // mécanicien, un chauffeur — ou un rôle encore inconnu — faisait jeter cette
+    // ligne, et l'enregistrement de la fiche ne répondait plus du tout.
+    overlay.querySelector('#delete-machine')?.addEventListener('click', async (e) => {
       const ok = confirm(tR('Supprimer définitivement « {nom} » ? Son plan d\'entretien, son historique, ses relevés, son carnet et sa photo seront aussi supprimés. Cette action est irréversible.', { nom: existing.name }));
       if (!ok) return;
       const btn = e.target;
@@ -11439,8 +11448,13 @@ function openMachineModal(companyId, categories, existing) {
   }
 
   if (isEdit && existing.manual_url) {
-    overlay.querySelector('#modal-view-manual').addEventListener('click', (e) => viewManual(existing.manual_url, e.target));
-    overlay.querySelector('#modal-analyze-manual').addEventListener('click', async (e) => {
+    // ⚠️ CES DEUX BOUTONS NE SONT RENDUS QUE si la machine a déjà un carnet
+    // (`${isEdit && existing.manual_url ? … : ''}`). Le `?.` est donc obligatoire :
+    // sans lui, ouvrir la fiche d'une machine SANS carnet — le cas le plus
+    // courant — jetait ici même, et tout le câblage qui suit était perdu :
+    // la photo, le champ du carnet, la caméra, et jusqu'à l'enregistrement.
+    overlay.querySelector('#modal-view-manual')?.addEventListener('click', (e) => viewManual(existing.manual_url, e.target));
+    overlay.querySelector('#modal-analyze-manual')?.addEventListener('click', async (e) => {
       const btn = e.target;
       const original = btn.textContent;
       btn.disabled = true;
