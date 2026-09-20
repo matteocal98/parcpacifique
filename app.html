@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0cOCC8jAJ2YjRfadz36MhU50XbYBjxCte26nb7wEGvc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-T0HLq01Cr6r7LQfou4Mb71zvlHAwBGgtIOYsU4oTe8Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3675,6 +3675,23 @@ function renderSocieteManquante(user, motif) {
   });
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// L'ADRESSE TECHNIQUE DES MEMBRES D'ATELIER
+// ════════════════════════════════════════════════════════════════════════════
+// Le gérant crée un mécanicien sans e-mail : le serveur fabrique un compte à
+// adresse interne `<login>@membres.keeva.work`, qui ne sert JAMAIS à du
+// courrier. Ce domaine est donc ajouté ici, à la saisie, pour que la personne
+// n'ait qu'un login court à retenir — et il l'est d'un seul endroit : l'écran de
+// connexion, la ré-authentification de « Mon compte » et le verrou s'en servent.
+const DOMAINE_MEMBRES = 'membres.keeva.work';
+
+function emailDeConnexion(saisie) {
+  const valeur = String(saisie == null ? '' : saisie).trim().toLowerCase();
+  // Une adresse complète reste une adresse : on n'y touche pas.
+  if (!valeur || valeur.includes('@')) return valeur;
+  return valeur + '@' + DOMAINE_MEMBRES;
+}
+
 function renderLogin(errorMsg, horsLigne) {
   // Retour de paiement sans session : l'écran de connexion annonce la nouvelle.
   // Le paramètre reste dans l'adresse : la confirmation viendra après la connexion.
@@ -3702,8 +3719,9 @@ function renderLogin(errorMsg, horsLigne) {
       <p>${trad('Connecte-toi pour voir tes machines.')}</p>
       ${avisForfait ? '<div class="hint" role="status">' + esc(avisForfait) + '</div>' : ''}
       <form id="login-form">
-        <label for="email">${trad('Email')}</label>
-        <input id="email" type="email" autocomplete="username" required>
+        <label for="email">${trad('E-mail ou login')}</label>
+        <input id="email" type="text" autocomplete="username" required placeholder="${trad('jean.dupont')}">
+        <p class="hint">${trad('Une adresse e-mail, ou le login donné par le gérant (par exemple jean.dupont).')}</p>
         <label for="password">${trad('Mot de passe')}</label>
         <div class="password-wrap">
           <input id="password" type="password" autocomplete="current-password" required>
@@ -3743,7 +3761,11 @@ function renderLogin(errorMsg, horsLigne) {
   `;
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    // ★ SOIT UNE ADRESSE, SOIT UN LOGIN COURT : le mécanicien tape
+    //   `jean.dupont`, jamais `<login>@membres.keeva.work`. Pas d'arobase → on
+    //   complète avec le domaine interne. Le serveur, lui, ne voit qu'une
+    //   adresse : rien à changer dans Supabase.
+    const email = emailDeConnexion(document.getElementById('email').value);
     const password = document.getElementById('password').value;
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) { renderLogin(error.message); return; }
@@ -8144,7 +8166,12 @@ VIEWS.account = {
         <div class="card-head"><h2 class="card-title">${trad('Équipe')}</h2></div>
         <div class="hint" id="acc-equipe-msg" role="status" aria-live="polite"></div>
         <div id="acc-equipe-liste">${trad('Chargement de l\'équipe…')}</div>
-        <div id="acc-equipe-invitation"></div>
+        <div id="acc-equipe-creation"></div>
+        <details id="acc-equipe-invitation-bloc">
+          <summary>${trad('Inviter par e-mail')}</summary>
+          <p class="hint">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un mécanicien d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
+          <div id="acc-equipe-invitation"></div>
+        </details>
       </section>
 
       <section class="card">
@@ -8260,7 +8287,7 @@ VIEWS.account = {
     // qu'un REFLET. Si le serveur et lui divergent, c'est le serveur qui gagne —
     // et le message d'erreur affiché est le SIEN, jamais une phrase inventée ici.
     const ROLE_DROITS = {
-      gerant: { libelle: 'Gérant', invite: true, change: true, retire: true },
+      gerant: { libelle: 'Gérant', invite: true, change: true, retire: true, nouveauMotDePasse: true },
       mecanicien: { libelle: 'Mécanicien', invite: false, change: false, retire: false },
       chauffeur: { libelle: 'Chauffeur', invite: false, change: false, retire: false },
     };
@@ -8321,28 +8348,91 @@ VIEWS.account = {
       liste.innerHTML = `
         <div>
           ${membres.map((m) => `
-            <div>
+            <div data-membre="${esc(m.id)}">
               <div class="value">${esc(nomAffiche(m))}${m.est_moi ? ' ' + trad('(toi)') : ''}</div>
-              <div class="hint">${esc(m.email || '—')} · ${esc((ROLE_DROITS[m.role] || {}).libelle || m.role)}</div>
+              <div class="hint">${esc(identiteDe(m))} · ${esc(roleDe(m.role))}${estMembreCree(m) ? '' : ' · ' + esc(m.email || '—')}</div>
+              <div class="hint">${trad('Ce qu\'il a le droit de faire :')} ${esc(ceQuIlPeutFaire(m.role))}</div>
               ${peutGererEquipe() && !m.est_moi && m.role !== 'gerant' ? `
               <div class="modal-actions" style="margin-top:6px;">
+                <button type="button" class="link-inline" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
                 <button type="button" class="link-inline" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(m.role)}">${trad('Changer le rôle')}</button>
                 <button type="button" class="link-inline" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>
               </div>` : ''}
             </div>`).join('')}
         </div>`;
 
-      // ── L'INVITATION : le plafond est dit AVANT de proposer d'inviter, et le
-      //    serveur le revérifiera de toute façon (les deux, pas l'un ou l'autre).
+      // ── LE PLAFOND EST DIT, ET IL COMPTE LES INVITATIONS EN ATTENTE ─────────
+      //    Le serveur applique EXACTEMENT la même règle (déclencheur
+      //    `profiles_plafond` + fonction Edge `creer-membre`) : l'écran ne fait
+      //    que dire ce que le serveur refusera. Un écran qui masquerait le bouton
+      //    ne prouverait rien ; un écran qui proposerait une création impossible
+      //    ferait perdre du temps au gérant.
       const plafond = plafondUtilisateurs(UI.companyPlan || 'free');
       const placesRestantes = plafond == null ? null : Math.max(0, plafond - membres.length);
+
+      // ── LA REVUE DE L'ÉQUIPE EST RETIRÉE À CHAQUE RELECTURE ────────────────
+      //    Sans cela, les gestionnaires posés au passage précédent resteraient
+      //    attachés aux boutons qui viennent d'être remplacés — et « Créer le
+      //    membre » ne ferait plus rien après un premier essai.
+      if (racine._equipeBranchee) racine._equipeBranchee();
+      racine._equipeBranchee = () => {
+        racine.querySelector('#acc-membre-creer')?.removeEventListener('click', creerLeMembre);
+        racine.querySelector('#acc-equipe-liste')?.querySelectorAll('[data-pw-reset]').forEach((bouton) => {
+          bouton.removeEventListener('click', relancerLeMotDePasse);
+        });
+        racine.querySelector('#acc-invite-envoyer')?.removeEventListener('click', creerLInvitation);
+        racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
+          bouton.removeEventListener('click', changerLeRole);
+        });
+        racine.querySelectorAll('[data-equipe-retirer]').forEach((bouton) => {
+          bouton.removeEventListener('click', retirerLeMembre);
+        });
+      };
+
+      // ── LA CRÉATION DIRECTE, EN PREMIER ───────────────────────────────────
+      //    Un mécanicien d'atelier n'a pas d'e-mail : l'invitation par lien est
+      //    un fonctionnement de bureau. Le gérant remplit donc un prénom, un nom
+      //    et un rôle, et le SERVEUR fabrique le login et le mot de passe.
+      //    Aucun identifiant n'est demandé au gérant : il en inventerait un avec
+      //    un accent, ou en double.
+      //
+      //    Le formulaire n'est écrit QUE pour un gérant, et son écouteur est posé
+      //    juste après, sans `?.` : les deux vont ensemble, et le contrôle
+      //    `verifier-ecouteurs-orphelins.mjs` refuse l'inverse.
+      const zoneCreation = racine.querySelector('#acc-equipe-creation');
+      if (zoneCreation) {
+        zoneCreation.innerHTML = peutGererEquipe() ? `
+          <div class="plan-field">
+            <div class="label">${trad('Ajouter un membre')}</div>
+            <p class="hint">${trad('Pour un mécanicien ou un chauffeur qui n\'a pas d\'e-mail : indique son prénom et son nom, le serveur crée son accès et te donne son login et son mot de passe.')}</p>
+            <label for="acc-membre-prenom">${trad('Prénom')}</label>
+            <input id="acc-membre-prenom" autocomplete="off" placeholder="${trad('Jean')}">
+            <label for="acc-membre-nom">${trad('Nom')}</label>
+            <input id="acc-membre-nom" autocomplete="off" placeholder="${trad('Dupont')}">
+            <label for="acc-membre-role">${trad('Rôle')}</label>
+            <select id="acc-membre-role">
+              <option value="mecanicien">${trad('Mécanicien')}</option>
+              <option value="chauffeur">${trad('Chauffeur')}</option>
+            </select>
+            <div class="hint">${trad('Ce que le rôle permet : un mécanicien tient le parc et les entretiens, un chauffeur lit le parc, relève le compteur et prend la photo de sa machine. Ni l\'un ni l\'autre ne gère l\'équipe.')}</div>
+            <div class="modal-actions" style="margin-top:10px;">
+              <button type="button" class="primary" id="acc-membre-creer">${trad('Créer le membre')}</button>
+            </div>
+          </div>
+          <div id="acc-membre-identifiants"></div>` : '';
+      }
+
       if (!peutGererEquipe()) {
-        zoneInvitation.innerHTML = `<p class="hint">${trad('Seul le gérant peut inviter quelqu\'un, changer un rôle ou retirer un membre.')}</p>`;
+        // Le rôle et l'offre ont été relus juste avant : on ne dit donc la raison
+        // que si elle est vraie. Le refus, lui, viendra du serveur de toute façon.
+        zoneInvitation.innerHTML = '';
         return;
       }
+
       zoneInvitation.innerHTML = `
         <div class="plan-field">
-          <div class="label">${trad('Inviter quelqu\'un')}</div>
+          <div class="label">${trad('Inviter quelqu\'un par e-mail')}</div>
+          <p class="hint">${trad('Pour un chef d\'équipe, un comptable ou quelqu\'un qui a une adresse : la personne reçoit un lien et crée son compte elle-même.')}</p>
           ${placesRestantes === 0 ? `<p class="hint">${tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe les occupe déjà. Passe à une offre supérieure pour inviter.', { plafond }) }</p>` : ''}
           <label for="acc-invite-email">${trad('E-mail de la personne')}</label>
           <input id="acc-invite-email" type="email" autocomplete="off">
@@ -8390,36 +8480,201 @@ VIEWS.account = {
         }
       });
 
-      // Changer un rôle : on demande le nouveau rôle, on appelle le serveur, on redit la liste.
-      racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
-        bouton.addEventListener('click', async () => {
-          const profil = bouton.getAttribute('data-equipe-role');
-          const actuel = bouton.getAttribute('data-role-actuel');
-          const nouveau = actuel === 'mecanicien' ? 'chauffeur' : 'mecanicien';
-          dire(trad('Enregistrement…'));
-          try {
-            const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: nouveau });
-            if (error) throw error;
-            dire(trad('Rôle modifié.'));
-            preparerCarteEquipe(racine);
-          } catch (err) { dire(String((err && err.message) || err), true); }
+      // ── CRÉER LE MEMBRE : c'est le SERVEUR qui fabrique le login ───────────
+      //    L'écran n'envoie que le prénom, le nom et le rôle. Le login et le mot
+      //    de passe reviennent UNE SEULE FOIS : ils ne sont ni stockés, ni
+      //    relisibles ensuite. La liste est ensuite RELUE DEPUIS LE SERVEUR —
+      //    jamais recomposée à la main à partir de ce qu'on croit avoir créé.
+      async function creerLeMembre() {
+        const prenom = (racine.querySelector('#acc-membre-prenom')?.value || '').trim();
+        const nom = (racine.querySelector('#acc-membre-nom')?.value || '').trim();
+        const role = racine.querySelector('#acc-membre-role')?.value || 'mecanicien';
+        const zone = racine.querySelector('#acc-membre-identifiants');
+        dire('');
+        if (!prenom || !nom) { dire(trad('Indique le prénom ET le nom.'), true); return; }
+        if (zone) zone.innerHTML = `<p class="hint">${trad('Création du compte…')}</p>`;
+        try {
+          const { data, error } = await sb.functions.invoke('creer-membre', {
+            method: 'POST',
+            body: { prenom, nom, role },
+          });
+          if (error) throw new Error(await functionErrorMessage(error, trad('création impossible')));
+          if (!data || data.ok !== true) throw new Error((data && data.error) || trad('création impossible'));
+          afficherIdentifiants(zone, data, tR('Accès de {nom}', { nom: prenom + ' ' + nom }));
+          const champPrenom = racine.querySelector('#acc-membre-prenom');
+          const champNom = racine.querySelector('#acc-membre-nom');
+          if (champPrenom) champPrenom.value = '';
+          if (champNom) champNom.value = '';
+          dire(trad('Membre créé.'));
+          await preparerCarteEquipe(racine);
+        } catch (err) {
+          // Le refus du SERVEUR est affiché tel quel : plafond atteint, rôle
+          // refusé, session expirée. On ne le réécrit pas.
+          if (zone) zone.innerHTML = '';
+          dire(String((err && err.message) || err), true);
+        }
+      }
+
+      // ── GÉNÉRER UN NOUVEAU MOT DE PASSE ───────────────────────────────────
+      //    Indispensable : un mécanicien n'a pas d'e-mail, donc pas de « mot de
+      //    passe oublié ». Le nouveau mot de passe s'affiche DANS la ligne du
+      //    membre, à sa place : le gérant le lit à la personne devant l'atelier.
+      async function relancerLeMotDePasse() {
+        const bouton = this;
+        const membre = bouton.getAttribute('data-pw-reset');
+        const ligne = bouton.closest('[data-membre]');
+        dire('');
+        if (ligne) ligne.innerHTML = `<p class="hint">${trad('Nouveau mot de passe…')}</p>`;
+        try {
+          const { data, error } = await sb.functions.invoke('creer-membre', {
+            method: 'POST',
+            body: { mode: 'reinitialiser', membre },
+          });
+          if (error) throw new Error(await functionErrorMessage(error, trad('réinitialisation impossible')));
+          if (!data || data.ok !== true) throw new Error((data && data.error) || trad('réinitialisation impossible'));
+          if (ligne) {
+            ligne.innerHTML = identifiantsMembre(data, tR('Nouveau mot de passe de {login}', { login: data.login || '' }));
+          }
+          dire(trad('Nouveau mot de passe généré.'));
+          await preparerCarteEquipe(racine);
+        } catch (err) {
+          dire(String((err && err.message) || err), true);
+          await preparerCarteEquipe(racine);
+        }
+      }
+
+      // ── LES IDENTIFIANTS, EN GROS, UNE SEULE FOIS ──────────────────────────
+      //    Le mot de passe est dans un champ de mot de passe : il ne s'affiche
+      //    pas à l'épaule de quelqu'un qui passe, et le bouton « Afficher » (déjà
+      //    posé pour toute la page sur `.toggle-pw-btn`) le montre au gérant au
+      //    moment où il le lit. Le bouton de copie est LÀ AUSSI : c'est le geste
+      //    réel — on colle l'identifiant dans un message ou un carnet.
+      function identifiantsMembre(data, titre) {
+        const login = String((data && data.login) || '');
+        const motDePasse = String((data && data.mot_de_passe) || '');
+        const texte = tR('KEEVA — {titre}\nLogin : {login}\nMot de passe : {motDePasse}\nConnexion : https://keeva.work', {
+          titre: titre || trad('Accès'),
+          login,
+          motDePasse,
         });
-      });
+        return `
+          <div class="plan-field">
+            <div class="label">${esc(titre || trad('Accès'))}</div>
+            <div class="hint">${trad('Identifiant de connexion')}</div>
+            <div class="value">${esc(login)}</div>
+            <div class="hint">${trad('Mot de passe')}</div>
+            <div class="password-wrap">
+              <input type="password" value="${esc(motDePasse)}" readonly aria-label="${trad('Mot de passe')}">
+              <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+            </div>
+            <p class="hint">${trad('Note-les maintenant : le mot de passe ne sera plus affiché. Tu peux en générer un nouveau à tout moment.')}</p>
+            <div class="modal-actions" style="margin-top:8px;">
+              <button type="button" class="secondary" data-copier-access="${esc(texte)}">${trad('Copier le login et le mot de passe')}</button>
+            </div>
+          </div>`;
+      }
+
+      function afficherIdentifiants(zone, data, titre) {
+        if (!zone) return;
+        zone.innerHTML = identifiantsMembre(data, titre);
+      }
+
+      // ── QUI FAIT QUOI, EN UNE LIGNE ───────────────────────────────────────
+      //    Le gérant a demandé « qui fait quoi » : chaque membre porte donc, sous
+      //    son rôle, ce que le rôle autorise. Ce sont les droits que le SERVEUR
+      //    applique (`migration-roles-equipe.sql`), pas une promesse d'écran.
+      const ROLE_DESCRIPTIONS = {
+        gerant: trad('Tout : le parc, les plans, l\'équipe et l\'abonnement.'),
+        mecanicien: trad('Le parc et les entretiens : il ajoute, modifie et marque fait. Il ne gère pas l\'équipe.'),
+        chauffeur: trad('Il consulte le parc, relève le compteur et prend la photo de sa machine. Il ne modifie rien d\'autre.'),
+      };
+      const roleDe = (role) => (ROLE_DROITS[role] || {}).libelle || role || '';
+      const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demande au gérant de vérifier son rôle.');
+      // L'identité affichée : le login court quand il existe, l'adresse sinon.
+      const estMembreCree = (m) => !!m.login || /@membres\.keeva\.work$/i.test(String(m.email || ''));
+      const identiteDe = (m) => m.login || (m.email ? String(m.email).split('@')[0] : trad('Membre'));
+
+      // ── L'INVITATION PAR E-MAIL reste, en second ──────────────────────────
+      async function creerLInvitation() {
+        const email = (racine.querySelector('#acc-invite-email')?.value || '').trim();
+        const role = racine.querySelector('#acc-invite-role')?.value || 'mecanicien';
+        const resultat = racine.querySelector('#acc-invite-resultat');
+        dire('');
+        if (resultat) resultat.innerHTML = `<p class="hint">${trad('Création de l\'invitation…')}</p>`;
+        try {
+          const { data, error } = await sb.rpc('inviter_membre', { p_email: email, p_role: role });
+          if (error) throw error;
+          const ligne = Array.isArray(data) ? data[0] : data;
+          const code = ligne && ligne.code ? ligne.code : '';
+          const lien = lienInvitation(code);
+          const sujet = tR('Invitation à rejoindre {societe} sur KEEVA', { societe: UI.company?.name || UI.companyName || '' });
+          if (resultat) {
+            resultat.innerHTML = `
+              <div class="plan-field">
+                <div class="label">${trad('Lien à transmettre')}</div>
+                <div class="value" id="acc-invite-lien" style="word-break:break-all;font-size:13px;">${esc(lien)}</div>
+                <p class="hint">${tR('Valable jusqu\'au {date}. La personne crée son compte en le conservant : elle rejoindra la société automatiquement.', { date: esc(String((ligne && ligne.expire_le) || '').slice(0, 10)) })}</p>
+                <div class="modal-actions" style="margin-top:8px;">
+                  <a class="primary" id="acc-invite-mailto" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corpsInvitation(lien))}" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${trad('Envoyer l\'invitation par e-mail')}</a>
+                </div>
+              </div>`;
+          }
+          dire(trad('Invitation créée.'));
+        } catch (err) {
+          // Le refus du SERVEUR est affiché tel quel : plafond atteint, adresse
+          // déjà membre, rôle inconnu. On ne le réécrit pas.
+          if (resultat) resultat.innerHTML = '';
+          dire(String((err && err.message) || err), true);
+        }
+      }
+
+      // Changer un rôle : on demande le nouveau rôle, on appelle le serveur, on redit la liste.
+      async function changerLeRole() {
+        const bouton = this;
+        const profil = bouton.getAttribute('data-equipe-role');
+        const actuel = bouton.getAttribute('data-role-actuel');
+        const nouveau = actuel === 'mecanicien' ? 'chauffeur' : 'mecanicien';
+        dire(trad('Enregistrement…'));
+        try {
+          const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: nouveau });
+          if (error) throw error;
+          dire(trad('Rôle modifié.'));
+          await preparerCarteEquipe(racine);
+        } catch (err) { dire(String((err && err.message) || err), true); }
+      }
 
       // Retirer : DEUX confirmations, comme la suppression d'une machine — et on
       // dit ce qui va se passer, pas seulement « êtes-vous sûr ».
+      async function retirerLeMembre() {
+        const bouton = this;
+        const profil = bouton.getAttribute('data-equipe-retirer');
+        if (!window.confirm(trad('Retirer cette personne de la société ? Elle perd l\'accès au parc, mais garde son compte et son mot de passe.'))) return;
+        dire(trad('Retrait…'));
+        try {
+          const { error } = await sb.rpc('retirer_membre', { p_profil: profil });
+          if (error) throw error;
+          dire(trad('Personne retirée de la société.'));
+          await preparerCarteEquipe(racine);
+        } catch (err) { dire(String((err && err.message) || err), true); }
+      }
+
+      // ── LE CÂBLAGE, À LA FIN, SUR LES ÉLÉMENTS QUI VIENNENT D'ÊTRE ÉCRITS ──
+      //    Poser un écouteur sur un élément absent jette, et l'exception emporte
+      //    tout le câblage qui suit — c'est le défaut que
+      //    `verifier-ecouteurs-orphelins.mjs` surveille. Les éléments ci-dessous
+      //    existent tous à cette ligne : le formulaire pour un gérant (garde
+      //    `peutGererEquipe()` avec retour), les boutons de rôle et de retrait
+      //    dans le même gabarit que leurs données.
+      racine.querySelector('#acc-membre-creer').addEventListener('click', creerLeMembre);
+      racine.querySelector('#acc-invite-envoyer').addEventListener('click', creerLInvitation);
+      racine.querySelectorAll('[data-pw-reset]').forEach((bouton) => {
+        bouton.addEventListener('click', relancerLeMotDePasse);
+      });
+      racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
+        bouton.addEventListener('click', changerLeRole);
+      });
       racine.querySelectorAll('[data-equipe-retirer]').forEach((bouton) => {
-        bouton.addEventListener('click', async () => {
-          const profil = bouton.getAttribute('data-equipe-retirer');
-          if (!window.confirm(trad('Retirer cette personne de la société ? Elle perd l\'accès au parc, mais garde son compte et son mot de passe.'))) return;
-          dire(trad('Retrait…'));
-          try {
-            const { error } = await sb.rpc('retirer_membre', { p_profil: profil });
-            if (error) throw error;
-            dire(trad('Personne retirée de la société.'));
-            preparerCarteEquipe(racine);
-          } catch (err) { dire(String((err && err.message) || err), true); }
-        });
+        bouton.addEventListener('click', retirerLeMembre);
       });
     }
 
@@ -8601,7 +8856,11 @@ VIEWS.account = {
       btn.textContent = trad('Vérification…');
       try {
         // Ré-authentification obligatoire avant un changement sensible.
-        const { error: authErr } = await sb.auth.signInWithPassword({ email: UI.email, password: motDePasse });
+        // ★ L'ADRESSE TECHNIQUE EST COMPLÈTE ICI. UI.email peut être le login
+        //   court d'un membre créé par le gérant (`jean.dupont`) : le renvoyer
+        //   tel quel ferait échouer la ré-authentification, alors que l'écran
+        //   affiche « jean.dupont ». Même fonction que l'écran de connexion.
+        const { error: authErr } = await sb.auth.signInWithPassword({ email: emailDeConnexion(UI.email), password: motDePasse });
         if (authErr) throw new Error(trad('Mot de passe incorrect.'));
 
         btn.textContent = trad('Envoi du lien…');
