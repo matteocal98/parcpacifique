@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KEEVA — La juste mesure de votre parc | Precise tracking for your fleet</title>
-<meta name="description" content="KEEVA transforme vos manuels constructeur en plans de maintenance : suivi par calendrier, heures ou kilomètres, rappels d'échéance et liste de pièces à commander. Gratuit pour 1 machine, puis 5 €/mois jusqu'à 5 machines.">
+<meta name="description" content="KEEVA transforme vos manuels constructeur en plans de maintenance : suivi par calendrier, heures ou kilomètres, rappels d'échéance et liste de pièces à commander. Gratuit pour 2 machines, puis 12 €/mois jusqu'à 5 machines.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#0D1424">
 <link rel="canonical" href="https://keeva.work/decouvrir.html">
@@ -38,9 +38,10 @@
   "description": "Suivi d'entretien de parc matériel : le manuel constructeur devient un plan de maintenance, échéances en dates ou au compteur, rappels et liste de pièces à commander.",
   "url": "https://keeva.work/decouvrir.html",
   "offers": [
-    { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "EUR", "description": "1 machine suivie." },
-    { "@type": "Offer", "name": "Éco", "price": "5", "priceCurrency": "EUR", "description": "Jusqu'à 5 machines suivies." },
-    { "@type": "Offer", "name": "Pro", "price": "20", "priceCurrency": "EUR", "description": "Au-delà de 5 machines, sans limite." }
+    { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "EUR", "description": "2 machines suivies, 1 utilisateur." },
+    { "@type": "Offer", "name": "Starter / Artisan", "price": "12", "priceCurrency": "EUR", "description": "Jusqu'à 5 machines suivies, 1 utilisateur, export CSV." },
+    { "@type": "Offer", "name": "Business / Flotte", "price": "39", "priceCurrency": "EUR", "description": "Jusqu'à 20 machines suivies, 3 utilisateurs, QR codes et préparation groupée." },
+    { "@type": "Offer", "name": "Enterprise / Parc", "price": "89", "priceCurrency": "EUR", "description": "Parc sur mesure, rôles d'équipe et support dédié ; au-delà de 20 machines, 1,50 € par machine et par mois." }
   ],
   "featureList": [
     "Lecture automatique des manuels constructeur",
@@ -228,15 +229,15 @@
   .confiance .suite{margin-top:22px;font-size:14.5px;}
   .confiance .suite a{color:var(--tagline-fr);font-weight:600;}
 
-  /* --- Tarifs : trois offres côte à côte, largeurs égales ------------------ */
-  /* Une seule ligne sur écran large ; en dessous, l'empilement (une colonne)
-     parce que trois colonnes ne tiennent pas sur un téléphone. */
+  /* --- Tarifs : quatre offres, largeurs égales ---------------------------- */
+  /* Deux lignes de deux sur écran large ; en dessous, l'empilement (une
+     colonne) parce que quatre colonnes ne tiennent sur aucun téléphone. */
   .tarifs{display:grid;gap:26px;align-items:stretch;}
-  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(3,1fr);}}
+  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(2,1fr);}}
   .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
   /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
      une couleur inventée : encre pour les deux, indigo pour le badge. */
-  .offre.pro{border:2px solid var(--encre);overflow:hidden;}
+  .offre.business{border:2px solid var(--encre);overflow:hidden;}
   .recommande{position:absolute;top:0;right:0;background:var(--indigo);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);}
   .offre h3{font-size:20px;font-weight:700;}
   /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
@@ -248,10 +249,10 @@
   .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
   .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
   .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--cyan);}
-  /* Le bouton est poussé en BAS de la carte : les trois boutons s'alignent,
-     quelle que soit la longueur des listes. */
+  /* Le bouton est poussé en BAS de la carte : les boutons s'alignent, quelle
+     que soit la longueur des listes. */
   .offre .btn{width:100%;margin-top:auto;}
-  .offre.pro .avantages svg{color:var(--encre);}
+  .offre.business .avantages svg{color:var(--encre);}
 
   .faq{display:grid;gap:12px;}
   details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
@@ -358,8 +359,8 @@
     </div>
     <p class="note">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-      <span class="fr">Gratuit pour 1 machine · Éco 5 €/mois · Pro 20 €/mois · sans carte bancaire</span>
-      <span class="en">Free for 1 machine · Eco €5/month · Pro €20/month · no credit card</span>
+      <span class="fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
+      <span class="en">Free for 2 machines · Starter €12/month · Business €39/month · no credit card</span>
     </p>
   </div>
 
@@ -579,53 +580,73 @@
   <div class="section-tete">
     <span class="sur-titre fr">Tarifs</span>
     <span class="sur-titre en">Pricing</span>
-    <h2><span class="fr">Trois offres, des limites annoncées</span><span class="en">Three plans, clear limits</span></h2>
+    <h2><span class="fr">Quatre offres, des limites annoncées</span><span class="en">Four plans, clear limits</span></h2>
     <p>
-      <span class="fr">Gratuit pour une machine, Éco jusqu'à cinq, Pro sans limite — sans engagement.</span>
-      <span class="en">Free for one machine, Eco up to five, Pro with no limit — no commitment.</span>
+      <span class="fr">Gratuit pour deux machines, Starter jusqu'à cinq, Business jusqu'à vingt, Enterprise sur mesure — sans engagement.</span>
+      <span class="en">Free for two machines, Starter up to five, Business up to twenty, Enterprise built to measure — no commitment.</span>
     </p>
   </div>
   <div class="tarifs">
     <article class="offre">
       <h3><span class="fr">Gratuit</span><span class="en">Free</span></h3>
       <div class="prix"><span class="montant">0 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">1 machine</span><span class="en">1 machine</span></p>
+      <p class="limite"><span class="fr">2 machines · 1 utilisateur</span><span class="en">2 machines · 1 user</span></p>
       <p class="pour fr">Pour un particulier, ou pour essayer KEEVA.</p>
       <p class="pour en">For an individual, or to try KEEVA.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Lecture automatique des manuels constructeur</span><span class="en">Automatic reading of manufacturer manuals</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Liste de pièces générée automatiquement</span><span class="en">Automatically generated parts list</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Rappels d'échéance sur le téléphone</span><span class="en">Due-date reminders on your phone</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet.</span><span class="en">Meter readings do not use up your logbook analyses.</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
       </ul>
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
     </article>
 
     <article class="offre">
-      <h3><span class="fr">Éco</span><span class="en">Eco</span></h3>
-      <div class="prix"><span class="montant">5 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">Jusqu'à 5 machines</span><span class="en">Up to 5 machines</span></p>
+      <h3><span class="fr">Starter / Artisan</span><span class="en">Starter / Artisan</span></h3>
+      <div class="prix"><span class="montant">12 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">5 machines · 1 utilisateur</span><span class="en">5 machines · 1 user</span></p>
       <p class="pour fr">Pour un petit parc qu'il faut suivre de près.</p>
       <p class="pour en">For a small fleet that needs close tracking.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit</span><span class="en">Everything included in Free</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">20 analyses de carnet, 10 recherches de photo, 200 lectures de compteur par mois</span><span class="en">20 logbook analyses, 10 photo searches, 200 meter readings per month</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit, plus l'export CSV</span><span class="en">Everything included in Free, plus CSV export</span></li>
       </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Éco</span><span class="en">Move to Eco</span></a>
+      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Starter</span><span class="en">Move to Starter</span></a>
     </article>
 
-    <article class="offre pro">
+    <article class="offre business">
       <span class="recommande fr">RECOMMANDÉ</span>
       <span class="recommande en">RECOMMENDED</span>
-      <h3><span class="fr">Pro</span><span class="en">Pro</span></h3>
-      <div class="prix"><span class="montant">20 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">Machines illimitées</span><span class="en">Unlimited machines</span></p>
-      <p class="pour fr">Au-delà de cinq machines, sans limite.</p>
-      <p class="pour en">Beyond five machines, with no limit.</p>
+      <h3><span class="fr">Business / Flotte</span><span class="en">Business / Fleet</span></h3>
+      <div class="prix"><span class="montant">39 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">20 machines · 3 utilisateurs</span><span class="en">20 machines · 3 users</span></p>
+      <p class="pour fr">Pour une flotte suivie par plusieurs personnes.</p>
+      <p class="pour en">For a fleet tracked by several people.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Éco</span><span class="en">Everything included in Eco</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">30 analyses de carnet, 30 recherches de photo, 500 lectures de compteur par mois</span><span class="en">30 logbook analyses, 30 photo searches, 500 meter readings per month</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Multi-utilisateurs, QR codes et préparation groupée</span><span class="en">Multi-user, QR codes and grouped preparation</span></li>
       </ul>
-      <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Pro</span><span class="en">Upgrade to Pro</span></a>
+      <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Business</span><span class="en">Move to Business</span></a>
+    </article>
+
+    <article class="offre">
+      <h3><span class="fr">Enterprise / Parc</span><span class="en">Enterprise / Fleet</span></h3>
+      <div class="prix"><span class="montant">89 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
+      <p class="limite"><span class="fr">Parc sur mesure · rôles d'équipe</span><span class="en">Fleet built to measure · team roles</span></p>
+      <p class="pour fr">Pour un grand parc, avec un interlocuteur dédié. Au-delà de 20 machines, chaque machine supplémentaire est facturée 1,50 € par mois.</p>
+      <p class="pour en">For a large fleet, with a dedicated contact. Beyond 20 machines, each additional machine is billed at €1.50 per month.</p>
+      <ul class="avantages">
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">5 000 analyses de carnet, 5 000 recherches de photo, 2 000 lectures de compteur par mois</span><span class="en">5,000 logbook analyses, 5,000 photo searches, 2,000 meter readings per month</span></li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Support dédié</span><span class="en">Dedicated support</span></li>
+      </ul>
+      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
     </article>
   </div>
+  <p class="suite" style="margin-top:24px;font-size:15px;">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px;"><path d="M20 6L9 17l-5-5"/></svg>
+    <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
+    <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
+  </p>
   <p class="suite" style="margin-top:24px;font-size:15px;">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px;"><path d="M20 6L9 17l-5-5"/></svg>
     <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
@@ -642,8 +663,8 @@
       <summary><span class="fr">Qu'est-ce qui compte comme une machine ?</span><span class="en">What counts as a machine?</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
-      <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite de votre offre porte sur le nombre suivi en même temps : 1 machine en Gratuit, 5 en Éco, sans limite en Pro.</div>
-      <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — your plan limits how many are tracked at once: 1 machine on Free, 5 on Eco, no limit on Pro.</div>
+      <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite de votre offre porte sur le nombre suivi en même temps : 2 machines en Gratuit, 5 en Starter, 20 en Business, et un parc sur mesure en Enterprise.</div>
+      <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — your plan limits how many are tracked at once: 2 machines on Free, 5 on Starter, 20 on Business, and a fleet built to measure on Enterprise.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Puis-je changer d'offre à tout moment ?</span><span class="en">Can I change plan at any time?</span>
@@ -688,8 +709,8 @@
   <div class="final">
     <h2><span class="fr">Le juste suivi de votre parc commence aujourd'hui</span><span class="en">Precise tracking for your fleet starts today</span></h2>
     <p>
-      <span class="fr">Un compte, un manuel, et vous saurez si KEEVA tient la route sur vos machines. Gratuit pour une machine, 5 €/mois jusqu'à cinq.</span>
-      <span class="en">One account, one manual, and you will know whether KEEVA holds up on your machines. Free for one machine, €5/month up to five.</span>
+      <span class="fr">Un compte, un manuel, et vous saurez si KEEVA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.</span>
+      <span class="en">One account, one manual, and you will know whether KEEVA holds up on your machines. Free for two machines, €12/month up to five.</span>
     </p>
     <div class="actions">
       <a class="btn btn-clair" href="./app.html?inscription=1"><span class="fr">Commencer gratuitement</span><span class="en">Start for free</span></a>
