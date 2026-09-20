@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-A6iL5WyNEH4clzRr2vo+sS0bZp7nwqjIr5Iotnz8zHQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ia+QXN9xjkVr7i1B6slY9a/OSksx3LnVmZD7Y9BX6OI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -121,6 +121,22 @@
     --ok-accent:#24B5A8;
     --alert:#0E1333;
     --alert-bg:rgba(222,122,22,.16);
+    /* ★ LOT 6 — LES VOILES DE COULEUR. Une teinte décorative (ambre 3,04:1,
+       indigo 4,47, cyan 2,55, olive 3,07 sur blanc) ne peut PAS écrire ; elle
+       peut porter un FOND, une PASTILLE, un TRAIT. Le voile est assez léger pour
+       que l'encre garde plus de 16:1 dessus, et assez franc pour que la couleur
+       se voie : c'est ce qui manquait au tableau de bord. Le seul voile EMPLOYÉ
+       par la feuille est `--tint-action` (les tuiles et le résumé) ; les quatre
+       autres sont déclarés pour que le nom d'une famille de produits ne soit
+       jamais recopié en clair dans une règle — c'est la déclaration qui fait foi,
+       et signal/test-charte.mjs refuse une variable employée mais non déclarée.
+       Les NOMS ÉVITENT LES CHIFFRES : le contrôle des variables lit les jetons
+       avec `[\w-]`, où un chiffre s'arrête — `--tint-cyan` se lisait `--tint-`. */
+    --tint-action:rgba(91,82,223,.06);
+    --voile-cyan:rgba(36,181,168,.14);
+    --voile-ambre:rgba(222,122,22,.14);
+    --voile-olive:rgba(139,155,55,.16);
+    --voile-indigo:rgba(99,102,241,.14);
 
     /* Rayons */
     --r-md:12px;
@@ -340,10 +356,20 @@
     }
     .sidebar .wordmark{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.01em;padding-bottom:18px;}
     .sidebar .wordmark em{font-style:normal;color:var(--ok-accent);}
+    /* L'ICÔNE EST DANS LE BOUTON, PAS À CÔTÉ : le dessin prend `currentColor`,
+       donc l'entrée active n'a qu'un état à définir — le sien. L'ardoise
+       (`--dark-ink`) est la teinte atténuée sur fond sombre du socle (7,17:1 sur
+       la nuit) : c'est son rôle, et c'est le seul texte de la barre qui ne soit
+       pas du blanc. */
     .sidebar .nav-item{
-      display:block;width:100%;text-align:left;border:none;cursor:pointer;background:none;
+      display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;cursor:pointer;background:none;
       font-size:13.5px;font-weight:600;color:var(--dark-ink);padding:10px 12px;border-radius:9px;
     }
+    .sidebar .nav-ico{display:flex;align-items:center;justify-content:center;flex:0 0 18px;color:var(--dark-ink);}
+    .sidebar .nav-ico svg{display:block;width:18px;height:18px;}
+    .sidebar .nav-item span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .sidebar .nav-item:hover .nav-ico{color:#fff;}
+    .sidebar .nav-item.is-active .nav-ico{color:#fff;}
     .sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.06);}
     .sidebar .nav-item.is-active{color:#fff;background:var(--dark-2);font-weight:700;}
     .sidebar .sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;}
@@ -546,6 +572,51 @@
     width:100%;text-align:left;cursor:pointer;
   }
   .alert-row:last-child{border-bottom:none;}
+  /* ★ LOT 6 — LIBELLÉ / VALEUR, PARTOUT OÙ L'ON SAISIT DU TEXTE : les étiquettes
+     de formulaire héritaient de la taille du corps (15 px) et se confondaient
+     avec lui. Elles passent au barreau des libellés (13.5 px). */
+  label{font-size:13.5px;font-weight:600;color:var(--ink-2);}
+  /* ★ LOT 6 — LE DÉPLI D'UNE LIGNE D'ÉCHÉANCE, ET LE CORPS QUI VA AVEC.
+     Le voile d'encre du produit (`--surface-soft`, 4 %) : aucun risque de
+     contraste, et le dépli se détache de la carte blanche sans crier. */
+  .alert-detail{
+    display:flex;flex-direction:column;gap:8px;padding:12px;
+    background:var(--surface-soft);border-radius:var(--r-md);margin-bottom:8px;
+  }
+  .alert-detail-titre{font-size:13.5px;font-weight:800;color:var(--ink);}
+  .alert-detail-ligne{font-size:12px;line-height:1.45;color:var(--ink-2);}
+  .alert-echeance-late{color:var(--late-ink);background:var(--late-bg);}
+  .alert-echeance-soon{color:var(--soon-ink);background:var(--soon-bg);}
+  .alert-echeance-ok{color:var(--ok-ink);background:var(--ok-bg);}
+  /* Le signe du dépli, à droite de la pastille : du TEXTE, donc à l'encre. */
+  .alert-plus{font-size:15px;font-weight:800;line-height:1;color:var(--ink-3);flex-shrink:0;}
+  /* ★ LOT 6 — LE DÉBUT DE LA LISTE DE PRÉPARATION, SUR LE TABLEAU DE BORD.
+     Chaque produit porte la COULEUR DE SA FAMILLE sur un TRAIT de 3 px à gauche :
+     la teinte ne porte jamais le texte (le nom du produit est écrit à l'encre,
+     plus de 16:1 sur le voile), et la famille se lit d'un coup d'œil. */
+  .prep-apercu{display:flex;flex-direction:column;gap:8px;}
+  .prep-ligne{
+    display:flex;flex-direction:column;gap:2px;
+    border-left:3px solid var(--line-3);border-radius:0 var(--r-chip) var(--r-chip) 0;
+    background:var(--surface-soft);padding:8px 12px;
+  }
+  .prep-ligne.famille-filtres{border-left-color:var(--cyan);}
+  .prep-ligne.famille-huiles{border-left-color:var(--late);}
+  /* L'olive n'est pas un jeton de la feuille : sa teinte s'écrit en clair, comme
+     dans signal/design-dashboard.patch. La palette ne s'agrandit pas pour
+     autant — #8B9B37 est l'une des douze. */
+  .prep-ligne.famille-graisses{border-left-color:#8B9B37;}
+  .prep-ligne.famille-liquides{border-left-color:var(--primary);}
+  .prep-ligne.famille-usure{border-left-color:var(--primary-line);}
+  .prep-ligne.famille-autres{border-left-color:var(--line-3);}
+  .prep-ligne-nom{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--ink);}
+  .prep-ligne-machine{font-size:12px;font-weight:700;line-height:1.4;color:var(--ink-3);}
+  /* Le total : une pastille d'état, donc du TEXTE À L'ENCRE sur son voile — le
+     cyan sur blanc écrit 2,55:1, et n'écrit pas. */
+  .prep-ligne-total{
+    font-size:11px;font-weight:800;color:var(--ok-ink);background:var(--ok-bg);
+    border-radius:var(--r-pill);padding:2px 8px;align-self:flex-start;
+  }
   .alert-bar{width:4px;height:38px;border-radius:4px;flex-shrink:0;}
   .alert-bar.late{background:var(--late);}
   .alert-bar.soon{background:var(--soon);}
@@ -1388,15 +1459,84 @@
   .sheet .sheet-title{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 12px 4px;}
 
   /* Grille du tableau de bord */
-  #view-root{display:flex;flex-direction:column;gap:16px;}
-  .dash-grid{display:flex;flex-direction:column;gap:16px;}
-  .dash-side{display:flex;flex-direction:column;gap:16px;}
+  #view-root{display:flex;flex-direction:column;gap:20px;}
+  .dash-grid{display:flex;flex-direction:column;gap:20px;}
+  .dash-side{display:flex;flex-direction:column;gap:20px;}
 
   /* Aides d'affichage responsive */
   .mobile-only{display:flex;}
   @media (min-width:900px){
-    #view-root{gap:20px;}
-    .dash-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;}
+    #view-root{gap:24px;}
+    /* LA PROPORTION DE DESIGN.md §3 : φ pour la mise en page. Les deux colonnes du
+     tableau de bord, `1.618fr / 1fr` — la colonne latérale occupe 38,2 %. */
+  .dash-grid{display:grid;grid-template-columns:1.618fr 1fr;gap:24px;align-items:start;}
+    .mobile-only{display:none;}
+  }
+
+  /* ★ LOT 5 — L'AIR ET LA DENSITÉ DU TABLEAU DE BORD.
+     Le bloc vit ici, dans la requête du bureau, et il est PRÉFIXÉ : il ne peut
+     donc toucher que ce qu'il nomme, et il gagne le conflit d'égalité par
+     l'ORDRE, comme le fait déjà la règle des cadres. Rien ici ne fait écrire une
+     teinte décorative, et aucune valeur ne sort de l'échelle. */
+  .dash-main{display:flex;flex-direction:column;gap:20px;min-width:0;}
+  @media (min-width:900px){ .dash-main{gap:24px;} }
+
+  /* Les cartes du tableau de bord respirent ENTRE elles et se resserrent EN
+     elles : le rembourrage passe de 18 px à 16 px, l'écart interne de 12 à 8. */
+  .dash-main > .card, .dash-side > .card{padding:16px 20px;gap:8px;}
+
+  /* Le résumé de préparation se sépare du reste : il ANNONCE, il ne détaille
+     pas — la liste complète vit dans l'Agenda, où « Voir la liste » mène. */
+  .dash-preparation{border-style:dashed;border-color:var(--line-3);}
+  .dash-preparation .card-head{gap:8px;}
+  .dash-preparation .pieces-legende{font-size:11px;font-weight:700;letter-spacing:.1em;}
+  .dash-preparation .card-title{font-size:15px;}
+  .dash-preparation .muted-text{font-size:12px;line-height:1.45;}
+
+  /* « Tout voir » et « Voir la liste » : des commandes secondaires, plus petites
+     que le titre qu'elles accompagnent — jamais moins de 12 px, parce que c'est
+     du texte, et qu'il se lit dehors. */
+  .dash-main .card-head .link-inline, .dash-side .card-head .link-inline{font-size:12px;}
+
+  /* La ligne d'échéance : plus courte et plus dense, sans toucher en rien à sa
+     barre d'état ni à la pastille qui porte le délai. */
+  .dash-main .alert-row{padding:12px 0;gap:12px;}
+  .dash-main .alert-title{font-size:13.5px;}
+  .dash-main .alert-sub, .dash-main .alert-due{font-size:12px;}
+
+  /* La tuile : la légende reste petite, c'est le CHIFFRE qui porte la lecture. */
+  .dash-main .stat-card .lbl{font-size:12px;line-height:1.35;}
+
+  /* ★ LOT 6 — LA COULEUR DES QUATRE TUILES, SUR LE FOND ET LA PASTILLE.
+     La maquette donne à chaque tuile la teinte de son état. On ne peut pas la
+     mettre dans le CHIFFRE (ambre 3,04:1, indigo 4,47 sur blanc : sous la barre,
+     DESIGN.md §4) : elle va donc sur ce qui n'écrit pas — un voile de fond à 6 à
+     14 % et la pastille déjà colorée. L'encre sur ces voiles dépasse 16:1.
+     Les tuiles prennent aussi du CORPS : un peu plus de rembourrage, et un
+     chiffre plus grand — c'est un tableau de bord, on y lit des nombres. */
+  .dash-main .stat-card{padding:16px;gap:8px;}
+  .dash-main .stat-card .num{font-size:31px;}
+  .stat-card.tuile-late{background:var(--late-bg);}
+  .stat-card.tuile-soon{background:var(--soon-bg);}
+  .stat-card.tuile-ok{background:var(--ok-bg);}
+  .stat-card.tuile-primary{background:var(--tint-action);}
+
+  /* ★ LOT 6 — DU CORPS DANS LES CARTES DU TABLEAU DE BORD.
+     Le titre de carte passe au barreau du sous-titre (17 px) : les blocs se
+     lisent enfin comme des blocs, au lieu de se confondre avec leur contenu. */
+  .dash-main .card-title, .dash-side .card-title{font-size:17px;}
+
+  /* ★ LOT 6 — LA LIGNE D'ÉCHÉANCE PORTE SA COULEUR D'ÉTAT, À DROITE AUSSI.
+     Le trait de gauche existait ; la pastille de délai passe de 11 à 12 px, dans
+     sa teinte d'état (texte à l'encre), et le signe du dépli reste discret. */
+  .dash-main .alert-row .pill{font-size:12px;}
+  .dash-main .alert-row{gap:12px;}
+  .dash-main .alert-detail .badge{font-size:12px;align-self:flex-start;}
+
+  /* Les blocs de la colonne latérale : le même rembourrage que la colonne
+     principale, et des pastilles à la taille du reste de l'écran. */
+  .dash-side .dropzone{padding:16px 20px;gap:8px;}
+  .dash-side .badge, .dash-side .pill{font-size:11px;}
     .mobile-only{display:none;}
   }
 
@@ -6471,12 +6611,12 @@ const UI = {
 };
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: '◈' },
-  { id: 'machines', label: trad('Machines'), short: trad('Parc'), icon: '▤' },
-  { id: 'manuals', label: trad('Manuels & carnets'), short: trad('Manuels'), icon: '✦' },
-  { id: 'agenda', label: trad('Agenda'), short: trad('Agenda'), icon: '◔' },
-  { id: 'reminders', label: trad('Rappels'), short: trad('Rappels'), icon: '☰' },
-  { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: '◉' },
+  { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil' },
+  { id: 'machines', label: trad('Machines'), short: trad('Parc'), icon: 'parc' },
+  { id: 'manuals', label: trad('Manuels & carnets'), short: trad('Manuels'), icon: 'manuels' },
+  { id: 'agenda', label: trad('Agenda'), short: trad('Agenda'), icon: 'agenda' },
+  { id: 'reminders', label: trad('Rappels'), short: trad('Rappels'), icon: 'rappels' },
+  { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
 
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
@@ -6506,6 +6646,9 @@ const NAV_ICONES = {
   parc: '<rect x="2.5" y="13" width="15" height="7" rx="1.5"/><path d="M8 13V9h7l3.5 4"/><circle cx="6.5" cy="20.5" r="2"/><circle cx="16.5" cy="20.5" r="2"/>',
   manuels: '<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8.5 3v18"/>',
   plus: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
+  compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
 function navIcone(nom) {
   const trace = NAV_ICONES[nom];
@@ -6656,7 +6799,7 @@ function greetingLabel() {
 function sidebarHtml() {
   return `
     <span class="wordmark">KEEVA</span>
-    ${NAV_ITEMS.map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}">${esc(item.label)}</button>`).join('')}
+    ${NAV_ITEMS.map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}"><span class="nav-ico" aria-hidden="true">${navIcone(item.icon)}</span>${esc(item.label)}</button>`).join('')}
     <div class="sidebar-foot">
       <button type="button" id="logout-btn">${trad('Se déconnecter')}</button>
     </div>`;
@@ -7134,7 +7277,13 @@ function wireReminderSwitches(root) {
 // projection. Sa teinte vient des voiles de la charte, et son TEXTE reste à
 // l'encre (ambre et indigo sur voile clair : 2,61 et 3,70, donc jamais la
 // teinte elle-même en texte).
-function alertRowHtml(machine, info) {
+// ★ LOT 6 — `depliable` AJOUTE LE DÉPLI, SUR LE SEUL TABLEAU DE BORD.
+// L'Agenda garde exactement la ligne qu'il avait : même fonction, même rendu,
+// même clic. Ici, la ligne s'ouvre SUR PLACE et montre l'échéance complète, la
+// pastille d'état et « Marquer fait » — sans quitter le tableau de bord.
+// Le déclencheur reste UN SEUL bouton (le corps déplié est son frère) : rien de
+// ce qu'on touche n'est imbriqué dans autre chose.
+function alertRowHtml(machine, info, depliable) {
   const pastille = { alert: 'late', soon: 'soon', ok: 'ok', neutral: 'neutral' }[badgeClass(info.state)] || 'neutral';
   // Le compteur relevé reste sur la ligne, entre parenthèses, à la place où la
   // maquette écrit son échéance (« Kubota U17-3 (250 h) ») : c'est la valeur qui
@@ -7142,22 +7291,57 @@ function alertRowHtml(machine, info) {
   const compteur = machineCounter(machine) != null
     ? formatCounter(machineCounter(machine), counterUnitOf(machine))
     : '';
-  return `
-    <button type="button" class="alert-row" data-machine="${esc(machine.id)}">
+  const ouvert = !!(depliable && UI.alerteOuverte === machine.id);
+  const marqueur = depliable
+    ? `<span class="alert-plus" aria-hidden="true">${ouvert ? '−' : '+'}</span>`
+    : '';
+  const ligne = `
+    <button type="button" class="alert-row" data-machine="${esc(machine.id)}"${depliable ? ` data-alerte="${esc(machine.id)}" aria-expanded="${ouvert ? 'true' : 'false'}"` : ''}>
       <span class="alert-bar ${info.state}"></span>
       <span class="alert-main">
         <span class="alert-title">${esc(machine.name)}${compteur ? ` (${esc(compteur)})` : ''}</span>
         <span class="alert-sub">${esc(nextTaskLabel(machine))}</span>
       </span>
       <span class="pill ${pastille}">${esc(info.short)}</span>
+      ${marqueur}
     </button>`;
+  if (!ouvert) return ligne;
+  // L'échéance COMPLÈTE est celle que le produit écrit déjà (`info.label` :
+  // « En retard de 18 h (compteur 268 h · échéance 250 h) ») : aucune phrase
+  // nouvelle, aucune donnée nouvelle.
+  return ligne + `
+    <div class="alert-detail" data-alerte-detail="${esc(machine.id)}">
+      <span class="alert-detail-titre">${esc(nextTaskLabel(machine))}</span>
+      <span class="alert-detail-ligne">${esc(info.label)}</span>
+      <span class="badge ${badgeClass(info.state)} alert-echeance-${badgeClass(info.state)}">${esc(badgeLabel(info.state))}</span>
+      <button type="button" class="btn-tint" data-priority-done="${esc(machine.id)}" data-priority-tache="${esc(nextTaskLabel(machine))}">${trad('Marquer fait')}</button>
+    </div>`;
 }
 
 function wireAlertRows(root) {
-  root.querySelectorAll('[data-machine]').forEach(row => {
+  // La ligne DÉPLIABLE du tableau de bord a son propre écouteur, posé par
+  // `monterAlertes` : elle ne doit pas, en plus, ouvrir le plan. Elle est donc
+  // écartée ici — l'Agenda garde le comportement d'origine, inchangé.
+  root.querySelectorAll('[data-machine]:not([data-alerte])').forEach(row => {
     row.addEventListener('click', () => {
       const machine = UI.machines.find(m => m.id === row.dataset.machine);
       if (machine) openPlanView(machine, UI.companyId, UI.categories);
+    });
+  });
+}
+
+// ★ LOT 6 — L'ÉCOUTEUR DU DÉPLI, POSÉ SUR LA ZONE, PAS SUR LA LIGNE.
+// Le dépli se referme sur un rendu : un écouteur posé sur la ligne
+// disparaîtrait avec elle — c'est exactement le défaut déjà vu sur la carte
+// « Équipe » (equipe-zones.patch), et la même réponse s'applique.
+function monterAlertes(root) {
+  const zone = root.querySelector('#echeances-zone');
+  if (!zone) return;
+  zone.querySelectorAll('[data-alerte]').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.dataset.alerte;
+      UI.alerteOuverte = UI.alerteOuverte === id ? null : id;
+      renderApp();
     });
   });
 }
@@ -7173,45 +7357,60 @@ VIEWS.dashboard = {
     const alerts = openAlerts();
     const first = alerts[0];
     const retards = tachesEnRetard();
+    // « ÉCHÉANCES À VENIR » NE RÉPÈTE PAS LA CARTE DU DESSUS : une machine en
+    // retard est déjà nommée en grand, avec sa tâche la plus urgente. La même
+    // machine n'apparaît donc qu'UNE fois sur le tableau de bord.
+    const enRetard = machinesEnRetard();
+    const alertsAVenir = alerts.filter(x => !enRetard.has(x.machine.id));
+    // ★ LOT 6 — QUATRE LIGNES D'EMBLÉE, ET LA LIGNE S'OUVRE SUR PLACE.
+    // La maquette de bureau montre quatre échéances ; six lignes plus courtes
+    // tenaient mal sous les quatre tuiles. Le dépli est piloté par
+    // `UI.alerteOuverte` — un seul état, donc une seule ligne ouverte à la fois.
+    const affichees = alertsAVenir.slice(0, 4);
     return `
       ${retards.length
         ? prioritiesHtml(retards)
         : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}
 
       <div class="stat-grid">
-        <div class="stat-card">
+        <div class="stat-card tuile-late">
           <div class="stat-tete"><span class="lbl">${trad('En retard')}</span><span class="stat-point late" aria-hidden="true"></span></div>
           <span class="num late">${c.late}</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card tuile-soon">
           <div class="stat-tete"><span class="lbl">${tR('Sous {n} jours', { n: SOON_DAYS })}</span><span class="stat-point soon" aria-hidden="true"></span></div>
           <span class="num soon">${c.soon}</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card tuile-ok">
           <div class="stat-tete"><span class="lbl">${trad('À jour')}</span><span class="stat-point ok" aria-hidden="true"></span></div>
           <span class="num ok">${c.ok}</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card tuile-primary">
           <div class="stat-tete"><span class="lbl">${trad('Manuels analysés')}</span><span class="stat-point primary" aria-hidden="true"></span></div>
           <span class="num primary">${c.analysed}</span>
         </div>
       </div>
 
       <div class="dash-grid">
+        <div class="dash-main">
         <section class="card">
           <div class="card-head">
             <h2 class="card-title">${trad('Échéances à venir')}</h2>
             <span class="spacer"></span>
             <button type="button" class="link-inline" data-nav="agenda">${trad('Tout voir')}</button>
           </div>
-          ${alerts.length
-            ? `<div class="alert-list">${alerts.slice(0, 6).map(x => alertRowHtml(x.machine, x.info)).join('')}</div>`
+          <div id="echeances-zone">
+          ${affichees.length
+            ? `<div class="alert-list">${affichees.map(x => alertRowHtml(x.machine, x.info, true)).join('')}</div>`
             : `<div class="empty-soft">${UI.machines.length ? trad('Aucune échéance dans les prochaines semaines.') : trad('Ajoute une machine pour commencer le suivi.')}</div>`}
+          </div>
         </section>
 
         ${preparationResumeHtml()}
 
         ${aiCardHtml()}
+
+        </div>
 
         <div class="dash-side">
           ${dropzoneHtml('dash-drop')}
@@ -7224,6 +7423,7 @@ VIEWS.dashboard = {
     const root = document.getElementById('view-root');
     wireReminderSwitches(root);
     wireAlertRows(root);
+    monterAlertes(root);
     root.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => goTo(btn.dataset.nav)));
     attachDropzone(root.querySelector('#dash-drop'), (file) => openManualUploadModal(null, file));
 
@@ -7258,21 +7458,23 @@ VIEWS.dashboard = {
   },
 };
 
-// ── Toutes les tâches EN RETARD : une entrée par TÂCHE ─────────
-// Le bandeau violet ne montrait que l'entretien le plus urgent : le deuxième, le
-// troisième… n'étaient visibles qu'en descendant dans la liste.
+// ── Les machines EN RETARD : UNE SEULE CARTE PAR MACHINE ───────
+// La maquette de bureau ne montre QU'UNE carte pour une machine, quelle que soit
+// l'urgence de ses tâches. L'écran doit donc choisir : on garde LA PLUS URGENTE
+// — le plus grand dépassement, c'est-à-dire la plus petite `sortKey` (négative
+// quand l'échéance est dépassée). Les autres tâches ne disparaissent pas : elles
+// sont dans le plan, que « Détails » ouvre.
 //
-// AUCUN dédoublonnage par machine, AUCUN plafond, aucun `slice` : deux tâches en
-// retard sur la même machine font DEUX blocs, et sept en font sept.
-//
-// DEUX NATURES DE BLOCS :
-//   • « tâche » : une tâche dont l'échéance propre est dépassée ;
+// DEUX NATURES DE BLOCS, ET UNE SEULE PAR MACHINE :
+//   • « tâche » : une tâche dont l'échéance propre est dépassée — c'est elle qui
+//     est retenue dès qu'il y en a une ;
 //   • « plan »  : la machine dont l'ÉCHÉANCE GÉNÉRALE est dépassée sans qu'aucune
 //     tâche ne le soit (toutes conditionnelles, mensuelles à échéance future…).
 //     Ce bloc ne NOMME AUCUNE TÂCHE : coller le dépassement du plan sur un
 //     contrôle mensuel affirmerait quelque chose de faux — cas réel « Vehicule du
 //     PDG », +1 470 km attribués aux pneumatiques qui n'étaient PAS en retard.
-//     Il le dit donc au niveau du plan, et le compteur reste cohérent.
+//     Il le dit donc au niveau du plan, et il n'apparaît que si AUCUNE tâche de
+//     la machine n'est en retard.
 function tachesEnRetard() {
   const entrees = [];
   (UI.machines || []).forEach(machine => {
@@ -7281,9 +7483,14 @@ function tachesEnRetard() {
     const items = tachesAffichees(machine.plan, machine);
     const suivies = items
       .map(item => ({ item, info: infoTache(item, machine.plan, machine) }))
-      .filter(x => x.info.state === 'late');
+      .filter(x => x.info.state === 'late')
+      // LA PLUS URGENTE DE LA MACHINE, ET UNE SEULE. On classe explicitement par
+      // `sortKey` croissante — la plus dépassée d'abord, la même clé que le tri
+      // des alertes — puis on ne garde que la première. Aucun ordre implicite :
+      // `infoTache` ne trie rien.
+      .sort((a, b) => a.info.sortKey - b.info.sortKey);
     if (suivies.length) {
-      suivies.forEach(x => entrees.push({ machine, item: x.item, info: x.info, planEntier: false }));
+      entrees.push({ machine, item: suivies[0].item, info: suivies[0].info, planEntier: false });
       return;
     }
     const info = dueInfo(machine.plan, machine);
@@ -7292,6 +7499,13 @@ function tachesEnRetard() {
   });
   // La plus dépassée d'abord, comme le tri des alertes.
   return entrees.sort((a, b) => a.info.sortKey - b.info.sortKey);
+}
+
+// Les machines des cartes sombres, par identifiant : la liste « Échéances à
+// venir » s'en sert pour ne pas répéter, juste en dessous, ce qui est déjà écrit
+// en grand au-dessus.
+function machinesEnRetard() {
+  return new Set(tachesEnRetard().map(e => e.machine.id));
 }
 
 // Un bloc de retard : tâche, machine, compteur et dépassement, puis les deux
@@ -8498,6 +8712,25 @@ function preparationResumeHtml() {
   const nombre = liste.produits.length;
   if (!nombre && !liste.sansItems.length) return '';
 
+  // ★ LOT 6 — LE DÉBUT DE LA LISTE, PAS SEULEMENT SON RÉSUMÉ. Trois lignes, dans
+  // l'ordre de la liste complète (la famille la plus urgente d'abord), avec la
+  // quantité totale et la machine concernée : c'est ce que le client veut voir
+  // avant de cliquer, et c'est le MÊME objet que l'écran de préparation emploie —
+  // aucune donnée n'est recalculée ici.
+  const lignes = liste.produits.slice(0, 3).map((produit) => {
+    const famille = categorieProduit(produit.label);
+    const total = produit.total ? formatteTotal(produit.total) : '';
+    const besoins = produit.besoins || [];
+    const machines = besoins.slice(0, 2).map((b) => esc(b.machine.name)).join(', ');
+    const autres = besoins.length > 2 ? tR(' + {n} autre(s)', { n: besoins.length - 2 }) : '';
+    return `
+      <div class="prep-ligne famille-${esc(famille)}">
+        <span class="prep-ligne-nom">${esc(produit.label)}</span>
+        ${total ? `<span class="prep-ligne-total">${esc(total)}</span>` : ''}
+        ${machines ? `<span class="prep-ligne-machine">${machines}${autres}</span>` : ''}
+      </div>`;
+  }).join('');
+  const apercu = lignes ? `<div class="prep-apercu">${lignes}</div>` : '';
   const noms = liste.produits.slice(0, 3).map((p) => p.label).join(', ');
   const reste = nombre > 3 ? tR(', + {n} autre(s)', { n: nombre - 3 }) : '';
   const resume = nombre
@@ -8510,7 +8743,7 @@ function preparationResumeHtml() {
   const resumeHtml = esc(resume).replace(/^([^:]+)/, '<strong>$1</strong>');
 
   return `
-    <section class="card">
+    <section class="card dash-preparation">
       <div class="card-head">
         <div class="pieces-tete">
           <span class="pieces-legende">${trad('Préparation')}</span>
@@ -8520,6 +8753,7 @@ function preparationResumeHtml() {
         <button type="button" class="link-inline" data-nav="agenda">${trad('Voir la liste')}</button>
       </div>
       <p class="muted-text">${resumeHtml}</p>
+      ${apercu}
     </section>`;
 }
 
