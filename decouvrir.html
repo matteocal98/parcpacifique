@@ -59,47 +59,69 @@
   /* ==========================================================================
      KEEVA — jetons de la charte. AUCUNE autre couleur n'est employée : les
      surfaces et les bordures sont ces mêmes teintes en transparence, jamais des
-     gris inventés. La page suit le mode clair et le mode sombre du système.
+     gris inventés ni un dégradé. La page suit le mode clair et le mode sombre.
+
+     LES RÔLES SONT ÉCRITS DANS LE NOM, ET C'EST VOLONTAIRE. La charte range les
+     douze teintes en deux familles : celles qui PORTENT DU TEXTE (encre, blanc,
+     bleu roi, Signature EN) et celles qui sont DÉCORATIVES (Signature FR,
+     turquoise, ambre, indigo, olive, cyan, ardoise). Un jeton nommé « indigo »
+     finit toujours par se retrouver derrière un libellé ; un jeton nommé
+     « décoratif » ne le peut pas. Le bleu roi garde son nom de charte, et il est
+     mesuré comme les autres.
+
+     ⚠️ LE TEXTE D'ACCENT EST LA **SIGNATURE EN** (#5B52DF), PAS LA SIGNATURE FR.
+     C'est contre-intuitif, et c'est le calcul qui tranche : la Signature FR
+     #24B5A8 donne **2,55:1** sur blanc, donc un texte d'accent illisible en plein
+     soleil. La Signature EN #5B52DF donne **5,65:1** — c'est elle que la charte
+     elle-même mesure dans « blanc sur signature FR, texte secondaire (bloc
+     d'action) ». Les deux noms restent ceux de la charte : c'est le RÔLE qui
+     change, et il est écrit ici pour qu'on ne les ré-échange pas.
      ========================================================================== */
   :root{
-    --nuit:#0D1424;        /* fond mode sombre */
-    --blanc:#FFFFFF;       /* fond mode clair */
-    --encre:#0E1333;       /* texte KEEVA (clair) + ligne verticale */
-    --cyan:#24B5A8;        /* aile supérieure du pictogramme */
-    --ambre:#DE7A16;       /* aile inférieure du pictogramme */
-    --indigo:#6366F1;      /* puce centrale */
-    --roi:#236FE0;         /* dégradé de l'hexagone : côté gauche */
-    --turquoise:#14B8A6;   /* dégradé : côté droit */
-    --olive:#8B9B37;       /* dégradé : base */
-    --tagline-fr:#5B52DF;  /* « LA JUSTE MESURE DE VOTRE PARC » */
-    --tagline-en:#009BDE;  /* « PRECISE TRACKING FOR YOUR FLEET » */
-    --slate:#94A3B8;       /* légendes du bas */
+    /* Teintes de la charte, nommées comme dans DESIGN.md */
+    --nuit:#0D1424;
+    --blanc:#FFFFFF;
+    --encre:#0E1333;
+    --signature-fr:#24B5A8;   /* décoratif — 2,55:1 sur blanc, jamais du texte */
+    --ambre:#DE7A16;          /* décoratif */
+    --indigo:#6366F1;         /* décoratif */
+    --roi:#236FE0;            /* liens — 4,75:1 sur blanc */
+    --turquoise:#14B8A6;      /* décoratif */
+    --olive:#8B9B37;          /* décoratif */
+    --signature-en:#5B52DF;   /* TEXTE D'ACCENT — 5,65:1 sur blanc */
+    --cyan:#009BDE;           /* décoratif (aplat de pastille) */
+    --ardoise:#94A3B8;        /* atténué sur nuit — 7,17:1 */
 
-    /* Surfaces dérivées : la teinte de base, en transparence. */
+    /* Rôles : ce qui écrit, ce qui décore, ce qui sépare. */
+    --texte:var(--encre);
+    --texte-doux:rgba(14,19,51,.74);
+    --accent:var(--signature-en);
+    --lien:var(--roi);
+    --decoratif-1:var(--signature-fr);
+    --decoratif-2:var(--ambre);
+    --decoratif-3:var(--indigo);
     --trait:rgba(14,19,51,.12);
-    --trait-fort:rgba(14,19,51,.22);
+    --trait-fort:rgba(14,19,51,.24);
     --surface-douce:rgba(14,19,51,.03);
-    --texte-doux:rgba(14,19,51,.72);
     --ombre:0 1px 2px rgba(14,19,51,.06), 0 12px 32px rgba(14,19,51,.08);
     --r-sm:10px; --r-md:14px; --r-lg:20px;
-    --grad:linear-gradient(135deg, var(--roi), var(--turquoise) 58%, var(--olive));
     --fond:var(--blanc);
   }
   @media (prefers-color-scheme: dark){
     :root{
       --fond:var(--nuit);
-      --encre:var(--blanc);
+      --texte:var(--blanc);
+      --texte-doux:rgba(255,255,255,.74);
       --trait:rgba(255,255,255,.14);
       --trait-fort:rgba(255,255,255,.26);
       --surface-douce:rgba(255,255,255,.05);
-      --texte-doux:rgba(255,255,255,.72);
       --ombre:0 0 0 1px rgba(255,255,255,.10);
     }
   }
 
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
-  body{margin:0;background:var(--fond);color:var(--encre);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  body{margin:0;background:var(--fond);color:var(--texte);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
   h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;}
   a{color:inherit;}
   .wrap{max-width:1200px;margin:0 auto;padding:0 16px;}
@@ -116,19 +138,21 @@
   @media(min-width:640px){section.wrap{padding-left:24px;padding-right:24px;}}
   @media(min-width:1024px){section.wrap{padding-top:96px;padding-bottom:96px;padding-left:32px;padding-right:32px;}}
   @media(max-width:600px){section.wrap{padding-top:56px;padding-bottom:56px;}}
-  :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:8px;}
+  /* Le contour de focus est décoratif (il ne porte pas de texte) : l'indigo est
+     ici à sa place, et il se voit aussi bien sur blanc que sur nuit. */
+  :focus-visible{outline:3px solid var(--decoratif-3);outline-offset:2px;border-radius:8px;}
 
-  /* --- Marque : hexagone en dégradé + puce centrale (pictogramme de la charte) */
+  /* --- Marque : le pictogramme de la charte, mot en encre ------------------- */
   .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
   .marque svg{display:block;flex:0 0 auto;}
-  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--encre);}
+  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--texte);}
 
   /* --- Boutons ------------------------------------------------------------- */
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;min-height:46px;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
   .btn svg{flex:0 0 auto;}
-  .btn-primaire{background:var(--encre);color:var(--fond);box-shadow:var(--ombre);}
+  .btn-primaire{background:var(--texte);color:var(--fond);box-shadow:var(--ombre);}
   .btn-primaire:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(14,19,51,.22);}
-  .btn-secondaire{background:transparent;color:var(--encre);border-color:var(--trait-fort);}
+  .btn-secondaire{background:transparent;color:var(--texte);border-color:var(--trait-fort);}
   .btn-secondaire:hover{background:var(--surface-douce);}
   .btn-clair{background:var(--blanc);color:var(--nuit);}
   .btn-contour{background:transparent;color:var(--blanc);border:2px solid rgba(255,255,255,.35);}
@@ -146,68 +170,78 @@
   .entete nav{display:none;gap:4px;}
   @media(min-width:900px){.entete nav{display:flex;margin-left:14px;}}
   .entete nav a{padding:8px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--texte-doux);text-decoration:none;}
-  .entete nav a:hover{color:var(--encre);background:var(--surface-douce);}
+  .entete nav a:hover{color:var(--texte);background:var(--surface-douce);}
   .entete .pousse{flex:1;}
   .lang{display:none;gap:2px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-sm);padding:3px;}
   @media(min-width:640px){.lang{display:flex;}}
   .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;}
-  .lang button.actif{background:var(--fond);color:var(--encre);box-shadow:0 1px 2px rgba(14,19,51,.10);}
+  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:0 1px 2px rgba(14,19,51,.10);}
   .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:8px;}
   @media(min-width:640px){.lien-connexion{display:inline-flex;}}
-  .lien-connexion:hover{color:var(--encre);}
+  .lien-connexion:hover{color:var(--texte);}
 
-  /* --- Héros --------------------------------------------------------------- */
+  /* --- Accroche ------------------------------------------------------------ */
   section.heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
-  @media(min-width:1024px){section.heros{grid-template-columns:1.05fr .95fr;gap:56px;padding-top:72px;}}
+  @media(min-width:1024px){section.heros{grid-template-columns:1.618fr 1fr;gap:56px;padding-top:72px;}}
   .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
-  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--cyan);flex:0 0 auto;}
-  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--cyan);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
+  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--decoratif-1);flex:0 0 auto;}
+  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--decoratif-1);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
   @keyframes ping{75%,100%{transform:scale(2.4);opacity:0;}}
   h1{font-size:clamp(30px,5.2vw,58px);font-weight:800;margin:20px 0 0;}
   .tagline{display:block;font-size:clamp(13px,1.6vw,16px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
-  .tagline.fr{color:var(--tagline-fr);}
-  .tagline.en{color:var(--tagline-en);}
-  .accroche-gras{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  /* Le texte d'accent est `--accent` (Signature EN, 5,65:1 sur blanc) — jamais
+     l'indigo (4,47:1, décoratif), jamais la Signature FR (2,55:1 sur blanc), et
+     jamais un dégradé de texte : illisible en plein soleil. */
+  .tagline.fr{color:var(--accent);}
+  .tagline.en{color:var(--texte-doux);}
+  .accroche-fort{color:var(--accent);}
   .sous-titre{font-size:clamp(16px,1.6vw,19px);color:var(--texte-doux);margin:20px 0 30px;max-width:56ch;}
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--slate);margin-top:18px;}
-  .note svg{color:var(--cyan);flex:0 0 auto;}
+  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--texte-doux);margin-top:18px;}
+  .note svg{color:var(--accent);flex:0 0 auto;}
 
-  /* Maquette d'interface : dessinée en HTML, et annoncée comme telle. */
+  /* --- L'illustration : l'application telle qu'elle est -------------------- */
+  /* Honnête par construction : c'est la mise en page réelle (une carte machine,
+     son compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES
+     — aucun modèle, aucune marque, aucune donnée inventée. Le cadre est annoncé
+     comme un aperçu, et il ne porte ni dégradé, ni pastille décorative écrite. */
   .visuel{position:relative;}
-  .halo{position:absolute;inset:-18px;background:var(--grad);filter:blur(46px);opacity:.28;border-radius:28px;}
-  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;animation:flotte 6s ease-in-out infinite;}
-  @keyframes flotte{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-  @media (prefers-reduced-motion: reduce){
-    .maquette{animation:none;} .point::after{animation:none;} html{scroll-behavior:auto;}
-  }
-  .barre{display:flex;gap:6px;margin-bottom:14px;}
-  .barre i{width:9px;height:9px;border-radius:50%;display:block;background:var(--trait-fort);}
-  .barre i:nth-child(1){background:var(--ambre);}
-  .barre i:nth-child(2){background:var(--cyan);}
-  .barre i:nth-child(3){background:var(--indigo);}
+  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;}
+  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--trait);}
+  .maquette .tete .titre{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--texte-doux);}
+  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);}
   .ligne-machine{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 13px;border:1px solid var(--trait);border-radius:var(--r-md);margin-bottom:8px;}
+  .ligne-machine:last-of-type{margin-bottom:0;}
   .ligne-machine .nom{font-weight:600;font-size:13.5px;}
-  .ligne-machine .meta{font-size:12px;color:var(--slate);}
-  .etat{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;color:var(--blanc);}
+  .ligne-machine .meta{font-size:12px;color:var(--texte-doux);}
+  /* Une pastille de couleur EST le signal. Le texte y est en encre, et les deux
+     aplats choisis sont les DEUX teintes décoratives qui passent 4,5:1 avec lui :
+     l'ambre (5,95:1) et le cyan (5,82:1). La Signature FR, elle, plafonne à
+     3,79:1 avec l'encre : elle ne porte donc pas de texte ici — « à jour » est
+     une pastille en contour, ce qui la distingue sans rien inventer. */
+  .etat{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;color:var(--encre);}
   .etat.retard{background:var(--ambre);}
-  .etat.bientot{background:var(--indigo);}
-  .etat.ajour{background:var(--cyan);}
-  .maquette .legende{font-size:11.5px;color:var(--slate);text-align:center;margin-top:10px;}
+  .etat.bientot{background:var(--cyan);}
+  .etat.ajour{border:1px solid var(--trait-fort);}
+  .maquette .legende{font-size:12px;color:var(--texte-doux);margin:12px 0 0;}
   .maquette .bloc-pieces{border:1px solid var(--trait);border-radius:var(--r-md);padding:11px 13px;margin-top:12px;}
   .maquette .bloc-pieces .titre{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);}
   .maquette .bloc-pieces ul{margin:8px 0 0;padding-left:16px;font-size:13px;color:var(--texte-doux);}
 
-  /* --- Fonctionnalités ----------------------------------------------------- */
+  /* --- Têtes de section ---------------------------------------------------- */
   .section-tete{max-width:60ch;margin-bottom:40px;}
-  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tagline-fr);}
+  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
   h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;margin-top:10px;}
   .section-tete p{color:var(--texte-doux);font-size:17px;margin:14px 0 0;}
+
+  /* --- Cartes -------------------------------------------------------------- */
   .cartes{display:grid;gap:26px;}
   @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
   .carte{background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;transition:border-color .3s,box-shadow .3s,transform .3s;}
-  .carte:hover{border-color:var(--indigo);box-shadow:0 18px 40px rgba(99,102,241,.14);transform:translateY(-2px);}
-  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--grad);color:var(--blanc);}
+  .carte:hover{border-color:var(--trait-fort);box-shadow:0 18px 40px rgba(14,19,51,.10);transform:translateY(-2px);}
+  /* Plus de dégradé dans la pastille d'icône : la teinte décorative reste, le
+     trait dessus est en encre — donc lisible. */
+  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--decoratif-1);color:var(--encre);}
   .carte h3{font-size:20px;font-weight:700;margin-bottom:10px;}
   .carte p{margin:0;color:var(--texte-doux);}
 
@@ -215,19 +249,19 @@
   .etapes{list-style:none;margin:0;padding:0;display:grid;gap:26px;}
   @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
   .etape{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:30px;}
-  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--grad);color:var(--blanc);font-weight:800;font-size:16px;margin-bottom:18px;}
+  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--decoratif-1);color:var(--encre);font-weight:800;font-size:16px;margin-bottom:18px;}
   .etape h3{font-size:18px;font-weight:700;margin-bottom:8px;}
   .etape p{margin:0;color:var(--texte-doux);font-size:15.5px;}
 
-  /* --- Engagements sur les données ---------------------------------------- */
+  /* --- Vos données : quatre engagements ------------------------------------ */
   .confiance{display:grid;gap:24px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:36px 32px;}
   @media(min-width:768px){.confiance{grid-template-columns:repeat(2,1fr);}}
   @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
   .confiance h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0 0 7px;}
-  .confiance h3 svg{color:var(--cyan);flex:0 0 auto;}
+  .confiance h3 svg{color:var(--encre);flex:0 0 auto;}
   .confiance p{margin:0;font-size:14.5px;color:var(--texte-doux);}
   .confiance .suite{margin-top:22px;font-size:14.5px;}
-  .confiance .suite a{color:var(--tagline-fr);font-weight:600;}
+  .suite a{color:var(--lien);font-weight:600;}
 
   /* --- Tarifs : quatre offres, largeurs égales ---------------------------- */
   /* Deux lignes de deux sur écran large ; en dessous, l'empilement (une
@@ -236,9 +270,15 @@
   @media(min-width:1024px){.tarifs{grid-template-columns:repeat(2,1fr);}}
   .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
   /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
-     une couleur inventée : encre pour les deux, indigo pour le badge. */
+     une couleur inventée : l'encre pour les deux. Le badge, lui, est écrit en
+     blanc : il porte donc une teinte qui PORTE du blanc (la Signature EN,
+     5,65:1) — l'indigo (4,47:1) est décoratif, il n'écrit pas.
+     Le bouton de la carte mise en avant est le bouton PRINCIPAL : c'est la
+     règle de la charte (« une action de validation dans une carte est un bouton
+     principal, plein, encre »). */
   .offre.business{border:2px solid var(--encre);overflow:hidden;}
-  .recommande{position:absolute;top:0;right:0;background:var(--indigo);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);}
+  @media (prefers-color-scheme: dark){.offre.business{border-color:var(--blanc);}}
+  .recommande{position:absolute;top:0;right:0;background:var(--accent);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);}
   .offre h3{font-size:20px;font-weight:700;}
   /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
   .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 0;}
@@ -248,41 +288,53 @@
   .offre .pour{color:var(--texte-doux);margin:16px 0 0;}
   .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
   .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
-  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--cyan);}
+  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--accent);}
   /* Le bouton est poussé en BAS de la carte : les boutons s'alignent, quelle
      que soit la longueur des listes. */
   .offre .btn{width:100%;margin-top:auto;}
-  .offre.business .avantages svg{color:var(--encre);}
+  .offre.business .avantages svg{color:var(--texte);}
+  .notes{display:grid;gap:18px;margin-top:28px;}
+  @media(min-width:768px){.notes{grid-template-columns:repeat(2,1fr);}}
+  .notetarif{display:flex;gap:10px;margin:0;font-size:15px;color:var(--texte-doux);}
+  .notetarif svg{color:var(--encre);flex:0 0 auto;margin-top:3px;}
 
+  /* --- FAQ : deux colonnes sur écran large -------------------------------- */
   .faq{display:grid;gap:12px;}
+  @media(min-width:900px){.faq{grid-template-columns:repeat(2,1fr);gap:16px 26px;align-items:start;}}
   details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
-  details[open]{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+  details[open]{border-color:var(--trait-fort);box-shadow:0 0 0 3px rgba(14,19,51,.06);}
   summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;font-weight:600;font-size:15.5px;}
   summary::-webkit-details-marker{display:none;}
   summary svg{flex:0 0 auto;color:var(--texte-doux);transition:transform .2s ease;}
   details[open] summary svg{transform:rotate(180deg);}
   details .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:15px;}
 
-  /* --- Appel final + pied de page ----------------------------------------- */
+  /* --- Bandeau final + pied de page --------------------------------------- */
   .final{background:var(--nuit);color:var(--blanc);border-radius:var(--r-lg);padding:64px 28px;text-align:center;}
   .final h2{color:var(--blanc);}
-  .final p{color:rgba(255,255,255,.72);margin:16px auto 30px;max-width:56ch;}
+  .final p{color:rgba(255,255,255,.74);margin:16px auto 30px;max-width:56ch;}
   .final .actions{justify-content:center;}
-  footer{background:var(--nuit);color:var(--slate);padding:56px 0 28px;margin-top:80px;}
+  footer{background:var(--nuit);color:var(--ardoise);padding:56px 0 28px;margin-top:80px;}
   .pied{display:grid;gap:32px;}
   @media(min-width:768px){.pied{grid-template-columns:2fr 1fr 1fr 1fr;}}
   footer .marque .mot{color:var(--blanc);}
-  footer p{color:var(--slate);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
+  footer p{color:var(--ardoise);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
   footer h3{color:var(--blanc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;}
   footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
-  footer a{color:var(--slate);text-decoration:none;font-size:14.5px;}
+  footer a{color:var(--ardoise);text-decoration:none;font-size:14.5px;}
   footer a:hover{color:var(--blanc);}
-  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--slate);}
-  footer .lang button{color:var(--slate);}
+  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--ardoise);}
+  footer .lang button{color:var(--ardoise);}
   footer .lang button.actif{background:rgba(255,255,255,.12);color:var(--blanc);box-shadow:none;}
 
   html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
   @media(max-width:600px){section{padding:56px 0;}}
+  /* Le défilement doux et le pouls de la pastille sont du confort, pas de
+     l'information : ceux qui demandent moins d'animation ne les reçoivent pas. */
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .point::after{animation:none;}
+  }
 </style>
 </head>
 <body>
@@ -305,7 +357,7 @@
   </defs>
 </svg>
 
-<!-- ================= HEADER ================= -->
+<!-- ================= EN-TÊTE ================= -->
 <header>
   <div class="wrap entete">
     <a class="marque" href="./decouvrir.html" aria-label="KEEVA">
@@ -314,7 +366,7 @@
     </a>
     <nav aria-label="Navigation principale">
       <a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a>
-      <a href="#comment"><span class="fr">Comment ça marche</span><span class="en">How it works</span></a>
+      <a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a>
       <a href="#tarifs"><span class="fr">Tarifs</span><span class="en">Pricing</span></a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -330,7 +382,7 @@
 
 <main>
 
-<!-- ================= HERO ================= -->
+<!-- ================= ACCROCHE ================= -->
 <section class="heros wrap">
   <div>
     <span class="pastille"><span class="point" aria-hidden="true"></span>
@@ -340,8 +392,8 @@
     <h1>
       <span class="tagline fr">La juste mesure de votre parc</span>
       <span class="tagline en">Precise tracking for your fleet</span>
-      <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-gras">lu par notre algorithme</span>.</span>
-      <span class="en">Your fleet's service logbook, <span class="accroche-gras">read by our algorithm</span>.</span>
+      <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-fort">lu par notre algorithme</span>.</span>
+      <span class="en">Your fleet's service logbook, <span class="accroche-fort">read by our algorithm</span>.</span>
     </h1>
     <p class="sous-titre">
       <span class="fr">Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
@@ -364,20 +416,28 @@
     </p>
   </div>
 
+  <!-- L'APERÇU : la mise en page réelle de l'application (une carte machine, son
+       compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES.
+       Aucun modèle de machine, aucune donnée de client, aucune télémétrie : la
+       télémétrie n'existe pas dans le produit. -->
   <div class="visuel">
-    <div class="halo" aria-hidden="true"></div>
     <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KEEVA">
-      <div class="barre" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="ligne-machine">
-        <span><span class="nom">KUBOTA U17-3</span><br><span class="meta">Vidange, filtre à huile · 250 h</span></span>
-        <span class="etat retard">+3 j</span>
+      <div class="tete">
+        <span class="titre fr">Aperçu de l'interface</span>
+        <span class="titre en">Interface preview</span>
+        <span class="plan fr">Plan d'entretien · 250 h</span>
+        <span class="plan en">Maintenance plan · 250 h</span>
       </div>
       <div class="ligne-machine">
-        <span><span class="nom">PEUGEOT 208</span><br><span class="meta fr">Révision 20 000 km</span><span class="meta en">20,000 km service</span></span>
-        <span class="etat bientot fr">dans 12 j</span><span class="etat bientot en">in 12 d</span>
+        <span><span class="nom fr">Mini-pelle</span><span class="nom en">Mini excavator</span><br><span class="meta fr">Vidange, filtre à huile · compteur 243 h</span><span class="meta en">Oil change, oil filter · meter 243 h</span></span>
+        <span class="etat retard fr">en retard +3 j</span><span class="etat retard en">overdue +3 d</span>
       </div>
       <div class="ligne-machine">
-        <span><span class="nom">JOHN DEERE 6120M</span><br><span class="meta fr">Graissage, filtres</span><span class="meta en">Greasing, filters</span></span>
+        <span><span class="nom fr">Tronçonneuse</span><span class="nom en">Chainsaw</span><br><span class="meta fr">Filtre à air, bougie · compteur 118 h</span><span class="meta en">Air filter, spark plug · meter 118 h</span></span>
+        <span class="etat bientot fr">bientôt dans 12 h</span><span class="etat bientot en">due in 12 h</span>
+      </div>
+      <div class="ligne-machine">
+        <span><span class="nom fr">Tracteur</span><span class="nom en">Tractor</span><br><span class="meta fr">Graissage, filtres hydrauliques</span><span class="meta en">Greasing, hydraulic filters</span></span>
         <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
       </div>
       <div class="bloc-pieces">
@@ -388,8 +448,8 @@
           <li class="en">2 items · 4 units · from 12/10</li>
         </ul>
       </div>
-      <p class="legende fr">Aperçu de l'interface — l'application reprend cette mise en page.</p>
-      <p class="legende en">Interface preview — the app uses this layout.</p>
+      <p class="legende fr">Aperçu de la mise en page : les exemples sont génériques, aucune donnée de client.</p>
+      <p class="legende en">Layout preview: the examples are generic, no customer data.</p>
     </div>
   </div>
 </section>
@@ -446,7 +506,7 @@
 </section>
 
 <!-- ================= FONCTIONNALITÉS ================= -->
-<section id="fonctionnalites" class="wrap">
+<section id="fonctionnalites" class="wrap" style="padding-top:0;">
   <div class="section-tete">
     <span class="sur-titre fr">Fonctionnalités</span>
     <span class="sur-titre en">Features</span>
@@ -532,7 +592,7 @@
   </ol>
 </section>
 
-<!-- ================= ENGAGEMENTS SUR LES DONNÉES ================= -->
+<!-- ================= VOS DONNÉES ================= -->
 <section id="confidentialite" class="wrap" style="padding-top:0;">
   <div class="section-tete">
     <span class="sur-titre fr">Vos données</span>
@@ -595,7 +655,6 @@
       <p class="pour en">For an individual, or to try KEEVA.</p>
       <ul class="avantages">
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet.</span><span class="en">Meter readings do not use up your logbook analyses.</span></li>
         <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
       </ul>
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
@@ -642,16 +701,18 @@
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
     </article>
   </div>
-  <p class="suite" style="margin-top:24px;font-size:15px;">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px;"><path d="M20 6L9 17l-5-5"/></svg>
-    <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
-    <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
-  </p>
-  <p class="suite" style="margin-top:24px;font-size:15px;">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px;"><path d="M20 6L9 17l-5-5"/></svg>
-    <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
-    <span class="en">You change plan from inside the app, at any time and with no commitment. Your machines, your history and your manuals stay in place.</span>
-  </p>
+  <div class="notes">
+    <p class="notetarif">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+      <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
+      <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
+    </p>
+    <p class="notetarif">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+      <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
+      <span class="en">You change plan from inside the app, at any time and with no commitment. Your machines, your history and your manuals stay in place.</span>
+    </p>
+  </div>
 
   <div class="section-tete" style="margin-top:64px;">
     <span class="sur-titre fr">Questions fréquentes</span>
@@ -698,13 +759,13 @@
       <summary><span class="fr">Les rappels partent-ils aussi par WhatsApp ?</span><span class="en">Are reminders also sent by WhatsApp?</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
-      <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
-      <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
+      <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application, et par notification sur téléphone Android. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
+      <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application, and by notification on Android phones. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
     </details>
   </div>
 </section>
 
-<!-- ================= CTA FINALE ================= -->
+<!-- ================= BANDEAU FINAL ================= -->
 <section class="wrap">
   <div class="final">
     <h2><span class="fr">Le juste suivi de votre parc commence aujourd'hui</span><span class="en">Precise tracking for your fleet starts today</span></h2>
@@ -721,7 +782,7 @@
 
 </main>
 
-<!-- ================= FOOTER ================= -->
+<!-- ================= PIED DE PAGE ================= -->
 <footer>
   <div class="wrap">
     <div class="pied">
@@ -730,13 +791,20 @@
           <svg width="28" height="28" aria-hidden="true"><use href="#picto-keeva"/></svg>
           <span class="mot">KEEVA</span>
         </span>
-        <p><span class="fr">La juste mesure de votre parc : suivi d'entretien des engins et véhicules, plans issus des manuels constructeur, rappels et listes de pièces.</span>
-        <span class="en">Precise tracking for your fleet: maintenance of machines and vehicles, plans from manufacturer manuals, reminders and parts lists.</span></p>
+        <p>
+          <span class="fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
+          <span class="en">Maintenance tracking for machines and vehicles: plans from manufacturer manuals, due dates by calendar or meter, reminders and a parts list.</span>
+        </p>
+        <p>
+          <span class="fr">Édité par Matthieu Courtois, entrepreneur individuel — Nouvelle-Calédonie.</span>
+          <span class="en">Published by Matthieu Courtois, sole trader — New Caledonia.</span>
+        </p>
       </div>
       <div>
         <h3><span class="fr">Produit</span><span class="en">Product</span></h3>
         <ul>
           <li><a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a></li>
+          <li><a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a></li>
           <li><a href="#tarifs"><span class="fr">Tarification</span><span class="en">Pricing</span></a></li>
           <li><a href="#faq">FAQ</a></li>
           <li><a href="./app.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a></li>
@@ -761,7 +829,7 @@
       </div>
     </div>
     <div class="bas">
-      <span>© <span id="annee">2026</span> KEEVA</span>
+      <span>© <span id="annee">2026</span> KEEVA — <span class="fr">KEEVA aide à organiser l'entretien ; elle ne certifie ni ne garantit rien.</span><span class="en">KEEVA helps you organise maintenance; it certifies and guarantees nothing.</span></span>
       <div class="lang" style="display:flex" role="group" aria-label="Langue / Language">
         <button type="button" data-langue="fr">FR</button>
         <button type="button" data-langue="en">EN</button>
