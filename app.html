@@ -161,13 +161,12 @@
      paragraphe technique. La maquette en fait une CARTE avec un titre : c'est
      plus juste, parce que la question du client sur un chantier n'est pas
      « qu'y a-t-il dans le cache ? » mais « est-ce que je peux travailler sans
-     réseau ? ». Ses valeurs d'échelle sont celles des autres cartes du produit
-     (rayon --r-card, rembourrage 18/20, titre 16 px) : aucune valeur nouvelle, et
-     le cadre est l'encre en 2 px, comme tous les cadres de l'application. */
+     réseau ? ». Ses valeurs d'échelle sont celles des autres cartes du produit :
+     rayon --r-card, rembourrage 18/20, titre 16 px, et le cadre d'encre de 2 px
+     que lui donne la liste des cadres (voir plus bas) — aucune valeur nouvelle. */
   .access-local{
     margin-top:20px;
-    background:var(--surface);border-radius:var(--r-card);
-    padding:18px 20px;box-shadow:var(--shadow-soft);text-align:left;
+    padding:18px 20px;text-align:left;
   }
   .access-local .card-head{align-items:flex-start;}
   /* LE TITRE DE LA CARTE N'EST PAS UN PARAGRAPHE CENTRÉ. « .login-box p » centre
@@ -1461,9 +1460,20 @@
      OPPOSÉ refuse qu'une bordure revienne sur ces lignes. */
   :is(.card, .stat-card, .machine, .modal, .sheet, .login-box, .offre-plan, .chemin,
       .page-carnet, .ref-scroll, .tache-carte, .prep-groupe, .attention-box,
-      .dropzone, .empty, .erreur-globale, .offline-banner, .copie-locale,
+      .dropzone, .empty, .erreur-globale, .offline-banner, .access-local,
       .suppr-alerte, .compteur, .pages-utiles){
     border:2px solid var(--ink);
+  }
+  /* ★ LOT 2 — LA CARTE HORS CONNEXION EST DU MÊME BOIS QUE LA CARTE DE CONNEXION.
+     Elle portait un trait discontinu d'un pixel ; elle prend le cadre d'encre de
+     2 px de tous les cadres du produit, et c'est la liste ci-dessus qui le lui
+     donne (elle y remplace « .copie-locale », le nom de l'ancien encadré, qui
+     n'est plus employé nulle part — un nom mort laissé dans la liste ferait
+     croire que la règle le couvre encore). Mêmes valeurs que la carte voisine :
+     le fond du panneau, le rayon de carte, l'ombre douce teintée à l'encre. */
+  .access-local{
+    background:var(--surface);border-radius:var(--r-card);
+    box-shadow:var(--shadow-soft);
   }
   /* La carte des machines portait DÉJÀ une bordure d'encre, en 2,5 px : même
      intention, épaisseur différente. On l'harmonise à 2 px. */
