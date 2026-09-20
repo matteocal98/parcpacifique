@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-oO2SfA2YZE5g/8NIKbIGzb52pEAQn0KLqVwUedN1Y7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-zPBcAsHvh8pni2li30xxYFAqkM6rKWE2iGUuayz0CA8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3517,7 +3517,40 @@ function openForgotPasswordModal() {
 // antérieure. L'application s'arrêtait sur « Vérifie la table profiles » — un
 // message pour développeur, sans issue. On propose de créer la société : c'est la
 // seule chose qui manque, et un nom suffit (colonnes obligatoires : id et name).
-function renderSocieteManquante(user) {
+// LA FONCTION DE CRÉATION EXISTE-T-ELLE SUR CETTE BASE ? Le parcours fonctionne
+// AVANT comme APRÈS la migration : on reconnaît le refus de PostgREST — la
+// fonction n'existe pas encore — pour retomber sur l'ancien chemin. Tout autre
+// refus (plafond, droits, doublon) est un VRAI refus : il est affiché tel quel.
+function fonctionAbsente(err) {
+  if (!err) return false;
+  const texte = String(err.message || '') + ' ' + String(err.details || '') + ' ' + String(err.hint || '');
+  return err.code === 'PGRST202' || err.code === '42883'
+    || /could not find the function|function .* does not exist/i.test(texte);
+}
+
+// LE CHEMIN DE REPLI, POUR UNE BASE NON ENCORE MIGRÉE. Il rattache le profil au
+// lieu de le recréer — un `insert` sec était exactement le défaut d'origine. Sur
+// une telle base, l'écriture reste cependant bornée par la politique de mise à
+// jour du profil, qui exige une société : c'est la migration qui débloque le cas
+// « profil déjà présent », et ce repli ne fait que préserver le cas normal.
+async function creerSocieteEtProfil(nom, activite, user) {
+  const companyId = crypto.randomUUID();
+  const { error: errSociete } = await sb.from('companies').insert({
+    id: companyId, name: nom, activity: activite || null, plan: 'free',
+  });
+  if (errSociete) throw errSociete;
+  const { error: errInsert } = await sb.from('profiles').insert({ id: user.id, company_id: companyId });
+  if (!errInsert) return companyId;
+  const { error: errUpdate } = await sb.from('profiles').update({ company_id: companyId }).eq('id', user.id);
+  if (errUpdate) throw errUpdate;
+  return companyId;
+}
+
+// `motif` : la raison pour laquelle cet écran s'affiche, quand la lecture du
+// compte a ÉCHOUÉ (et non « rien trouvé »). On la montre discrètement : elle ne
+// bloque rien, mais elle évite de faire croire à un compte neuf quand ce n'est
+// qu'une lecture ratée.
+function renderSocieteManquante(user, motif) {
   app.innerHTML = `
     <div class="login-box">
       <h1>KEEVA</h1>
@@ -3529,6 +3562,7 @@ function renderSocieteManquante(user) {
         <select id="societe-activite">
           ${SIGNUP_ACTIVITIES.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join('')}
         </select>
+        ${motif ? `<div class="hint">${esc(trad('Erreur :') + ' ' + motif)}</div>` : ''}
         <div class="hint" id="societe-error"></div>
         <div class="modal-actions">
           <button type="button" class="secondary" id="societe-deconnexion">${trad('Se déconnecter')}</button>
@@ -3552,23 +3586,35 @@ function renderSocieteManquante(user) {
     bouton.textContent = trad('Création…');
     try {
       if (!nom) throw new Error(trad('Indique le nom de la société.'));
+      // ★ UNE SEULE ÉCRITURE, CÔTÉ SERVEUR, ET ELLE EST IDEMPOTENTE.
+      //   Avant : `companies.insert` PUIS `profiles.insert`, deux écritures
+      //   séparées. La seconde échouait avec « duplicate key value violates
+      //   unique constraint "profiles_pkey" » dès que le profil existait déjà,
+      //   et la première laissait derrière elle une société SANS AUCUN MEMBRE :
+      //   quatre sociétés fantômes sont nées comme ça (KEEVA AGRI deux fois,
+      //   lakshmi deux fois). Un profil existant ne se recrée pas, il se
+      //   RATTACHE — et un second essai ne doit RIEN créer de plus.
+      //   La fonction fait les deux écritures dans la même transaction et
+      //   RÉUTILISE la société du compte si elle existe déjà.
+      const { error } = await sb.rpc('creer_ma_societe', { p_nom: nom, p_activite: activite || null });
+      if (error) {
+        // Base pas encore migrée : on le DIT, et on retombe sur l'ancien chemin.
+        if (!fonctionAbsente(error)) throw error;
+        await creerSocieteEtProfil(nom, activite, user);
+      }
       // Les colonnes prénom/nom du contact n'existent qu'après migration : on ne
       // les envoie que si elles sont là, comme à l'inscription.
       const { error: sonde } = await sb.from('companies').select('contact_first_name').limit(1);
-      const contact = sonde ? {} : (() => {
+      if (!sonde) {
         const plein = (user && user.user_metadata && user.user_metadata.full_name) || '';
         const morceaux = String(plein).trim().split(/\s+/);
-        return morceaux.length > 1
-          ? { contact_first_name: morceaux[0], contact_last_name: morceaux.slice(1).join(' ') }
-          : {};
-      })();
-      const companyId = crypto.randomUUID();
-      const { error: errSociete } = await sb.from('companies').insert({
-        id: companyId, name: nom, activity: activite || null, plan: 'free', ...contact,
-      });
-      if (errSociete) throw errSociete;
-      const { error: errProfil } = await sb.from('profiles').insert({ id: user.id, company_id: companyId });
-      if (errProfil) throw errProfil;
+        if (morceaux.length > 1) {
+          await sb.rpc('update_my_company', {
+            p_contact_first_name: morceaux[0],
+            p_contact_last_name: morceaux.slice(1).join(' '),
+          });
+        }
+      }
       boot(trad('Société créée'));
     } catch (err) {
       errorEl.textContent = trad('Erreur :') + " " + err.message;
@@ -3983,24 +4029,31 @@ function openSignupWizard() {
           ? {}
           : { contact_first_name: state.contactFirstName || null, contact_last_name: state.contactLastName || null };
 
-        const companyId = crypto.randomUUID();
-        const { error: companyErr } = await sb.from('companies').insert({
-          id: companyId,
-          name: state.name,
-          activity: state.activity,
-          registration_number: state.registrationNumber || null,
-          phone: state.phone,
-          contact_name: state.contactName || null,
-          ...colonnesContact,
-          plan: 'free',
+        // ★ MÊME RÈGLE QU'À L'ÉCRAN « CRÉER MA SOCIÉTÉ » : une seule écriture,
+        //   côté serveur, atomique et idempotente. Le second `insert` d'origine
+        //   produisait la même collision de clé dès que le profil existait déjà,
+        //   et la société créée juste avant restait sans membre.
+        const { error: creationErr } = await sb.rpc('creer_ma_societe', {
+          p_nom: state.name,
+          p_activite: state.activity || null,
         });
-        if (companyErr) throw companyErr;
+        if (creationErr && !fonctionAbsente(creationErr)) throw creationErr;
+        if (creationErr) await creerSocieteEtProfil(state.name, state.activity, data.user);
 
-        const { error: profileErr } = await sb.from('profiles').insert({
-          id: data.user.id,
-          company_id: companyId,
+        // Les informations qui ne servent PAS à créer la société (registre,
+        // téléphone, contact) passent par le chemin d'écriture déjà sanctionné —
+        // c'est lui qui tient `contact_name` à jour pour l'accueil.
+        const { error: infosErr } = await sb.rpc('update_my_company', {
+          p_registration_number: state.registrationNumber || null,
+          p_phone: state.phone || null,
+          ...(colonnesContact.contact_first_name ? { p_contact_first_name: colonnesContact.contact_first_name } : {}),
+          ...(colonnesContact.contact_last_name ? { p_contact_last_name: colonnesContact.contact_last_name } : {}),
         });
-        if (profileErr) throw profileErr;
+        // Un échec ici ne remet pas en cause la société : on ne bloque pas
+        // l'inscription pour des coordonnées, mais on ne le tait pas non plus.
+        if (infosErr && !fonctionAbsente(infosErr)) {
+          console.warn('Coordonnées de société non enregistrées :', infosErr.message);
+        }
 
         overlay.remove();
         boot();
@@ -11945,12 +11998,20 @@ async function boot(toastMessage) {
     if (!profileErr) break;
   }
 
-  if (profileErr || !profile) {
+  // ★ « PAS DE LIGNE » N'EST PAS « ERREUR », ET LES DEUX MÈNENT ICI.
+  //   Un profil absent (`.single()` répond PGRST116) et un profil PRÉSENT mais
+  //   SANS société aboutissent au même écran : c'est la fonction de création qui
+  //   rattache dans les deux cas. Quant à une lecture qui ÉCHOUE (schéma, droits,
+  //   réseau), on ne peut pas en conclure « ce compte n'a pas de société » — mais
+  //   on garde quand même le chemin vers la création, parce que c'est la seule
+  //   issue d'un compte neuf, et qu'elle est devenue SANS DANGER : si une société
+  //   existe, elle est réutilisée, jamais dupliquée. Le motif est affiché.
+  const pasDeLigne = !!profileErr
+    && (profileErr.code === 'PGRST116' || /no rows|0 rows/i.test(String(profileErr.message || '')));
+  if (!profile || !profile.company_id) {
     // Un réseau absent ne doit pas ressembler à un compte mal rattaché.
     if (cache && estErreurReseau(profileErr)) { afficherDepuisCache(cache); return; }
-    // Compte sans société : ce n'est pas une panne, c'est un rattachement à
-    // faire. On le propose, au lieu d'un message technique sans issue.
-    renderSocieteManquante(session.user);
+    renderSocieteManquante(session.user, profileErr && !pasDeLigne ? profileErr.message : '');
     return;
   }
 
