@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2AY8B8YykWY3EhuU2Vpu4uMQEqLCbZb7aMqEeG7ECOM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0cOCC8jAJ2YjRfadz36MhU50XbYBjxCte26nb7wEGvc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8241,7 +8241,29 @@ VIEWS.account = {
         annonce.className = estErreur ? 'hint is-late' : 'hint';
       };
 
-      let membres = [];
+      // ★ L'ÉTAT SERVEUR EST RELU À CHAQUE OUVERTURE DE CETTE CARTE. Le rôle et
+      //   l'offre peuvent avoir changé côté serveur — une mise à niveau, un
+      //   changement de rôle par un autre gérant — et afficher un plafond ou un
+      //   rôle PÉRIMÉS masque une action légitime. On ne fait donc pas confiance à
+      //   l'état du démarrage : on relit ce qu'on s'apprête à afficher. Si la
+      //   relecture échoue (hors connexion), on garde l'état connu — mieux que
+      //   rien, et l'écran ne ment pas sur le reste.
+      if (sb.auth && sb.auth.getUser) {
+        try {
+          const { data: sessionCourante } = await sb.auth.getUser();
+          const moi = sessionCourante && sessionCourante.user ? sessionCourante.user.id : null;
+          if (moi) {
+            const { data: frais } = await sb.from('profiles').select('role, companies(plan)').eq('id', moi).single();
+            if (frais) {
+              if (frais.role) UI.role = frais.role;
+              const societe = Array.isArray(frais.companies) ? frais.companies[0] : frais.companies;
+              if (societe && societe.plan) UI.companyPlan = societe.plan;
+            }
+          }
+        } catch (err) { /* hors connexion : on garde l'état du démarrage */ }
+      }
+
+  let membres = [];
       try {
         const { data, error } = await sb.rpc('membres_de_ma_societe');
         if (error) throw error;
@@ -11999,12 +12021,23 @@ async function boot(toastMessage) {
     ['name', 'plan'],
   ];
 
+  // ★ LE RÔLE SE LIT ICI, AVEC LE RESTE DU PROFIL. C'est lui qui commande ce que
+  //   l'écran propose ou masque : inviter, changer un rôle, retirer un membre,
+  //   supprimer une machine. Il n'était PAS sélectionné : `UI.role` restait vide,
+  //   `ROLE_DROITS[vide]` retombait sur le droit le plus faible — et l'écran
+  //   annonçait « Seul le gérant peut inviter » À UN GÉRANT, sans bouton.
+  //   La colonne n'existe qu'après migration-roles-equipe : on la SONDE, comme les
+  //   autres, pour ne pas casser une base plus ancienne. La sonde RÉUSSIT quand la
+  //   colonne existe — c'est ce cas, et lui seul, qui l'ajoute au `select`.
+  const { error: sondeRole } = await sb.from('profiles').select('role').limit(1);
+  const colonnesProfil = sondeRole ? 'company_id' : 'company_id, role';
+
   let profile = null;
   let profileErr = null;
   for (const colonnes of tentatives) {
     ({ data: profile, error: profileErr } = await sb
       .from('profiles')
-      .select(`company_id, companies(${colonnes.join(', ')})`)
+      .select(`${colonnesProfil}, companies(${colonnes.join(', ')})`)
       .eq('id', session.user.id)
       .single());
     if (!profileErr) break;
@@ -12092,6 +12125,9 @@ async function boot(toastMessage) {
   UI.companyId = profile.company_id;
   UI.companyName = company?.name || trad('Ta société');
   UI.companyPlan = company?.plan || 'free';
+  // Le rôle vient de `profiles.role`. Vide = rôle INCONNU, et c'est un cas à part
+  // entière : l'écran ne suppose alors rien et dit pourquoi (voir la carte Équipe).
+  UI.role = profile.role || '';
   UI.company = {
     name: company?.name || '',
     activity: company?.activity || '',

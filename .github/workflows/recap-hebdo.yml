@@ -1,0 +1,61 @@
+# Récapitulatif hebdomadaire KEEVA — déclencheur planifié.
+#
+# POURQUOI UNE ACTION GITHUB PLUTÔT QUE pg_cron + pg_net
+#   · le JETON vit dans les secrets GitHub, jamais dans la base : avec pg_cron il
+#     faudrait stocker un jeton dans Postgres (Vault ou table), donc donner à la
+#     base un secret qui ouvre une fonction lisant TOUTES les sociétés ;
+#   · l'HISTORIQUE est le contrôle : une exécution en échec est visible, et GitHub
+#     prévient par e-mail — c'est exactement « ne jamais échouer en silence » ;
+#   · rien à installer, rien à activer dans Supabase.
+#   Le prix à payer, et il est petit : GitHub peut retarder une tâche planifiée de
+#   quelques minutes (rarement plus) — sans conséquence pour un rapport hebdomadaire.
+#
+# CE QU'IL FAUT AVOIR POSÉ (une fois) :
+#   1. secret de dépôt  RECAP_TOKEN            = une chaîne aléatoire d'au moins 32 caractères
+#   2. secret de fonction Supabase RECAP_TOKEN = LA MÊME valeur
+#      (la fonction refuse tout si elle est absente — voir recap-hebdo/index.ts)
+#   3. la fonction déployée : node signal/deployer-fonction.mjs recap-hebdo
+#
+# À SAVOIR : GitHub désactive les tâches planifiées d'un dépôt PUBLIC resté
+# 60 jours sans activité. Ce dépôt bouge ; si un jour il dort, l'onglet Actions le
+# dira et il suffira de réactiver la tâche.
+
+name: Récapitulatif hebdomadaire
+
+on:
+  schedule:
+    # Tous les lundis à 07:00 UTC (18:00 à Nouméa) — le lundi matin en métropole,
+    # qui laisse la semaine pour réagir.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:      # et à la main, pour éprouver sans attendre lundi
+
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer le récapitulatif
+        env:
+          # Le JWT de la passerelle, en plus du jeton : la fonction est déployée
+          # avec `verify_jwt` actif, donc la passerelle exige un JWT valide du
+          # projet. La clé publique du site convient — elle n'est pas un secret.
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RECAP_TOKEN: ${{ secrets.RECAP_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RECAP_TOKEN:-}" ]; then
+            echo "::error::le secret RECAP_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/recap-hebdo" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "x-recap-token: ${RECAP_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d '{}')
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::le récapitulatif n'a pas été envoyé (HTTP $code)"
+            exit 1
+          fi
