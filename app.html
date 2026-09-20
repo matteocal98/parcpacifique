@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ia+QXN9xjkVr7i1B6slY9a/OSksx3LnVmZD7Y9BX6OI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-scD8Omem1oPamTsXSIkdeLkEgIwBG4KCFZP9I11anr4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -715,8 +715,6 @@
      (2,55) n'y portent de texte — c'est la règle du socle, et elle ne bouge
      pas ici. La classe « due » reste sur la valeur : c'est elle que le relevé
      du compteur relit pour dire l'état avant et après. */
-  .machine-echeance{display:flex;flex-direction:column;gap:4px;}
-  .machine-echeance .due{font-size:25px;font-weight:800;color:var(--ink);line-height:1.2;}
   .machine-echeance-texte{font-size:13.5px;font-weight:600;color:var(--ink-2);line-height:1.5;}
   /* LA JAUGE DE L'INTERVALLE — ELLE EST CALCULÉE, JAMAIS ÉCRITE.
      POURQUOI CETTE RÈGLE EXISTE : l'audit relève que les maquettes portent des
@@ -726,10 +724,7 @@
      dueInfo(). Le dépassement, lui, s'écrit en UNITÉ RÉELLE (« +18 h ») dans la
      phrase d'échéance. La barre est donc décorative — elle n'écrit rien — et
      l'ambre y est à sa place. */
-  .machine-jauge{height:8px;border-radius:999px;background:var(--line-2);overflow:hidden;}
-  .machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--ink);}
-  .machine-jauge-part.is-soon{background:var(--soon);}
-  .machine-jauge-part.is-late{background:var(--late);}
+
   /* LA BANDE D'ALERTE DE LA CARTE : la tâche qui vient, et l'échéance dite par
      le produit lui-même (dueInfo). C'est du TEXTE sur un voile d'ambre ou
      d'indigo à 14 % — la recette « encre sur teinte pâle » du socle (15,5:1),
@@ -744,13 +739,28 @@
   /* LE CARNET, POSÉ SUR LA PHOTO. On voit d'un coup d'œil quelles machines ont
      leur carnet — et c'est le bouton qui l'ouvre, jamais une vignette
      décorative. Le mot est celui du produit (« Carnet »), pas « OCR ». */
-  .machine-photo-cadre{position:relative;display:flex;margin-top:12px;}
-  .machine-photo-cadre .machine-photo{margin-top:0;}
+  /* LE CADRE DE LA PHOTO PREND LA LARGEUR DE LA PHOTO, PAS CELLE DE LA CARTE.
+     C'EST LA CORRECTION DU BADGE QUI DÉBORDAIT : en `display:flex`, le cadre
+     était large de toute la carte (plus de 320 px au téléphone) alors que la
+     photo s'arrête à `max-width:220px` ; le badge, posé en absolu à `right:8px`,
+     se retrouvait donc à 8 px du bord de la CARTE — c'est-à-dire entièrement
+     hors de l'image. En `inline-flex`, le cadre épouse la photo, et le badge
+     tombe à 8 px de SES bords. `min-width:0` et `max-width:100%` garantissent
+     qu'un cadre étroit ne le pousse jamais dehors. */
+  .machine-photo-cadre{
+    position:relative;display:inline-flex;align-items:flex-start;
+    min-width:0;max-width:100%;margin-top:12px;
+  }
+  .machine-photo-cadre .machine-photo{margin-top:0;max-width:100%;}
   .machine-carnet-lien{margin-top:12px;}
+  /* LE BADGE DU CARNET : toujours DANS la photo, à 8 px de ses bords, sur UNE
+     SEULE LIGNE. `white-space:nowrap` est ce qui l'empêche d'être coupé en deux
+     quand le cadre se resserre : il s'élargit au lieu de se replier. */
   .carnet-badge{
-    position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;
+    position:absolute;top:8px;right:8px;left:auto;display:inline-flex;align-items:center;gap:4px;
     padding:6px 12px;border:none;border-radius:10px;cursor:pointer;font-family:inherit;
     background:var(--ink);color:var(--surface);font-size:12px;font-weight:800;
+    white-space:nowrap;max-width:calc(100% - 16px);
   }
   /* LE PLIEUR : un chevron de 44 px, la cible tactile du socle. Il porte
      aria-expanded ; le chevron suit l'état, et il est décoratif (aria-hidden),
@@ -773,12 +783,60 @@
     .machine.is-replie .machine-carnet-lien,
     .machine.is-replie .machine-jauge,
     .machine.is-replie .machine-echeance-texte,
+    .machine.is-replie .machine-tache,
     .machine.is-replie .compteur-lire{display:none;}
   }
   .m-main .name{font-size:17px;font-weight:700;}
   .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
-  .m-side{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
-  .m-actions{display:flex;flex-wrap:wrap;gap:6px;}
+  /* ★ LOT 7 — LES DEUX COLONNES DE LA CARTE.
+     À droite : l'ÉTAT OPÉRATIONNEL et ce qui se FAIT. Les quatre actions sont
+     empilées, l'action principale pleine largeur en 44 px (la cible tactile du
+     socle), les trois autres en contour 2 px — la règle 5 du DESIGN.md. */
+  .m-side{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;}
+  .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;}
+  .m-actions .btn-row-action{min-height:44px;white-space:normal;}
+  .m-actions .btn-principal{grid-column:1 / -1;}
+  /* ★ LOT 7 — L'ENCART DE LA TÂCHE. La maquette de bureau écrit
+     « TÂCHE PRÉVUE : <tâche> » au-dessus du compteur : la tâche se lit AVANT la
+     photo, et le mot est celui du produit (`nextTaskLabel`). */
+  .machine-tache{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
+    padding:8px 12px;border-radius:12px;background:var(--surface-soft);
+  }
+  .machine-tache-mot{
+    font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .machine-tache-valeur{font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap;}
+  /* ★ LOT 7 — L'ÉTAT OPÉRATIONNEL, DANS LA COLONNE DE DROITE : le mot, la
+     pastille teintée de son état, et l'ÉCHÉANCE EN GRAND à côté.
+     LE CHIFFRE EST À L'ENCRE, JAMAIS DANS LA TEINTE : l'ambre écrit 3,04:1 sur la
+     carte et l'indigo 4,47 — sous la barre de 4,5:1 du DESIGN.md §1. La teinte
+     porte la PASTILLE et son voile, pas le nombre. */
+  .m-etat{display:flex;flex-direction:column;gap:8px;}
+  .m-etat-ligne{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
+  .m-etat-mot{
+    font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .m-echeance{display:flex;flex-direction:column;gap:2px;align-items:flex-end;text-align:right;}
+  .machine-echeance-mot{
+    font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .machine-echeance .due{
+    display:block;font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
+    font-size:25px;font-weight:800;color:var(--ink);line-height:1.15;white-space:nowrap;
+  }
+  /* ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, DANS UN BLOC, PLUS UN TRAIT NU.
+     La piste est VOILÉE, le remplissage est COLORÉ par l'état, et tout le texte
+     du bloc est À L'ENCRE. Aucun pourcentage écrit : le chiffre qui s'affiche est
+     l'échéance réelle, et l'`aria-label` reste la phrase du produit. */
+  .machine-jauge{display:flex;flex-direction:column;gap:6px;padding:8px 12px;border-radius:12px;background:var(--surface-soft);}
+  .machine-jauge-tete{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;}
+  .machine-jauge-mot{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
+  .machine-jauge-valeur{font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap;}
+  .machine-jauge-piste{height:10px;border-radius:999px;background:var(--line-2);overflow:hidden;}
+  .machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--ink);}
+  .machine-jauge-part.is-soon{background:var(--soon);}
+  .machine-jauge-part.is-late{background:var(--late);}
   .badge{
     display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;
     letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;
@@ -880,10 +938,12 @@
   .compteur-bureau{display:none;}
   @media (min-width:900px){
     .machine{flex-direction:row;justify-content:space-between;gap:18px;}
-    .m-side{align-items:flex-end;}
-    .m-actions{justify-content:flex-end;}
+    /* ★ LOT 7 — LA COLONNE DE DROITE FAIT 340 px, LA PROPORTION DE LA MAQUETTE DE
+       BUREAU : la carte se lit « contenu, puis état et actions », et les quatre
+       boutons ne s'écrasent plus sur la largeur. */
+    .m-side{flex:0 0 340px;width:340px;}
     .compteur-mobile{display:none;}
-    .compteur-bureau{display:flex;width:100%;max-width:360px;}
+    .compteur-bureau{display:flex;width:100%;max-width:100%;}
   }
 
   .btn-row-action{
@@ -1565,6 +1625,40 @@
   }
   .search-wrap input[type=search]:focus{border-color:var(--primary);}
   .search-wrap input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
+
+  /* ★ LOT 7 — L'EN-TÊTE DE L'ÉCRAN PARC : LA RECHERCHE ET « AJOUTER UNE MACHINE »
+     SUR LA MÊME LIGNE, SANS QU'ILS S'ÉCRASENT. La recherche prend la place
+     disponible et ne descend pas sous 140 px ; le bouton ne se comprime pas et
+     son libellé ne se replie jamais. C'est la disposition de la maquette, et elle
+     vaut à toutes les largeurs — c'est l'écran de travail du parc. */
+  .toolbar-parc .toolbar-top{flex-direction:row;align-items:center;gap:8px;}
+  .toolbar-parc .search-wrap{flex:1 1 auto;min-width:140px;}
+  .toolbar-parc .search-wrap input[type=search]{min-width:0;}
+  .toolbar-parc .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:46px;}
+
+  /* ★ LOT 7 — LA COULEUR DES FILTRES DE L'ÉTAT. Quatre pastilles à compteur :
+     chacune porte sa teinte d'état (un point) et son compteur sur un voile, la
+     pastille d'état restant à l'ENCRE sur ce voile (14 %). Le filtre actif reste
+     en Signature FR, et son compteur reste lisible sur l'aplat. */
+  .chip{white-space:nowrap;}
+  .chip .chip-count{white-space:nowrap;}
+  .chip-mot{display:inline-flex;align-items:center;gap:6px;}
+  .chip-mot::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--ink-3);flex:0 0 auto;}
+  .chip-late .chip-mot::before{background:var(--late);}
+  .chip-soon .chip-mot::before{background:var(--soon);}
+  .chip-ok .chip-mot::before{background:var(--ok);}
+  .chip .chip-count{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:20px;padding:0 5px;border-radius:var(--r-pill);
+    background:var(--surface-soft);color:var(--ink);opacity:1;
+  }
+  .chip-late .chip-count{background:var(--late-bg);}
+  .chip-soon .chip-count{background:var(--soon-bg);}
+  .chip-ok .chip-count{background:var(--ok-bg);}
+  .chip-late:hover{border-color:var(--late);}
+  .chip-soon:hover{border-color:var(--soon);}
+  .chip-ok:hover{border-color:var(--ok);}
+  .chip.is-active .chip-count{background:rgba(255,255,255,.22);color:#fff;}
 
   .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
   /* Préparation des entretiens : ce qu'il faut se procurer, et pour quand. */
@@ -8152,9 +8246,13 @@ function fleetSorted(list) {
   });
 }
 
+// ★ LOT 7 — LE FILTRE PORTE LA COULEUR DE SON ÉTAT, ET LA PASTILLE RESTE À
+// L'ENCRE SUR SON VOILE (ambre 3,04:1 et indigo 4,47 : sous la barre, ces teintes
+// ne portent jamais de texte ici). Le filtre ACTIF garde la Signature FR en aplat
+// — blanc dessus = 5,65:1 — et son compteur.
 function chipHtml(status, label, count) {
   const active = fleetFilters().status === status;
-  return `<button type="button" class="chip${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}">${esc(label)}<span class="chip-count">${count}</span></button>`;
+  return `<button type="button" class="chip chip-${status}${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="chip-mot">${esc(label)}</span><span class="chip-count">${count}</span></button>`;
 }
 
 function fleetListHtml() {
@@ -8242,7 +8340,7 @@ VIEWS.machines = {
     const c = UI.counts;
     const f = fleetFilters();
     return `
-      <div class="toolbar">
+      <div class="toolbar toolbar-parc">
         <div class="toolbar-top">
           <div class="search-wrap">
             <span class="search-icon" aria-hidden="true">⌕</span>
@@ -8252,7 +8350,7 @@ VIEWS.machines = {
                    placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
                    aria-label="${trad('Rechercher dans le parc')}">
           </div>
-          <button type="button" class="btn-primary" id="fleet-add">${trad('Ajouter une machine')}</button>
+          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add">${trad('Ajouter une machine')}</button>
         </div>
         <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
@@ -8336,9 +8434,32 @@ function jaugeIntervalleHtml(info, m) {
   if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(reste)) return '';
   const fait = intervalle - reste;
   const part = Math.max(0, Math.min(100, Math.round((fait / intervalle) * 100)));
-  return `<div class="machine-jauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(info.label)}"><span class="machine-jauge-part is-${info.state}" style="width:${part}%"></span></div>`;
+  // ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, EN CLAIR.
+  // Le bloc PORTE la valeur de l'échéance (« Échéance 250 h ») et laisse voir la
+  // consommation par le remplissage coloré. Il n'écrit AUCUN pourcentage : le
+  // travers systématique des maquettes est d'annoncer un taux que personne ne
+  // mesure (« 100 % d'extraction », « 99,4 % de confiance », §5.2 de l'audit), et
+  // une barre déjà pleine pour une échéance dépassée dirait « 100 % » là où la
+  // vérité est « +18 h ». Le libellé accessible reste la phrase du produit.
+  const unite = counterUnitOf(m);
+  const echeance = formatCounter(planNextDueCounter(m.plan), unite);
+  return `<div class="machine-jauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(info.label)}">
+      <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Intervalle')}</span><span class="machine-jauge-valeur">${tR('Échéance {valeur}', { valeur: echeance })}</span></span>
+      <span class="machine-jauge-piste"><span class="machine-jauge-part is-${info.state}" style="width:${part}%"></span></span>
+    </div>`;
 }
 
+// ★ LOT 7 — LA CARTE STRUCTURÉE DU PARC.
+// CE QUI CHANGE, ET RIEN D'AUTRE : l'ordre et la hiérarchie. Au-dessus, la carte
+// était une grande ligne plate — titre, méta, échéance, photo, jauge, compteur et
+// quatre boutons étalés sur la largeur, sans colonne. Elle suit maintenant la
+// maquette : photo et identité dans la colonne de contenu, encart de la TÂCHE,
+// puis une COLONNE DE DROITE qui porte l'ÉTAT OPÉRATIONNEL, l'ÉCHÉANCE EN GRAND,
+// la CONSOMMATION DE L'INTERVALLE, les QUATRE ACTIONS et le COMPTEUR.
+// AUCUNE DONNÉE NOUVELLE : l'état vient de `dueInfo()`, la tâche de
+// `nextTaskLabel()`, la jauge de l'intervalle du plan et du compteur relevé — les
+// mêmes valeurs qu'avant, rangées autrement. Aucun taux, aucune télémétrie,
+// aucune marque, aucun chantier.
 function machineCardHtml(m) {
   const info = dueInfo(m.plan, m);
   const identifiant = identifiantAffiche(m);
@@ -8380,24 +8501,38 @@ function machineCardHtml(m) {
         </div>` : ''}
         ${horsOffre ? '<div class="hint">Non couverte par ton offre</div>' : ''}
         ${photo ? `
-        <div class="machine-photo-cadre">
+        <div class="machine-photo-cadre" data-conteneur="photo">
           <img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">
           ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${trad('Carnet PDF')}</button>` : ''}
         </div>`
           : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${trad('Voir le carnet d\'entretien (PDF)')}</button>` : '')}
-        <div class="machine-echeance">
-          <span class="due">${esc(info.short)}</span>
-          <span class="machine-echeance-texte">${esc(info.label)}</span>
-        </div>
-        ${jaugeIntervalleHtml(info, m)}
+        ${tache ? `
+        <div class="machine-tache">
+          <span class="machine-tache-mot">${trad('Tâche prévue')}</span>
+          <span class="machine-tache-valeur">${esc(tache)}</span>
+        </div>` : ''}
+        <span class="machine-echeance-texte">${esc(info.label)}</span>
         ${compteurHtml(m, 'mobile')}
       </div>
       <div class="m-side">
+        <div class="m-etat">
+          <div class="m-etat-ligne">
+            <span class="m-etat-mot">${trad('État opérationnel')}</span>
+          </div>
+          <div class="m-etat-ligne">
+            <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+            <span class="m-echeance">
+              <span class="machine-echeance-mot">${trad('Échéance')}</span>
+              <span class="due">${esc(info.short)}</span>
+            </span>
+          </div>
+          ${jaugeIntervalleHtml(info, m)}
+        </div>
         <div class="m-actions">
-          <button class="btn-row-action log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${trad('Enregistrer un entretien')}</button>
+          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${trad('Enregistrer un entretien')}</button>
           <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${trad('Prochain entretien')}</button>
           <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${trad('Voir le plan')}</button>
-          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${trad('Modifier')}</button>
+          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${trad('Modifier la machine')}</button>
         </div>
         ${compteurHtml(m, 'bureau')}
       </div>
