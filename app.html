@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-T0HLq01Cr6r7LQfou4Mb71zvlHAwBGgtIOYsU4oTe8Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kTO9UMNSLeq0IFbOiO/lbezYlIfocATL44OcUKdvZK4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8345,6 +8345,44 @@ VIEWS.account = {
       // (`value`, `hint`, `modal-actions`) portent DÉJÀ la mise en forme de la
       // charte. Une classe sans style est refusée par `check-classes.mjs`, et à
       // juste titre : elle ne dit rien et vieillit toute seule.
+
+
+      // ── LE PLAFOND EST DIT, ET IL COMPTE LES INVITATIONS EN ATTENTE ─────────
+      //    Le serveur applique EXACTEMENT la même règle (déclencheur
+      //    `profiles_plafond` + fonction Edge `creer-membre`) : l'écran ne fait
+      //    que dire ce que le serveur refusera. Un écran qui masquerait le bouton
+      //    ne prouverait rien ; un écran qui proposerait une création impossible
+      //    ferait perdre du temps au gérant.
+      const plafond = plafondUtilisateurs(UI.companyPlan || 'free');
+      const placesRestantes = plafond == null ? null : Math.max(0, plafond - membres.length);
+
+      // ── QUI FAIT QUOI, EN UNE LIGNE, ET SOUS QUEL NOM ON LE MONTRE ─────────
+      //    Le gérant a demandé « qui fait quoi » : chaque membre porte donc, sous
+      //    son rôle, ce que le rôle autorise. Ce sont les droits que le SERVEUR
+      //    applique (`migration-roles-equipe.sql`), pas une promesse d'écran.
+      //
+      //    ⚠️ CES TABLES SONT DÉCLARÉES AVANT LA LISTE DE L'ÉQUIPE, qui les LIT
+      //    juste en dessous : une `const` lue avant sa ligne jetterait
+      //    (« Cannot access 'identiteDe' before initialization »), et l'équipe
+      //    s'afficherait vide pour tout le monde.
+      const ROLE_DESCRIPTIONS = {
+        gerant: trad('Tout : le parc, les plans, l\'équipe et l\'abonnement.'),
+        mecanicien: trad('Le parc et les entretiens : il ajoute, modifie et marque fait. Il ne gère pas l\'équipe.'),
+        chauffeur: trad('Il consulte le parc, relève le compteur et prend la photo de sa machine. Il ne modifie rien d\'autre.'),
+      };
+      const roleDe = (role) => (ROLE_DROITS[role] || {}).libelle || role || '';
+      const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demande au gérant de vérifier son rôle.');
+      // Ce qui s'affiche comme identité : le login court quand il existe,
+      // l'adresse sinon. L'adresse TECHNIQUE n'est jamais montrée au gérant —
+      // elle ne veut rien dire pour lui.
+      const estMembreCree = (m) => !!m.login || /@membres\.keeva\.work$/i.test(String(m.email || ''));
+      const identiteDe = (m) => m.login || (m.email ? String(m.email).split('@')[0] : trad('Membre'));
+
+      // ── LA LISTE DES MEMBRES ──────────────────────────────────────────────
+      // Pas de classe de plus pour la liste ni pour chaque membre : les enfants
+      // (`value`, `hint`, `modal-actions`) portent DÉJÀ la mise en forme de la
+      // charte. Une classe sans style est refusée par `check-classes.mjs`, et à
+      // juste titre : elle ne dit rien et vieillit toute seule.
       liste.innerHTML = `
         <div>
           ${membres.map((m) => `
@@ -8361,15 +8399,6 @@ VIEWS.account = {
             </div>`).join('')}
         </div>`;
 
-      // ── LE PLAFOND EST DIT, ET IL COMPTE LES INVITATIONS EN ATTENTE ─────────
-      //    Le serveur applique EXACTEMENT la même règle (déclencheur
-      //    `profiles_plafond` + fonction Edge `creer-membre`) : l'écran ne fait
-      //    que dire ce que le serveur refusera. Un écran qui masquerait le bouton
-      //    ne prouverait rien ; un écran qui proposerait une création impossible
-      //    ferait perdre du temps au gérant.
-      const plafond = plafondUtilisateurs(UI.companyPlan || 'free');
-      const placesRestantes = plafond == null ? null : Math.max(0, plafond - membres.length);
-
       // ── LA REVUE DE L'ÉQUIPE EST RETIRÉE À CHAQUE RELECTURE ────────────────
       //    Sans cela, les gestionnaires posés au passage précédent resteraient
       //    attachés aux boutons qui viennent d'être remplacés — et « Créer le
@@ -8377,7 +8406,7 @@ VIEWS.account = {
       if (racine._equipeBranchee) racine._equipeBranchee();
       racine._equipeBranchee = () => {
         racine.querySelector('#acc-membre-creer')?.removeEventListener('click', creerLeMembre);
-        racine.querySelector('#acc-equipe-liste')?.querySelectorAll('[data-pw-reset]').forEach((bouton) => {
+        racine.querySelectorAll('#acc-equipe-liste [data-pw-reset]').forEach((bouton) => {
           bouton.removeEventListener('click', relancerLeMotDePasse);
         });
         racine.querySelector('#acc-invite-envoyer')?.removeEventListener('click', creerLInvitation);
@@ -8396,9 +8425,10 @@ VIEWS.account = {
       //    Aucun identifiant n'est demandé au gérant : il en inventerait un avec
       //    un accent, ou en double.
       //
-      //    Le formulaire n'est écrit QUE pour un gérant, et son écouteur est posé
-      //    juste après, sans `?.` : les deux vont ensemble, et le contrôle
-      //    `verifier-ecouteurs-orphelins.mjs` refuse l'inverse.
+      //    Le formulaire n'est écrit QUE pour un gérant, et l'écouteur qui suit
+      //    est PROTÉGÉ (`?.`) : `verifier-ecouteurs-orphelins.mjs` refuse un
+      //    écouteur nu sur un élément rendu conditionnellement, et il a raison —
+      //    l'écran d'un mécanicien doit rester câblé de bout en bout.
       const zoneCreation = racine.querySelector('#acc-equipe-creation');
       if (zoneCreation) {
         zoneCreation.innerHTML = peutGererEquipe() ? `
@@ -8419,13 +8449,20 @@ VIEWS.account = {
               <button type="button" class="primary" id="acc-membre-creer">${trad('Créer le membre')}</button>
             </div>
           </div>
-          <div id="acc-membre-identifiants"></div>` : '';
+          <div id="acc-membre-acces"></div>` : '';
       }
 
       if (!peutGererEquipe()) {
         // Le rôle et l'offre ont été relus juste avant : on ne dit donc la raison
         // que si elle est vraie. Le refus, lui, viendra du serveur de toute façon.
-        zoneInvitation.innerHTML = '';
+        //
+        // ⚠️ LA RAISON DE L'INTERDICTION EST ÉCRITE, pas seulement le bouton
+        // masqué : « Seul le gérant… ». Un écran muet laisse croire à une panne.
+        // ?. : la carte de l'équipe existait avant ce correctif (un DOM simulé
+        // peut ne pas porter la zone de création) ; un écran sans cette zone doit
+        // rester câblé de bout en bout, pas jeter.
+        if (zoneCreation) zoneCreation.innerHTML = '';
+        zoneInvitation.innerHTML = `<p class="hint">${trad('Seul le gérant peut inviter quelqu\'un, changer un rôle ou retirer un membre.')}</p>`;
         return;
       }
 
@@ -8447,39 +8484,6 @@ VIEWS.account = {
         </div>
         <div id="acc-invite-resultat"></div>`;
 
-      racine.querySelector('#acc-invite-envoyer')?.addEventListener('click', async () => {
-        const email = (racine.querySelector('#acc-invite-email')?.value || '').trim();
-        const role = racine.querySelector('#acc-invite-role')?.value || 'mecanicien';
-        const resultat = racine.querySelector('#acc-invite-resultat');
-        dire('');
-        if (resultat) resultat.innerHTML = `<p class="hint">${trad('Création de l\'invitation…')}</p>`;
-        try {
-          const { data, error } = await sb.rpc('inviter_membre', { p_email: email, p_role: role });
-          if (error) throw error;
-          const ligne = Array.isArray(data) ? data[0] : data;
-          const code = ligne && ligne.code ? ligne.code : '';
-          const lien = lienInvitation(code);
-          const sujet = tR('Invitation à rejoindre {societe} sur KEEVA', { societe: UI.company?.name || UI.companyName || '' });
-          if (resultat) {
-            resultat.innerHTML = `
-              <div class="plan-field">
-                <div class="label">${trad('Lien à transmettre')}</div>
-                <div class="value" id="acc-invite-lien" style="word-break:break-all;font-size:13px;">${esc(lien)}</div>
-                <p class="hint">${tR('Valable jusqu\'au {date}. La personne crée son compte en le conservant : elle rejoindra la société automatiquement.', { date: esc(String((ligne && ligne.expire_le) || '').slice(0, 10)) })}</p>
-                <div class="modal-actions" style="margin-top:8px;">
-                  <a class="primary" id="acc-invite-mailto" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corpsInvitation(lien))}" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${trad('Envoyer l\'invitation par e-mail')}</a>
-                </div>
-              </div>`;
-          }
-          dire(trad('Invitation créée.'));
-        } catch (err) {
-          // Le refus du SERVEUR est affiché tel quel : plafond atteint, adresse
-          // déjà membre, rôle inconnu. On ne le réécrit pas.
-          if (resultat) resultat.innerHTML = '';
-          dire(String((err && err.message) || err), true);
-        }
-      });
-
       // ── CRÉER LE MEMBRE : c'est le SERVEUR qui fabrique le login ───────────
       //    L'écran n'envoie que le prénom, le nom et le rôle. Le login et le mot
       //    de passe reviennent UNE SEULE FOIS : ils ne sont ni stockés, ni
@@ -8489,7 +8493,10 @@ VIEWS.account = {
         const prenom = (racine.querySelector('#acc-membre-prenom')?.value || '').trim();
         const nom = (racine.querySelector('#acc-membre-nom')?.value || '').trim();
         const role = racine.querySelector('#acc-membre-role')?.value || 'mecanicien';
-        const zone = racine.querySelector('#acc-membre-identifiants');
+        // La zone des identifiants est HORS du formulaire de création : la relecture
+        // de la carte ne l'efface donc pas, et le mot de passe — qui n'existe
+        // qu'à cet instant — reste lisible par le gérant.
+        const zone = racine.querySelector('#acc-membre-acces');
         dire('');
         if (!prenom || !nom) { dire(trad('Indique le prénom ET le nom.'), true); return; }
         if (zone) zone.innerHTML = `<p class="hint">${trad('Création du compte…')}</p>`;
@@ -8500,13 +8507,19 @@ VIEWS.account = {
           });
           if (error) throw new Error(await functionErrorMessage(error, trad('création impossible')));
           if (!data || data.ok !== true) throw new Error((data && data.error) || trad('création impossible'));
-          afficherIdentifiants(zone, data, tR('Accès de {nom}', { nom: prenom + ' ' + nom }));
-          const champPrenom = racine.querySelector('#acc-membre-prenom');
-          const champNom = racine.querySelector('#acc-membre-nom');
-          if (champPrenom) champPrenom.value = '';
-          if (champNom) champNom.value = '';
+          // ⚠️ L'ORDRE COMPTE : la carte est RELUE d'abord (la liste doit montrer le
+          // nouveau membre), et les identifiants s'affichent ENSUITE dans la zone
+          // FRAÎCHE. Les afficher avant la relecture ne servait à rien : la
+          // relecture réécrit le formulaire, donc le noeud qui portait le mot de
+          // passe était détaché — le gérant ne voyait RIEN, et le mot de passe
+          // était perdu (c'est le seul moment où il existe).
           dire(trad('Membre créé.'));
           await preparerCarteEquipe(racine);
+          afficherIdentifiants(
+            racine.querySelector('#acc-membre-acces'),
+            data,
+            tR('Accès de {nom}', { nom: prenom + ' ' + nom }),
+          );
         } catch (err) {
           // Le refus du SERVEUR est affiché tel quel : plafond atteint, rôle
           // refusé, session expirée. On ne le réécrit pas.
@@ -8579,21 +8592,6 @@ VIEWS.account = {
         zone.innerHTML = identifiantsMembre(data, titre);
       }
 
-      // ── QUI FAIT QUOI, EN UNE LIGNE ───────────────────────────────────────
-      //    Le gérant a demandé « qui fait quoi » : chaque membre porte donc, sous
-      //    son rôle, ce que le rôle autorise. Ce sont les droits que le SERVEUR
-      //    applique (`migration-roles-equipe.sql`), pas une promesse d'écran.
-      const ROLE_DESCRIPTIONS = {
-        gerant: trad('Tout : le parc, les plans, l\'équipe et l\'abonnement.'),
-        mecanicien: trad('Le parc et les entretiens : il ajoute, modifie et marque fait. Il ne gère pas l\'équipe.'),
-        chauffeur: trad('Il consulte le parc, relève le compteur et prend la photo de sa machine. Il ne modifie rien d\'autre.'),
-      };
-      const roleDe = (role) => (ROLE_DROITS[role] || {}).libelle || role || '';
-      const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demande au gérant de vérifier son rôle.');
-      // L'identité affichée : le login court quand il existe, l'adresse sinon.
-      const estMembreCree = (m) => !!m.login || /@membres\.keeva\.work$/i.test(String(m.email || ''));
-      const identiteDe = (m) => m.login || (m.email ? String(m.email).split('@')[0] : trad('Membre'));
-
       // ── L'INVITATION PAR E-MAIL reste, en second ──────────────────────────
       async function creerLInvitation() {
         const email = (racine.querySelector('#acc-invite-email')?.value || '').trim();
@@ -8659,15 +8657,12 @@ VIEWS.account = {
       }
 
       // ── LE CÂBLAGE, À LA FIN, SUR LES ÉLÉMENTS QUI VIENNENT D'ÊTRE ÉCRITS ──
-      //    Poser un écouteur sur un élément absent jette, et l'exception emporte
-      //    tout le câblage qui suit — c'est le défaut que
-      //    `verifier-ecouteurs-orphelins.mjs` surveille. Les éléments ci-dessous
-      //    existent tous à cette ligne : le formulaire pour un gérant (garde
-      //    `peutGererEquipe()` avec retour), les boutons de rôle et de retrait
-      //    dans le même gabarit que leurs données.
-      racine.querySelector('#acc-membre-creer').addEventListener('click', creerLeMembre);
-      racine.querySelector('#acc-invite-envoyer').addEventListener('click', creerLInvitation);
-      racine.querySelectorAll('[data-pw-reset]').forEach((bouton) => {
+      //    Le formulaire de création n'existe QUE pour un gérant (garde ci-dessus
+      //    avec retour) : son écouteur est donc PROTÉGÉ. Les autres boutons
+      //    existent à cette ligne, dans le même gabarit que leurs données.
+      racine.querySelector('#acc-membre-creer')?.addEventListener('click', creerLeMembre);
+      racine.querySelector('#acc-invite-envoyer')?.addEventListener('click', creerLInvitation);
+      racine.querySelectorAll('#acc-equipe-liste [data-pw-reset]').forEach((bouton) => {
         bouton.addEventListener('click', relancerLeMotDePasse);
       });
       racine.querySelectorAll('[data-equipe-role]').forEach((bouton) => {
