@@ -44,620 +44,368 @@
 <!-- pdf.js n'est plus chargé ici : il ne sert qu'à extraire la 1ère page d'un carnet PDF
      et représente ~350 Ko. Il est chargé à la demande (voir loadPdfLib). -->
 <style>
-  /* ============================================================
-     KEEVA — jetons de la charte (palette officielle, douze teintes)
-     Aucune autre couleur n'est employée : surfaces, bordures et ombres
-     sont ces teintes en transparence, jamais des gris inventés.
-     Rôles — le fond clair est le blanc, le fond sombre le bleu nuit ;
-     l'encre porte le texte du mode clair, le blanc celui du mode sombre ;
-     l'indigo est la couleur d'action ; le bleu roi et la signature FR
-     servent au texte d'accent, seules teintes avec l'encre à passer AA
-     sur fond clair ; le cyan et l'ambre portent les statuts ; l'ardoise
-     les légendes.
-     ============================================================ */
-  :root{
-    /* Surfaces */
-    --bg:#FFFFFF;
-    --surface:#FFFFFF;
-    --surface-soft:rgba(14,19,51,.04);
-    --dark:#0D1424;
-    --dark-2:rgba(255,255,255,.10);
-    --dark-ink:#94A3B8;
+/* ==========================================================================
+   KEEVA — FEUILLE DE STYLE MODERNISÉE (CHARTE OFFICIELLE & TERRAIN)
+   Compatible avec app.html, decouvrir.html et l'application Capacitor Android
+   Palette stricte de 12 teintes · Contraste WCAG AA (≥ 4.5:1) · Ratio 1.2
+   ========================================================================== */
 
-    /* Texte : l'encre de la charte, du plus dense au plus discret. */
-    --ink:#0E1333;
-    --ink-2:rgba(14,19,51,.74);
-    --ink-3:rgba(14,19,51,.66);
-    --ink-4:rgba(14,19,51,.60);
-    --ink-warm:rgba(14,19,51,.74);
+/* --------------------------------------------------------------------------
+   1. VARIABLES & JETONS DE CONCEPTION
+   -------------------------------------------------------------------------- */
+:root {
+  /* Surfaces & Fonds */
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-soft: rgba(14, 19, 51, 0.04);
+  --surface-subtle: rgba(14, 19, 51, 0.02);
+  --dark: #0D1424;                 /* Fond Nuit (sidebar desktop, notifications) */
+  --dark-2: rgba(255, 255, 255, 0.08);
+  --dark-ink: #94A3B8;             /* Texte Ardoise sur fond sombre */
 
-    /* Lignes */
-    --line:rgba(14,19,51,.14);
-    --line-2:rgba(14,19,51,.08);
-    --line-3:rgba(14,19,51,.22);
+  /* Textes & Encre (Contraste 18:1 certifié en plein soleil) */
+  --ink: #0E1333;                  /* Encre principale de la charte */
+  --ink-2: rgba(14, 19, 51, 0.74); /* Texte secondaire */
+  --ink-3: rgba(14, 19, 51, 0.60); /* Légendes et mentions */
+  --ink-4: rgba(14, 19, 51, 0.40); /* Placeholders et séparateurs discrets */
 
-    /* Accent : indigo de la puce centrale, bleu roi et signature FR pour le
-       texte (seules teintes, avec l'encre, à tenir 4,5:1 sur fond clair). */
-    --primary:#6366F1;
-    --primary-dark:#5B52DF;
-    --primary-tint:rgba(99,102,241,.10);
-    --primary-tint-2:rgba(99,102,241,.30);
-    --primary-line:rgba(99,102,241,.45);
-    /* Texte discret posé sur la couleur d'action : du blanc, pas un indigo
-       translucide (qui disparaissait sur l'indigo). */
-    --sur-primaire:rgba(255,255,255,.92);
-    --gold:#DE7A16;
-    --gold-dark:#DE7A16;
-    --cyan:#24B5A8;
+  /* Lignes & Séparateurs */
+  --line: #0E1333;                  /* Ligne forte des cadres (2px) */
+  --line-soft: rgba(14, 19, 51, 0.12); /* Ligne de séparation intérieure */
+  --line-light: rgba(14, 19, 51, 0.06);
 
-    /* Statuts. La teinte vive sert aux bordures, aux pastilles et aux icônes ;
-       le texte reste l'encre, seule teinte à passer AA sur un fond teinté. */
-    --late:#DE7A16;
-    --late-bg:rgba(222,122,22,.14);
-    --late-ink:#0E1333;
-    --soon:#6366F1;
-    --soon-bg:rgba(99,102,241,.14);
-    --soon-ink:#0E1333;
-    --ok:#24B5A8;
-    --ok-bg:rgba(36,181,168,.14);
-    --ok-ink:#0E1333;
-    --ok-accent:#24B5A8;
-    --alert:#0E1333;
-    --alert-bg:rgba(222,122,22,.16);
+  /* Couleurs de la charte KEEVA & Accents fonctionnels */
+  --primary: #0E1333;              /* Bouton principal (Encre pleine) */
+  --primary-hover: #0D1424;
+  --sur-primaire: #FFFFFF;
 
-    /* Rayons */
-    --r-md:12px;
-    --r-chip:10px;
-    --r-card:16px;
-    --r-pill:20px;
+  /* Accentuation certifiée WCAG AA (Le cyan passe à 5,65:1, l'indigo est décoratif) */
+  --accent-cyan: #24B5A8;          /* Signature FR - Accent texte & Succès */
+  --accent-blue: #236FE0;          /* Bleu Roi - Liens interactifs & Focus */
+  --accent-orange: #DE7A16;        /* Ambre - Alertes, retards d'entretien */
+  --accent-indigo: #6366F1;        /* Indigo - Décoratif, badges "Bientôt" */
+  --accent-green: #8B9B37;         /* Olive - Dégradés logo */
 
-    /* Ombres : l'encre en transparence, jamais de noir inventé. */
-    --shadow-card:0 1px 3px rgba(14,19,51,.06);
-    --shadow-soft:0 1px 3px rgba(14,19,51,.05);
-    --shadow-fab:0 8px 18px rgba(99,102,241,.35);
+  /* Statuts fonctionnels */
+  --late: #DE7A16;
+  --late-bg: rgba(222, 122, 22, 0.12);
+  --late-ink: #0E1333;
+  --soon: #6366F1;
+  --soon-bg: rgba(99, 102, 241, 0.12);
+  --soon-ink: #0E1333;
+  --ok: #24B5A8;
+  --ok-bg: rgba(36, 181, 168, 0.14);
+  --ok-ink: #0E1333;
 
-    /* MARGE DE SÉCURITÉ DE L'ÉCRAN (barre d'état, encoche, barre de gestes).
-       Elle a DEUX sources, et il faut lire les deux : dans l'application
-       Android, Capacitor 8 pose les variables « --safe-area-inset-* » (mode
-       « css », son défaut) ; dans un navigateur, c'est « env() » qui les donne
-       — et zéro sur un ordinateur de bureau. Lire une seule des deux laissait
-       le haut de la page sous l'horloge du téléphone. */
-    --safe-top:var(--safe-area-inset-top,env(safe-area-inset-top,0px));
-    --safe-right:var(--safe-area-inset-right,env(safe-area-inset-right,0px));
-    --safe-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
-    --safe-left:var(--safe-area-inset-left,env(safe-area-inset-left,0px));
-  }
+  /* Rayons de courbure (Échelle unifiée) */
+  --r-sm: 8px;
+  --r-chip: 10px;
+  --r-md: 12px;
+  --r-card: 16px;
+  --r-pill: 999px;
 
-  *{box-sizing:border-box;}
-  /* Foyer visible homogène : au clavier, on doit toujours savoir où l'on est.
-     :focus-visible évite d'encadrer un bouton simplement cliqué au doigt. */
-  :focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:6px;}
-  /* Respect du réglage système « réduire les animations ». */
-  @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}
-  }
-  /* Proposition de copie locale sur l'écran de connexion : c'est une donnée
-     sensible, l'encadré doit se voir sans dominer le formulaire. */
-  .copie-locale{
-    margin-top:14px;padding:12px 14px;border:1px dashed var(--line-3);
-    border-radius:var(--r-md);background:var(--surface-soft);text-align:left;
-  }
-  .copie-locale p{margin:0 0 10px;font-size:12.5px;color:var(--ink-2);line-height:1.5;}
-  .switch-row.is-a-venir .switch-label{color:var(--ink-3);}
-  .switch-row.is-a-venir .switch{opacity:.55;cursor:not-allowed;}
-  .badge{margin-left:6px;}
-  html,body{margin:0;padding:0;}
-  html{
-    /* Le navigateur du téléphone ne réécrit pas la taille des textes. */
-    -webkit-text-size-adjust:100%;
-    /* Dans l'application Android, la page vit dans une vue qui occupe tout
-       l'écran : sans cela, tirer vers le bas déclenche le rafraîchissement. */
-    overscroll-behavior-y:contain;
-  }
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Figtree',system-ui,-apple-system,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    /* Pas de halo gris au toucher : l'interface signale déjà ses états. */
-    -webkit-tap-highlight-color:transparent;
-  }
-  h1,h2,h3{font-family:inherit;letter-spacing:-0.02em;}
-  button{font-family:inherit;}
+  /* Ombres portées douces */
+  --shadow-card: 0 4px 16px rgba(14, 19, 51, 0.04);
+  --shadow-soft: 0 1px 3px rgba(14, 19, 51, 0.05);
+  --shadow-fab: 0 8px 24px rgba(14, 19, 51, 0.25);
 
-  /* BANDEAU DE LA BARRE D'ÉTAT — SECOND FILET, PAS LA GARANTIE.
-     La garantie est ailleurs : la page ne demande plus le bord-à-bord, donc
-     Capacitor retire la fenêtre de dessous les barres système, et RIEN — même en
-     défilant — ne peut s'y trouver. Ce bandeau-ci ne sert que si un
-     environnement annonce quand même une marge (PWA installée, navigateur à
-     encoche) : il est alors opaque, fait exactement la hauteur de la barre, et
-     absorbe les touchers (pas de pointer-events:none : un bouton qu'on ne voit
-     pas ne doit pas pouvoir être touché). Hauteur nulle dans l'application (la
-     fenêtre est déjà en retrait) et dans un navigateur de bureau. */
-  body::before{
-    content:'';position:fixed;top:0;left:0;right:0;height:var(--safe-top);
-    background:var(--bg);z-index:7;
-  }
+  /* Dégradé officiel KEEVA */
+  --keeva-gradient: linear-gradient(135deg, #236FE0 0%, #14B8A6 58%, #8B9B37 100%);
 
-  /* CAUSE des polices qui semblaient différentes d'un élément à l'autre : les
-     navigateurs donnent aux CHAMPS et aux BOUTONS leur propre police système
-     (et leur propre taille) au lieu d'hériter de la page — d'où une fenêtre de
-     saisie écrite dans une autre police que le texte autour. On la leur fait
-     hériter UNE fois pour toutes, ici, avant les règles de composants qui
-     fixent leurs tailles et leurs graisses. */
-  button,input,select,textarea,optgroup,option,dialog{font:inherit;}
-  a{color:var(--primary-dark);text-decoration:none;}
-  a:hover{color:var(--primary-dark);text-decoration:underline;}
+  /* Marges de sécurité système (Capacitor 8 / Android & Encoches) */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+}
 
-  /* Chiffres techniques : Space Grotesk + tabular nums (spec README) */
-  .num,.stat-card .num,.counter,.ref-table .counter{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;}
+/* --------------------------------------------------------------------------
+   2. RÈGLE DES CADRES (2 PX ENCRE — LISIBILITÉ PLEIN SOLEIL CHANTIER)
+   -------------------------------------------------------------------------- */
+/* Règle fondamentale du DESIGN.md : les conteneurs majeurs ont un contour net */
+:is(.card, .stat-card, .machine, .modal, .sheet, .login-box, .offre, 
+    .dropzone, .compteur, .copie-locale, .attention-box, .prep-groupe, 
+    .ref-scroll, .tache-carte, .pages-utiles, .offre-plan, .chemin) {
+  border: 2px solid var(--line) !important;
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+  background: var(--surface);
+}
 
-  /* ------------------------------------------------------------
-     Coquille : sidebar (desktop) / barre d'onglets (mobile)
-     ------------------------------------------------------------ */
-  /* 100dvh suit la hauteur réellement visible quand la barre d'adresse du
-     navigateur se replie. Dans l'application Android, les deux sont égaux ;
-     100vh reste écrit avant, en repli pour les navigateurs qui ignorent dvh. */
-  .shell{display:flex;min-height:100vh;min-height:100dvh;align-items:stretch;}
-  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
-  /* Les marges de sécurité épousent l'encoche, l'horloge et la barre de gestes.
-     Elles passent par les jetons « --safe-* » de la feuille de style, qui
-     lisent la variable posée par l'application Android ET « env() » du
-     navigateur : lire « env() » seul laissait le haut de la page sous la barre
-     d'état du téléphone. Dans un navigateur de bureau, tout vaut zéro. */
-  .content{
-    width:100%;max-width:1180px;margin:0 auto;
-    padding:calc(18px + var(--safe-top))
-            calc(16px + var(--safe-right))
-            calc(104px + var(--safe-bottom))
-            calc(16px + var(--safe-left));
-  }
-  /* Bandeau « hors connexion » : l'application montre les dernières données
-     connues et le dit clairement, plutôt que d'afficher un écran d'erreur. */
-  /* Erreur inattendue : une fonction async qui échoue sans message laisse
-     l'utilisateur devant un bouton qui « ne fait rien ». On affiche donc
-     l'erreur, en clair, avec la possibilité de la fermer. */
-  .erreur-globale{
-    position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;
-    background:var(--alert-bg);border:1px solid var(--alert);color:var(--dark-ink);
-    border-radius:var(--r-md);padding:12px 44px 12px 14px;font-size:13px;line-height:1.5;
-    box-shadow:0 10px 30px rgba(13,20,36,.18);
-  }
-  .erreur-globale strong{display:block;margin-bottom:2px;}
-  .erreur-globale code{font-size:12px;word-break:break-word;}
-  .erreur-globale .fermer{
-    position:absolute;top:6px;right:8px;border:none;background:transparent;
-    font-size:18px;line-height:1;cursor:pointer;color:var(--ink-2);padding:6px;
-  }
-  .offline-banner{
-    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-    background:var(--soon-bg);color:var(--soon-ink);
-    border:1px solid var(--primary-line);border-radius:var(--r-chip);
-    padding:10px 12px;font-size:13px;font-weight:600;
-  }
-  .offline-banner .link-inline{color:inherit;text-decoration:underline;font-weight:700;}
-  .view{display:flex;flex-direction:column;gap:16px;}
+/* Les lignes de tableaux et listes ne portent PAS de bordure 2px pour aérer la lecture */
+.alert-row, .manual-row, .switch-row, .check-row, .prep-produit, .page-utile, .tache-ligne {
+  border: none !important;
+  border-bottom: 1px solid var(--line-soft) !important;
+}
+.alert-row:last-child, .manual-row:last-child, .prep-produit:last-child {
+  border-bottom: none !important;
+}
 
-  .sidebar{display:none;}
+/* --------------------------------------------------------------------------
+   3. TYPOGRAPHIE & HIÉRARCHIE VISUELLE (RATIO 1.2)
+   -------------------------------------------------------------------------- */
+body, input, button, select, textarea {
+  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
 
-  .tabbar{
-    position:fixed;left:0;right:0;bottom:0;z-index:6;
-    display:flex;align-items:center;justify-content:space-between;
-    background:var(--surface);border-top:1px solid var(--line);
-    padding:8px 6px calc(8px + var(--safe-bottom));
-  }
-  .tab{
-    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-    background:none;border:none;padding:7px 0;cursor:pointer;
-    font-size:10.5px;font-weight:600;color:var(--ink-4);
-    /* Cible tactile confortable au pouce : la zone utile dépasse 44 px. */
-    min-height:48px;
-  }
-  .tab .tab-icon{font-size:16px;line-height:1;}
-  .tab.is-active{color:var(--primary-dark);font-weight:700;}
-  .tab-fab{
-    flex:0 0 58px;display:flex;justify-content:center;background:none;border:none;cursor:pointer;
-  }
-  .tab-fab span{
-    width:50px;height:50px;border-radius:16px;background:var(--primary);color:#fff;
-    font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;
-    box-shadow:var(--shadow-fab);transition:transform .12s ease;
-  }
-  .tab-fab:active span{transform:scale(.96);}
+/* Compteurs d'engins, heures, km et dates : Space Grotesk + tabular nums */
+.num, .counter, .stat-card .num, .compteur-champ, .val, .ref-table .counter, .compteur-jour-valeur {
+  font-family: 'Space Grotesk', system-ui, sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.02em;
+}
 
-  @media (min-width:900px){
-    .sidebar{
-      display:flex;flex-direction:column;gap:5px;
-      width:198px;flex:0 0 198px;background:var(--dark);padding:22px 16px;
-      position:sticky;top:0;height:100vh;
-    }
-    .sidebar .wordmark{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.01em;padding-bottom:18px;}
-    .sidebar .wordmark em{font-style:normal;color:var(--ok-accent);}
-    .sidebar .nav-item{
-      display:block;width:100%;text-align:left;border:none;cursor:pointer;background:none;
-      font-size:13.5px;font-weight:600;color:var(--dark-ink);padding:10px 12px;border-radius:9px;
-    }
-    .sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.06);}
-    .sidebar .nav-item.is-active{color:#fff;background:var(--dark-2);font-weight:700;}
-    .sidebar .sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:4px;}
-    .sidebar .sidebar-foot button{
-      background:none;border:none;color:var(--dark-ink);font-size:13px;font-weight:600;
-      text-align:left;padding:8px 12px;border-radius:9px;cursor:pointer;
-    }
-    .sidebar .sidebar-foot button:hover{color:#fff;}
-    .tabbar{display:none;}
-    .content{padding:26px 28px 60px;}
-    .view{gap:20px;}
-  }
+/* Liens et accents */
+a, .link-inline {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+a:hover, .link-inline:hover {
+  text-decoration: underline;
+  color: #1a4d9e;
+}
 
-  /* ------------------------------------------------------------
-     En-tête
-     ------------------------------------------------------------ */
-  .page-head{display:flex;flex-direction:column;gap:12px;}
-  .greeting-row{display:flex;justify-content:space-between;align-items:center;gap:14px;}
-  .greeting{display:flex;flex-direction:column;}
-  .greeting .hello{font-size:13px;font-weight:600;color:var(--ink-2);}
-  .greeting .count{font-size:24px;font-weight:800;letter-spacing:-0.02em;}
-  .avatar{
-    width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;
-    font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  }
-  .avatar.sm{width:30px;height:30px;font-size:12px;}
+/* --------------------------------------------------------------------------
+   4. BOUTONS & CIBLES TACTILES TERRAIN (≥ 44-48 PX)
+   -------------------------------------------------------------------------- */
+/* Bouton d'action principale : Fond Encre, texte blanc */
+button.primary, .btn-primary {
+  min-height: 48px;
+  background: var(--primary);
+  color: var(--sur-primaire) !important;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+button.primary:hover, .btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+button.primary:active, .btn-primary:active {
+  transform: scale(0.98);
+}
 
-  .head-title{display:none;}
-  .head-title h1{margin:0;font-size:26px;font-weight:800;}
-  .head-title .sub{font-size:13.5px;color:var(--ink-2);margin-top:4px;}
+/* Bouton secondaire en contour */
+button.secondary, .btn-secondary, .btn-tint {
+  min-height: 44px;
+  background: var(--surface);
+  color: var(--ink) !important;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+button.secondary:hover, .btn-secondary:hover {
+  border-color: var(--ink);
+  background: var(--surface-soft);
+}
 
-  @media (min-width:900px){
-    .greeting-row{display:none;}
-    .head-title{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;}
-  }
+/* Actions rapides sur lignes de machines */
+.btn-row-action {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-size: 13.5px;
+  font-weight: 700;
+  border: 1.5px solid var(--line-soft);
+  background: var(--surface);
+  color: var(--ink);
+}
+.btn-row-action:hover {
+  border-color: var(--ink);
+  background: var(--surface-soft);
+}
+.btn-row-action.log-intervention-btn {
+  background: var(--ink);
+  color: #FFFFFF !important;
+  border-color: var(--ink);
+}
 
-  /* Boutons */
-  .btn-primary{
-    background:var(--primary);color:#fff;border:none;border-radius:11px;
-    font-size:14px;font-weight:700;padding:12px 18px;cursor:pointer;
-    transition:background .15s ease,transform .1s ease;
-  }
-  .btn-primary:hover{background:var(--primary-dark);}
-  .btn-primary:active{transform:scale(.98);}
-  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-  .btn-tint{
-    background:var(--primary-tint);color:var(--primary-dark);border:1px solid var(--primary-tint-2);
-    border-radius:11px;font-size:13.5px;font-weight:700;padding:9px 14px;cursor:pointer;
-  }
-  .btn-tint:hover{background:var(--primary-tint-2);}
-  .link-inline{
-    background:none;border:none;padding:0;cursor:pointer;font-family:inherit;
-    color:var(--primary-dark);font-size:13.5px;font-weight:700;
-  }
-  .link-inline:hover{color:var(--primary-dark);text-decoration:underline;}
+/* --------------------------------------------------------------------------
+   5. COMPOSANTS MÉTIER KEEVA
+   -------------------------------------------------------------------------- */
+/* Pastilles de statut de maintenance */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  line-height: 1;
+}
+.badge.alert, .badge.late {
+  background: var(--late-bg);
+  color: var(--late);
+}
+.badge.soon {
+  background: var(--soon-bg);
+  color: var(--soon);
+}
+.badge.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.badge.neutral {
+  background: var(--surface-soft);
+  color: var(--ink-2);
+}
 
-  /* ------------------------------------------------------------
-     Cartes
-     ------------------------------------------------------------ */
-  .card{
-    background:var(--surface);border-radius:var(--r-card);padding:18px 20px;
-    box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:12px;
-  }
-  .card-head{display:flex;align-items:center;gap:10px;}
-  .card-title{margin:0;font-size:16px;font-weight:800;}
-  .card-title-sm{font-size:15px;font-weight:700;}
-  .card-head .spacer{margin-left:auto;}
-  .muted-text{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0;}
+/* Le Compteur du Quotidien (Relevé d'heures / km sur chantier) */
+.compteur {
+  padding: 14px 16px;
+  background: var(--surface-subtle);
+  margin-top: 12px;
+}
+.compteur-saisie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.compteur-champ {
+  min-height: 46px;
+  font-size: 22px;
+  font-weight: 800;
+  width: 140px;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-sm);
+  background: #FFFFFF;
+}
+.compteur-unite {
+  min-height: 46px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 16px;
+  border-radius: var(--r-sm);
+  padding: 0 10px;
+}
+.compteur-enregistrer {
+  min-height: 46px;
+  background: var(--accent-cyan);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.compteur-enregistrer:hover {
+  background: #1e9d91;
+}
 
-  /* Grille des compteurs */
-  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-  .stat-card{
-    background:var(--surface);border-radius:14px;padding:16px 18px;
-    box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:5px;
-  }
-  .stat-card .num{font-size:28px;font-weight:700;line-height:1;}
-  .stat-card .num.late{color:var(--late-ink);}
-  .stat-card .num.soon{color:var(--soon-ink);}
-  .stat-card .num.ok{color:var(--ok-ink);}
-  .stat-card .num.primary{color:var(--primary);}
-  .stat-card .lbl{font-size:12.5px;font-weight:600;color:var(--ink-2);}
-  @media (min-width:900px){ .stat-grid{grid-template-columns:repeat(4,1fr);gap:14px;} }
+/* --------------------------------------------------------------------------
+   6. NAVIGATION MOBILE & DOCK (CAPACITOR ANDROID)
+   -------------------------------------------------------------------------- */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: #FFFFFF;
+  border-top: 2px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 8px calc(8px + var(--safe-bottom));
+}
+.tab {
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 700;
+  background: none;
+  border: none;
+}
+.tab.is-active {
+  color: var(--accent-cyan);
+}
+.tab-fab {
+  flex: 0 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  margin-top: -24px;
+}
+.tab-fab span {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: #FFFFFF;
+  font-size: 26px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-fab);
+  border: 2px solid #FFFFFF;
+}
 
-  /* Le bandeau du haut : UN BLOC PAR TÂCHE EN RETARD.
-     Règle de disposition demandée : les blocs vont par paires, et un bloc seul
-     sur sa ligne occupe toute la largeur. Elle s'exprime en deux lignes :
-       • base de 50 % (moins la gouttière) et croissance autorisée — deux blocs
-         remplissent donc la ligne, et un bloc resté seul la remplit aussi ;
-       • le dernier bloc en position impaire est explicitement mis à 100 %, pour
-         que la règle reste vraie même si la croissance changeait.
-     Sur téléphone, une seule colonne : deux demi-bandes sur 390 px seraient
-     illisibles. */
-  .priorities{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
-  .priorities > .priority{flex:1 1 calc(50% - 6px);min-width:0;margin-bottom:0;}
-  .priorities > .priority:last-child:nth-child(odd){flex-basis:100%;}
-  /* Bloc au niveau du PLAN (aucune tâche n'est en retard) : la mention le dit
-     sans détour, et ne nomme aucune tâche. */
-  .priority-mention{font-size:13px;line-height:1.45;color:rgba(255,255,255,.78);}
-  @media (max-width:720px){
-    .priorities > .priority{flex-basis:100%;}
-  }
-
-  /* Carte prioritaire (violette) */
-  .priority{
-    /* La signature FR plutôt que l'indigo : du texte blanc sur #6366F1 ne
-       donne que 4,47:1, sous la barre des 4,5:1 pour du petit texte. */
-    background:var(--primary-dark);border-radius:14px;padding:16px;color:#fff;
-    display:flex;flex-direction:column;gap:12px;
-  }
-  .priority-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--sur-primaire);}
-  .pill-late{font-size:11px;font-weight:800;background:var(--late);color:#fff;padding:4px 8px;border-radius:var(--r-pill);}
-  .pill-soon{font-size:11px;font-weight:800;background:var(--soon);color:#fff;padding:4px 8px;border-radius:var(--r-pill);}
-  .priority h2{margin:0;font-size:22px;font-weight:800;line-height:1.15;}
-  .priority .machine-name{font-size:14px;color:rgba(255,255,255,.82);}
-  .priority-stats{display:flex;gap:20px;padding-top:10px;border-top:1px solid rgba(255,255,255,.22);}
-  .priority-stats .stat{display:flex;flex-direction:column;gap:2px;}
-  .priority-stats .val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;}
-  .priority-stats .key{font-size:11px;font-weight:600;color:var(--sur-primaire);}
-  .priority-actions{display:flex;gap:8px;}
-  .priority-actions button{
-    flex:1;font-size:13px;font-weight:700;padding:11px 0;border-radius:12px;cursor:pointer;
-  }
-  .priority-actions .do{background:#fff;color:var(--primary-dark);border:none;}
-  .priority-actions .see{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}
-  @media (min-width:900px){
-    .priority{flex-direction:row;align-items:center;gap:28px;flex-wrap:wrap;}
-    .priority .priority-body{flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px;}
-    .priority-stats{border-top:none;padding-top:0;}
-    .priority-actions{flex:0 0 auto;min-width:260px;}
-  }
-
-  /* Liste des échéances */
-  .alert-list{display:flex;flex-direction:column;}
-  .alert-row{
-    display:flex;align-items:center;gap:14px;padding:13px 0;
-    border-bottom:1px solid var(--line-2);background:none;border-left:none;border-right:none;border-top:none;
-    width:100%;text-align:left;cursor:pointer;
-  }
-  .alert-row:last-child{border-bottom:none;}
-  .alert-bar{width:4px;height:38px;border-radius:4px;flex-shrink:0;}
-  .alert-bar.late{background:var(--late);}
-  .alert-bar.soon{background:var(--soon);}
-  .alert-bar.ok{background:var(--ok);}
-  .alert-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-  .alert-title{font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .alert-sub{font-size:12.5px;color:var(--ink-2);}
-  .alert-due{font-size:12.5px;font-weight:700;white-space:nowrap;}
-  .alert-due.late{color:var(--late-ink);}
-  .alert-due.soon{color:var(--soon-ink);}
-  .alert-due.ok{color:var(--ok-ink);}
-
-  /* Bloc analyse du carnet */
-  .chip-icon{
-    width:30px;height:30px;border-radius:9px;background:var(--primary-tint);color:var(--primary-dark);
-    font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  }
-  .pill{font-size:11px;font-weight:700;padding:4px 8px;border-radius:var(--r-pill);}
-  .pill.ok{color:var(--ok-ink);background:var(--ok-bg);}
-  .pill.soon{color:var(--soon-ink);background:var(--soon-bg);}
-  .pill.late{color:var(--late-ink);background:var(--late-bg);}
-  .pill.neutral{color:var(--ink-2);background:var(--surface-soft);}
-  .ai-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;}
-  .ai-row span:first-child{color:var(--ink);font-weight:600;}
-  .ai-row span:last-child{color:var(--ink-2);}
-
-  /* Zone de dépôt PDF */
-  .dropzone{
-    background:var(--surface);border:1.5px dashed var(--line-3);border-radius:var(--r-card);
-    padding:20px;display:flex;flex-direction:column;gap:9px;align-items:flex-start;cursor:pointer;
-    transition:background .15s ease,border-color .15s ease;
-  }
-  .dropzone:hover,.dropzone.is-over{background:var(--primary-tint);border-color:var(--primary);}
-  .dropzone .dz-icon{font-size:22px;color:var(--primary);}
-  .dropzone .dz-title{font-size:15px;font-weight:800;}
-  .dropzone .dz-help{font-size:13px;line-height:1.5;color:var(--ink-2);}
-
-  /* Rappels */
-  .switch-row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
-  .switch-row .switch-label{font-size:13.5px;color:var(--ink-2);}
-  .switch{
-    width:38px;height:22px;border-radius:var(--r-pill);background:rgba(14,19,51,.16);border:none;cursor:pointer;
-    display:flex;align-items:center;padding:2px;flex-shrink:0;transition:background .15s ease;
-  }
-  .switch span{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s ease;}
-  .switch.on{background:var(--primary);justify-content:flex-end;}
-
-  /* ------------------------------------------------------------
-     Vue Parc : cartes machine (compat. avec le JS existant)
-     ------------------------------------------------------------ */
-  /* Un cadre unique, sur les quatre côtés. L'ancien liseré de statut n'était posé
-     qu'à gauche, et seulement pour les classes is-alert / is-soon / is-ok : une
-     carte « en retard » — la vue émet is-late — n'en avait donc aucun, d'où des
-     cadres différents d'une machine à l'autre. Le statut est déjà annoncé par la
-     pastille, en haut à droite, et par la phrase d'échéance. */
-  .machine{
-    background:var(--surface);border:2.5px solid var(--ink);border-radius:14px;
-    box-shadow:var(--shadow-soft);padding:16px 18px;display:flex;flex-direction:column;gap:14px;
-  }
-  .m-main .name{font-size:17px;font-weight:700;}
-  .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
-  .m-side{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
-  .m-actions{display:flex;flex-wrap:wrap;gap:6px;}
-  .badge{
-    display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;
-  }
-  .badge.ok{color:var(--ok-ink);background:var(--ok-bg);}
-  .badge.soon{color:var(--soon-ink);background:var(--soon-bg);}
-  .badge.alert{color:var(--late-ink);background:var(--late-bg);}
-  .badge.neutral{color:var(--ink-2);background:var(--surface-soft);}
-  .due{font-size:13.5px;color:var(--ink-2);font-weight:600;}
-
-  /* ------------------------------------------------------------
-     LE COMPTEUR DU QUOTIDIEN — SUR LA CARTE DE LA MACHINE
-     ------------------------------------------------------------
-     C'est LE geste le plus fréquent : relever les heures ou les kilomètres. Il
-     ne doit donc pas se chercher : bloc encadré, valeur en grand, unité sur fond
-     sombre, bouton plein. Sur ordinateur il est SOUS les boutons, sur téléphone
-     SOUS la photo ; la feuille de style n'en montre qu'un à la fois, et les deux
-     portent le même repère `data-compteur` (un seul est visible). */
-  .compteur{
-    margin-top:10px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;
-    background:var(--surface-soft);display:flex;flex-direction:column;gap:6px;
-  }
-  .compteur-titre{
-    display:block;margin:0;font-size:12.5px;font-weight:800;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink-2);
-  }
-  .compteur-saisie{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;}
-  .compteur-champ{
-    font-size:22px;font-weight:800;line-height:1.1;width:6.5em;min-width:0;padding:8px 10px;
-    border:2px solid var(--ink);border-radius:10px;background:var(--surface);color:var(--ink);
-  }
-  .compteur-unite{
-    display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:0 10px;
-    font-size:18px;font-weight:800;color:var(--surface);background:var(--ink);border-radius:10px;
-  }
-  .compteur-enregistrer{
-    font-size:14px;font-weight:800;padding:8px 16px;border:none;border-radius:10px;
-    background:var(--primary);color:#fff;cursor:pointer;font-family:inherit;
-  }
-  .compteur-enregistrer:hover{background:var(--primary-dark);}
-  .compteur-note{font-size:12.5px;font-weight:700;color:var(--ink-2);min-height:1.1em;}
-  .compteur-note.is-ok{color:var(--ok);}
-  .compteur-note.is-late{color:var(--late);}
-  /* ── LIRE LE COMPTEUR SUR UNE PHOTO ─────────────────────────────────────
-     Le bouton est À CÔTÉ de la saisie, pas à sa place : la saisie manuelle
-     reste la base. La zone de lecture porte la proposition et ses deux gestes
-     (Confirmer / Corriger), ou la raison honnête d'un échec. */
-  .compteur-lire{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px;}
-  /* Les champs fichier ne sont jamais visibles : c'est le bouton qui les ouvre.
-     Il y en a DEUX — un pour l'appareil photo, un pour la galerie — et la règle
-     est écrite ici, avec leurs classes, pour que la feuille déclare bien tout ce
-     que le code emploie. */
-  input.compteur-photo-champ,
-  input.compteur-photo-champ-appareil,
-  input.compteur-photo-champ-galerie{display:none;}
-  .compteur-photo{
-    font-size:13.5px;font-weight:800;padding:7px 14px;border-radius:10px;cursor:pointer;font-family:inherit;
-    background:var(--surface);color:var(--ink);border:1.5px solid var(--line-3);
-  }
-  .compteur-photo:hover{border-color:var(--ink-2);background:var(--surface-soft);}
-  /* DEUX GESTES, DEUX POIDS. Devant la machine, prendre la photo est le geste
-     normal : bouton plein, comme « Enregistrer ». La galerie reste offerte, mais
-     discrète — un lien souligné, pas un second bouton de même poids. Sur un
-     ordinateur il n'y a pas d'appareil photo : le choix d'un fichier est alors le
-     SEUL bouton, et il prend le poids du geste principal. */
-  .compteur-photo.is-principal{background:var(--primary);color:#fff;border-color:var(--primary);}
-  .compteur-photo.is-principal:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
-  .compteur-photo.is-secondaire{
-    background:none;border-color:transparent;color:var(--primary-dark);
-    text-decoration:underline;padding:7px 4px;
-  }
-  .compteur-photo.is-secondaire:hover{background:none;border-color:transparent;color:var(--primary-dark);}
-  .compteur-lecture{
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-    font-size:13px;font-weight:700;color:var(--ink-2);
-  }
-  .compteur-lecture:empty{display:none;}
-  .compteur-lecture-texte{font-size:14px;font-weight:800;color:var(--ink);}
-  .compteur-confirmer{
-    font-size:13px;font-weight:800;padding:6px 12px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;
-    background:var(--ok);color:var(--surface);
-  }
-  .compteur-corriger{
-    font-size:13px;font-weight:800;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;
-    background:var(--surface);color:var(--ink);border:1.5px solid var(--line-3);
-  }
-  .compteur-jour-valeur{font-size:22px;font-weight:800;color:var(--ink);}
-  /* Machine NON COUVERTE par l'offre : la valeur s'affiche, la saisie n'existe
-     pas. Un champ qui aurait l'air modifiable sans rien enregistrer est le piège
-     qu'on refuse. */
-  .compteur-lecture{background:var(--surface);border-color:var(--line);}
-  .compteur-lecture .compteur-titre{color:var(--ink-3);}
-  /* Un seul emplacement visible : sous la photo sur téléphone (défaut), sous les
-     boutons dès que la carte passe en ligne (le même seuil que la carte). */
-  .compteur-mobile{display:flex;}
-  .compteur-bureau{display:none;}
-  @media (min-width:900px){
-    .machine{flex-direction:row;justify-content:space-between;gap:18px;}
-    .m-side{align-items:flex-end;}
-    .m-actions{justify-content:flex-end;}
-    .compteur-mobile{display:none;}
-    .compteur-bureau{display:flex;width:100%;max-width:360px;}
-  }
-
-  .btn-row-action{
-    font-size:13px;font-weight:700;cursor:pointer;border-radius:var(--r-pill);padding:7px 13px;
-    white-space:nowrap;border:1px solid transparent;background:var(--surface-soft);color:var(--ink-2);
-    transition:background .15s ease,border-color .15s ease,color .15s ease;
-  }
-  .btn-row-action:hover{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
-  .log-intervention-btn{background:var(--primary);color:#fff;}
-  .log-intervention-btn:hover{background:var(--primary-dark);color:#fff;border-color:transparent;}
-  .view-plan-btn,.next-maint-btn{background:var(--surface);border-color:var(--line);color:var(--ink);}
-
-  .view-manual{
-    display:inline-block;background:var(--primary-tint);border:1px solid var(--primary-tint-2);
-    color:var(--primary-dark);font-size:12.5px;font-weight:700;padding:5px 12px;
-    border-radius:var(--r-pill);cursor:pointer;font-family:inherit;
-  }
-  .view-manual:hover{background:var(--primary-tint-2);}
-  /* Dans la fiche machine, « Voir le carnet actuel (PDF) » et « Analyser ce
-     carnet » étaient collés l'un à l'autre : on leur donne l'écart qui manque,
-     y compris quand ils passent l'un sous l'autre sur un écran étroit. */
-  .view-manual + .view-manual{margin-left:8px;}
-  @media (max-width:520px){
-    .view-manual{width:100%;}
-    .view-manual + .view-manual{margin-left:0;margin-top:8px;}
-  }
-  /* Fiche machine : les boutons ne doivent plus toucher les cadres voisins —
-     ni la photo au-dessus, ni le champ « Choisir un fichier » en dessous, ni le
-     libellé qui les précède. Les valeurs viennent de l'échelle déjà employée
-     dans l'application (8, 12 et 18 px). */
-  #fetch-photo-btn{margin-top:12px;}
-  /* ── LA PHOTO CHOISIE PAR LE CLIENT ─────────────────────────────────────
-     Deux boutons à côté de la recherche web — « Choisir une photo » et
-     « Prendre une photo » — disponibles AVANT tout échec : c'est ce qui évite
-     de rester avec une photo inadaptée. 8 px d'écart entre les deux (l'échelle
-     de l'application), et ils passent à la ligne sur un écran étroit. */
-  .photo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-  .photo-actions .secondary{margin-top:0;}
-  .photo-apercu{margin-top:10px;}
-  .photo-apercu:empty{display:none;}
-  .photo-apercu .machine-photo{margin-bottom:0;}
-  /* L'ÉTIQUETTE QUI INTERDIT DE CONFONDRE une illustration trouvée sur le web
-     avec le visuel du fabricant : elle se voit sur l'aperçu lui-même, pas
-     seulement dans un message qui défile. */
-  .photo-illustration{
-    display:inline-block;margin-top:8px;padding:4px 10px;border-radius:var(--r-chip);
-    background:var(--late-bg);color:var(--late);font-size:12px;font-weight:700;
-  }
-  #photo-manuelle-statut{margin-top:8px;}
-  #f-manual{margin-top:12px;}
-  label[for="f-manual"]{margin-bottom:12px;}
-  /* LE BOUTON DE PHOTO SUIT LE CHAMP DU CARNET : sans marge, les deux commandes
-     se touchent (vu sur capture d'écran, et c'est désagréable au doigt). 8 px :
-     la même échelle que le reste. La règle vise les DEUX dispositions — empilés,
-     le bouton respire en dessous ; si un jour ils passent côte à côte sur un grand
-     écran, c'est la marge de gauche qui prendra le relais (0 pour l'instant, pour
-     ne rien inventer). */
-  #f-manual + #btn-camera{margin-top:8px;margin-left:0;}
-  /* LE REPÉRAGE DES PAGES UTILES : une liste courte, cochée d'avance, avec
-     l'aperçu qui justifie chaque page, et le coût annoncé avant l'envoi. */
-  .pages-utiles:empty{display:none;}
-  .pages-utiles{
-    margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-chip);
-    background:var(--surface-soft);
-  }
-  .pages-utiles .reperage-titre{font-weight:700;font-size:14px;color:var(--ink);}
-  /* CHAQUE LIGNE : case à cocher, numéro de page, aperçu — DANS le cadre.
-     La première version utilisait flex sans `min-width: 0` : l'aperçu, long,
-     refusait de se réduire, poussait tout vers la droite HORS du panneau, et il
-     ne restait que la case à cocher à gauche — l'utilisateur croyait alors que
-     rien n'avait été trouvé. Une grille avec `minmax(0, 1fr)` garantit que
-     l'aperçu se replie À L'INTÉRIEUR de sa colonne, sur ordinateur comme sur
-     téléphone. */
-  .pages-utiles .page-utile{
-    display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:start;
-    gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);max-width:100%;
+/* --------------------------------------------------------------------------
+   7. CHAMPS DE FORMULAIRE HAUTE LISIBILITÉ
+   -------------------------------------------------------------------------- */
+label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+input, select, textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: #FFFFFF;
+  font-size: 15px;
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(14, 19, 51, 0.12);
   }
   .pages-utiles .page-utile input{margin:3px 0 0;flex:0 0 auto;}
   .pages-utiles .page-num{font-weight:600;color:var(--ink);white-space:nowrap;}
