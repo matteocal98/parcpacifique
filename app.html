@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xqEgxKPilEagsrp+P1+onOWZzgojEQIm7+GJSZzWtxM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-A1umT8Dfbr+4ZKD82SxneQFCROv9Row9SKeXYmvMmwE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2628,6 +2628,75 @@
       width:58px;height:58px;border-radius:50%;margin-top:-30px;font-size:28px;
       border:4px solid var(--surface);box-shadow:0 6px 18px rgba(91,82,223,.4);
     }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ REFONTE STITCH — ÉCRAN PARC
+     Une seule maquette existe (Android) : le bureau en reprend le langage
+     (filtres, boutons, compteur) et garde sa carte à trois colonnes. Aucune
+     donnée nouvelle, aucune action retirée : les quatre boutons de la carte
+     restent, seul leur habillage change.
+     ══════════════════════════════════════════════════════════════════════════ */
+  .fleet-ajouter{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .fleet-ajouter .fa-court{display:none;}
+
+  /* Filtres : capsules à point de couleur, l'actif en encre pleine */
+  .chip{font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;min-height:38px;padding:6px 14px;}
+  .chip.is-active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .chip:not(.is-active){background:rgba(99,102,241,.08);border-color:transparent;}
+  .chip:not(.is-active):hover{border-color:var(--primary-line);}
+
+  /* Compteur : saisie, unité et « Enregistrer » sur une ligne ; photo en teinte Signature FR */
+  .compteur-enregistrer{background:var(--ink);}
+  .compteur-enregistrer:hover{background:var(--dark);}
+  .compteur-photo.is-principal{
+    background:rgba(36,181,168,.14);color:var(--ink);border-color:rgba(36,181,168,.55);
+  }
+  .compteur-photo.is-principal:hover{background:rgba(36,181,168,.22);border-color:rgba(36,181,168,.75);}
+
+  /* Boutons de la carte : « Enregistrer un entretien » en indigo pour un retard,
+     en encre sinon ; les trois autres en voile lavande, sans cadre */
+  .machine:not(.is-late) .m-actions .btn-principal{background:var(--ink);border-color:var(--ink);}
+  .machine .m-actions .btn-row-action:not(.btn-principal){
+    background:rgba(99,102,241,.1);border:none;color:var(--ink);
+  }
+  .machine .m-actions .btn-row-action:not(.btn-principal):hover{background:rgba(99,102,241,.18);}
+
+  @media (min-width:900px){
+    .machine .m-titre .name{font-size:20px;font-weight:800;line-height:1.2;}
+  }
+
+  @media (max-width:899px){
+    /* Pas de salut sur le Parc : l'en-tête du téléphone nomme déjà l'écran */
+    .page-head[data-view="machines"]{display:none;}
+    .machine .m-main{display:flex;flex-direction:column;gap:10px;}
+
+    /* Recherche + « Ajouter » : libellé court, la recherche garde sa place */
+    .fleet-ajouter .fa-long{display:none;}
+    .fleet-ajouter .fa-court{display:inline;}
+    .toolbar-parc .fleet-ajouter{padding:0 16px;}
+    .toolbar-parc .search-wrap input[type=search]{font-size:15px;}
+
+    /* Tri compact, à droite */
+    .sort-wrap{align-self:flex-end;}
+    .sort-wrap select{width:auto;min-height:38px;padding:6px 32px 6px 12px;font-size:13.5px;font-weight:700;border-radius:10px;}
+
+    /* Carte : pas de gros bandeau, identité lisible */
+    .machine{padding:18px 16px;border-radius:var(--r-card);}
+    .machine .m-bande{display:none;}
+    .machine .m-titre .name{font-size:22px;font-weight:800;line-height:1.15;letter-spacing:-.01em;}
+    .machine .m-titre .meta{
+      font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+      color:var(--ink-2);margin-top:4px;line-height:1.45;
+    }
+    .machine .machine-plieur{width:38px;height:38px;min-height:0;padding:0;}
+    .machine-alerte{border-radius:12px;padding:10px 12px;}
+
+    /* Compteur : une ligne (valeur, unité, Enregistrer) */
+    .compteur-saisie{flex-wrap:nowrap;}
+    .compteur-champ{width:auto;flex:1 1 0;min-width:0;}
+    .compteur-unite{flex:none;}
+    .compteur-enregistrer{flex:none;}
   }
 </style>
 </head>
@@ -9325,7 +9394,7 @@ VIEWS.machines = {
                    placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
                    aria-label="${trad('Rechercher dans le parc')}">
           </div>
-          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add">${trad('Ajouter une machine')}</button>
+          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg><span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
         </div>
         <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
