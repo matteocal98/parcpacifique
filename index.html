@@ -3,1286 +3,1014 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEEVA — Tableau de bord</title>
+<meta name="theme-color" content="#0D1424">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KEEVA">
+<title>KEEVA — Suivi d'entretien de parc (application)</title>
+<meta name="description" content="Application de suivi d'entretien de parc matériel : plans de maintenance, échéances en dates ou au compteur, rappels, historique et liste de produits à commander.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://keeva.work/decouvrir.html">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icones/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icones/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="64x64" href="icones/favicon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icones/icone-192.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="icones/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <style>
+  /* ============================================================
+     KEEVA — CHARTE GRAPHIQUE & SYSTÈME DE DESIGN
+     Palette officielle de 12 teintes · Cadre 2px Encre · Contraste 18:1
+     ============================================================ */
   :root {
-    --bg-page: #faf8ff;
-    --surface: #ffffff;
-    --surface-low: #f2f3ff;
-    --surface-dim: #d3d9f0;
-    --ink: #0e1333;
+    /* Surfaces */
+    --bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-soft: rgba(14, 19, 51, 0.04);
+    --surface-tinte: #E9EDFF;
+    --dark: #0D1424;
+    --dark-2: rgba(255, 255, 255, 0.08);
+    --dark-ink: #94A3B8;
+
+    /* Encre & Textes */
+    --ink: #0E1333;
     --ink-2: rgba(14, 19, 51, 0.74);
     --ink-3: rgba(14, 19, 51, 0.60);
     --ink-4: rgba(14, 19, 51, 0.40);
-    --sidebar-bg: #0d1424;
-    --sidebar-active: #1a233a;
-    --sidebar-ink: #94a3b8;
-    
-    /* Accents & Statuts */
-    --primary: #4355b9;
-    --primary-light: #5b6cd1;
-    --primary-tint: rgba(67, 85, 185, 0.08);
-    --primary-line: rgba(67, 85, 185, 0.25);
-    
-    --urgent: #ba1a1a;
-    --urgent-bg: #ffdad6;
-    --urgent-ink: #410002;
-    
-    --warning: #de7a16;
-    --warning-bg: rgba(222, 122, 22, 0.14);
-    --warning-ink: #4a2800;
-    
-    --ok: #006a60;
-    --ok-bg: #70f7e6;
-    --ok-ink: #00201c;
-    --teal: #24b5a8;
-    
-    --cyan: #236fe0;
-    --radius-card: 16px;
-    --radius-pill: 999px;
-    --radius-sm: 8px;
-    --shadow-soft: 0 4px 20px rgba(14, 19, 51, 0.04);
+    --ink-soft: rgba(14, 19, 51, 0.70);
+
+    /* Lignes & Séparateurs */
+    --line: #0E1333;
+    --line-soft: rgba(14, 19, 51, 0.12);
+    --line-2: rgba(14, 19, 51, 0.08);
+    --line-3: rgba(14, 19, 51, 0.22);
+
+    /* Accents et Couleurs Officielles */
+    --primary: #0E1333;
+    --primary-dark: #5B52DF; /* Signature FR / Accent texte haute lisibilité 5.65:1 */
+    --accent: #5B52DF;
+    --accent-cyan: #24B5A8;
+    --accent-blue: #236FE0;
+    --accent-orange: #DE7A16;
+    --accent-indigo: #6366F1;
+    --accent-green: #8B9B37;
+    --lien: #236FE0;
+    --sur-primaire: #FFFFFF;
+
+    /* Statuts */
+    --late: #DE7A16;
+    --late-bg: rgba(222, 122, 22, 0.14);
+    --late-ink: #0E1333;
+    --late-fort: #DE7A16;
+    --soon: #6366F1;
+    --soon-bg: rgba(99, 102, 241, 0.14);
+    --soon-ink: #0E1333;
+    --soon-fort: #5B52DF;
+    --ok: #24B5A8;
+    --ok-bg: rgba(36, 181, 168, 0.14);
+    --ok-ink: #0E1333;
+    --alert: #0E1333;
+    --alert-bg: rgba(222, 122, 22, 0.16);
+
+    /* Rayons & Cibles */
+    --r-sm: 8px;
+    --r-chip: 10px;
+    --r-md: 12px;
+    --r-card: 16px;
+    --r-pill: 999px;
+    --cible-tactile: 44px;
+    --cible-tactile-fort: 48px;
+
+    /* Ombres */
+    --shadow-soft: 0 1px 3px rgba(14, 19, 51, 0.05);
+    --shadow-card: 0 4px 18px rgba(14, 19, 51, 0.05);
+    --shadow-fab: 0 8px 24px rgba(14, 19, 51, 0.25);
+
+    /* Marges de sécurité */
+    --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+    --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
   body {
-    background-color: var(--bg-page);
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
     color: var(--ink);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Figtree', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    display: flex;
-    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Chiffres techniques & compteurs */
-  .num, .counter, .mono {
-    font-family: 'Space Grotesk', sans-serif;
+  h1, h2, h3, h4, button, input, select, textarea {
+    font-family: inherit;
+    letter-spacing: -0.015em;
+  }
+
+  .num, .counter, .stat-card .num, .compteur-champ, .val, .ref-table .counter, .due {
+    font-family: 'Space Grotesk', sans-serif !important;
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------------- BARRE LATÉRALE (SIDEBAR) ---------------- */
-  aside.sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--sidebar-bg);
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    padding: 24px 16px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
+  /* ------------------------------------------------------------
+     RÈGLE DES CADRES (2 PX ENCRE)
+     ------------------------------------------------------------ */
+  :is(.card, .stat-card, .machine, .modal, .sheet, .login-box, .offre-plan, .chemin,
+      .page-carnet, .ref-scroll, .tache-carte, .prep-groupe, .attention-box,
+      .dropzone, .empty, .erreur-globale, .offline-banner, .access-local, .compteur) {
+    border: 2px solid var(--ink);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+    background: var(--surface);
   }
-  .brand-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 10px 28px;
+
+  /* Lignes de tableaux et listes */
+  .alert-row, .manual-row, .switch-row, .check-row, .prep-produit, .page-utile, .tache-ligne {
+    border: none;
+    border-bottom: 1px solid var(--line-soft);
   }
-  .brand-logo svg {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
+  .alert-row:last-child, .manual-row:last-child, .prep-produit:last-child {
+    border-bottom: none;
   }
-  .brand-logo span {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: #ffffff;
-  }
-  nav.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex-grow: 1;
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    color: var(--sidebar-ink);
-    text-decoration: none;
-    font-size: 13.5px;
-    font-weight: 600;
-    border-radius: 10px;
-    transition: all 0.15s ease;
-  }
-  .nav-item svg {
-    width: 18px;
-    height: 18px;
-    stroke-width: 2;
-  }
-  .nav-item:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
-  }
-  .nav-item.is-active {
-    color: #ffffff;
-    background: var(--sidebar-active);
-    border-left: 3px solid var(--teal);
-    font-weight: 700;
-  }
-  .sidebar-footer {
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .sidebar-version {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #64748b;
-    margin-bottom: 12px;
-    padding: 0 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .btn-logout {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+
+  /* ------------------------------------------------------------
+     STRUCTURE GLOBALE & SHELL
+     ------------------------------------------------------------ */
+  .shell { display: flex; min-height: 100vh; min-height: 100dvh; align-items: stretch; }
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .content {
     width: 100%;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    color: var(--sidebar-ink);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-logout:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  /* ---------------- ZONE PRINCIPALE (MAIN CONTENT) ---------------- */
-  main.main-content {
-    flex: 1;
-    min-width: 0;
-    padding: 28px 40px 60px;
-    max-width: 1360px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: calc(20px + var(--safe-top)) calc(16px + var(--safe-right)) calc(116px + var(--safe-bottom)) calc(16px + var(--safe-left));
+  }
+  .view { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Navigation bureau (Sidebar Nuit) */
+  .sidebar { display: none; }
+  @media (min-width: 900px) {
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 220px;
+      flex: 0 0 220px;
+      background: var(--dark);
+      padding: 24px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .sidebar .wordmark {
+      font-size: 19px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 0.05em;
+      padding-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      cursor: pointer;
+      background: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark-ink);
+      padding: 12px 14px;
+      border-radius: 12px;
+      min-height: var(--cible-tactile);
+      transition: all 0.15s ease;
+    }
+    .sidebar .nav-item:hover { color: #FFF; background: var(--dark-2); }
+    .sidebar .nav-item.is-active {
+      color: var(--accent-cyan);
+      background: var(--ink);
+      font-weight: 700;
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 0 12px 12px 0;
+    }
+    .sidebar .sidebar-foot { margin-top: auto; }
+    .sidebar .sidebar-foot button {
+      background: none;
+      border: none;
+      color: var(--dark-ink);
+      font-size: 13.5px;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .sidebar .sidebar-foot button:hover { color: #FFF; }
+    .tabbar { display: none !important; }
+    .content { padding: 32px 36px 64px; }
   }
 
-  /* EN-TÊTE SUPÉRIEUR */
-  header.dash-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .user-greeting {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .user-avatar-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ink);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  .user-greeting h1 {
-    font-size: 21px;
-    font-weight: 800;
-    color: var(--ink);
-    letter-spacing: -0.01em;
-  }
-  .user-greeting p {
-    font-size: 13px;
-    color: var(--ink-2);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .status-dot-active {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10b981;
-    display: inline-block;
-  }
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .btn-add-machine {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--ink);
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 11px;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(14, 19, 51, 0.15);
-    transition: transform 0.1s, background-color 0.15s;
-  }
-  .btn-add-machine:hover {
-    background: #1a2347;
-    transform: translateY(-1px);
-  }
-  .user-pill {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--ink);
-  }
-
-  /* BANDEAU PRIORITAIRE VIOLET (ACTION IMMÉDIATE) */
-  .priority-banner {
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-    color: #ffffff;
-    border-radius: var(--radius-card);
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 10px 28px rgba(79, 70, 229, 0.25);
-  }
-  .priority-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .priority-icon-badge {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.16);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .priority-content {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .priority-tags {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .tag-late {
-    background: var(--warning);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
-  }
-  .priority-machine-id {
-    font-size: 18px;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.01em;
-  }
-  .priority-machine-ref {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    font-weight: 500;
-  }
-  .priority-task-desc {
-    font-size: 13.5px;
-    color: rgba(255, 255, 255, 0.9);
-  }
-  .priority-task-desc strong {
-    color: #ffffff;
-    font-weight: 700;
-  }
-  .priority-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .btn-priority-done {
-    background: #ffffff;
-    color: #4338ca;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 11px;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .btn-priority-done:hover {
-    background: #f8fafc;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  .btn-priority-details {
-    background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 10px 16px;
-    border-radius: 11px;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background 0.15s;
-  }
-  .btn-priority-details:hover {
-    background: rgba(255, 255, 255, 0.22);
-  }
-
-  /* GRILLE DES 4 COMPTEURS (STATS) */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: #ffffff;
-    border-radius: var(--radius-card);
-    padding: 20px;
-    border: 1px solid rgba(14, 19, 51, 0.06);
-    box-shadow: var(--shadow-soft);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .stat-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink-2);
-  }
-  .stat-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-  }
-  .stat-icon.late { background: #fee2e2; color: #b91c1c; }
-  .stat-icon.soon { background: #e0e7ff; color: #4338ca; }
-  .stat-icon.ok { background: #d1fae5; color: #047857; }
-  .stat-icon.docs { background: #dbeafe; color: #1d4ed8; }
-
-  .stat-body {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-  .stat-number {
-    font-size: 34px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .stat-number.late { color: var(--warning); }
-  .stat-number.soon { color: var(--ink); }
-  .stat-number.ok { color: #059669; }
-  .stat-number.docs { color: #2563eb; }
-
-  .stat-badge {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
-    text-transform: uppercase;
-  }
-  .stat-badge.urgent { background: #fef2f2; color: #b91c1c; }
-  .stat-badge.plan { background: #eef2ff; color: #4338ca; }
-  .stat-badge.nominal { background: #ecfdf5; color: #059669; }
-  .stat-badge.ratio { background: #eff6ff; color: #1d4ed8; }
-
-  /* ---------------- CORPS DE PAGE : 2 COLONNES (1.618fr / 1fr) ---------------- */
-  .dashboard-columns {
-    display: grid;
-    grid-template-columns: 1.55fr 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  /* SECTION GAUCHE */
-  .col-left {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .card-box {
-    background: #ffffff;
-    border-radius: var(--radius-card);
-    padding: 24px;
-    border: 1px solid rgba(14, 19, 51, 0.06);
-    box-shadow: var(--shadow-soft);
-  }
-  .card-box-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .card-title-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .card-title-group h2 {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-  }
-  .badge-count {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  /* LISTE DES ÉCHÉANCES D'ENTRETIEN */
-  .machine-due-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .due-item-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
-    background: #ffffff;
-    transition: all 0.15s;
-  }
-  .due-item-row:hover {
-    border-color: #cbd5e1;
-    background: #f8fafc;
-  }
-  .due-item-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .status-bar-indicator {
-    width: 4px;
-    height: 38px;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-  .status-bar-indicator.late { background: var(--warning); }
-  .status-bar-indicator.soon { background: #6366f1; }
-  .status-bar-indicator.ok { background: #10b981; }
-
-  .due-item-info h3 {
-    font-size: 14.5px;
-    font-weight: 700;
-    margin-bottom: 3px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .due-pill-badge {
-    font-size: 10.5px;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 999px;
-    text-transform: uppercase;
-  }
-  .due-pill-badge.late { background: #fff7ed; color: #c2410c; }
-  .due-pill-badge.soon { background: #eef2ff; color: #4338ca; }
-  .due-pill-badge.ok { background: #ecfdf5; color: #047857; }
-
-  .due-item-info p {
-    font-size: 12.5px;
-    color: var(--ink-2);
-  }
-  .due-item-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .due-delay-text {
-    font-size: 13.5px;
-    font-weight: 700;
-    text-align: right;
-    white-space: nowrap;
-  }
-  .due-delay-text.late { color: var(--warning); }
-  .due-delay-text.soon { color: #4f46e5; }
-  .due-delay-text.ok { color: #059669; }
-
-  .btn-table-action {
-    background: var(--ink);
-    color: #ffffff;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .btn-table-action:hover {
-    background: #1e293b;
-  }
-  .btn-table-action.secondary-action {
-    background: #f1f5f9;
-    color: #334155;
-    border: 1px solid #e2e8f0;
-  }
-  .btn-table-action.secondary-action:hover {
-    background: #e2e8f0;
-  }
-
-  /* PRÉPARATION DES PIÈCES & CONSOMMABLES */
-  .prep-filter-pills {
-    display: flex;
-    gap: 4px;
-    background: #f1f5f9;
-    padding: 3px;
-    border-radius: 8px;
-  }
-  .pill-filter-btn {
-    border: none;
-    background: transparent;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .pill-filter-btn.active {
-    background: #0f172a;
-    color: #ffffff;
-  }
-  .prep-family-box {
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    background: #f8fafc;
-  }
-  .prep-family-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .prep-family-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #0f172a;
-  }
-  .prep-family-badge {
-    font-size: 11px;
-    font-weight: 700;
-    background: #e2e8f0;
-    color: #475569;
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  .prep-item-row {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
-  .prep-item-row:last-child { margin-bottom: 0; }
-  .prep-item-meta {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .prep-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--warning);
-  }
-  .prep-dot.teal { background: var(--teal); }
-  .prep-item-name {
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .prep-item-machine {
-    font-size: 12px;
-    color: #64748b;
-  }
-  .prep-item-qty {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--ink);
-    text-align: right;
-  }
-
-  .prep-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #f1f5f9;
-  }
-  .prep-footer p {
-    font-size: 12px;
-    color: #64748b;
-  }
-  .btn-copy-order {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--ink);
-    color: #ffffff;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  /* SECTION DROITE */
-  .col-right {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  /* CARTE DÉPÔT PDF */
-  .drop-card {
-    background: #ffffff;
-    border-radius: var(--radius-card);
-    padding: 24px;
-    border: 1px solid rgba(14, 19, 51, 0.06);
-    box-shadow: var(--shadow-soft);
-  }
-  .drop-title-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .drop-title-group h2 {
-    font-size: 16.5px;
-    font-weight: 800;
-  }
-  .drop-desc {
-    font-size: 12.5px;
-    color: var(--ink-2);
-    line-height: 1.5;
-    margin-bottom: 16px;
-  }
-  .upload-dropzone {
-    border: 1.5px dashed #cbd5e1;
-    background: #f8fafc;
-    border-radius: 14px;
-    padding: 30px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .upload-dropzone:hover {
-    border-color: #4f46e5;
-    background: #eef2ff;
-  }
-  .upload-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #e0e7ff;
-    color: #4338ca;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
-  .upload-prompt {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-  .upload-sub {
-    font-size: 11px;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .drop-features {
+  /* Barre de navigation mobile (Dock) */
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
     display: flex;
     align-items: center;
     justify-content: space-around;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #f1f5f9;
+    background: var(--surface);
+    border-top: 1px solid var(--line-soft);
+    padding: 8px 6px calc(8px + var(--safe-bottom));
   }
-  .drop-feature-item {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #059669;
+  .tab {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  /* CANAUX DE RAPPELS */
-  .reminders-card {
-    background: #ffffff;
-    border-radius: var(--radius-card);
-    padding: 24px;
-    border: 1px solid rgba(14, 19, 51, 0.06);
-    box-shadow: var(--shadow-soft);
-  }
-  .reminders-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-  .reminders-head h2 {
-    font-size: 16.5px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .btn-link-setting {
-    background: none;
-    border: none;
-    color: #4f46e5;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 4px;
+    background: none;
+    border: none;
+    padding: 6px 0;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    min-height: 48px;
   }
-  .channel-row {
+  .tab.is-active { color: var(--primary-dark); font-weight: 700; }
+  .tab-fab {
+    flex: 0 0 58px;
+    display: flex;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .tab-fab span {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: var(--ink);
+    color: #FFF;
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-fab);
+  }
+
+  /* ------------------------------------------------------------
+     EN-TÊTE DE PAGE
+     ------------------------------------------------------------ */
+  .page-head { display: flex; flex-direction: column; gap: 14px; }
+  .dash-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 14px;
+    gap: 16px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-soft);
+  }
+  .dash-head-left { display: flex; align-items: center; gap: 14px; }
+  .dash-avatar {
+    width: 46px;
+    height: 46px;
     border-radius: 12px;
-    background: #f8fafc;
-    border: 1px solid #f1f5f9;
-    margin-bottom: 10px;
-  }
-  .channel-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .channel-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: #0f172a;
-    color: #ffffff;
+    background: var(--ink);
+    color: #FFF;
+    font-size: 16px;
+    font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .channel-icon.email { background: #2563eb; }
-  .channel-icon.whatsapp { background: #16a34a; }
-  .channel-title {
+  .dash-head-text h1 { margin: 0; font-size: 22px; font-weight: 800; line-height: 1.2; }
+  .dash-head-text .sub { font-size: 13.5px; color: var(--ink-2); font-weight: 600; }
+
+  /* ------------------------------------------------------------
+     BOUTONS & COMMANDES HAUTE VISIBILITÉ
+     ------------------------------------------------------------ */
+  button.primary, .btn-primary {
+    min-height: var(--cible-tactile-fort);
+    background: var(--primary);
+    color: var(--sur-primaire) !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.primary:hover, .btn-primary:hover { background: #000; transform: translateY(-1px); }
+
+  button.secondary, .btn-secondary, .btn-tint {
+    min-height: var(--cible-tactile);
+    background: var(--surface);
+    color: var(--ink) !important;
+    border: 1.5px solid var(--line-3);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  button.secondary:hover { border-color: var(--ink); background: var(--surface-soft); }
+
+  .btn-row-action {
     font-size: 13px;
     font-weight: 700;
+    cursor: pointer;
+    border-radius: var(--r-pill);
+    padding: 8px 14px;
+    border: 1.5px solid var(--line-3);
+    background: var(--surface);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .channel-sub {
-    font-size: 11.5px;
-    color: #64748b;
+  .btn-row-action.log-intervention-btn {
+    background: var(--ink);
+    color: #FFF !important;
+    border-color: var(--ink);
   }
-  .channel-badge {
-    font-size: 11px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
-    letter-spacing: 0.04em;
-  }
-  .channel-badge.active { background: #ecfdf5; color: #047857; }
-  .channel-badge.pending { background: #f1f5f9; color: #64748b; }
 
-  .telematics-status {
+  /* ------------------------------------------------------------
+     TABLEAU DE BORD & TUILES MÉTRIQUES
+     ------------------------------------------------------------ */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (min-width: 900px) {
+    .stat-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  }
+  .stat-card {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--surface);
+  }
+  .stat-tete {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11.5px;
-    color: #64748b;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #f1f5f9;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-2);
   }
+  .stat-card .num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin: 4px 0 2px;
+  }
+  .stat-card .num.etat-late { color: var(--late); }
+  .stat-card .num.etat-soon { color: var(--accent-blue); }
+  .stat-card .num.etat-ok { color: var(--accent-green); }
+  .stat-card .num.etat-manuels { color: var(--ink); }
+
+  /* Carte Prioritaire d'alerte */
+  .priority {
+    background: var(--dark);
+    color: #FFF;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .priority-top { display: flex; justify-content: space-between; align-items: center; }
+  .priority-genre { font-size: 12px; font-weight: 700; color: var(--dark-ink); letter-spacing: 0.08em; }
+  .priority .machine-name { font-size: 24px; font-weight: 800; color: #FFF; }
+  .priority-tache {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .priority-tache h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .priority-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .priority-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .priority-actions .do { background: #FFF; color: var(--ink); border: none; }
+  .priority-actions .see { background: transparent; color: #FFF; border: 1.5px solid rgba(255, 255, 255, 0.3); }
+
+  /* Grille 2 colonnes Tableau de bord */
+  .dash-grid { display: flex; flex-direction: column; gap: 20px; }
+  @media (min-width: 900px) {
+    .dash-grid { display: grid; grid-template-columns: 1.618fr 1fr; gap: 24px; align-items: start; }
+  }
+
+  /* ------------------------------------------------------------
+     CARTE MACHINE (PARC & LISTING)
+     ------------------------------------------------------------ */
+  .machine {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .m-main .name { font-size: 19px; font-weight: 800; color: var(--ink); }
+  .m-main .meta { font-size: 13px; color: var(--ink-2); line-height: 1.5; margin-top: 2px; }
+  
+  /* Bandeau d'état */
+  .machine-alerte {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--late-bg);
+    color: var(--late-ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .machine-alerte.is-soon { background: var(--soon-bg); color: var(--soon-ink); }
+
+  /* Le Compteur de Chantier */
+  .compteur {
+    padding: 12px 14px;
+    border: 2px solid var(--ink);
+    border-left: 5px solid var(--ink);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    margin-top: 10px;
+  }
+  .compteur-titre {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .compteur-saisie { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .compteur-champ {
+    width: 130px;
+    height: 44px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ink);
+    background: #FFF;
+  }
+  .compteur-unite {
+    height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink);
+    color: #FFF;
+    font-weight: 800;
+    border-radius: 10px;
+    padding: 0 10px;
+  }
+
+  /* Badges */
+  .badge, .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+  }
+  .badge.alert, .pill.late { background: var(--late-bg); color: var(--late); }
+  .badge.soon, .pill.soon { background: var(--soon-bg); color: var(--soon); }
+  .badge.ok, .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .badge.neutral, .pill.neutral { background: var(--surface-soft); color: var(--ink-2); }
+
+  /* ------------------------------------------------------------
+     FORMULAIRES & MODALES
+     ------------------------------------------------------------ */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 20, 36, 0.6);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: calc(24px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .modal {
+    max-width: 520px;
+    width: 100%;
+    padding: 28px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--r-card);
+  }
+  .modal h2 { margin: 0 0 6px; font-size: 22px; font-weight: 800; }
+  .modal p.sub { margin: 0 0 16px; font-size: 14px; color: var(--ink-2); }
+
+  label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+  input, select, textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--line-3);
+    border-radius: 10px;
+    background: #FFF;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(14, 19, 51, 0.12);
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 22px; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row > div { flex: 1; min-width: 0; }
 </style>
 </head>
 <body>
 
-  <!-- BARRE LATÉRALE FIXE -->
-  <aside class="sidebar">
-    <div class="brand-logo">
-      <!-- Logo vectoriel officiel KEEVA -->
-      <svg viewBox="0 0 100 100" fill="none">
-        <defs>
-          <linearGradient id="logo-hex" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#236FE0"/>
-            <stop offset="58%" stop-color="#14B8A6"/>
-            <stop offset="100%" stop-color="#8B9B37"/>
-          </linearGradient>
-        </defs>
-        <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" stroke="url(#logo-hex)" stroke-width="8" fill="none" stroke-linejoin="round"/>
-        <rect x="26" y="20" width="8" height="60" rx="4" fill="#FFFFFF"/>
-        <circle cx="49" cy="50" r="7" fill="#6366F1"/>
-        <path d="M34 48 C 50 35, 68 34, 76 38 C 66 48, 48 50, 34 48 Z" fill="#24B5A8"/>
-        <path d="M34 52 C 50 65, 68 66, 76 62 C 66 52, 48 50, 34 52 Z" fill="#DE7A16"/>
-      </svg>
-      <span>KEEVA</span>
-    </div>
+<div id="app" class="wrap">
+  <div class="loading" style="padding:80px;text-align:center;font-weight:700;color:var(--ink-2)">Chargement du parc KEEVA…</div>
+</div>
 
-    <nav class="sidebar-nav">
-      <a href="#" class="nav-item is-active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Tableau de bord</span>
-      </a>
-      <a href="#" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        <span>Machines (Parc)</span>
-      </a>
-      <a href="#" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span>Manuels & carnets</span>
-      </a>
-      <a href="#" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Agenda</span>
-      </a>
-      <a href="#" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span>Rappels</span>
-      </a>
-      <a href="#" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Mon compte</span>
-      </a>
-    </nav>
+<script>
+// ── Configuration Supabase ─────────────────────────────────────
+const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
+const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
+const app = document.getElementById('app');
 
-    <div class="sidebar-footer">
-      <div class="sidebar-version">
-        <span>VERSION</span>
-        <span class="mono">v1.0.0</span>
-      </div>
-      <button class="btn-logout">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span>Se déconnecter</span>
-      </button>
-    </div>
-  </aside>
+let sb = null;
+try {
+  if (window.supabase) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+} catch(e) {
+  console.warn("Mode démo ou Supabase indisponible", e);
+}
 
-  <!-- CONTENU PRINCIPAL -->
-  <main class="main-content">
-    
-    <!-- EN-TÊTE -->
-    <header class="dash-header">
-      <div class="user-greeting">
-        <div class="user-avatar-icon">
-          <!-- Pictogramme K stylisé -->
-          <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
-            <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" stroke="#236FE0" stroke-width="8" fill="none"/>
-            <rect x="26" y="20" width="8" height="60" rx="4" fill="#0E1333"/>
-            <path d="M34 48 C 50 35, 68 34, 76 38 C 66 48, 48 50, 34 48 Z" fill="#24B5A8"/>
-            <path d="M34 52 C 50 65, 68 66, 76 62 C 66 52, 48 50, 34 52 Z" fill="#DE7A16"/>
+// État de l'application
+const UI = {
+  view: 'dashboard',
+  companyName: 'BTP & Terrassons Pacifique',
+  companyPlan: 'starter',
+  role: 'gerant',
+  machines: [
+    {
+      id: 'm1',
+      name: 'KUBOTA U17-3',
+      brand_model: 'KUBOTA Mini-pelle',
+      category: { name: 'MINI-PELLE' },
+      counter_value: 268,
+      counter_unit: 'hours',
+      status: 'en_service',
+      manual_url: 'carnet.pdf',
+      plan: {
+        id: 'p1',
+        tracking_mode: 'hours',
+        interval_counter: 250,
+        next_due_counter: 250,
+        tasks: 'Vidange moteur, filtre à huile, graissage pivots',
+        items: [
+          { label: 'Vidange moteur', frequency: 'Toutes les 250 h', due_counter: 250, spec: '15W40', qty: '3.6 L' },
+          { label: 'Filtre à huile', frequency: 'Toutes les 250 h', due_counter: 250, spec: 'Réf KB-204', qty: '1 unité' },
+          { label: 'Graissage complet', frequency: 'Toutes les 50 h', due_counter: 300, spec: 'Graisse NLGI 2', qty: '2 cartouches' }
+        ]
+      }
+    },
+    {
+      id: 'm2',
+      name: 'PEUGEOT 208 UTILITY',
+      brand_model: 'PEUGEOT 1.5 BlueHDi',
+      category: { name: 'VÉHICULE' },
+      counter_value: 19850,
+      counter_unit: 'km',
+      status: 'en_service',
+      plan: {
+        id: 'p2',
+        tracking_mode: 'km',
+        interval_counter: 20000,
+        next_due_counter: 20000,
+        tasks: 'Révision des 20 000 km, filtres habitacle'
+      }
+    },
+    {
+      id: 'm3',
+      name: 'OREC FL500BC',
+      brand_model: 'OREC Débroussailleuse',
+      category: { name: 'MOTOCULTURE' },
+      counter_value: 42,
+      counter_unit: 'hours',
+      status: 'en_service',
+      plan: {
+        id: 'p3',
+        tracking_mode: 'days',
+        interval_days: 90,
+        next_due_at: '2026-11-15',
+        tasks: 'Contrôle lame, filtre air'
+      }
+    }
+  ]
+};
+
+// ── Calcul des états d'échéance ─────────────────────────────────
+function dueInfo(plan, machine) {
+  if (!plan) return { state: 'neutral', label: 'Aucun plan actif', short: '—', sortKey: 999999 };
+  if (plan.tracking_mode === 'hours' || plan.tracking_mode === 'km') {
+    const unit = machine.counter_unit === 'km' ? 'km' : 'h';
+    const current = machine.counter_value || 0;
+    const due = plan.next_due_counter || 0;
+    const diff = due - current;
+    if (diff < 0) {
+      return { state: 'late', label: `En retard de ${Math.abs(diff)} ${unit}`, short: `+${Math.abs(diff)} ${unit}`, sortKey: diff };
+    }
+    if (diff <= 30) {
+      return { state: 'soon', label: `Échéance dans ${diff} ${unit}`, short: `dans ${diff} ${unit}`, sortKey: diff };
+    }
+    return { state: 'ok', label: `À jour (${diff} ${unit} restants)`, short: `${diff} ${unit}`, sortKey: diff };
+  }
+  return { state: 'ok', label: 'Échéance calendaire à jour', short: 'À jour', sortKey: 100 };
+}
+
+// ── Rendu de l'application ──────────────────────────────────────
+function renderApp() {
+  const cLate = UI.machines.filter(m => dueInfo(m.plan, m).state === 'late').length;
+  const cSoon = UI.machines.filter(m => dueInfo(m.plan, m).state === 'soon').length;
+  const cOk = UI.machines.filter(m => dueInfo(m.plan, m).state === 'ok').length;
+
+  app.innerHTML = `
+    <div class="shell">
+      <!-- Barre latérale Bureau (Fond Nuit) -->
+      <aside class="sidebar">
+        <div class="wordmark">
+          <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" stroke="#24B5A8" stroke-width="8" fill="none"/>
+            <circle cx="50" cy="50" r="16" fill="#6366F1"/>
+            <line x1="28" y1="20" x2="28" y2="80" stroke="#FFF" stroke-width="9" stroke-linecap="round"/>
           </svg>
+          <span>KEEVA</span>
+        </div>
+        <button class="nav-item ${UI.view === 'dashboard' ? 'is-active' : ''}" onclick="switchView('dashboard')">
+          <span>◈</span> <span>Tableau de bord</span>
+        </button>
+        <button class="nav-item ${UI.view === 'machines' ? 'is-active' : ''}" onclick="switchView('machines')">
+          <span>▤</span> <span>Parc & Machines</span>
+        </button>
+        <button class="nav-item ${UI.view === 'manuals' ? 'is-active' : ''}" onclick="switchView('manuals')">
+          <span>✦</span> <span>Manuels & carnets</span>
+        </button>
+        <button class="nav-item ${UI.view === 'agenda' ? 'is-active' : ''}" onclick="switchView('agenda')">
+          <span>◔</span> <span>Agenda & Pièces</span>
+        </button>
+        <button class="nav-item ${UI.view === 'reminders' ? 'is-active' : ''}" onclick="switchView('reminders')">
+          <span>☰</span> <span>Rappels & Alertes</span>
+        </button>
+        <button class="nav-item ${UI.view === 'account' ? 'is-active' : ''}" onclick="switchView('account')">
+          <span>◉</span> <span>Mon compte</span>
+        </button>
+        <div class="sidebar-foot">
+          <button onclick="alert('Déconnexion effectuée.')">Déconnexion</button>
+        </div>
+      </aside>
+
+      <!-- Zone Principale -->
+      <div class="main">
+        <div class="content">
+          <div class="view">
+            <!-- En-tête Unifié -->
+            <div class="dash-head">
+              <div class="dash-head-left">
+                <div class="dash-avatar">BP</div>
+                <div class="dash-head-text">
+                  <h1>Bonjour, Équipe Atelier</h1>
+                  <div class="sub">${UI.companyName} · ${UI.machines.length} machines suivies</div>
+                </div>
+              </div>
+              <button class="btn-primary" onclick="openAddModal()">
+                <span>+</span> <span>Ajouter une machine</span>
+              </button>
+            </div>
+
+            <!-- Vues Dynamiques -->
+            <div id="view-container">
+              ${renderCurrentView(cLate, cSoon, cOk)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre d'onglets Mobile -->
+    <nav class="tabbar">
+      <button class="tab ${UI.view === 'dashboard' ? 'is-active' : ''}" onclick="switchView('dashboard')">
+        <span>◈</span> Accueil
+      </button>
+      <button class="tab ${UI.view === 'machines' ? 'is-active' : ''}" onclick="switchView('machines')">
+        <span>▤</span> Parc
+      </button>
+      <div class="tab-fab" onclick="openAddModal()">
+        <span>+</span>
+      </div>
+      <button class="tab ${UI.view === 'manuals' ? 'is-active' : ''}" onclick="switchView('manuals')">
+        <span>✦</span> Manuels
+      </button>
+      <button class="tab ${UI.view === 'account' ? 'is-active' : ''}" onclick="switchView('account')">
+        <span>◉</span> Compte
+      </button>
+    </nav>
+  `;
+}
+
+function renderCurrentView(cLate, cSoon, cOk) {
+  if (UI.view === 'dashboard') {
+    const machineUrgente = UI.machines[0];
+    const infoUrgente = dueInfo(machineUrgente.plan, machineUrgente);
+    return `
+      <!-- Alerte Prioritaire -->
+      <section class="priority">
+        <div class="priority-top">
+          <span class="badge alert">EN RETARD</span>
+          <span class="priority-genre">${machineUrgente.category.name}</span>
+        </div>
+        <div class="machine-name">${machineUrgente.name}</div>
+        <div class="priority-tache">
+          <h2>${machineUrgente.plan.tasks}</h2>
+          <div style="font-size:12px;color:var(--dark-ink);margin-top:4px">
+            Compteur : <strong>${machineUrgente.counter_value} ${machineUrgente.counter_unit}</strong> (Échéance dépassée de 18 h)
+          </div>
+        </div>
+        <div class="priority-actions">
+          <button class="do" onclick="openLogModal('${machineUrgente.id}')">Marquer fait</button>
+          <button class="see" onclick="switchView('machines')">Voir la fiche</button>
+        </div>
+      </section>
+
+      <!-- 4 Tuiles Métriques -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-tete"><span>EN RETARD</span> <span style="color:var(--late)">●</span></div>
+          <div class="num etat-late">${cLate}</div>
+          <div style="font-size:12px;color:var(--ink-2)">intervention requise</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-tete"><span>SOUS 15 JOURS</span> <span style="color:var(--accent-blue)">●</span></div>
+          <div class="num etat-soon">${cSoon}</div>
+          <div style="font-size:12px;color:var(--ink-2)">à planifier</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-tete"><span>À JOUR</span> <span style="color:var(--accent-green)">●</span></div>
+          <div class="num etat-ok">${cOk}</div>
+          <div style="font-size:12px;color:var(--ink-2)">matériel opérationnel</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-tete"><span>MANUELS INDEXÉS</span> <span>✦</span></div>
+          <div class="num etat-manuels">1</div>
+          <div style="font-size:12px;color:var(--ink-2)">carnets analysés</div>
+        </div>
+      </div>
+
+      <!-- Grille Principale + Pièces -->
+      <div class="dash-grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 style="margin:0;font-size:17px;font-weight:800">Échéances d'entretien</h2>
+            <button class="btn-row-action" onclick="switchView('agenda')">Tout voir</button>
+          </div>
+          ${UI.machines.map(m => {
+            const inf = dueInfo(m.plan, m);
+            return `
+              <div class="alert-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+                <div>
+                  <div style="font-weight:700;font-size:14.5px">${m.name}</div>
+                  <div style="font-size:12.5px;color:var(--ink-2)">${m.plan ? m.plan.tasks : 'Aucun plan'}</div>
+                </div>
+                <span class="badge ${inf.state}">${inf.short}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="card">
+          <h2 style="margin:0 0 8px;font-size:17px;font-weight:800">Préparation Pièces & Huiles</h2>
+          <p style="font-size:13px;color:var(--ink-2);margin:0 0 12px">Besoins consolidés constructeur pour les 30 prochains jours.</p>
+          <div style="background:var(--surface-soft);padding:10px 14px;border-radius:10px;margin-bottom:8px">
+            <div style="font-weight:700;font-size:13.5px">Huile Moteur 15W40</div>
+            <div style="font-size:12px;color:var(--ink-2)">Total : 3.6 L (KUBOTA U17-3)</div>
+          </div>
+          <div style="background:var(--surface-soft);padding:10px 14px;border-radius:10px">
+            <div style="font-weight:700;font-size:13.5px">Filtre à Huile KB-204</div>
+            <div style="font-size:12px;color:var(--ink-2)">Total : 1 unité</div>
+          </div>
+          <button class="secondary" style="width:100%;margin-top:14px" onclick="switchView('agenda')">Consulter la liste complète</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (UI.view === 'machines') {
+    return `
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <input type="search" placeholder="Rechercher par engin, marque, matricule..." style="flex:1">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        ${UI.machines.map(m => {
+          const inf = dueInfo(m.plan, m);
+          return `
+            <div class="machine card">
+              <div class="m-tete">
+                <div>
+                  <div class="name">${m.name}</div>
+                  <div class="meta">${m.brand_model} · ${m.category.name}</div>
+                </div>
+                <span class="badge ${inf.state}">${inf.short}</span>
+              </div>
+              <div class="machine-alerte ${inf.state === 'late' ? '' : 'is-soon'}">
+                ${inf.label} — ${m.plan ? m.plan.tasks : ''}
+              </div>
+              <div class="compteur">
+                <span class="compteur-titre">RELEVER LE COMPTEUR</span>
+                <div class="compteur-saisie">
+                  <input class="compteur-champ" type="number" value="${m.counter_value}" id="c-${m.id}">
+                  <span class="compteur-unite">${m.counter_unit}</span>
+                  <button class="btn-primary" onclick="updateCounter('${m.id}')">Enregistrer</button>
+                  <button class="secondary" onclick="alert('Appareil photo activé pour lecture OCR du cadran.')">Prendre photo cadran</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                <button class="btn-row-action log-intervention-btn" onclick="openLogModal('${m.id}')">Enregistrer un entretien</button>
+                <button class="btn-row-action" onclick="alert('Affichage du plan complet')">Voir le plan</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card" style="padding:40px;text-align:center">
+      <h2>Vue en cours de consultation</h2>
+      <p style="color:var(--ink-2)">Toutes les informations métier sont parfaitement chargées.</p>
+      <button class="btn-primary" onclick="switchView('dashboard')">Retourner au Tableau de bord</button>
+    </div>
+  `;
+}
+
+function switchView(v) {
+  UI.view = v;
+  renderApp();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateCounter(id) {
+  const val = document.getElementById(`c-${id}`).value;
+  const m = UI.machines.find(x => x.id === id);
+  if (m) {
+    m.counter_value = parseFloat(val);
+    renderApp();
+  }
+}
+
+function openAddModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Ajouter une machine</h2>
+      <p class="sub">Renseignez les détails de l'engin ou véhicule pour initialiser son suivi.</p>
+      <label>Désignation / Nom de la machine</label>
+      <input id="f-nom" placeholder="Ex. KUBOTA U17-3">
+      <label>Catégorie</label>
+      <select id="f-cat">
+        <option>MINI-PELLE</option>
+        <option>VÉHICULE</option>
+        <option>TRACTEUR</option>
+        <option>GROUPE ÉLECTROGÈNE</option>
+      </select>
+      <div class="field-row">
+        <div>
+          <label>Compteur initial</label>
+          <input type="number" id="f-compteur" placeholder="250">
         </div>
         <div>
-          <h1>Bonjour Matthieu</h1>
-          <p><span class="status-dot-active"></span> 4 machines suivies</p>
+          <label>Unité</label>
+          <select id="f-unite"><option value="hours">Heures</option><option value="km">Kilomètres</option></select>
         </div>
       </div>
-
-      <div class="header-actions">
-        <button class="btn-add-machine">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          <span>Ajouter une machine</span>
-        </button>
-        <div class="user-pill" title="Profil utilisateur">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
+      <div class="modal-actions">
+        <button class="secondary" onclick="this.closest('.overlay').remove()">Annuler</button>
+        <button class="primary" onclick="saveNewMachine(this)">Créer la machine</button>
       </div>
-    </header>
-
-    <!-- BANDEAU PRIORITAIRE VIOLET (ACTION IMMÉDIATE) -->
-    <section class="priority-banner">
-      <div class="priority-left">
-        <div class="priority-icon-badge">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="priority-content">
-          <div class="priority-tags">
-            <span class="tag-late">EN RETARD · +3 J</span>
-            <span class="priority-machine-id">KUBOTA U17-3</span>
-            <span class="priority-machine-ref">#KB-2021-089</span>
-          </div>
-          <div class="priority-task-desc">
-            Tâche requise : <strong>Vidange, filtre à huile · Échéance 250 h</strong> (Compteur relevé à <span class="mono"><strong>253 h</strong></span>)
-          </div>
-        </div>
-      </div>
-      <div class="priority-actions">
-        <button class="btn-priority-done">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Marquer fait</span>
-        </button>
-        <button class="btn-priority-details">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span>Détails</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- GRILLE DES 4 STATS -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-head">
-          <span>En retard</span>
-          <div class="stat-icon late">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </div>
-        </div>
-        <div class="stat-body">
-          <span class="stat-number late mono">1</span>
-          <span class="stat-badge urgent">URGENT</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-head">
-          <span>Sous 15 jours</span>
-          <div class="stat-icon soon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-        </div>
-        <div class="stat-body">
-          <span class="stat-number soon mono">1</span>
-          <span class="stat-badge plan">À PLANIFIER</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-head">
-          <span>À jour</span>
-          <div class="stat-icon ok">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-        </div>
-        <div class="stat-body">
-          <span class="stat-number ok mono">2</span>
-          <span class="stat-badge nominal">NOMINAL</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-head">
-          <span>Manuels analysés</span>
-          <div class="stat-icon docs">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          </div>
-        </div>
-        <div class="stat-body">
-          <span class="stat-number docs mono">3</span>
-          <span class="stat-badge ratio mono">75% PARC</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION EN 2 COLONNES (1.618fr / 1fr) -->
-    <div class="dashboard-columns">
-      
-      <!-- COLONNE GAUCHE (1.618fr) -->
-      <div class="col-left">
-        
-        <!-- ÉCHÉANCES D'ENTRETIEN -->
-        <section class="card-box">
-          <div class="card-box-header">
-            <div class="card-title-group">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <h2>Échéances d'entretien</h2>
-            </div>
-            <span class="badge-count mono">4 MACHINES ACTIVES</span>
-          </div>
-
-          <div class="machine-due-list">
-            <!-- Machine 1 : En retard -->
-            <div class="due-item-row">
-              <div class="due-item-left">
-                <div class="status-bar-indicator late"></div>
-                <div class="due-item-info">
-                  <h3>KUBOTA U17-3 <span class="due-pill-badge late">EN RETARD</span></h3>
-                  <p>Vidange, filtre à huile · compteur 253 h / 250 h</p>
-                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Mini-pelle sur chenilles · Dépassement critique</p>
-                </div>
-              </div>
-              <div class="due-item-right">
-                <div class="due-delay-text late mono">+3 j</div>
-                <button class="btn-table-action">Traiter</button>
-              </div>
-            </div>
-
-            <!-- Machine 2 : Bientôt -->
-            <div class="due-item-row">
-              <div class="due-item-left">
-                <div class="status-bar-indicator soon"></div>
-                <div class="due-item-info">
-                  <h3>PEUGEOT 208 <span class="due-pill-badge soon">BIENTÔT</span></h3>
-                  <p>Révision périodique 20 000 km (relevé 19 450 km)</p>
-                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Véhicule de liaison atelier · Concessionnaire</p>
-                </div>
-              </div>
-              <div class="due-item-right">
-                <div class="due-delay-text soon mono">dans 12 j</div>
-                <button class="btn-table-action secondary-action">Planifier</button>
-              </div>
-            </div>
-
-            <!-- Machine 3 : À jour -->
-            <div class="due-item-row">
-              <div class="due-item-left">
-                <div class="status-bar-indicator ok"></div>
-                <div class="due-item-info">
-                  <h3>JOHN DEERE 6120M <span class="due-pill-badge ok">À JOUR</span></h3>
-                  <p>Graissage transmission intégrale & pack filtres</p>
-                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Tracteur agricole principal · Échéance standard</p>
-                </div>
-              </div>
-              <div class="due-item-right">
-                <div class="due-delay-text ok mono">dans 45 j</div>
-                <button class="btn-table-action secondary-action">Voir</button>
-              </div>
-            </div>
-
-            <!-- Machine 4 : À jour -->
-            <div class="due-item-row">
-              <div class="due-item-left">
-                <div class="status-bar-indicator ok"></div>
-                <div class="due-item-info">
-                  <h3>STIHL MS 261 <span class="due-pill-badge ok">À JOUR</span></h3>
-                  <p>Affûtage chaîne & contrôle bougie · 50 h</p>
-                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Tronçonneuse d'abattage</p>
-                </div>
-              </div>
-              <div class="due-item-right">
-                <div class="due-delay-text ok mono">dans 18 h</div>
-                <button class="btn-table-action secondary-action">Voir</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- PRÉPARATION DES PIÈCES & CONSOMMABLES -->
-        <section class="card-box">
-          <div class="card-box-header">
-            <div>
-              <h2>Préparation des pièces & consommables</h2>
-              <p style="font-size:12.5px;color:#64748b;margin-top:2px;">Prévisions d'achats groupés pour interventions programmées</p>
-            </div>
-            <div class="prep-filter-pills">
-              <button class="pill-filter-btn">30 j</button>
-              <button class="pill-filter-btn active">90 j</button>
-              <button class="pill-filter-btn">180 j</button>
-            </div>
-          </div>
-
-          <!-- Famille Filtres -->
-          <div class="prep-family-box">
-            <div class="prep-family-head">
-              <div class="prep-family-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                <span>Famille : Filtres</span>
-              </div>
-              <span class="prep-family-badge mono">3 pièces</span>
-            </div>
-            <div class="prep-item-row">
-              <div class="prep-item-meta">
-                <span class="prep-dot"></span>
-                <span class="prep-item-name">Filtre à huile (Réf: K-15241)</span>
-                <span class="prep-item-machine">· Pour Kubota U17-3</span>
-              </div>
-              <span class="prep-item-qty mono">2 unités (dès le 12/10)</span>
-            </div>
-            <div class="prep-item-row">
-              <div class="prep-item-meta">
-                <span class="prep-dot teal"></span>
-                <span class="prep-item-name">Filtre habitacle charbon actif</span>
-                <span class="prep-item-machine">· Pour Peugeot 208</span>
-              </div>
-              <span class="prep-item-qty mono">1 unité</span>
-            </div>
-          </div>
-
-          <!-- Famille Huiles -->
-          <div class="prep-family-box">
-            <div class="prep-family-head">
-              <div class="prep-family-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                <span>Famille : Huiles et lubrifiants</span>
-              </div>
-              <span class="prep-family-badge mono">5 Litres</span>
-            </div>
-            <div class="prep-item-row">
-              <div class="prep-item-meta">
-                <span class="prep-dot teal"></span>
-                <span class="prep-item-name">Huile moteur 15W40 Minérale Haute Charge</span>
-                <span class="prep-item-machine">· Pour John Deere 6120M</span>
-              </div>
-              <span class="prep-item-qty mono">Bidon 5L</span>
-            </div>
-          </div>
-
-          <div class="prep-footer">
-            <p>Généré automatiquement d'après les préconisations constructeurs constructives</p>
-            <button class="btn-copy-order">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Copier la liste commande</span>
-            </button>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- COLONNE DROITE (1fr) -->
-      <div class="col-right">
-        
-        <!-- CARTE DÉPÔT PDF -->
-        <section class="drop-card">
-          <div class="drop-title-group">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            <h2>Déposer un manuel PDF</h2>
-          </div>
-          <p class="drop-desc">L'algorithme KEEVA scanne le carnet d'entretien, extrait les périodicités en heures ou kilomètres et configure les alertes automatiquement.</p>
-
-          <div class="upload-dropzone">
-            <div class="upload-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <div class="upload-prompt">Glissez votre PDF ici ou parcourez</div>
-            <div class="upload-sub">FORMATS ACCEPTÉS : PDF, JPG, SCAN HAUTE DÉF. (MAX 45 MO)</div>
-          </div>
-
-          <div class="drop-features">
-            <span class="drop-feature-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Reconnaissance OCR</span>
-            </span>
-            <span class="drop-feature-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Tableaux périodiques</span>
-            </span>
-          </div>
-        </section>
-
-        <!-- CANAUX DE RAPPELS -->
-        <section class="reminders-card">
-          <div class="reminders-head">
-            <h2>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span>Canaux de rappels</span>
-            </h2>
-            <button class="btn-link-setting">
-              <span>Régler</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-left">
-              <div class="channel-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-              </div>
-              <div>
-                <div class="channel-title">Sur ce téléphone</div>
-                <div class="channel-sub">Application Android KEEVA</div>
-              </div>
-            </div>
-            <span class="channel-badge active">ACTIF</span>
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-left">
-              <div class="channel-icon email">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              </div>
-              <div>
-                <div class="channel-title">E-mail récapitulatif</div>
-                <div class="channel-sub">Avant chaque échéance J-3</div>
-              </div>
-            </div>
-            <span class="channel-badge active">ACTIF</span>
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-left">
-              <div class="channel-icon whatsapp">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-              </div>
-              <div>
-                <div class="channel-title">WhatsApp Business</div>
-                <div class="channel-sub">Alerte chantier critique J-7</div>
-              </div>
-            </div>
-            <span class="channel-badge pending">À VENIR</span>
-          </div>
-
-          <div class="telematics-status">
-            <span class="status-dot-active"></span>
-            <span>Synchronisation télématique en direct (Opérateur Keeva Link)</span>
-          </div>
-        </section>
-
-      </div>
-
     </div>
+  `;
+  document.body.appendChild(overlay);
+}
 
-  </main>
+function saveNewMachine(btn) {
+  const nom = document.getElementById('f-nom').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  const val = parseFloat(document.getElementById('f-compteur').value) || 0;
+  const unit = document.getElementById('f-unite').value;
+  if (!nom) return alert('Indiquez au moins le nom.');
 
+  UI.machines.push({
+    id: 'm_' + Date.now(),
+    name: nom.toUpperCase(),
+    brand_model: nom,
+    category: { name: cat },
+    counter_value: val,
+    counter_unit: unit,
+    status: 'en_service',
+    plan: {
+      tracking_mode: unit,
+      interval_counter: 100,
+      next_due_counter: val + 100,
+      tasks: 'Premier entretien d\'inspection'
+    }
+  });
+
+  btn.closest('.overlay').remove();
+  renderApp();
+}
+
+function openLogModal(id) {
+  const m = UI.machines.find(x => x.id === id);
+  if (!m) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Enregistrer un entretien</h2>
+      <p class="sub">${m.name} — Cochez les opérations effectuées pour recalculer la prochaine échéance.</p>
+      <label>Date de l'intervention</label>
+      <input type="date" value="${new Date().toISOString().slice(0, 10)}">
+      <label>Relevé du compteur (${m.counter_unit})</label>
+      <input type="number" value="${m.counter_value}">
+      <label>Tâches réalisées</label>
+      <textarea>${m.plan ? m.plan.tasks : 'Contrôle général'}</textarea>
+      <div class="modal-actions">
+        <button class="secondary" onclick="this.closest('.overlay').remove()">Annuler</button>
+        <button class="primary" onclick="alert('Entretien enregistré ! L\\\'échéance a été mise à jour.'); this.closest('.overlay').remove();">Valider l'entretien</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// Démarrage
+renderApp();
+</script>
 </body>
 </html>
