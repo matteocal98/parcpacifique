@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PMFzB0ogwa+TKPolzXMR0BBWmHrTy16shj5yU+WEGIw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-raTP/NsyPDt+rxp3SQVUVVCXwc08kxdxClklVsROcqM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -71,13 +71,58 @@
     --surface:#FFFFFF;
     --surface-soft:rgba(14,19,51,.04);
     --dark:#0D1424;
-    --dark-2:rgba(255,255,255,.10);
+    --dark-2:rgba(255,255,255,.08);
     --dark-ink:#94A3B8;
+    /* ★ LA FEUILLE UNIQUE — LA SURFACE INTERMÉDIAIRE DE LA MAQUETTE, DÉCLARÉE ICI.
+       `#e9edff` (son jeton `surface-container`) et `#f2f3ff` (`surface-container-low`)
+       sont deux teintes de la MAQUETTE : ce ne sont pas des teintes de notre
+       charte, et c'est la raison pour laquelle elles n'avaient jamais été
+       déclarées. Elles le sont maintenant, NOMMÉES, pour deux raisons : elles
+       portent le fond de la vignette de la carte et le fond du cadre du compteur
+       (le lot 9 les emploie depuis `index.html`), et un jeton employé sans être
+       déclaré rend la couleur HÉRITÉE en silence — le défaut que
+       `signal/test-charte.mjs` a précisément été écrit pour attraper. */
+    --surface-tinte:#e9edff;
+    /* L'aplat du picto de la carte machine (le `tertiary-container` de la
+       maquette, `#07006c`) : c'est la nuit de la maquette, pas une teinte
+       nouvelle. */
+    --primary-container:#07006c;
+    /* ★ LA TAILLE DES GANTS, ÉCRITE UNE FOIS. Sur un chantier, en plein soleil,
+       un bouton de 32 px ne se touche pas : 44 px pour une action secondaire,
+       48 px pour une action principale. Les deux jetons évitent qu'un écran
+       réinvente « 38 » un jour. */
+    --cible-tactile:44px;
+    --cible-tactile-fort:48px;
+
+    /* ★ LE DÉGRADÉ DE LA MARQUE — gardé comme JETON. Il n'est employé QUE là où
+       la maquette s'en sert (le bandeau noir de la marque) : jamais pour du
+       texte, où il n'aurait aucun contraste garanti. */
+    --keeva-gradient:linear-gradient(135deg,#236FE0,#14B8A6,#8B9B37);
+    --surface-tinte:#e9edff;
+    /* L'aplat du picto de la carte machine (le `tertiary-container` de la
+       maquette, `#07006c`) : c'est la nuit de la maquette, pas une teinte
+       nouvelle. */
+    --primary-container:#07006c;
+    /* ★ LA TAILLE DES GANTS, ÉCRITE UNE FOIS. Sur un chantier, en plein soleil,
+       un bouton de 32 px ne se touche pas : 44 px pour une action secondaire,
+       48 px pour une action principale. Les deux jetons évitent qu'un écran
+       réinvente « 38 » un jour. */
+    --cible-tactile:44px;
+    --cible-tactile-fort:48px;
+
+    /* ★ LE DÉGRADÉ DE LA MARQUE — gardé comme JETON. Il n'est employé QUE là où
+       la maquette s'en sert (le bandeau noir de la marque) : jamais pour du
+       texte, où il n'aurait aucun contraste garanti. */
+    --keeva-gradient:linear-gradient(135deg,#236FE0,#14B8A6,#8B9B37);
 
     /* Texte : l'encre de la charte, du plus dense au plus discret. */
     --ink:#0E1333;
     --ink-2:rgba(14,19,51,.74);
-    --ink-3:rgba(14,19,51,.66);
+    /* ★ LA FEUILLE UNIQUE — 60 % D'ENCRE, LE BARREAU DE LA MAQUETTE. Il valait
+       66 % : la maquette écrit « encre 60 % », et l'encre à 60 % sur blanc rend
+       4,81:1 — la barre AA (4,5:1) est tenue. Le contrôle de contraste recalcule
+       ce rapport à chaque exécution : il n'est pas recopié ici. */
+    --ink-3:rgba(14,19,51,.60);
     --ink-4:rgba(14,19,51,.60);
     --ink-warm:rgba(14,19,51,.74);
     /* Encre atténuée des messages de remplissage (« Chargement… », « Aucune
@@ -92,6 +137,65 @@
     --line:rgba(14,19,51,.14);
     --line-2:rgba(14,19,51,.08);
     --line-3:rgba(14,19,51,.22);
+    /* ★ LA FEUILLE UNIQUE — LE FILET DES CHAMPS ET DES BOUTONS SECONDAIRES.
+       12 % d'encre : visible au soleil, sans faire une grille. */
+    --line-soft:rgba(14,19,51,.12);
+
+    /* ★ LA FEUILLE UNIQUE — LES TROIS RÔLES DE COULEUR, CORRIGÉS DE LA MAQUETTE.
+       ⚠️ L'en-tête `tailwind.config` des cinq maquettes écrit
+       `"signature-fr": "#24B5A8"` et annote le cyan « validé WCAG AA à 5,65:1 ».
+       C'EST FAUX, ET C'EST MESURÉ : #24B5A8 sur blanc rend 2,55:1 — illisible en
+       plein soleil — et le 5,65:1 appartient à #5B52DF. Les rôles sont donc :
+         · `--accent` (#5B52DF) : LE TEXTE D'ACCENT, 5,65:1 sur blanc ;
+         · `--lien`   (#236FE0) : les liens, 4,75:1 sur blanc ;
+         · `--retard` (#DE7A16) : l'ambre, 3,04:1 — TRAIT, PASTILLE, VOILE ou
+           GRAND CHIFFRE (≥ 24 px, barre 3:1), jamais du texte en dessous ;
+         · le cyan reste `--cyan` : DÉCORATIF sur fond clair (2,55:1) et LISIBLE
+           sur la nuit (7,22:1), où la barre latérale s'en sert pour l'onglet actif.
+       Aucune de ces valeurs n'est une teinte nouvelle : les quatre sont dans les
+       douze de la charte, et `signal/test-charte.mjs` vérifie leur NOM et leur
+       rôle — « #5B52DF écrit, #24B5A8 décore sur clair et écrit sur nuit ». */
+    --accent:#5B52DF;
+    --lien:#236FE0;
+    --retard:#DE7A16;
+
+    /* ★ LA FEUILLE DE STITCH, ADOPTÉE COMME BASE — SES NOMS, SES VALEURS.
+       La feuille officielle de Stitch nomme ses accents `--accent-*`. On garde
+       ses noms en ALIAS pour que la feuille livrée reste reconnaissable d'un
+       coup d'œil, ET parce qu'un alias ne coûte rien :
+         · `--accent-cyan` (#24B5A8) : DÉCORATIF sur clair, LISIBLE sur nuit.
+           Stitch le croit « Signature FR, 5,65:1 » — c'est l'erreur corrigée ;
+         · `--accent-blue` (#236FE0, 4,75:1) : les liens ;
+         · `--accent-orange` (#DE7A16, 3,04:1) : les retards, jamais en texte
+           sous 24 px ;
+         · `--accent-indigo` (#6366F1) et `--accent-green` (#8B9B37) : décoratifs.
+       Et les jetons de Stitch qui manquaient au produit : `--surface-subtle`,
+       `--line-light`, `--primary`, `--primary-hover`, `--sur-primaire`, `--r-sm`,
+       plus la répartition φ de la mise en page, née dans
+       `signal/design-tokens.css` et employée sans être déclarée ici. */
+    --accent-cyan:#24B5A8;
+    --accent-blue:#236FE0;
+    --accent-orange:#DE7A16;
+    --accent-indigo:#6366F1;
+    --accent-green:#8B9B37;
+    --surface-subtle:rgba(14,19,51,.02);
+    --line-light:rgba(14,19,51,.06);
+    /* LE BOUTON PRINCIPAL EST À L'ENCRE — décision de l'utilisateur. Tant que
+       `--primary` valait l'indigo #6366F1, toute règle qui écrivait du blanc
+       dessus était à 4,47:1, trois centièmes sous la barre : c'est le défaut que
+       le contrôle « blanc sur un aplat » a trouvé NEUF fois. À l'encre, la même
+       écriture donne 18,11:1 — et c'est la maquette. */
+    --primary:#0E1333;
+    --primary-hover:#0D1424;
+    --sur-primaire:#FFFFFF;
+    --r-sm:8px;
+    --r-pill:999px;
+    --or-part-grande:1.618fr;
+    --or-part-petite:1fr;
+
+    
+    --lien:#236FE0;
+    --retard:#DE7A16;
 
     /* Accent : indigo de la puce centrale, bleu roi et signature FR pour le
        texte (seules teintes, avec l'encre, à tenir 4,5:1 sur fond clair). */
@@ -144,6 +248,33 @@
        teintes n'écrivent jamais sous 24 px. */
     --late-fort:rgba(222,122,22,.90);
     --soon-fort:rgba(99,102,241,.86);
+    /* ★ LOT 10 — LA RÈGLE DU CLIENT, EN TROIS JETONS : « la couleur du liseré
+       collé au bord de la carte doit être la même que les boutons et la police
+       (exemple « en retard de … h ») ». L'état de la CARTE pose ces trois jetons,
+       et TOUT ce qui appartient à cet état les lit : le LISERÉ (`--etat`), la
+       PASTILLE et son PIcto (`--etat` sur `--etat-fond`), le TEXTE d'état, le
+       BORD DU CADRE COMPTEUR, et l'ACTION PRINCIPALE pleine (`--etat-fort`).
+       Les valeurs par défaut valent pour une carte SANS état connu (`unknown`). */
+    --etat:var(--ink-3);
+    --etat-fond:var(--surface-soft);
+    --etat-fort:var(--ink);
+    /* Le fond de la surface intermédiaire de la maquette (`#e9edff`, son jeton
+       `surface-container`) et le fond du cadre de la vignette (son jeton
+       `surface-container-low`, `#f2f3ff`) sont TROIS TEINTES DE LA MAQUETTE, pas
+       notre charte : on emploie la seule qui soit aussi un jeton nommé de la
+       maquette ET assez dense pour se voir sous une vignette. Jamais un gris. */
+    --surface-tinte:#e9edff;
+    /* ★ LA FEUILLE UNIQUE — LES TROIS JETONS DE L'ÉTAT D'UNE CARTE MACHINE.
+       Ils sont nés au LOT 10, dans le correctif qui s'ancre sur `index.html` —
+       donc APRÈS la copie de cette feuille, et le contrôle des variables les
+       lisait comme « employés mais déclarés nulle part ». Leur vraie place est
+       ici : les voici, avec la valeur par défaut d'une carte SANS état connu.
+       Le correctif du lot 10 continue de les reposer sur `.machine.is-late`,
+       `.is-soon`, `.is-ok` — c'est la MÊME valeur, écrite deux fois. */
+    --etat:var(--ink-3);
+    --etat-fond:var(--surface-soft);
+    --etat-fort:var(--ink);
+    
     /* ★ LOT 8 — LES DEUX TEINTES DU GRAND TEXTE. Le chiffre d'une tuile du
        tableau de bord est écrit à 31 px : WCAG le juge en « grand texte », où la
        barre est 3:1 et non 4,5:1. Deux des quatre états la passent là et pas
@@ -201,6 +332,15 @@
     --safe-left:var(--safe-area-inset-left,env(safe-area-inset-left,0px));
   }
 
+  /* ⚠️ LA PILE DE PLATEFORME EST RETIRÉE AILLEURS, PAS ICI — ET ELLE NE PEUT PAS
+     L'ÊTRE ICI. `body{…font-family:'Figtree',system-ui,-apple-system,sans-serif}`
+     dit « sinon la police du SYSTÈME » : sur le poste de l'utilisateur, `system-ui`
+     se résout en INTER, la police des pages publiques — d'où les écarts de
+     typographie vus dans Chrome. La correction vit dans la FEUILLE UNIQUE
+     (`signal/feuille-unique.css`), posée EN DERNIER : à spécificité égale,
+     `body,h1,…{font-family:'Figtree','Space Grotesk',sans-serif}` y gagne. Ce
+     bloc-ci est l'ANCRE de `signal/mobile.patch` : le réécrire, même en
+     commentaire, fait échouer la chaîne. On le laisse donc tel quel, et c'est dit. */
   *{box-sizing:border-box;}
   /* Foyer visible homogène : au clavier, on doit toujours savoir où l'on est.
      :focus-visible évite d'encadrer un bouton simplement cliqué au doigt. */
@@ -469,13 +609,20 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .dash-head-compte{font-size:13.5px;font-weight:600;color:var(--ink-2);}
+  /* ★ LOT 10 — « AJOUTER UNE MACHINE » DE L'EN-TÊTE EST UN APLAT D'ENCRE DANS LA
+     MAQUETTE (`bg-encre text-blanc`, `rounded-xl`, `h-[44px]`, icône
+     `add_circle` de 20 px, ombre `0_8px_24px_rgba(14,19,51,0.08)`). Il était en
+     contour d'encre, un cran en dessous du bouton du parc, alors que la maquette
+     les écrit IDENTIQUES. */
   .dash-head .dash-ajouter{
-    display:none;margin-left:auto;flex:0 0 auto;
+    display:none;margin-left:auto;flex:0 0 auto;align-items:center;gap:8px;
     min-height:44px;padding:0 16px;white-space:nowrap;
-    background:transparent;color:var(--ink);border:2px solid var(--ink);
-    border-radius:var(--r-md);font-size:13.5px;font-weight:700;cursor:pointer;
+    background:var(--ink);color:#fff;border:2px solid var(--ink);
+    border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;
+    box-shadow:0 8px 24px rgba(14,19,51,.08);
   }
-  .dash-head .dash-ajouter:hover{background:var(--surface-soft);}
+  .dash-head .dash-ajouter:hover{background:var(--ink);color:#fff;}
+  .dash-head .dash-ajouter svg{display:block;width:20px;height:20px;flex:0 0 auto;}
 
   @media (min-width:900px){
     .greeting-row{display:none;}
@@ -872,17 +1019,28 @@
      16 px, et l'écart vertical de 14 px à 12 px (le barreau `--espace-3`). */
   .machine{
     background:var(--surface);border:2px solid var(--ink);border-radius:14px;
-    box-shadow:0 8px 24px rgba(14,19,51,.06);padding:16px;display:flex;flex-direction:column;gap:12px;
+    box-shadow:0 8px 24px rgba(14,19,51,.06);padding:16px;display:flex;flex-direction:column;gap:16px;
     overflow:hidden;
+    /* ★ LOT 10 — L'ÉTAT DE LA CARTE POSE SES TROIS JETONS ICI, ET NULLE PART
+       AILLEURS. Les maquettes n'ont pas de carte « sans état » : on retombe sur
+       l'encre discrète, qui n'écrit aucun mot d'état. */
+    --etat:var(--ink-3);--etat-fond:var(--surface-soft);--etat-fort:var(--ink);
   }
+  /* ★ LOT 10 — UN ÉTAT = UNE COULEUR. Chaque état ne déclare QUE ses jetons ; le
+     reste de la feuille s'en sert. C'est ce qui garantit que le liseré, la
+     pastille, le texte d'état, l'échéance en grand, le bord du compteur et
+     l'action principale soient de la MÊME FAMILLE — la règle du client. */
+  .machine.is-late{--etat:var(--late);--etat-fond:var(--late-bg);--etat-fort:var(--late-fort);}
+  .machine.is-soon{--etat:var(--soon);--etat-fond:var(--soon-bg);--etat-fort:var(--soon-fort);}
+  .machine.is-ok{--etat:var(--ok);--etat-fond:var(--ok-bg);--etat-fort:var(--ink);}
   /* ★ LE TRAIT DE COULEUR À GAUCHE (la maquette : `h-1.5 lg:h-auto lg:w-2`).
      Il dit l'état AVANT toute lecture : ambre pour un retard, indigo pour une
      échéance proche, cyan pour une machine à jour. Il ne porte aucun texte —
      c'est une teinte, et c'est exactement l'usage que la charte lui donne. */
-  .m-bande{height:6px;flex:0 0 auto;background:var(--ink-3);}
-  .machine.is-late .m-bande{background:var(--late);}
-  .machine.is-soon .m-bande{background:var(--soon);}
-  .machine.is-ok .m-bande{background:var(--ok);}
+  /* ★ LOT 10 — LE LISERÉ LIT LE JETON DE L'ÉTAT (`--etat`), au lieu de répéter
+     trois règles de teinte. Même valeur qu'au lot 9 (l'ambre du retard), mais
+     UNE seule source : c'est ce qui interdit « liseré ambre et boutons violets ». */
+  .m-bande{height:6px;flex:0 0 auto;background:var(--etat);}
   /* ★ LOT 3 — LE PARC : LA LIGNE REPLIÉE, LE DÉTAIL DÉPLIABLE.
      CE QUE L'AUDIT A MESURÉ : les cartes faisaient 620 à 720 px de haut, soit
      SEPT écrans de défilement pour quatre machines — sur le téléphone qui est
@@ -978,19 +1136,29 @@
      ⚠️ AUCUNE BORDURE : la maquette montre la vignette ARRONDIE, SANS bordure
      d'encre — et une image n'est pas un cadre (voir les règles reposées en fin
      de feuille, bloc ⑰). */
+  /* ★ LOT 10 — LA VIGNETTE PREND LE FOND DE LA MAQUETTE (`bg-surface-container`,
+     un voile bleuté) et non un gris d'encre. Rayon 12 px, `object-cover`. */
   .machine-tete-photo{
     position:relative;display:none;align-items:flex-start;flex:0 0 auto;
     width:112px;height:96px;border-radius:12px;overflow:hidden;
-    background:var(--surface-soft);margin:0;
+    background:var(--surface-tinte);margin:0;border:none;
   }
   /* LA PASTILLE « Carnet d'entretien (PDF) » DU BUREAU : sous l'identité, à
      gauche (`self-start`), JAMAIS sur la photo. Elle est cachée au téléphone,
      où c'est le badge posé sur l'image qui joue ce rôle. */
+  /* ★ LOT 10 — LA PASTILLE DU CARNET PREND LES VALEURS DE LA MAQUETTE DE BUREAU :
+     `px-3 py-1.5 rounded-full bg-surface-container-low border border-encre/10
+     font-label text-helper` → 13,5 px pour le libellé (« Carnet d'entretien
+     (PDF) »), 10,5 px sur téléphone, `bg-surface-container-low` (≈ #f2f3ff,
+     notre `--surface-tinte`), bord `encre/10` (notre `--line-2`). */
   .machine-tete-carnet{
     display:none;align-self:flex-start;align-items:center;gap:4px;
     padding:6px 12px;border-radius:var(--r-pill);cursor:pointer;font-family:inherit;
-    background:var(--surface-soft);border:1px solid var(--line);color:var(--ink);
-    font-size:12px;font-weight:700;white-space:nowrap;
+    background:var(--surface-tinte);border:1px solid var(--line-2);color:var(--ink);
+    font-size:13.5px;font-weight:600;white-space:nowrap;
+  }
+  @media (max-width:899px){
+    .machine-tete-carnet{font-size:10.5px;}
   }
   /* L'icône est en Signature FR : 5,65:1 sur le blanc, la teinte qui ÉCRIT. */
   .machine-tete-carnet svg{display:block;width:14px;height:14px;color:var(--primary-dark);flex:0 0 auto;}
@@ -1000,10 +1168,11 @@
      quand le cadre se resserre : il s'élargit au lieu de se replier. */
   .carnet-badge{
     position:absolute;top:8px;right:8px;left:auto;display:inline-flex;align-items:center;gap:4px;
-    padding:6px 12px;border:none;border-radius:10px;cursor:pointer;font-family:inherit;
-    background:var(--ink);color:var(--surface);font-size:12px;font-weight:800;
+    padding:4px 10px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;
+    background:var(--primary-container);color:var(--surface);font-size:10.5px;font-weight:700;
     white-space:nowrap;max-width:calc(100% - 16px);
   }
+  .carnet-badge svg{display:block;width:15px;height:15px;flex:0 0 auto;color:var(--ok);}
   /* LE PLIEUR : un chevron de 44 px, la cible tactile du socle. Il porte
      aria-expanded ; le chevron suit l'état, et il est décoratif (aria-hidden),
      parce que l'état est déjà dit par l'attribut. */
@@ -1013,7 +1182,12 @@
     background:var(--surface);color:var(--ink);border:1px solid var(--line);
   }
   .machine-plieur:hover{border-color:var(--primary-line);color:var(--primary-dark);}
-  .machine-chevron{font-size:17px;line-height:1;}
+  /* ★ LOT 10 — LE CHEVRON EST LE PICTO `expand_more` DE LA MAQUETTE, retourné
+     quand la carte est ouverte (le glyphe ▸/▾ du lot 9 n'était pas le même
+     dessin). */
+  .machine-chevron{display:inline-flex;align-items:center;justify-content:center;}
+  .machine-chevron svg{display:block;width:20px;height:20px;transform:rotate(-90deg);}
+  .machine-chevron.is-ouvert svg{transform:none;}
   @media (min-width:900px){
     .machine-plieur{display:none;}
   }
@@ -1027,8 +1201,15 @@
     .machine.is-replie .machine-tache,
     .machine.is-replie .compteur-lire{display:none;}
   }
-  .m-main .name{font-size:17px;font-weight:700;}
-  .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
+  /* ★ LOT 10 — LE NOM ET LA MÉTA AUX TAILLES DE LA MAQUETTE. Le nom est un
+     `text-headline-md` : 21 px, interligne 28 px, interlettrage −0,01em, 800 —
+     c'est du Space Grotesk (`font-headline-md`), d'où la famille. La méta est un
+     `font-helper` : 12 px, interligne 1,5. Le lot 9 les laissait à 17 et 14 px. */
+  .m-main .name{
+    font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:800;
+    letter-spacing:-0.01em;line-height:1.33;
+  }
+  .m-main .meta{color:var(--ink-2);font-size:12px;margin-top:4px;line-height:1.5;}
   /* `min-width:0` autorise l'enfant d'un `flex` à se resserrer au lieu de
      pousser la carte (l'identité, à droite de la vignette). */
   .m-main{min-width:0;}
@@ -1043,10 +1224,24 @@
   .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;}
   .m-actions .btn-row-action{min-height:44px;white-space:normal;}
   .m-actions .btn-principal{grid-column:1 / -1;}
-  .m-actions .btn-principal{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
-  .m-actions .btn-principal:hover{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
+  /* ★ LOT 10 — « ENREGISTRER UN ENTRETIEN » PREND LA COULEUR DE SON ÉTAT.
+     C'ÉTAIT LE DÉFAUT LE PLUS VISIBLE : la maquette écrit ce bouton en
+     `bg-ambre` sur une carte en retard — exactement la teinte du liseré et du
+     « en retard de … h ». Chez nous il était en Signature FR, c'est-à-dire VIOLET
+     sous un liseré AMBRE : « la couleur du liseré doit être la même que les
+     boutons ». Une seule déclaration, et les trois états suivent :
+       · en retard → ambre   · bientôt → indigo   · à jour → encre
+     Le BLANC sur l'ambre dense (`--late-fort`, 4,50:1) et sur l'indigo dense
+     (5,29:1) atteint AA ; sur l'encre il atteint 18,11:1. */
+  .m-actions .btn-principal{background:var(--etat-fort);color:#fff;border-color:var(--etat-fort);}
+  .m-actions .btn-principal:hover{background:var(--etat-fort);color:#fff;border-color:var(--etat-fort);}
   .m-actions .btn-row-action:not(.btn-principal){background:var(--surface);border:2px solid var(--ink);color:var(--ink);}
   .m-actions .btn-row-action:not(.btn-principal):hover{background:var(--surface-soft);border-color:var(--ink);color:var(--ink);}
+  /* ★ LOT 10 — LES LIBELLÉS D'ACTION SONT DES `font-label` : 13,5 px, 600.
+     L'action principale est une icône de 20 px + le mot, les trois autres une
+     icône de 18 px + le mot, ce que dit la maquette. */
+  .m-actions .btn-row-action{font-size:13.5px;font-weight:600;}
+  .m-actions .btn-row-action.btn-principal svg{width:20px;height:20px;}
   /* ★ LOT 9 — LE PICTO DES BOUTONS : `build_circle`, `event_repeat`,
      `fact_check`, `settings` — les quatre de la maquette, aux quatre places
      qu'elle leur donne. `photo_camera` sur le geste de la photo. */
@@ -1066,19 +1261,28 @@
   /* ★ LOT 7 — L'ENCART DE LA TÂCHE. La maquette de bureau écrit
      « TÂCHE PRÉVUE : <tâche> » au-dessus du compteur : la tâche se lit AVANT la
      photo, et le mot est celui du produit (`nextTaskLabel`). */
+  /* ★ LOT 10 — L'ENCART DE TÂCHE EST NU dans la maquette de bureau : le mot, la
+     pastille de la valeur, et rien autour. Le fond de bloc du lot 7 ajoutait un
+     troisième voile à côté du voile d'alerte et de la jauge. */
   .machine-tache{
-    display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
-    padding:8px 12px;border-radius:12px;background:var(--surface-soft);
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    padding:0;border-radius:12px;background:none;
   }
   /* ★ LE PICTO DE LA TÂCHE : `build_circle` (l'action à faire), à l'encre. La
      maquette écrit « Tâche prévue : <tâche> » ; le mot et la valeur restent les
      nôtres, l'icône vient devant le mot. */
+  /* ★ LOT 10 — LE MOT DE LA TÂCHE EST UN `text-caption` DE LA MAQUETTE : 10,5 px,
+     interlettrage +0,04em, 700, majuscules. Et la VALEUR est dans une pastille
+     `bg-surface-container` (`--surface-tinte`), en `text-label` : 13,5 px. */
   .machine-tache-mot{
     display:inline-flex;align-items:center;gap:4px;
-    font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
   }
-  .machine-tache-mot svg{display:block;width:14px;height:14px;flex:0 0 auto;}
-  .machine-tache-valeur{font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap;}
+  .machine-tache-mot svg{display:block;width:14px;height:14px;flex:0 0 auto;color:var(--ink);}
+  .machine-tache-valeur{
+    font-size:13.5px;font-weight:500;color:var(--ink);white-space:nowrap;
+    padding:2px 8px;border-radius:8px;background:var(--surface-tinte);
+  }
   /* ★ LOT 7 — L'ÉTAT OPÉRATIONNEL, DANS LA COLONNE DE DROITE : le mot, la
      pastille teintée de son état, et l'ÉCHÉANCE EN GRAND à côté.
      LE CHIFFRE EST À L'ENCRE, JAMAIS DANS LA TEINTE : l'ambre écrit 3,04:1 sur la
@@ -1090,8 +1294,12 @@
     font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
   }
   .m-echeance{display:flex;flex-direction:column;gap:2px;align-items:flex-end;text-align:right;}
+  /* ★ LOT 10 — « ÉTAT OPÉRATIONNEL » ET « ÉCHÉANCE » SONT DES `text-caption` DE LA
+     MAQUETTE : 10,5 px, interlettrage large, majuscules. Le lot 9 les laissait à
+     12 px, soit deux barreaux au-dessus. */
+  .m-etat-mot,
   .machine-echeance-mot{
-    font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
+    font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
   }
   .machine-echeance .due{
     display:block;font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
@@ -1108,28 +1316,52 @@
      décide du trait, de la pastille, de l'échéance et de la barre d'un coup. */
   .badge{display:inline-flex;align-items:center;gap:4px;}
   .badge svg{display:block;width:14px;height:14px;flex:0 0 auto;}
-  .machine.is-late .machine-echeance .due{color:var(--late-fort);}
-  .machine.is-soon .machine-echeance .due{color:var(--soon-fort);}
+  /* ★ LOT 10 — LE « +9 h » SOUS « ÉCHÉANCE », CORRIGÉ. Le lot 9 écrivait bien
+     `var(--late-fort)`, mais l'ÉCHÉANCE DE LA JAUGE PORTE LA CLASSE `due` ELLE
+     AUSSI, et sa règle est plus bas dans la feuille : à spécificité égale la
+     DERNIÈRE gagne, et le chiffre de la carte reprenait la couleur du second.
+     Les deux règles sont donc posées ensemble, plus bas, en spécificité
+     explicite (voir le bloc « LES DEUX ÉCHÉANCES » en fin de feuille).
+     Ici, la couleur vient du jeton de l'état, et la TAILLE reste 25 px : c'est
+     le seul barreau du produit qui reste du « grand texte » (≥ 24 px), donc le
+     seul où la teinte d'état a le droit d'écrire (barre 3:1). */
+  .machine .machine-echeance .due{color:var(--etat-fort);}
   /* ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, DANS UN BLOC, PLUS UN TRAIT NU.
      La piste est VOILÉE, le remplissage est COLORÉ par l'état, et tout le texte
      du bloc est À L'ENCRE. Aucun pourcentage écrit : le chiffre qui s'affiche est
      l'échéance réelle, et l'`aria-label` reste la phrase du produit. */
-  .machine-jauge{display:flex;flex-direction:column;gap:6px;padding:8px 12px;border-radius:12px;background:var(--surface-soft);}
+  /* ★ LOT 10 — LA JAUGE PREND LES VALEURS DE LA MAQUETTE : `p-2.5` (10/12 px
+     arrondi au barreau 8/12), `rounded-lg` (8 px), et une piste de 8 px
+     (`h-2`) au lieu de 10. Le bloc reste sur un fond BLANC
+     (`bg-blanc` de la maquette, `border border-encre/10`). */
+  .machine-jauge{
+    display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-radius:8px;
+    background:var(--surface);border:1px solid var(--line-2);
+  }
   .machine-jauge-tete{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;}
   .machine-jauge-mot{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
   .machine-jauge-valeur{font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap;}
-  .machine-jauge-piste{height:10px;border-radius:999px;background:var(--line-2);overflow:hidden;}
-  .machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--ink);}
-  .machine-jauge-part.is-soon{background:var(--soon);}
-  .machine-jauge-part.is-late{background:var(--late);}
+  /* ★ LOT 10 — LA PISTE FAIT 8 px (`h-2` de la maquette) et le REMPLISSAGE prend
+     la teinte de l'état par le jeton : une barre d'ambre sous un cadre d'ambre. */
+  .machine-jauge-piste{height:8px;border-radius:999px;background:var(--surface-tinte);overflow:hidden;}
+  .machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--etat);}
   .badge{
-    display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;
+    display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.04em;padding:4px 12px;border-radius:var(--r-pill);border:none;
   }
-  .badge.ok{color:var(--ok-ink);background:var(--ok-bg);}
-  .badge.soon{color:var(--soon-ink);background:var(--soon-bg);}
-  .badge.alert{color:var(--late-ink);background:var(--late-bg);}
+  .badge.ok{color:var(--ok);background:var(--ok-bg);}
+  .badge.soon{color:var(--soon);background:var(--soon-bg);}
+  .badge.alert{color:var(--late);background:var(--late-bg);}
   .badge.neutral{color:var(--ink-2);background:var(--surface-soft);}
+  /* ★ LOT 10 — DANS LA CARTE, LA PASTILLE PORTE LES JETONS DE SON ÉTAT, ET SON
+     BORD EST DE LA MÊME TEINTE (`border-ambre/30` de la maquette → `--line-3`,
+     le barreau 22 % du produit). Le mot d'état et l'échéance sont donc
+     littéralement de la couleur du liseré. */
+  .machine .badge{
+    display:inline-flex;align-items:center;
+    color:var(--etat);background:var(--etat-fond);border:1px solid var(--line-3);
+  }
+  .machine .badge svg{display:block;width:14px;height:14px;flex:0 0 auto;color:var(--etat);}
   .due{font-size:13.5px;color:var(--ink-2);font-weight:600;}
 
   /* ------------------------------------------------------------
@@ -1144,8 +1376,11 @@
     margin-top:10px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;
     background:var(--surface-soft);display:flex;flex-direction:column;gap:6px;
   }
+  /* ★ LOT 10 — LE LIBELLÉ ET LA NOTE DU COMPTEUR SUIVENT LA MAQUETTE : le libellé
+     est un `text-caption` (10,5 px, +0,04em, 700) et la note un `font-helper`
+     (12 px, 500, en `--ink-4` = ardoise de la maquette, 4,81:1). */
   .compteur-titre{
-    display:inline-flex;align-items:center;gap:4px;margin:0;font-size:12.5px;font-weight:800;letter-spacing:.08em;
+    display:inline-flex;align-items:center;gap:4px;margin:0;font-size:10.5px;font-weight:700;letter-spacing:.04em;
     text-transform:uppercase;color:var(--ink-2);
   }
   /* ★ LOT 9 — LE PICTO DU COMPTEUR : `speed`, l'icône du compteur dans la
@@ -1234,6 +1469,29 @@
   .compteur-lecture .compteur-titre{color:var(--ink-3);}
   /* Un seul emplacement visible : sous la photo sur téléphone (défaut), sous les
      boutons dès que la carte passe en ligne (le même seuil que la carte). */
+  /* ★ LOT 10, CORRIGÉ — LE CADRE DU COMPTEUR EST À L'ENCRE, PAS DANS LA TEINTE
+     DE L'ÉTAT. La première version lui donnait la couleur de son état ; c'était
+     une ERREUR, et elle s'est vue sur une capture : sur une machine EN RETARD, le
+     cadre du compteur sortait INDIGO — la couleur de « Bientôt » sur une machine
+     en retard. C'est exactement le défaut que le client a signalé (« le liseré
+     doit être de la même couleur que les boutons et la police »).
+     LA RÈGLE, DÉSORMAIS ÉCRITE : le CADRE est à l'encre ; la couleur d'état va
+     sur le LISERÉ DE GAUCHE, la pastille, le texte d'état, l'échéance et les
+     pictos. Le compteur n'est pas une exception : il porte le liseré d'état à
+     gauche (4 px, `--etat`) et son cadre d'encre de 2 px. La maquette de bureau
+     fait de même : son encart de compteur est sombre, c'est le LISERÉ qui est
+     coloré. */
+  .compteur{
+    margin-top:0;border:2px solid var(--ink);border-left:4px solid var(--etat);
+    border-radius:12px;background:var(--surface-soft);
+  }
+  .compteur-titre svg{color:var(--etat-fort);}
+  .compteur-enregistrer{background:var(--ink);color:#fff;}
+  .compteur-enregistrer:hover{background:var(--ink);color:#fff;}
+  /* Le fond du cadre compte les deux dispositions : le blanc de la maquette de
+     bureau (`bg-surface-container-low/70` → presque blanc), le voile de la
+     maquette mobile. */
+  .compteur-bureau{background:var(--surface-tinte);border-color:var(--ink);border-left-color:var(--etat);}
   .compteur-mobile{display:flex;}
   .compteur-bureau{display:none;}
   @media (min-width:900px){
@@ -1243,7 +1501,9 @@
        boutons ne s'écrasent plus sur la largeur. */
     /* ★ LOT 9 — LE TRAIT DE COULEUR PASSE DU BORD HAUT AU BORD GAUCHE
        (`lg:h-auto lg:w-2` dans la maquette : 8 px de large, toute la hauteur). */
-    .m-bande{width:8px;height:auto;align-self:stretch;}
+    /* ★ LOT 10 — LE LISERÉ PASSE À GAUCHE (8 px, toute la hauteur), dans la
+       teinte de l'état : `bg-ambre` de la maquette, lu sur le jeton `--etat`. */
+    .m-bande{width:8px;height:auto;align-self:stretch;background:var(--etat);}
     /* ★ LA PHOTO EN HAUT À GAUCHE, L'IDENTITÉ À SA DROITE, SUR LA MÊME LIGNE
        (`flex gap-space-md items-start` de la maquette de bureau), et la pastille
        « Carnet d'entretien (PDF) » SOUS l'identité, à gauche. */
@@ -1856,8 +2116,6 @@
     /* LA PROPORTION DE DESIGN.md §3 : φ pour la mise en page. Les deux colonnes du
      tableau de bord, `1.618fr / 1fr` — la colonne latérale occupe 38,2 %. */
   .dash-grid{display:grid;grid-template-columns:1.618fr 1fr;gap:24px;align-items:start;}
-    .mobile-only{display:none;}
-  }
 
   /* ★ LOT 5 — L'AIR ET LA DENSITÉ DU TABLEAU DE BORD.
      Le bloc vit ici, dans la requête du bureau, et il est PRÉFIXÉ : il ne peut
@@ -1948,12 +2206,17 @@
   .toolbar-top{display:flex;flex-direction:column;gap:10px;}
   .toolbar-bottom{display:flex;flex-direction:column;gap:10px;}
   .search-wrap{position:relative;display:flex;align-items:center;}
+  /* ★ LOT 10 — LA LOUPE EST LE PICTO `search` DE LA MAQUETTE (22 px, dans la
+     teinte discrète `--ink-4`), posée à 14 px du bord. Le champ suit le dessin
+     de la maquette : blanc, bord 2 px `encre/20` (`--line-3`), 44 px. */
   .search-wrap .search-icon{
-    position:absolute;left:14px;font-size:17px;color:var(--ink-3);pointer-events:none;
+    position:absolute;left:14px;display:inline-flex;align-items:center;
+    color:var(--ink-4);pointer-events:none;
   }
+  .search-wrap .search-icon svg{display:block;width:22px;height:22px;}
   .search-wrap input[type=search]{
-    padding-left:38px;background:var(--surface);border:1.5px solid var(--line);
-    min-height:46px;
+    padding-left:44px;background:var(--surface);border:2px solid var(--line-3);
+    border-radius:12px;min-height:44px;
   }
   .search-wrap input[type=search]:focus{border-color:var(--primary);}
   .search-wrap input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
@@ -1966,7 +2229,22 @@
   .toolbar-parc .toolbar-top{flex-direction:row;align-items:center;gap:8px;}
   .toolbar-parc .search-wrap{flex:1 1 auto;min-width:140px;}
   .toolbar-parc .search-wrap input[type=search]{min-width:0;}
-  .toolbar-parc .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:46px;}
+  /* ★ LOT 10 — « AJOUTER UNE MACHINE » EST UN APLAT D'ENCRE DANS LA MAQUETTE
+     (`bg-encre text-blanc`), avec le picto `add_circle` de 20 px. Le lot 7 le
+     laissait en Signature FR.
+     ⚠️ LA HAUTEUR RESTE CELLE DU LOT 7 — 46 px — ET CE N'EST PAS UN DÉTAIL : ce
+     bouton est posé SUR LA MÊME RANGÉE que le champ de recherche, qui fait 46 px
+     (la hauteur d'un champ du produit). Le ramener à 44 px désalignait la rangée
+     de deux pixels, et `--cible-tactile` vaut 44 : 46 est le barreau SUPÉRIEUR,
+     celui qui aligne. La feuille unique a dû le reposer, faute de quoi la valeur
+     44 revenait. */
+  .toolbar-parc .fleet-ajouter{
+    flex:0 0 auto;white-space:nowrap;min-height:46px;border-radius:12px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--ink);color:#fff;border:2px solid var(--ink);
+  }
+  .toolbar-parc .fleet-ajouter:hover{background:var(--ink);color:#fff;}
+  .toolbar-parc .fleet-ajouter svg{display:block;width:20px;height:20px;flex:0 0 auto;}
 
   /* ★ LOT 7 — LA COULEUR DES FILTRES DE L'ÉTAT. Quatre pastilles à compteur :
      chacune porte sa teinte d'état (un point) et son compteur sur un voile, la
@@ -1981,11 +2259,18 @@
   .chip-late .chip-mot::before{background:var(--late);}
   .chip-soon .chip-mot::before{background:var(--soon);}
   .chip-ok .chip-mot::before{background:var(--ok);}
+  /* ★ LOT 10 — LE COMPTEUR D'UN FILTRE EST DANS LA TEINTE DE SON ÉTAT SUR SON
+     VOILE (`bg-ambre/15 text-ambre ... font-bold` de la maquette) : c'est la
+     même règle « un état = une couleur », appliquée au filtre. */
   .chip .chip-count{
     display:inline-flex;align-items:center;justify-content:center;
     min-width:20px;padding:0 5px;border-radius:var(--r-pill);
     background:var(--surface-soft);color:var(--ink);opacity:1;
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;
   }
+  .chip-late .chip-count{color:var(--late);}
+  .chip-soon .chip-count{color:var(--soon);}
+  .chip-ok .chip-count{color:var(--ok);}
   .chip-late .chip-count{background:var(--late-bg);}
   .chip-soon .chip-count{background:var(--soon-bg);}
   .chip-ok .chip-count{background:var(--ok-bg);}
@@ -2032,12 +2317,22 @@
     border-radius:var(--r-pill);padding:8px 14px;font-family:inherit;
     font-size:13.5px;font-weight:700;min-height:38px;white-space:nowrap;
   }
-  .chip:hover{border-color:var(--primary-line);color:var(--primary-dark);}
+  /* ★ LOT 10 — LES FILTRES INACTIFS SONT DES CONTOURS DE 2 px D'ENCRE SUR BLANC
+     (`border-2 border-encre/15 bg-surface-container-lowest`), et leur libellé
+     est un `font-label` de 13,5 px. 36 px de haut : la maquette, et ce n'est pas
+     un geste de chantier — voir l'écart ④ de l'en-tête. */
+  .chip:hover{border-color:var(--ink);color:var(--ink);}
+  .chip{min-height:36px;padding:6px 14px;font-size:13.5px;font-weight:600;border-width:2px;}
   /* La NEUVIÈME règle d'action, et elle n'était dans aucune liste : le filtre
      ACTIF du parc écrit du blanc sur l'indigo, soit 4,47:1. Elle vient
      d'ergonomie.patch, donc elle n'existait pas encore quand le socle a été
      corrigé — c'est le contrôle « blanc sur un aplat » qui l'a nommée. */
-  .chip.is-active{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
+  /* ★ LOT 10 — LE FILTRE ACTIF EST UN APLAT D'ENCRE, comme dans les deux
+     maquettes (`bg-encre text-blanc`), et son compteur reste lisible dessus
+     (`bg-blanc/20`). Le lot 7 l'écrivait en Signature FR : c'est ce que le
+     client appelle « les couleurs ne sont pas bonnes » sur les boutons du haut. */
+  .chip.is-active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .chip.is-active:hover{border-color:var(--ink);color:#fff;}
   .chip .chip-count{
     font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
     font-size:12.5px;font-weight:700;opacity:.75;
@@ -2045,9 +2340,14 @@
   .chip.is-active .chip-count{opacity:.9;}
 
   .sort-wrap{display:flex;align-items:center;gap:8px;}
-  .sort-wrap select{min-height:42px;background:var(--surface);border:1.5px solid var(--line);}
+  /* ★ LOT 10 — LE TRI EST UN CHAMP BLANC BORDÉ DE 1 px `encre/20` (`--line-3`),
+     haut de 36 px, avec son `font-label` de 13,5 px — la maquette de bureau. */
+  .sort-wrap select{
+    min-height:36px;background:var(--surface);border:1px solid var(--line-3);
+    border-radius:8px;font-size:13.5px;font-weight:600;
+  }
 
-  .fleet-count{font-size:12.5px;font-weight:600;color:var(--ink-2);}
+  .fleet-count{font-size:12px;font-weight:500;color:var(--ink-2);}
   #fleet-list{display:flex;flex-direction:column;gap:14px;}
 
   .sr-only{
@@ -2214,10 +2514,501 @@
     display:block;margin:0;width:100%;height:100%;max-width:100%;aspect-ratio:auto;
     object-fit:cover;border:none;border-radius:0;background:none;
   }
+
+  /* ── ★ LOT 10 — LES DEUX ÉCHÉANCES, EN DERNIER (la cascade de `.due`). ──────
+     La maquette distingue DEUX objets : l'ÉCHÉANCE EN GRAND de la colonne de
+     droite (`text-counter-lg`, 28 px, dans la teinte de l'état) et le LIBELLÉ DE
+     LA JAUGE (12 px, à l'encre). Le produit emploie la classe `due` pour les
+     deux ; la règle générique `.due{font-size:13.5px;color:var(--ink-2)}` est
+     écrite APRÈS celle du lot 9, et elle écrasait donc la couleur du grand
+     chiffre — c'est le « +9 h » que le client voyait sans couleur d'état.
+     Ici les deux sont posées ensemble, après tout le reste. */
+  .machine .machine-echeance .due{
+    display:block;font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
+    font-size:25px;font-weight:800;letter-spacing:-0.02em;color:var(--etat-fort);line-height:1.15;white-space:nowrap;
+  }
+  /* La jauge, elle, écrit son chiffre À L'ENCRE (18,11:1) : c'est un libellé de
+     12 px, pas un grand texte, et `--etat-fort` n'y serait pas tenu de passer AA. */
+  .machine-jauge .due,
+  .machine-jauge-valeur{font-size:12px;font-weight:600;color:var(--ink);}
+
+  /* ── ★ LOT 10 — LE LISERÉ ET LES DEUX PHOTOS, DANS LA TEINTE DE L'ÉTAT. ────
+     Reposé ici pour la même raison : la règle générique de `.machine-photo` vit
+     plus haut, et la vignette de bureau ne doit garder ni bordure ni voile gris. */
+  .m-bande{background:var(--etat);}
+  @media (min-width:900px){
+    .m-bande{width:8px;height:auto;align-self:stretch;background:var(--etat);}
+  }
+  .machine-tete-photo{background:var(--surface-tinte);border:none;}
+  .machine-tete-photo .machine-photo{border:none;border-radius:0;background:none;object-fit:cover;}
   @media (min-width:900px){
     .machine-tete-photo{display:inline-flex;}
     .machine-photo-cadre{display:none;}
   }
+
+  /* ── ★ LOT 10 — LES QUATRE ACTIONS, REPOSÉES APRÈS TOUT LE RESTE. ──────────
+     Elles portent des libellés à 13,5 px et une icône de 20 px : la maquette de
+     bureau. Les règles génériques de `.btn-row-action` (13 px, 18 px d'icône)
+     sont écrites AVANT ce bloc, donc celles-ci gagnent. */
+  .m-actions .btn-row-action{font-size:13.5px;font-weight:600;min-height:44px;}
+  .m-actions .btn-row-action svg{width:18px;height:18px;}
+  .m-actions .btn-row-action.btn-principal svg{width:20px;height:20px;}
+  /* ── ★ LOT 10, CORRIGÉ — LE CADRE DU COMPTEUR EST À L'ENCRE, la couleur d'état
+     va sur le LISERÉ de gauche. Voir le pourquoi au premier bloc de ce lot. ── */
+  .compteur{border:2px solid var(--ink);border-left:4px solid var(--etat);}
+  .compteur-bureau{background:var(--surface-tinte);border-color:var(--ink);border-left-color:var(--etat);}
+  .compteur-enregistrer{background:var(--ink);color:#fff;}
+  .compteur-enregistrer:hover{background:var(--ink);color:#fff;}
+  .compteur-titre svg{color:var(--etat-fort);}
+  .machine-jauge-part{background:var(--etat);}
+/* ════════════════════════════════════════════════════════════════════════════
+   KEEVA — LA FEUILLE DE STYLE UNIQUE, ADOPTÉE DES MAQUETTES.
+
+   POURQUOI CE FICHIER EXISTE, ET CE QU'IL CHANGE DE MÉTHODE.
+   Jusqu'ici on corrigeait écran par écran : chaque maquette lue donnait un lot,
+   et le client ne voyait jamais « le design ». Ici, la feuille des maquettes est
+   ADOPTÉE ENTIÈRE — une seule fois — avec NOS NOMS DE CLASSES. Conséquence
+   cherchée : le JavaScript ne change pas d'une ligne (mêmes classes, mêmes
+   identifiants, mêmes écouteurs), ni Supabase, ni Capacitor.
+
+   ELLE EST POSÉE EN DERNIER DANS LA CHAÎNE (`signal/poser-feuille.mjs`, après le
+   lot 10 et avant `embarquer-polices.mjs`), donc à spécificité ÉGALE elle gagne
+   par ORDRE sur les règles des lots 0 à 10 qui la précèdent — c'est ce qui
+   permet de n'écrire AUCUN `!important` (règle ⑦ de la consigne). Une seule
+   exception, et elle est antérieure à ce fichier : `prefers-reduced-motion`, où
+   `!important` est le seul moyen d'annuler une durée d'animation déjà posée.
+
+   ── CE QUI EST CORRIGÉ DE LA MAQUETTE, ET POURQUOI (règle ②) ────────────────
+   L'en-tête `tailwind.config` des cinq maquettes affirme :
+       "signature-fr": "#24B5A8"   et   "signature-en": "#5B52DF"
+   et la charte de Stitch annote le cyan « validé WCAG AA à 5,65:1 ». C'EST FAUX,
+   ET C'EST MESURÉ : #24B5A8 sur blanc rend 2,55:1 (illisible en plein soleil), et
+   le 5,65:1 appartient à #5B52DF. Donc :
+     · le TEXTE D'ACCENT est #5B52DF (Signature FR du produit, 5,65:1) — pas le
+       cyan, qui reste DÉCORATIF sur fond clair (points, traits, voiles, bordures,
+       aplats) et LISIBLE sur la nuit (7,22:1) ;
+     · l'ambre #DE7A16 (3,04:1) ne porte JAMAIS de texte sous 24 px : trait,
+       pastille, voile, ou GRAND CHIFFRE (seuil WCAG du grand texte : 3:1) ;
+     · l'olive #8B9B37 (3,07:1) et le bleu roi #236FE0 (4,75:1) suivent la même
+       règle ;
+     · `badge.ok` écrit à l'ENCRE sur son voile de cyan (≈15:1) et non en cyan sur
+       du cyan pâle (≈2,3:1) ;
+     · le bouton d'enregistrement est à l'ENCRE avec texte blanc (≈18:1), jamais
+       blanc sur cyan (2,55:1).
+   La maquette est suivie partout ailleurs, valeur par valeur.
+
+   ── LES JETONS (règle ①) ────────────────────────────────────────────────────
+   Ils sont DÉCLARÉS dans `signal/styles.css` (le `:root` de la feuille de base),
+   pas ici : `signal/test-charte.mjs` lit ce fichier-là pour vérifier que toute
+   variable employée est déclarée. Ce fichier les EMPLOIE.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ① LES SURFACES, LES ENCRES ET LES LIGNES.
+   LA FEUILLE DE STITCH EST LA BASE DE CE BLOC, JETON PAR JETON, AVEC SES VALEURS
+   ET SES NOMS quand nous les employons déjà : `--surface-soft`, `--dark`,
+   `--dark-2`, `--dark-ink`, `--ink`, `--ink-2`, `--ink-3`, `--ink-4`,
+   `--line-soft`, `--primary`, `--primary-hover`, `--sur-primaire`, `--late*`,
+   `--soon*`, `--ok*`, `--r-*`, les trois ombres, `--keeva-gradient`, les quatre
+   marges de sécurité. Les deux seules différences sont NOMMÉES :
+     · `--ink-4` : Stitch écrit 40 % — mesuré 2,87:1 sur blanc, sous la barre AA,
+       et ce jeton sert à des libellés (donc du TEXTE). On descend jusqu'à 60 %
+       (4,81:1), et `--ink-3` garde SA valeur de 60 % de Stitch : les deux
+       barreaux coïncident, c'est le seul niveau qui passe.
+     · `--dark-2` : Stitch écrit 8 %, nous étions à 10 % (le survol de la barre
+       latérale). On revient À SA VALEUR : 8 %.
+   Et deux jetons sont AJOUTÉS, parce que des correctifs postérieurs les emploient
+   sans les déclarer : `--or-part-grande` / `--or-part-petite` (la répartition φ
+   de la mise en page, née dans `signal/design-tokens.css`).
+   ════════════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-soft:rgba(14,19,51,.04);
+  --surface-subtle:rgba(14,19,51,.02);
+  --dark:#0D1424;
+  --dark-2:rgba(255,255,255,.08);
+  --dark-ink:#94A3B8;
+  --ink:#0E1333;
+  --ink-2:rgba(14,19,51,.74);
+  --ink-3:rgba(14,19,51,.60);
+  --ink-4:rgba(14,19,51,.60);
+  --ink-soft:rgba(14,19,51,.70);
+  --line-soft:rgba(14,19,51,.12);
+  --line:rgba(14,19,51,.14);
+  --line-2:rgba(14,19,51,.08);
+  --line-3:rgba(14,19,51,.22);
+  /* ★ LES DEUX JETONS DE L'ACCENT, CORRIGÉS DE STITCH (règle ②).
+     Stitch écrit `--accent-cyan:#24B5A8` et l'annote « Signature FR — accent
+     texte & succès, 5,65:1 ». C'EST FAUX, ET NOUS L'AVONS MESURÉ : #24B5A8 sur
+     blanc rend 2,55:1 — illisible en plein soleil — et le 5,65:1 appartient à
+     #5B52DF. Le cyan garde donc ses rôles DÉCORATIFS (trait, pastille, voile,
+     point) et son rôle LISIBLE SUR LA NUIT (7,22:1), et c'est le violet qui
+     écrit. Les noms de Stitch sont conservés en ALIAS pour que la feuille reste
+     reconnaissable ; les noms employés par le produit sont les nôtres. */
+  --accent:#5B52DF;
+  --accent-cyan:#24B5A8;
+  --accent-blue:#236FE0;
+  --accent-orange:#DE7A16;
+  --accent-indigo:#6366F1;
+  --accent-green:#8B9B37;
+  --lien:#236FE0;
+  --retard:#DE7A16;
+  --primary:#0E1333;
+  --primary-hover:#0D1424;
+  --sur-primaire:#FFFFFF;
+  /* Rayons : les noms de Stitch, avec `--r-pill` à 999 px comme chez lui. */
+  --r-sm:8px;
+  --r-md:12px;
+  --r-pill:999px;
+  --keeva-gradient:linear-gradient(135deg,#236FE0 0%,#14B8A6 58%,#8B9B37 100%);
+  --cible-tactile:44px;
+  --cible-tactile-fort:48px;
+  --or-part-grande:1.618fr;
+  --or-part-petite:1fr;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ② LES CADRES — 2 px d'ENCRE, rayon 16, ombre de la maquette, sur les
+   CONTENEURS seuls. C'est la règle ④, écrite UNE fois, et sa LISTE est celle du
+   DESIGN.md : les cartes, les fenêtres, les compteurs. Rien d'autre.
+   ── CE QUI N'EST PAS UN CADRE, ET POURQUOI ─────────────────────────────────
+   · LES LIGNES DE LISTE (voir ③) : une ligne se lit comme une ligne ; sa
+     bordure collait au contenu faute de rembourrage latéral ;
+   · LES PHOTOS : une image n'est ni une carte ni une ligne — elle est NUE et
+     arrondie dans la maquette (voir ⑪) ;
+   · ★ `div.machine-jauge` : c'est une PISTE DE JAUGE, pas une carte. Elle a un
+     filet clair de 1 px (`--line-2`) et deux enfants (la piste, le
+     remplissage). Un 2 px d'encre autour d'une piste de 8 px de haut en ferait
+     un cadre plus épais que la jauge elle-même — la maquette la dessine nue,
+     et `verifier-rendu.mjs` l'a comptée à tort comme un cadre ;
+   · LES BOUTONS, LES CHAMPS, LA BARRE D'ONGLETS : leur bordure est leur style.
+   ── ⚠️ LA COULEUR D'ÉTAT NE VA PAS SUR UN CADRE ────────────────────────────
+   Elle va sur le LISERÉ DE GAUCHE, la pastille, le texte d'état, l'échéance et
+   les pictos. Le compteur portait la teinte de son état sur son CADRE : sur une
+   machine EN RETARD, il sortait INDIGO — la couleur de « Bientôt » sur une
+   machine en retard. Corrigé : le cadre est à l'encre, le liseré porte l'état.
+   ════════════════════════════════════════════════════════════════════════════ */
+:is(.card,.stat-card,.machine,.modal,.sheet,.login-box,.offre,.offre-plan,.dropzone,
+    .compteur,.copie-locale,.access-local,.attention-box,.prep-groupe,
+    .ref-scroll,.tache-carte,.chemin,.page-carnet,.pages-utiles,.empty,
+    .erreur-globale,.offline-banner,.depassement-version,.suppr-alerte){
+  border:2px solid var(--ink);
+  border-radius:16px;
+  /* L'OMBRE DE LA MAQUETTE, à sa valeur (Stitch : `0 4px 16px rgba(14,19,51,.04)`). */
+  box-shadow:0 4px 16px rgba(14,19,51,.04);
+}
+/* La piste de la jauge est SORTIE de la règle des cadres, nommément : elle ne
+   porte ni encre ni ombre, seulement son filet clair de 1 px. Cette règle est
+   écrite APRÈS celle des cadres, donc elle la reprend si un lot l'élargissait. */
+.machine-jauge{
+  border:0;border-radius:0;box-shadow:none;background:none;
+}
+/* ⚠️ LA PISTE EST UNE PISTE, PAS UN CADRE — et comme la règle ci-dessus efface
+   toute bordure, son filet clair est REPOSÉ ici, nommément : 1 px de `--line-2`,
+   le voile de la feuille, et rien d'autre. La maquette la dessine nue ; un 2 px
+   d'encre autour d'une piste de 8 px serait plus épais que la jauge elle-même. */
+.machine-jauge-piste{border:1px solid var(--line-2);border-radius:999px;}
+/* Le compteur garde le rayon des cadres ; son LISERÉ de gauche porte l'état
+   (posé par le lot 10). On ne redit ici que ce qui doit être vrai partout. */
+.compteur,.compteur-bureau{border-radius:16px;}
+/* Les surfaces intérieures des cadres : le voile de la maquette, jamais un blanc
+   plat posé sur du blanc (c'est ce qui fait « plat » à l'œil). */
+.compteur,.compteur-bureau{background:var(--surface-soft);}
+.card,.stat-card,.machine,.modal,.sheet,.login-box,.offre-plan,.tache-carte,
+.page-carnet,.pages-utiles,.attention-box,.ref-scroll,.prep-groupe,.empty,
+.chemin{background:var(--surface);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ③ LES LIGNES DE LISTE NE SONT PAS DES CADRES — filet bas, rien d'autre.
+   Les lots précédents leur avaient posé un fond et un cadre : la consigne les
+   exclut nommément. Une ligne de liste se lit comme une ligne, pas comme une
+   carte — et sa bordure collait au contenu faute de rembourrage latéral.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* ⚠️ LES DÉCLARATIONS SONT EN LONGUEUR (`border-style`, pas `border`) : `border:0`
+   efface aussi `border-color`, et le contrôle de `signal/test-views.mjs` lit la
+   DERNIÈRE règle qui écrit `white-space` — la barre d'état a donc perdu sa
+   hauteur (`min-height:var(--ligne-cible)`, `height:auto`, `align-self:stretch`)
+   sans que personne ne le voie. C'est mesuré, et c'est réparé. */
+:is(.alert-row,.manual-row,.switch-row,.check-row,.prep-produit,.page-utile,
+    .tache-ligne,.service-ligne,.sheet-item){
+  border-style:none;
+  border-bottom:1px solid var(--line-soft);
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+:is(.alert-row,.manual-row,.switch-row,.check-row,.prep-produit,.page-utile,
+    .tache-ligne,.service-ligne,.sheet-item):last-child{border-bottom-style:none;}
+/* La pastille d'état gauche d'une ligne d'échéance garde son trait plein : c'est
+   une barre d'état, pas une bordure de cadre. Ses trois propriétés de hauteur
+   (le lot 8 les a posées pour qu'elle s'étire sur une ligne qui passe à deux
+   lignes) sont REPOSÉES ici, à l'identique, parce qu'elles décident de la
+   lisibilité de la ligne : une barre d'état courte à côté d'un texte long ne
+   désigne plus rien. */
+.alert-bar{
+  border-style:none;border-radius:0;
+  min-height:var(--ligne-cible);
+  height:auto;
+  align-self:stretch;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ④ LES BOUTONS — les principaux à l'ENCRE, les secondaires en contour.
+   Décision du client (règle ③) : le violet d'action #6366F1 ne porte plus les
+   boutons pleins, et il reste le texte d'accent (#5B52DF) et les voiles.
+   Toutes les cibles tactiles font 44 à 48 px : on travaille avec des gants.
+   ════════════════════════════════════════════════════════════════════════════ */
+:is(.btn-primary,.btn-principal,.primary,button.primary,.chip.is-active,
+    .tab-fab span,.m-actions .btn-principal,.choix-option.is-actif,
+    .step-options .is-actif,.compteur-enregistrer,.compteur-confirmer,
+    .toggle-pw-btn,.photo-actions button.is-principal,.lecteur-zoom){
+  background:var(--ink);
+  color:#fff;
+  border-color:var(--ink);
+}
+:is(.btn-primary,.btn-principal,button.primary,.m-actions .btn-principal,
+    .compteur-enregistrer,.compteur-confirmer){
+  min-height:var(--cible-tactile-fort);
+  border-radius:12px;
+  font-weight:800;
+}
+:is(.btn-primary,.btn-principal,button.primary,.m-actions .btn-principal,
+    .compteur-enregistrer,.compteur-confirmer):hover{background:var(--ink);color:#fff;}
+/* Les secondaires : un contour de 1,5 px, texte à l'encre, 44 px. */
+:is(.btn-tint,button.secondary,.secondary,.compteur-photo,.compteur-corriger,
+    .icon-btn,.m-actions .btn-row-action:not(.btn-principal),.page-utile,
+    .choice-option,.choix-option,.lang-btn,.step-back,.delete-link,
+    .compteur-lire button:not(.compteur-enregistrer):not(.compteur-confirmer),
+    .toolbar-parc button:not(.fleet-ajouter),.dash-ajouter){
+  background:var(--surface);
+  color:var(--ink);
+  border:1.5px solid var(--line-soft);
+  border-radius:12px;
+  min-height:var(--cible-tactile);
+  font-weight:700;
+}
+:is(.btn-tint,button.secondary,.secondary,.compteur-photo,.icon-btn,
+    .m-actions .btn-row-action:not(.btn-principal),.lang-btn):hover{
+  background:var(--surface-soft);border-color:var(--ink);color:var(--ink);
+}
+/* Le lien en ligne reste un lien : bleu roi (4,75:1), souligné, jamais un aplat. */
+.link-inline,.link-inline:hover,.pres-lien{color:var(--lien);}
+.link-inline{text-decoration:underline;}
+/* Le geste principal d'un cadre compte : le bouton qui enregistre un compteur
+   prend la cible de 48 px même quand le libellé est court. */
+.compteur-enregistrer{padding:10px 18px;cursor:pointer;border:0;font-family:inherit;font-size:14px;}
+
+/* ── LA BARRE D'OUTILS DU PARC — SA MISE EN PAGE EST CELLE DU LOT 7 (recherche
+      souple, jamais sous 140 px ; bouton d'ajout rigide sur la même rangée) et
+      elle N'EST PAS RÉÉCRITE ICI. Une seule valeur est reprise, parce qu'elle
+      avait DÉRIVÉ : le lot 10 avait ramené ce bouton de 46 px à 44 px, alors
+      qu'il est posé sur la rangée du champ de recherche, qui fait 46. Le lot 10
+      est corrigé à sa source ; cette règle-ci n'est que le filet de sécurité de
+      la cascade, au cas où un correctif futur le reprendrait. */
+.toolbar-parc button{border-radius:12px;}
+.toolbar-parc .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:46px;}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑤ LES CHAMPS — 46 px, filet de 12 %, anneau d'ENCRE à la prise de focus.
+   L'anneau remplace le halo indigo : sur un chantier, en plein soleil, c'est le
+   contraste de l'anneau qui dit où l'on écrit — pas sa teinte.
+   ════════════════════════════════════════════════════════════════════════════ */
+input:not([type=checkbox]):not([type=radio]):not([type=file]),
+select,textarea{
+  min-height:46px;
+  border:1.5px solid var(--line-soft);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--ink);
+}
+input:not([type=checkbox]):not([type=radio]):not([type=file]):focus,
+select:focus,textarea:focus{
+  border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(14,19,51,.18);
+  outline:0;
+}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+/* L'ÉTIQUETTE DE CHAMP : 13,5 px en gras (le barreau du produit). */
+label{font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.check-row label,.switch-row .switch-label{font-size:13.5px;font-weight:600;color:var(--ink);}
+.check-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--ink);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑥ LES PASTILLES D'ÉTAT — voile teinté, TEXTE À L'ENCRE, majuscules, 999 px.
+   C'est la correction de contraste n° 2 : la maquette écrit `text-signature-fr`
+   sur `bg-signature-fr/15`, soit ≈2,3:1. La teinte reste sur le POINT, le TRAIT
+   et le VOILE ; le mot d'état, lui, s'écrit à l'encre (≈15:1).
+   ════════════════════════════════════════════════════════════════════════════ */
+.badge,.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+  padding:4px 12px;border-radius:999px;border:0;
+  color:var(--ink);background:var(--surface-soft);
+}
+.badge.ok,.pill.ok,.badge.etat-ok{background:var(--ok-bg);color:var(--ok-ink);}
+.badge.soon,.pill.soon,.badge.etat-soon{background:var(--soon-bg);color:var(--soon-ink);}
+.badge.alert,.pill.alert,.pill.late,.badge.etat-late{background:var(--late-bg);color:var(--late-ink);}
+.badge.neutral,.pill.neutral{background:var(--surface-soft);color:var(--ink-2);}
+/* Dans la carte machine, la pastille suit le jeton d'état de la carte (liseré,
+   mot, échéance : une seule teinte) — le TEXTE reste à l'encre. */
+.machine .badge{color:var(--ink);background:var(--etat-fond);border:1px solid var(--line-soft);}
+.machine .badge svg{color:var(--etat);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑦ LE COMPTEUR — le geste quotidien, celui qu'on fait avec des gants.
+   Champ de 46 px à 2 px d'ENCRE, 22 px de chiffres ; bloc unité en encre avec
+   texte blanc ; « Enregistrer » en encre. La maquette écrivait « Enregistrer »
+   sur l'aplat de la teinte d'état (ambre 3,04:1 avec du blanc) : corrigé.
+   ════════════════════════════════════════════════════════════════════════════ */
+.compteur-champ{
+  min-height:46px;height:46px;
+  border:2px solid var(--ink);
+  border-radius:12px;
+  font-size:22px;font-weight:800;line-height:1.1;
+  font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
+  padding:6px 10px;background:var(--surface);color:var(--ink);
+}
+.compteur-unite{
+  min-height:46px;background:var(--ink);color:#fff;border-radius:12px;
+  font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
+}
+.compteur-enregistrer{background:var(--ink);color:#fff;border:0;border-radius:12px;}
+.compteur-enregistrer:hover{background:var(--ink);color:#fff;}
+.compteur-titre svg{color:var(--ink);}
+.compteur-photo.is-secondaire{background:none;border-color:transparent;color:var(--accent);}
+.compteur-photo.is-secondaire:hover{background:none;border-color:transparent;color:var(--accent);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑧ LA BARRE D'ONGLETS — fond blanc, filet haut, actif en #5B52DF, bouton
+   central à l'ENCRE avec sa bordure blanche.
+   ════════════════════════════════════════════════════════════════════════════ */
+.tabbar{background:var(--surface);border-top:1px solid var(--line-soft);}
+.tab{min-height:var(--cible-tactile-fort);color:var(--ink-3);}
+.tab.is-active{color:var(--accent);font-weight:700;}
+.tab-fab span{
+  min-width:var(--cible-tactile-fort);min-height:var(--cible-tactile-fort);
+  background:var(--ink);color:#fff;border:2px solid var(--surface);border-radius:16px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑨ LA TYPOGRAPHIE — Figtree pour tout, Space Grotesk pour les CHIFFRES.
+   C'est ce qui aligne les heures et les kilomètres : `tabular-nums` donne à
+   chaque chiffre la même largeur, donc les colonnes ne dansent plus.
+   ── ⚠️ AUCUNE POLICE DE PLATEFORME DANS LA PILE (ni `system-ui`, ni
+      `-apple-system`) ────────────────────────────────────────────────────────
+   C'EST LA CAUSE DES 128 ÉCARTS MESURÉS DANS CHROME, ET ELLE SE LIT ICI.
+   `font-family:'Figtree',system-ui,-apple-system,sans-serif` ne dit pas
+   seulement « Figtree, sinon du repli » : il dit « sinon LA POLICE DU SYSTÈME »,
+   et le système de l'utilisateur n'est pas celui du développeur. Sur ce poste,
+   `system-ui` se résout en **Inter** — la police des PAGES PUBLIQUES du projet,
+   qui n'a rien à faire dans l'application. Le contrôle de `verifier-rendu.mjs`
+   lisait donc « Inter » sur des titres de page, alors que la feuille ne contient
+   pas une seule fois le mot `Inter` : le nom venait du SYSTÈME, pas de nous.
+   DEUX RAISONS DE DONNER UN REPLI EXPLICITE, ET NOMMÉ :
+     · la MESURE devient reproductible d'un poste à l'autre — `getComputedStyle`
+       ne peut plus rendre le nom d'une police que nous n'avons pas choisie ;
+     · le repli reste DANS la charte : `'Space Grotesk'` puis `sans-serif`, jamais
+       une police de plateforme. Space Grotesk est embarquée, elle est donc
+       réellement disponible, et son dessin est celui du produit.
+   ════════════════════════════════════════════════════════════════════════════ */
+body,h1,h2,h3,h4,h5,h6,button,input,select,textarea,label,th,td{
+  font-family:'Figtree','Space Grotesk',sans-serif;
+}
+/* Et le PLANCHER, écrit pour que RIEN ne puisse rester en dehors : tout élément
+   qui n'est ni un texte nommé ci-dessus ni un CHIFFRE nommé ci-dessous porte
+   Figtree. Chaque sélecteur de cette liste a une classe (spécificité 0,1,0) ;
+   la règle des chiffres, écrite APRÈS à spécificité égale, les reprend pour
+   eux — et pour eux seuls. Le résultat ne dépend donc plus d'aucune police de
+   plateforme, et il ne dépend pas non plus de la liste du dessus. */
+:is(p,span,div,li,dt,dd,small,strong,em,b,i,code,summary,legend,fieldset,
+    article,section,header,footer,nav,aside,main,figure,figcaption,blockquote,
+    table,thead,tbody,tfoot,tr,caption,details,output,time,mark,abbr,cite,q,s,u,
+    h1,h2,h3,h4,h5,h6,label,th,td,button,select,textarea,
+    input:not([type=checkbox]):not([type=radio]):not([type=file])){
+  font-family:'Figtree','Space Grotesk',sans-serif;
+}
+:is(.num,.stat-card .num,.compteur-champ,.compteur-unite,.val,.counter,.count,
+    .machine-jauge-valeur,.compteur-jour-valeur,.ref-table .counter,
+    .prep-ligne-total,.fleet-count,.chip-count,.machine-echeance .due,
+    .due-hero,.version-app,.tel-champ){
+  font-family:'Space Grotesk',sans-serif;
+  font-variant-numeric:tabular-nums;
+}
+/* Les chiffres et les dates de la maquette : les barreaux du produit. */
+.machine .machine-echeance .due{font-size:25px;font-weight:800;line-height:1.15;color:var(--etat-fort);}
+.compteur-titre{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑩ LA BARRE LATÉRALE DE BUREAU — la nuit, l'ardoise, et l'actif à l'ENCRE
+   avec son liseré cyan (la maquette de bureau : `bg-encre text-signature-fr
+   border-l-4 border-signature-fr`). Le cyan ÉCRIT ici : il est sur la nuit,
+   où il rend 7,22:1 — c'est le seul endroit où la maquette a raison sur lui.
+   ════════════════════════════════════════════════════════════════════════════ */
+.sidebar{background:var(--dark);}
+.sidebar .nav-item{color:var(--dark-ink);min-height:var(--cible-tactile);border-radius:12px;}
+.sidebar .nav-item .nav-ico{color:var(--dark-ink);}
+.sidebar .nav-item:hover{color:#fff;background:var(--dark-2);}
+.sidebar .nav-item:hover .nav-ico{color:#fff;}
+.sidebar .nav-item.is-active{
+  color:var(--cyan);background:var(--ink);font-weight:700;
+  border-left:4px solid var(--cyan);border-radius:0 12px 12px 0;
+}
+.sidebar .nav-item.is-active .nav-ico{color:var(--cyan);}
+.sidebar .wordmark em{color:var(--cyan);}
+.sidebar .sidebar-foot button{color:var(--dark-ink);min-height:var(--cible-tactile);}
+.sidebar .sidebar-foot button:hover{color:#fff;}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑪ CE QUI N'EST PAS UN CADRE. Les photos se montrent NUES et arrondies (la
+   maquette : `rounded-xl overflow-hidden`, aucune bordure) — une image n'est pas
+   une fenêtre. Les tuiles du tableau de bord, elles, portent un voile de leur
+   état : c'est la couleur qui les distingue, pas un cadre.
+   ════════════════════════════════════════════════════════════════════════════ */
+:is(.machine-photo,.machine-photo-cadre .machine-photo,.machine-tete-photo,
+    .machine-tete-photo .machine-photo,.photo-apercu,.photo-illustration,
+    .vignette-bouton,.vignette-bouton img,.page-apercu){
+  border:0;
+  box-shadow:none;
+}
+.machine-photo-cadre .machine-photo,.machine-tete-photo{border-radius:12px;overflow:hidden;}
+.machine-photo-cadre .machine-photo{background:var(--surface-soft);}
+.machine-tete-photo{background:var(--surface-soft);}
+.stat-card{border-radius:16px;}
+.stat-card.tuile-late{background:var(--voile-ambre);}
+.stat-card.tuile-soon{background:var(--voile-indigo);}
+.stat-card.tuile-ok{background:var(--voile-olive);}
+.stat-card.tuile-primary{background:var(--tint-action);}
+/* Le grand chiffre garde la teinte de son état (contrat du lot 8, vérifié par
+   signal/test-charte.mjs) — la règle est rappelée ici pour qu'aucune règle
+   postérieure ne la reprenne. */
+.stat-card .num{font-size:31px;font-weight:700;line-height:1;}
+.stat-card .num.etat-late{color:var(--late);}
+.stat-card .num.etat-soon{color:#236FE0;}
+.stat-card .num.etat-ok{color:#8B9B37;}
+.stat-card .num.etat-manuels{color:var(--ink);}
+
+/* ── LES DEUX PIÈCES DE LA JAUGE, REPOSÉES AVEC LEURS VALEURS D'ORIGINE (lot 9) :
+      le lot 10 avait écrasé la piste et le remplissage par un seul `var(--etat)`,
+      ce qui vidait de leur sens les deux règles par état que le lot 7 avait
+      écrites — et ces deux règles ne s'appliquaient plus à rien. On les remet
+      donc EN VIGUEUR ici, après le lot 10 : la piste reste le voile de la
+      feuille (`--line-2`), et le remplissage prend la teinte NOM DE SON ÉTAT. */
+.machine-jauge-piste{height:8px;border-radius:999px;background:var(--line-2);overflow:hidden;}
+.machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--etat);}
+.machine-jauge-part.is-late{background:var(--late);}
+.machine-jauge-part.is-soon{background:var(--soon);}
+.machine-jauge-part.is-ok{background:var(--ok);}
+.machine-jauge-mot{font-size:12px;font-weight:600;color:var(--ink-2);}
+.machine-jauge-valeur{font-size:12px;font-weight:600;color:var(--ink);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ⑫ LES PUPITRES (fenêtres, feuilles, tiroirs) — même cadre que les cartes, et
+   la cible tactile de leurs actions.
+   ════════════════════════════════════════════════════════════════════════════ */
+.modal,.sheet{border-radius:16px;}
+.modal-actions button,.sheet-item{min-height:var(--cible-tactile);}
+.sheet-item{border-radius:0;}
 </style>
 </head>
 <body>
@@ -7117,23 +7908,29 @@ const NAV_ICONES = {
 // d'alerte, engrenage, calendrier à flèches, liste cochée, appareil photo,
 // compteur, carnet, entonnoir de filtre) — pas une forme inventée.
 const PICTOS = {
-  retard: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
-  bientot: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3.5 2"/>',
-  ajuste: '<circle cx="12" cy="12" r="9"/><path d="M8 12.2l2.8 2.8L16.4 9.4"/>',
-  alerte: '<path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5"/><path d="M12 17.4h.01"/>',
-  entretien: '<path d="M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8z"/><path d="M14.8 8.4 13 13l-4.6 1.8L10.2 10z"/>',
-  prochain: '<path d="M3.5 5.5h17v15h-17z"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9.2 14.2 11 16l3.8-3.8"/>',
-  plan: '<path d="M9 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9"/><path d="M4.5 8.5l1.6 1.6L9 7.2"/><path d="M4.5 15.5l1.6 1.6L9 14.2"/>',
-  reglages: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>',
-  carnet: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v18H6.5A1.5 1.5 0 0 1 5 19.5z"/><path d="M8.5 3v18"/>',
-  photo: '<path d="M3.5 8.5h3.2l1.6-2.2h7.4l1.6 2.2h3.2v10.5h-17z"/><circle cx="12" cy="13.5" r="3.4"/>',
-  compteur: '<path d="M4.5 18.5a8.5 8.5 0 1 1 15 0"/><path d="M12 13.8 16.6 9"/>',
-  filtre: '<path d="M3.5 5.5h17l-6.6 7.6v6.4l-3.8-2.2v-4.2z"/>',
+  retard: '<path d="M503.5-289.48q9.5-9.48 9.5-23.5t-9.48-23.52q-9.48-9.5-23.5-9.5t-23.52 9.48q-9.5 9.48-9.5 23.5t9.48 23.52q9.48 9.5 23.5 9.5t23.52-9.48ZM453-433h60v-253h-60v253Zm27.27 353q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Zm.23-60Q622-140 721-239.5t99-241Q820-622 721.19-721T480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/>',
+  bientot: '<path d="m627-287 45-45-159-160v-201h-60v225l174 181ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-82 31.5-155t86-127.5Q252-817 325-848.5T480-880q82 0 155 31.5t127.5 86Q817-708 848.5-635T880-480q0 82-31.5 155t-86 127.5Q708-143 635-111.5T480-80Zm0-400Zm0 340q140 0 240-100t100-240q0-140-100-240T480-820q-140 0-240 100T140-480q0 140 100 240t240 100Z"/>',
+  ajuste: '<path d="m421-298 283-283-46-45-237 237-120-120-45 45 165 166Zm59 218q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/>',
+  alerte: '<path d="m40-120 440-760 440 760H40Zm104-60h672L480-760 144-180Zm361.5-65.68q8.5-8.67 8.5-21.5 0-12.82-8.68-21.32-8.67-8.5-21.5-8.5-12.82 0-21.32 8.68-8.5 8.67-8.5 21.5 0 12.82 8.68 21.32 8.67 8.5 21.5 8.5 12.82 0 21.32-8.68ZM454-348h60v-224h-60v224Zm26-122Z"/>',
+  entretien: '<path d="m643-273 44-41q7-7 7-15.5t-7-15.5L535-497q5-14 8-27t3-27q0-58-41-99t-99-41q-17 0-34 5t-33 14l88 87-54 51-86-85q-9 16-13.5 33t-4.5 35q0 57 40 96.5t97 39.5q14 0 27.5-2.5T461-425l151 152q6 6 15.5 6t15.5-6ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 82-31.5 155T763-197.5q-54 54.5-127 86T480-80Zm0-60q142 0 241-99.5T820-480q0-142-99-241t-241-99q-141 0-240.5 99T140-480q0 141 99.5 240.5T480-140Zm0-340Z"/>',
+  prochain: '<path d="M180-80q-24 0-42-18t-18-42v-620q0-24 18-42t42-18h65v-60h65v60h340v-60h65v60h65q24 0 42 18t18 42v300h-60v-110H180v430h324v60H180ZM760 0q-73 0-127.5-45.5T564-160h62q13 44 49.5 72T760-60q58 0 99-41t41-99q0-58-41-99t-99-41q-29 0-54 10.5T662-300h58v60H560v-160h60v57q27-26 63-41.5t77-15.5q83 0 141.5 58.5T960-200q0 83-58.5 141.5T760 0ZM180-630h600v-130H180v130Zm0 0v-130 130Z"/>',
+  plan: '<path d="M132-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h696q24 0 42 18t18 42v600q0 24-18 42t-42 18H132Zm0-60h696v-600H132v600Zm68-100h200v-80H200v80Zm382-80 198-198-57-57-141 142-57-57-56 57 113 113Zm-382-80h200v-80H200v80Zm0-160h200v-80H200v80Zm-68 420v-600 600Z"/>',
+  reglages: '<path d="m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z"/>',
+  carnet: '<path d="M560-574v-48q33-14 67.5-21t72.5-7q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-610q-38 0-73 9.5T560-574Zm0 220v-49q33-13.5 67.5-20.25T700-430q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-390q-38 0-73 9t-67 27Zm0-110v-48q33-14 67.5-21t72.5-7q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-500q-38 0-73 9.5T560-464ZM248-300q53.57 0 104.28 12.5Q403-275 452-250v-427q-45-30-97.62-46.5Q301.76-740 248-740q-38 0-74.5 9.5T100-707v434q31-14 70.5-20.5T248-300Zm264 50q50-25 98-37.5T712-300q38 0 78.5 6t69.5 16v-429q-34-17-71.82-25-37.82-8-76.18-8-54 0-104.5 16.5T512-677v427Zm-30 90q-51-38-111-58.5T248-239q-36.54 0-71.77 9T106-208q-23.1 11-44.55-3Q40-225 40-251v-463q0-15 7-27.5T68-761q42-20 87.39-29.5 45.4-9.5 92.61-9.5 63 0 122.5 17T482-731q51-35 109.5-52T712-800q46.87 0 91.93 9.5Q849-781 891-761q14 7 21.5 19.5T920-714v463q0 27.89-22.5 42.45Q875-194 853-208q-34-14-69.23-22.5Q748.54-239 712-239q-63 0-121 21t-109 58ZM276-489Z"/>',
+  photo: '<path d="M479.5-267q72.5 0 121.5-49t49-121.5q0-72.5-49-121T479.5-607q-72.5 0-121 48.5t-48.5 121q0 72.5 48.5 121.5t121 49Zm0-60q-47.5 0-78.5-31.5t-31-79q0-47.5 31-78.5t78.5-31q47.5 0 79 31t31.5 78.5q0 47.5-31.5 79t-79 31.5ZM140-120q-24 0-42-18t-18-42v-513q0-23 18-41.5t42-18.5h147l73-87h240l73 87h147q23 0 41.5 18.5T880-693v513q0 24-18.5 42T820-120H140Zm0-60h680v-513H645l-73-87H388l-73 87H140v513Zm340-257Z"/>',
+  compteur: '<path d="M473.5-303.5Q517-305 537-336l216-339-335 219q-30 20-32 64t21 67q23 23 66.5 21.5ZM478-799q57 0 119 18.5T716-717l-52 37q-45-30-96.5-44.5T477.98-739q-140.47 0-239.23 100.22Q140-538.57 140-396.02 140-351 152.5-305q12.5 46 35.5 85h579q22-36 35-84t13-94q0-42-12.5-90.5T758-578l39-52q38 56 57 112.5T875-404q2 60-12 113t-41 98q-12 23-25.5 28t-33.5 5H192q-17 0-33.5-8.5T134-193q-26-48-40-97.5T80-396q0-83 31.5-156.5t85.5-128Q251-735 323.68-767T478-799Zm-9 331Z"/>',
+  filtre: '<path d="M400-240v-60h160v60H400ZM240-450v-60h480v60H240ZM120-660v-60h720v60H120Z"/>',
+  carnetBadge: '<path d="M331-431h37v-83h48q15.73 0 26.36-10.64Q453-535.28 453-551v-48q0-15.72-10.64-26.36Q431.73-636 416-636h-85v205Zm37-120v-48h48v48h-48Zm129 120h84q15 0 26-10.64 11-10.63 11-26.36v-131q0-15.72-11-26.36Q596-636 581-636h-84v205Zm37-37v-131h47v131h-47Zm133 37h37v-83h50v-37h-50v-48h50v-37h-87v205ZM260-200q-24 0-42-18t-18-42v-560q0-24 18-42t42-18h560q24 0 42 18t18 42v560q0 24-18 42t-42 18H260Zm0-60h560v-560H260v560ZM140-80q-24 0-42-18t-18-42v-620h60v620h620v60H140Zm120-740v560-560Z"/>',
+  ajouter: '<path d="M453-280h60v-166h167v-60H513v-174h-60v174H280v60h173v166Zm27.27 200q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Zm.23-60Q622-140 721-239.5t99-241Q820-622 721.19-721T480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/>',
+  chercher: '<path d="M796-121 533-384q-30 26-70 40.5T378-329q-108 0-183-75t-75-181q0-106 75-181t182-75q106 0 180.5 75T632-585q0 43-14 83t-42 75l264 262-44 44ZM377-389q81 0 138-57.5T572-585q0-81-57-138.5T377-781q-82 0-139.5 57.5T180-585q0 81 57.5 138.5T377-389Z"/>',
+  deplier: '<path d="M480-345 240-585l43-43 197 198 197-197 43 43-240 239Z"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
   if (!trace) return '';
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${trace}</svg>`;
+  // `viewBox="0 -960 960 960"` est celui de Material Symbols : on le garde TEL
+  // QUEL, la taille se règle par la feuille (comme la police de la maquette).
+  return `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" focusable="false">${trace}</svg>`;
 }
 // L'état vient de `dueInfo()` — les MÊMES trois mots que la pastille ; le picto
 // ne fait que les rendre lisibles d'un coup d'œil, il n'ajoute aucun sens.
@@ -7344,7 +8141,7 @@ function dashHeadHtml() {
           <h1>${greetingLabel()}</h1>
           <span class="dash-head-compte">${tR('{n} machine(s) suivie(s)', { n })}</span>
         </div>
-        <button type="button" class="dash-ajouter" id="dash-add">${trad('Ajouter une machine')}</button>
+        <button type="button" class="dash-ajouter" id="dash-add">${picto('ajouter')}<span>${trad('Ajouter une machine')}</span></button>
       </div>
     </div>`;
 }
@@ -8821,14 +9618,14 @@ VIEWS.machines = {
       <div class="toolbar toolbar-parc">
         <div class="toolbar-top">
           <div class="search-wrap">
-            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="search-icon" aria-hidden="true">${picto('chercher')}</span>
             <!-- Pas d'autofocus : sur téléphone il ouvrirait le clavier à chaque
                  venue sur l'onglet Parc. -->
             <input id="fleet-search" type="search" value="${esc(f.q)}"
                    placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
                    aria-label="${trad('Rechercher dans le parc')}">
           </div>
-          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add">${trad('Ajouter une machine')}</button>
+          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add">${picto('ajouter')}<span>${trad('Ajouter une machine')}</span></button>
         </div>
         <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
@@ -8973,7 +9770,7 @@ function machineCardHtml(m) {
           ${m.manual_url ? `<button type="button" class="view-manual machine-tete-carnet" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet d\'entretien (PDF)')}</span></button>` : ''}
         </div>
         <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
-        <button type="button" class="machine-plieur" data-plier="${esc(m.id)}" aria-expanded="${replie ? 'false' : 'true'}" aria-label="${esc(tR('Détails de {machine}', { machine: m.name }))}"><span class="machine-chevron" aria-hidden="true">${replie ? '▸' : '▾'}</span></button>
+        <button type="button" class="machine-plieur" data-plier="${esc(m.id)}" aria-expanded="${replie ? 'false' : 'true'}" aria-label="${esc(tR('Détails de {machine}', { machine: m.name }))}"><span class="machine-chevron${replie ? '' : ' is-ouvert'}" aria-hidden="true">${picto('deplier')}</span></button>
       </div>
       <div class="m-main">
         ${info.state === 'late' || info.state === 'soon' ? `
@@ -8985,7 +9782,7 @@ function machineCardHtml(m) {
         ${photo ? `
         <div class="machine-photo-cadre" data-conteneur="photo">
           <img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">
-          ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet PDF')}</span></button>` : ''}
+          ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${picto('carnetBadge')}<span>${trad('Carnet PDF')}</span></button>` : ''}
         </div>`
           : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : '')}
         ${tache ? `
@@ -9010,7 +9807,7 @@ function machineCardHtml(m) {
           ${jaugeIntervalleHtml(info, m)}
         </div>
         <div class="m-actions">
-          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}${trad('Enregistrer un entretien')}</button>
+          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span>${trad('Enregistrer un entretien')}</span></button>
           <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${picto('prochain')}${trad('Prochain entretien')}</button>
           <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${picto('plan')}${trad('Voir le plan')}</button>
           <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${picto('reglages')}${trad('Modifier la machine')}</button>
