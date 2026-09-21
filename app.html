@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-iVUSVbc3rfqMZJWObb6RoE5tbL9gqUYXurxMcUFVJX8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xqEgxKPilEagsrp+P1+onOWZzgojEQIm7+GJSZzWtxM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1993,8 +1993,6 @@
      principale, et des pastilles à la taille du reste de l'écran. */
   .dash-side .dropzone{padding:16px 20px;gap:8px;}
   .dash-side .badge, .dash-side .pill{font-size:11px;}
-    .mobile-only{display:none;}
-  }
 
   /* Carte prioritaire : corps empilé (mobile) puis en ligne (desktop) */
   .priority .priority-body{display:flex;flex-direction:column;gap:8px;}
@@ -2477,7 +2475,159 @@
     }
 
     .dash-side .dropzone:hover,.dash-side .dropzone.is-over{background:var(--surface);border-color:var(--line);}
+    .barre-mobile{display:none;}
+    .priority-outil{display:none;}
+    .priority-boite{display:contents;}
+    .stat-grid .stat-mot{display:none;}
+  }
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ REFONTE STITCH — TABLEAU DE BORD DU TÉLÉPHONE (< 900 px)
+     Mêmes règles que le bureau pour les teintes : rien de nouveau dans la
+     palette. Le bandeau prioritaire reste SOMBRE (la maquette Android le veut
+     ainsi, et la nuit porte le cyan et l'ambre à un bon contraste) ; le violet
+     est celui du bureau. En-tête : la marque, le nom de l'écran, le compte.
+     ══════════════════════════════════════════════════════════════════════════ */
+  @media (max-width:899px){
+    .main{background:rgba(99,102,241,.06);}
+
+    /* En-tête du téléphone */
+    .barre-mobile{
+      position:sticky;top:var(--safe-top);z-index:20;
+      display:flex;align-items:center;gap:12px;padding:10px 16px;
+      background:var(--surface);border-bottom:1px solid var(--line-2);
+    }
+    .bm-logo{
+      width:40px;height:40px;border-radius:12px;background:var(--dark);flex:none;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .bm-logo svg{display:block;width:28px;height:28px;}
+    .bm-texte{display:flex;flex-direction:column;flex:1;min-width:0;line-height:1.15;}
+    .bm-nom{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+    .bm-page{font-size:12px;font-weight:600;color:var(--ink-2);}
+    .bm-compte{
+      display:flex;align-items:center;justify-content:center;flex:none;
+      width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;border:none;cursor:pointer;
+    }
+
+    /* Carte de salut du tableau de bord : avatar carré, salut en grand */
+    .page-head[data-view="dashboard"] .greeting-row{
+      justify-content:flex-start;gap:14px;padding:16px;background:var(--surface);
+      border:1.5px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-soft);
+    }
+    .page-head[data-view="dashboard"] .greeting-row .avatar{
+      order:-1;width:56px;height:56px;border-radius:14px;background:var(--dark);font-size:20px;font-weight:800;
+    }
+    .page-head[data-view="dashboard"] .greeting .hello{
+      order:1;font-size:24px;font-weight:800;line-height:1.15;letter-spacing:-.02em;color:var(--ink);
+    }
+    .page-head[data-view="dashboard"] .greeting .count{
+      order:2;font-size:13.5px;font-weight:500;letter-spacing:0;color:var(--ink-2);margin-top:2px;
+    }
+
+    /* Bandeau prioritaire : nuit, outil en coin, boîte tâche + compteur */
+    .priority{position:relative;background:linear-gradient(160deg,var(--dark),var(--ink));border-radius:var(--r-card);padding:18px;}
+    .priorities{margin-bottom:0;}
+    .priority-outil{
+      position:absolute;top:16px;right:16px;display:flex;align-items:center;justify-content:center;
+      width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);color:var(--ok-accent);
+    }
+    .priority-retard .priority-top{padding-right:56px;justify-content:flex-start;gap:10px;flex-wrap:wrap;}
+    .priority-boite{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px;border-radius:14px;background:rgba(255,255,255,.08);
+    }
+    .priority-boite .priority-tache{padding:0;background:none;flex:1;min-width:0;}
+    .priority-boite .priority-compteur{flex-direction:column;align-items:flex-end;gap:4px;}
+    .priority-boite .priority-compteur .val{font-size:30px;color:var(--ok-accent);}
+    .priority-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .priority-actions button{min-height:48px;border-radius:12px;}
+    .priority-actions .do{background:var(--primary-dark);color:#fff;box-shadow:0 4px 14px rgba(91,82,223,.4);}
+    .priority-actions .see{background:rgba(255,255,255,.12);border:none;color:#fff;}
+
+    /* Tuiles : blanches, filet doux, libellé en petites capitales */
+    .stat-grid .stat-card{
+      background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-card);
+      box-shadow:var(--shadow-soft);padding:16px;display:flex;flex-direction:column;gap:10px;
+    }
+    .stat-grid .stat-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .stat-grid .stat-card .lbl{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
+    .stat-grid .stat-ico{display:flex;align-items:center;justify-content:center;flex:none;}
+    .stat-grid .ico-late,.stat-grid .ico-soon,.stat-grid .ico-ok{width:10px;height:10px;border-radius:50%;}
+    .stat-grid .ico-late svg,.stat-grid .ico-soon svg,.stat-grid .ico-ok svg{display:none;}
+    .stat-grid .ico-late{background:var(--late);}
+    .stat-grid .ico-soon{background:var(--soon);}
+    .stat-grid .ico-ok{background:var(--ok);}
+    .stat-grid .ico-manuels{color:var(--ink-2);}
+    .stat-grid .ico-manuels svg{width:18px;height:18px;}
+    .stat-grid .num-ligne{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
+    .stat-grid .stat-card .num{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+    .stat-grid .stat-card .num.etat-late{color:var(--late);}
+    .stat-grid .stat-card .num.etat-soon{color:var(--soon);}
+    .stat-grid .stat-card .num.etat-ok{color:var(--ok);}
+    .stat-grid .stat-card .num.etat-manuels{color:var(--ink);}
+    .stat-grid .stat-card .stat-mot{font-size:12px;font-weight:600;color:var(--ink-2);text-align:right;margin:0;}
+    .stat-grid .stat-etat{display:none;}
+
+    /* Cartes : filet doux et ombre légère, comme sur le bureau */
+    .dash-grid .card,
+    .dash-side .dropzone{
+      background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow-soft);
+    }
+
+    /* Échéances : un bloc teinté par machine, une seule pastille à droite */
+    .dash-main .alert-list{gap:10px;}
+    .dash-main .alert-row{
+      padding:12px 12px 12px 0;gap:12px;border:none;border-radius:12px;overflow:hidden;
+      background:rgba(14,19,51,.04);
+    }
+    .dash-main .alert-bar{align-self:stretch;height:auto;width:4px;border-radius:0;}
+    .dash-main .alert-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    .dash-main .alert-title{font-size:15px;font-weight:700;}
+    .alert-etat{display:none;}
+    .dash-main .alert-plus{
+      display:inline-flex;align-items:center;justify-content:center;flex:none;
+      width:28px;height:28px;border-radius:8px;background:var(--surface);color:var(--ink);font-weight:700;
+    }
+
+    /* Préparation : carte teintée, période, gros bouton « Voir la liste » */
+    .dash-grid .card.dash-preparation{background:rgba(222,122,22,.07);}
+    .prep-pied{border-top:none;padding-top:0;}
+    .prep-pied .link-inline{
+      display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
+      border-radius:12px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;
+    }
+    .prep-pied .link-inline:hover{color:#fff;text-decoration:none;background:var(--dark);}
+
+    /* Carte du manuel analysé : légende, phrase, bouton plein indigo */
+    .card.mobile-only .chip-icon{
+      display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
+      border-radius:10px;background:rgba(99,102,241,.14);color:var(--primary-dark);
+    }
+    #ai-cta.link-inline{
+      display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
+      border-radius:12px;background:var(--primary-dark);color:#fff;font-size:15px;font-weight:700;
+      align-self:stretch !important;
+    }
+    #ai-cta.link-inline:hover{color:#fff;text-decoration:none;}
+
+    /* Titres de cartes : icône et texte alignés */
+    .dash-grid .card-title,.dash-grid .card-title-sm{display:inline-flex;align-items:center;gap:10px;font-size:18px;font-weight:800;}
+
+    /* Le dépôt par glisser-déposer n'a pas de sens sur un téléphone (la maquette
+       Android ne le montre pas) : le dépôt reste possible par la carte du manuel
+       et par l'onglet « Manuels ». */
+    .dash-side .dropzone{display:none;}
+    .dropzone .dz-zone{min-height:0;padding:24px 16px;}
+
+    /* Barre d'onglets : icônes plus lisibles, bouton « + » rond et surélevé */
+    .tab .tab-icon{font-size:22px;}
+    .tab-icon svg{width:22px;height:22px;}
+    .tab{font-size:11px;}
+    .tab-fab span{
+      width:58px;height:58px;border-radius:50%;margin-top:-30px;font-size:28px;
+      border:4px solid var(--surface);box-shadow:0 6px 18px rgba(91,82,223,.4);
+    }
   }
 </style>
 </head>
@@ -7602,14 +7752,36 @@ function greetingLabel() {
   return who ? tR('Bonjour {nom}', { nom: esc(who) }) : trad('Bonjour');
 }
 
+// La marque KEEVA (hexagone + barre), en SVG : l'identifiant du dégradé doit être
+// unique dans la page, la couleur de la barre change selon le fond (encre sur
+// blanc, blanc sur nuit).
+function marqueSvg(idDegrade, couleurBarre) {
+  return `<svg viewBox="0 0 1 1" focusable="false"><defs><linearGradient id="${idDegrade}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#236FE0"/><stop offset="58%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#8B9B37"/></linearGradient></defs><path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#${idDegrade})"/><path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/><path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/><path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/><path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="${couleurBarre}"/></svg>`;
+}
+
 function sidebarHtml() {
   return `
-    <span class="wordmark"><span class="wm-logo" aria-hidden="true"><svg viewBox="0 0 1 1" focusable="false"><defs><linearGradient id="keeva-barre" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#236FE0"/><stop offset="58%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#8B9B37"/></linearGradient></defs><path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#keeva-barre)"/><path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/><path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/><path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/><path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="#0E1333"/></svg></span><span>KEEVA</span></span>
+    <span class="wordmark"><span class="wm-logo" aria-hidden="true">${marqueSvg('keeva-barre', '#0E1333')}</span><span>KEEVA</span></span>
     ${NAV_ITEMS.map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}"><span class="nav-ico" aria-hidden="true">${navIcone(item.icon)}</span>${esc(item.label)}</button>`).join('')}
     <div class="sidebar-foot">
       <div class="version-ligne"><span>${trad('Version')}</span><span>v${esc(versionAffichee())}</span></div>
       <button type="button" id="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>${trad('Se déconnecter')}</span></button>
     </div>`;
+}
+
+// En-tête du téléphone : la marque, le nom de l'écran, l'accès au compte. Il
+// n'existe que sous 900 px (la barre latérale prend le relais au-dessus).
+function barreMobileHtml() {
+  const entree = NAV_ITEMS.find((item) => item.id === UI.view);
+  return `
+    <header class="barre-mobile">
+      <span class="bm-logo" aria-hidden="true">${marqueSvg('keeva-mobile', '#FFFFFF')}</span>
+      <span class="bm-texte">
+        <span class="bm-nom">KEEVA</span>
+        ${entree ? `<span class="bm-page">${esc(entree.short)}</span>` : ''}
+      </span>
+      <button type="button" class="bm-compte" id="bm-compte" aria-label="${trad('Mon compte')}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></button>
+    </header>`;
 }
 
 function tabbarHtml() {
@@ -7655,7 +7827,7 @@ function pageHeadHtml() {
     <div class="greeting-row">
       <div class="greeting">
         <span class="hello">${greetingLabel()}</span>
-        <span class="count">${n} machine${n > 1 ? 's' : ''}</span>
+        <span class="count">${UI.view === 'dashboard' ? tR('{n} machine(s) suivie(s)', { n }) : `${n} machine${n > 1 ? 's' : ''}`}</span>
       </div>
       <span class="avatar">${initialsFrom(UI.contactName || UI.companyName)}</span>
     </div>
@@ -7677,6 +7849,7 @@ function renderApp() {
     <div class="shell">
       <aside class="sidebar">${sidebarHtml()}</aside>
       <div class="main">
+        ${barreMobileHtml()}
         <div class="content">
           <div class="view">
             ${bandeauHorsLigneHtml()}
@@ -7714,6 +7887,7 @@ function wireShell() {
   // atteint le plafond de l'offre. Aucun second chemin.
   document.getElementById('dash-add')?.addEventListener('click', handleAddMachine);
   document.getElementById('dash-compte')?.addEventListener('click', () => goTo('account'));
+  document.getElementById('bm-compte')?.addEventListener('click', () => goTo('account'));
 
   document.getElementById('open-plus')?.addEventListener('click', openPlusSheet);
   document.getElementById('logout-btn')?.addEventListener('click', doLogout);
@@ -8265,19 +8439,19 @@ VIEWS.dashboard = {
       <div class="stat-grid">
         <div class="stat-card tuile-late">
           <div class="stat-tete"><span class="lbl">${trad('En retard')}</span><span class="stat-ico ico-late" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></span></div>
-          <div class="num-ligne"><span class="num etat-late">${c.late}</span><span class="stat-etat">${trad('URGENT')}</span></div>
+          <div class="num-ligne"><span class="num etat-late">${c.late}</span><span class="stat-mot">${c.late > 1 ? trad('interventions') : trad('intervention')}</span><span class="stat-etat">${trad('URGENT')}</span></div>
         </div>
         <div class="stat-card tuile-soon">
           <div class="stat-tete"><span class="lbl">${tR('Sous {n} jours', { n: SOON_DAYS })}</span><span class="stat-ico ico-soon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div>
-          <div class="num-ligne"><span class="num etat-soon">${c.soon}</span><span class="stat-etat">${trad('À PLANIFIER')}</span></div>
+          <div class="num-ligne"><span class="num etat-soon">${c.soon}</span><span class="stat-mot">${trad('à planifier')}</span><span class="stat-etat">${trad('À PLANIFIER')}</span></div>
         </div>
         <div class="stat-card tuile-ok">
           <div class="stat-tete"><span class="lbl">${trad('À jour')}</span><span class="stat-ico ico-ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg></span></div>
-          <div class="num-ligne"><span class="num etat-ok">${c.ok}</span><span class="stat-etat">${trad('NOMINAL')}</span></div>
+          <div class="num-ligne"><span class="num etat-ok">${c.ok}</span><span class="stat-mot">${c.ok > 1 ? trad('machines') : trad('machine')}</span><span class="stat-etat">${trad('NOMINAL')}</span></div>
         </div>
         <div class="stat-card tuile-primary">
           <div class="stat-tete"><span class="lbl">${trad('Manuels analysés')}</span><span class="stat-ico ico-manuels" aria-hidden="true">${navIcone('manuels')}</span></div>
-          <div class="num-ligne"><span class="num etat-manuels">${c.analysed}</span>${UI.machines.length ? `<span class="stat-etat">${tR('{n} % du parc', { n: Math.round(100 * c.analysed / UI.machines.length) })}</span>` : ''}</div>
+          <div class="num-ligne"><span class="num etat-manuels">${c.analysed}</span><span class="stat-mot">${trad('indexés')}</span>${UI.machines.length ? `<span class="stat-etat">${tR('{n} % du parc', { n: Math.round(100 * c.analysed / UI.machines.length) })}</span>` : ''}</div>
         </div>
       </div>
 
@@ -8424,6 +8598,7 @@ function priorityTaskCardHtml(machine, item, info, planEntier) {
   const echeance = seuil ? tR('Échéance contractuelle : {valeur}', { valeur: esc(seuil) }) : '';
   return `
     <section class="priority priority-retard">
+      <span class="priority-outil" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span>
       <span class="priority-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0zM12 9v4M12 17h.01"/></svg></span>
       <div class="priority-body">
         <div class="priority-top">
@@ -8432,13 +8607,15 @@ function priorityTaskCardHtml(machine, item, info, planEntier) {
         </div>
         <span class="machine-name">${esc(machine.name)}</span>
         ${mention}
-        <div class="priority-tache">
-          <h2>${esc(titre)}</h2>
-          ${echeance ? `<span class="priority-tache-echeance">${echeance}</span>` : ''}
-        </div>
-        <div class="priority-compteur">
-          <span class="val">${esc(depart)}</span>
-          <span class="depassement">${esc(info.short)}</span>
+        <div class="priority-boite">
+          <div class="priority-tache">
+            <h2>${esc(titre)}</h2>
+            ${echeance ? `<span class="priority-tache-echeance">${echeance}</span>` : ''}
+          </div>
+          <div class="priority-compteur">
+            <span class="val">${esc(depart)}</span>
+            <span class="depassement">${esc(info.short)}</span>
+          </div>
         </div>
       </div>
       <div class="priority-actions">
