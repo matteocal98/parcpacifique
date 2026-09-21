@@ -3,926 +3,1286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEEVA — La juste mesure de votre parc | Precise tracking for your fleet</title>
-<meta name="description" content="KEEVA transforme vos manuels constructeur en plans de maintenance : suivi par calendrier, heures ou kilomètres, rappels d'échéance et liste de pièces à commander. Gratuit pour 2 machines, puis 12 €/mois jusqu'à 5 machines.">
-<meta name="robots" content="index, follow">
-<meta name="theme-color" content="#0D1424">
-<link rel="canonical" href="https://keeva.work/decouvrir.html">
-<link rel="icon" type="image/svg+xml" href="./favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="./icones/favicon-32x32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="./icones/apple-touch-icon.png">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="KEEVA">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:locale:alternate" content="en_GB">
-<meta property="og:title" content="KEEVA — La juste mesure de votre parc">
-<meta property="og:description" content="Vos manuels constructeur deviennent des plans de maintenance. Suivi par calendrier, heures ou kilomètres, rappels et liste de pièces prête à commander.">
-<meta property="og:url" content="https://keeva.work/decouvrir.html">
-<meta property="og:image" content="https://keeva.work/icones/icone-512.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KEEVA — Precise tracking for your fleet">
-<meta name="twitter:description" content="Manuals become maintenance plans. Track by calendar, hours or kilometres, get reminders and an order list.">
-<meta name="twitter:image" content="https://keeva.work/icones/icone-512.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "KEEVA",
-  "slogan": "La juste mesure de votre parc",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web, Android",
-  "inLanguage": ["fr", "en"],
-  "description": "Suivi d'entretien de parc matériel : le manuel constructeur devient un plan de maintenance, échéances en dates ou au compteur, rappels et liste de pièces à commander.",
-  "url": "https://keeva.work/decouvrir.html",
-  "offers": [
-    { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "EUR", "description": "2 machines suivies, 1 utilisateur." },
-    { "@type": "Offer", "name": "Starter / Artisan", "price": "12", "priceCurrency": "EUR", "description": "Jusqu'à 5 machines suivies, 1 utilisateur, export CSV." },
-    { "@type": "Offer", "name": "Business / Flotte", "price": "39", "priceCurrency": "EUR", "description": "Jusqu'à 20 machines suivies, 3 utilisateurs, QR codes et préparation groupée." },
-    { "@type": "Offer", "name": "Enterprise / Parc", "price": "89", "priceCurrency": "EUR", "description": "Parc sur mesure, rôles d'équipe et support dédié ; au-delà de 20 machines, 1,50 € par machine et par mois." }
-  ],
-  "featureList": [
-    "Lecture automatique des manuels constructeur",
-    "Plans de maintenance automatiques",
-    "Suivi calendaire, horaire ou kilométrique",
-    "Rappels d'échéance",
-    "Liste de pièces détachées prête à commander",
-    "Historique des interventions et export CSV",
-    "Consultation hors connexion",
-    "Français et anglais"
-  ]
-}
-</script>
+<title>KEEVA — Tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* POLICES AUTO-HÉBERGÉES — Inter (sous-ensemble latin), servies depuis NOTRE
-     domaine dans `polices/`. Ni CDN, ni base64 : un `<link>` vers Google ferait
-     transmettre l'adresse IP du visiteur, et la base64 alourdissait chaque page de
-     64 ko sans être mise en cache d'une page à l'autre. Ces fichiers le sont. */
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:600;src:url(./polices/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-
-  /* POLICES EMBARQUÉES — Inter (sous-ensemble latin), trois graisses : 400, 600,
-     700. C'est le SEUL jeu que la page écrit. Aucune ressource externe n'est
-     appelée : ni feuille distante, ni fichier de police. Un `<link>` vers
-     fonts.googleapis.com ferait transmettre l'adresse IP du visiteur à Google,
-     et la page dépendrait du réseau pour s'afficher correctement. */
-  /* ==========================================================================
-     KEEVA — jetons de la charte. AUCUNE autre couleur n'est employée : les
-     surfaces et les bordures sont ces mêmes teintes en transparence, jamais des
-     gris inventés ni un dégradé. La page suit le mode clair et le mode sombre.
-
-     LES RÔLES SONT ÉCRITS DANS LE NOM, ET C'EST VOLONTAIRE. La charte range les
-     douze teintes en deux familles : celles qui PORTENT DU TEXTE (encre, blanc,
-     bleu roi, Signature EN) et celles qui sont DÉCORATIVES (Signature FR,
-     turquoise, ambre, indigo, olive, cyan, ardoise). Un jeton nommé « indigo »
-     finit toujours par se retrouver derrière un libellé ; un jeton nommé
-     « décoratif » ne le peut pas. Le bleu roi garde son nom de charte, et il est
-     mesuré comme les autres.
-
-     ⚠️ LE TEXTE D'ACCENT EST LA **SIGNATURE EN** (#5B52DF), PAS LA SIGNATURE FR.
-     C'est contre-intuitif, et c'est le calcul qui tranche : la Signature FR
-     #24B5A8 donne **2,55:1** sur blanc, donc un texte d'accent illisible en plein
-     soleil. La Signature EN #5B52DF donne **5,65:1** — c'est elle que la charte
-     elle-même mesure dans « blanc sur signature FR, texte secondaire (bloc
-     d'action) ». Les deux noms restent ceux de la charte : c'est le RÔLE qui
-     change, et il est écrit ici pour qu'on ne les ré-échange pas.
-     ========================================================================== */
-  :root{
-    /* Teintes de la charte, nommées comme dans DESIGN.md */
-    --nuit:#0D1424;
-    --blanc:#FFFFFF;
-    --encre:#0E1333;
-    --signature-fr:#24B5A8;   /* décoratif — 2,55:1 sur blanc, jamais du texte */
-    --ambre:#DE7A16;          /* décoratif */
-    --indigo:#6366F1;         /* décoratif */
-    --roi:#236FE0;            /* liens — 4,75:1 sur blanc */
-    --turquoise:#14B8A6;      /* décoratif */
-    --olive:#8B9B37;          /* décoratif */
-    --signature-en:#5B52DF;   /* TEXTE D'ACCENT — 5,65:1 sur blanc */
-    --cyan:#009BDE;           /* décoratif (aplat de pastille) */
-    --ardoise:#94A3B8;        /* atténué sur nuit — 7,17:1 */
-
-    /* Rôles : ce qui écrit, ce qui décore, ce qui sépare. */
-    --texte:var(--encre);
-    --texte-doux:rgba(14,19,51,.74);
-    --accent:var(--signature-en);
-    --lien:var(--roi);
-    --decoratif-1:var(--signature-fr);
-    --decoratif-2:var(--ambre);
-    --decoratif-3:var(--indigo);
-    --trait:rgba(14,19,51,.12);
-    --trait-fort:rgba(14,19,51,.24);
-    --surface-douce:rgba(14,19,51,.03);
-    --ombre:0 1px 2px rgba(14,19,51,.06), 0 12px 32px rgba(14,19,51,.08);
-    --r-sm:10px; --r-md:14px; --r-lg:20px;
-    --fond:var(--blanc);
-  }
-  /* LE THÈME SOMBRE SUIT LE RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
-     la page d'accueil n'a pas à porter un interrupteur de test. Le petit texte
-     d'accent (surtitres et ligne d'accroche) y passe en BLANC — la Signature EN
-     donne 5,65:1 sur blanc mais 3,25:1 sur la nuit, sous la barre de 4,5:1 pour
-     de petites capitales. La teinte de marque reste portée par les pastilles, les
-     tracés et le bandeau final. */
-  @media (prefers-color-scheme: dark){
-    :root{
-      --fond:var(--nuit);
-      --texte:var(--blanc);
-      --texte-doux:rgba(255,255,255,.74);
-      --trait:rgba(255,255,255,.14);
-      --trait-fort:rgba(255,255,255,.26);
-      --surface-douce:rgba(255,255,255,.05);
-      --ombre:0 0 0 1px rgba(255,255,255,.10);
-    }
+  :root {
+    --bg-page: #faf8ff;
+    --surface: #ffffff;
+    --surface-low: #f2f3ff;
+    --surface-dim: #d3d9f0;
+    --ink: #0e1333;
+    --ink-2: rgba(14, 19, 51, 0.74);
+    --ink-3: rgba(14, 19, 51, 0.60);
+    --ink-4: rgba(14, 19, 51, 0.40);
+    --sidebar-bg: #0d1424;
+    --sidebar-active: #1a233a;
+    --sidebar-ink: #94a3b8;
+    
+    /* Accents & Statuts */
+    --primary: #4355b9;
+    --primary-light: #5b6cd1;
+    --primary-tint: rgba(67, 85, 185, 0.08);
+    --primary-line: rgba(67, 85, 185, 0.25);
+    
+    --urgent: #ba1a1a;
+    --urgent-bg: #ffdad6;
+    --urgent-ink: #410002;
+    
+    --warning: #de7a16;
+    --warning-bg: rgba(222, 122, 22, 0.14);
+    --warning-ink: #4a2800;
+    
+    --ok: #006a60;
+    --ok-bg: #70f7e6;
+    --ok-ink: #00201c;
+    --teal: #24b5a8;
+    
+    --cyan: #236fe0;
+    --radius-card: 16px;
+    --radius-pill: 999px;
+    --radius-sm: 8px;
+    --shadow-soft: 0 4px 20px rgba(14, 19, 51, 0.04);
   }
 
-  /* LE PETIT TEXTE D'ACCENT EN THÈME SOMBRE. La Signature EN donne 5,65:1 sur
-     blanc (elle est donc l'accent du thème clair) mais 3,25:1 sur la nuit : sous
-     la barre de 4,5:1 pour de PETITES CAPITALES. Les surtitres et la ligne
-     d'accroche s'écrivent donc en blanc sur la nuit, et la teinte de marque
-     reste portée par les pastilles, les tracés et le bandeau final. */
-  /* Le petit texte d'accent en thème sombre : la Signature EN donne 5,65:1 sur
-     blanc mais 3,25:1 sur la nuit — sous la barre de 4,5:1 pour de PETITES
-     CAPITALES. Surtitres et ligne d'accroche passent donc en blanc sur la nuit, et
-     la teinte de marque reste portée par les pastilles, les tracés et le bandeau. */
-    .tagline,.sur-titre{color:var(--blanc);}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-page);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    min-height: 100vh;
   }
-  /* Le thème sombre suit le RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
-     la page d'accueil n'a pas à porter un interrupteur de test. */
 
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{margin:0;background:var(--fond);color:var(--texte);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
-  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;}
-  a{color:inherit;}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 16px;}
-  @media(min-width:640px){.wrap{padding:0 24px;}}
-  @media(min-width:1024px){.wrap{padding:0 32px;}}
-  section{padding:80px 0;}
-  @media(min-width:1024px){section{padding:96px 0;}}
-  /* ATTENTION : .wrap ne porte que les marges latérales, mais une classe l'emporte
-     sur le sélecteur de type. Posé sur une <section>, il annulait donc aussi
-     l'espacement vertical — les sections se touchaient. On le rétablit ici, et les
-     déclarations en ligne « padding-top:0 » continuent de gagner quand une section
-     doit coller à la précédente. */
-  section.wrap{padding-top:80px;padding-bottom:80px;}
-  @media(min-width:640px){section.wrap{padding-left:24px;padding-right:24px;}}
-  @media(min-width:1024px){section.wrap{padding-top:96px;padding-bottom:96px;padding-left:32px;padding-right:32px;}}
-  @media(max-width:600px){section.wrap{padding-top:56px;padding-bottom:56px;}}
-  /* Le contour de focus est décoratif (il ne porte pas de texte) : l'indigo est
-     ici à sa place, et il se voit aussi bien sur blanc que sur nuit. */
-  :focus-visible{outline:3px solid var(--decoratif-3);outline-offset:2px;border-radius:8px;}
-
-  /* --- Marque : le pictogramme de la charte, mot en encre ------------------- */
-  .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
-  .marque svg{display:block;flex:0 0 auto;}
-  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--texte);}
-
-  /* --- Boutons ------------------------------------------------------------- */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;min-height:46px;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
-  .btn svg{flex:0 0 auto;}
-  .btn-primaire{background:var(--texte);color:var(--fond);box-shadow:var(--ombre);}
-  .btn-primaire:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(14,19,51,.22);}
-  .btn-secondaire{background:transparent;color:var(--texte);border-color:var(--trait-fort);}
-  .btn-secondaire:hover{background:var(--surface-douce);}
-  .btn-clair{background:var(--blanc);color:var(--nuit);}
-  .btn-contour{background:transparent;color:var(--blanc);border:2px solid rgba(255,255,255,.35);}
-  .btn-contour:hover{background:rgba(255,255,255,.10);}
-
-  /* --- En-tête sticky ------------------------------------------------------ */
-  header{position:sticky;top:0;z-index:50;background:var(--fond);border-bottom:1px solid var(--trait);}
-  @supports (backdrop-filter: blur(12px)){
-    header{background:rgba(255,255,255,.82);backdrop-filter:blur(12px);}
+  /* Chiffres techniques & compteurs */
+  .num, .counter, .mono {
+    font-family: 'Space Grotesk', sans-serif;
+    font-variant-numeric: tabular-nums;
   }
-  @media (prefers-color-scheme: dark){
-    @supports (backdrop-filter: blur(12px)){ header{background:rgba(13,20,36,.82);} }
+
+  /* ---------------- BARRE LATÉRALE (SIDEBAR) ---------------- */
+  aside.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
   }
-  .entete{display:flex;align-items:center;gap:14px;height:64px;}
-  .entete nav{display:none;gap:4px;}
-  @media(min-width:900px){.entete nav{display:flex;margin-left:14px;}}
-  .entete nav a{padding:8px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--texte-doux);text-decoration:none;}
-  .entete nav a:hover{color:var(--texte);background:var(--surface-douce);}
-  .entete .pousse{flex:1;}
-  .lang{display:none;gap:2px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-sm);padding:3px;}
-  @media(min-width:640px){.lang{display:flex;}}
-  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;}
-  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:0 1px 2px rgba(14,19,51,.10);}
-  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:8px;}
-  @media(min-width:640px){.lien-connexion{display:inline-flex;}}
-  .lien-connexion:hover{color:var(--texte);}
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 10px 28px;
+  }
+  .brand-logo svg {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+  .brand-logo span {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+  }
+  nav.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--sidebar-ink);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.15s ease;
+  }
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+  }
+  .nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .nav-item.is-active {
+    color: #ffffff;
+    background: var(--sidebar-active);
+    border-left: 3px solid var(--teal);
+    font-weight: 700;
+  }
+  .sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .sidebar-version {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 12px;
+    padding: 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: var(--sidebar-ink);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
 
-  /* --- Accroche ------------------------------------------------------------ */
-  section.heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
-  @media(min-width:1024px){section.heros{grid-template-columns:1.618fr 1fr;gap:56px;padding-top:72px;}}
-  .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
-  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--decoratif-1);flex:0 0 auto;}
-  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--decoratif-1);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
-  @keyframes ping{75%,100%{transform:scale(2.4);opacity:0;}}
-  h1{font-size:clamp(30px,5.2vw,58px);font-weight:800;margin:20px 0 0;}
-  .tagline{display:block;font-size:clamp(13px,1.6vw,16px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
-  /* Le texte d'accent est `--accent` (Signature EN, 5,65:1 sur blanc) — jamais
-     l'indigo (4,47:1, décoratif), jamais la Signature FR (2,55:1 sur blanc), et
-     jamais un dégradé de texte : illisible en plein soleil. */
-  .tagline.fr{color:var(--accent);}
-  .tagline.en{color:var(--texte-doux);}
-  .accroche-fort{color:var(--accent);}
-  .sous-titre{font-size:clamp(16px,1.6vw,19px);color:var(--texte-doux);margin:20px 0 30px;max-width:56ch;}
-  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--texte-doux);margin-top:18px;max-width:56em;}
-  .note svg{color:var(--accent);flex:0 0 auto;}
+  /* ---------------- ZONE PRINCIPALE (MAIN CONTENT) ---------------- */
+  main.main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 28px 40px 60px;
+    max-width: 1360px;
+    margin: 0 auto;
+  }
 
-  /* --- L'illustration : l'application telle qu'elle est -------------------- */
-  /* Honnête par construction : c'est la mise en page réelle (une carte machine,
-     son compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES
-     — aucun modèle, aucune marque, aucune donnée inventée. Le cadre est annoncé
-     comme un aperçu, et il ne porte ni dégradé, ni pastille décorative écrite. */
-  .visuel{position:relative;}
-  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;}
-  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--trait);}
-  .maquette .tete .titre{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--texte-doux);}
-  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);}
-  .ligne-machine{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 13px;border:1px solid var(--trait);border-radius:var(--r-md);margin-bottom:8px;}
-  .ligne-machine:last-of-type{margin-bottom:0;}
-  .ligne-machine .nom{font-weight:600;font-size:13.5px;}
-  .ligne-machine .meta{font-size:12px;color:var(--texte-doux);}
-  /* Une pastille de couleur EST le signal. Le texte y est en encre, et les deux
-     aplats choisis sont les DEUX teintes décoratives qui passent 4,5:1 avec lui :
-     l'ambre (5,95:1) et le cyan (5,82:1). La Signature FR, elle, plafonne à
-     3,79:1 avec l'encre : elle ne porte donc pas de texte ici — « à jour » est
-     une pastille en contour, ce qui la distingue sans rien inventer. */
-  .etat{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;flex:0 0 auto;color:var(--encre);}
-  .etat.retard{background:var(--ambre);}
-  .etat.bientot{background:var(--cyan);}
-  .etat.ajour{border:1px solid var(--trait-fort);}
-  .maquette .legende{font-size:12px;color:var(--texte-doux);margin:12px 0 0;}
-  .maquette .bloc-pieces{border:1px solid var(--trait);border-radius:var(--r-md);padding:11px 13px;margin-top:12px;}
-  .maquette .bloc-pieces .titre{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);}
-  .maquette .bloc-pieces ul{margin:8px 0 0;padding-left:16px;font-size:13px;color:var(--texte-doux);}
+  /* EN-TÊTE SUPÉRIEUR */
+  header.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .user-greeting {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .user-avatar-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .user-greeting h1 {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .user-greeting p {
+    font-size: 13px;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-dot-active {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .btn-add-machine {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 11px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(14, 19, 51, 0.15);
+    transition: transform 0.1s, background-color 0.15s;
+  }
+  .btn-add-machine:hover {
+    background: #1a2347;
+    transform: translateY(-1px);
+  }
+  .user-pill {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+  }
 
-  /* --- Têtes de section ---------------------------------------------------- */
-  .section-tete{max-width:60ch;margin-bottom:40px;}
-  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
-  h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;margin-top:10px;}
-  .section-tete p{color:var(--texte-doux);font-size:17px;margin:14px 0 0;}
+  /* BANDEAU PRIORITAIRE VIOLET (ACTION IMMÉDIATE) */
+  .priority-banner {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 28px rgba(79, 70, 229, 0.25);
+  }
+  .priority-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .priority-icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .priority-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .priority-tags {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tag-late {
+    background: var(--warning);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .priority-machine-id {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+  .priority-machine-ref {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+  }
+  .priority-task-desc {
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .priority-task-desc strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .priority-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .btn-priority-done {
+    background: #ffffff;
+    color: #4338ca;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 11px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-priority-done:hover {
+    background: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .btn-priority-details {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 16px;
+    border-radius: 11px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-priority-details:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
 
-  /* --- Cartes -------------------------------------------------------------- */
-  .cartes{display:grid;gap:26px;}
-  @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
-  .carte{background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;transition:border-color .3s,box-shadow .3s,transform .3s;}
-  .carte:hover{border-color:var(--trait-fort);box-shadow:0 18px 40px rgba(14,19,51,.10);transform:translateY(-2px);}
-  /* Plus de dégradé dans la pastille d'icône : la teinte décorative reste, le
-     trait dessus est en encre — donc lisible. */
-  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--decoratif-1);color:var(--encre);}
-  .carte h3{font-size:20px;font-weight:700;margin-bottom:10px;}
-  .carte p{margin:0;color:var(--texte-doux);}
+  /* GRILLE DES 4 COMPTEURS (STATS) */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 20px;
+    border: 1px solid rgba(14, 19, 51, 0.06);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .stat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .stat-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .stat-icon.late { background: #fee2e2; color: #b91c1c; }
+  .stat-icon.soon { background: #e0e7ff; color: #4338ca; }
+  .stat-icon.ok { background: #d1fae5; color: #047857; }
+  .stat-icon.docs { background: #dbeafe; color: #1d4ed8; }
 
-  /* --- Comment ça marche : trois étapes ------------------------------------ */
-  .etapes{list-style:none;margin:0;padding:0;display:grid;gap:26px;}
-  @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
-  .etape{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:30px;}
-  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--decoratif-1);color:var(--encre);font-weight:800;font-size:16px;margin-bottom:18px;}
-  .etape h3{font-size:18px;font-weight:700;margin-bottom:8px;}
-  .etape p{margin:0;color:var(--texte-doux);font-size:15.5px;}
+  .stat-body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .stat-number {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-number.late { color: var(--warning); }
+  .stat-number.soon { color: var(--ink); }
+  .stat-number.ok { color: #059669; }
+  .stat-number.docs { color: #2563eb; }
 
-  /* --- Vos données : quatre engagements ------------------------------------ */
-  .confiance{display:grid;gap:24px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:36px 32px;}
-  @media(min-width:768px){.confiance{grid-template-columns:repeat(2,1fr);}}
-  @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
-  .confiance h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0 0 7px;}
-  .confiance h3 svg{color:var(--encre);flex:0 0 auto;}
-  .confiance p{margin:0;font-size:14.5px;color:var(--texte-doux);}
-  .confiance .suite{margin-top:22px;font-size:14.5px;}
-  .suite a{color:var(--lien);font-weight:600;}
-  /* LA LARGEUR DE LECTURE EST UNE RÈGLE, PAS UNE IMPRESSION : au-delà de 90
-     caractères par ligne, l'œil perd le début de la ligne suivante. Ces deux
-     blocs sont hors de `.section-tete` (qui porte déjà ses 60ch) : sans cette
-     borne, ils couraient sur 124 caractères à 1440 px. La cible est 75 ; on
-     borne donc à ~82 caractères, ce qui laisse la phrase respirer sans perdre
-     le lecteur. Contrôlé par le harnais de rendu (mesure « largeur de lecture »). */
-  .suite{max-width:34em;}
-  .notetarif{max-width:52ch;}
+  .stat-badge {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+  }
+  .stat-badge.urgent { background: #fef2f2; color: #b91c1c; }
+  .stat-badge.plan { background: #eef2ff; color: #4338ca; }
+  .stat-badge.nominal { background: #ecfdf5; color: #059669; }
+  .stat-badge.ratio { background: #eff6ff; color: #1d4ed8; }
 
-  /* --- Tarifs : quatre offres, largeurs égales ---------------------------- */
-  /* Deux lignes de deux sur écran large ; en dessous, l'empilement (une
-     colonne) parce que quatre colonnes ne tiennent sur aucun téléphone. */
-  .tarifs{display:grid;gap:26px;align-items:stretch;}
-  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(2,1fr);}}
-  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
-  /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
-     une couleur inventée : l'encre pour les deux. Le badge, lui, est écrit en
-     blanc : il porte donc une teinte qui PORTE du blanc (la Signature EN,
-     5,65:1) — l'indigo (4,47:1) est décoratif, il n'écrit pas.
-     Le bouton de la carte mise en avant est le bouton PRINCIPAL : c'est la
-     règle de la charte (« une action de validation dans une carte est un bouton
-     principal, plein, encre »). */
-  /* PAS D'« overflow:hidden » ICI : le badge « RECOMMANDÉ » est posé en
-     position:absolute depuis le bord du REMBOURRAGE (2 px à l'intérieur du bord
-     de 2 px), et le pixel d'arrondi de chaque côté le faisait dépasser d'environ
-     2 px — le moteur le coupait, et le contrôle « textes coupés » le voyait. Le
-     badge est maintenant borné (max-width:100%) et insécable (nowrap) : il ne peut
-     plus dépasser, donc plus rien n'a besoin d'être écrêté. */
-  .offre.business{border:2px solid var(--encre);}
-  @media (prefers-color-scheme: dark){.offre.business{border-color:var(--blanc);}}
-  .recommande{position:absolute;top:0;right:0;background:var(--accent);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);white-space:nowrap;max-width:100%;}
-  .offre h3{font-size:20px;font-weight:700;}
-  /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
-  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 0;}
-  .prix .montant{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;}
-  .prix .periode{color:var(--texte-doux);font-size:15px;}
-  .offre .limite{margin:8px 0 0;font-size:17px;font-weight:700;}
-  .offre .pour{color:var(--texte-doux);margin:16px 0 0;}
-  .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
-  .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
-  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--accent);}
-  /* Le bouton est poussé en BAS de la carte : les boutons s'alignent, quelle
-     que soit la longueur des listes. */
-  .offre .btn{width:100%;margin-top:auto;}
-  .offre.business .avantages svg{color:var(--texte);}
-  .notes{display:grid;gap:18px;margin-top:28px;}
-  @media(min-width:768px){.notes{grid-template-columns:repeat(2,1fr);}}
-  .notetarif{display:flex;gap:10px;margin:0;font-size:15px;color:var(--texte-doux);}
-  .notetarif svg{color:var(--encre);flex:0 0 auto;margin-top:3px;}
+  /* ---------------- CORPS DE PAGE : 2 COLONNES (1.618fr / 1fr) ---------------- */
+  .dashboard-columns {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
 
-  /* --- FAQ : deux colonnes sur écran large -------------------------------- */
-  .faq{display:grid;gap:12px;}
-  @media(min-width:900px){.faq{grid-template-columns:repeat(2,1fr);gap:16px 26px;align-items:start;}}
-  details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
-  details[open]{border-color:var(--trait-fort);box-shadow:0 0 0 3px rgba(14,19,51,.06);}
-  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;font-weight:600;font-size:15.5px;}
-  summary::-webkit-details-marker{display:none;}
-  summary svg{flex:0 0 auto;color:var(--texte-doux);transition:transform .2s ease;}
-  details[open] summary svg{transform:rotate(180deg);}
-  details .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:15px;}
+  /* SECTION GAUCHE */
+  .col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
 
-  /* --- Bandeau final + pied de page --------------------------------------- */
-  .final{background:var(--nuit);color:var(--blanc);border-radius:var(--r-lg);padding:64px 28px;text-align:center;}
-  .final h2{color:var(--blanc);}
-  .final p{color:rgba(255,255,255,.74);margin:16px auto 30px;max-width:56ch;}
-  .final .actions{justify-content:center;}
-  footer{background:var(--nuit);color:var(--ardoise);padding:56px 0 28px;margin-top:80px;}
-  .pied{display:grid;gap:32px;}
-  @media(min-width:768px){.pied{grid-template-columns:2fr 1fr 1fr 1fr;}}
-  footer .marque .mot{color:var(--blanc);}
-  footer p{color:var(--ardoise);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
-  footer h3{color:var(--blanc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;}
-  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
-  footer a{color:var(--ardoise);text-decoration:none;font-size:14.5px;}
-  footer a:hover{color:var(--blanc);}
-  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--ardoise);}
-  footer .lang button{color:var(--ardoise);}
-  footer .lang button.actif{background:rgba(255,255,255,.12);color:var(--blanc);box-shadow:none;}
+  .card-box {
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 24px;
+    border: 1px solid rgba(14, 19, 51, 0.06);
+    box-shadow: var(--shadow-soft);
+  }
+  .card-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title-group h2 {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .badge-count {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
 
-  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
-  @media(max-width:600px){section{padding:56px 0;}}
-  /* Le défilement doux et le pouls de la pastille sont du confort, pas de
-     l'information : ceux qui demandent moins d'animation ne les reçoivent pas. */
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    .point::after{animation:none;}
+  /* LISTE DES ÉCHÉANCES D'ENTRETIEN */
+  .machine-due-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .due-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    background: #ffffff;
+    transition: all 0.15s;
+  }
+  .due-item-row:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+  }
+  .due-item-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .status-bar-indicator {
+    width: 4px;
+    height: 38px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .status-bar-indicator.late { background: var(--warning); }
+  .status-bar-indicator.soon { background: #6366f1; }
+  .status-bar-indicator.ok { background: #10b981; }
+
+  .due-item-info h3 {
+    font-size: 14.5px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .due-pill-badge {
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .due-pill-badge.late { background: #fff7ed; color: #c2410c; }
+  .due-pill-badge.soon { background: #eef2ff; color: #4338ca; }
+  .due-pill-badge.ok { background: #ecfdf5; color: #047857; }
+
+  .due-item-info p {
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
+  .due-item-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .due-delay-text {
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .due-delay-text.late { color: var(--warning); }
+  .due-delay-text.soon { color: #4f46e5; }
+  .due-delay-text.ok { color: #059669; }
+
+  .btn-table-action {
+    background: var(--ink);
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-table-action:hover {
+    background: #1e293b;
+  }
+  .btn-table-action.secondary-action {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+  .btn-table-action.secondary-action:hover {
+    background: #e2e8f0;
+  }
+
+  /* PRÉPARATION DES PIÈCES & CONSOMMABLES */
+  .prep-filter-pills {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+  }
+  .pill-filter-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .pill-filter-btn.active {
+    background: #0f172a;
+    color: #ffffff;
+  }
+  .prep-family-box {
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    background: #f8fafc;
+  }
+  .prep-family-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .prep-family-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+  }
+  .prep-family-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .prep-item-row {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .prep-item-row:last-child { margin-bottom: 0; }
+  .prep-item-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .prep-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--warning);
+  }
+  .prep-dot.teal { background: var(--teal); }
+  .prep-item-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .prep-item-machine {
+    font-size: 12px;
+    color: #64748b;
+  }
+  .prep-item-qty {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  .prep-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .prep-footer p {
+    font-size: 12px;
+    color: #64748b;
+  }
+  .btn-copy-order {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: #ffffff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* SECTION DROITE */
+  .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* CARTE DÉPÔT PDF */
+  .drop-card {
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 24px;
+    border: 1px solid rgba(14, 19, 51, 0.06);
+    box-shadow: var(--shadow-soft);
+  }
+  .drop-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .drop-title-group h2 {
+    font-size: 16.5px;
+    font-weight: 800;
+  }
+  .drop-desc {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .upload-dropzone {
+    border: 1.5px dashed #cbd5e1;
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .upload-dropzone:hover {
+    border-color: #4f46e5;
+    background: #eef2ff;
+  }
+  .upload-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4338ca;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .upload-prompt {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .upload-sub {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .drop-features {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .drop-feature-item {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #059669;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* CANAUX DE RAPPELS */
+  .reminders-card {
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 24px;
+    border: 1px solid rgba(14, 19, 51, 0.06);
+    box-shadow: var(--shadow-soft);
+  }
+  .reminders-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .reminders-head h2 {
+    font-size: 16.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-link-setting {
+    background: none;
+    border: none;
+    color: #4f46e5;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .channel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    margin-bottom: 10px;
+  }
+  .channel-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .channel-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .channel-icon.email { background: #2563eb; }
+  .channel-icon.whatsapp { background: #16a34a; }
+  .channel-title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .channel-sub {
+    font-size: 11.5px;
+    color: #64748b;
+  }
+  .channel-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.04em;
+  }
+  .channel-badge.active { background: #ecfdf5; color: #047857; }
+  .channel-badge.pending { background: #f1f5f9; color: #64748b; }
+
+  .telematics-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #64748b;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
   }
 </style>
 </head>
 <body>
 
-<!-- ================= PICTOGRAMME (défini une fois, réutilisé) ================= -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="keeva-degrade" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#236FE0"/>
-      <stop offset="58%" stop-color="#14B8A6"/>
-      <stop offset="100%" stop-color="#8B9B37"/>
-    </linearGradient>
-    <symbol id="picto-keeva" viewBox="0 0 1 1">
-      <path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#keeva-degrade)"/>
-      <path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/>
-      <path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/>
-      <path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/>
-      <path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="#0E1333"/>
-    </symbol>
-  </defs>
-</svg>
+  <!-- BARRE LATÉRALE FIXE -->
+  <aside class="sidebar">
+    <div class="brand-logo">
+      <!-- Logo vectoriel officiel KEEVA -->
+      <svg viewBox="0 0 100 100" fill="none">
+        <defs>
+          <linearGradient id="logo-hex" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#236FE0"/>
+            <stop offset="58%" stop-color="#14B8A6"/>
+            <stop offset="100%" stop-color="#8B9B37"/>
+          </linearGradient>
+        </defs>
+        <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" stroke="url(#logo-hex)" stroke-width="8" fill="none" stroke-linejoin="round"/>
+        <rect x="26" y="20" width="8" height="60" rx="4" fill="#FFFFFF"/>
+        <circle cx="49" cy="50" r="7" fill="#6366F1"/>
+        <path d="M34 48 C 50 35, 68 34, 76 38 C 66 48, 48 50, 34 48 Z" fill="#24B5A8"/>
+        <path d="M34 52 C 50 65, 68 66, 76 62 C 66 52, 48 50, 34 52 Z" fill="#DE7A16"/>
+      </svg>
+      <span>KEEVA</span>
+    </div>
 
-<!-- ================= EN-TÊTE ================= -->
-<header>
-  <div class="wrap entete">
-    <a class="marque" href="./decouvrir.html" aria-label="KEEVA">
-      <svg width="30" height="30" aria-hidden="true"><use href="#picto-keeva"/></svg>
-      <span class="mot">KEEVA</span>
-    </a>
-    <nav aria-label="Navigation principale">
-      <a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a>
-      <a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a>
-      <a href="#tarifs"><span class="fr">Tarifs</span><span class="en">Pricing</span></a>
-      <a href="#faq">FAQ</a>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item is-active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Tableau de bord</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <span>Machines (Parc)</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Manuels & carnets</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Agenda</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Rappels</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Mon compte</span>
+      </a>
     </nav>
-    <span class="pousse"></span>
-    <div class="lang" role="group" aria-label="Langue / Language">
-      <button type="button" data-langue="fr">FR</button>
-      <button type="button" data-langue="en">EN</button>
-    </div>
-    <a class="lien-connexion" href="./app.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a>
-    <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Essai gratuit</span><span class="en">Start free</span></a>
-  </div>
-</header>
 
-<main>
-
-<!-- ================= ACCROCHE ================= -->
-<section class="heros wrap">
-  <div>
-    <span class="pastille"><span class="point" aria-hidden="true"></span>
-      <span class="fr">Lecture automatique des manuels — disponible</span>
-      <span class="en">Automatic manual reading — live</span>
-    </span>
-    <h1>
-      <span class="tagline fr">La juste mesure de votre parc</span>
-      <span class="tagline en">Precise tracking for your fleet</span>
-      <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-fort">lu par notre algorithme</span>.</span>
-      <span class="en">Your fleet's service logbook, <span class="accroche-fort">read by our algorithm</span>.</span>
-    </h1>
-    <p class="sous-titre">
-      <span class="fr">Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
-      <span class="en">Import your manufacturer manuals: KEEVA extracts the intervals and builds the maintenance plan. Track by calendar, hours or kilometres — then send the parts list straight to your suppliers.</span>
-    </p>
-    <div class="actions">
-      <a class="btn btn-primaire" href="./app.html?inscription=1">
-        <span class="fr">Commencer gratuitement</span><span class="en">Start for free</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-      <a class="btn btn-secondaire" href="#comment">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/></svg>
-        <span class="fr">Voir comment ça marche</span><span class="en">See how it works</span>
-      </a>
-    </div>
-    <p class="note">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-      <span class="fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
-      <span class="en">Free for 2 machines · Starter €12/month · Business €39/month · no credit card</span>
-    </p>
-  </div>
-
-  <!-- L'APERÇU : la mise en page réelle de l'application (une carte machine, son
-       compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES.
-       Aucun modèle de machine, aucune donnée de client, aucune télémétrie : la
-       télémétrie n'existe pas dans le produit. -->
-  <div class="visuel">
-    <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KEEVA">
-      <div class="tete">
-        <span class="titre fr">Aperçu de l'interface</span>
-        <span class="titre en">Interface preview</span>
-        <span class="plan fr">Plan d'entretien · 250 h</span>
-        <span class="plan en">Maintenance plan · 250 h</span>
+    <div class="sidebar-footer">
+      <div class="sidebar-version">
+        <span>VERSION</span>
+        <span class="mono">v1.0.0</span>
       </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Mini-pelle</span><span class="nom en">Mini excavator</span><br><span class="meta fr">Vidange, filtre à huile · compteur 243 h</span><span class="meta en">Oil change, oil filter · meter 243 h</span></span>
-        <span class="etat retard fr">en retard +3 j</span><span class="etat retard en">overdue +3 d</span>
-      </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Tronçonneuse</span><span class="nom en">Chainsaw</span><br><span class="meta fr">Filtre à air, bougie · compteur 118 h</span><span class="meta en">Air filter, spark plug · meter 118 h</span></span>
-        <span class="etat bientot fr">bientôt dans 12 h</span><span class="etat bientot en">due in 12 h</span>
-      </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Tracteur</span><span class="nom en">Tractor</span><br><span class="meta fr">Graissage, filtres hydrauliques</span><span class="meta en">Greasing, hydraulic filters</span></span>
-        <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
-      </div>
-      <div class="bloc-pieces">
-        <span class="titre fr">À prévoir — Filtres</span>
-        <span class="titre en">To order — Filters</span>
-        <ul>
-          <li class="fr">2 références · 4 unités · dès le 12/10</li>
-          <li class="en">2 items · 4 units · from 12/10</li>
-        </ul>
-      </div>
-      <p class="legende fr">Aperçu de la mise en page : les exemples sont génériques, aucune donnée de client.</p>
-      <p class="legende en">Layout preview: the examples are generic, no customer data.</p>
+      <button class="btn-logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Se déconnecter</span>
+      </button>
     </div>
-  </div>
-</section>
+  </aside>
 
-<!-- ================= CE QU'UN MAUVAIS SUIVI COÛTE ================= -->
-<!-- Accroche demandée explicitement : les conséquences d'un suivi en retard.
-     Ton sobre et factuel, AUCUN chiffre — nous n'en avons aucun à prouver. -->
-<section id="enjeu" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Ce qu'un mauvais suivi coûte</span>
-    <span class="sur-titre en">What poor tracking costs</span>
-    <h2><span class="fr">Un entretien en retard ne se rattrape pas toujours</span><span class="en">Late maintenance cannot always be caught up</span></h2>
-    <p>
-      <span class="fr">Rien de théorique : c'est ce qui arrive quand les échéances ne sont suivies nulle part.</span>
-      <span class="en">Nothing theoretical: this is what happens when intervals are tracked nowhere.</span>
-    </p>
-  </div>
-  <div class="cartes">
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a5 5 0 006 6L11 19l-6-6z"/><path d="M7 17l-3.5 3.5"/></svg>
-      </span>
-      <h3><span class="fr">Des réparations plus coûteuses</span><span class="en">More expensive repairs</span></h3>
-      <p>
-        <span class="fr">Une échéance manquée use la pièce avant l'heure : ce qui relevait de l'entretien courant devient une réparation, parfois une pièce à remplacer.</span>
-        <span class="en">A missed interval wears the part out early: what was routine servicing becomes a repair, sometimes a part to replace.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9 16H3z"/><path d="M12 9.5v4.5M12 17v.01"/></svg>
-      </span>
-      <h3><span class="fr">Des pannes évitables</span><span class="en">Avoidable breakdowns</span></h3>
-      <p>
-        <span class="fr">Les défaillances que l'entretien prévient ne choisissent pas leur moment : elles tombent souvent quand la machine sert le plus.</span>
-        <span class="en">Failures that servicing prevents do not pick their moment: they tend to happen when the machine is needed most.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9M16 21c0-5-8-5-8-9"/></svg>
-      </span>
-      <h3><span class="fr">Des immobilisations</span><span class="en">Downtime</span></h3>
-      <p>
-        <span class="fr">Un engin arrêté, c'est du travail qui attend, un chantier décalé, ou une location à payer à la place.</span>
-        <span class="en">A machine standing still means work waiting, a job pushed back, or a rental to pay for instead.</span>
-      </p>
-    </article>
-  </div>
-  <p class="suite" style="margin-top:22px;font-size:14.5px;">
-    <span class="fr">À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années.</span>
-    <span class="en">Conversely, a regularly tracked fleet lasts longer: what is already invested keeps working for more years.</span>
-  </p>
-</section>
-
-<!-- ================= FONCTIONNALITÉS ================= -->
-<section id="fonctionnalites" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Fonctionnalités</span>
-    <span class="sur-titre en">Features</span>
-    <h2>
-      <span class="fr">Trois gestes, et le suivi se tient tout seul</span>
-      <span class="en">Three moves, and the tracking holds itself</span>
-    </h2>
-    <p>
-      <span class="fr">Rien à paramétrer pendant des heures : le manuel fait le travail, vous validez.</span>
-      <span class="en">Nothing to configure for hours: the manual does the work, you approve it.</span>
-    </p>
-  </div>
-  <div class="cartes">
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v12a3 3 0 013-3h7z"/></svg>
-      </span>
-      <h3><span class="fr">Manuels intelligents</span><span class="en">Smart manuals</span></h3>
-      <p>
-        <span class="fr">Importez le manuel constructeur (PDF). Notre algorithme en extrait les échéances et les tâches pour créer un plan de maintenance structuré — premier entretien compris.</span>
-        <span class="en">Import the manufacturer's manual (PDF). Our algorithm extracts intervals and tasks to build a structured maintenance plan — including the first service.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
-      </span>
-      <h3><span class="fr">Suivi flexible</span><span class="en">Flexible tracking</span></h3>
-      <p>
-        <span class="fr">Alertes fondées sur le calendrier, les heures moteur ou le kilométrage. Le mode se déduit du carnet ; vous gardez la main.</span>
-        <span class="en">Alerts based on the calendar, engine hours or mileage. The mode is inferred from the manual; you stay in control.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
-      </span>
-      <h3><span class="fr">Commandes simplifiées</span><span class="en">Simplified ordering</span></h3>
-      <p>
-        <span class="fr">Les pièces et consommables à prévoir sont regroupés par famille, avec quantités et dates — prêts à envoyer au fournisseur.</span>
-        <span class="en">Parts and consumables are grouped by family, with quantities and dates — ready to send to your supplier.</span>
-      </p>
-    </article>
-  </div>
-</section>
-
-<!-- ================= COMMENT ÇA MARCHE ================= -->
-<section id="comment" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Comment ça marche</span>
-    <span class="sur-titre en">How it works</span>
-    <h2><span class="fr">Du PDF au carnet d'entretien, en trois étapes</span><span class="en">From PDF to service logbook, in three steps</span></h2>
-    <p>
-      <span class="fr">Aucun paramétrage interminable : vous importez, vous validez, vous suivez.</span>
-      <span class="en">No endless setup: you import, you approve, you track.</span>
-    </p>
-  </div>
-  <ol class="etapes">
-    <li class="etape">
-      <span class="num" aria-hidden="true">1</span>
-      <h3><span class="fr">Importez le manuel</span><span class="en">Import the manual</span></h3>
-      <p>
-        <span class="fr">Déposez le PDF constructeur de la machine. Une photo de la plaque ou du carnet suffit à retrouver le bon document, et le modèle comme l'année peuvent être précisés.</span>
-        <span class="en">Drop the machine's manufacturer PDF. A photo of the plate or the logbook is enough to find the right document, and model and year can be specified.</span>
-      </p>
-    </li>
-    <li class="etape">
-      <span class="num" aria-hidden="true">2</span>
-      <h3><span class="fr">Validez le plan proposé</span><span class="en">Approve the proposed plan</span></h3>
-      <p>
-        <span class="fr">KEEVA en tire les tâches, les échéances et l'unité de suivi (heures, kilomètres ou mois), premier entretien compris. Vous relisez, vous corrigez si besoin, puis vous confirmez.</span>
-        <span class="en">KEEVA derives the tasks, the intervals and the tracking unit (hours, kilometres or months), first service included. You review, adjust if needed, then confirm.</span>
-      </p>
-    </li>
-    <li class="etape">
-      <span class="num" aria-hidden="true">3</span>
-      <h3><span class="fr">Suivez, puis commandez</span><span class="en">Track, then order</span></h3>
-      <p>
-        <span class="fr">Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.</span>
-        <span class="en">Log the meter whenever you like: the schedule updates, reminders go out ahead of the date, and the parts list groups itself by family.</span>
-      </p>
-    </li>
-  </ol>
-</section>
-
-<!-- ================= VOS DONNÉES ================= -->
-<section id="confidentialite" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Vos données</span>
-    <span class="sur-titre en">Your data</span>
-    <h2><span class="fr">Quatre engagements, vérifiables dans le produit</span><span class="en">Four commitments, verifiable in the product</span></h2>
-  </div>
-  <div class="confiance">
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6z"/><path d="M9.5 12.2l1.8 1.8 3.4-3.6"/></svg><span class="fr">Parc cloisonné</span><span class="en">Isolated fleet</span></h3>
-      <p>
-        <span class="fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
-        <span class="en">Access rules are enforced server-side: your fleet is readable only by your company's accounts.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg><span class="fr">Analyse sur votre action</span><span class="en">Analysis on your action</span></h3>
-      <p>
-        <span class="fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
-        <span class="en">Reading a manual starts only when you import it, and the document is used only to build your maintenance plan.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0112 6c5 0 9 4.5 9 6a11 11 0 01-2.6 3.4M6.2 7.6C4 9 3 11 3 12a12 12 0 003.4 3.5"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg><span class="fr">Aucun traceur publicitaire</span><span class="en">No advertising tracker</span></h3>
-      <p>
-        <span class="fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
-        <span class="en">No ad network, no resale. Language and session are the only things the browser keeps.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20h16"/></svg><span class="fr">Emporter et effacer</span><span class="en">Export and erase</span></h3>
-      <p>
-        <span class="fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
-        <span class="en">History exports to CSV, and deleting the account takes the related documents with it.</span>
-      </p>
-    </div>
-  </div>
-  <p class="suite" style="margin-top:22px;font-size:14.5px;">
-    <span class="fr">Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
-    <span class="en">Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</span>
-  </p>
-</section>
-
-<!-- ================= TARIFS + FAQ ================= -->
-<section id="tarifs" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Tarifs</span>
-    <span class="sur-titre en">Pricing</span>
-    <h2><span class="fr">Quatre offres, des limites annoncées</span><span class="en">Four plans, clear limits</span></h2>
-    <p>
-      <span class="fr">Gratuit pour deux machines, Starter jusqu'à cinq, Business jusqu'à vingt, Enterprise sur mesure — sans engagement.</span>
-      <span class="en">Free for two machines, Starter up to five, Business up to twenty, Enterprise built to measure — no commitment.</span>
-    </p>
-  </div>
-  <div class="tarifs">
-    <article class="offre">
-      <h3><span class="fr">Gratuit</span><span class="en">Free</span></h3>
-      <div class="prix"><span class="montant">0 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">2 machines · 1 utilisateur</span><span class="en">2 machines · 1 user</span></p>
-      <p class="pour fr">Pour un particulier, ou pour essayer KEEVA.</p>
-      <p class="pour en">For an individual, or to try KEEVA.</p>
-      <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
-    </article>
-
-    <article class="offre">
-      <h3><span class="fr">Starter / Artisan</span><span class="en">Starter / Artisan</span></h3>
-      <div class="prix"><span class="montant">12 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">5 machines · 1 utilisateur</span><span class="en">5 machines · 1 user</span></p>
-      <p class="pour fr">Pour un petit parc qu'il faut suivre de près.</p>
-      <p class="pour en">For a small fleet that needs close tracking.</p>
-      <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">20 analyses de carnet, 10 recherches de photo, 200 lectures de compteur par mois</span><span class="en">20 logbook analyses, 10 photo searches, 200 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit, plus l'export CSV</span><span class="en">Everything included in Free, plus CSV export</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Starter</span><span class="en">Move to Starter</span></a>
-    </article>
-
-    <article class="offre business">
-      <span class="recommande fr">RECOMMANDÉ</span>
-      <span class="recommande en">RECOMMENDED</span>
-      <h3><span class="fr">Business / Flotte</span><span class="en">Business / Fleet</span></h3>
-      <div class="prix"><span class="montant">39 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">20 machines · 3 utilisateurs</span><span class="en">20 machines · 3 users</span></p>
-      <p class="pour fr">Pour une flotte suivie par plusieurs personnes.</p>
-      <p class="pour en">For a fleet tracked by several people.</p>
-      <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">30 analyses de carnet, 30 recherches de photo, 500 lectures de compteur par mois</span><span class="en">30 logbook analyses, 30 photo searches, 500 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Multi-utilisateurs, QR codes et préparation groupée</span><span class="en">Multi-user, QR codes and grouped preparation</span></li>
-      </ul>
-      <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Business</span><span class="en">Move to Business</span></a>
-    </article>
-
-    <article class="offre">
-      <h3><span class="fr">Enterprise / Parc</span><span class="en">Enterprise / Fleet</span></h3>
-      <div class="prix"><span class="montant">89 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">Parc sur mesure · rôles d'équipe</span><span class="en">Fleet built to measure · team roles</span></p>
-      <p class="pour fr">Pour un grand parc, avec un interlocuteur dédié. Au-delà de 20 machines, chaque machine supplémentaire est facturée 1,50 € par mois.</p>
-      <p class="pour en">For a large fleet, with a dedicated contact. Beyond 20 machines, each additional machine is billed at €1.50 per month.</p>
-      <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">5 000 analyses de carnet, 5 000 recherches de photo, 2 000 lectures de compteur par mois</span><span class="en">5,000 logbook analyses, 5,000 photo searches, 2,000 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Support dédié</span><span class="en">Dedicated support</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
-    </article>
-  </div>
-  <div class="notes">
-    <p class="notetarif">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-      <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
-      <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
-    </p>
-    <p class="notetarif">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-      <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
-      <span class="en">You change plan from inside the app, at any time and with no commitment. Your machines, your history and your manuals stay in place.</span>
-    </p>
-  </div>
-
-  <div class="section-tete" style="margin-top:64px;">
-    <span class="sur-titre fr">Questions fréquentes</span>
-    <span class="sur-titre en">Frequently asked questions</span>
-    <h2><span class="fr">Ce qu'on nous demande le plus</span><span class="en">What we are asked most</span></h2>
-  </div>
-  <div class="faq" id="faq">
-    <details class="faq">
-      <summary><span class="fr">Qu'est-ce qui compte comme une machine ?</span><span class="en">What counts as a machine?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite de votre offre porte sur le nombre suivi en même temps : 2 machines en Gratuit, 5 en Starter, 20 en Business, et un parc sur mesure en Enterprise.</div>
-      <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — your plan limits how many are tracked at once: 2 machines on Free, 5 on Starter, 20 on Business, and a fleet built to measure on Enterprise.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Puis-je changer d'offre à tout moment ?</span><span class="en">Can I change plan at any time?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Oui, sans engagement : le changement se fait depuis l'application, prend effet immédiatement, et la facturation se fait au prorata le mois suivant. Vos données et vos manuels restent en place.</div>
-      <div class="reponse en">Yes, with no commitment: you change plan from inside the app, it takes effect immediately, and billing is prorated the following month. Your data and manuals stay in place.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Mes données et mes manuels sont-ils en sécurité ?</span><span class="en">Are my data and manuals safe?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Chaque société ne voit que son parc : les règles d'accès sont appliquées côté serveur. Les documents servent uniquement à construire votre plan de maintenance, et l'analyse automatique ne part que d'une action de votre part. Aucun traceur publicitaire, aucune revente. Détail dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</div>
-      <div class="reponse en">Each company only sees its own fleet: access rules are enforced server-side. Documents are used only to build your maintenance plan, and the automatic analysis starts only with an action of yours. No advertising trackers, no resale. Details in the <a href="./politique-confidentialite.html">privacy policy</a>.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Est-ce utilisable sur le terrain, sans réseau ?</span><span class="en">Can I use it on site, with no signal?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Oui. La consultation hors connexion s'active sur l'appareil : le dernier état connu du parc reste lisible, et les relevés faits sans réseau sont repris à la reconnexion. Les rappels d'échéance sont locaux, donc ils ne dépendent pas du réseau.</div>
-      <div class="reponse en">Yes. Offline viewing is enabled on the device: the last known state of the fleet stays readable, and readings taken without a network are picked up again on reconnection. Due-date reminders are local, so they do not depend on the network.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Faut-il forcément un manuel au format PDF ?</span><span class="en">Do I need a manual in PDF format?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">C'est le cas le plus courant et le mieux pris en charge. À défaut, l'analyse d'une photo de la plaque ou du carnet permet de retrouver le bon document en ligne, et un plan peut aussi être saisi à la main : aucune machine n'est bloquée faute de notice.</div>
-      <div class="reponse en">That is the most common and best supported case. Failing that, analysing a photo of the plate or the logbook finds the right document online, and a plan can also be entered by hand: no machine is blocked for lack of a manual.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Les rappels partent-ils aussi par WhatsApp ?</span><span class="en">Are reminders also sent by WhatsApp?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application, et par notification sur téléphone Android. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
-      <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application, and by notification on Android phones. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
-    </details>
-  </div>
-</section>
-
-<!-- ================= BANDEAU FINAL ================= -->
-<section class="wrap">
-  <div class="final">
-    <h2><span class="fr">Le juste suivi de votre parc commence aujourd'hui</span><span class="en">Precise tracking for your fleet starts today</span></h2>
-    <p>
-      <span class="fr">Un compte, un manuel, et vous saurez si KEEVA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.</span>
-      <span class="en">One account, one manual, and you will know whether KEEVA holds up on your machines. Free for two machines, €12/month up to five.</span>
-    </p>
-    <div class="actions">
-      <a class="btn btn-clair" href="./app.html?inscription=1"><span class="fr">Commencer gratuitement</span><span class="en">Start for free</span></a>
-      <a class="btn btn-contour" href="mailto:support@keeva.work"><span class="fr">Poser une question</span><span class="en">Ask a question</span></a>
-    </div>
-  </div>
-</section>
-
-</main>
-
-<!-- ================= PIED DE PAGE ================= -->
-<footer>
-  <div class="wrap">
-    <div class="pied">
-      <div>
-        <span class="marque">
-          <svg width="28" height="28" aria-hidden="true"><use href="#picto-keeva"/></svg>
-          <span class="mot">KEEVA</span>
-        </span>
-        <p>
-          <span class="fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
-          <span class="en">Maintenance tracking for machines and vehicles: plans from manufacturer manuals, due dates by calendar or meter, reminders and a parts list.</span>
-        </p>
-        <p>
-          <span class="fr">Édité par Matthieu Courtois, entrepreneur individuel — Nouvelle-Calédonie.</span>
-          <span class="en">Published by Matthieu Courtois, sole trader — New Caledonia.</span>
-        </p>
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main-content">
+    
+    <!-- EN-TÊTE -->
+    <header class="dash-header">
+      <div class="user-greeting">
+        <div class="user-avatar-icon">
+          <!-- Pictogramme K stylisé -->
+          <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" stroke="#236FE0" stroke-width="8" fill="none"/>
+            <rect x="26" y="20" width="8" height="60" rx="4" fill="#0E1333"/>
+            <path d="M34 48 C 50 35, 68 34, 76 38 C 66 48, 48 50, 34 48 Z" fill="#24B5A8"/>
+            <path d="M34 52 C 50 65, 68 66, 76 62 C 66 52, 48 50, 34 52 Z" fill="#DE7A16"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Bonjour Matthieu</h1>
+          <p><span class="status-dot-active"></span> 4 machines suivies</p>
+        </div>
       </div>
-      <div>
-        <h3><span class="fr">Produit</span><span class="en">Product</span></h3>
-        <ul>
-          <li><a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a></li>
-          <li><a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a></li>
-          <li><a href="#tarifs"><span class="fr">Tarification</span><span class="en">Pricing</span></a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <li><a href="./app.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a></li>
-        </ul>
+
+      <div class="header-actions">
+        <button class="btn-add-machine">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>Ajouter une machine</span>
+        </button>
+        <div class="user-pill" title="Profil utilisateur">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
       </div>
-      <div>
-        <h3><span class="fr">Légal</span><span class="en">Legal</span></h3>
-        <ul>
-          <li><a href="./mentions-legales.html"><span class="fr">Mentions légales</span><span class="en">Legal notice</span></a></li>
-          <li><a href="./cgu.html"><span class="fr">CGU</span><span class="en">Terms</span></a></li>
-          <li><a href="./politique-confidentialite.html"><span class="fr">Confidentialité</span><span class="en">Privacy</span></a></li>
-          <li><a href="./suppression-compte.html"><span class="fr">Suppression du compte</span><span class="en">Account deletion</span></a></li>
-          <li><a href="./supprimer-mes-donnees.html"><span class="fr">Supprimer mes données</span><span class="en">Delete my data</span></a></li>
-        </ul>
+    </header>
+
+    <!-- BANDEAU PRIORITAIRE VIOLET (ACTION IMMÉDIATE) -->
+    <section class="priority-banner">
+      <div class="priority-left">
+        <div class="priority-icon-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="priority-content">
+          <div class="priority-tags">
+            <span class="tag-late">EN RETARD · +3 J</span>
+            <span class="priority-machine-id">KUBOTA U17-3</span>
+            <span class="priority-machine-ref">#KB-2021-089</span>
+          </div>
+          <div class="priority-task-desc">
+            Tâche requise : <strong>Vidange, filtre à huile · Échéance 250 h</strong> (Compteur relevé à <span class="mono"><strong>253 h</strong></span>)
+          </div>
+        </div>
       </div>
-      <div>
-        <h3>Contact</h3>
-        <ul>
-          <li><a href="mailto:support@keeva.work">support@keeva.work</a></li>
-          <li><span class="fr">Une question, un manuel qui résiste ? Écrivez-nous.</span><span class="en">A question, a stubborn manual? Write to us.</span></li>
-        </ul>
+      <div class="priority-actions">
+        <button class="btn-priority-done">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Marquer fait</span>
+        </button>
+        <button class="btn-priority-details">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Détails</span>
+        </button>
       </div>
+    </section>
+
+    <!-- GRILLE DES 4 STATS -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-head">
+          <span>En retard</span>
+          <div class="stat-icon late">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number late mono">1</span>
+          <span class="stat-badge urgent">URGENT</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-head">
+          <span>Sous 15 jours</span>
+          <div class="stat-icon soon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number soon mono">1</span>
+          <span class="stat-badge plan">À PLANIFIER</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-head">
+          <span>À jour</span>
+          <div class="stat-icon ok">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number ok mono">2</span>
+          <span class="stat-badge nominal">NOMINAL</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-head">
+          <span>Manuels analysés</span>
+          <div class="stat-icon docs">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-number docs mono">3</span>
+          <span class="stat-badge ratio mono">75% PARC</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION EN 2 COLONNES (1.618fr / 1fr) -->
+    <div class="dashboard-columns">
+      
+      <!-- COLONNE GAUCHE (1.618fr) -->
+      <div class="col-left">
+        
+        <!-- ÉCHÉANCES D'ENTRETIEN -->
+        <section class="card-box">
+          <div class="card-box-header">
+            <div class="card-title-group">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <h2>Échéances d'entretien</h2>
+            </div>
+            <span class="badge-count mono">4 MACHINES ACTIVES</span>
+          </div>
+
+          <div class="machine-due-list">
+            <!-- Machine 1 : En retard -->
+            <div class="due-item-row">
+              <div class="due-item-left">
+                <div class="status-bar-indicator late"></div>
+                <div class="due-item-info">
+                  <h3>KUBOTA U17-3 <span class="due-pill-badge late">EN RETARD</span></h3>
+                  <p>Vidange, filtre à huile · compteur 253 h / 250 h</p>
+                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Mini-pelle sur chenilles · Dépassement critique</p>
+                </div>
+              </div>
+              <div class="due-item-right">
+                <div class="due-delay-text late mono">+3 j</div>
+                <button class="btn-table-action">Traiter</button>
+              </div>
+            </div>
+
+            <!-- Machine 2 : Bientôt -->
+            <div class="due-item-row">
+              <div class="due-item-left">
+                <div class="status-bar-indicator soon"></div>
+                <div class="due-item-info">
+                  <h3>PEUGEOT 208 <span class="due-pill-badge soon">BIENTÔT</span></h3>
+                  <p>Révision périodique 20 000 km (relevé 19 450 km)</p>
+                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Véhicule de liaison atelier · Concessionnaire</p>
+                </div>
+              </div>
+              <div class="due-item-right">
+                <div class="due-delay-text soon mono">dans 12 j</div>
+                <button class="btn-table-action secondary-action">Planifier</button>
+              </div>
+            </div>
+
+            <!-- Machine 3 : À jour -->
+            <div class="due-item-row">
+              <div class="due-item-left">
+                <div class="status-bar-indicator ok"></div>
+                <div class="due-item-info">
+                  <h3>JOHN DEERE 6120M <span class="due-pill-badge ok">À JOUR</span></h3>
+                  <p>Graissage transmission intégrale & pack filtres</p>
+                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Tracteur agricole principal · Échéance standard</p>
+                </div>
+              </div>
+              <div class="due-item-right">
+                <div class="due-delay-text ok mono">dans 45 j</div>
+                <button class="btn-table-action secondary-action">Voir</button>
+              </div>
+            </div>
+
+            <!-- Machine 4 : À jour -->
+            <div class="due-item-row">
+              <div class="due-item-left">
+                <div class="status-bar-indicator ok"></div>
+                <div class="due-item-info">
+                  <h3>STIHL MS 261 <span class="due-pill-badge ok">À JOUR</span></h3>
+                  <p>Affûtage chaîne & contrôle bougie · 50 h</p>
+                  <p style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Tronçonneuse d'abattage</p>
+                </div>
+              </div>
+              <div class="due-item-right">
+                <div class="due-delay-text ok mono">dans 18 h</div>
+                <button class="btn-table-action secondary-action">Voir</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRÉPARATION DES PIÈCES & CONSOMMABLES -->
+        <section class="card-box">
+          <div class="card-box-header">
+            <div>
+              <h2>Préparation des pièces & consommables</h2>
+              <p style="font-size:12.5px;color:#64748b;margin-top:2px;">Prévisions d'achats groupés pour interventions programmées</p>
+            </div>
+            <div class="prep-filter-pills">
+              <button class="pill-filter-btn">30 j</button>
+              <button class="pill-filter-btn active">90 j</button>
+              <button class="pill-filter-btn">180 j</button>
+            </div>
+          </div>
+
+          <!-- Famille Filtres -->
+          <div class="prep-family-box">
+            <div class="prep-family-head">
+              <div class="prep-family-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span>Famille : Filtres</span>
+              </div>
+              <span class="prep-family-badge mono">3 pièces</span>
+            </div>
+            <div class="prep-item-row">
+              <div class="prep-item-meta">
+                <span class="prep-dot"></span>
+                <span class="prep-item-name">Filtre à huile (Réf: K-15241)</span>
+                <span class="prep-item-machine">· Pour Kubota U17-3</span>
+              </div>
+              <span class="prep-item-qty mono">2 unités (dès le 12/10)</span>
+            </div>
+            <div class="prep-item-row">
+              <div class="prep-item-meta">
+                <span class="prep-dot teal"></span>
+                <span class="prep-item-name">Filtre habitacle charbon actif</span>
+                <span class="prep-item-machine">· Pour Peugeot 208</span>
+              </div>
+              <span class="prep-item-qty mono">1 unité</span>
+            </div>
+          </div>
+
+          <!-- Famille Huiles -->
+          <div class="prep-family-box">
+            <div class="prep-family-head">
+              <div class="prep-family-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                <span>Famille : Huiles et lubrifiants</span>
+              </div>
+              <span class="prep-family-badge mono">5 Litres</span>
+            </div>
+            <div class="prep-item-row">
+              <div class="prep-item-meta">
+                <span class="prep-dot teal"></span>
+                <span class="prep-item-name">Huile moteur 15W40 Minérale Haute Charge</span>
+                <span class="prep-item-machine">· Pour John Deere 6120M</span>
+              </div>
+              <span class="prep-item-qty mono">Bidon 5L</span>
+            </div>
+          </div>
+
+          <div class="prep-footer">
+            <p>Généré automatiquement d'après les préconisations constructeurs constructives</p>
+            <button class="btn-copy-order">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copier la liste commande</span>
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COLONNE DROITE (1fr) -->
+      <div class="col-right">
+        
+        <!-- CARTE DÉPÔT PDF -->
+        <section class="drop-card">
+          <div class="drop-title-group">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <h2>Déposer un manuel PDF</h2>
+          </div>
+          <p class="drop-desc">L'algorithme KEEVA scanne le carnet d'entretien, extrait les périodicités en heures ou kilomètres et configure les alertes automatiquement.</p>
+
+          <div class="upload-dropzone">
+            <div class="upload-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="upload-prompt">Glissez votre PDF ici ou parcourez</div>
+            <div class="upload-sub">FORMATS ACCEPTÉS : PDF, JPG, SCAN HAUTE DÉF. (MAX 45 MO)</div>
+          </div>
+
+          <div class="drop-features">
+            <span class="drop-feature-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Reconnaissance OCR</span>
+            </span>
+            <span class="drop-feature-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Tableaux périodiques</span>
+            </span>
+          </div>
+        </section>
+
+        <!-- CANAUX DE RAPPELS -->
+        <section class="reminders-card">
+          <div class="reminders-head">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>Canaux de rappels</span>
+            </h2>
+            <button class="btn-link-setting">
+              <span>Régler</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          <div class="channel-row">
+            <div class="channel-left">
+              <div class="channel-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              </div>
+              <div>
+                <div class="channel-title">Sur ce téléphone</div>
+                <div class="channel-sub">Application Android KEEVA</div>
+              </div>
+            </div>
+            <span class="channel-badge active">ACTIF</span>
+          </div>
+
+          <div class="channel-row">
+            <div class="channel-left">
+              <div class="channel-icon email">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div>
+                <div class="channel-title">E-mail récapitulatif</div>
+                <div class="channel-sub">Avant chaque échéance J-3</div>
+              </div>
+            </div>
+            <span class="channel-badge active">ACTIF</span>
+          </div>
+
+          <div class="channel-row">
+            <div class="channel-left">
+              <div class="channel-icon whatsapp">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </div>
+              <div>
+                <div class="channel-title">WhatsApp Business</div>
+                <div class="channel-sub">Alerte chantier critique J-7</div>
+              </div>
+            </div>
+            <span class="channel-badge pending">À VENIR</span>
+          </div>
+
+          <div class="telematics-status">
+            <span class="status-dot-active"></span>
+            <span>Synchronisation télématique en direct (Opérateur Keeva Link)</span>
+          </div>
+        </section>
+
+      </div>
+
     </div>
-    <div class="bas">
-      <span>© <span id="annee">2026</span> KEEVA — <span class="fr">KEEVA aide à organiser l'entretien ; elle ne certifie ni ne garantit rien.</span><span class="en">KEEVA helps you organise maintenance; it certifies and guarantees nothing.</span></span>
-      <div class="lang" style="display:flex" role="group" aria-label="Langue / Language">
-        <button type="button" data-langue="fr">FR</button>
-        <button type="button" data-langue="en">EN</button>
-      </div>
-    </div>
-  </div>
-</footer>
 
-<script>
-// Même clé de stockage que l'application : la langue choisie ici est celle de
-// l'app, et inversement. Le texte des deux langues est écrit en clair dans la
-// page (aucune traduction à l'exécution) : la page reste indexable.
-(function () {
-  var CLE = 'parcpacific.langue';
-  var TITRES = {
-    fr: 'KEEVA — La juste mesure de votre parc | Precise tracking for your fleet',
-    en: 'KEEVA — Precise tracking for your fleet | La juste mesure de votre parc'
-  };
+  </main>
 
-  function lire() {
-    try {
-      var choisie = localStorage.getItem(CLE);
-      if (choisie === 'fr' || choisie === 'en') return choisie;
-    } catch (err) { /* stockage indisponible */ }
-    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
-    return appareil === 'en' ? 'en' : 'fr';
-  }
-
-  function appliquer(code) {
-    document.documentElement.lang = code;
-    document.title = TITRES[code];
-    var boutons = document.querySelectorAll('.lang button');
-    for (var i = 0; i < boutons.length; i++) {
-      var actif = boutons[i].getAttribute('data-langue') === code;
-      boutons[i].classList.toggle('actif', actif);
-      boutons[i].setAttribute('aria-pressed', actif ? 'true' : 'false');
-    }
-    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
-  }
-
-  appliquer(lire());
-  document.getElementById('annee').textContent = String(new Date().getFullYear());
-  var boutons = document.querySelectorAll('.lang button');
-  for (var i = 0; i < boutons.length; i++) {
-    boutons[i].addEventListener('click', function (e) {
-      appliquer(e.currentTarget.getAttribute('data-langue'));
-    });
-  }
-})();
-</script>
 </body>
 </html>
