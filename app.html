@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MHAkO/KiV/j812TkOuXr4qaFnY2C/QpUwZJEthB05Og=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-RnsqB6HOKCOGPZAmIlL8aVTO6y6K0te7VcTSZdJsgPM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -134,6 +134,16 @@
     --ok-bg:rgba(36,181,168,.14);
     --ok-ink:#0E1333;
     --ok-accent:#24B5A8;
+    /* ★ LOT 9 — LES DEUX TEINTES DU GRAND TEXTE DE LA CARTE MACHINE.
+       La maquette de bureau écrit l'échéance en grand DANS la teinte de son état
+       (`text-ambre`, `text-indigo`). Chez nous ce chiffre est à 25 px : WCAG le
+       juge en « grand texte », où la barre est 3:1. L'ambre (3,04) et l'indigo
+       (4,47) y passent de justesse ; ces deux jetons gardent la MÊME famille de
+       couleur, plus dense, pour que le chiffre ait de la marge (4,50 et 5,29 sur
+       le blanc de la carte). Le texte ORDINAIRE, lui, reste à l'encre : ces
+       teintes n'écrivent jamais sous 24 px. */
+    --late-fort:rgba(222,122,22,.90);
+    --soon-fort:rgba(99,102,241,.86);
     /* ★ LOT 8 — LES DEUX TEINTES DU GRAND TEXTE. Le chiffre d'une tuile du
        tableau de bord est écrit à 31 px : WCAG le juge en « grand texte », où la
        barre est 3:1 et non 4,5:1. Deux des quatre états la passent là et pas
@@ -845,10 +855,26 @@
      carte « en retard » — la vue émet is-late — n'en avait donc aucun, d'où des
      cadres différents d'une machine à l'autre. Le statut est déjà annoncé par la
      pastille, en haut à droite, et par la phrase d'échéance. */
+  /* ★ LOT 9 — LA CARTE, TELLE QUE LA MAQUETTE LA DESSINE.
+     `rounded-[14px]` et `shadow-[0_8px_24px_rgba(14,19,51,0.06)]` : le rayon est
+     le barreau `--rayon-carte` du produit, l'ombre est celle de la maquette,
+     teintée à l'encre du produit (jamais un gris inventé). `overflow:hidden` est
+     ce qui permet au TRAIT DE COULEUR de suivre les coins arrondis, comme
+     l'`overflow-hidden` de la maquette. Le rembourrage passe de 16/18 px à
+     16 px, et l'écart vertical de 14 px à 12 px (le barreau `--espace-3`). */
   .machine{
-    background:var(--surface);border:2.5px solid var(--ink);border-radius:14px;
-    box-shadow:var(--shadow-soft);padding:16px 18px;display:flex;flex-direction:column;gap:14px;
+    background:var(--surface);border:2px solid var(--ink);border-radius:14px;
+    box-shadow:0 8px 24px rgba(14,19,51,.06);padding:16px;display:flex;flex-direction:column;gap:12px;
+    overflow:hidden;
   }
+  /* ★ LE TRAIT DE COULEUR À GAUCHE (la maquette : `h-1.5 lg:h-auto lg:w-2`).
+     Il dit l'état AVANT toute lecture : ambre pour un retard, indigo pour une
+     échéance proche, cyan pour une machine à jour. Il ne porte aucun texte —
+     c'est une teinte, et c'est exactement l'usage que la charte lui donne. */
+  .m-bande{height:6px;flex:0 0 auto;background:var(--ink-3);}
+  .machine.is-late .m-bande{background:var(--late);}
+  .machine.is-soon .m-bande{background:var(--soon);}
+  .machine.is-ok .m-bande{background:var(--ok);}
   /* ★ LOT 3 — LE PARC : LA LIGNE REPLIÉE, LE DÉTAIL DÉPLIABLE.
      CE QUE L'AUDIT A MESURÉ : les cartes faisaient 620 à 720 px de haut, soit
      SEPT écrans de défilement pour quatre machines — sur le téléphone qui est
@@ -896,8 +922,18 @@
     padding:8px 12px;border-radius:12px;background:var(--late-bg);color:var(--ink);
   }
   .machine-alerte.is-soon{background:var(--soon-bg);}
+  /* Le PICTO DE LA BANDE EST DANS LA TEINTE DE SON ÉTAT (`warning` ambre sur la
+     bande de retard, `schedule` indigo sur la bande « bientôt ») : dans la
+     maquette, l'icône est colorée et le TEXTE reste à l'encre. C'est la règle du
+     socle, respectée à la lettre. */
+  .machine-alerte-ligne{display:flex;align-items:center;gap:8px;}
+  .machine-alerte-picto{display:inline-flex;flex:0 0 auto;color:var(--late);}
+  .machine-alerte.is-soon .machine-alerte-picto{color:var(--soon);}
+  .machine-alerte-picto svg{display:block;width:18px;height:18px;}
   .machine-alerte-titre{font-size:13.5px;font-weight:800;line-height:1.4;}
-  .machine-alerte-texte{font-size:12px;font-weight:600;color:var(--ink-2);line-height:1.5;}
+  /* Le détail de l'échéance s'aligne sur le TITRE, pas sur l'icône : 18 px de
+     picto + 8 px d'écart. */
+  .machine-alerte-texte{font-size:12px;font-weight:600;color:var(--ink-2);line-height:1.5;padding-left:26px;}
   /* LE CARNET, POSÉ SUR LA PHOTO. On voit d'un coup d'œil quelles machines ont
      leur carnet — et c'est le bouton qui l'ouvre, jamais une vignette
      décorative. Le mot est celui du produit (« Carnet »), pas « OCR ». */
@@ -924,6 +960,12 @@
     background:var(--ink);color:var(--surface);font-size:12px;font-weight:800;
     white-space:nowrap;max-width:calc(100% - 16px);
   }
+  /* ★ LOT 9 — LE BADGE PORTE SON PICTO (la maquette : `menu_book` dans la
+     pastille « Carnet d'entretien (PDF) », `picture_as_pdf` sur le bouton posé
+     sur la photo). Le mot reste celui du produit — « Carnet PDF » — et le DESSIN
+     vient de la maquette. L'icône est en cyan, la seule teinte lisible sur
+     l'aplat d'encre (7,22:1) ; le blanc y écrit 18,11:1. */
+  .carnet-badge svg{display:block;width:14px;height:14px;color:var(--ok);flex:0 0 auto;}
   /* LE PLIEUR : un chevron de 44 px, la cible tactile du socle. Il porte
      aria-expanded ; le chevron suit l'état, et il est décoratif (aria-hidden),
      parce que l'état est déjà dit par l'attribut. */
@@ -950,14 +992,40 @@
   }
   .m-main .name{font-size:17px;font-weight:700;}
   .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
+  /* ★ LOT 9 — LA COLONNE DE CONTENU PORTE LA PHOTO, SOUS LA BANDE D'ALERTE.
+     C'est la maquette du téléphone : bande d'échéance, puis photo `w-full`.
+     L'image est en `width:100%` depuis toujours, mais son CADRE était
+     `inline-flex` sans largeur : la photo s'arrêtait donc à sa boîte de 220 px —
+     la VIGNETTE de la maquette de bureau, pas la photo pleine largeur de la
+     maquette du téléphone. `width:100%` sur le cadre rend la largeur à la
+     colonne, sans toucher à la correction du lot 7 : le badge reste mesuré sur
+     les bords de la PHOTO (le cadre épouse l'image, qui remplit le cadre). */
+  .m-main{min-width:0;}
+  .machine-photo-cadre{width:100%;align-self:flex-start;}
   /* ★ LOT 7 — LES DEUX COLONNES DE LA CARTE.
      À droite : l'ÉTAT OPÉRATIONNEL et ce qui se FAIT. Les quatre actions sont
      empilées, l'action principale pleine largeur en 44 px (la cible tactile du
      socle), les trois autres en contour 2 px — la règle 5 du DESIGN.md. */
   .m-side{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;}
-  .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;}
+  /* ★ LOT 9 — LES QUATRE ACTIONS SONT EMPILÉES, COMME DANS LA MAQUETTE DE BUREAU
+     (`flex flex-col gap-2`) : l'action principale pleine largeur en 44 px
+     (`min-h-[44px]`, la cible tactile du socle), les trois autres en contour 2 px
+     (`border-2 border-encre`) — la règle 5 du DESIGN.md. Elles étaient en grille
+     2 × 2, ce qui n'est la disposition d'aucune des deux maquettes. */
+  .m-actions{display:flex;flex-direction:column;gap:8px;min-width:0;}
   .m-actions .btn-row-action{min-height:44px;white-space:normal;}
-  .m-actions .btn-principal{grid-column:1 / -1;}
+  .m-actions .btn-principal{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
+  .m-actions .btn-principal:hover{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
+  .m-actions .btn-row-action:not(.btn-principal){background:var(--surface);border:2px solid var(--ink);color:var(--ink);}
+  .m-actions .btn-row-action:not(.btn-principal):hover{background:var(--surface-soft);border-color:var(--ink);color:var(--ink);}
+  /* ★ LOT 9 — LE PICTO DES BOUTONS : `build_circle`, `event_repeat`,
+     `fact_check`, `settings` — les quatre de la maquette de bureau, aux quatre
+     places qu'elle leur donne. `photo_camera` sur le geste de la photo. */
+  .btn-row-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-row-action svg{display:block;width:18px;height:18px;flex:0 0 auto;}
+  .btn-principal svg{width:20px;height:20px;}
+  .compteur-photo{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .compteur-photo svg{display:block;width:18px;height:18px;flex:0 0 auto;}
   /* ★ LOT 7 — L'ENCART DE LA TÂCHE. La maquette de bureau écrit
      « TÂCHE PRÉVUE : <tâche> » au-dessus du compteur : la tâche se lit AVANT la
      photo, et le mot est celui du produit (`nextTaskLabel`). */
@@ -965,9 +1033,14 @@
     display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
     padding:8px 12px;border-radius:12px;background:var(--surface-soft);
   }
+  /* ★ LE PICTO DE LA TÂCHE : `build_circle` (l'action à faire), à l'encre. La
+     maquette écrit « Tâche prévue : <tâche> » ; le mot et la valeur restent les
+     nôtres, l'icône vient devant le mot. */
   .machine-tache-mot{
+    display:inline-flex;align-items:center;gap:4px;
     font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
   }
+  .machine-tache-mot svg{display:block;width:14px;height:14px;flex:0 0 auto;}
   .machine-tache-valeur{font-size:13.5px;font-weight:700;color:var(--ink);white-space:nowrap;}
   /* ★ LOT 7 — L'ÉTAT OPÉRATIONNEL, DANS LA COLONNE DE DROITE : le mot, la
      pastille teintée de son état, et l'ÉCHÉANCE EN GRAND à côté.
@@ -987,6 +1060,21 @@
     display:block;font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
     font-size:25px;font-weight:800;color:var(--ink);line-height:1.15;white-space:nowrap;
   }
+  /* ★ LOT 9 — LA COULEUR DES TROIS ÉTATS DANS LA COLONNE DE DROITE.
+     Les pastilles teintées de la maquette (`bg-ambre/15 text-ambre`,
+     `bg-indigo/15 text-indigo`, `bg-signature-fr/15 text-signature-fr`) portent
+     maintenant leur PICTO, à l'encre sur leur VOILE : c'est la recette du socle
+     (l'ambre écrit 3,04:1 sur blanc et n'y porte aucun texte). Et l'ÉCHÉANCE EN
+     GRAND prend la teinte de son état — 25 px, donc grand texte, donc 3:1 — par
+     les deux jetons dérivés ; « À jour » garde l'encre, sa teinte n'y ajoutant
+     rien (l'encre écrit 18,11:1).
+     L'état est porté par la CARTE (`.machine.is-late`), pas par la pastille :
+     c'est lui qui décide du trait, de la pastille, de l'échéance et de la barre
+     d'un seul coup. */
+  .badge{display:inline-flex;align-items:center;gap:4px;}
+  .badge svg{display:block;width:14px;height:14px;flex:0 0 auto;}
+  .machine.is-late .machine-echeance .due{color:var(--late-fort);}
+  .machine.is-soon .machine-echeance .due{color:var(--soon-fort);}
   /* ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, DANS UN BLOC, PLUS UN TRAIT NU.
      La piste est VOILÉE, le remplissage est COLORÉ par l'état, et tout le texte
      du bloc est À L'ENCRE. Aucun pourcentage écrit : le chiffre qui s'affiche est
@@ -1022,9 +1110,12 @@
     background:var(--surface-soft);display:flex;flex-direction:column;gap:6px;
   }
   .compteur-titre{
-    display:block;margin:0;font-size:12.5px;font-weight:800;letter-spacing:.08em;
+    display:inline-flex;align-items:center;gap:4px;margin:0;font-size:12.5px;font-weight:800;letter-spacing:.08em;
     text-transform:uppercase;color:var(--ink-2);
   }
+  /* ★ LOT 9 — LE PICTO DU COMPTEUR : `speed`, l'icône du compteur dans la
+     maquette mobile. Elle se pose devant le libellé, à l'encre. */
+  .compteur-titre svg{display:block;width:16px;height:16px;flex:0 0 auto;}
   .compteur-saisie{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;}
   .compteur-champ{
     font-size:22px;font-weight:800;line-height:1.1;width:6.5em;min-width:0;padding:8px 10px;
@@ -1103,6 +1194,12 @@
     /* ★ LOT 7 — LA COLONNE DE DROITE FAIT 340 px, LA PROPORTION DE LA MAQUETTE DE
        BUREAU : la carte se lit « contenu, puis état et actions », et les quatre
        boutons ne s'écrasent plus sur la largeur. */
+    /* ★ LOT 9 — LE TRAIT DE COULEUR PASSE DU BORD HAUT AU BORD GAUCHE
+       (`lg:h-auto lg:w-2` dans la maquette : 8 px de large, toute la hauteur). */
+    .m-bande{width:8px;height:auto;align-self:stretch;}
+    /* Et la photo prend la largeur de la colonne de contenu, bornée à 480 px
+       pour qu'un écran large ne transforme pas la carte en bandeau. */
+    .machine-photo-cadre{max-width:480px;}
     .m-side{flex:0 0 340px;width:340px;}
     .compteur-mobile{display:none;}
     .compteur-bureau{display:flex;width:100%;max-width:100%;}
@@ -1811,6 +1908,8 @@
   .chip{white-space:nowrap;}
   .chip .chip-count{white-space:nowrap;}
   .chip-mot{display:inline-flex;align-items:center;gap:6px;}
+  .chips-picto{display:inline-flex;align-items:center;margin-right:4px;color:var(--ink-2);flex:0 0 auto;}
+  .chips-picto svg{display:block;width:13px;height:13px;}
   .chip-mot::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--ink-3);flex:0 0 auto;}
   .chip-late .chip-mot::before{background:var(--late);}
   .chip-soon .chip-mot::before{background:var(--soon);}
@@ -6912,6 +7011,39 @@ const NAV_ICONES = {
   rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
   compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
+// ★ LOT 9 — LES PICTOs DE LA CARTE MACHINE, DESSINÉS COMME CEUX DE LA NAVIGATION.
+// La maquette emploie la police « Material Symbols » (une ressource DISTANTE) :
+// impossible ici, et pour deux raisons qui ne se négocient pas — la politique de
+// sécurité du contenu interdit toute origine, et l'application Android embarque
+// cette page sans réseau. Les icônes sont donc RETRACÉES sur le repère de la
+// marque : 24 × 24, trait 2 px, extrémités arrondies, `currentColor`. Le DESSIN
+// est celui de la maquette (cercle barré, horloge, coche dans un cercle, triangle
+// d'alerte, engrenage, calendrier à flèches, liste cochée, appareil photo,
+// compteur, carnet, entonnoir de filtre) — pas une forme inventée.
+const PICTOS = {
+  retard: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  bientot: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3.5 2"/>',
+  ajuste: '<circle cx="12" cy="12" r="9"/><path d="M8 12.2l2.8 2.8L16.4 9.4"/>',
+  alerte: '<path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5"/><path d="M12 17.4h.01"/>',
+  entretien: '<path d="M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8z"/><path d="M14.8 8.4 13 13l-4.6 1.8L10.2 10z"/>',
+  prochain: '<path d="M3.5 5.5h17v15h-17z"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9.2 14.2 11 16l3.8-3.8"/>',
+  plan: '<path d="M9 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9"/><path d="M4.5 8.5l1.6 1.6L9 7.2"/><path d="M4.5 15.5l1.6 1.6L9 14.2"/>',
+  reglages: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>',
+  carnet: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v18H6.5A1.5 1.5 0 0 1 5 19.5z"/><path d="M8.5 3v18"/>',
+  photo: '<path d="M3.5 8.5h3.2l1.6-2.2h7.4l1.6 2.2h3.2v10.5h-17z"/><circle cx="12" cy="13.5" r="3.4"/>',
+  compteur: '<path d="M4.5 18.5a8.5 8.5 0 1 1 15 0"/><path d="M12 13.8 16.6 9"/>',
+  filtre: '<path d="M3.5 5.5h17l-6.6 7.6v6.4l-3.8-2.2v-4.2z"/>',
+};
+function picto(nom) {
+  const trace = PICTOS[nom];
+  if (!trace) return '';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${trace}</svg>`;
+}
+// L'état vient de `dueInfo()` — les MÊMES trois mots que la pastille ; le picto
+// ne fait que les rendre lisibles d'un coup d'œil, il n'ajoute aucun sens.
+const PICTOS_ETAT = { late: 'retard', soon: 'bientot', ok: 'ajuste' };
+function pictoEtat(etat) { return picto(PICTOS_ETAT[etat] || 'ajuste'); }
+
 function navIcone(nom) {
   const trace = NAV_ICONES[nom];
   if (!trace) return '';
@@ -8178,7 +8310,7 @@ function compteurHtml(m, emplacement) {
   }
   return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
-      <label class="compteur-titre" for="${champId}">${trad('Compteur')}</label>
+      <label class="compteur-titre" for="${champId}">${picto('compteur')}${trad('Compteur')}</label>
       <div class="compteur-saisie">
         <input id="${champId}" class="compteur-champ" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
           value="${montre == null ? '' : esc(montre)}" placeholder="—"
@@ -8187,8 +8319,8 @@ function compteurHtml(m, emplacement) {
         <button type="button" class="compteur-enregistrer" data-compteur-enregistrer="${id}">${trad('Enregistrer')}</button>
       </div>
       <div class="compteur-lire">
-        ${appareil ? `<button type="button" class="compteur-photo is-principal" data-compteur-photo="${id}" data-compteur-photo-source="appareil">${trad('Prendre la photo')}</button>
-        ` : ''}<button type="button" class="compteur-photo${appareil ? ' is-secondaire' : ' is-principal'}" data-compteur-photo="${id}" data-compteur-photo-source="galerie">${appareil ? trad('Choisir dans la galerie') : trad('Choisir une photo')}</button>
+        ${appareil ? `<button type="button" class="compteur-photo is-principal" data-compteur-photo="${id}" data-compteur-photo-source="appareil">${picto('photo')}<span>${trad('Prendre la photo')}</span></button>
+        ` : ''}<button type="button" class="compteur-photo${appareil ? ' is-secondaire' : ' is-principal'}" data-compteur-photo="${id}" data-compteur-photo-source="galerie">${picto('photo')}<span>${appareil ? trad('Choisir dans la galerie') : trad('Choisir une photo')}</span></button>
         ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
         ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
       </div>
@@ -8604,6 +8736,7 @@ VIEWS.machines = {
         </div>
         <div class="toolbar-bottom">
         <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
+          <span class="chips-picto" aria-hidden="true">${picto('filtre')}</span>
           ${chipHtml('all', trad('Toutes'), UI.machines.length)}
           ${chipHtml('late', trad('En retard'), c.late)}
           ${chipHtml('soon', trad('Bientôt'), c.soon)}
@@ -8735,30 +8868,31 @@ function machineCardHtml(m) {
   const tache = nextTaskLabel(m);
   return `
     <article class="machine is-${info.state}${replie ? ' is-replie' : ''}" data-machine-id="${esc(m.id)}">
+      <span class="m-bande" aria-hidden="true"></span>
       <div class="m-tete">
         <div class="m-titre">
           <div class="name">${esc(m.name)}</div>
           <div class="meta">${meta}</div>
         </div>
-        <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+        <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
         <button type="button" class="machine-plieur" data-plier="${esc(m.id)}" aria-expanded="${replie ? 'false' : 'true'}" aria-label="${esc(tR('Détails de {machine}', { machine: m.name }))}"><span class="machine-chevron" aria-hidden="true">${replie ? '▸' : '▾'}</span></button>
       </div>
       <div class="m-main">
         ${info.state === 'late' || info.state === 'soon' ? `
         <div class="machine-alerte${info.state === 'late' ? '' : ' is-soon'}">
-          <span class="machine-alerte-titre">${esc(tache)}</span>
+          <span class="machine-alerte-ligne"><span class="machine-alerte-picto" aria-hidden="true">${info.state === 'late' ? picto('alerte') : picto('bientot')}</span><span class="machine-alerte-titre">${esc(tache)}</span></span>
           <span class="machine-alerte-texte">${esc(info.label)}</span>
         </div>` : ''}
         ${horsOffre ? '<div class="hint">Non couverte par ton offre</div>' : ''}
         ${photo ? `
         <div class="machine-photo-cadre" data-conteneur="photo">
           <img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">
-          ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${trad('Carnet PDF')}</button>` : ''}
+          ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet PDF')}</span></button>` : ''}
         </div>`
           : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${trad('Voir le carnet d\'entretien (PDF)')}</button>` : '')}
         ${tache ? `
         <div class="machine-tache">
-          <span class="machine-tache-mot">${trad('Tâche prévue')}</span>
+          <span class="machine-tache-mot">${picto('entretien')}${trad('Tâche prévue')}</span>
           <span class="machine-tache-valeur">${esc(tache)}</span>
         </div>` : ''}
         <span class="machine-echeance-texte">${esc(info.label)}</span>
@@ -8770,7 +8904,7 @@ function machineCardHtml(m) {
             <span class="m-etat-mot">${trad('État opérationnel')}</span>
           </div>
           <div class="m-etat-ligne">
-            <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+            <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
             <span class="m-echeance">
               <span class="machine-echeance-mot">${trad('Échéance')}</span>
               <span class="due">${esc(info.short)}</span>
@@ -8779,10 +8913,10 @@ function machineCardHtml(m) {
           ${jaugeIntervalleHtml(info, m)}
         </div>
         <div class="m-actions">
-          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${trad('Enregistrer un entretien')}</button>
-          <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${trad('Prochain entretien')}</button>
-          <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${trad('Voir le plan')}</button>
-          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${trad('Modifier la machine')}</button>
+          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}${trad('Enregistrer un entretien')}</button>
+          <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${picto('prochain')}${trad('Prochain entretien')}</button>
+          <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${picto('plan')}${trad('Voir le plan')}</button>
+          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${picto('reglages')}${trad('Modifier la machine')}</button>
         </div>
         ${compteurHtml(m, 'bureau')}
       </div>
