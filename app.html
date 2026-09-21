@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-RnsqB6HOKCOGPZAmIlL8aVTO6y6K0te7VcTSZdJsgPM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PMFzB0ogwa+TKPolzXMR0BBWmHrTy16shj5yU+WEGIw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -482,8 +482,16 @@
     .head-title{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;}
     /* L'écran de bureau ouvre sur le salut de la maquette : le titre générique
        « Tableau de bord » s'efface, c'est la carte d'accueil qui parle. */
-    [data-view="dashboard"] .head-title{display:none;}
-    [data-view="dashboard"] .dash-head{display:flex;}
+    /* ★ LOT 9 — LE PARC PORTE LE MÊME EN-TÊTE GLOBAL QUE LE TABLEAU DE BORD :
+       « Bonjour … · N machines suivies », l'avatar et « Ajouter une machine »,
+       PUIS la barre de travail du parc (recherche, filtres à compteurs, tri).
+       C'est la disposition de la maquette de bureau, et elle n'ajoute aucune
+       donnée : le mot vient de `greetingLabel()`, le compte de `UI.machines`,
+       les initiales de `initialsFrom()`. */
+    [data-view="dashboard"] .head-title,
+    [data-view="machines"] .head-title{display:none;}
+    [data-view="dashboard"] .dash-head,
+    [data-view="machines"] .dash-head{display:flex;}
     .dash-head .dash-ajouter{display:inline-flex;align-items:center;}
   }
 
@@ -855,7 +863,7 @@
      carte « en retard » — la vue émet is-late — n'en avait donc aucun, d'où des
      cadres différents d'une machine à l'autre. Le statut est déjà annoncé par la
      pastille, en haut à droite, et par la phrase d'échéance. */
-  /* ★ LOT 9 — LA CARTE, TELLE QUE LA MAQUETTE LA DESSINE.
+  /* ★ LOT 9 — LA CARTE, TELLE QUE LES DEUX MAQUETTES LA DESSINENT.
      `rounded-[14px]` et `shadow-[0_8px_24px_rgba(14,19,51,0.06)]` : le rayon est
      le barreau `--rayon-carte` du produit, l'ombre est celle de la maquette,
      teintée à l'encre du produit (jamais un gris inventé). `overflow:hidden` est
@@ -903,7 +911,9 @@
      (2,55) n'y portent de texte — c'est la règle du socle, et elle ne bouge
      pas ici. La classe « due » reste sur la valeur : c'est elle que le relevé
      du compteur relit pour dire l'état avant et après. */
-  .machine-echeance-texte{font-size:13.5px;font-weight:600;color:var(--ink-2);line-height:1.5;}
+  /* La ligne « En retard de … » sous l'encart de tâche est RETIRÉE : la bande
+     d'alerte dit déjà la même chose, trois lignes plus haut. Sa règle part avec
+     elle — une règle sans élément rendu est ce que `check-classes.mjs` refuse. */
   /* LA JAUGE DE L'INTERVALLE — ELLE EST CALCULÉE, JAMAIS ÉCRITE.
      POURQUOI CETTE RÈGLE EXISTE : l'audit relève que les maquettes portent des
      taux que personne ne mesure (« 100 % », « 99,4 % »). Ici la jauge ne porte
@@ -924,8 +934,7 @@
   .machine-alerte.is-soon{background:var(--soon-bg);}
   /* Le PICTO DE LA BANDE EST DANS LA TEINTE DE SON ÉTAT (`warning` ambre sur la
      bande de retard, `schedule` indigo sur la bande « bientôt ») : dans la
-     maquette, l'icône est colorée et le TEXTE reste à l'encre. C'est la règle du
-     socle, respectée à la lettre. */
+     maquette, l'icône est colorée et le TEXTE reste à l'encre. */
   .machine-alerte-ligne{display:flex;align-items:center;gap:8px;}
   .machine-alerte-picto{display:inline-flex;flex:0 0 auto;color:var(--late);}
   .machine-alerte.is-soon .machine-alerte-picto{color:var(--soon);}
@@ -945,12 +954,47 @@
      hors de l'image. En `inline-flex`, le cadre épouse la photo, et le badge
      tombe à 8 px de SES bords. `min-width:0` et `max-width:100%` garantissent
      qu'un cadre étroit ne le pousse jamais dehors. */
+  /* TÉLÉPHONE (défaut, hors media query) — la maquette mobile : photo PLEINE
+     LARGEUR sous la bande d'alerte (`relative w-full h-36 rounded-xl
+     overflow-hidden mt-3 bg-surface-container`), badge du carnet POSÉ DESSUS.
+     La correction du lot 7 tient : le cadre épouse la photo, le badge tombe à
+     8 px de SES bords.
+     ⚠️ CES RÈGLES SONT REPOSÉES TELLES QUELLES À LA FIN DE LA FEUILLE (bloc ⑰) :
+     la règle générique `.machine-photo{display:block;width:100%;max-width:220px;
+     aspect-ratio:16/9;…}` vit plus bas, et la DERNIÈRE gagne à spécificité
+     égale. C'est ce qui laissait DEUX photos visibles à 1440 px. */
   .machine-photo-cadre{
     position:relative;display:inline-flex;align-items:flex-start;
-    min-width:0;max-width:100%;margin-top:12px;
+    min-width:0;max-width:100%;width:100%;margin-top:12px;
   }
-  .machine-photo-cadre .machine-photo{margin-top:0;max-width:100%;}
+  .machine-photo-cadre .machine-photo{margin-top:0;max-width:100%;width:100%;}
   .machine-carnet-lien{margin-top:12px;}
+  /* ★ LOT 9 — LA VIGNETTE DE LA MAQUETTE DE BUREAU (`w-24 h-20 sm:w-28 sm:h-24`,
+     soit 112 × 96 px, `rounded-xl` = 12 px). `flex:0 0 auto` l'empêche de
+     grandir quand l'identité, à sa droite, est courte — sinon la photo
+     prendrait la moitié de la carte. Elle est CACHÉE au téléphone, et la grande
+     image reprend sa place : deux dispositions, un seul élément visible à la
+     fois, et c'est la FEUILLE qui décide — jamais le script.
+     ⚠️ AUCUNE BORDURE : la maquette montre la vignette ARRONDIE, SANS bordure
+     d'encre — et une image n'est pas un cadre (voir les règles reposées en fin
+     de feuille, bloc ⑰). */
+  .machine-tete-photo{
+    position:relative;display:none;align-items:flex-start;flex:0 0 auto;
+    width:112px;height:96px;border-radius:12px;overflow:hidden;
+    background:var(--surface-soft);margin:0;
+  }
+  /* LA PASTILLE « Carnet d'entretien (PDF) » DU BUREAU : sous l'identité, à
+     gauche (`self-start`), JAMAIS sur la photo. Elle est cachée au téléphone,
+     où c'est le badge posé sur l'image qui joue ce rôle. */
+  .machine-tete-carnet{
+    display:none;align-self:flex-start;align-items:center;gap:4px;
+    padding:6px 12px;border-radius:var(--r-pill);cursor:pointer;font-family:inherit;
+    background:var(--surface-soft);border:1px solid var(--line);color:var(--ink);
+    font-size:12px;font-weight:700;white-space:nowrap;
+  }
+  /* L'icône est en Signature FR : 5,65:1 sur le blanc, la teinte qui ÉCRIT. */
+  .machine-tete-carnet svg{display:block;width:14px;height:14px;color:var(--primary-dark);flex:0 0 auto;}
+  .machine-tete-droite{min-width:0;}
   /* LE BADGE DU CARNET : toujours DANS la photo, à 8 px de ses bords, sur UNE
      SEULE LIGNE. `white-space:nowrap` est ce qui l'empêche d'être coupé en deux
      quand le cadre se resserre : il s'élargit au lieu de se replier. */
@@ -960,12 +1004,6 @@
     background:var(--ink);color:var(--surface);font-size:12px;font-weight:800;
     white-space:nowrap;max-width:calc(100% - 16px);
   }
-  /* ★ LOT 9 — LE BADGE PORTE SON PICTO (la maquette : `menu_book` dans la
-     pastille « Carnet d'entretien (PDF) », `picture_as_pdf` sur le bouton posé
-     sur la photo). Le mot reste celui du produit — « Carnet PDF » — et le DESSIN
-     vient de la maquette. L'icône est en cyan, la seule teinte lisible sur
-     l'aplat d'encre (7,22:1) ; le blanc y écrit 18,11:1. */
-  .carnet-badge svg{display:block;width:14px;height:14px;color:var(--ok);flex:0 0 auto;}
   /* LE PLIEUR : un chevron de 44 px, la cible tactile du socle. Il porte
      aria-expanded ; le chevron suit l'état, et il est décoratif (aria-hidden),
      parce que l'état est déjà dit par l'attribut. */
@@ -986,46 +1024,45 @@
     .machine.is-replie .machine-photo-cadre,
     .machine.is-replie .machine-carnet-lien,
     .machine.is-replie .machine-jauge,
-    .machine.is-replie .machine-echeance-texte,
     .machine.is-replie .machine-tache,
     .machine.is-replie .compteur-lire{display:none;}
   }
   .m-main .name{font-size:17px;font-weight:700;}
   .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
-  /* ★ LOT 9 — LA COLONNE DE CONTENU PORTE LA PHOTO, SOUS LA BANDE D'ALERTE.
-     C'est la maquette du téléphone : bande d'échéance, puis photo `w-full`.
-     L'image est en `width:100%` depuis toujours, mais son CADRE était
-     `inline-flex` sans largeur : la photo s'arrêtait donc à sa boîte de 220 px —
-     la VIGNETTE de la maquette de bureau, pas la photo pleine largeur de la
-     maquette du téléphone. `width:100%` sur le cadre rend la largeur à la
-     colonne, sans toucher à la correction du lot 7 : le badge reste mesuré sur
-     les bords de la PHOTO (le cadre épouse l'image, qui remplit le cadre). */
+  /* `min-width:0` autorise l'enfant d'un `flex` à se resserrer au lieu de
+     pousser la carte (l'identité, à droite de la vignette). */
   .m-main{min-width:0;}
-  .machine-photo-cadre{width:100%;align-self:flex-start;}
-  /* ★ LOT 7 — LES DEUX COLONNES DE LA CARTE.
-     À droite : l'ÉTAT OPÉRATIONNEL et ce qui se FAIT. Les quatre actions sont
-     empilées, l'action principale pleine largeur en 44 px (la cible tactile du
-     socle), les trois autres en contour 2 px — la règle 5 du DESIGN.md. */
+  /* ★ LOT 9 — LES QUATRE ACTIONS REPRENNENT LA MAQUETTE DE BUREAU
+     (`flex flex-col gap-2`) : l'action principale PLEINE LARGEUR en 44 px
+     (`min-h-[44px]`, la cible tactile du socle), puis « Prochain entretien » ET
+     « Voir le plan » CÔTE À CÔTE (deux colonnes), puis « Modifier la machine ».
+     C'est la grille 2 × 2 du lot 7 qui était juste ; les mettre en pile était
+     l'erreur de la première version (c'est la disposition du TÉLÉPHONE, où la
+     carte est étroite). */
   .m-side{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;}
-  /* ★ LOT 9 — LES QUATRE ACTIONS SONT EMPILÉES, COMME DANS LA MAQUETTE DE BUREAU
-     (`flex flex-col gap-2`) : l'action principale pleine largeur en 44 px
-     (`min-h-[44px]`, la cible tactile du socle), les trois autres en contour 2 px
-     (`border-2 border-encre`) — la règle 5 du DESIGN.md. Elles étaient en grille
-     2 × 2, ce qui n'est la disposition d'aucune des deux maquettes. */
-  .m-actions{display:flex;flex-direction:column;gap:8px;min-width:0;}
+  .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;}
   .m-actions .btn-row-action{min-height:44px;white-space:normal;}
+  .m-actions .btn-principal{grid-column:1 / -1;}
   .m-actions .btn-principal{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
   .m-actions .btn-principal:hover{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
   .m-actions .btn-row-action:not(.btn-principal){background:var(--surface);border:2px solid var(--ink);color:var(--ink);}
   .m-actions .btn-row-action:not(.btn-principal):hover{background:var(--surface-soft);border-color:var(--ink);color:var(--ink);}
   /* ★ LOT 9 — LE PICTO DES BOUTONS : `build_circle`, `event_repeat`,
-     `fact_check`, `settings` — les quatre de la maquette de bureau, aux quatre
-     places qu'elle leur donne. `photo_camera` sur le geste de la photo. */
+     `fact_check`, `settings` — les quatre de la maquette, aux quatre places
+     qu'elle leur donne. `photo_camera` sur le geste de la photo. */
   .btn-row-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .btn-row-action svg{display:block;width:18px;height:18px;flex:0 0 auto;}
   .btn-principal svg{width:20px;height:20px;}
   .compteur-photo{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .compteur-photo svg{display:block;width:18px;height:18px;flex:0 0 auto;}
+  /* ★ LOT 7 — LES DEUX COLONNES DE LA CARTE.
+     À droite : l'ÉTAT OPÉRATIONNEL et ce qui se FAIT. Les quatre actions sont
+     empilées, l'action principale pleine largeur en 44 px (la cible tactile du
+     socle), les trois autres en contour 2 px — la règle 5 du DESIGN.md. */
+  .m-side{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;}
+  .m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;}
+  .m-actions .btn-row-action{min-height:44px;white-space:normal;}
+  .m-actions .btn-principal{grid-column:1 / -1;}
   /* ★ LOT 7 — L'ENCART DE LA TÂCHE. La maquette de bureau écrit
      « TÂCHE PRÉVUE : <tâche> » au-dessus du compteur : la tâche se lit AVANT la
      photo, et le mot est celui du produit (`nextTaskLabel`). */
@@ -1063,14 +1100,12 @@
   /* ★ LOT 9 — LA COULEUR DES TROIS ÉTATS DANS LA COLONNE DE DROITE.
      Les pastilles teintées de la maquette (`bg-ambre/15 text-ambre`,
      `bg-indigo/15 text-indigo`, `bg-signature-fr/15 text-signature-fr`) portent
-     maintenant leur PICTO, à l'encre sur leur VOILE : c'est la recette du socle
-     (l'ambre écrit 3,04:1 sur blanc et n'y porte aucun texte). Et l'ÉCHÉANCE EN
-     GRAND prend la teinte de son état — 25 px, donc grand texte, donc 3:1 — par
-     les deux jetons dérivés ; « À jour » garde l'encre, sa teinte n'y ajoutant
-     rien (l'encre écrit 18,11:1).
-     L'état est porté par la CARTE (`.machine.is-late`), pas par la pastille :
-     c'est lui qui décide du trait, de la pastille, de l'échéance et de la barre
-     d'un seul coup. */
+     leur PICTO, à l'encre sur leur VOILE : c'est la recette du socle (l'ambre
+     écrit 3,04:1 sur blanc et n'y porte aucun texte). Et l'ÉCHÉANCE EN GRAND
+     prend la teinte de son état — 25 px, donc grand texte, donc 3:1 — par les
+     deux jetons dérivés ; « À jour » garde l'encre (18,11:1). L'état est porté
+     par la CARTE (`.machine.is-late`), pas par la pastille : c'est lui qui
+     décide du trait, de la pastille, de l'échéance et de la barre d'un coup. */
   .badge{display:inline-flex;align-items:center;gap:4px;}
   .badge svg{display:block;width:14px;height:14px;flex:0 0 auto;}
   .machine.is-late .machine-echeance .due{color:var(--late-fort);}
@@ -1116,6 +1151,18 @@
   /* ★ LOT 9 — LE PICTO DU COMPTEUR : `speed`, l'icône du compteur dans la
      maquette mobile. Elle se pose devant le libellé, à l'encre. */
   .compteur-titre svg{display:block;width:16px;height:16px;flex:0 0 auto;}
+  /* ★ LOT 9 — LA LIGNE DU COMPTEUR DE BUREAU. La maquette de bureau écrit, sur
+     UNE SEULE LIGNE : « RELEVER LE COMPTEUR [valeur] h [Enregistrer] », puis
+     « Lire sur une photo » à l'extrémité droite (`flex-wrap items-center
+     justify-between`). Le cadre encadré de la maquette MOBILE reste tel quel
+     pour le téléphone (`.compteur`) ; seule la version bureau s'aplatit. */
+  .compteur-bureau{
+    margin-top:0;flex-direction:row;flex-wrap:wrap;align-items:center;
+    justify-content:space-between;gap:12px;padding:12px;
+    border:2px solid var(--ink);border-radius:12px;background:var(--surface-soft);
+  }
+  .compteur-bureau .compteur-saisie{flex:1 1 auto;}
+  .compteur-bureau .compteur-lire{margin-top:0;}
   .compteur-saisie{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;}
   .compteur-champ{
     font-size:22px;font-weight:800;line-height:1.1;width:6.5em;min-width:0;padding:8px 10px;
@@ -1197,9 +1244,29 @@
     /* ★ LOT 9 — LE TRAIT DE COULEUR PASSE DU BORD HAUT AU BORD GAUCHE
        (`lg:h-auto lg:w-2` dans la maquette : 8 px de large, toute la hauteur). */
     .m-bande{width:8px;height:auto;align-self:stretch;}
-    /* Et la photo prend la largeur de la colonne de contenu, bornée à 480 px
-       pour qu'un écran large ne transforme pas la carte en bandeau. */
-    .machine-photo-cadre{max-width:480px;}
+    /* ★ LA PHOTO EN HAUT À GAUCHE, L'IDENTITÉ À SA DROITE, SUR LA MÊME LIGNE
+       (`flex gap-space-md items-start` de la maquette de bureau), et la pastille
+       « Carnet d'entretien (PDF) » SOUS l'identité, à gauche. */
+    .m-tete{flex-direction:row;align-items:flex-start;gap:16px;}
+    /* ⚠️ LA GRANDE PHOTO DOIT ÊTRE CACHÉE ICI, ET C'EST LE DÉFAUT QUE LA CAPTURE
+       A RÉVÉLÉ : les règles de la grande photo sont écrites PLUS HAUT que la
+       règle générique `.machine-photo{display:block;…}` (vers la fin de la
+       feuille, section « Vue Parc ») ; à spécificité égale, la DERNIÈRE gagne —
+       et le cadre `inline-flex` redevenait visible sous l'encart de tâche, donc
+       DEUX photos à l'écran à 1440 px. Même famille que la panne de cascade déjà
+       vue sur `.alert-title`. Les règles des DEUX photos sont donc REPOSÉES À LA
+       FIN DE LA FEUILLE (voir le bloc « ⑰ LES DEUX PHOTOS ») : la cascade ne
+       peut plus les reprendre. */
+    .machine-tete-photo{display:inline-flex;}
+    .machine-photo-cadre{display:none;}
+    .machine-tete-carnet{display:inline-flex;}
+    .machine-tete-droite{display:flex;flex-direction:column;align-items:flex-start;gap:8px;flex:1;}
+    /* ★ LOT 9 — LE COMPTEUR DE BUREAU RESTE DANS LA COLONNE DE DROITE, SOUS LES
+       ACTIONS : c'est là que la maquette de bureau le met (`flex flex-col gap-2`
+       de la colonne des actions), et c'est ce que le harnais de rendu mesure
+       depuis le lot 3 (« ordinateur : le compteur est SOUS la rangée de
+       boutons »). La version BUREAU s'aplatit en ligne (`.compteur-bureau`,
+       plus haut) ; le CADRE encadré reste celui du téléphone. */
     .m-side{flex:0 0 340px;width:340px;}
     .compteur-mobile{display:none;}
     .compteur-bureau{display:flex;width:100%;max-width:100%;}
@@ -2122,6 +2189,35 @@
   /* La carte des machines portait DÉJÀ une bordure d'encre, en 2,5 px : même
      intention, épaisseur différente. On l'harmonise à 2 px. */
   .machine{border:2px solid var(--ink);}
+
+  /* ── ★ LOT 9 — LES DEUX PHOTOS DE LA CARTE, EN DERNIER (voir le pourquoi
+     ci-dessus : la cascade de `.machine-photo`). ────────────────────────────
+     TÉLÉPHONE (hors media query) : la grande photo prend la largeur de la
+     colonne, sous la bande d'alerte (maquette mobile : `w-full h-36`).
+     BUREAU : la vignette 112 × 96 de la maquette, `object-fit:cover`
+     (`object-cover`), AUCUNE bordure d'encre — la maquette la montre arrondie
+     et nue, et une image n'est pas un cadre. */
+  .machine-photo-cadre{
+    position:relative;display:inline-flex;align-items:flex-start;
+    min-width:0;max-width:100%;width:100%;margin-top:12px;
+  }
+  .machine-photo-cadre .machine-photo{
+    margin-top:0;width:100%;max-width:100%;aspect-ratio:16/9;object-fit:contain;
+    border-radius:var(--r-chip);border:1px solid var(--line);background:var(--surface-soft);
+  }
+  .machine-tete-photo{
+    position:relative;display:none;align-items:flex-start;flex:0 0 auto;
+    width:112px;height:96px;border-radius:12px;overflow:hidden;
+    background:var(--surface-soft);border:none;margin:0;
+  }
+  .machine-tete-photo .machine-photo{
+    display:block;margin:0;width:100%;height:100%;max-width:100%;aspect-ratio:auto;
+    object-fit:cover;border:none;border-radius:0;background:none;
+  }
+  @media (min-width:900px){
+    .machine-tete-photo{display:inline-flex;}
+    .machine-photo-cadre{display:none;}
+  }
 </style>
 </head>
 <body>
@@ -7258,7 +7354,7 @@ function pageHeadHtml() {
   const n = UI.machines.length;
   const subtitle = typeof view.subtitle === 'function' ? view.subtitle() : view.subtitle;
   return `
-    ${UI.view === 'dashboard' ? dashHeadHtml() : ''}
+    ${UI.view === 'dashboard' || UI.view === 'machines' ? dashHeadHtml() : ''}
     <div class="greeting-row">
       <div class="greeting">
         <span class="hello">${greetingLabel()}</span>
@@ -8870,9 +8966,11 @@ function machineCardHtml(m) {
     <article class="machine is-${info.state}${replie ? ' is-replie' : ''}" data-machine-id="${esc(m.id)}">
       <span class="m-bande" aria-hidden="true"></span>
       <div class="m-tete">
-        <div class="m-titre">
+        ${photo ? `<div class="machine-tete-photo" data-conteneur="photo"><img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy"></div>` : ''}
+        <div class="m-titre machine-tete-droite">
           <div class="name">${esc(m.name)}</div>
           <div class="meta">${meta}</div>
+          ${m.manual_url ? `<button type="button" class="view-manual machine-tete-carnet" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet d\'entretien (PDF)')}</span></button>` : ''}
         </div>
         <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
         <button type="button" class="machine-plieur" data-plier="${esc(m.id)}" aria-expanded="${replie ? 'false' : 'true'}" aria-label="${esc(tR('Détails de {machine}', { machine: m.name }))}"><span class="machine-chevron" aria-hidden="true">${replie ? '▸' : '▾'}</span></button>
@@ -8889,13 +8987,12 @@ function machineCardHtml(m) {
           <img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">
           ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet PDF')}</span></button>` : ''}
         </div>`
-          : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${trad('Voir le carnet d\'entretien (PDF)')}</button>` : '')}
+          : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : '')}
         ${tache ? `
         <div class="machine-tache">
           <span class="machine-tache-mot">${picto('entretien')}${trad('Tâche prévue')}</span>
           <span class="machine-tache-valeur">${esc(tache)}</span>
         </div>` : ''}
-        <span class="machine-echeance-texte">${esc(info.label)}</span>
         ${compteurHtml(m, 'mobile')}
       </div>
       <div class="m-side">
