@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Cg6QmCrUJYjSVO/M2er+xUMVBoRQn0bkXjtxNyQQbJs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PoPH5eGDEv6MgALI9FLvp+NmenkQe/NdviBEfN3Qjbo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3429,7 +3429,7 @@
   .prep-produit{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line-2);}
   .prep-groupe-corps .prep-produit{padding:10px 0;}
   .prep-produit-corps{flex:1;min-width:0;}
-  .prep-case{flex:0 0 auto;margin-top:1px;color:var(--ok);}
+  .prep-case{flex:0 0 auto;margin-top:1px;color:var(--ink);}
   .prep-groupes-plus{display:none;}
   .prep-groupes-plus.is-ouvert{display:block;}
   .prep-groupes-toggle{
@@ -3669,6 +3669,11 @@
   .vue-compte button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-compte button.secondary:hover{background:var(--primary-tint-2);}
   .vue-compte .membre-ligne{background:var(--primary-tint);}
+
+  /* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
+     léger voile de couleur plutôt qu'un blanc plat, comme sur « Mon compte ». */
+  .vue-agenda button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
+  .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
 </style>
 </head>
 <body>
@@ -4113,8 +4118,17 @@ async function verifierVersionPubliee() {
     if (!reponse || !reponse.ok) return;
     const publiee = await reponse.json();
     const ici = empreintePage();
+    // `empreintePage()` renvoie le hachage NU (sans « sha256- », en minuscules) :
+    // `version.json` le porte tel que `publier-site.mjs` l'écrit, préfixe et
+    // casse d'origine compris. Sans cette même normalisation ici, les deux
+    // chaînes ne pouvaient JAMAIS être égales — le bandeau s'affichait donc à
+    // chaque chargement dès que `version.json` répondait, même sans nouvelle
+    // version publiée.
+    const publieeEmpreinte = publiee && publiee.empreinte
+      ? String(publiee.empreinte).replace(/^sha256-/i, '').toLowerCase()
+      : '';
     // Rien à dire si la version publiée est illisible, ou si c'est la nôtre.
-    if (!publiee || !publiee.empreinte || !ici || publiee.empreinte === ici) return;
+    if (!publieeEmpreinte || !ici || publieeEmpreinte === ici) return;
     if (document.getElementById('depassement-version')) return;
     const bloc = document.createElement('div');
     bloc.className = 'depassement-version';
@@ -11361,6 +11375,7 @@ VIEWS.agenda = {
     }).join('');
 
     return `
+      <div class="vue-agenda">
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Planification & logistique')}</span>
         <div class="agenda-toolbar-actions">
@@ -11384,6 +11399,7 @@ VIEWS.agenda = {
           ${remindersCardHtml()}
           ${bonCommandeHtml()}
         </div>
+      </div>
       </div>`;
   },
   mount() {
