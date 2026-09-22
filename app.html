@@ -3631,6 +3631,10 @@
     border:1px solid var(--line);border-radius:12px;background:var(--surface);
   }
   .membre-ligne:first-child{margin-top:0;}
+  /* Un groupe de rôle (« Gérant », « Mécanicien »…) par bloc [data-groupe] : le
+     premier n'a rien au-dessus, les suivants doivent se détacher du dernier
+     membre du groupe précédent plutôt que de lui coller. */
+  #acc-equipe-liste [data-groupe] + [data-groupe]{margin-top:26px;}
   .membre-corps{flex:1;min-width:0;}
   .membre-tete{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
   .avatar-gerant{background:var(--ink);}
