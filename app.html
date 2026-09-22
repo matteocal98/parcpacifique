@@ -1696,8 +1696,14 @@
   /* L'OFFRE « nous établissons votre plan » : visible là où l'on cherche un
      carnet, mais sobre — un cadre, deux phrases, un bouton qui ouvre un e-mail. */
   .offre-plan{
-    margin-top:14px;padding:14px 16px;border:1px solid var(--primary-tint-2);border-radius:var(--r-chip);
-    background:var(--primary-tint);border-left:3px solid var(--primary-dark);
+    /* Fond en couleur PLEINE (pas une rgba) : ce bloc est parfois posé sur un
+       fond déjà teinté (carnet, en ambre) — une couleur transparente s'y
+       mélangerait et virerait au mauve au lieu de rester bleu clair. Le
+       cadre n'est pas fixé ici : .offre-plan fait partie de la liste des
+       cadres uniformes du harnais (règle :is(...) plus bas dans la feuille),
+       volontairement la même encre 2px que toutes les autres cartes. */
+    margin-top:14px;padding:14px 16px;border-radius:var(--r-chip);
+    background:#E6E5FA;
   }
   .offre-plan .offre-titre{font-weight:700;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:7px;}
   .offre-plan .offre-titre .card-ico{color:var(--primary-dark);}
