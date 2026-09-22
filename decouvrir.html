@@ -53,326 +53,285 @@
 }
 </script>
 <style>
-  /* POLICES AUTO-HÉBERGÉES — Inter (sous-ensemble latin), servies depuis NOTRE
-     domaine dans `polices/`. Ni CDN, ni base64 : un `<link>` vers Google ferait
-     transmettre l'adresse IP du visiteur, et la base64 alourdissait chaque page de
-     64 ko sans être mise en cache d'une page à l'autre. Ces fichiers le sont. */
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:600;src:url(./polices/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-
-  /* POLICES EMBARQUÉES — Inter (sous-ensemble latin), trois graisses : 400, 600,
-     700. C'est le SEUL jeu que la page écrit. Aucune ressource externe n'est
-     appelée : ni feuille distante, ni fichier de police. Un `<link>` vers
-     fonts.googleapis.com ferait transmettre l'adresse IP du visiteur à Google,
-     et la page dépendrait du réseau pour s'afficher correctement. */
   /* ==========================================================================
-     KEEVA — jetons de la charte. AUCUNE autre couleur n'est employée : les
-     surfaces et les bordures sont ces mêmes teintes en transparence, jamais des
-     gris inventés ni un dégradé. La page suit le mode clair et le mode sombre.
+     KEEVA — refonte alignée sur la maquette Stitch « WEB accueil keeva ».
+     Polices AUTO-HÉBERGÉES (Inter, servie depuis NOTRE domaine dans `polices/`)
+     et icônes en SVG inline : ni CDN Tailwind, ni Google Fonts, ni police
+     d'icônes distante. La page revendique plus loin « aucun traceur
+     publicitaire » — ça ne vaudrait rien si le simple chargement de la page
+     tirait déjà des requêtes vers fonts.googleapis.com et cdn.tailwindcss.com.
 
-     LES RÔLES SONT ÉCRITS DANS LE NOM, ET C'EST VOLONTAIRE. La charte range les
-     douze teintes en deux familles : celles qui PORTENT DU TEXTE (encre, blanc,
-     bleu roi, Signature EN) et celles qui sont DÉCORATIVES (Signature FR,
-     turquoise, ambre, indigo, olive, cyan, ardoise). Un jeton nommé « indigo »
-     finit toujours par se retrouver derrière un libellé ; un jeton nommé
-     « décoratif » ne le peut pas. Le bleu roi garde son nom de charte, et il est
-     mesuré comme les autres.
-
-     ⚠️ LE TEXTE D'ACCENT EST LA **SIGNATURE EN** (#5B52DF), PAS LA SIGNATURE FR.
-     C'est contre-intuitif, et c'est le calcul qui tranche : la Signature FR
-     #24B5A8 donne **2,55:1** sur blanc, donc un texte d'accent illisible en plein
-     soleil. La Signature EN #5B52DF donne **5,65:1** — c'est elle que la charte
-     elle-même mesure dans « blanc sur signature FR, texte secondaire (bloc
-     d'action) ». Les deux noms restent ceux de la charte : c'est le RÔLE qui
-     change, et il est écrit ici pour qu'on ne les ré-échange pas.
+     JETONS DE COULEUR : repris tels quels de la charte (mêmes valeurs que la
+     maquette). AUCUNE autre couleur n'est employée.
+     ⚠️ LE TEXTE D'ACCENT EST LA SIGNATURE EN (#5B52DF), PAS LA SIGNATURE FR :
+     la Signature FR #24B5A8 ne donne que 2,55:1 sur blanc (illisible en plein
+     soleil pour du texte), quand la Signature EN donne 5,65:1. La Signature FR
+     reste utilisée, mais uniquement en décoratif (icônes, puces, dégradés).
      ========================================================================== */
+  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:600;src:url(./polices/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:800;src:url(./polices/inter-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+
   :root{
-    /* Teintes de la charte, nommées comme dans DESIGN.md */
     --nuit:#0D1424;
     --blanc:#FFFFFF;
     --encre:#0E1333;
-    --signature-fr:#24B5A8;   /* décoratif — 2,55:1 sur blanc, jamais du texte */
-    --ambre:#DE7A16;          /* décoratif */
-    --indigo:#6366F1;         /* décoratif */
-    --roi:#236FE0;            /* liens — 4,75:1 sur blanc */
-    --turquoise:#14B8A6;      /* décoratif */
-    --olive:#8B9B37;          /* décoratif */
-    --signature-en:#5B52DF;   /* TEXTE D'ACCENT — 5,65:1 sur blanc */
-    --cyan:#009BDE;           /* décoratif (aplat de pastille) */
-    --ardoise:#94A3B8;        /* atténué sur nuit — 7,17:1 */
+    --signature-fr:#24B5A8;
+    --ambre:#DE7A16;
+    --indigo:#6366F1;
+    --bleu-roi:#236FE0;
+    --turquoise:#14B8A6;
+    --olive:#8B9B37;
+    --signature-en:#5B52DF;
+    --cyan:#009BDE;
+    --ardoise:#94A3B8;
+    --erreur:#BA1A1A;
 
-    /* Rôles : ce qui écrit, ce qui décore, ce qui sépare. */
     --texte:var(--encre);
-    --texte-doux:rgba(14,19,51,.74);
+    --texte-doux:#46464E;
     --accent:var(--signature-en);
-    --lien:var(--roi);
-    --decoratif-1:var(--signature-fr);
-    --decoratif-2:var(--ambre);
-    --decoratif-3:var(--indigo);
-    --trait:rgba(14,19,51,.12);
-    --trait-fort:rgba(14,19,51,.24);
-    --surface-douce:rgba(14,19,51,.03);
-    --ombre:0 1px 2px rgba(14,19,51,.06), 0 12px 32px rgba(14,19,51,.08);
-    --r-sm:10px; --r-md:14px; --r-lg:20px;
+    --lien:var(--bleu-roi);
+
     --fond:var(--blanc);
+    --surface-1:#FAF8FF;
+    --surface-2:#F2F3FF;
+    --surface-3:#E9EDFF;
+    --ligne:rgba(14,19,51,.10);
+    --ligne-forte:rgba(14,19,51,.22);
+
+    --ombre-sm:0 1px 2px rgba(14,19,51,.05);
+    --ombre-md:0 10px 24px rgba(14,19,51,.08);
+    --ombre-lg:0 20px 40px rgba(14,19,51,.12);
+    --ombre-xl:0 28px 64px rgba(14,19,51,.18);
+
+    --r:12px;
+    --r-lg:16px;
   }
-  /* LE THÈME SOMBRE SUIT LE RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
-     la page d'accueil n'a pas à porter un interrupteur de test. Le petit texte
-     d'accent (surtitres et ligne d'accroche) y passe en BLANC — la Signature EN
-     donne 5,65:1 sur blanc mais 3,25:1 sur la nuit, sous la barre de 4,5:1 pour
-     de petites capitales. La teinte de marque reste portée par les pastilles, les
-     tracés et le bandeau final. */
   @media (prefers-color-scheme: dark){
     :root{
       --fond:var(--nuit);
       --texte:var(--blanc);
-      --texte-doux:rgba(255,255,255,.74);
-      --trait:rgba(255,255,255,.14);
-      --trait-fort:rgba(255,255,255,.26);
-      --surface-douce:rgba(255,255,255,.05);
-      --ombre:0 0 0 1px rgba(255,255,255,.10);
+      --texte-doux:rgba(255,255,255,.72);
+      --surface-1:#0D1424;
+      --surface-2:#131B2E;
+      --surface-3:#1A2338;
+      --ligne:rgba(255,255,255,.12);
+      --ligne-forte:rgba(255,255,255,.26);
+      --ombre-sm:0 0 0 1px rgba(255,255,255,.08);
+      --ombre-md:0 0 0 1px rgba(255,255,255,.10);
+      --ombre-lg:0 0 0 1px rgba(255,255,255,.12);
+      --ombre-xl:0 0 0 1px rgba(255,255,255,.14);
     }
-    /* LE PETIT TEXTE D'ACCENT EN THÈME SOMBRE. La Signature EN donne 5,65:1 sur
-       blanc (elle est donc l'accent du thème clair) mais 3,25:1 sur la nuit : sous
-       la barre de 4,5:1 pour de PETITES CAPITALES. Les surtitres et la ligne
-       d'accroche s'écrivent donc en blanc sur la nuit, et la teinte de marque
-       reste portée par les pastilles, les tracés et le bandeau final. */
+    /* Le petit texte d'accent (surtitres, tagline) donne 5,65:1 sur blanc mais
+       seulement 3,25:1 sur la nuit — sous la barre de 4,5:1 pour de petites
+       capitales. Il passe donc en blanc en thème sombre. */
     .tagline,.sur-titre{color:var(--blanc);}
   }
-  /* Le thème sombre suit le RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
-     la page d'accueil n'a pas à porter un interrupteur de test. */
 
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{margin:0;background:var(--fond);color:var(--texte);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
-  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;font-weight:800;}
   a{color:inherit;}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 16px;}
-  @media(min-width:640px){.wrap{padding:0 24px;}}
-  @media(min-width:1024px){.wrap{padding:0 32px;}}
-  section{padding:80px 0;}
-  @media(min-width:1024px){section{padding:96px 0;}}
-  /* ATTENTION : .wrap ne porte que les marges latérales, mais une classe l'emporte
-     sur le sélecteur de type. Posé sur une <section>, il annulait donc aussi
-     l'espacement vertical — les sections se touchaient. On le rétablit ici, et les
-     déclarations en ligne « padding-top:0 » continuent de gagner quand une section
-     doit coller à la précédente. */
-  section.wrap{padding-top:80px;padding-bottom:80px;}
-  @media(min-width:640px){section.wrap{padding-left:24px;padding-right:24px;}}
-  @media(min-width:1024px){section.wrap{padding-top:96px;padding-bottom:96px;padding-left:32px;padding-right:32px;}}
-  @media(max-width:600px){section.wrap{padding-top:56px;padding-bottom:56px;}}
-  /* Le contour de focus est décoratif (il ne porte pas de texte) : l'indigo est
-     ici à sa place, et il se voit aussi bien sur blanc que sur nuit. */
-  :focus-visible{outline:3px solid var(--decoratif-3);outline-offset:2px;border-radius:8px;}
+  ul{margin:0;padding:0;}
+  :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:8px;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 20px;}
+  @media(min-width:640px){.wrap{padding:0 32px;}}
+  section{padding:64px 0;}
+  @media(min-width:768px){section{padding:88px 0;}}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
 
-  /* --- Marque : le pictogramme de la charte, mot en encre ------------------- */
-  .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
+  /* --- Icônes : traits ronds 2px, cohérentes, jamais une police distante --- */
+  .ic{flex:0 0 auto;display:block;}
+
+  /* --- Boutons --------------------------------------------------------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 24px;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;text-decoration:none;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
+  .btn-primaire{background:var(--encre);color:var(--blanc);box-shadow:var(--ombre-lg);}
+  .btn-primaire:hover{background:var(--indigo);transform:translateY(-1px);}
+  .btn-secondaire{background:var(--surface-2);color:var(--encre);}
+  .btn-secondaire:hover{background:var(--surface-3);}
+  .btn-clair{background:var(--blanc);color:var(--encre);font-weight:700;box-shadow:var(--ombre-md);}
+  .btn-clair:hover{background:var(--surface-2);}
+  .btn-contour{background:rgba(255,255,255,.10);color:var(--blanc);border-color:rgba(255,255,255,.28);font-weight:700;}
+  .btn-contour:hover{background:rgba(255,255,255,.18);}
+
+  /* --- En-tête ----------------------------------------------------------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);border-bottom:1.5px solid var(--ligne);}
+  @supports (backdrop-filter:blur(12px)){header{backdrop-filter:blur(12px);}}
+  @media (prefers-color-scheme:dark){header{background:rgba(13,20,36,.92);}}
+  .entete{display:flex;align-items:center;gap:20px;height:72px;}
+  .marque{display:inline-flex;align-items:center;gap:9px;text-decoration:none;}
   .marque svg{display:block;flex:0 0 auto;}
-  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--texte);}
-
-  /* --- Boutons ------------------------------------------------------------- */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;min-height:46px;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
-  .btn svg{flex:0 0 auto;}
-  .btn-primaire{background:var(--texte);color:var(--fond);box-shadow:var(--ombre);}
-  .btn-primaire:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(14,19,51,.22);}
-  .btn-secondaire{background:transparent;color:var(--texte);border-color:var(--trait-fort);}
-  .btn-secondaire:hover{background:var(--surface-douce);}
-  .btn-clair{background:var(--blanc);color:var(--nuit);}
-  .btn-contour{background:transparent;color:var(--blanc);border:2px solid rgba(255,255,255,.35);}
-  .btn-contour:hover{background:rgba(255,255,255,.10);}
-
-  /* --- En-tête sticky ------------------------------------------------------ */
-  header{position:sticky;top:0;z-index:50;background:var(--fond);border-bottom:1px solid var(--trait);}
-  @supports (backdrop-filter: blur(12px)){
-    header{background:rgba(255,255,255,.82);backdrop-filter:blur(12px);}
-  }
-  @media (prefers-color-scheme: dark){
-    @supports (backdrop-filter: blur(12px)){ header{background:rgba(13,20,36,.82);} }
-  }
-  .entete{display:flex;align-items:center;gap:14px;height:64px;}
-  .entete nav{display:none;gap:4px;}
-  @media(min-width:900px){.entete nav{display:flex;margin-left:14px;}}
-  .entete nav a{padding:8px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--texte-doux);text-decoration:none;}
-  .entete nav a:hover{color:var(--texte);background:var(--surface-douce);}
+  .marque .mot{font-weight:800;font-size:19px;letter-spacing:-.01em;color:var(--texte);}
+  .entete nav{display:none;align-items:center;gap:22px;}
+  @media(min-width:960px){.entete nav{display:flex;}}
+  .entete nav a{font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent;}
+  .entete nav a:hover{color:var(--texte);}
   .entete .pousse{flex:1;}
-  .lang{display:none;gap:2px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-sm);padding:3px;}
+  .lang{display:none;align-items:center;gap:2px;background:var(--surface-2);border:1px solid var(--ligne);border-radius:10px;padding:3px;}
   @media(min-width:640px){.lang{display:flex;}}
-  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;}
-  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:0 1px 2px rgba(14,19,51,.10);}
-  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:8px;}
-  @media(min-width:640px){.lien-connexion{display:inline-flex;}}
-  .lien-connexion:hover{color:var(--texte);}
+  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:12.5px;font-weight:700;letter-spacing:.02em;padding:6px 11px;border-radius:8px;cursor:pointer;text-transform:uppercase;}
+  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:var(--ombre-sm);}
+  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte);text-decoration:none;padding:10px 14px;border-radius:var(--r);}
+  @media(min-width:640px){.lien-connexion{display:inline-flex;align-items:center;}}
+  .lien-connexion:hover{background:var(--surface-2);}
 
   /* --- Accroche ------------------------------------------------------------ */
-  section.heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
-  @media(min-width:1024px){section.heros{grid-template-columns:1.618fr 1fr;gap:56px;padding-top:72px;}}
-  .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
-  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--decoratif-1);flex:0 0 auto;}
-  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--decoratif-1);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
-  @keyframes ping{75%,100%{transform:scale(2.4);opacity:0;}}
-  h1{font-size:clamp(30px,5.2vw,58px);font-weight:800;margin:20px 0 0;}
-  .tagline{display:block;font-size:clamp(13px,1.6vw,16px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
-  /* Le texte d'accent est `--accent` (Signature EN, 5,65:1 sur blanc) — jamais
-     l'indigo (4,47:1, décoratif), jamais la Signature FR (2,55:1 sur blanc), et
-     jamais un dégradé de texte : illisible en plein soleil. */
-  .tagline.fr{color:var(--accent);}
-  .tagline.en{color:var(--texte-doux);}
-  .accroche-fort{color:var(--accent);}
-  .sous-titre{font-size:clamp(16px,1.6vw,19px);color:var(--texte-doux);margin:20px 0 30px;max-width:56ch;}
-  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--texte-doux);margin-top:18px;max-width:56em;}
-  .note svg{color:var(--accent);flex:0 0 auto;}
+  .heros{position:relative;overflow:hidden;padding-top:48px;padding-bottom:48px;}
+  @media(min-width:768px){.heros{padding-top:72px;padding-bottom:72px;}}
+  .heros .lueur{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
+  .heros .lueur-1{top:-140px;right:-40px;width:380px;height:380px;background:rgba(36,181,168,.14);}
+  .heros .lueur-2{top:45%;left:-80px;width:340px;height:340px;background:rgba(91,82,223,.14);}
+  .heros-grille{position:relative;display:grid;gap:44px;align-items:center;}
+  @media(min-width:1024px){.heros-grille{grid-template-columns:1.5fr 1fr;gap:56px;}}
+  .pastille{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;background:var(--surface-2);box-shadow:var(--ombre-sm);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);}
+  .point{position:relative;width:9px;height:9px;border-radius:50%;background:var(--turquoise);flex:0 0 auto;}
+  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--turquoise);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
+  @keyframes ping{75%,100%{transform:scale(2.6);opacity:0;}}
+  @media(prefers-reduced-motion:reduce){.point::after{animation:none;}}
+  .tagline{display:block;font-size:14px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:18px 0 8px;}
+  h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.02em;margin:0;}
+  @media(min-width:640px){h1{line-height:1.12;}}
+  .accroche-degrade{background:linear-gradient(90deg,var(--bleu-roi),var(--turquoise),var(--olive));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sous-titre{font-size:clamp(16px,1.6vw,18px);font-weight:600;color:var(--texte-doux);max-width:56ch;margin:18px 0 28px;}
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .note{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ardoise);margin-top:18px;}
+  .note .ic{color:var(--signature-fr);}
 
-  /* --- L'illustration : l'application telle qu'elle est -------------------- */
-  /* Honnête par construction : c'est la mise en page réelle (une carte machine,
-     son compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES
-     — aucun modèle, aucune marque, aucune donnée inventée. Le cadre est annoncé
-     comme un aperçu, et il ne porte ni dégradé, ni pastille décorative écrite. */
+  /* --- Aperçu produit (maquette honnête, exemples génériques) ------------- */
   .visuel{position:relative;}
-  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;}
-  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--trait);}
-  .maquette .tete .titre{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--texte-doux);}
-  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);}
-  .ligne-machine{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 13px;border:1px solid var(--trait);border-radius:var(--r-md);margin-bottom:8px;}
-  .ligne-machine:last-of-type{margin-bottom:0;}
-  .ligne-machine .nom{font-weight:600;font-size:13.5px;}
+  .maquette{position:relative;background:var(--fond);border-radius:var(--r-lg);box-shadow:var(--ombre-xl);padding:20px;}
+  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:14px;margin-bottom:14px;}
+  .maquette .points{display:flex;align-items:center;gap:6px;}
+  .maquette .points span{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .maquette .points span:nth-child(1){background:var(--ambre);}
+  .maquette .points span:nth-child(2){background:var(--signature-fr);}
+  .maquette .points span:nth-child(3){background:var(--indigo);}
+  .maquette .tete .titre{font-size:11px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--ardoise);}
+  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);font-weight:600;}
+  .ligne-machine{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:6px;}
+  .ligne-machine:hover{background:var(--surface-1);}
+  .ligne-machine .nom{font-weight:700;font-size:14px;}
   .ligne-machine .meta{font-size:12px;color:var(--texte-doux);}
-  /* Une pastille de couleur EST le signal. Le texte y est en encre, et les deux
-     aplats choisis sont les DEUX teintes décoratives qui passent 4,5:1 avec lui :
-     l'ambre (5,95:1) et le cyan (5,82:1). La Signature FR, elle, plafonne à
-     3,79:1 avec l'encre : elle ne porte donc pas de texte ici — « à jour » est
-     une pastille en contour, ce qui la distingue sans rien inventer. */
-  .etat{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;flex:0 0 auto;color:var(--encre);}
-  .etat.retard{background:var(--ambre);}
-  .etat.bientot{background:var(--cyan);}
-  .etat.ajour{border:1px solid var(--trait-fort);}
-  .maquette .legende{font-size:12px;color:var(--texte-doux);margin:12px 0 0;}
-  .maquette .bloc-pieces{border:1px solid var(--trait);border-radius:var(--r-md);padding:11px 13px;margin-top:12px;}
-  .maquette .bloc-pieces .titre{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);}
-  .maquette .bloc-pieces ul{margin:8px 0 0;padding-left:16px;font-size:13px;color:var(--texte-doux);}
+  .etat{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;flex:0 0 auto;text-transform:uppercase;letter-spacing:.02em;}
+  .etat.retard{background:rgba(222,122,22,.16);color:var(--ambre);}
+  .etat.bientot{background:rgba(91,82,223,.14);color:var(--signature-en);}
+  .etat.ajour{background:rgba(36,181,168,.14);color:var(--signature-fr);}
+  .bloc-pieces{border-radius:10px;background:var(--surface-2);padding:12px 14px;margin-top:10px;}
+  .bloc-pieces .titre{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte);}
+  .bloc-pieces .titre .ic{color:var(--signature-fr);}
+  .bloc-pieces p{margin:6px 0 0;font-size:12.5px;color:var(--texte-doux);font-weight:600;}
+  .legende{font-size:11px;color:var(--ardoise);text-align:center;margin:14px 0 0;}
 
   /* --- Têtes de section ---------------------------------------------------- */
   .section-tete{max-width:60ch;margin-bottom:40px;}
-  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
-  h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;margin-top:10px;}
-  .section-tete p{color:var(--texte-doux);font-size:17px;margin:14px 0 0;}
+  .sur-titre{display:block;font-size:12.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  h2{font-size:clamp(24px,3.4vw,34px);}
+  .section-tete p{color:var(--texte-doux);font-size:16.5px;font-weight:600;margin:12px 0 0;}
 
-  /* --- Cartes -------------------------------------------------------------- */
-  .cartes{display:grid;gap:26px;}
+  /* --- Cartes (constat, fonctionnalités) ------------------------------------ */
+  .cartes{display:grid;gap:24px;}
   @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
-  .carte{background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;transition:border-color .3s,box-shadow .3s,transform .3s;}
-  .carte:hover{border-color:var(--trait-fort);box-shadow:0 18px 40px rgba(14,19,51,.10);transform:translateY(-2px);}
-  /* Plus de dégradé dans la pastille d'icône : la teinte décorative reste, le
-     trait dessus est en encre — donc lisible. */
-  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--decoratif-1);color:var(--encre);}
-  .carte h3{font-size:20px;font-weight:700;margin-bottom:10px;}
-  .carte p{margin:0;color:var(--texte-doux);}
+  .carte{background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);transition:box-shadow .25s ease,transform .25s ease;}
+  .carte:hover{box-shadow:var(--ombre-lg);transform:translateY(-2px);}
+  .badge-icone{width:48px;height:48px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+  .badge-icone.ambre{background:rgba(222,122,22,.14);color:var(--ambre);}
+  .badge-icone.erreur{background:rgba(186,26,26,.12);color:var(--erreur);}
+  .badge-icone.nuit{background:var(--encre);color:var(--blanc);}
+  .badge-icone.degrade{background:linear-gradient(135deg,var(--bleu-roi),var(--turquoise),var(--olive));color:var(--blanc);box-shadow:var(--ombre-md);}
+  .carte h3{font-size:19px;margin-bottom:8px;}
+  .carte p{margin:0;color:var(--texte-doux);font-size:15px;}
+  .rassurance{margin-top:24px;padding:18px 20px;border-radius:var(--r-lg);background:var(--surface-2);display:flex;align-items:center;gap:16px;}
+  .rassurance .rond{width:40px;height:40px;border-radius:50%;background:rgba(36,181,168,.18);color:var(--signature-fr);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .rassurance p{margin:0;font-weight:700;font-size:15px;}
 
-  /* --- Comment ça marche : trois étapes ------------------------------------ */
-  .etapes{list-style:none;margin:0;padding:0;display:grid;gap:26px;}
+  /* --- Comment ça marche : étapes numérotées ------------------------------- */
+  .etapes{list-style:none;display:grid;gap:24px;}
   @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
-  .etape{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:30px;}
-  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--decoratif-1);color:var(--encre);font-weight:800;font-size:16px;margin-bottom:18px;}
-  .etape h3{font-size:18px;font-weight:700;margin-bottom:8px;}
-  .etape p{margin:0;color:var(--texte-doux);font-size:15.5px;}
+  .etape{background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);}
+  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--bleu-roi),var(--turquoise));color:var(--blanc);font-weight:800;font-size:16px;margin-bottom:16px;}
+  .etape h3{font-size:17px;margin-bottom:7px;}
+  .etape p{margin:0;color:var(--texte-doux);font-size:15px;}
 
-  /* --- Vos données : quatre engagements ------------------------------------ */
-  .confiance{display:grid;gap:24px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:36px 32px;}
-  @media(min-width:768px){.confiance{grid-template-columns:repeat(2,1fr);}}
+  /* --- Vos données ----------------------------------------------------------- */
+  .confiance-bloc{background:var(--surface-2);border-radius:var(--r-lg);padding:32px 28px;}
+  @media(min-width:768px){.confiance-bloc{padding:40px 36px;}}
+  .confiance{display:grid;gap:26px;}
+  @media(min-width:640px){.confiance{grid-template-columns:repeat(2,1fr);}}
   @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
-  .confiance h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0 0 7px;}
-  .confiance h3 svg{color:var(--encre);flex:0 0 auto;}
-  .confiance p{margin:0;font-size:14.5px;color:var(--texte-doux);}
-  .confiance .suite{margin-top:22px;font-size:14.5px;}
-  .suite a{color:var(--lien);font-weight:600;}
-  /* LA LARGEUR DE LECTURE EST UNE RÈGLE, PAS UNE IMPRESSION : au-delà de 90
-     caractères par ligne, l'œil perd le début de la ligne suivante. Ces deux
-     blocs sont hors de `.section-tete` (qui porte déjà ses 60ch) : sans cette
-     borne, ils couraient sur 124 caractères à 1440 px. La cible est 75 ; on
-     borne donc à ~82 caractères, ce qui laisse la phrase respirer sans perdre
-     le lecteur. Contrôlé par le harnais de rendu (mesure « largeur de lecture »). */
-  .suite{max-width:34em;}
-  .notetarif{max-width:52ch;}
+  .confiance h4{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 7px;}
+  .confiance h4 .ic{color:var(--signature-fr);}
+  .confiance p{margin:0;font-size:14px;color:var(--texte-doux);}
+  .confiance-suite{margin-top:24px;padding-top:18px;border-top:1px solid var(--ligne-forte);font-size:13.5px;color:var(--texte-doux);}
+  .confiance-suite a{color:var(--accent);font-weight:700;text-decoration:none;}
+  .confiance-suite a:hover{text-decoration:underline;}
 
-  /* --- Tarifs : quatre offres, largeurs égales ---------------------------- */
-  /* Deux lignes de deux sur écran large ; en dessous, l'empilement (une
-     colonne) parce que quatre colonnes ne tiennent sur aucun téléphone. */
-  .tarifs{display:grid;gap:26px;align-items:stretch;}
-  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(2,1fr);}}
-  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
-  /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
-     une couleur inventée : l'encre pour les deux. Le badge, lui, est écrit en
-     blanc : il porte donc une teinte qui PORTE du blanc (la Signature EN,
-     5,65:1) — l'indigo (4,47:1) est décoratif, il n'écrit pas.
-     Le bouton de la carte mise en avant est le bouton PRINCIPAL : c'est la
-     règle de la charte (« une action de validation dans une carte est un bouton
-     principal, plein, encre »). */
-  /* PAS D'« overflow:hidden » ICI : le badge « RECOMMANDÉ » est posé en
-     position:absolute depuis le bord du REMBOURRAGE (2 px à l'intérieur du bord
-     de 2 px), et le pixel d'arrondi de chaque côté le faisait dépasser d'environ
-     2 px — le moteur le coupait, et le contrôle « textes coupés » le voyait. Le
-     badge est maintenant borné (max-width:100%) et insécable (nowrap) : il ne peut
-     plus dépasser, donc plus rien n'a besoin d'être écrêté. */
-  .offre.business{border:2px solid var(--encre);}
-  @media (prefers-color-scheme: dark){.offre.business{border-color:var(--blanc);}}
-  .recommande{position:absolute;top:0;right:0;background:var(--accent);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);white-space:nowrap;max-width:100%;}
-  .offre h3{font-size:20px;font-weight:700;}
-  /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
-  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 0;}
-  .prix .montant{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;}
-  .prix .periode{color:var(--texte-doux);font-size:15px;}
-  .offre .limite{margin:8px 0 0;font-size:17px;font-weight:700;}
-  .offre .pour{color:var(--texte-doux);margin:16px 0 0;}
-  .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
-  .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
-  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--accent);}
-  /* Le bouton est poussé en BAS de la carte : les boutons s'alignent, quelle
-     que soit la longueur des listes. */
+  /* --- Tarifs -------------------------------------------------------------- */
+  .tarifs{display:grid;gap:22px;align-items:stretch;}
+  @media(min-width:720px){.tarifs{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1180px){.tarifs{grid-template-columns:repeat(4,1fr);}}
+  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);}
+  .offre.recommandee{box-shadow:0 0 0 2px var(--encre),var(--ombre-xl);}
+  @media(prefers-color-scheme:dark){.offre.recommandee{box-shadow:0 0 0 2px var(--blanc),var(--ombre-xl);}}
+  .badge-recommande{position:absolute;top:0;right:20px;transform:translateY(-50%);background:var(--accent);color:var(--blanc);font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px 12px;border-radius:999px;white-space:nowrap;box-shadow:var(--ombre-sm);}
+  .offre h3{font-size:19px;}
+  .prix{display:flex;align-items:baseline;gap:6px;margin:14px 0 6px;}
+  .prix .montant{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1;}
+  .prix .periode{color:var(--ardoise);font-size:14px;font-weight:600;}
+  .offre .limite{margin:0;font-size:15.5px;font-weight:700;}
+  .offre .pour{color:var(--texte-doux);margin:10px 0 20px;font-size:13.5px;}
+  .avantages{list-style:none;display:grid;gap:11px;margin:0 0 24px;flex:1;}
+  .avantages li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--texte-doux);}
+  .avantages .ic{color:var(--signature-fr);margin-top:2px;}
+  .offre.recommandee .avantages{color:var(--texte);}
+  .offre.recommandee .avantages li{color:var(--texte);font-weight:600;}
   .offre .btn{width:100%;margin-top:auto;}
-  .offre.business .avantages svg{color:var(--texte);}
-  .notes{display:grid;gap:18px;margin-top:28px;}
-  @media(min-width:768px){.notes{grid-template-columns:repeat(2,1fr);}}
-  .notetarif{display:flex;gap:10px;margin:0;font-size:15px;color:var(--texte-doux);}
-  .notetarif svg{color:var(--encre);flex:0 0 auto;margin-top:3px;}
+  .notes-tarifs{display:grid;gap:16px;margin-top:28px;}
+  @media(min-width:768px){.notes-tarifs{grid-template-columns:repeat(2,1fr);}}
+  .note-tarif{display:flex;gap:10px;margin:0;font-size:13.5px;color:var(--texte-doux);}
+  .note-tarif .ic{color:var(--signature-fr);margin-top:2px;flex:0 0 auto;}
 
-  /* --- FAQ : deux colonnes sur écran large -------------------------------- */
-  .faq{display:grid;gap:12px;}
-  @media(min-width:900px){.faq{grid-template-columns:repeat(2,1fr);gap:16px 26px;align-items:start;}}
-  details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
-  details[open]{border-color:var(--trait-fort);box-shadow:0 0 0 3px rgba(14,19,51,.06);}
-  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;font-weight:600;font-size:15.5px;}
-  summary::-webkit-details-marker{display:none;}
-  summary svg{flex:0 0 auto;color:var(--texte-doux);transition:transform .2s ease;}
-  details[open] summary svg{transform:rotate(180deg);}
-  details .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:15px;}
+  /* --- FAQ ------------------------------------------------------------------ */
+  .faq-grille{display:grid;gap:12px;}
+  @media(min-width:900px){.faq-grille{grid-template-columns:repeat(2,1fr);gap:14px 24px;align-items:start;}}
+  details.faq{background:var(--fond);border-radius:var(--r);box-shadow:var(--ombre-sm);overflow:hidden;}
+  details.faq[open]{box-shadow:var(--ombre-md);}
+  details.faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;font-weight:700;font-size:15px;}
+  details.faq summary::-webkit-details-marker{display:none;}
+  details.faq summary .ic{color:var(--ardoise);transition:transform .2s ease;flex:0 0 auto;}
+  details.faq[open] summary .ic{transform:rotate(180deg);}
+  details.faq .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:14.5px;}
+  details.faq .reponse a{color:var(--accent);font-weight:700;}
 
-  /* --- Bandeau final + pied de page --------------------------------------- */
-  .final{background:var(--nuit);color:var(--blanc);border-radius:var(--r-lg);padding:64px 28px;text-align:center;}
-  .final h2{color:var(--blanc);}
-  .final p{color:rgba(255,255,255,.74);margin:16px auto 30px;max-width:56ch;}
-  .final .actions{justify-content:center;}
-  footer{background:var(--nuit);color:var(--ardoise);padding:56px 0 28px;margin-top:80px;}
-  .pied{display:grid;gap:32px;}
-  @media(min-width:768px){.pied{grid-template-columns:2fr 1fr 1fr 1fr;}}
+  /* --- Bandeau final --------------------------------------------------------- */
+  .bandeau-final{position:relative;overflow:hidden;background:var(--nuit);color:var(--blanc);border-radius:24px;padding:56px 28px;text-align:center;}
+  @media(min-width:768px){.bandeau-final{padding:72px 48px;}}
+  .bandeau-final .lueur{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+  .bandeau-final .lueur-1{right:-70px;bottom:-70px;width:300px;height:300px;background:rgba(35,111,224,.18);}
+  .bandeau-final .lueur-2{left:-70px;top:-70px;width:300px;height:300px;background:rgba(36,181,168,.16);}
+  .bandeau-final .pastille{position:relative;background:rgba(36,181,168,.18);color:var(--signature-fr);box-shadow:none;margin-bottom:14px;}
+  .bandeau-final h2{position:relative;color:var(--blanc);font-size:clamp(24px,4vw,36px);max-width:38ch;margin:0 auto;}
+  .bandeau-final p{position:relative;color:rgba(255,255,255,.76);font-weight:600;max-width:52ch;margin:16px auto 28px;}
+  .bandeau-final .actions{position:relative;justify-content:center;}
+
+  /* --- Pied de page ------------------------------------------------------------ */
+  footer{background:var(--nuit);color:var(--ardoise);padding:64px 0 28px;}
+  .pied{display:grid;gap:36px;}
+  @media(min-width:860px){.pied{grid-template-columns:1.6fr 1fr 1fr 1fr;}}
   footer .marque .mot{color:var(--blanc);}
-  footer p{color:var(--ardoise);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
-  footer h3{color:var(--blanc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;}
-  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
-  footer a{color:var(--ardoise);text-decoration:none;font-size:14.5px;}
-  footer a:hover{color:var(--blanc);}
-  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--ardoise);}
+  footer .description{color:var(--ardoise);font-size:14px;margin:16px 0 0;max-width:36ch;}
+  footer .editeur{color:var(--ardoise);font-size:13px;margin:10px 0 0;max-width:36ch;}
+  footer h3{color:var(--blanc);font-size:12.5px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;margin:0 0 16px;}
+  footer .liste{list-style:none;display:grid;gap:11px;}
+  footer .liste a{color:var(--ardoise);text-decoration:none;font-size:14px;}
+  footer .liste a:hover{color:var(--blanc);}
+  .pied-bas{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);font-size:12.5px;color:var(--ardoise);}
+  footer .lang{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);}
   footer .lang button{color:var(--ardoise);}
-  footer .lang button.actif{background:rgba(255,255,255,.12);color:var(--blanc);box-shadow:none;}
+  footer .lang button.actif{background:rgba(255,255,255,.14);color:var(--blanc);}
 
   html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
-  @media(max-width:600px){section{padding:56px 0;}}
-  /* Le défilement doux et le pouls de la pastille sont du confort, pas de
-     l'information : ceux qui demandent moins d'animation ne les reçoivent pas. */
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    .point::after{animation:none;}
-  }
 </style>
 </head>
 <body>
@@ -404,6 +363,7 @@
     </a>
     <nav aria-label="Navigation principale">
       <a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a>
+      <a href="#comment"><span class="fr">Comment ça marche</span><span class="en">How it works</span></a>
       <a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a>
       <a href="#tarifs"><span class="fr">Tarifs</span><span class="en">Pricing</span></a>
       <a href="#faq">FAQ</a>
@@ -421,81 +381,83 @@
 <main>
 
 <!-- ================= ACCROCHE ================= -->
-<section class="heros wrap">
-  <div>
-    <span class="pastille"><span class="point" aria-hidden="true"></span>
-      <span class="fr">Lecture automatique des manuels — disponible</span>
-      <span class="en">Automatic manual reading — live</span>
-    </span>
-    <h1>
+<section class="heros">
+  <div class="lueur lueur-1" aria-hidden="true"></div>
+  <div class="lueur lueur-2" aria-hidden="true"></div>
+  <div class="wrap heros-grille">
+    <div>
+      <span class="pastille"><span class="point" aria-hidden="true"></span>
+        <span class="fr">Lecture automatique des manuels — disponible</span>
+        <span class="en">Automatic manual reading — live</span>
+      </span>
       <span class="tagline fr">La juste mesure de votre parc</span>
       <span class="tagline en">Precise tracking for your fleet</span>
-      <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-fort">lu par notre algorithme</span>.</span>
-      <span class="en">Your fleet's service logbook, <span class="accroche-fort">read by our algorithm</span>.</span>
-    </h1>
-    <p class="sous-titre">
-      <span class="fr">Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
-      <span class="en">Import your manufacturer manuals: KEEVA extracts the intervals and builds the maintenance plan. Track by calendar, hours or kilometres — then send the parts list straight to your suppliers.</span>
-    </p>
-    <div class="actions">
-      <a class="btn btn-primaire" href="./app.html?inscription=1">
-        <span class="fr">Commencer gratuitement</span><span class="en">Start for free</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-      <a class="btn btn-secondaire" href="#comment">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/></svg>
-        <span class="fr">Voir comment ça marche</span><span class="en">See how it works</span>
-      </a>
+      <h1>
+        <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-degrade">lu par notre algorithme</span>.</span>
+        <span class="en">Your fleet's service logbook, <span class="accroche-degrade">read by our algorithm</span>.</span>
+      </h1>
+      <p class="sous-titre">
+        <span class="fr">Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
+        <span class="en">Import your manufacturer manuals: KEEVA extracts the intervals and builds the maintenance plan. Track by calendar, hours or kilometres — then send the parts list straight to your suppliers.</span>
+      </p>
+      <div class="actions">
+        <a class="btn btn-primaire" href="./app.html?inscription=1">
+          <span class="fr">Commencer gratuitement</span><span class="en">Start for free</span>
+          <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-secondaire" href="#comment">
+          <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/></svg>
+          <span class="fr">Voir comment ça marche</span><span class="en">See how it works</span>
+        </a>
+      </div>
+      <p class="note">
+        <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        <span class="fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
+        <span class="en">Free for 2 machines · Starter €12/month · Business €39/month · no credit card</span>
+      </p>
     </div>
-    <p class="note">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-      <span class="fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
-      <span class="en">Free for 2 machines · Starter €12/month · Business €39/month · no credit card</span>
-    </p>
-  </div>
 
-  <!-- L'APERÇU : la mise en page réelle de l'application (une carte machine, son
-       compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES.
-       Aucun modèle de machine, aucune donnée de client, aucune télémétrie : la
-       télémétrie n'existe pas dans le produit. -->
-  <div class="visuel">
-    <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KEEVA">
-      <div class="tete">
-        <span class="titre fr">Aperçu de l'interface</span>
-        <span class="titre en">Interface preview</span>
-        <span class="plan fr">Plan d'entretien · 250 h</span>
-        <span class="plan en">Maintenance plan · 250 h</span>
+    <!-- L'APERÇU : la mise en page réelle de l'application (une carte machine, son
+         compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES.
+         Aucun modèle de machine, aucune donnée de client, aucune télémétrie : la
+         télémétrie n'existe pas dans le produit. -->
+    <div class="visuel">
+      <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KEEVA">
+        <div class="tete">
+          <div class="points" aria-hidden="true"><span></span><span></span><span></span></div>
+          <span class="titre fr">Aperçu de l'interface</span>
+          <span class="titre en">Interface preview</span>
+          <span class="plan fr">Plan d'entretien · 250 h</span>
+          <span class="plan en">Maintenance plan · 250 h</span>
+        </div>
+        <div class="ligne-machine">
+          <span><span class="nom fr">Mini-pelle</span><span class="nom en">Mini excavator</span><br><span class="meta fr">Vidange, filtre à huile · compteur 243 h</span><span class="meta en">Oil change, oil filter · meter 243 h</span></span>
+          <span class="etat retard fr">en retard +3 j</span><span class="etat retard en">overdue +3 d</span>
+        </div>
+        <div class="ligne-machine">
+          <span><span class="nom fr">Tronçonneuse</span><span class="nom en">Chainsaw</span><br><span class="meta fr">Filtre à air, bougie · compteur 118 h</span><span class="meta en">Air filter, spark plug · meter 118 h</span></span>
+          <span class="etat bientot fr">bientôt dans 12 h</span><span class="etat bientot en">due in 12 h</span>
+        </div>
+        <div class="ligne-machine">
+          <span><span class="nom fr">Tracteur</span><span class="nom en">Tractor</span><br><span class="meta fr">Graissage, filtres hydrauliques</span><span class="meta en">Greasing, hydraulic filters</span></span>
+          <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
+        </div>
+        <div class="bloc-pieces">
+          <span class="titre">
+            <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
+            <span class="fr">À prévoir — Filtres</span><span class="en">To order — Filters</span>
+          </span>
+          <p><span class="fr">2 références · 4 unités · dès le 12/10</span><span class="en">2 items · 4 units · from 12/10</span></p>
+        </div>
+        <p class="legende fr">Aperçu de la mise en page : les exemples sont génériques, aucune donnée de client.</p>
+        <p class="legende en">Layout preview: the examples are generic, no customer data.</p>
       </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Mini-pelle</span><span class="nom en">Mini excavator</span><br><span class="meta fr">Vidange, filtre à huile · compteur 243 h</span><span class="meta en">Oil change, oil filter · meter 243 h</span></span>
-        <span class="etat retard fr">en retard +3 j</span><span class="etat retard en">overdue +3 d</span>
-      </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Tronçonneuse</span><span class="nom en">Chainsaw</span><br><span class="meta fr">Filtre à air, bougie · compteur 118 h</span><span class="meta en">Air filter, spark plug · meter 118 h</span></span>
-        <span class="etat bientot fr">bientôt dans 12 h</span><span class="etat bientot en">due in 12 h</span>
-      </div>
-      <div class="ligne-machine">
-        <span><span class="nom fr">Tracteur</span><span class="nom en">Tractor</span><br><span class="meta fr">Graissage, filtres hydrauliques</span><span class="meta en">Greasing, hydraulic filters</span></span>
-        <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
-      </div>
-      <div class="bloc-pieces">
-        <span class="titre fr">À prévoir — Filtres</span>
-        <span class="titre en">To order — Filters</span>
-        <ul>
-          <li class="fr">2 références · 4 unités · dès le 12/10</li>
-          <li class="en">2 items · 4 units · from 12/10</li>
-        </ul>
-      </div>
-      <p class="legende fr">Aperçu de la mise en page : les exemples sont génériques, aucune donnée de client.</p>
-      <p class="legende en">Layout preview: the examples are generic, no customer data.</p>
     </div>
   </div>
 </section>
 
 <!-- ================= CE QU'UN MAUVAIS SUIVI COÛTE ================= -->
-<!-- Accroche demandée explicitement : les conséquences d'un suivi en retard.
-     Ton sobre et factuel, AUCUN chiffre — nous n'en avons aucun à prouver. -->
-<section id="enjeu" class="wrap" style="padding-top:0;">
+<section class="wrap" style="padding-top:0;">
   <div class="section-tete">
     <span class="sur-titre fr">Ce qu'un mauvais suivi coûte</span>
     <span class="sur-titre en">What poor tracking costs</span>
@@ -507,7 +469,7 @@
   </div>
   <div class="cartes">
     <article class="carte">
-      <span class="icone" aria-hidden="true">
+      <span class="badge-icone ambre" aria-hidden="true">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a5 5 0 006 6L11 19l-6-6z"/><path d="M7 17l-3.5 3.5"/></svg>
       </span>
       <h3><span class="fr">Des réparations plus coûteuses</span><span class="en">More expensive repairs</span></h3>
@@ -517,7 +479,7 @@
       </p>
     </article>
     <article class="carte">
-      <span class="icone" aria-hidden="true">
+      <span class="badge-icone erreur" aria-hidden="true">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9 16H3z"/><path d="M12 9.5v4.5M12 17v.01"/></svg>
       </span>
       <h3><span class="fr">Des pannes évitables</span><span class="en">Avoidable breakdowns</span></h3>
@@ -527,7 +489,7 @@
       </p>
     </article>
     <article class="carte">
-      <span class="icone" aria-hidden="true">
+      <span class="badge-icone nuit" aria-hidden="true">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9M16 21c0-5-8-5-8-9"/></svg>
       </span>
       <h3><span class="fr">Des immobilisations</span><span class="en">Downtime</span></h3>
@@ -537,14 +499,19 @@
       </p>
     </article>
   </div>
-  <p class="suite" style="margin-top:22px;font-size:14.5px;">
-    <span class="fr">À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années.</span>
-    <span class="en">Conversely, a regularly tracked fleet lasts longer: what is already invested keeps working for more years.</span>
-  </p>
+  <div class="rassurance">
+    <span class="rond" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    </span>
+    <p>
+      <span class="fr">À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années.</span>
+      <span class="en">Conversely, a regularly tracked fleet lasts longer: what is already invested keeps working for more years.</span>
+    </p>
+  </div>
 </section>
 
 <!-- ================= FONCTIONNALITÉS ================= -->
-<section id="fonctionnalites" class="wrap" style="padding-top:0;">
+<section class="wrap" style="padding-top:0;" id="fonctionnalites">
   <div class="section-tete">
     <span class="sur-titre fr">Fonctionnalités</span>
     <span class="sur-titre en">Features</span>
@@ -559,8 +526,8 @@
   </div>
   <div class="cartes">
     <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v12a3 3 0 013-3h7z"/></svg>
+      <span class="badge-icone degrade" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v12a3 3 0 013-3h7z"/></svg>
       </span>
       <h3><span class="fr">Manuels intelligents</span><span class="en">Smart manuals</span></h3>
       <p>
@@ -569,8 +536,8 @@
       </p>
     </article>
     <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      <span class="badge-icone degrade" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
       </span>
       <h3><span class="fr">Suivi flexible</span><span class="en">Flexible tracking</span></h3>
       <p>
@@ -579,8 +546,8 @@
       </p>
     </article>
     <article class="carte">
-      <span class="icone" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
+      <span class="badge-icone degrade" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
       </span>
       <h3><span class="fr">Commandes simplifiées</span><span class="en">Simplified ordering</span></h3>
       <p>
@@ -592,7 +559,7 @@
 </section>
 
 <!-- ================= COMMENT ÇA MARCHE ================= -->
-<section id="comment" class="wrap" style="padding-top:0;">
+<section class="wrap" style="padding-top:0;" id="comment">
   <div class="section-tete">
     <span class="sur-titre fr">Comment ça marche</span>
     <span class="sur-titre en">How it works</span>
@@ -631,50 +598,52 @@
 </section>
 
 <!-- ================= VOS DONNÉES ================= -->
-<section id="confidentialite" class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Vos données</span>
-    <span class="sur-titre en">Your data</span>
-    <h2><span class="fr">Quatre engagements, vérifiables dans le produit</span><span class="en">Four commitments, verifiable in the product</span></h2>
+<section class="wrap" style="padding-top:0;" id="confidentialite">
+  <div class="confiance-bloc">
+    <div class="section-tete" style="margin-bottom:28px;">
+      <span class="sur-titre fr">Vos données</span>
+      <span class="sur-titre en">Your data</span>
+      <h2 style="font-size:clamp(22px,3vw,28px);"><span class="fr">Quatre engagements, vérifiables dans le produit</span><span class="en">Four commitments, verifiable in the product</span></h2>
+    </div>
+    <div class="confiance">
+      <div>
+        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6z"/><path d="M9.5 12.2l1.8 1.8 3.4-3.6"/></svg><span class="fr">Parc cloisonné</span><span class="en">Isolated fleet</span></h4>
+        <p>
+          <span class="fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
+          <span class="en">Access rules are enforced server-side: your fleet is readable only by your company's accounts.</span>
+        </p>
+      </div>
+      <div>
+        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg><span class="fr">Analyse sur votre action</span><span class="en">Analysis on your action</span></h4>
+        <p>
+          <span class="fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
+          <span class="en">Reading a manual starts only when you import it, and the document is used only to build your maintenance plan.</span>
+        </p>
+      </div>
+      <div>
+        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0112 6c5 0 9 4.5 9 6a11 11 0 01-2.6 3.4M6.2 7.6C4 9 3 11 3 12a12 12 0 003.4 3.5"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg><span class="fr">Aucun traceur publicitaire</span><span class="en">No advertising tracker</span></h4>
+        <p>
+          <span class="fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
+          <span class="en">No ad network, no resale. Language and session are the only things the browser keeps.</span>
+        </p>
+      </div>
+      <div>
+        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20h16"/></svg><span class="fr">Emporter et effacer</span><span class="en">Export and erase</span></h4>
+        <p>
+          <span class="fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
+          <span class="en">History exports to CSV, and deleting the account takes the related documents with it.</span>
+        </p>
+      </div>
+    </div>
+    <p class="confiance-suite">
+      <span class="fr">Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
+      <span class="en">Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</span>
+    </p>
   </div>
-  <div class="confiance">
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6z"/><path d="M9.5 12.2l1.8 1.8 3.4-3.6"/></svg><span class="fr">Parc cloisonné</span><span class="en">Isolated fleet</span></h3>
-      <p>
-        <span class="fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
-        <span class="en">Access rules are enforced server-side: your fleet is readable only by your company's accounts.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg><span class="fr">Analyse sur votre action</span><span class="en">Analysis on your action</span></h3>
-      <p>
-        <span class="fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
-        <span class="en">Reading a manual starts only when you import it, and the document is used only to build your maintenance plan.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0112 6c5 0 9 4.5 9 6a11 11 0 01-2.6 3.4M6.2 7.6C4 9 3 11 3 12a12 12 0 003.4 3.5"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg><span class="fr">Aucun traceur publicitaire</span><span class="en">No advertising tracker</span></h3>
-      <p>
-        <span class="fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
-        <span class="en">No ad network, no resale. Language and session are the only things the browser keeps.</span>
-      </p>
-    </div>
-    <div>
-      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20h16"/></svg><span class="fr">Emporter et effacer</span><span class="en">Export and erase</span></h3>
-      <p>
-        <span class="fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
-        <span class="en">History exports to CSV, and deleting the account takes the related documents with it.</span>
-      </p>
-    </div>
-  </div>
-  <p class="suite" style="margin-top:22px;font-size:14.5px;">
-    <span class="fr">Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
-    <span class="en">Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</span>
-  </p>
 </section>
 
 <!-- ================= TARIFS + FAQ ================= -->
-<section id="tarifs" class="wrap" style="padding-top:0;">
+<section class="wrap" style="padding-top:0;" id="tarifs">
   <div class="section-tete">
     <span class="sur-titre fr">Tarifs</span>
     <span class="sur-titre en">Pricing</span>
@@ -692,8 +661,8 @@
       <p class="pour fr">Pour un particulier, ou pour essayer KEEVA.</p>
       <p class="pour en">For an individual, or to try KEEVA.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
       </ul>
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
     </article>
@@ -705,23 +674,23 @@
       <p class="pour fr">Pour un petit parc qu'il faut suivre de près.</p>
       <p class="pour en">For a small fleet that needs close tracking.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">20 analyses de carnet, 10 recherches de photo, 200 lectures de compteur par mois</span><span class="en">20 logbook analyses, 10 photo searches, 200 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit, plus l'export CSV</span><span class="en">Everything included in Free, plus CSV export</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">20 analyses de carnet, 10 recherches de photo, 200 lectures de compteur par mois</span><span class="en">20 logbook analyses, 10 photo searches, 200 meter readings per month</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit, plus l'export CSV</span><span class="en">Everything included in Free, plus CSV export</span></li>
       </ul>
       <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Starter</span><span class="en">Move to Starter</span></a>
     </article>
 
-    <article class="offre business">
-      <span class="recommande fr">RECOMMANDÉ</span>
-      <span class="recommande en">RECOMMENDED</span>
+    <article class="offre recommandee">
+      <span class="badge-recommande fr">RECOMMANDÉ</span>
+      <span class="badge-recommande en">RECOMMENDED</span>
       <h3><span class="fr">Business / Flotte</span><span class="en">Business / Fleet</span></h3>
       <div class="prix"><span class="montant">39 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
       <p class="limite"><span class="fr">20 machines · 3 utilisateurs</span><span class="en">20 machines · 3 users</span></p>
       <p class="pour fr">Pour une flotte suivie par plusieurs personnes.</p>
       <p class="pour en">For a fleet tracked by several people.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">30 analyses de carnet, 30 recherches de photo, 500 lectures de compteur par mois</span><span class="en">30 logbook analyses, 30 photo searches, 500 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Multi-utilisateurs, QR codes et préparation groupée</span><span class="en">Multi-user, QR codes and grouped preparation</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">30 analyses de carnet, 30 recherches de photo, 500 lectures de compteur par mois</span><span class="en">30 logbook analyses, 30 photo searches, 500 meter readings per month</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Multi-utilisateurs, QR codes et préparation groupée</span><span class="en">Multi-user, QR codes and grouped preparation</span></li>
       </ul>
       <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Business</span><span class="en">Move to Business</span></a>
     </article>
@@ -733,20 +702,20 @@
       <p class="pour fr">Pour un grand parc, avec un interlocuteur dédié. Au-delà de 20 machines, chaque machine supplémentaire est facturée 1,50 € par mois.</p>
       <p class="pour en">For a large fleet, with a dedicated contact. Beyond 20 machines, each additional machine is billed at €1.50 per month.</p>
       <ul class="avantages">
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">5 000 analyses de carnet, 5 000 recherches de photo, 2 000 lectures de compteur par mois</span><span class="en">5,000 logbook analyses, 5,000 photo searches, 2,000 meter readings per month</span></li>
-        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Support dédié</span><span class="en">Dedicated support</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">5 000 analyses de carnet, 5 000 recherches de photo, 2 000 lectures de compteur par mois</span><span class="en">5,000 logbook analyses, 5,000 photo searches, 2,000 meter readings per month</span></li>
+        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Support dédié</span><span class="en">Dedicated support</span></li>
       </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
+      <a class="btn btn-secondaire" href="mailto:support@keeva.work"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
     </article>
   </div>
-  <div class="notes">
-    <p class="notetarif">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+  <div class="notes-tarifs">
+    <p class="note-tarif">
+      <svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01M11.5 11h1v6h-1"/></svg>
       <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
       <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
     </p>
-    <p class="notetarif">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+    <p class="note-tarif">
+      <svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>
       <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
       <span class="en">You change plan from inside the app, at any time and with no commitment. Your machines, your history and your manuals stay in place.</span>
     </p>
@@ -757,45 +726,45 @@
     <span class="sur-titre en">Frequently asked questions</span>
     <h2><span class="fr">Ce qu'on nous demande le plus</span><span class="en">What we are asked most</span></h2>
   </div>
-  <div class="faq" id="faq">
+  <div class="faq-grille" id="faq">
     <details class="faq">
       <summary><span class="fr">Qu'est-ce qui compte comme une machine ?</span><span class="en">What counts as a machine?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite de votre offre porte sur le nombre suivi en même temps : 2 machines en Gratuit, 5 en Starter, 20 en Business, et un parc sur mesure en Enterprise.</div>
       <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — your plan limits how many are tracked at once: 2 machines on Free, 5 on Starter, 20 on Business, and a fleet built to measure on Enterprise.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Puis-je changer d'offre à tout moment ?</span><span class="en">Can I change plan at any time?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">Oui, sans engagement : le changement se fait depuis l'application, prend effet immédiatement, et la facturation se fait au prorata le mois suivant. Vos données et vos manuels restent en place.</div>
       <div class="reponse en">Yes, with no commitment: you change plan from inside the app, it takes effect immediately, and billing is prorated the following month. Your data and manuals stay in place.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Mes données et mes manuels sont-ils en sécurité ?</span><span class="en">Are my data and manuals safe?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">Chaque société ne voit que son parc : les règles d'accès sont appliquées côté serveur. Les documents servent uniquement à construire votre plan de maintenance, et l'analyse automatique ne part que d'une action de votre part. Aucun traceur publicitaire, aucune revente. Détail dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</div>
       <div class="reponse en">Each company only sees its own fleet: access rules are enforced server-side. Documents are used only to build your maintenance plan, and the automatic analysis starts only with an action of yours. No advertising trackers, no resale. Details in the <a href="./politique-confidentialite.html">privacy policy</a>.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Est-ce utilisable sur le terrain, sans réseau ?</span><span class="en">Can I use it on site, with no signal?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">Oui. La consultation hors connexion s'active sur l'appareil : le dernier état connu du parc reste lisible, et les relevés faits sans réseau sont repris à la reconnexion. Les rappels d'échéance sont locaux, donc ils ne dépendent pas du réseau.</div>
       <div class="reponse en">Yes. Offline viewing is enabled on the device: the last known state of the fleet stays readable, and readings taken without a network are picked up again on reconnection. Due-date reminders are local, so they do not depend on the network.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Faut-il forcément un manuel au format PDF ?</span><span class="en">Do I need a manual in PDF format?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">C'est le cas le plus courant et le mieux pris en charge. À défaut, l'analyse d'une photo de la plaque ou du carnet permet de retrouver le bon document en ligne, et un plan peut aussi être saisi à la main : aucune machine n'est bloquée faute de notice.</div>
       <div class="reponse en">That is the most common and best supported case. Failing that, analysing a photo of the plate or the logbook finds the right document online, and a plan can also be entered by hand: no machine is blocked for lack of a manual.</div>
     </details>
     <details class="faq">
       <summary><span class="fr">Les rappels partent-ils aussi par WhatsApp ?</span><span class="en">Are reminders also sent by WhatsApp?</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </summary>
       <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application, et par notification sur téléphone Android. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
       <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application, and by notification on Android phones. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
@@ -805,7 +774,12 @@
 
 <!-- ================= BANDEAU FINAL ================= -->
 <section class="wrap">
-  <div class="final">
+  <div class="bandeau-final">
+    <div class="lueur lueur-1" aria-hidden="true"></div>
+    <div class="lueur lueur-2" aria-hidden="true"></div>
+    <span class="pastille">
+      <span class="fr">Démarrage immédiat</span><span class="en">Get started right away</span>
+    </span>
     <h2><span class="fr">Le juste suivi de votre parc commence aujourd'hui</span><span class="en">Precise tracking for your fleet starts today</span></h2>
     <p>
       <span class="fr">Un compte, un manuel, et vous saurez si KEEVA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.</span>
@@ -829,18 +803,18 @@
           <svg width="28" height="28" aria-hidden="true"><use href="#picto-keeva"/></svg>
           <span class="mot">KEEVA</span>
         </span>
-        <p>
+        <p class="description">
           <span class="fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
           <span class="en">Maintenance tracking for machines and vehicles: plans from manufacturer manuals, due dates by calendar or meter, reminders and a parts list.</span>
         </p>
-        <p>
+        <p class="editeur">
           <span class="fr">Édité par Matthieu Courtois, entrepreneur individuel — Nouvelle-Calédonie.</span>
           <span class="en">Published by Matthieu Courtois, sole trader — New Caledonia.</span>
         </p>
       </div>
       <div>
         <h3><span class="fr">Produit</span><span class="en">Product</span></h3>
-        <ul>
+        <ul class="liste">
           <li><a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a></li>
           <li><a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a></li>
           <li><a href="#tarifs"><span class="fr">Tarification</span><span class="en">Pricing</span></a></li>
@@ -850,7 +824,7 @@
       </div>
       <div>
         <h3><span class="fr">Légal</span><span class="en">Legal</span></h3>
-        <ul>
+        <ul class="liste">
           <li><a href="./mentions-legales.html"><span class="fr">Mentions légales</span><span class="en">Legal notice</span></a></li>
           <li><a href="./cgu.html"><span class="fr">CGU</span><span class="en">Terms</span></a></li>
           <li><a href="./politique-confidentialite.html"><span class="fr">Confidentialité</span><span class="en">Privacy</span></a></li>
@@ -860,13 +834,13 @@
       </div>
       <div>
         <h3>Contact</h3>
-        <ul>
+        <ul class="liste">
           <li><a href="mailto:support@keeva.work">support@keeva.work</a></li>
           <li><span class="fr">Une question, un manuel qui résiste ? Écrivez-nous.</span><span class="en">A question, a stubborn manual? Write to us.</span></li>
         </ul>
       </div>
     </div>
-    <div class="bas">
+    <div class="pied-bas">
       <span>© <span id="annee">2026</span> KEEVA — <span class="fr">KEEVA aide à organiser l'entretien ; elle ne certifie ni ne garantit rien.</span><span class="en">KEEVA helps you organise maintenance; it certifies and guarantees nothing.</span></span>
       <div class="lang" style="display:flex" role="group" aria-label="Langue / Language">
         <button type="button" data-langue="fr">FR</button>
@@ -916,6 +890,17 @@
       appliquer(e.currentTarget.getAttribute('data-langue'));
     });
   }
+
+  // Micro-interaction : défilement doux vers les ancres internes.
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var cible = this.getAttribute('href');
+      if (cible && cible !== '#') {
+        var el = document.querySelector(cible);
+        if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+      }
+    });
+  });
 })();
 </script>
 </body>
