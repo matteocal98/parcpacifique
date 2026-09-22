@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/qSzBEza5Fn6xuWsAQgHu2kJ6myhNsOnfd4Xtsi7v/c=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZJSsBN1X7jLAqWml9IJBM2Fj3yLnr7FLBTRv0cWFyvQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2594,6 +2594,10 @@
   .tel-champ{display:flex;gap:8px;align-items:stretch;}
   .tel-champ .tel-pays{flex:0 1 auto;max-width:62%;}
   .tel-champ input{flex:1 1 38%;min-width:0;}
+  /* Sélecteur réduit à l'indicatif seul (« +687 ») : une largeur fixe, courte,
+     qui laisse toute la place au numéro plutôt qu'à un nom de pays tronqué. */
+  .tel-champ .tel-pays-etroit{flex:0 0 98px;max-width:98px;padding-left:8px;padding-right:24px;}
+  .tel-champ .tel-pays-etroit + input{flex:1 1 auto;}
 
   /* Case à cocher isolée (option de l'assistant) */
   /* Choix de la langue : deux drapeaux, avec leur nom à côté — un drapeau est
@@ -4391,11 +4395,19 @@ function champTelephoneHtml(id, valeur, opts = {}) {
   // sert qu'à poser un <span class="requis"> déjà construit par l'appelant
   // (jamais du texte utilisateur), quand `opts.label` échappé ne suffit pas.
   const etiquette = opts.labelHtml || esc(opts.label || trad('Téléphone'));
+  // « Drapeau + indicatif + nom du pays » déborde dès que la colonne est
+  // partagée avec un autre champ (le sélecteur se tronque, illisible). Un
+  // <select> HTML ne peut pas afficher un texte fermé différent de celui de
+  // ses <option> ouvertes : `indicatifSeul` réduit donc les DEUX au seul
+  // indicatif (« +687 », 4 caractères), pour un sélecteur étroit qui laisse
+  // la place au numéro. La liste de pays reste courte (5 territoires du
+  // Pacifique/France) : l'indicatif seul y reste identifiable.
+  const etroit = opts.indicatifSeul ? ' tel-pays-etroit' : '';
   return `
     <label for="${id}">${etiquette}</label>
     <div class="tel-champ${compact}">
-      <select id="${id}-pays" class="tel-pays" aria-label="${trad('Pays de l\'indicatif')}"${desactive}>
-        ${PAYS_TEL.map((p) => `<option value="${esc(p.code)}"${p.code === pays.code ? ' selected' : ''}>${drapeauDe(p.code)} +${esc(p.indicatif)} — ${esc(p.nom)}</option>`).join('')}
+      <select id="${id}-pays" class="tel-pays${etroit}" aria-label="${trad('Pays de l\'indicatif')}"${desactive}>
+        ${PAYS_TEL.map((p) => `<option value="${esc(p.code)}"${p.code === pays.code ? ' selected' : ''}>${opts.indicatifSeul ? `+${esc(p.indicatif)}` : `${drapeauDe(p.code)} +${esc(p.indicatif)} — ${esc(p.nom)}`}</option>`).join('')}
       </select>
       <input id="${id}" type="tel" inputmode="tel" autocomplete="tel-national"
              value="${esc(formatNational(national, pays))}"
@@ -6542,7 +6554,7 @@ function openSignupWizard() {
             <input id="su-reg" value="${esc(state.registrationNumber)}">
           </div>
           <div>
-            ${champTelephoneHtml('su-phone', state.phone, { labelHtml: `${esc(trad('Numéro de téléphone'))} <span class="requis">*</span>`, required: true })}
+            ${champTelephoneHtml('su-phone', state.phone, { labelHtml: `${esc(trad('Numéro de téléphone'))} <span class="requis">*</span>`, required: true, indicatifSeul: true })}
           </div>
         </div>
         <div class="hint">${trad('Le téléphone sert aux rappels d\'échéance par WhatsApp et par e-mail.')}</div>
