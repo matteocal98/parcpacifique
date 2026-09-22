@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-4uRLKjs7h8LYXu7Wlu9NBHlCwywU4aDbNDutnAoRIiw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cUmvmASdYTviIXg366uGICFpzex4+WavMQGCvh3Olhk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2852,6 +2852,13 @@
     .machine.is-late .m-echeance .due{color:var(--late);}
     .machine.is-soon .m-echeance .due{color:var(--soon);}
     .machine.is-ok .m-echeance .due{color:var(--ok);}
+    /* Sans plan de maintenance (« Compteur à saisir », « Plan à définir »…) : la
+       phrase est longue, elle n'a pas la brièveté d'une échéance chiffrée
+       (« +3 h », « dans 12 j ») et ne doit pas hériter de sa grande taille. */
+    .machine.is-unknown .m-echeance .due{
+      font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:0;
+      color:var(--ink-2);white-space:normal;max-width:150px;
+    }
     .m-side .machine-jauge{background:var(--surface);border:1px solid var(--line-2);border-radius:10px;}
     .m-actions{padding-top:12px;border-top:1px solid var(--line-2);gap:8px;}
     .m-actions .btn-row-action{white-space:nowrap;padding:8px 12px;gap:8px;}
@@ -7804,7 +7811,7 @@ const PICTOS = {
   bientot: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3.5 2"/>',
   ajuste: '<circle cx="12" cy="12" r="9"/><path d="M8 12.2l2.8 2.8L16.4 9.4"/>',
   alerte: '<path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5"/><path d="M12 17.4h.01"/>',
-  entretien: '<path d="M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8z"/><path d="M14.8 8.4 13 13l-4.6 1.8L10.2 10z"/>',
+  entretien: '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
   prochain: '<path d="M3.5 5.5h17v15h-17z"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9.2 14.2 11 16l3.8-3.8"/>',
   plan: '<path d="M9 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9"/><path d="M4.5 8.5l1.6 1.6L9 7.2"/><path d="M4.5 15.5l1.6 1.6L9 14.2"/>',
   reglages: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>',
