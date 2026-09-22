@@ -53,637 +53,326 @@
 }
 </script>
 <style>
- <!DOCTYPE html>
+  /* POLICES AUTO-HÉBERGÉES — Inter (sous-ensemble latin), servies depuis NOTRE
+     domaine dans `polices/`. Ni CDN, ni base64 : un `<link>` vers Google ferait
+     transmettre l'adresse IP du visiteur, et la base64 alourdissait chaque page de
+     64 ko sans être mise en cache d'une page à l'autre. Ces fichiers le sont. */
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:600;src:url(./polices/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 
-<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Space+Grotesk:wght@500;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"inverse-surface":"#293041","on-primary-fixed-variant":"#404467","tertiary-fixed":"#e1e0ff","error-container":"#ffdad6","signature-en":"#5B52DF","on-secondary-fixed-variant":"#00504a","tertiary-fixed-dim":"#c0c1ff","blanc":"#FFFFFF","ardoise":"#94A3B8","on-error":"#ffffff","surface-container":"#e9edff","inverse-primary":"#c0c4ed","outline":"#77767f","surface-container-low":"#f2f3ff","signature-fr":"#24B5A8","encre":"#0E1333","on-tertiary-container":"#7073ff","secondary-container":"#78f7e8","on-primary-container":"#7d81a7","surface":"#faf8ff","nuit":"#0D1424","outline-variant":"#c7c5cf","on-tertiary-fixed-variant":"#2f2ebe","on-surface-variant":"#46464e","secondary-fixed":"#78f7e8","surface-bright":"#faf8ff","olive":"#8B9B37","secondary-fixed-dim":"#58dacc","on-background":"#141b2c","primary-container":"#141939","surface-container-lowest":"#ffffff","primary-fixed":"#dfe0ff","turquoise":"#14B8A6","surface-tint":"#575c80","secondary":"#006a62","surface-dim":"#d3d9f0","ambre":"#DE7A16","indigo":"#6366F1","on-secondary":"#ffffff","on-tertiary":"#ffffff","on-secondary-container":"#007168","surface-container-high":"#e1e8ff","on-tertiary-fixed":"#07006c","error":"#ba1a1a","background":"#faf8ff","tertiary-container":"#07006c","primary-fixed-dim":"#c0c4ed","on-primary":"#ffffff","on-primary-fixed":"#141939","tertiary":"#000000","on-error-container":"#93000a","surface-container-highest":"#dce2f9","inverse-on-surface":"#edf0ff","on-secondary-fixed":"#00201d","surface-variant":"#dce2f9","on-surface":"#141b2c","primary":"#000000","cyan":"#009BDE","bleu-roi":"#236FE0"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin-desktop":"2rem","space-xl":"2rem","margin":"1rem","gutter-desktop":"1.5rem","space-md":"1rem","space-sm":"0.5rem","space-xs":"0.25rem","gutter":"1rem","space-lg":"1.5rem"},"fontFamily":{"label":["Figtree"],"counter-lg":["Space Grotesk"],"headline-md":["Space Grotesk"],"headline-lg":["Space Grotesk"],"counter-md":["Space Grotesk"],"body-strong":["Figtree"],"body-base":["Figtree"],"helper":["Figtree"],"caption":["Figtree"],"display-title":["Space Grotesk"]},"fontSize":{"label":["13.5px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"counter-lg":["28px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-md":["21px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg":["25px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"700"}],"counter-md":["21px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"700"}],"body-strong":["17px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"600"}],"body-base":["15px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"500"}],"helper":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"caption":["10.5px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-title":["31px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"800"}]}}}};</script></head><body class="bg-surface-container-lowest text-on-surface font-body-base text-body-base antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><header class="fixed top-0 left-0 right-0 z-50 bg-blanc/95 backdrop-blur-md border-b-[1.5px] border-encre/10 shadow-[0_8px_24px_rgba(14,19,51,0.04)]"><div class="h-20 max-w-[1200px] mx-auto px-margin-desktop flex items-center justify-between gap-gutter-desktop"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" data-path="landing" href="#"><img alt="logo keeva.jpg" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Xoe83hwCV_wjG61Es9sY3eexaztBac0O1PTYzqU_1NcT-P-VXhicgluPgHF_CZGH8b2pz3itVqyABKoRte4UqT61sywBT72aXsp-dNKJHzOgYV9VbwRwTjGDM8Gx9EpoA7JHkf7kDk1wSwfigGTybRwEeizbTOIKwaeNYMAH4WPtMDDvZIws8P2MmcW5vYbwNPvb0ggLaUP6QSuBiFPAYnzUSiJbxlTwuG8asBM05KqmGR6TPahdwiTWZM_uMc6UOgAa-dz3UywQ"/><span class="font-headline-lg text-headline-lg text-encre tracking-tight font-extrabold">KEEVA</span></a><nav class="hidden xl:flex items-center gap-gutter-desktop" data-active-classes="text-encre font-body-strong border-b-2 border-encre"><a class="font-label text-label text-on-surface-variant hover:text-encre transition-colors py-space-xs" data-path="fonctionnalites" href="#">Fonctionnalités</a><a class="font-label text-label text-on-surface-variant hover:text-encre transition-colors py-space-xs" data-path="comment-ca-marche" href="#">Comment ça marche</a><a class="font-label text-label text-on-surface-variant hover:text-encre transition-colors py-space-xs" data-path="donnees" href="#">Données</a><a class="font-label text-label text-on-surface-variant hover:text-encre transition-colors py-space-xs" data-path="tarifs" href="#">Tarifs</a><a class="font-label text-label text-on-surface-variant hover:text-encre transition-colors py-space-xs" data-path="faq" href="#">FAQ</a></nav></div><div class="flex items-center gap-space-md"><div class="flex items-center bg-surface-container-low rounded-xl p-[3px] border border-encre/10"><button class="px-space-sm py-[4px] rounded-lg font-caption text-caption uppercase bg-blanc text-encre font-bold shadow-[0_2px_8px_rgba(14,19,51,0.06)]" type="button">FR</button><button class="px-space-sm py-[4px] rounded-lg font-caption text-caption uppercase text-on-surface-variant hover:text-encre transition-colors" type="button">EN</button></div><a class="hidden sm:inline-flex items-center justify-center min-h-[44px] px-space-md rounded-xl font-label text-label text-encre hover:bg-surface-container-high transition-colors" data-path="login" href="#">Se connecter</a><a class="inline-flex items-center justify-center min-h-[44px] px-space-lg rounded-xl bg-encre text-blanc font-label text-label hover:bg-indigo active:translate-y-[1px] shadow-[0_8px_24px_rgba(14,19,51,0.12)] transition-all" data-path="signup" href="#">Commencer gratuitement</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface-container-lowest min-h-screen"><div class="flex flex-col w-full">
-<!-- Svg definitions for linear gradients matching the emblem -->
-<svg aria-hidden="true" class="absolute pointer-events-none" height="0" width="0">
-<defs>
-<lineargradient id="keeva-spectrum" x1="0%" x2="100%" y1="0%" y2="100%">
-<stop offset="0%" stop-color="#236FE0"></stop>
-<stop offset="58%" stop-color="#14B8A6"></stop>
-<stop offset="100%" stop-color="#8B9B37"></stop>
-</lineargradient>
-</defs>
-</svg>
-<!-- ================= 1. HERO SECTION ================= -->
-<section class="relative w-full overflow-hidden bg-surface-container-lowest py-space-xl md:py-[80px]">
-<!-- Ambient field backdrop lighting -->
-<div class="absolute -top-32 right-10 w-96 h-96 rounded-full bg-signature-fr/10 blur-[100px] pointer-events-none"></div>
-<div class="absolute top-1/2 left-0 w-80 h-80 rounded-full bg-signature-en/10 blur-[90px] pointer-events-none"></div>
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-center">
-<!-- Left Editorial Column (62% macro volume feeling) -->
-<div class="lg:col-span-7 flex flex-col items-start z-10">
-<!-- Eyebrow status badge -->
-<div class="inline-flex items-center gap-space-xs px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-sm">
-<span class="relative flex h-2.5 w-2.5">
-<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-turquoise opacity-75"></span>
-<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-turquoise"></span>
-</span>
-<span class="font-caption text-caption uppercase text-on-surface-variant tracking-wider">Lecture automatique des manuels — disponible</span>
-</div>
-<!-- Tagline -->
-<p class="font-headline-md text-headline-md text-signature-en uppercase tracking-widest mt-space-md mb-space-xs font-bold">
-          LA JUSTE MESURE DE VOTRE PARC
-        </p>
-<!-- Main Title -->
-<h1 class="font-display-title text-display-title text-encre text-[34px] sm:text-[46px] lg:text-[52px] sm:leading-[1.12] tracking-tight">
-          Le carnet d'entretien de votre flotte, <span class="text-transparent bg-clip-text bg-gradient-to-r from-bleu-roi via-turquoise to-olive">lu par notre algorithme.</span>
-</h1>
-<!-- Subtitle -->
-<p class="font-body-strong text-body-strong text-on-surface-variant max-w-xl mt-space-md mb-space-lg">
-          Importez vos manuels constructeur : KEEVA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.
-        </p>
-<!-- CTAs -->
-<div class="flex flex-wrap items-center gap-space-sm sm:gap-space-md w-full sm:w-auto">
-<a class="inline-flex items-center justify-center gap-space-xs min-h-[48px] px-space-lg rounded-xl bg-encre text-blanc font-label text-label hover:bg-indigo active:translate-y-[1px] shadow-lg transition-all" data-path="signup" href="#">
-<span>Commencer gratuitement</span>
-<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-</a>
-<a class="inline-flex items-center justify-center gap-space-xs min-h-[48px] px-space-md rounded-xl bg-surface-container-low text-encre font-label text-label hover:bg-surface-container transition-all" href="#comment-ca-marche">
-<span class="material-symbols-outlined text-signature-fr text-[20px]">play_circle</span>
-<span>Voir comment ça marche</span>
-</a>
-</div>
-<!-- Trust Note -->
-<div class="flex items-center gap-space-xs mt-space-md text-ardoise">
-<span class="material-symbols-outlined text-signature-fr text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span class="font-helper text-helper">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
-</div>
-</div>
-<!-- Right Interactive Mockup (38% split volume) -->
-<div class="lg:col-span-5 relative mt-space-lg lg:mt-0 z-10">
-<div class="relative bg-blanc rounded-xl p-space-md sm:p-space-lg shadow-xl">
-<!-- Window Header bar -->
-<div class="flex items-center justify-between pb-space-sm mb-space-md">
-<div class="flex items-center gap-1.5">
-<span class="w-3 h-3 rounded-full bg-ambre inline-block"></span>
-<span class="w-3 h-3 rounded-full bg-signature-fr inline-block"></span>
-<span class="w-3 h-3 rounded-full bg-indigo inline-block"></span>
-</div>
-<span class="font-caption text-caption text-ardoise uppercase tracking-widest">KEEVA TELEMETRY v2.4</span>
-<div class="w-4"></div>
-</div>
-<!-- Live Mock Machine 1: Retard -->
-<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors mb-space-xs">
-<div class="min-w-0 pr-space-xs">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-encre text-[16px]">precision_manufacturing</span>
-<h4 class="font-body-strong text-[14px] text-encre truncate">KUBOTA U17-3</h4>
-</div>
-<p class="font-helper text-helper text-on-surface-variant truncate">Vidange, filtre à huile · 250 h</p>
-</div>
-<div class="shrink-0">
-<span class="inline-flex items-center px-2.5 py-1 rounded-full font-caption text-[11px] font-bold bg-amber-500/15 text-ambre uppercase">
-                En retard +3j
-              </span>
-</div>
-</div>
-<!-- Live Mock Machine 2: Bientôt -->
-<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors mb-space-xs">
-<div class="min-w-0 pr-space-xs">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-encre text-[16px]">local_shipping</span>
-<h4 class="font-body-strong text-[14px] text-encre truncate">PEUGEOT 208</h4>
-</div>
-<p class="font-helper text-helper text-on-surface-variant truncate">Révision 20 000 km</p>
-</div>
-<div class="shrink-0">
-<span class="inline-flex items-center px-2.5 py-1 rounded-full font-caption text-[11px] font-bold bg-signature-en/15 text-signature-en uppercase">
-                Bientôt dans 12j
-              </span>
-</div>
-</div>
-<!-- Live Mock Machine 3: A jour -->
-<div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container-lowest hover:bg-surface-container-low transition-colors mb-space-sm">
-<div class="min-w-0 pr-space-xs">
-<div class="flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-encre text-[16px]">agriculture</span>
-<h4 class="font-body-strong text-[14px] text-encre truncate">JOHN DEERE 6120M</h4>
-</div>
-<p class="font-helper text-helper text-on-surface-variant truncate">Graissage, filtres hydrauliques</p>
-</div>
-<div class="shrink-0">
-<span class="inline-flex items-center px-2.5 py-1 rounded-full font-caption text-[11px] font-bold bg-signature-fr/15 text-signature-fr uppercase">
-                À jour
-              </span>
-</div>
-</div>
-<!-- Parts Order Module -->
-<div class="p-space-sm rounded-lg bg-surface-container-low">
-<div class="flex items-center justify-between mb-1">
-<span class="font-caption text-caption text-encre uppercase font-bold tracking-wider flex items-center gap-1">
-<span class="material-symbols-outlined text-[15px] text-signature-fr">shopping_basket</span>
-                À prévoir — Filtres
-              </span>
-<span class="font-caption text-caption text-ardoise">PO-2025-08</span>
-</div>
-<p class="font-helper text-helper text-on-surface-variant font-medium">
-              2 références · 4 unités · prêt dès le 12/10
-            </p>
-</div>
-<p class="font-caption text-[10px] text-ardoise text-center mt-space-sm">
-            Aperçu de l'interface en conditions réelles de chantier.
-          </p>
-</div>
-</div>
-</div>
-</section>
-<!-- ================= 2. LE COÛT D'UN MAUVAIS SUIVI ================= -->
-<section class="w-full bg-surface-container-low py-space-xl md:py-[88px]">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="max-w-2xl mb-space-xl">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-          Ce qu'un mauvais suivi coûte
-        </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[32px] text-encre font-bold">
-          Un entretien en retard ne se rattrape pas toujours
-        </h2>
-<p class="font-body-base text-body-base text-on-surface-variant mt-space-xs">
-          Rien de théorique : c'est ce qui arrive sur le terrain quand les échéances ne sont centralisées nulle part.
-        </p>
-</div>
-<!-- 3 Impact Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
-<!-- Card 1 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 rounded-xl bg-ambre/15 flex items-center justify-center text-ambre mb-space-md shrink-0">
-<span class="material-symbols-outlined text-[26px]">build</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Des réparations plus coûteuses
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Une échéance manquée use la pièce avant l'heure : ce qui relevait de l'entretien courant devient une lourde réparation mécanique, voire le remplacement forcé d'un sous-ensemble complet.
-          </p>
-</div>
-<!-- Card 2 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 rounded-xl bg-error/15 flex items-center justify-center text-error mb-space-md shrink-0">
-<span class="material-symbols-outlined text-[26px]">warning</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Des pannes évitables
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Les défaillances que l'entretien planifié prévient ne choisissent jamais leur moment : elles tombent inévitablement en plein pic d'activité, quand la machine est sollicitée au maximum.
-          </p>
-</div>
-<!-- Card 3 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow">
-<div class="w-12 h-12 rounded-xl bg-encre text-blanc flex items-center justify-center mb-space-md shrink-0">
-<span class="material-symbols-outlined text-[26px]">timer_off</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Des immobilisations
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Un engin arrêté, c'est du travail qui attend, un chantier complet décalé avec pénalités de retard, ou une location d'urgence onéreuse à supporter immédiatement pour compenser.
-          </p>
-</div>
-</div>
-<!-- Reassurance Banner -->
-<div class="mt-space-lg p-space-md rounded-xl bg-surface-container flex items-center gap-space-md shadow-sm">
-<div class="w-10 h-10 rounded-full bg-signature-fr/20 text-signature-fr flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-[22px]">trending_up</span>
-</div>
-<p class="font-body-strong text-body-strong text-encre">
-          À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années sans perte de rentabilité.
-        </p>
-</div>
-</div>
-</section>
-<!-- ================= 3. FONCTIONNALITÉS ================= -->
-<section class="w-full bg-surface-container-lowest py-space-xl md:py-[96px]" id="fonctionnalites">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="max-w-2xl mb-space-xl">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-          Fonctionnalités
-        </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[34px] text-encre font-bold">
-          Trois gestes, et le suivi se tient tout seul
-        </h2>
-<p class="font-body-base text-body-base text-on-surface-variant mt-space-xs">
-          Rien à paramétrer pendant des heures : le manuel fait le travail, vous confirmez d'un simple geste.
-        </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
-<!-- Feature 1 -->
-<div class="group relative bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-lg transition-all duration-300">
-<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-bleu-roi via-turquoise to-olive text-blanc flex items-center justify-center mb-space-md shadow-md">
-<span class="material-symbols-outlined text-[24px]">menu_book</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Manuels intelligents
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Importez le manuel constructeur (PDF). Notre algorithme en extrait les échéances et les tâches pour créer un plan de maintenance structuré — premier entretien compris, sans saisie manuelle.
-          </p>
-</div>
-<!-- Feature 2 -->
-<div class="group relative bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-lg transition-all duration-300">
-<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-bleu-roi via-turquoise to-olive text-blanc flex items-center justify-center mb-space-md shadow-md">
-<span class="material-symbols-outlined text-[24px]">speed</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Suivi flexible
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Alertes fondées sur le calendrier, les heures moteur ou le kilométrage. Le mode se déduit du carnet ; vous gardez toujours la main pour ajuster selon vos rythmes réels.
-          </p>
-</div>
-<!-- Feature 3 -->
-<div class="group relative bg-blanc rounded-xl p-space-lg shadow-sm hover:shadow-lg transition-all duration-300">
-<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-bleu-roi via-turquoise to-olive text-blanc flex items-center justify-center mb-space-md shadow-md">
-<span class="material-symbols-outlined text-[24px]">inventory_2</span>
-</div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Commandes simplifiées
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Les pièces et consommables à prévoir sont regroupés par famille, avec quantités et dates d'intervention — prêts à être envoyés directement à vos fournisseurs habituels.
-          </p>
-</div>
-</div>
-</div>
-</section>
-<!-- ================= 4. COMMENT ÇA MARCHE ================= -->
-<section class="w-full bg-surface-container-low py-space-xl md:py-[96px]" id="comment-ca-marche">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="max-w-2xl mb-space-xl">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-          Comment ça marche
-        </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[34px] text-encre font-bold">
-          Du PDF au carnet d'entretien, en trois étapes
-        </h2>
-<p class="font-body-base text-body-base text-on-surface-variant mt-space-xs">
-          Aucun paramétrage interminable : vous importez, vous validez, vous suivez.
-        </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
-<!-- Step 1 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<div class="w-10 h-10 rounded-full bg-gradient-to-br from-bleu-roi to-turquoise text-blanc font-headline-md text-headline-md flex items-center justify-center mb-space-md shadow-sm">
-            1
-          </div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Importez le manuel
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Déposez le PDF constructeur de la machine. Une photo de la plaque ou du carnet suffit à retrouver le bon document en ligne, et le modèle comme l'année peuvent être précisés.
-          </p>
-</div>
-<!-- Step 2 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<div class="w-10 h-10 rounded-full bg-gradient-to-br from-bleu-roi to-turquoise text-blanc font-headline-md text-headline-md flex items-center justify-center mb-space-md shadow-sm">
-            2
-          </div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Validez le plan proposé
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            KEEVA en tire les tâches, les échéances et l'unité de suivi (heures, kilomètres ou mois), premier entretien compris. Vous relisez, vous corrigez si besoin, puis vous confirmez.
-          </p>
-</div>
-<!-- Step 3 -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<div class="w-10 h-10 rounded-full bg-gradient-to-br from-bleu-roi to-turquoise text-blanc font-headline-md text-headline-md flex items-center justify-center mb-space-md shadow-sm">
-            3
-          </div>
-<h3 class="font-headline-md text-headline-md text-encre mb-space-xs">
-            Suivez, puis commandez
-          </h3>
-<p class="font-body-base text-body-base text-on-surface-variant">
-            Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.
-          </p>
-</div>
-</div>
-</div>
-</section>
-<!-- ================= 5. VOS DONNÉES & ENGAGEMENTS ================= -->
-<section class="w-full bg-surface-container-lowest py-space-xl md:py-[88px]">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="bg-surface-container-low rounded-xl p-space-lg md:p-space-xl shadow-sm">
-<div class="max-w-2xl mb-space-lg">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-            Vos données
-          </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[28px] text-encre font-bold">
-            Quatre engagements, vérifiables dans le produit
-          </h2>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop">
-<!-- Commitment 1 -->
-<div>
-<h4 class="font-body-strong text-body-strong text-encre flex items-center gap-2 mb-1.5">
-<span class="material-symbols-outlined text-signature-fr text-[20px]">verified_user</span>
-              Parc cloisonné
-            </h4>
-<p class="font-body-base text-[14px] text-on-surface-variant">
-              Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes autorisés de votre société.
-            </p>
-</div>
-<!-- Commitment 2 -->
-<div>
-<h4 class="font-body-strong text-body-strong text-encre flex items-center gap-2 mb-1.5">
-<span class="material-symbols-outlined text-signature-fr text-[20px]">flash_on</span>
-              Analyse sur votre action
-            </h4>
-<p class="font-body-base text-[14px] text-on-surface-variant">
-              La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.
-            </p>
-</div>
-<!-- Commitment 3 -->
-<div>
-<h4 class="font-body-strong text-body-strong text-encre flex items-center gap-2 mb-1.5">
-<span class="material-symbols-outlined text-signature-fr text-[20px]">visibility_off</span>
-              Aucun traceur publicitaire
-            </h4>
-<p class="font-body-base text-[14px] text-on-surface-variant">
-              Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments mémorisés par le navigateur.
-            </p>
-</div>
-<!-- Commitment 4 -->
-<div>
-<h4 class="font-body-strong text-body-strong text-encre flex items-center gap-2 mb-1.5">
-<span class="material-symbols-outlined text-signature-fr text-[20px]">file_download</span>
-              Emporter et effacer
-            </h4>
-<p class="font-body-base text-[14px] text-on-surface-variant">
-              L'historique complet s'exporte en CSV à tout moment, et la suppression du compte purge tous les documents associés.
-            </p>
-</div>
-</div>
-<div class="mt-space-lg pt-space-md border-t border-encre/10 flex items-center gap-space-xs font-helper text-helper text-on-surface-variant">
-<span>Le détail complet figure dans notre</span>
-<a class="text-signature-en font-bold hover:underline" href="#">politique de confidentialité</a>.
-        </div>
-</div>
-</div>
-</section>
-<!-- ================= 6. TARIFS TRANSPARENTS ================= -->
-<section class="w-full bg-surface-container-low py-space-xl md:py-[96px]" id="tarifs">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="max-w-2xl mb-space-xl">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-          Tarifs transparents
-        </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[34px] text-encre font-bold">
-          Quatre offres, des limites annoncées
-        </h2>
-<p class="font-body-base text-body-base text-on-surface-variant mt-space-xs">
-          Gratuit pour deux machines, Starter jusqu'à cinq, Business jusqu'à vingt, Enterprise sur mesure — sans engagement.
-        </p>
-</div>
-<!-- Pricing Cards 4 Columns -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop items-stretch">
-<!-- PLAN 1: Gratuit -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<h3 class="font-headline-md text-headline-md text-encre">Gratuit</h3>
-<div class="flex items-baseline gap-1 mt-space-sm mb-space-xs">
-<span class="font-counter-lg text-[42px] text-encre font-extrabold leading-none">0 €</span>
-<span class="font-body-base text-ardoise">/ mois</span>
-</div>
-<p class="font-body-strong text-body-strong text-encre font-bold">2 machines · 1 utilisateur</p>
-<p class="font-helper text-helper text-on-surface-variant mt-1 mb-space-md">Pour un particulier, ou pour essayer KEEVA.</p>
-<ul class="space-y-space-xs mb-space-lg flex-1">
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>10 analyses de carnet, 10 recherches photo</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>30 lectures de compteur par mois</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>Consultation, alertes e-mail et notifications</span>
-</li>
-</ul>
-<a class="w-full inline-flex items-center justify-center min-h-[44px] px-space-md rounded-xl bg-surface-container-low text-encre font-label text-label hover:bg-surface-container transition-colors mt-auto" data-path="signup" href="#">
-            Créer un compte
-          </a>
-</div>
-<!-- PLAN 2: Starter -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<h3 class="font-headline-md text-headline-md text-encre">Starter / Artisan</h3>
-<div class="flex items-baseline gap-1 mt-space-sm mb-space-xs">
-<span class="font-counter-lg text-[42px] text-encre font-extrabold leading-none">12 €</span>
-<span class="font-body-base text-ardoise">/ mois</span>
-</div>
-<p class="font-body-strong text-body-strong text-encre font-bold">5 machines · 1 utilisateur</p>
-<p class="font-helper text-helper text-on-surface-variant mt-1 mb-space-md">Pour un petit parc qu'il faut suivre de près.</p>
-<ul class="space-y-space-xs mb-space-lg flex-1">
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>20 analyses de carnet, 10 recherches photo</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>200 lectures de compteur par mois</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>Tout inclus dans Gratuit + export CSV</span>
-</li>
-</ul>
-<a class="w-full inline-flex items-center justify-center min-h-[44px] px-space-md rounded-xl bg-surface-container-low text-encre font-label text-label hover:bg-surface-container transition-colors mt-auto" data-path="signup" href="#">
-            Passer à Starter
-          </a>
-</div>
-<!-- PLAN 3: Business (RECOMMENDED) -->
-<div class="relative flex flex-col bg-blanc rounded-xl p-space-lg shadow-xl overflow-hidden ring-2 ring-encre">
-<div class="absolute top-0 right-0 bg-signature-en text-blanc font-caption text-[11px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-            RECOMMANDÉ
-          </div>
-<h3 class="font-headline-md text-headline-md text-encre">Business / Flotte</h3>
-<div class="flex items-baseline gap-1 mt-space-sm mb-space-xs">
-<span class="font-counter-lg text-[42px] text-encre font-extrabold leading-none">39 €</span>
-<span class="font-body-base text-ardoise">/ mois</span>
-</div>
-<p class="font-body-strong text-body-strong text-encre font-bold">20 machines · 3 utilisateurs</p>
-<p class="font-helper text-helper text-on-surface-variant mt-1 mb-space-md">Pour une flotte suivie par plusieurs collaborateurs.</p>
-<ul class="space-y-space-xs mb-space-lg flex-1">
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-encre font-medium">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>30 analyses de carnet, 30 recherches photo</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-encre font-medium">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>500 lectures de compteur par mois</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-encre font-medium">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>Multi-utilisateurs, QR codes d'engins &amp; préparation groupée</span>
-</li>
-</ul>
-<a class="w-full inline-flex items-center justify-center min-h-[44px] px-space-md rounded-xl bg-encre text-blanc font-label text-label hover:bg-indigo active:translate-y-[1px] shadow-md transition-all mt-auto" data-path="signup" href="#">
-            Passer à Business
-          </a>
-</div>
-<!-- PLAN 4: Enterprise -->
-<div class="flex flex-col bg-blanc rounded-xl p-space-lg shadow-sm">
-<h3 class="font-headline-md text-headline-md text-encre">Enterprise / Parc</h3>
-<div class="flex items-baseline gap-1 mt-space-sm mb-space-xs">
-<span class="font-counter-lg text-[42px] text-encre font-extrabold leading-none">89 €</span>
-<span class="font-body-base text-ardoise">/ mois</span>
-</div>
-<p class="font-body-strong text-body-strong text-encre font-bold">Parc sur mesure · Équipe</p>
-<p class="font-helper text-helper text-on-surface-variant mt-1 mb-space-md">Au-delà de 20 machines : +1,50 € / machine / mois.</p>
-<ul class="space-y-space-xs mb-space-lg flex-1">
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>5 000 analyses carnet &amp; photos</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>2 000 lectures de compteur mensuelles</span>
-</li>
-<li class="flex items-start gap-2 font-body-base text-[13.5px] text-on-surface-variant">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0">check</span>
-<span>Support dédié &amp; intégration API de parc</span>
-</li>
-</ul>
-<a class="w-full inline-flex items-center justify-center min-h-[44px] px-space-md rounded-xl bg-surface-container-low text-encre font-label text-label hover:bg-surface-container transition-colors mt-auto" href="mailto:support@keeva.work">
-            Nous contacter
-          </a>
-</div>
-</div>
-<!-- Pricing Specific Clarifications -->
-<div class="mt-space-lg space-y-space-xs max-w-4xl">
-<p class="font-body-base text-[14px] text-on-surface-variant flex items-start gap-2">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0 mt-0.5">info</span>
-<span><strong>Précision compteur :</strong> Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle particulier, nous établissons le plan d'entretien sur mesure : 29 € par plan demandé depuis l'application.</span>
-</p>
-<p class="font-body-base text-[14px] text-on-surface-variant flex items-start gap-2">
-<span class="material-symbols-outlined text-signature-fr text-[18px] shrink-0 mt-0.5">sync_alt</span>
-<span>Le changement d'offre se fait directement depuis l'application à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent intégralement en place.</span>
-</p>
-</div>
-</div>
-</section>
-<!-- ================= 7. FAQ ================= -->
-<section class="w-full bg-surface-container-lowest py-space-xl md:py-[96px]" id="faq">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="max-w-2xl mb-space-xl">
-<span class="font-caption text-caption text-signature-en uppercase tracking-widest block mb-space-xs">
-          Questions fréquentes
-        </span>
-<h2 class="font-headline-lg text-headline-lg sm:text-[34px] text-encre font-bold">
-          Ce qu'on nous demande le plus
-        </h2>
-</div>
-<!-- FAQ Accordions -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-desktop">
-<!-- Question 1 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Qu'est-ce qui compte comme une machine ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            Un équipement unique suivi : pelleteuse, tracteur agricole, groupe électrogène, utilitaire ou engin de terrassement. Vous pouvez en ajouter ou en retirer à tout moment : la limite porte uniquement sur le nombre d'actifs suivis en simultané.
-          </div>
-</details>
-<!-- Question 2 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Puis-je changer d'offre à tout moment ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            Oui, absolument sans engagement : le basculement d'offre se configure depuis l'application, prend effet immédiatement, et la facturation s'ajuste au prorata temporis le mois suivant. Vos données restent totalement intactes.
-          </div>
-</details>
-<!-- Question 3 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Mes données et mes manuels sont-ils en sécurité ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            Chaque société ne voit que son propre parc grâce aux règles RLS appliquées rigoureusement côté serveur. Vos documents servent uniquement à extraire vos plans de maintenance. Aucun traceur publicitaire, aucune revente de données d'exploitation.
-          </div>
-</details>
-<!-- Question 4 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Est-ce utilisable sur le terrain, sans réseau ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            Oui. La consultation hors connexion s'active localement sur l'appareil mobile ou tablette : le dernier état connu du parc reste lisible en plein chantier, et les relevés de compteur saisis hors réseau sont automatiquement synchronisés à la reconnexion.
-          </div>
-</details>
-<!-- Question 5 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Faut-il forcément un manuel au format PDF ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            C'est le mode le plus rapide. À défaut, la prise de photo de la plaque constructeur ou de la couverture du carnet physique permet de localiser automatiquement la bonne documentation technique en ligne. Vous pouvez également saisir des échéances manuellement.
-          </div>
-</details>
-<!-- Question 6 -->
-<details class="group bg-blanc rounded-xl p-space-md shadow-sm open:shadow-md transition-all">
-<summary class="font-body-strong text-body-strong text-encre cursor-pointer list-none flex items-center justify-between gap-2">
-<span>Les rappels partent-ils aussi par WhatsApp ?</span>
-<span class="material-symbols-outlined text-ardoise group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
-</summary>
-<div class="mt-space-sm pt-space-xs text-on-surface-variant font-body-base text-[14.5px]">
-            Pas encore : actuellement, les alertes et préavis d'échéances sont envoyés par courrier électronique et notifications applicatives. L'intégration directe WhatsApp pour les conducteurs de travaux et chefs d'atelier est actuellement en cours de développement.
-          </div>
-</details>
-</div>
-</div>
-</section>
-<!-- ================= 8. FINAL CTA BANNER ================= -->
-<section class="w-full bg-surface-container-lowest pb-space-xl md:pb-[96px]">
-<div class="max-w-[1200px] mx-auto px-margin md:px-margin-desktop">
-<div class="relative bg-nuit text-blanc rounded-xl p-space-lg sm:p-space-xl md:p-[64px] shadow-2xl overflow-hidden text-center flex flex-col items-center">
-<!-- Subtle emblem background accent glow -->
-<div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-bleu-roi/10 blur-[80px] pointer-events-none"></div>
-<div class="absolute -left-20 -top-20 w-80 h-80 rounded-full bg-signature-fr/10 blur-[80px] pointer-events-none"></div>
-<span class="px-space-xs py-[2px] rounded-full bg-signature-fr/20 text-signature-fr font-caption text-caption uppercase tracking-widest mb-space-sm font-bold">
-          DÉMARRAGE IMMÉDIAT
-        </span>
-<h2 class="font-display-title text-display-title text-blanc text-[28px] sm:text-[40px] max-w-2xl leading-tight">
-          Le juste suivi de votre parc commence aujourd'hui
-        </h2>
-<p class="font-body-strong text-body-strong text-ardoise max-w-xl mt-space-sm mb-space-lg">
-          Un compte, un manuel constructeur, et vous saurez si KEEVA tient la route sur vos machines. Gratuit pour 2 machines, puis 12 €/mois jusqu'à 5 machines.
-        </p>
-<div class="flex flex-wrap items-center justify-center gap-space-sm sm:gap-space-md z-10">
-<a class="inline-flex items-center justify-center min-h-[48px] px-space-xl rounded-xl bg-blanc text-encre font-label text-label hover:bg-surface-container-high transition-all shadow-md font-bold" data-path="signup" href="#">
-            Commencer gratuitement
-          </a>
-<a class="inline-flex items-center justify-center min-h-[48px] px-space-lg rounded-xl bg-white/10 text-blanc font-label text-label hover:bg-white/20 transition-all font-bold" href="mailto:support@keeva.work">
-            Poser une question
-          </a>
-</div>
-</div>
-</div>
-</section>
-</div>
-<script>
-  // Simple micro-interaction for smooth scrolling on anchored elements
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const targetId = this.getAttribute('href');
-      if (targetId && targetId !== '#') {
-        const targetElem = document.querySelector(targetId);
-        if (targetElem) {
-          e.preventDefault();
-          targetElem.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-    });
-  });
-</script></main><footer class="w-full bg-nuit text-blanc border-t-2 border-encre"><div class="max-w-[1200px] mx-auto px-margin-desktop py-space-xl"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-gutter-desktop mb-space-xl"><div class="lg:col-span-5 flex flex-col justify-between pr-0 lg:pr-space-xl"><div class="space-y-space-md"><div class="flex items-center gap-space-sm"><span class="font-headline-lg text-headline-lg text-blanc tracking-tight font-extrabold">KEEVA</span><span class="px-space-xs py-[2px] rounded-full bg-signature-fr/20 text-signature-fr font-caption text-caption uppercase tracking-wider">Field Precision</span></div><p class="font-body-base text-body-base text-ardoise max-w-sm">L'infrastructure télématique de nouvelle génération dédiée au suivi d'engins, d'équipements lourds et d'opérations de terrain sous conditions extrêmes.</p></div><div class="pt-space-lg"><div class="font-helper text-helper text-ardoise mb-space-xs uppercase tracking-wider">Assistance Opérationnelle</div><a class="inline-flex items-center gap-space-xs font-label text-label text-signature-fr hover:text-turquoise transition-colors" href="mailto:support@keeva.work"><span class="material-symbols-outlined text-[16px]">mail</span>support@keeva.work</a></div></div><div class="lg:col-span-2 space-y-space-md"><div class="font-caption text-caption text-ardoise uppercase tracking-wider">Plateforme</div><ul class="space-y-space-sm"><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" data-path="fonctionnalites" href="#">Fonctionnalités</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" data-path="comment-ca-marche" href="#">Comment ça marche</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" data-path="donnees" href="#">Données &amp; IoT</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" data-path="tarifs" href="#">Grille Tarifaire</a></li></ul></div><div class="lg:col-span-2 space-y-space-md"><div class="font-caption text-caption text-ardoise uppercase tracking-wider">Ressources</div><ul class="space-y-space-sm"><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" data-path="faq" href="#">FAQ &amp; Guides</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Documentation API</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Status Chantiers</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Boîtiers Matériels</a></li></ul></div><div class="lg:col-span-3 space-y-space-md"><div class="font-caption text-caption text-ardoise uppercase tracking-wider">Légal &amp; Conformité</div><ul class="space-y-space-sm"><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Mentions Légales</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Politique de Confidentialité</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Sécurité &amp; RGPD</a></li><li class="border-b border-white/5 pb-space-xs"><a class="font-body-base text-body-base text-inverse-on-surface hover:text-secondary-fixed transition-colors" href="#">Conditions Générales</a></li></ul></div></div><div class="pt-space-md border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-space-md"><p class="font-helper text-helper text-ardoise">© 2025 KEEVA Technologies Inc. Tous droits réservés. Conçu pour les environnements industriels et travaux publics.</p><div class="flex items-center gap-space-sm"><span class="w-2 h-2 rounded-full bg-signature-fr animate-pulse"></span><span class="font-caption text-caption uppercase text-ardoise">Serveurs Opérationnels 99.98%</span></div></div></div></footer></body></html>
-}
+  /* POLICES EMBARQUÉES — Inter (sous-ensemble latin), trois graisses : 400, 600,
+     700. C'est le SEUL jeu que la page écrit. Aucune ressource externe n'est
+     appelée : ni feuille distante, ni fichier de police. Un `<link>` vers
+     fonts.googleapis.com ferait transmettre l'adresse IP du visiteur à Google,
+     et la page dépendrait du réseau pour s'afficher correctement. */
+  /* ==========================================================================
+     KEEVA — jetons de la charte. AUCUNE autre couleur n'est employée : les
+     surfaces et les bordures sont ces mêmes teintes en transparence, jamais des
+     gris inventés ni un dégradé. La page suit le mode clair et le mode sombre.
+
+     LES RÔLES SONT ÉCRITS DANS LE NOM, ET C'EST VOLONTAIRE. La charte range les
+     douze teintes en deux familles : celles qui PORTENT DU TEXTE (encre, blanc,
+     bleu roi, Signature EN) et celles qui sont DÉCORATIVES (Signature FR,
+     turquoise, ambre, indigo, olive, cyan, ardoise). Un jeton nommé « indigo »
+     finit toujours par se retrouver derrière un libellé ; un jeton nommé
+     « décoratif » ne le peut pas. Le bleu roi garde son nom de charte, et il est
+     mesuré comme les autres.
+
+     ⚠️ LE TEXTE D'ACCENT EST LA **SIGNATURE EN** (#5B52DF), PAS LA SIGNATURE FR.
+     C'est contre-intuitif, et c'est le calcul qui tranche : la Signature FR
+     #24B5A8 donne **2,55:1** sur blanc, donc un texte d'accent illisible en plein
+     soleil. La Signature EN #5B52DF donne **5,65:1** — c'est elle que la charte
+     elle-même mesure dans « blanc sur signature FR, texte secondaire (bloc
+     d'action) ». Les deux noms restent ceux de la charte : c'est le RÔLE qui
+     change, et il est écrit ici pour qu'on ne les ré-échange pas.
+     ========================================================================== */
+  :root{
+    /* Teintes de la charte, nommées comme dans DESIGN.md */
+    --nuit:#0D1424;
+    --blanc:#FFFFFF;
+    --encre:#0E1333;
+    --signature-fr:#24B5A8;   /* décoratif — 2,55:1 sur blanc, jamais du texte */
+    --ambre:#DE7A16;          /* décoratif */
+    --indigo:#6366F1;         /* décoratif */
+    --roi:#236FE0;            /* liens — 4,75:1 sur blanc */
+    --turquoise:#14B8A6;      /* décoratif */
+    --olive:#8B9B37;          /* décoratif */
+    --signature-en:#5B52DF;   /* TEXTE D'ACCENT — 5,65:1 sur blanc */
+    --cyan:#009BDE;           /* décoratif (aplat de pastille) */
+    --ardoise:#94A3B8;        /* atténué sur nuit — 7,17:1 */
+
+    /* Rôles : ce qui écrit, ce qui décore, ce qui sépare. */
+    --texte:var(--encre);
+    --texte-doux:rgba(14,19,51,.74);
+    --accent:var(--signature-en);
+    --lien:var(--roi);
+    --decoratif-1:var(--signature-fr);
+    --decoratif-2:var(--ambre);
+    --decoratif-3:var(--indigo);
+    --trait:rgba(14,19,51,.12);
+    --trait-fort:rgba(14,19,51,.24);
+    --surface-douce:rgba(14,19,51,.03);
+    --ombre:0 1px 2px rgba(14,19,51,.06), 0 12px 32px rgba(14,19,51,.08);
+    --r-sm:10px; --r-md:14px; --r-lg:20px;
+    --fond:var(--blanc);
+  }
+  /* LE THÈME SOMBRE SUIT LE RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
+     la page d'accueil n'a pas à porter un interrupteur de test. Le petit texte
+     d'accent (surtitres et ligne d'accroche) y passe en BLANC — la Signature EN
+     donne 5,65:1 sur blanc mais 3,25:1 sur la nuit, sous la barre de 4,5:1 pour
+     de petites capitales. La teinte de marque reste portée par les pastilles, les
+     tracés et le bandeau final. */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fond:var(--nuit);
+      --texte:var(--blanc);
+      --texte-doux:rgba(255,255,255,.74);
+      --trait:rgba(255,255,255,.14);
+      --trait-fort:rgba(255,255,255,.26);
+      --surface-douce:rgba(255,255,255,.05);
+      --ombre:0 0 0 1px rgba(255,255,255,.10);
+    }
+    /* LE PETIT TEXTE D'ACCENT EN THÈME SOMBRE. La Signature EN donne 5,65:1 sur
+       blanc (elle est donc l'accent du thème clair) mais 3,25:1 sur la nuit : sous
+       la barre de 4,5:1 pour de PETITES CAPITALES. Les surtitres et la ligne
+       d'accroche s'écrivent donc en blanc sur la nuit, et la teinte de marque
+       reste portée par les pastilles, les tracés et le bandeau final. */
+    .tagline,.sur-titre{color:var(--blanc);}
+  }
+  /* Le thème sombre suit le RÉGLAGE DU SYSTÈME, sans JavaScript et sans attribut :
+     la page d'accueil n'a pas à porter un interrupteur de test. */
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--fond);color:var(--texte);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;}
+  a{color:inherit;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px;}
+  @media(min-width:640px){.wrap{padding:0 24px;}}
+  @media(min-width:1024px){.wrap{padding:0 32px;}}
+  section{padding:80px 0;}
+  @media(min-width:1024px){section{padding:96px 0;}}
+  /* ATTENTION : .wrap ne porte que les marges latérales, mais une classe l'emporte
+     sur le sélecteur de type. Posé sur une <section>, il annulait donc aussi
+     l'espacement vertical — les sections se touchaient. On le rétablit ici, et les
+     déclarations en ligne « padding-top:0 » continuent de gagner quand une section
+     doit coller à la précédente. */
+  section.wrap{padding-top:80px;padding-bottom:80px;}
+  @media(min-width:640px){section.wrap{padding-left:24px;padding-right:24px;}}
+  @media(min-width:1024px){section.wrap{padding-top:96px;padding-bottom:96px;padding-left:32px;padding-right:32px;}}
+  @media(max-width:600px){section.wrap{padding-top:56px;padding-bottom:56px;}}
+  /* Le contour de focus est décoratif (il ne porte pas de texte) : l'indigo est
+     ici à sa place, et il se voit aussi bien sur blanc que sur nuit. */
+  :focus-visible{outline:3px solid var(--decoratif-3);outline-offset:2px;border-radius:8px;}
+
+  /* --- Marque : le pictogramme de la charte, mot en encre ------------------- */
+  .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;}
+  .marque svg{display:block;flex:0 0 auto;}
+  .marque .mot{font-weight:800;font-size:18px;letter-spacing:.06em;color:var(--texte);}
+
+  /* --- Boutons ------------------------------------------------------------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--r-sm);padding:12px 20px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;min-height:46px;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
+  .btn svg{flex:0 0 auto;}
+  .btn-primaire{background:var(--texte);color:var(--fond);box-shadow:var(--ombre);}
+  .btn-primaire:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(14,19,51,.22);}
+  .btn-secondaire{background:transparent;color:var(--texte);border-color:var(--trait-fort);}
+  .btn-secondaire:hover{background:var(--surface-douce);}
+  .btn-clair{background:var(--blanc);color:var(--nuit);}
+  .btn-contour{background:transparent;color:var(--blanc);border:2px solid rgba(255,255,255,.35);}
+  .btn-contour:hover{background:rgba(255,255,255,.10);}
+
+  /* --- En-tête sticky ------------------------------------------------------ */
+  header{position:sticky;top:0;z-index:50;background:var(--fond);border-bottom:1px solid var(--trait);}
+  @supports (backdrop-filter: blur(12px)){
+    header{background:rgba(255,255,255,.82);backdrop-filter:blur(12px);}
+  }
+  @media (prefers-color-scheme: dark){
+    @supports (backdrop-filter: blur(12px)){ header{background:rgba(13,20,36,.82);} }
+  }
+  .entete{display:flex;align-items:center;gap:14px;height:64px;}
+  .entete nav{display:none;gap:4px;}
+  @media(min-width:900px){.entete nav{display:flex;margin-left:14px;}}
+  .entete nav a{padding:8px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:500;color:var(--texte-doux);text-decoration:none;}
+  .entete nav a:hover{color:var(--texte);background:var(--surface-douce);}
+  .entete .pousse{flex:1;}
+  .lang{display:none;gap:2px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-sm);padding:3px;}
+  @media(min-width:640px){.lang{display:flex;}}
+  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;}
+  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:0 1px 2px rgba(14,19,51,.10);}
+  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:8px;}
+  @media(min-width:640px){.lien-connexion{display:inline-flex;}}
+  .lien-connexion:hover{color:var(--texte);}
+
+  /* --- Accroche ------------------------------------------------------------ */
+  section.heros{display:grid;gap:44px;align-items:center;padding-top:56px;}
+  @media(min-width:1024px){section.heros{grid-template-columns:1.618fr 1fr;gap:56px;padding-top:72px;}}
+  .pastille{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--trait-fort);background:var(--surface-douce);font-size:12.5px;font-weight:600;color:var(--texte-doux);}
+  .point{position:relative;width:8px;height:8px;border-radius:50%;background:var(--decoratif-1);flex:0 0 auto;}
+  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--decoratif-1);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
+  @keyframes ping{75%,100%{transform:scale(2.4);opacity:0;}}
+  h1{font-size:clamp(30px,5.2vw,58px);font-weight:800;margin:20px 0 0;}
+  .tagline{display:block;font-size:clamp(13px,1.6vw,16px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
+  /* Le texte d'accent est `--accent` (Signature EN, 5,65:1 sur blanc) — jamais
+     l'indigo (4,47:1, décoratif), jamais la Signature FR (2,55:1 sur blanc), et
+     jamais un dégradé de texte : illisible en plein soleil. */
+  .tagline.fr{color:var(--accent);}
+  .tagline.en{color:var(--texte-doux);}
+  .accroche-fort{color:var(--accent);}
+  .sous-titre{font-size:clamp(16px,1.6vw,19px);color:var(--texte-doux);margin:20px 0 30px;max-width:56ch;}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .note{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--texte-doux);margin-top:18px;max-width:56em;}
+  .note svg{color:var(--accent);flex:0 0 auto;}
+
+  /* --- L'illustration : l'application telle qu'elle est -------------------- */
+  /* Honnête par construction : c'est la mise en page réelle (une carte machine,
+     son compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES
+     — aucun modèle, aucune marque, aucune donnée inventée. Le cadre est annoncé
+     comme un aperçu, et il ne porte ni dégradé, ni pastille décorative écrite. */
+  .visuel{position:relative;}
+  .maquette{position:relative;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);box-shadow:var(--ombre);padding:16px;}
+  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--trait);}
+  .maquette .tete .titre{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--texte-doux);}
+  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);}
+  .ligne-machine{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 13px;border:1px solid var(--trait);border-radius:var(--r-md);margin-bottom:8px;}
+  .ligne-machine:last-of-type{margin-bottom:0;}
+  .ligne-machine .nom{font-weight:600;font-size:13.5px;}
+  .ligne-machine .meta{font-size:12px;color:var(--texte-doux);}
+  /* Une pastille de couleur EST le signal. Le texte y est en encre, et les deux
+     aplats choisis sont les DEUX teintes décoratives qui passent 4,5:1 avec lui :
+     l'ambre (5,95:1) et le cyan (5,82:1). La Signature FR, elle, plafonne à
+     3,79:1 avec l'encre : elle ne porte donc pas de texte ici — « à jour » est
+     une pastille en contour, ce qui la distingue sans rien inventer. */
+  .etat{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;flex:0 0 auto;color:var(--encre);}
+  .etat.retard{background:var(--ambre);}
+  .etat.bientot{background:var(--cyan);}
+  .etat.ajour{border:1px solid var(--trait-fort);}
+  .maquette .legende{font-size:12px;color:var(--texte-doux);margin:12px 0 0;}
+  .maquette .bloc-pieces{border:1px solid var(--trait);border-radius:var(--r-md);padding:11px 13px;margin-top:12px;}
+  .maquette .bloc-pieces .titre{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);}
+  .maquette .bloc-pieces ul{margin:8px 0 0;padding-left:16px;font-size:13px;color:var(--texte-doux);}
+
+  /* --- Têtes de section ---------------------------------------------------- */
+  .section-tete{max-width:60ch;margin-bottom:40px;}
+  .sur-titre{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
+  h2{font-size:clamp(24px,3.2vw,38px);font-weight:800;margin-top:10px;}
+  .section-tete p{color:var(--texte-doux);font-size:17px;margin:14px 0 0;}
+
+  /* --- Cartes -------------------------------------------------------------- */
+  .cartes{display:grid;gap:26px;}
+  @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
+  .carte{background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;transition:border-color .3s,box-shadow .3s,transform .3s;}
+  .carte:hover{border-color:var(--trait-fort);box-shadow:0 18px 40px rgba(14,19,51,.10);transform:translateY(-2px);}
+  /* Plus de dégradé dans la pastille d'icône : la teinte décorative reste, le
+     trait dessus est en encre — donc lisible. */
+  .carte .icone{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:var(--decoratif-1);color:var(--encre);}
+  .carte h3{font-size:20px;font-weight:700;margin-bottom:10px;}
+  .carte p{margin:0;color:var(--texte-doux);}
+
+  /* --- Comment ça marche : trois étapes ------------------------------------ */
+  .etapes{list-style:none;margin:0;padding:0;display:grid;gap:26px;}
+  @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
+  .etape{background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:30px;}
+  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--decoratif-1);color:var(--encre);font-weight:800;font-size:16px;margin-bottom:18px;}
+  .etape h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+  .etape p{margin:0;color:var(--texte-doux);font-size:15.5px;}
+
+  /* --- Vos données : quatre engagements ------------------------------------ */
+  .confiance{display:grid;gap:24px;background:var(--surface-douce);border:1px solid var(--trait);border-radius:var(--r-lg);padding:36px 32px;}
+  @media(min-width:768px){.confiance{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
+  .confiance h3{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;margin:0 0 7px;}
+  .confiance h3 svg{color:var(--encre);flex:0 0 auto;}
+  .confiance p{margin:0;font-size:14.5px;color:var(--texte-doux);}
+  .confiance .suite{margin-top:22px;font-size:14.5px;}
+  .suite a{color:var(--lien);font-weight:600;}
+  /* LA LARGEUR DE LECTURE EST UNE RÈGLE, PAS UNE IMPRESSION : au-delà de 90
+     caractères par ligne, l'œil perd le début de la ligne suivante. Ces deux
+     blocs sont hors de `.section-tete` (qui porte déjà ses 60ch) : sans cette
+     borne, ils couraient sur 124 caractères à 1440 px. La cible est 75 ; on
+     borne donc à ~82 caractères, ce qui laisse la phrase respirer sans perdre
+     le lecteur. Contrôlé par le harnais de rendu (mesure « largeur de lecture »). */
+  .suite{max-width:34em;}
+  .notetarif{max-width:52ch;}
+
+  /* --- Tarifs : quatre offres, largeurs égales ---------------------------- */
+  /* Deux lignes de deux sur écran large ; en dessous, l'empilement (une
+     colonne) parce que quatre colonnes ne tiennent sur aucun téléphone. */
+  .tarifs{display:grid;gap:26px;align-items:stretch;}
+  @media(min-width:1024px){.tarifs{grid-template-columns:repeat(2,1fr);}}
+  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border:1px solid var(--trait);border-radius:var(--r-lg);padding:32px;box-shadow:var(--ombre);}
+  /* La carte mise en avant se distingue par sa BORDURE et son bouton, pas par
+     une couleur inventée : l'encre pour les deux. Le badge, lui, est écrit en
+     blanc : il porte donc une teinte qui PORTE du blanc (la Signature EN,
+     5,65:1) — l'indigo (4,47:1) est décoratif, il n'écrit pas.
+     Le bouton de la carte mise en avant est le bouton PRINCIPAL : c'est la
+     règle de la charte (« une action de validation dans une carte est un bouton
+     principal, plein, encre »). */
+  /* PAS D'« overflow:hidden » ICI : le badge « RECOMMANDÉ » est posé en
+     position:absolute depuis le bord du REMBOURRAGE (2 px à l'intérieur du bord
+     de 2 px), et le pixel d'arrondi de chaque côté le faisait dépasser d'environ
+     2 px — le moteur le coupait, et le contrôle « textes coupés » le voyait. Le
+     badge est maintenant borné (max-width:100%) et insécable (nowrap) : il ne peut
+     plus dépasser, donc plus rien n'a besoin d'être écrêté. */
+  .offre.business{border:2px solid var(--encre);}
+  @media (prefers-color-scheme: dark){.offre.business{border-color:var(--blanc);}}
+  .recommande{position:absolute;top:0;right:0;background:var(--accent);color:var(--blanc);font-size:11.5px;font-weight:700;letter-spacing:.08em;padding:6px 12px;border-bottom-left-radius:var(--r-sm);white-space:nowrap;max-width:100%;}
+  .offre h3{font-size:20px;font-weight:700;}
+  /* Le prix domine, la limite est juste en dessous et se lit d'un coup d'œil. */
+  .prix{display:flex;align-items:baseline;gap:8px;margin:14px 0 0;}
+  .prix .montant{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;}
+  .prix .periode{color:var(--texte-doux);font-size:15px;}
+  .offre .limite{margin:8px 0 0;font-size:17px;font-weight:700;}
+  .offre .pour{color:var(--texte-doux);margin:16px 0 0;}
+  .avantages{list-style:none;margin:22px 0 26px;padding:0;display:grid;gap:11px;align-content:start;}
+  .avantages li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--texte-doux);}
+  .avantages svg{flex:0 0 auto;margin-top:3px;color:var(--accent);}
+  /* Le bouton est poussé en BAS de la carte : les boutons s'alignent, quelle
+     que soit la longueur des listes. */
+  .offre .btn{width:100%;margin-top:auto;}
+  .offre.business .avantages svg{color:var(--texte);}
+  .notes{display:grid;gap:18px;margin-top:28px;}
+  @media(min-width:768px){.notes{grid-template-columns:repeat(2,1fr);}}
+  .notetarif{display:flex;gap:10px;margin:0;font-size:15px;color:var(--texte-doux);}
+  .notetarif svg{color:var(--encre);flex:0 0 auto;margin-top:3px;}
+
+  /* --- FAQ : deux colonnes sur écran large -------------------------------- */
+  .faq{display:grid;gap:12px;}
+  @media(min-width:900px){.faq{grid-template-columns:repeat(2,1fr);gap:16px 26px;align-items:start;}}
+  details{border:1px solid var(--trait);border-radius:var(--r-md);background:var(--fond);overflow:hidden;}
+  details[open]{border-color:var(--trait-fort);box-shadow:0 0 0 3px rgba(14,19,51,.06);}
+  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;font-weight:600;font-size:15.5px;}
+  summary::-webkit-details-marker{display:none;}
+  summary svg{flex:0 0 auto;color:var(--texte-doux);transition:transform .2s ease;}
+  details[open] summary svg{transform:rotate(180deg);}
+  details .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:15px;}
+
+  /* --- Bandeau final + pied de page --------------------------------------- */
+  .final{background:var(--nuit);color:var(--blanc);border-radius:var(--r-lg);padding:64px 28px;text-align:center;}
+  .final h2{color:var(--blanc);}
+  .final p{color:rgba(255,255,255,.74);margin:16px auto 30px;max-width:56ch;}
+  .final .actions{justify-content:center;}
+  footer{background:var(--nuit);color:var(--ardoise);padding:56px 0 28px;margin-top:80px;}
+  .pied{display:grid;gap:32px;}
+  @media(min-width:768px){.pied{grid-template-columns:2fr 1fr 1fr 1fr;}}
+  footer .marque .mot{color:var(--blanc);}
+  footer p{color:var(--ardoise);font-size:14.5px;margin:14px 0 0;max-width:38ch;}
+  footer h3{color:var(--blanc);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px;}
+  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+  footer a{color:var(--ardoise);text-decoration:none;font-size:14.5px;}
+  footer a:hover{color:var(--blanc);}
+  .bas{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;border-top:1px solid rgba(255,255,255,.12);margin-top:44px;padding-top:22px;font-size:13px;color:var(--ardoise);}
+  footer .lang button{color:var(--ardoise);}
+  footer .lang button.actif{background:rgba(255,255,255,.12);color:var(--blanc);box-shadow:none;}
+
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
+  @media(max-width:600px){section{padding:56px 0;}}
+  /* Le défilement doux et le pouls de la pastille sont du confort, pas de
+     l'information : ceux qui demandent moins d'animation ne les reçoivent pas. */
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .point::after{animation:none;}
+  }
 </style>
 </head>
 <body>
