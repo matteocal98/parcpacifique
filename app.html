@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AIT6nsCdwp74sk1DPx6fKXAplhLsWXjPrjcBswy4CdU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9AogyQSqSGczw0ctcQcCE8emS8KOKjp35V2QCrYiGaY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1488,7 +1488,7 @@
      référence (6 colonnes) tienne sans ascenseur horizontal — c'est cet
      ascenseur qui donnait l'impression de défaut d'affichage sous le
      tableau. */
-  .plan-modal .modal{max-width:960px;}
+  .plan-modal .modal{max-width:1180px;}
   /* Fil d'Ariane, au-dessus de tout : « Retour au parc » ferme la modale,
      comme le bouton Fermer — il n'y a pas d'autre page à revenir. */
   .plan-fil-ariane{
@@ -1517,6 +1517,12 @@
   .plan-toolbar-btn.is-primary{background:var(--ink);border-color:var(--ink);color:#fff;}
   .plan-toolbar-btn.is-primary:hover{background:var(--dark);}
   .plan-modal .modal-actions{justify-content:flex-end;}
+  /* Le bouton Fermer, seul en pied de modale, ne reste pas gris neutre :
+     même teinte indigo que le reste de la fiche (mini-champs, icônes). */
+  .plan-modal .modal-actions #close-plan{
+    flex:0 0 auto;min-width:140px;color:var(--primary-dark);border-color:var(--primary-tint-2);background:var(--primary-tint);
+  }
+  .plan-modal .modal-actions #close-plan:hover{background:var(--primary-tint-2);border-color:var(--primary-dark);}
   /* En-tête de la fiche : photo (si connue), nom et badge d'état, comme la
      maquette « WEB fiche plan entretien » — sans rien inventer (moteur, poids,
      chantier ne sont pas des champs du produit, ils restent absents). */
@@ -1526,7 +1532,7 @@
      photo étriquée à côté d'un grand bloc vide — c'est ce que dit la
      maquette (« même hauteur que le bloc en haut à droite »). */
   .plan-hero{display:flex;gap:14px;align-items:stretch;margin-bottom:14px;flex-wrap:wrap;}
-  .plan-hero-photo{flex:0 0 150px;width:150px;border-radius:var(--r-chip);overflow:hidden;border:1.5px solid var(--line);background:var(--surface-soft);}
+  .plan-hero-photo{flex:0 0 220px;width:220px;border-radius:var(--r-chip);overflow:hidden;border:1.5px solid var(--line);background:var(--surface-soft);}
   .plan-hero-photo img{width:100%;height:100%;object-fit:cover;display:block;}
   .plan-hero-corps{flex:1 1 180px;min-width:180px;display:flex;flex-direction:column;}
   .plan-hero-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -14885,7 +14891,7 @@ function openPlanView(machine, companyId, categories) {
     const enRetard = infoTache(it, machine.plan, machine).state === 'late';
     return `
           <tr class="${enRetard ? 'is-late-row' : ''}">
-            <td class="item-label"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span><span>${esc(it.label || '')}</span></td>
+            <td class="item-label"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</td>
             <td>${cell(it.frequency)}</td>
             <td>${etatTacheHtml(it, machine.plan, machine, 'colonne')}</td>
             <td>${cell(it.spec)}</td>
@@ -14897,7 +14903,7 @@ function openPlanView(machine, companyId, categories) {
     const enRetard = infoTache(it, machine.plan, machine).state === 'late';
     return `
         <div class="tache-carte${enRetard ? ' is-late-row' : ''}">
-          <div class="tache-titre"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span><span>${esc(it.label || '')}</span></div>
+          <div class="tache-titre"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Fréquence')}</span><span class="tache-valeur">${cell(it.frequency)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>
