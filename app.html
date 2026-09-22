@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-yrxrWqwo/ARttDVd2h4T4GgQ/NuVvqelD9KS8u9B13I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vJAnPCNg7mwQkK8OPGogcKPLDQ7on9B7H1sJTYEA1kE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1742,6 +1742,15 @@
   .log-machine-texte{font-size:13.5px;color:var(--ink-2);}
   .log-modal label .label-ico{color:var(--primary-dark);}
 
+  /* Un fond par bloc, comme sur la fiche machine — plus foncé là où le bloc
+     porte surtout du texte à LIRE (spécifications, remarques) que là où il
+     ne porte que des champs courts (date, compteur). */
+  .log-bloc{margin:16px 0 0;padding:16px 18px;border-radius:var(--r-card);border:1.5px solid var(--line-3);}
+  .log-bloc:first-of-type{margin-top:16px;}
+  .log-bloc-quand{background:rgba(91,82,223,.05);}
+  .log-bloc-elements{background:rgba(36,181,168,.09);}
+  .log-bloc-remarques{background:rgba(35,111,224,.12);}
+
   .log-compteur-ligne{display:flex;align-items:stretch;}
   .log-compteur-ligne input{border-top-right-radius:0;border-bottom-right-radius:0;}
   .log-compteur-unite{
@@ -1780,8 +1789,10 @@
   }
 
   .log-info-box{
+    /* Un peu plus foncé que les autres blocs : celui-ci porte un paragraphe
+       à lire, pas seulement des champs courts. */
     display:flex;gap:10px;margin-top:16px;padding:13px 15px;
-    border:1.5px solid var(--primary-tint-2);border-radius:var(--r-chip);background:#E6E5FA;
+    border:1.5px solid var(--primary-tint-2);border-radius:var(--r-chip);background:#D9D6F9;
   }
   .log-info-box .card-ico{color:var(--primary-dark);margin-top:1px;}
   .log-info-titre{font-weight:700;font-size:13.5px;color:var(--ink);}
@@ -14791,35 +14802,38 @@ function openLogInterventionModal(machine, tache) {
         <span class="log-machine-texte">${trad('coche ce qui a été fait, ça met à jour la prochaine échéance.')}</span>
       </div>
       <form id="log-form">
-        <div class="field-row">
-          <div>
-            <label for="log-date"><span class="label-ico">${picto('prochain')}</span>${trad('Date de l\'entretien')}</label>
-            <input id="log-date" type="date" value="${today}" required>
-            <div class="hint">${trad('Date d\'intervention sur site')}</div>
-          </div>
-          ${isCounter ? `
-          <div>
-            <label for="log-hours"><span class="label-ico">${picto('compteur')}</span>${trad('Compteur au moment de l\'entretien')}</label>
-            <div class="log-compteur-ligne">
-              <input id="log-hours" type="number" min="0" step="${COUNTER_UNITS[unit].step}" value="${esc(machineCounter(machine) ?? '')}" required>
-              <span class="log-compteur-unite">${esc(COUNTER_UNITS[unit].short)}</span>
+        <div class="log-bloc log-bloc-quand">
+          <div class="field-row">
+            <div>
+              <label for="log-date"><span class="label-ico">${picto('prochain')}</span>${trad('Date de l\'entretien')}</label>
+              <input id="log-date" type="date" value="${today}" required>
+              <div class="hint">${trad('Date d\'intervention sur site')}</div>
             </div>
-            ${machineCounter(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter(machine), unit) })}</div>` : ''}
-          </div>` : ''}
+            ${isCounter ? `
+            <div>
+              <label for="log-hours"><span class="label-ico">${picto('compteur')}</span>${trad('Compteur au moment de l\'entretien')}</label>
+              <div class="log-compteur-ligne">
+                <input id="log-hours" type="number" min="0" step="${COUNTER_UNITS[unit].step}" value="${esc(machineCounter(machine) ?? '')}" required>
+                <span class="log-compteur-unite">${esc(COUNTER_UNITS[unit].short)}</span>
+              </div>
+              ${machineCounter(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter(machine), unit) })}</div>` : ''}
+            </div>` : ''}
+          </div>
+
+          <!-- Qui a fait l'entretien, dans l'équipe : le CHAMP seulement pour
+               l'instant, comme convenu — la sélection réelle (liste de
+               l'équipe) et l'enregistrement viendront dans une prochaine
+               passe. Désactivé plutôt qu'actif-mais-muet : un champ qui a
+               l'air de fonctionner et n'enregistre rien est le piège que ce
+               produit refuse déjà ailleurs (compteur, photo…). -->
+          <label for="log-operateur"><span class="label-ico">${picto('equipe')}</span>${trad('Effectué par')}</label>
+          <select id="log-operateur" disabled>
+            <option value="">${trad('Choix dans l\'équipe — bientôt disponible')}</option>
+          </select>
         </div>
 
-        <!-- Qui a fait l'entretien, dans l'équipe : le CHAMP seulement pour
-             l'instant, comme convenu — la sélection réelle (liste de
-             l'équipe) et l'enregistrement viendront dans une prochaine
-             passe. Désactivé plutôt qu'actif-mais-muet : un champ qui a
-             l'air de fonctionner et n'enregistre rien est le piège que ce
-             produit refuse déjà ailleurs (compteur, photo…). -->
-        <label for="log-operateur"><span class="label-ico">${picto('equipe')}</span>${trad('Effectué par')}</label>
-        <select id="log-operateur" disabled>
-          <option value="">${trad('Choix dans l\'équipe — bientôt disponible')}</option>
-        </select>
-
         ${items.length ? `
+        <div class="log-bloc log-bloc-elements">
           <div class="log-elements-tete">
             <label><span class="label-ico">${picto('case')}</span>${trad('Éléments traités')}</label>
             <span class="badge neutral" id="log-coches-compte"></span>
@@ -14835,10 +14849,13 @@ function openLogInterventionModal(machine, tache) {
                 ${it.frequency ? `<span class="log-item-cycle">${esc(it.frequency)}</span>` : ''}
               </label>`).join('')}
           </div>
+        </div>
         ` : ''}
 
-        <label for="log-notes"><span class="label-ico">${picto('message')}</span>${trad('Remarques')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
-        <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
+        <div class="log-bloc log-bloc-remarques">
+          <label for="log-notes"><span class="label-ico">${picto('message')}</span>${trad('Remarques')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
+          <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
+        </div>
         <div class="hint" id="log-error"></div>
 
         ${planItems.length && machine.plan ? `
