@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vJAnPCNg7mwQkK8OPGogcKPLDQ7on9B7H1sJTYEA1kE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-DEcc9PyZO180axXsDG58FtV/5daC5kCN+DsqYR5Ni7U=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1774,13 +1774,26 @@
      les cartes de la fiche machine). */
   .log-item-carte:has(input:checked),.log-item-carte.is-checked{border-color:var(--ok);background:var(--ok-bg);}
   .log-item-carte input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ok);}
-  .log-item-corps{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+  /* Colonnes à largeur FIXE (70 / 30 exactement) : un conteneur prend toute
+     la place restante une fois la case cochée posée (flex:1, sans quoi un
+     pourcentage du CONTENEUR ENTIER déborderait de la largeur de la case),
+     et c'est À L'INTÉRIEUR de ce conteneur que le produit et l'échéance se
+     partagent 70 / 30 en largeur réelle — pas une proportion de croissance
+     flex, que le contenu peut fausser. C'est l'échéance qui doit passer à
+     la ligne quand elle est longue, jamais le produit d'entretien : avant
+     ce correctif, un long libellé de cycle (non coupé) écrasait la colonne
+     du produit et lui faisait perdre la ligne, mot par mot. */
+  .log-item-colonnes{flex:1 1 0;min-width:0;display:flex;gap:11px;}
+  .log-item-corps{flex:0 0 70%;width:70%;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;min-width:0;}
+  /* Sans échéance à afficher (tâche sans cycle connu), le produit reprend
+     toute la largeur au lieu de laisser 30 % vides. */
+  .log-item-corps.log-item-corps-pleine{flex:1 1 auto;width:auto;}
   .log-item-titre{font-weight:700;font-size:14.5px;color:var(--ink);}
   .log-item-spec{font-size:12.5px;color:var(--ink-2);}
   .log-item-cycle{
-    flex:0 0 auto;font-size:11px;font-weight:800;text-align:center;line-height:1.4;
+    flex:0 0 30%;width:30%;min-width:0;box-sizing:border-box;font-size:11px;font-weight:800;text-align:left;line-height:1.4;
     padding:5px 9px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink-2);
-    white-space:nowrap;align-self:center;
+    white-space:normal;overflow-wrap:break-word;align-self:center;
   }
   .log-item-carte:has(input:checked) .log-item-cycle,.log-item-carte.is-checked .log-item-cycle{background:var(--ok);color:var(--ok-ink);}
 
@@ -14842,11 +14855,18 @@ function openLogInterventionModal(machine, tache) {
             ${itemsRiches.map(it => `
               <label class="log-item-carte">
                 <input type="checkbox" value="${esc(it.label)}"${it.label === tache ? ' checked' : ''}>
-                <span class="log-item-corps">
+                ${it.frequency ? `
+                <span class="log-item-colonnes">
+                  <span class="log-item-corps">
+                    <span class="log-item-titre">${esc(it.label)}</span>
+                    ${it.spec ? `<span class="log-item-spec">${esc(it.spec)}</span>` : ''}
+                  </span>
+                  <span class="log-item-cycle">${esc(it.frequency)}</span>
+                </span>` : `
+                <span class="log-item-corps log-item-corps-pleine">
                   <span class="log-item-titre">${esc(it.label)}</span>
                   ${it.spec ? `<span class="log-item-spec">${esc(it.spec)}</span>` : ''}
-                </span>
-                ${it.frequency ? `<span class="log-item-cycle">${esc(it.frequency)}</span>` : ''}
+                </span>`}
               </label>`).join('')}
           </div>
         </div>
