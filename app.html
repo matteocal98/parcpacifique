@@ -393,14 +393,14 @@
     }
     .sidebar .wordmark{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.01em;padding-bottom:18px;}
     .sidebar .wordmark em{font-style:normal;color:var(--ok-accent);}
-    /* L'ICÔNE EST DANS LE BOUTON, PAS À CÔTÉ : le dessin prend `currentColor`,
-       donc l'entrée active n'a qu'un état à définir — le sien. L'ardoise
-       (`--dark-ink`) est la teinte atténuée sur fond sombre du socle (7,17:1 sur
-       la nuit) : c'est son rôle, et c'est le seul texte de la barre qui ne soit
-       pas du blanc. */
+    /* L'ICÔNE EST DANS LE BOUTON, PAS À CÔTÉ. Le libellé est en blanc pour
+       TOUTES les entrées (pas seulement actif/survol) : c'est la barre la plus
+       visible de l'appli, son texte doit se lire d'un coup d'œil. Seule
+       l'icône reste en ardoise (`--dark-ink`) au repos, et c'est elle — avec le
+       fond et le trait de gauche — qui distingue encore l'entrée active. */
     .sidebar .nav-item{
       display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;cursor:pointer;background:none;
-      font-size:13.5px;font-weight:600;color:var(--dark-ink);padding:10px 12px;border-radius:9px;
+      font-size:14.5px;font-weight:600;color:#fff;padding:10px 12px;border-radius:9px;
     }
     .sidebar .nav-ico{display:flex;align-items:center;justify-content:center;flex:0 0 18px;color:var(--dark-ink);}
     .sidebar .nav-ico svg{display:block;width:18px;height:18px;}
