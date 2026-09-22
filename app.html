@@ -1588,12 +1588,12 @@
   .plan-hero-compteur .compteur-titre{color:rgba(255,255,255,.7);}
   .plan-hero-compteur .compteur-champ{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;}
   .plan-hero-compteur .compteur-unite{background:rgba(255,255,255,.16);color:#fff;}
-  /* Vert clair, comme demandé — la seule teinte verte de la charte close.
+  /* Vert demandé précisément par sa valeur (#24B5A8 = --ok), texte noir.
      Spécificité forcée à 3 classes : à ≥900px, une règle du Parc
      (.compteur-bureau .compteur-enregistrer, même poids que 2 classes)
      l'emportait sinon par ordre de source. */
   .plan-hero-compteur .compteur-bureau .compteur-enregistrer,
-  .plan-hero-compteur .compteur-mobile .compteur-enregistrer{background:var(--olive);}
+  .plan-hero-compteur .compteur-mobile .compteur-enregistrer{background:var(--ok);color:#000;}
   /* Spécificité forcée à 3 classes partout ici : à ≥900px, les règles
      .compteur-bureau .compteur-photo(...)  du Parc (même poids que 2
      classes) l'emportaient sinon par ordre de source, et repassaient ces
@@ -1602,14 +1602,14 @@
   .plan-hero-compteur .compteur-bureau .compteur-photo,
   .plan-hero-compteur .compteur-mobile .compteur-photo{
     background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.24);
-    padding:7px 14px;color:#fff;font-weight:800;text-decoration:none;
+    padding:10px 20px;color:#fff;font-weight:800;text-decoration:none;
   }
   .plan-hero-compteur .compteur-bureau .compteur-photo.is-principal,
   .plan-hero-compteur .compteur-mobile .compteur-photo.is-principal{
-    background:var(--ok);border-color:var(--ok);color:var(--ok-ink);
+    background:var(--ok);border-color:var(--ok);color:var(--ok-ink);padding:10px 20px;
   }
   .plan-hero-compteur .compteur-bureau .compteur-photo.is-secondaire,
-  .plan-hero-compteur .compteur-mobile .compteur-photo.is-secondaire{color:#fff;}
+  .plan-hero-compteur .compteur-mobile .compteur-photo.is-secondaire{color:#fff;padding:10px 20px;}
   .plan-hero-compteur .compteur-bureau .compteur-photo:hover,
   .plan-hero-compteur .compteur-mobile .compteur-photo:hover{background:rgba(255,255,255,.16);text-decoration:none;}
   .plan-hero-compteur .compteur-note{color:rgba(255,255,255,.7);}
