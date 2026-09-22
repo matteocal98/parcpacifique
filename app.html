@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-zAm3npA0FmOtv6E7a1rcq1VR9JD3b1nlZkdtrOyry60=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Cg6QmCrUJYjSVO/M2er+xUMVBoRQn0bkXjtxNyQQbJs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3645,9 +3645,9 @@
   }
   .compte-danger .card-title,.compte-danger .muted-text{color:var(--late);}
   .compte-danger .card-title .card-ico{color:var(--late);}
-  .btn-danger-outline{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:var(--surface);color:var(--late);font-weight:700;cursor:pointer;}
+  .btn-danger-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:rgba(222,122,22,.08);color:var(--late);font-weight:700;cursor:pointer;}
   .btn-danger-outline .card-ico{color:var(--late);}
-  .btn-danger-outline:hover{background:rgba(222,122,22,.08);}
+  .btn-danger-outline:hover{background:rgba(222,122,22,.16);}
   .compte-sous-bloc{margin-top:14px;padding:14px 16px;border-radius:12px;background:rgba(91,82,223,.07);border:1px solid rgba(91,82,223,.18);}
   .compte-sous-bloc:first-child{margin-top:0;}
   .compte-sous-bloc-tete{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -3655,6 +3655,16 @@
   .compte-sous-bloc-tete .label{margin:0;flex:1;}
   .badge-auto{font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--primary-dark);background:rgba(91,82,223,.14);border-radius:999px;padding:3px 9px;text-transform:uppercase;white-space:nowrap;}
   .tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:rgba(91,82,223,.08);border-color:rgba(91,82,223,.22);}
+
+  /* Toute la page « Mon compte » contrastée : chaque champ de saisie et chaque
+     bouton porte un léger voile de couleur plutôt qu'un blanc plat sur les
+     cartes blanches — même teinte indigo que le reste du produit
+     (--primary-tint), la zone sensible gardant son propre orange. */
+  .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--primary-tint);}
+  .vue-compte input:not([type=checkbox]):focus,.vue-compte select:focus,.vue-compte textarea:focus{background:var(--surface);}
+  .vue-compte button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
+  .vue-compte button.secondary:hover{background:var(--primary-tint-2);}
+  .vue-compte .membre-ligne{background:var(--primary-tint);}
 </style>
 </head>
 <body>
@@ -11693,6 +11703,7 @@ VIEWS.account = {
     // serait le pire des deux mondes.
     const plan = c.plan || UI.companyPlan || 'free';
     return `
+      <div class="vue-compte">
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Entreprise, équipe & sécurité')}</span>
       </div>
@@ -11772,6 +11783,11 @@ VIEWS.account = {
         </details>
       </section>
 
+        </div>
+        <div class="dash-side">
+
+      <!-- Déplacé en tête de colonne de droite, au-dessus de « Contact &
+           Alertes » — l'identité de connexion est ce qu'on cherche en premier. -->
       <section class="card">
         <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('cadenas')}</span><span>${trad('Identifiants & Connexion')}</span></h2></div>
         <p class="muted-text">${trad('Modification de l\'accès principal administrateur.')}</p>
@@ -11792,9 +11808,6 @@ VIEWS.account = {
           <button type="button" class="primary" id="acc-save-email">${trad('Mettre à jour l\'e-mail')}</button>
         </div>
       </section>
-
-        </div>
-        <div class="dash-side">
 
       <section class="card">
         <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Contact & Alertes')}</span></h2></div>
@@ -11867,6 +11880,7 @@ VIEWS.account = {
       </section>
 
         </div>
+      </div>
       </div>`;
   },
   mount() {
