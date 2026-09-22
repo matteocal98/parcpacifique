@@ -2643,7 +2643,7 @@
   /* Filtres : capsules à point de couleur, l'actif en encre pleine */
   .chip{font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;min-height:38px;padding:6px 14px;}
   .chip.is-active{background:var(--ink);border-color:var(--ink);color:#fff;}
-  .chip:not(.is-active){background:rgba(99,102,241,.08);border-color:transparent;}
+  .chip:not(.is-active){background:var(--surface);border-color:var(--line-3);}
   .chip:not(.is-active):hover{border-color:var(--primary-line);}
 
   /* Compteur : saisie, unité et « Enregistrer » sur une ligne ; photo en teinte Signature FR */
@@ -2716,7 +2716,18 @@
     background:rgba(14,19,51,.85);color:#fff;
   }
   .machine-photo-cadre .carnet-badge:hover{background:var(--ink);}
-  .machine-tete-carnet{width:auto;align-self:flex-start;}
+  /* Icône et texte sur UNE ligne, de la même couleur : lien du carnet, pastilles d'état */
+  .machine-tete-carnet,
+  .machine-carnet-lien,
+  .machine .badge{
+    display:inline-flex;flex-direction:row;align-items:center;gap:8px;white-space:nowrap;
+  }
+  .machine-tete-carnet{width:auto;align-self:flex-start;padding:8px 16px;}
+  .machine .badge{gap:6px;padding:5px 12px;}
+  .machine .badge svg,.machine-tete-carnet svg{flex:0 0 auto;color:inherit;}
+  /* Photos : entières, jamais rognées (le cadre s'adapte, le fond comble le reste) */
+  .machine-tete-photo{border:1px solid var(--line-2);background:var(--surface-soft);}
+  .machine-tete-photo .machine-photo{object-fit:contain;}
   .m-etat-col{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
   .machine-alerte.is-ok{background:var(--ok-bg);}
   .machine-alerte.is-ok .machine-alerte-picto{color:var(--ok);}
@@ -2827,11 +2838,13 @@
 
     /* Colonne de droite */
     .m-side{
-      flex:0 0 340px;width:340px;padding:24px;justify-content:space-between;gap:16px;
+      flex:0 0 400px;width:400px;padding:24px;justify-content:space-between;gap:16px;
       background:rgba(99,102,241,.05);border-left:2px solid rgba(14,19,51,.15);
     }
     .m-etat{gap:12px;}
     .m-etat-ligne{flex-wrap:nowrap;align-items:flex-start;}
+    .page-head[data-view="machines"] .dash-head .dash-ajouter{display:none;}
+    .page-head[data-view="machines"] .dash-head .dash-compte{margin-left:auto;}
     .m-echeance .due{
       display:block;font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;
       font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--ink);white-space:nowrap;
@@ -2841,6 +2854,7 @@
     .machine.is-ok .m-echeance .due{color:var(--ok);}
     .m-side .machine-jauge{background:var(--surface);border:1px solid var(--line-2);border-radius:10px;}
     .m-actions{padding-top:12px;border-top:1px solid var(--line-2);gap:8px;}
+    .m-actions .btn-row-action{white-space:nowrap;padding:8px 12px;gap:8px;}
     .machine .m-actions .btn-principal{background:var(--ink);border-color:var(--ink);color:#fff;}
     .machine.is-late .m-actions .btn-principal{background:var(--late);border-color:var(--late);color:var(--ink);}
     .machine.is-soon .m-actions .btn-principal{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
