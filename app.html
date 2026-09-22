@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9AogyQSqSGczw0ctcQcCE8emS8KOKjp35V2QCrYiGaY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-BNv3ZWKPZ3341Ut5SxmQi2U1DB3Obt1DJu2meIQDzMA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1588,10 +1588,30 @@
   .plan-hero-compteur .compteur-titre{color:rgba(255,255,255,.7);}
   .plan-hero-compteur .compteur-champ{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;}
   .plan-hero-compteur .compteur-unite{background:rgba(255,255,255,.16);color:#fff;}
-  .plan-hero-compteur .compteur-enregistrer{background:var(--ok);}
-  .plan-hero-compteur .compteur-photo{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;}
-  .plan-hero-compteur .compteur-photo.is-principal{background:var(--ok);border-color:var(--ok);color:var(--ok-ink);}
-  .plan-hero-compteur .compteur-photo.is-secondaire{color:#fff;}
+  /* Vert clair, comme demandé — la seule teinte verte de la charte close.
+     Spécificité forcée à 3 classes : à ≥900px, une règle du Parc
+     (.compteur-bureau .compteur-enregistrer, même poids que 2 classes)
+     l'emportait sinon par ordre de source. */
+  .plan-hero-compteur .compteur-bureau .compteur-enregistrer,
+  .plan-hero-compteur .compteur-mobile .compteur-enregistrer{background:var(--olive);}
+  /* Spécificité forcée à 3 classes partout ici : à ≥900px, les règles
+     .compteur-bureau .compteur-photo(...)  du Parc (même poids que 2
+     classes) l'emportaient sinon par ordre de source, et repassaient ces
+     boutons en lien bleu plat sur fond transparent — invisible sur la
+     carte sombre. */
+  .plan-hero-compteur .compteur-bureau .compteur-photo,
+  .plan-hero-compteur .compteur-mobile .compteur-photo{
+    background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.24);
+    padding:7px 14px;color:#fff;font-weight:800;text-decoration:none;
+  }
+  .plan-hero-compteur .compteur-bureau .compteur-photo.is-principal,
+  .plan-hero-compteur .compteur-mobile .compteur-photo.is-principal{
+    background:var(--ok);border-color:var(--ok);color:var(--ok-ink);
+  }
+  .plan-hero-compteur .compteur-bureau .compteur-photo.is-secondaire,
+  .plan-hero-compteur .compteur-mobile .compteur-photo.is-secondaire{color:#fff;}
+  .plan-hero-compteur .compteur-bureau .compteur-photo:hover,
+  .plan-hero-compteur .compteur-mobile .compteur-photo:hover{background:rgba(255,255,255,.16);text-decoration:none;}
   .plan-hero-compteur .compteur-note{color:rgba(255,255,255,.7);}
   .plan-hero-compteur .compteur-note.is-late{color:#fbbf6b;}
   /* Un petit picto devant un libellé de section (Points d'attention, Historique). */
@@ -1601,7 +1621,13 @@
   /* Une icône par famille de produit devant chaque ligne de la table de
      référence — les mêmes familles et pictos que la préparation de l'Agenda
      (categorieProduit / PICTO_CATEGORIE), aucune nouvelle donnée. */
-  .ref-scroll-plan .item-label{display:flex;align-items:flex-start;gap:7px;}
+  /* PAS de display:flex sur le <td> lui-même : un <td> flexbox sort du
+     calcul normal des cellules et n'étire plus sa PROPRE boîte à la hauteur
+     de la ligne — son fond de zébrure s'arrête alors à la hauteur de son
+     contenu, laissant un bas de ligne blanc quand une cellule voisine (plus
+     de texte) rend la ligne plus haute. Le flex reste sur un span INTERNE,
+     le <td> garde son display:table-cell normal et s'étire comme les autres. */
+  .ref-scroll-plan .item-label-ligne{display:flex;align-items:flex-start;gap:7px;}
   .item-ico{display:inline-flex;flex:0 0 auto;margin-top:2px;color:var(--primary-dark);}
   .item-ico svg{display:block;width:16px;height:16px;}
   .tache-carte .tache-titre{display:flex;align-items:center;gap:7px;}
@@ -1984,6 +2010,17 @@
      leur cadre. */
   .plan-modal .ref-scroll,.plan-modal .ref-table{border-color:transparent;}
   .plan-modal .ref-table td{border-top-color:var(--line-2);}
+  /* Fréquence un peu plus étroite, Échéance un peu plus large : c'est la
+     colonne qui porte le badge + le texte court, elle respirait moins que
+     les autres. */
+  .plan-modal .ref-scroll-plan .ref-table th:nth-child(2),
+  .plan-modal .ref-scroll-plan .ref-table td:nth-child(2){width:13%;}
+  .plan-modal .ref-scroll-plan .ref-table th:nth-child(3),
+  .plan-modal .ref-scroll-plan .ref-table td:nth-child(3){width:17%;}
+  /* Le texte secondaire de la colonne Échéance (hors badge) était nettement
+     plus clair que le texte des autres colonnes (Spec/Quantité/Remarque) :
+     même encre atténuée qu'ailleurs dans la fiche, pas la plus faible. */
+  .plan-modal .cell-echeance .muted,.plan-modal .cell-echeance-ligne .muted{color:var(--ink-2);}
   /* Colonne « Échéance » : le centrage doit être IMPOSSIBLE. Cellule et en-tête
      sont explicitement à gauche, et le cadre est une colonne flex dont les
      enfants se collent au bord gauche (aucun `margin:auto`, aucune marge
@@ -14891,7 +14928,7 @@ function openPlanView(machine, companyId, categories) {
     const enRetard = infoTache(it, machine.plan, machine).state === 'late';
     return `
           <tr class="${enRetard ? 'is-late-row' : ''}">
-            <td class="item-label"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</td>
+            <td class="item-label"><span class="item-label-ligne"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</span></td>
             <td>${cell(it.frequency)}</td>
             <td>${etatTacheHtml(it, machine.plan, machine, 'colonne')}</td>
             <td>${cell(it.spec)}</td>
