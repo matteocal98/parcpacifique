@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-7aWE8U+8uh+7UeFZ9RhnM70ULMGkKM59jTNcRvGvDSM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-zAm3npA0FmOtv6E7a1rcq1VR9JD3b1nlZkdtrOyry60=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1128,6 +1128,7 @@
   .machine-jauge-part{display:block;height:100%;border-radius:999px;background:var(--ink);}
   .machine-jauge-part.is-soon{background:var(--soon);}
   .machine-jauge-part.is-late{background:var(--late);}
+  .machine-jauge-part.is-ok{background:var(--ok);}
   .machine-jauge-reperes{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:700;color:var(--ink-3);}
   .machine-jauge-reperes .is-late{color:var(--late);}
   .machine-jauge-pied{font-size:11px;font-weight:700;color:var(--ink-4);}
@@ -3313,6 +3314,7 @@
     .machine .m-actions .btn-principal{background:var(--ink);border-color:var(--ink);color:#fff;}
     .machine.is-late .m-actions .btn-principal{background:var(--late);border-color:var(--late);color:var(--ink);}
     .machine.is-soon .m-actions .btn-principal{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
+    .machine.is-ok .m-actions .btn-principal{background:var(--ok);border-color:var(--ok);color:var(--ink);}
     .machine .m-actions .btn-row-action:not(.btn-principal):not([data-open="edit"]){
       background:var(--surface);border:2px solid var(--ink);color:var(--ink);font-size:12.5px;
     }
@@ -8639,7 +8641,7 @@ const PICTOS = {
   entretien: '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
   prochain: '<path d="M3.5 5.5h17v15h-17z"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9.2 14.2 11 16l3.8-3.8"/>',
   plan: '<path d="M9 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9"/><path d="M4.5 8.5l1.6 1.6L9 7.2"/><path d="M4.5 15.5l1.6 1.6L9 14.2"/>',
-  reglages: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/>',
+  reglages: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   carnet: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v18H6.5A1.5 1.5 0 0 1 5 19.5z"/><path d="M8.5 3v18"/>',
   photo: '<path d="M3.5 8.5h3.2l1.6-2.2h7.4l1.6 2.2h3.2v10.5h-17z"/><circle cx="12" cy="13.5" r="3.4"/>',
   compteur: '<path d="M4.5 18.5a8.5 8.5 0 1 1 15 0"/><path d="M12 13.8 16.6 9"/>',
