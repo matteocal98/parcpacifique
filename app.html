@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-pz4MYk1hoiWbBCYTxFMGKJ8HIoLZBa3JuMq9VF6ESxQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-syiSlilezMk4bBGa2Tl/osr1xljdP7W6uE43gWuOnqk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11187,7 +11187,7 @@ function machineCardHtml(m) {
               <span class="due">${esc(info.short)}</span>
             </span>
           </div>
-          ${jaugeIntervalleHtml(info, m)}
+          ${jaugeIntervalleHtml(dueInfo(m.plan, m), m)}
           ${(() => { const v2 = vueCompteurSecondaire(m); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue) : ''; })()}
         </div>
         <div class="m-actions">
@@ -16528,7 +16528,7 @@ function openPlanView(machine, companyId, categories) {
             <span class="phc-valeur phc-valeur-seuil">${seuilCompteur}</span>
           </div>
           ` : ''}
-          ${jaugeIntervalleHtml(info, machine, true)}
+          ${jaugeIntervalleHtml(dueInfo(machine.plan, machine), machine, true)}
           ${(() => { const v2 = vueCompteurSecondaire(machine); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue, true) : ''; })()}
           ${compteurHtml(machine, 'bureau', 'Mettre à jour', 'Valider')}${compteurHtml(machine, 'mobile', 'Mettre à jour', 'Valider')}
           ${compteur2Html(machine, 'bureau')}${compteur2Html(machine, 'mobile')}
