@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l1tEiL2otr010xXOcfdCop5yTlQdt7xVf32wa2o9XFY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d6+W3ObtLa3R1TCfsCffoaubu7TIUZZ6pM4yBnbWGoE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5392,17 +5392,37 @@ function echeancePlanPatch2(valeur, machine) {
 function echeancePlanPatch(valeur, plan) {
   return planIsCounter(plan) ? planNextDueCounterPatch(valeur) : { next_due_at: valeur };
 }
-// La TÂCHE qui gouverne réellement l'échéance du plan (calendaire) : celle qui
-// porte la date la plus proche parmi les tâches comparables — la même que
-// echeancePlanDepuisTaches() retient. C'est SON intervalle propre qui doit se
-// refléter dans le champ « Intervalle » du plan, pas une valeur saisie à part
-// qui n'a jamais de lien garanti avec ce que les tâches disent vraiment
-// (constaté en base : un plan à 90 j portant une tâche « tous les ans »).
+// La TÂCHE qui gouverne réellement l'échéance du plan : celle qui porte
+// l'échéance la plus proche parmi les tâches comparables — la même que
+// echeancePlanDepuisTaches() retient (calendaire OU compteur). C'est SON
+// intervalle propre qui doit se refléter dans le champ « Intervalle » du
+// plan, pas une valeur saisie à part qui n'a jamais de lien garanti avec ce
+// que les tâches disent vraiment (constaté en base : un plan à 90 j portant
+// une tâche « tous les ans », ou un plan à 100 km portant une tâche « tous
+// les 20 000 km »).
 function tacheGouvernante(items, plan) {
-  if (planIsCounter(plan)) return null;
   const suivies = tachesSuivies(items, plan);
   if (!suivies.length) return null;
+  if (planIsCounter(plan)) {
+    return suivies.reduce((min, it) => (Number(it.due_counter) < Number(min.due_counter) ? it : min), suivies[0]);
+  }
   return suivies.reduce((min, it) => (String(it.due_at) < String(min.due_at) ? it : min), suivies[0]);
+}
+// La même règle, mais pour le SECOND suivi de la machine — miroir de
+// echeancePlanDepuisTachesSecondaire, pour trouver QUELLE tâche porte cette
+// échéance secondaire (et donc quel est son vrai cycle).
+function tacheGouvernanteSecondaire(items, machine) {
+  const mode2 = modeSecondaireDe(machine);
+  if (!mode2) return null;
+  const liste = normalizeItems(items);
+  if (mode2 === 'days') {
+    const suivies = liste.filter(it => it.due_at && UNITES_INTERVALLE[it.interval_unite]?.genre === 'date');
+    if (!suivies.length) return null;
+    return suivies.reduce((min, it) => (String(it.due_at) < String(min.due_at) ? it : min), suivies[0]);
+  }
+  const suivies = liste.filter(it => it.interval_unite === mode2 && Number.isFinite(Number(it.due_counter)));
+  if (!suivies.length) return null;
+  return suivies.reduce((min, it) => (Number(it.due_counter) < Number(min.due_counter) ? it : min), suivies[0]);
 }
 // Convertit l'intervalle PROPRE d'une tâche (mois/ans compris, en vraie
 // arithmétique de calendrier via ajouterIntervalleIso) en nombre de jours :
@@ -5412,6 +5432,18 @@ function intervalleEnJoursDepuisTache(t) {
   const debut = ajouterIntervalleIso(t.due_at, -Number(t.interval), t.interval_unite);
   const jours = joursEntreIso(debut, t.due_at);
   return jours > 0 ? jours : null;
+}
+// La même conversion, mais pour une DIMENSION quelconque (calendaire ou
+// compteur) : en compteur, t.interval EST déjà l'intervalle dans la bonne
+// unité (garanti par tachesSuivies()/uniteCompatiblePlan()) — pas de
+// conversion nécessaire, contrairement au calendaire (mois/ans).
+function intervalleDepuisTacheGouvernante(t, genreCompteur) {
+  if (!t) return null;
+  if (genreCompteur) {
+    const v = Number(t.interval);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  }
+  return intervalleEnJoursDepuisTache(t);
 }
 
 // ── CLASSEMENT D'UNE FRÉQUENCE : UNE SEULE RÈGLE ─────────────
@@ -15728,7 +15760,22 @@ function openAddWizard(companyId, categories) {
         // quand aucune ne la porte (toutes conditionnelles, ou dans une autre
         // unité) : l'intervalle général du carnet ne doit pas rester en vestige.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
-        if (secondaireActif) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
+        // L'intervalle affiché (jauge, fiche) suit la tâche qui gouverne
+        // réellement cette échéance, pas la saisie du formulaire à part —
+        // même règle que pour le calendaire (voir plus bas), appliquée ici
+        // au compteur (signalé le 23/09 : 100 km en formulaire vs 20 000 km
+        // pour la tâche qui gouverne vraiment l'échéance).
+        {
+          const intervalleReel = intervalleDepuisTacheGouvernante(tacheGouvernante(planPayload.items, planPayload), true);
+          if (intervalleReel != null) Object.assign(planPayload, SCHEMA.hasCounter ? { interval_counter: intervalleReel } : { interval_hours: intervalleReel });
+        }
+        if (secondaireActif) {
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
+          const intervalleReelSec = intervalleDepuisTacheGouvernante(tacheGouvernanteSecondaire(planPayload.items, machineVue2), !secondaireCalendrier);
+          if (intervalleReelSec != null) {
+            Object.assign(planPayload, secondaireCalendrier ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
+          }
+        }
         // On conserve aussi un intervalle calendaire cohérent : il servira si la
         // machine bascule plus tard en suivi calendaire.
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
@@ -15740,14 +15787,20 @@ function openAddWizard(companyId, categories) {
         // Une échéance par tâche : même passe, même classement (mode calendaire).
         planPayload.items = preparerTaches(state.items, planPayload,
           { counter_unit: 'hours', counter_value: null, ...machineVue2 }, planPayload.next_due_at, 'days', duePlanSecondaire);
-        if (secondaireActif) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
         // Même règle en mode calendaire : le plan suit le minimum de ses tâches.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
         // L'intervalle affiché (jauge, fiche) suit la tâche qui gouverne
         // réellement cette échéance, pas la saisie du formulaire à part.
         {
-          const intervalleReel = intervalleEnJoursDepuisTache(tacheGouvernante(planPayload.items, planPayload));
+          const intervalleReel = intervalleDepuisTacheGouvernante(tacheGouvernante(planPayload.items, planPayload), false);
           if (intervalleReel != null) planPayload.interval_days = intervalleReel;
+        }
+        if (secondaireActif) {
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
+          const intervalleReelSec = intervalleDepuisTacheGouvernante(tacheGouvernanteSecondaire(planPayload.items, machineVue2), !secondaireCalendrier);
+          if (intervalleReelSec != null) {
+            Object.assign(planPayload, secondaireCalendrier ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
+          }
         }
         planPayload.interval_hours = state.intervalHours || FALLBACK_INTERVAL_HOURS;
         planPayload.reminder_hours_before = state.reminderHoursBefore ?? FALLBACK_REMINDER_HOURS;
@@ -17522,16 +17575,27 @@ function openMachineModal(companyId, categories, existing) {
           Object.assign(planUpdate, echeancePlanPatch(
             echeancePlanDepuisTaches(itemsMaj, { ...existing.plan, ...planUpdate }),
             { ...existing.plan, ...planUpdate }));
-          if (secondaryUnit) Object.assign(planUpdate, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2), machineVue2));
           // L'INTERVALLE AFFICHÉ (jauge, fiche) doit être celui de la tâche qui
           // gouverne réellement cette échéance, pas la valeur saisie à part
           // dans le formulaire — demandé le 23/09 après avoir constaté qu'un
           // plan à 90 j pouvait porter une tâche « tous les ans » sans que les
-          // deux ne se rejoignent jamais.
-          if (!isCounterMode) {
-            const intervalleReel = intervalleEnJoursDepuisTache(
-              tacheGouvernante(itemsMaj, { ...existing.plan, ...planUpdate }));
-            if (intervalleReel != null) planUpdate.interval_days = intervalleReel;
+          // deux ne se rejoignent jamais (et, de la même façon, un compteur à
+          // 100 km au lieu des 20 000 km réels de la tâche qui gouverne).
+          {
+            const intervalleReel = intervalleDepuisTacheGouvernante(
+              tacheGouvernante(itemsMaj, { ...existing.plan, ...planUpdate }), isCounterMode);
+            if (intervalleReel != null) {
+              if (isCounterMode) Object.assign(planUpdate, SCHEMA.hasCounter ? { interval_counter: intervalleReel } : { interval_hours: intervalleReel });
+              else planUpdate.interval_days = intervalleReel;
+            }
+          }
+          if (secondaryUnit) {
+            Object.assign(planUpdate, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2), machineVue2));
+            const intervalleReelSec = intervalleDepuisTacheGouvernante(
+              tacheGouvernanteSecondaire(itemsMaj, machineVue2), !secondaireCalendrierActif);
+            if (intervalleReelSec != null) {
+              Object.assign(planUpdate, secondaireCalendrierActif ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
+            }
           }
         }
 
@@ -17578,12 +17642,22 @@ function openMachineModal(companyId, categories, existing) {
         // L'échéance du plan suit le minimum de ses tâches comparables — et
         // disparaît si aucune ne la porte (aucune tâche périodique dans l'unité).
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
-        if (secondaryUnit) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau), machineVue2Nouveau));
         // Même règle que sur une modification : l'intervalle affiché suit la
         // tâche qui gouverne réellement l'échéance, pas la saisie à part.
-        if (!isCounterMode) {
-          const intervalleReel = intervalleEnJoursDepuisTache(tacheGouvernante(planPayload.items, planPayload));
-          if (intervalleReel != null) planPayload.interval_days = intervalleReel;
+        {
+          const intervalleReel = intervalleDepuisTacheGouvernante(tacheGouvernante(planPayload.items, planPayload), isCounterMode);
+          if (intervalleReel != null) {
+            if (isCounterMode) Object.assign(planPayload, SCHEMA.hasCounter ? { interval_counter: intervalleReel } : { interval_hours: intervalleReel });
+            else planPayload.interval_days = intervalleReel;
+          }
+        }
+        if (secondaryUnit) {
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau), machineVue2Nouveau));
+          const intervalleReelSec = intervalleDepuisTacheGouvernante(
+            tacheGouvernanteSecondaire(planPayload.items, machineVue2Nouveau), !secondaireCalendrierNouveau);
+          if (intervalleReelSec != null) {
+            Object.assign(planPayload, secondaireCalendrierNouveau ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
+          }
         }
         const { error: planErr } = await sb
           .from('maintenance_plans')
