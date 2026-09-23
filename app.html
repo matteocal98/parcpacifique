@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lSlQuPTpdVAksaS2C/s3X0o1s/WCQM7WkNboV+MAPR0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Nwb84SVKdpReh0l9m31Bth35oLEuXbYOsavNXC17jTo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13677,6 +13677,12 @@ const REPERAGE_MOTS_FAIBLES = [
 ];
 // LA FORME D'UN TABLEAU : un nombre associé à une unité (heures, km, mois, ans…).
 const REPERAGE_UNITES = /\b\d[\d\s.,]*\s*(h|hrs?|heures?|hours?|km|kilom[èe]tres?|miles?|mois|months?|ans?|ann[ée]es?|years?|jours?|days?|semaines?|weeks?)\b/gi;
+// LA FORME D'UN TABLEAU SE DIT AUSSI EN MOTS : un manuel réel (STIHL) écrit ses
+// périodicités en toutes lettres — « avant de commencer le travail », « tous les
+// jours », « une fois par semaine », « une fois par mois », « une fois par an » —
+// et n'a parfois AUCUNE durée chiffrée. Ne compter que les nombres suivis d'une
+// unité revenait à ne retenir aucune page d'un manuel parfaitement lisible.
+const REPERAGE_PERIODES_MOTS = /(?:toutes?|tous)\s+les\s+(?:heures?|jours?|semaines?|mois|ans?|ann[ée]es?)|(?:une|deux|trois|quatre|cinq|six)\s+fois\s+par\s+(?:jour|semaine|mois|an|ann[ée]e)|(?:après|apres)\s+chaque\s+\w+|chaque\s+(?:jour|semaine|mois|an|ann[ée]e|ravitaillement|plein)/gi;
 
 function occurrencesDe(texte, motif) {
   let position = texte.indexOf(motif);
@@ -13700,14 +13706,17 @@ function scorePageCarnet(texte) {
     const occurrences = occurrencesDe(normalise, mot);
     if (occurrences) { score += occurrences; trouves.push(mot); }
   }
-  const nombres = (normalise.match(REPERAGE_UNITES) || []).length;
+  const nombresChiffres = (normalise.match(REPERAGE_UNITES) || []).length;
+  const periodesEnMots = (normalise.match(REPERAGE_PERIODES_MOTS) || []).length;
+  const nombres = nombresChiffres + periodesEnMots;
   score += nombres * 2;
   // LES DEUX CONDITIONS QUI FONT LA DIFFÉRENCE : la forme (plusieurs périodicités)
   // ET un mot spécifique. Une page qui n'a que des mots banals, ou un seul nombre,
-  // n'est PAS un tableau d'entretien.
+  // n'est PAS un tableau d'entretien. Les deux écritures comptent pareil : « toutes
+  // les 100 heures » et « une fois par mois » sont la MÊME preuve de forme.
   const motsForts = trouves.filter((m) => REPERAGE_MOTS_FORTS.includes(m)).length;
   const tableau = nombres >= REPERAGE_MIN_NOMBRES && motsForts >= 1 && score >= REPERAGE_SEUIL;
-  return { score, trouves, nombres, motsForts, tableau };
+  return { score, trouves, nombres, nombresChiffres, periodesEnMots, motsForts, tableau };
 }
 
 // Aperçu COURT et lisible : on part du premier mot-clé (ou du premier nombre avec
@@ -13747,6 +13756,7 @@ async function repererPagesCarnet(file, surProgres) {
       const resultat = scorePageCarnet(texte);
       lues.push({
         numero, score: resultat.score, nombres: resultat.nombres, motsForts: resultat.motsForts,
+        nombresChiffres: resultat.nombresChiffres, periodesEnMots: resultat.periodesEnMots,
         tableau: resultat.tableau, trouves: resultat.trouves,
         // Le TEXTE est gardé (borné) : c'est lui qui permet d'extraire les lignes
         // d'entretien affichées sous la vignette — sans rien redemander au serveur.
