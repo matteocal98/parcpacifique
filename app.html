@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NJPQejA+uBafFUu75ZbGUyDAu5j4CvRl4vyejgAVSjs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Pyk20aDiNs0Bb4WEtFdyjG5GsaN22NSBW6XYAOniv7E=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5225,6 +5225,27 @@ function echeancePlanDepuisTaches(items, plan) {
 }
 function echeancePlanPatch(valeur, plan) {
   return planIsCounter(plan) ? planNextDueCounterPatch(valeur) : { next_due_at: valeur };
+}
+// La TÂCHE qui gouverne réellement l'échéance du plan (calendaire) : celle qui
+// porte la date la plus proche parmi les tâches comparables — la même que
+// echeancePlanDepuisTaches() retient. C'est SON intervalle propre qui doit se
+// refléter dans le champ « Intervalle » du plan, pas une valeur saisie à part
+// qui n'a jamais de lien garanti avec ce que les tâches disent vraiment
+// (constaté en base : un plan à 90 j portant une tâche « tous les ans »).
+function tacheGouvernante(items, plan) {
+  if (planIsCounter(plan)) return null;
+  const suivies = tachesSuivies(items, plan);
+  if (!suivies.length) return null;
+  return suivies.reduce((min, it) => (String(it.due_at) < String(min.due_at) ? it : min), suivies[0]);
+}
+// Convertit l'intervalle PROPRE d'une tâche (mois/ans compris, en vraie
+// arithmétique de calendrier via ajouterIntervalleIso) en nombre de jours :
+// seule façon fiable de comparer un cycle « 1 an » à un champ stocké en jours.
+function intervalleEnJoursDepuisTache(t) {
+  if (!t || !t.due_at || !Number.isFinite(Number(t.interval)) || !t.interval_unite) return null;
+  const debut = ajouterIntervalleIso(t.due_at, -Number(t.interval), t.interval_unite);
+  const jours = joursEntreIso(debut, t.due_at);
+  return jours > 0 ? jours : null;
 }
 
 // ── CLASSEMENT D'UNE FRÉQUENCE : UNE SEULE RÈGLE ─────────────
@@ -15248,6 +15269,12 @@ function openAddWizard(companyId, categories) {
           { counter_unit: 'hours', counter_value: null }, planPayload.next_due_at, 'days');
         // Même règle en mode calendaire : le plan suit le minimum de ses tâches.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
+        // L'intervalle affiché (jauge, fiche) suit la tâche qui gouverne
+        // réellement cette échéance, pas la saisie du formulaire à part.
+        {
+          const intervalleReel = intervalleEnJoursDepuisTache(tacheGouvernante(planPayload.items, planPayload));
+          if (intervalleReel != null) planPayload.interval_days = intervalleReel;
+        }
         planPayload.interval_hours = state.intervalHours || FALLBACK_INTERVAL_HOURS;
         planPayload.reminder_hours_before = state.reminderHoursBefore ?? FALLBACK_REMINDER_HOURS;
       }
@@ -16838,6 +16865,16 @@ function openMachineModal(companyId, categories, existing) {
           Object.assign(planUpdate, echeancePlanPatch(
             echeancePlanDepuisTaches(itemsMaj, { ...existing.plan, ...planUpdate }),
             { ...existing.plan, ...planUpdate }));
+          // L'INTERVALLE AFFICHÉ (jauge, fiche) doit être celui de la tâche qui
+          // gouverne réellement cette échéance, pas la valeur saisie à part
+          // dans le formulaire — demandé le 23/09 après avoir constaté qu'un
+          // plan à 90 j pouvait porter une tâche « tous les ans » sans que les
+          // deux ne se rejoignent jamais.
+          if (!isCounterMode) {
+            const intervalleReel = intervalleEnJoursDepuisTache(
+              tacheGouvernante(itemsMaj, { ...existing.plan, ...planUpdate }));
+            if (intervalleReel != null) planUpdate.interval_days = intervalleReel;
+          }
         }
 
         const { error: planErr } = await sb
@@ -16871,6 +16908,12 @@ function openMachineModal(companyId, categories, existing) {
         // L'échéance du plan suit le minimum de ses tâches comparables — et
         // disparaît si aucune ne la porte (aucune tâche périodique dans l'unité).
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
+        // Même règle que sur une modification : l'intervalle affiché suit la
+        // tâche qui gouverne réellement l'échéance, pas la saisie à part.
+        if (!isCounterMode) {
+          const intervalleReel = intervalleEnJoursDepuisTache(tacheGouvernante(planPayload.items, planPayload));
+          if (intervalleReel != null) planPayload.interval_days = intervalleReel;
+        }
         const { error: planErr } = await sb
           .from('maintenance_plans')
           .insert(planPayload);
