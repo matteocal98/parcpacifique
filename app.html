@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Spplnv76pnFBdn353w9W10FHzP/ovCA9PEKmOuVRV/k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gZVJTIiE7SDExrRQqU0M9TgmdNr7S4on1um49MEQjbI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3895,6 +3895,7 @@
   .tco-classement-chiffre .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
   .tco-classement-chiffre .value{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
   .tco-classement-chiffre .value.is-alerte{color:var(--late);}
+  .tco-carte-dashboard-corps{display:flex;align-items:center;gap:16px;}
 </style>
 </head>
 <body>
@@ -10520,6 +10521,7 @@ VIEWS.dashboard = {
         <div class="dash-side">
           ${dropzoneHtml('dash-drop')}
           ${remindersCardHtml()}
+          ${SCHEMA.hasTco ? tcoDashboardCarteHtml() : ''}
         </div>
       </div>
     `;
@@ -10532,6 +10534,7 @@ VIEWS.dashboard = {
     wirePreparation(root);
     root.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => goTo(btn.dataset.nav)));
     attachDropzone(root.querySelector('#dash-drop'), (file) => openManualUploadModal(null, file));
+    chargerCarteTcoDashboard(root);
 
     const favourite = openAlerts()[0];
     root.querySelector('#priority-done')?.addEventListener('click', () => {
@@ -12911,6 +12914,54 @@ function tcoClassementFlotteHtml() {
       </div>
       <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
     </section>`;
+}
+// Carte « Suivi TCO » du tableau de bord principal (phase 2, demandée
+// explicitement — pas seulement sur la page Coûts & TCO). Même motif
+// placeholder + remplissage asynchrone. Chargement séparé de celui de
+// VIEWS.tco : chaque vue fait son propre fetch à son montage, pas de cache
+// partagé entre pages (cohérent avec le reste de l'app, ex. l'historique
+// d'une fiche machine est toujours rechargé à l'ouverture).
+function tcoDashboardCarteHtml() {
+  return `
+    <section class="card" id="tco-dashboard-carte">
+      <div class="card-head">
+        <h2 class="card-title">${trad('Suivi TCO')}</h2>
+        <span class="spacer"></span>
+        <button type="button" class="link-inline" data-nav="tco">${trad('Voir le détail')}</button>
+      </div>
+      <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
+    </section>`;
+}
+async function chargerCarteTcoDashboard(root) {
+  if (!SCHEMA.hasTco) return;
+  const carte = root?.querySelector('#tco-dashboard-carte');
+  if (!carte) return;
+  const valueEl = carte.querySelector('.value');
+  const machineIds = (UI.machines || []).map((m) => m.id);
+  let flotte = null;
+  let repartition = null;
+  try {
+    const [interventionsFlotte, coutsFlotte] = await Promise.all([
+      fetchToutesInterventionsFlotte(machineIds),
+      fetchTousCoutsExploitationFlotte(machineIds),
+    ]);
+    flotte = calculerFlotteTco(UI.machines || [], grouperParMachine(interventionsFlotte), grouperParMachine(coutsFlotte));
+    repartition = repartitionFlotteTco(interventionsFlotte, coutsFlotte);
+  } catch (err) {
+    if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
+    return;
+  }
+  if (!root.isConnected || !carte.isConnected) return;
+  if (!flotte) { carte.remove(); return; }
+  if (valueEl) valueEl.remove();
+  carte.insertAdjacentHTML('beforeend', `
+    <div class="tco-carte-dashboard-corps">
+      ${repartition ? donutTcoSvgHtml(repartition, 64) : ''}
+      <div>
+        <div class="tco-classement-chiffre"><span class="label">${trad('TCO moyen')}</span><span class="value">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
+        <div class="tco-classement-chiffre" style="margin-top:8px;"><span class="label">${trad('En alerte')}</span><span class="value${flotte.nbAlertes ? ' is-alerte' : ''}">${flotte.nbAlertes ? tR('{n} machine(s)', { n: flotte.nbAlertes }) : trad('Aucune')}</span></div>
+      </div>
+    </div>`);
 }
 // Une ligne = un item compact (icône + désignation/référence à gauche, prix
 // + actions à droite) plutôt qu'un tableau à 4 colonnes : tient sur une
