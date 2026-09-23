@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dk+iT6HXkuhEi2L6t+PJj77vZzokH8H7qomLNTjVZic=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eNBuAW+zMg4jibSI7CynElCf8jJ2xtLl0V5cUUee56w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3732,19 +3732,156 @@
   /* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
      léger voile de couleur plutôt qu'un blanc plat, comme sur « Mon compte ». */
   .vue-agenda button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
+  .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
 
-  /* Coûts & TCO : pas de colonne latérale (.dash-side) sur cette vue — la
-     laisser sur le partage doré 1.618fr/1fr de .dash-grid.agenda-grid
-     réservait une colonne vide et écrasait le tableau du catalogue de pièces
-     (référence/désignation/prix/actions) dans ~62 % de la largeur, jusqu'à
-     forcer un défilement horizontal. Pleine largeur ici, + mêmes champs et
-     boutons secondaires teintés que « Mon compte »/« Agenda ». */
-  .vue-couts-tco{grid-template-columns:1fr;}
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
+     « Appli web/WEB TCO/code.html » (labellés, couleurs, tailles, police,
+     pictogrammes — voir keeva-tco-feature). Deux substitutions, forcées par
+     l'architecture existante et JAMAIS par approximation :
+       1. Aucune police d'icônes (Material Symbols) — CSP + page embarquée
+          hors-ligne dans l'app Android, comme documenté sur NAV_ICONES 30
+          lignes plus haut. Icônes retracées à la main, mêmes proportions.
+       2. Aucune donnée inventée : le bouton « Journal d'audit » (aucune
+          fonctionnalité derrière) a été retiré ; « Rapport TCO (PDF) » reste
+          visible mais désactivé (même motif que le canal WhatsApp « à venir
+          prochainement ») ; la tuile KPI « TCO moyen flotte » et sa tendance
+          (agrégat multi-machines, pas encore construit — voir phase 2) ont
+          été retirées ; le donut de répartition reste, mais EXPLICITEMENT
+          étiqueté « MODÈLE KEEVA » dans la maquette elle-même — il ne
+          prétend pas mesurer les machines réelles, même précédent que
+          l'aperçu WhatsApp (« voici seulement à quoi ressemblera... »).
+     Couleurs : les 12 teintes Tailwind du mockup sont LA MÊME palette que
+     les jetons --ink/--ok/--bleu-roi/--primary/--late/--olive/--primary-dark
+     déjà déclarés plus haut (douze teintes officielles) — mappées 1:1, pas
+     de nouvelle couleur. Les tons « surface-container-* » (gris neutres
+     d'élévation Material, pas des couleurs de marque) suivent les gris
+     déjà existants (--surface-soft, --line, --line-2).
+     ══════════════════════════════════════════════════════════════════════════ */
+  .page-head[data-view="tco"] h1{font-family:'Space Grotesk',sans-serif;font-size:31px;line-height:38px;font-weight:800;letter-spacing:-0.02em;}
   .vue-couts-tco input:not([type=checkbox]),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
   .vue-couts-tco input:not([type=checkbox]):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
   .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-couts-tco button.secondary:hover{background:var(--primary-tint-2);}
-  .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
+
+  .tco-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px;}
+  .tco-eyebrow-gauche{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tco-eyebrow-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--r-pill);background:var(--ok-bg);color:var(--ok);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tco-eyebrow-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:tco-pulse 1.8s ease-in-out infinite;}
+  @keyframes tco-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .tco-eyebrow-sep{color:var(--dark-ink);font-size:10.5px;}
+  .tco-eyebrow-texte{color:var(--ink-2);font-size:12px;font-weight:500;}
+  .tco-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;}
+  .tco-btn-outil svg{width:20px;height:20px;flex:0 0 auto;color:var(--bleu-roi);}
+  .tco-btn-outil[disabled]{opacity:.5;cursor:not-allowed;}
+  /* Filet de sécurité : un <svg> de picto() sans taille explicite (aucune
+     largeur/hauteur, seulement un viewBox) hérite du rendu par défaut du
+     navigateur — potentiellement énorme dans un bouton flex. Chaque bouton
+     de cette page qui pose une icône directement (pas dans un conteneur
+     déjà dimensionné comme .tco-kpi-icone) a besoin de cette contrainte. */
+  .vue-couts-tco .modal-actions button svg{width:20px;height:20px;flex:0 0 auto;}
+
+  .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:640px){.tco-kpi-grid{grid-template-columns:1fr;}}
+  .tco-kpi-tile{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+  .tco-kpi-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-kpi-valeur-ligne{display:flex;align-items:baseline;gap:5px;margin-top:2px;}
+  .tco-kpi-valeur{font-family:'Space Grotesk',sans-serif;font-size:28px;line-height:32px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .tco-kpi-unite{font-size:13.5px;font-weight:600;color:var(--ink-2);}
+  .tco-kpi-sub{font-size:12px;color:var(--dark-ink);margin-top:3px;display:flex;align-items:center;gap:3px;}
+  .tco-kpi-sub svg{width:14px;height:14px;}
+  .tco-kpi-sub.is-ok{color:var(--ok);}
+  .tco-kpi-icone{flex:0 0 auto;width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;}
+  .tco-kpi-icone svg{width:26px;height:26px;}
+  .tco-kpi-icone.is-fr{background:var(--ok-bg);color:var(--ok);}
+  .tco-kpi-icone.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
+  .tco-kpi-icone.is-indigo{background:var(--primary-tint);color:var(--primary);}
+
+  .tco-card-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .tco-card-tete-gauche{display:flex;align-items:center;gap:10px;}
+  .tco-card-icone-carre{flex:0 0 auto;width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:var(--shadow-soft);}
+  .tco-card-icone-carre svg{width:22px;height:22px;}
+  .tco-card-icone-carre.is-roi{background:var(--bleu-roi);}
+  .tco-card-icone-carre.is-indigo{background:var(--primary);}
+  .tco-card-titre{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:28px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);margin:0;}
+  .tco-card-soustitre{font-size:12px;color:var(--ink-2);margin-top:1px;}
+  .tco-btn-aide{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .tco-btn-aide svg{width:20px;height:20px;}
+
+  .tco-callout{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);}
+  .tco-callout.is-info{background:var(--surface-soft);}
+  .tco-callout.is-warn{background:var(--voile-ambre);color:var(--late);}
+  .tco-callout svg{flex:0 0 auto;width:22px;height:22px;margin-top:1px;}
+  .tco-callout.is-info svg{color:var(--bleu-roi);}
+  .tco-callout p{margin:0;font-size:12px;line-height:1.5;color:var(--ink);}
+  .tco-callout.is-warn p{color:var(--late);}
+  .tco-callout p strong{color:var(--ink);font-weight:700;}
+
+  .tco-devise-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media (max-width:520px){.tco-devise-grid{grid-template-columns:1fr;}}
+  .tco-devise-carte{position:relative;display:flex;align-items:center;padding:14px;border-radius:var(--r-md);cursor:pointer;background:var(--surface);box-shadow:var(--shadow-soft);transition:background .15s;}
+  .tco-devise-carte.is-selected{background:var(--ok-bg);}
+  .tco-devise-carte input{position:absolute;opacity:0;pointer-events:none;}
+  .tco-devise-coche{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface-soft);display:flex;align-items:center;justify-content:center;margin-right:12px;}
+  .tco-devise-carte.is-selected .tco-devise-coche{background:var(--ink);}
+  .tco-devise-coche svg{width:14px;height:14px;color:transparent;}
+  .tco-devise-carte.is-selected .tco-devise-coche svg{color:#fff;}
+  .tco-devise-nom{font-size:17px;line-height:24px;font-weight:600;color:var(--ink);}
+  .tco-devise-code{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink);}
+  .tco-devise-carte.is-selected .tco-devise-code{background:var(--ink);color:#fff;}
+  .tco-devise-zone{font-size:12px;color:var(--dark-ink);}
+  .tco-devise-actif{margin-left:auto;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ok);background:#fff;padding:2px 8px;border-radius:var(--r-pill);box-shadow:var(--shadow-soft);}
+
+  .tco-champ-unite{position:relative;display:flex;align-items:center;}
+  .tco-champ-unite input{width:100%;padding-right:64px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
+  .tco-champ-unite .tco-unite-tag{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
+  .tco-champ-label{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .tco-champ-label .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--dark-ink);}
+  .tco-champ-note{font-size:12px;color:var(--dark-ink);}
+
+  .tco-donut-carte{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);flex-wrap:wrap;}
+  .tco-donut-legende{display:grid;grid-template-columns:repeat(3,auto);gap:8px 14px;margin-top:6px;}
+  @media (max-width:520px){.tco-donut-legende{grid-template-columns:1fr;}}
+  .tco-donut-puce{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);}
+  .tco-donut-puce span.rond{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .tco-donut-badge{font-size:10.5px;font-weight:700;color:var(--ok);background:var(--ok-bg);padding:2px 8px;border-radius:var(--r-pill);}
+
+  .tco-recherche{position:relative;}
+  .tco-recherche svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--dark-ink);}
+  .tco-recherche input{width:100%;height:40px;padding-left:36px;border-radius:var(--r-chip);}
+
+  .tco-parts-liste{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px;}
+  .tco-part-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-md);background:var(--surface-soft);}
+  .tco-part-gauche{display:flex;align-items:center;gap:10px;min-width:0;}
+  .tco-part-icone{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);background:var(--voile-ambre);color:var(--late);display:flex;align-items:center;justify-content:center;}
+  .tco-part-icone svg{width:20px;height:20px;}
+  .tco-part-corps{min-width:0;display:flex;flex-direction:column;}
+  .tco-part-nom-ligne{display:flex;align-items:center;gap:6px;min-width:0;}
+  .tco-part-nom{font-size:17px;line-height:24px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tco-part-ref{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tco-part-droite{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .tco-part-prix{text-align:right;}
+  .tco-part-prix .montant{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);display:block;}
+  .tco-part-prix .devise{font-size:10.5px;color:var(--ink-2);display:block;margin-top:-3px;}
+  .tco-part-actions{display:flex;gap:2px;}
+  .tco-part-btn{width:32px;height:32px;border-radius:var(--r-chip);border:none;background:transparent;color:var(--dark-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .tco-part-btn svg{width:18px;height:18px;}
+  .tco-part-btn:hover{background:var(--surface-soft);color:var(--ink);}
+  .tco-part-btn.is-danger:hover{background:var(--voile-ambre);color:var(--late);}
+
+  .tco-quick-add{padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:10px;}
+  .tco-quick-add-tete{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .tco-quick-add-tete svg{width:18px;height:18px;}
+  .tco-quick-add .field-row{grid-template-columns:1fr 1fr;}
+  .tco-quick-add input{background:#fff;}
+
+  .tco-tip-carte{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-container,var(--primary-tint));}
+  .tco-tip-icone{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:#fff;color:var(--bleu-roi);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);}
+  .tco-tip-icone svg{width:20px;height:20px;}
+  .tco-tip-titre{font-size:17px;font-weight:600;color:var(--ink);}
+  .tco-tip-texte{font-size:12px;color:var(--ink-2);margin-top:2px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -9343,6 +9480,18 @@ const PICTOS = {
   fermer: '<path d="M6 6l12 12M18 6L6 18"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6h.01"/>',
   mallette: '<rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M8.5 7.5V5.8A1.8 1.8 0 0 1 10.3 4h3.4a1.8 1.8 0 0 1 1.8 1.8v1.7"/><path d="M3 12.5h18"/>',
+  // ── Reprise du mockup Stitch « WEB TCO » (voir keeva-tco-feature) : les
+  // icônes Material Symbols du fichier n'existent pas ici (aucune police
+  // d'icônes, jamais — voir le commentaire de NAV_ICONES) et sont retracées
+  // une à une, même grille 24×24 / trait 2px que le reste de PICTOS.
+  recherche: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/>',
+  plusCercle: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  disquette: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H16l4 4v12.5A1.5 1.5 0 0 1 18.5 21h-12A1.5 1.5 0 0 1 5 19.5z"/><path d="M8 3v5h7V3"/><path d="M7.5 21v-6.5A1 1 0 0 1 8.5 13.5h7a1 1 0 0 1 1 1V21"/>',
+  devise: '<path d="M4 8h12M13 4.5 16 8l-3 3.5"/><path d="M20 16H8M11 12.5 8 16l3 3.5"/>',
+  graphique: '<path d="M4 20V13"/><path d="M10.2 20V7.5"/><path d="M16.4 20v-9.5"/><path d="M4 20h16.4"/>',
+  aideCercle: '<circle cx="12" cy="12" r="9"/><path d="M9.3 9.2a2.7 2.7 0 1 1 3.9 2.4c-.8.4-1.2 1-1.2 1.9v.3"/><path d="M12 17.2h.01"/>',
+  ampoule: '<path d="M9 18.5h6"/><path d="M10 21.3h4"/><path d="M12 3a6 6 0 0 0-3.4 10.9c.5.35.7.9.7 1.5v.6h5.4v-.6c0-.6.2-1.15.7-1.5A6 6 0 0 0 12 3z"/>',
+  coche: '<path d="M5 13l4 4L19 7"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -12414,110 +12563,274 @@ VIEWS.reminders = {
 // d'identité de société. N'existe dans NAV_ITEMS/le menu mobile que si
 // SCHEMA.hasTco (voir navItemsVisibles) — même garde-fou que le reste de la
 // fonctionnalité (voir keeva-tco-feature).
+// Bandeau eyebrow + actions, au-dessus du h1 (déjà rendu par pageHeadHtml).
+// « Journal d'audit » retiré (aucun journal n'existe) ; « Rapport TCO (PDF) »
+// reste visible mais désactivé — même motif que le canal WhatsApp « à venir
+// prochainement » (bouton annoncé, jamais promis) plutôt que masqué.
+function tcoEyebrowToolbarHtml() {
+  return `
+    <div class="tco-eyebrow-row">
+      <div class="tco-eyebrow-gauche">
+        <span class="tco-eyebrow-pill"><span class="dot"></span>${trad('Configuration TCO & Matériel')}</span>
+        <span class="tco-eyebrow-sep">•</span>
+        <span class="tco-eyebrow-texte">${trad('Gestion de flotte & Exploitation')}</span>
+      </div>
+      <div class="tco-toolbar-actions">
+        <button type="button" class="tco-btn-outil" disabled title="${esc(trad('Bientôt disponible'))}">${picto('export')}<span>${trad('Rapport TCO (PDF)')}</span></button>
+      </div>
+    </div>`;
+}
+// KPI : uniquement des valeurs réelles — la tuile « TCO moyen flotte » du
+// mockup (agrégat multi-machines + tendance) n'a pas été reprise, ce calcul
+// n'existe pas encore (voir keeva-tco-feature, phase 2).
+function tcoKpiGridHtml() {
+  const c = UI.company || {};
+  const zone = c.currency === 'XPF' ? trad('Calédonie, Polynésie, Wallis') : trad('Europe');
+  const tauxActif = c.labor_hourly_rate != null;
+  return `
+    <div class="tco-kpi-grid">
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Devise d\'exploitation')}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${esc(c.currency || 'EUR')}</span></div>
+          <div class="tco-kpi-sub">${esc(zone)}</div>
+        </div>
+        <div class="tco-kpi-icone is-fr">${picto('devise')}</div>
+      </div>
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Taux main d\'œuvre')}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${tauxActif ? texteAvecSeparateurs(c.labor_hourly_rate) : '—'}</span><span class="tco-kpi-unite">${deviseCourte()}/h</span></div>
+          <div class="tco-kpi-sub${tauxActif ? ' is-ok' : ''}">${tauxActif ? picto('coche') + trad('Barème actif') : trad('Non renseigné')}</div>
+        </div>
+        <div class="tco-kpi-icone is-roi">${picto('entretien')}</div>
+      </div>
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Catalogue pièces')}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${(UI.partsCatalog || []).length}</span><span class="tco-kpi-unite">${trad('référence(s)')}</span></div>
+        </div>
+        <div class="tco-kpi-icone is-indigo">${picto('boite')}</div>
+      </div>
+    </div>`;
+}
 function blocParametresTcoHtml() {
   const c = UI.company || {};
   const gerant = UI.role === 'gerant';
   const bloque = gerant ? '' : ' disabled';
+  const dv = c.currency === 'XPF' ? 'XPF' : '€';
   return `
     <section class="card">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('reglages')}</span><span>${trad('Paramètres TCO')}</span></h2>
+      <div class="tco-card-tete">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-roi">${picto('reglages')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Paramètres TCO & Barèmes suggérés')}</h2>
+            <div class="tco-card-soustitre">${trad('Règles de calcul prédictif des coûts d\'intervention')}</div>
+          </div>
+        </div>
+        <button type="button" class="tco-btn-aide" title="${esc(trad('Informations complémentaires'))}">${picto('aideCercle')}</button>
       </div>
-      <p class="muted-text">${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs SUGGÉRÉES lors de l\'ajout d\'un coût d\'exploitation — jamais insérées automatiquement.')}</p>
+      <div class="tco-callout is-info">
+        ${picto('info')}
+        <p><strong>${trad('Règle de calcul :')}</strong> ${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs')} <strong>${trad('SUGGÉRÉES')}</strong> ${trad('lors de l\'ajout d\'un coût d\'exploitation — ils ne sont jamais appliqués sans confirmation manuelle.')}</p>
+      </div>
       ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
-      <label>${trad('Devise')}</label>
-      <div class="mform-cards" id="tco-devise-cards">
-        <label class="mform-card">
-          <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
-          <span class="mform-card-corps"><span class="mform-card-titre">${trad('Euros (€)')}</span></span>
+      <div>
+        <label class="tco-champ-label" style="margin-bottom:6px;">
+          <span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Devise principale de la flotte')}</span>
+          <span class="tag">${trad('MONNAIE DE REPORTING')}</span>
         </label>
-        <label class="mform-card">
-          <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
-          <span class="mform-card-corps"><span class="mform-card-titre">${trad('Francs Pacifique (XPF)')}</span></span>
-        </label>
+        <div class="tco-devise-grid" id="tco-devise-cards">
+          <label class="tco-devise-carte${c.currency === 'XPF' ? ' is-selected' : ''}" data-devise-carte="XPF">
+            <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
+            <span class="tco-devise-coche">${picto('coche')}</span>
+            <span style="display:flex;flex-direction:column;gap:2px;">
+              <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Franc Pacifique')}</span><span class="tco-devise-code">XPF</span></span>
+              <span class="tco-devise-zone">${trad('Calédonie, Polynésie, Wallis')}</span>
+            </span>
+            ${c.currency === 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
+          </label>
+          <label class="tco-devise-carte${c.currency !== 'XPF' ? ' is-selected' : ''}" data-devise-carte="EUR">
+            <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
+            <span class="tco-devise-coche">${picto('coche')}</span>
+            <span style="display:flex;flex-direction:column;gap:2px;">
+              <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Euro Européen')}</span><span class="tco-devise-code">EUR €</span></span>
+              <span class="tco-devise-zone">${trad('Métropole, Antilles, Guyane')}</span>
+            </span>
+            ${c.currency !== 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
+          </label>
+        </div>
       </div>
-      <div class="hint">${trad('S\'applique à tous les montants TCO de la société (scorecard, catalogue de pièces, coûts d\'exploitation). Changer de devise ne reconvertit pas les montants déjà saisis.')}</div>
-      <div class="field-row">
+      <div class="tco-callout is-warn">
+        ${picto('alerte')}
+        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise ne reconvertit pas rétroactivement les montants saisis.')}</p>
+      </div>
+      <div class="field-row" style="grid-template-columns:repeat(3,1fr);">
         <div>
-          <label for="tco-taux-horaire" id="tco-taux-horaire-label">${tR('Taux horaire main d\'œuvre ({devise}/h)', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-taux-horaire" type="text" inputmode="decimal" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
+          <label class="tco-champ-label" for="tco-taux-horaire"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Taux horaire MO')}</span><span class="tag" id="tco-taux-horaire-tag">${esc(dv)} / ${trad('HEURE')}</span></label>
+          <div class="tco-champ-unite">
+            <input id="tco-taux-horaire" type="text" inputmode="decimal" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
+            <span class="tco-unite-tag" id="tco-taux-horaire-unite">${esc(dv)}/h</span>
+          </div>
+          <div class="tco-champ-note">${trad('Coût moyen atelier')}</div>
         </div>
         <div>
-          <label for="tco-assurance" id="tco-assurance-label">${tR('Assurance — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-assurance" type="text" inputmode="decimal" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
+          <label class="tco-champ-label" for="tco-assurance"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Assurance annuelle')}</span><span class="tag">${trad('SUGGÉRÉ')}</span></label>
+          <div class="tco-champ-unite">
+            <input id="tco-assurance" type="text" inputmode="decimal" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
+            <span class="tco-unite-tag" id="tco-assurance-unite">${esc(dv)}/an</span>
+          </div>
+          <div class="tco-champ-note">${trad('Primes RC & machine')}</div>
         </div>
         <div>
-          <label for="tco-stockage" id="tco-stockage-label">${tR('Stockage — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-stockage" type="text" inputmode="decimal" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
+          <label class="tco-champ-label" for="tco-stockage"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Stockage annuel')}</span><span class="tag">${trad('SUGGÉRÉ')}</span></label>
+          <div class="tco-champ-unite">
+            <input id="tco-stockage" type="text" inputmode="decimal" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
+            <span class="tco-unite-tag" id="tco-stockage-unite">${esc(dv)}/an</span>
+          </div>
+          <div class="tco-champ-note">${trad('Hangar, parc fermé')}</div>
         </div>
       </div>
       <div class="hint" id="tco-parametres-msg" role="status" aria-live="polite"></div>
       <div class="modal-actions">
-        <button type="button" class="primary" id="tco-save-parametres"${bloque}>${trad('Enregistrer')}</button>
+        <button type="button" class="primary" id="tco-save-parametres"${bloque}>${picto('disquette')}<span>${trad('Enregistrer les paramètres')}</span></button>
       </div>
     </section>`;
 }
+// Donut EXPLICITEMENT étiqueté « modèle » — comme dans le mockup lui-même
+// (badge « MODÈLE KEEVA ») : ce n'est pas une mesure des machines réelles de
+// la société, la vraie répartition agrégée suppose de sommer les coûts de
+// TOUTES les interventions/coûts d'exploitation du parc (phase 2, voir
+// keeva-tco-feature) — même précédent que l'aperçu WhatsApp de l'app.
+function tcoDonutCarteHtml() {
+  return `
+    <div class="tco-donut-carte">
+      <div style="width:88px;height:88px;flex:0 0 auto;position:relative;display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 36 36" style="width:88px;height:88px;transform:rotate(-90deg);">
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--surface-soft)" stroke-width="4.5"/>
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bleu-roi)" stroke-width="4.5" stroke-dasharray="45,100" stroke-linecap="round"/>
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-dasharray="35,100" stroke-dashoffset="-45" stroke-linecap="round"/>
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--late)" stroke-width="4.5" stroke-dasharray="20,100" stroke-dashoffset="-80" stroke-linecap="round"/>
+        </svg>
+        <span style="position:absolute;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);">100%</span>
+      </div>
+      <div style="flex:1;min-width:180px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition indicative TCO par machine')}</span>
+          <span class="tco-donut-badge">${trad('MODÈLE KEEVA')}</span>
+        </div>
+        <div class="tco-donut-legende">
+          <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${trad('Pièces (45%)')}</span>
+          <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${trad('MO atelier (35%)')}</span>
+          <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${trad('Fixes (20%)')}</span>
+        </div>
+      </div>
+    </div>`;
+}
+// Une ligne = un item compact (icône + désignation/référence à gauche, prix
+// + actions à droite) plutôt qu'un tableau à 4 colonnes : tient sur une
+// seule ligne même dans la colonne étroite (38 %), sans défilement
+// horizontal — c'est ce composant, pas juste la largeur, qui répond au
+// « ligne entière visible » demandé.
+// Icône unique pour toutes les pièces (pas de catégorie par pièce en base —
+// contrairement au mockup qui varie l'icône par type de produit, aucune
+// donnée réelle ne permet de deviner « huile »/« filtre »/« bougie » ici).
 function ligneCatalogueTcoHtml(piece) {
-  return `<tr data-piece-id="${esc(piece.id)}">
-      <td>${piece.reference ? esc(piece.reference) : '<span class="muted">—</span>'}</td>
-      <td>${esc(piece.designation)}</td>
-      <td>${formatMontant(piece.unit_price)}</td>
-      <td>
-        <button type="button" class="link-inline" data-piece-modifier="${esc(piece.id)}">${trad('Modifier')}</button>
-        <button type="button" class="link-inline" data-piece-retirer="${esc(piece.id)}">${trad('Retirer')}</button>
-      </td>
-    </tr>`;
+  return `
+    <div class="tco-part-ligne" data-piece-id="${esc(piece.id)}">
+      <div class="tco-part-gauche">
+        <div class="tco-part-icone">${picto('boite')}</div>
+        <div class="tco-part-corps">
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece.designation)}</span></span>
+          <span class="tco-part-ref">${piece.reference ? esc(piece.reference) : trad('Sans référence')}</span>
+        </div>
+      </div>
+      <div class="tco-part-droite">
+        <div class="tco-part-prix"><span class="montant">${texteAvecSeparateurs(piece.unit_price)}</span><span class="devise">${esc(deviseCourte())}</span></div>
+        <div class="tco-part-actions">
+          <button type="button" class="tco-part-btn" data-piece-modifier="${esc(piece.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+          <button type="button" class="tco-part-btn is-danger" data-piece-retirer="${esc(piece.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
+        </div>
+      </div>
+    </div>`;
 }
 function blocCatalogueTcoHtml() {
   const pieces = UI.partsCatalog || [];
   return `
     <section class="card">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('carnet')}</span><span>${trad('Catalogue de pièces')}</span></h2>
-        <span class="spacer"></span>
-        <span class="pill neutral">${tR('{n} référence(s)', { n: pieces.length })}</span>
+      <div class="tco-card-tete" style="margin-bottom:2px;">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-indigo">${picto('boite')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Catalogue de pièces')}</h2>
+            <span class="tag" id="tco-catalogue-badge" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>
+          </div>
+        </div>
       </div>
-      <p class="muted-text">${trad('Sélectionnable sur chaque entretien (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces utilisées.')}</p>
-      <div id="tco-catalogue-liste">
-        ${pieces.length ? `<div class="ref-scroll"><table class="ref-table">
-          <thead><tr><th>${trad('Référence')}</th><th>${trad('Désignation')}</th><th>${trad('Prix unitaire')}</th><th></th></tr></thead>
-          <tbody>${pieces.map(ligneCatalogueTcoHtml).join('')}</tbody>
-        </table></div>` : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
+      <p class="muted-text">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
+      <div class="tco-recherche">
+        ${picto('recherche')}
+        <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
+      </div>
+      <div class="tco-parts-liste" id="tco-catalogue-liste">
+        ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
       </div>
       <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
-      <div class="label" id="tco-piece-form-titre" style="margin-top:10px;">${trad('Ajouter une pièce')}</div>
-      <div class="field-row">
-        <div>
-          <label for="tco-piece-reference">${trad('Référence')}</label>
-          <input id="tco-piece-reference" placeholder="${trad('Ex. FLT-0142')}">
+      <div class="tco-quick-add">
+        <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
+        <div class="field-row">
+          <div>
+            <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
+            <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+          </div>
+          <div>
+            <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
+            <div class="tco-champ-unite">
+              <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
+              <span class="tco-unite-tag" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <label for="tco-piece-designation">${trad('Désignation')}</label>
-          <input id="tco-piece-designation" required placeholder="${trad('Ex. Filtre à huile')}">
+        <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
+        <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
+          <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
         </div>
-        <div>
-          <label for="tco-piece-prix">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
-          <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Ex. 18.90')}">
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
-        <button type="button" class="secondary" id="tco-piece-ajouter">${trad('Ajouter au catalogue')}</button>
       </div>
     </section>`;
 }
+// Astuce honnête : le mockup promettait un scan QR Code inexistant côté web
+// — remplacé par un comportement RÉEL déjà construit (sélection catalogue →
+// prix proposé, quantité décimale acceptée).
+function tcoTipCarteHtml() {
+  return `
+    <div class="tco-tip-carte">
+      <div class="tco-tip-icone">${picto('ampoule')}</div>
+      <div>
+        <div class="tco-tip-titre">${trad('Astuce Gestionnaire')}</div>
+        <p class="tco-tip-texte">${trad('Les pièces enregistrées ici sont proposées automatiquement dans « Enregistrer un entretien » : sélectionner une pièce remplit son prix, et la quantité accepte les décimales (0,5 pour un demi-bidon, par exemple).')}</p>
+      </div>
+    </div>`;
+}
 VIEWS.tco = {
-  title: trad('Coûts & TCO'),
-  subtitle: () => trad('Réglages financiers de la société et catalogue de pièces, utilisés pour calculer le coût total de possession de chaque machine.'),
+  title: trad('Paramètres TCO & Coûts d\'exploitation'),
+  subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
   render() {
     return `
-      <div class="agenda-toolbar">
-        <span class="agenda-eyebrow">${trad('Paramètres & catalogue')}</span>
-      </div>
-      <div class="dash-grid agenda-grid vue-couts-tco">
-        <div class="dash-main">
-          ${blocParametresTcoHtml()}
-          ${blocCatalogueTcoHtml()}
+      <div class="vue-couts-tco">
+        ${tcoEyebrowToolbarHtml()}
+        ${tcoKpiGridHtml()}
+        <div class="dash-grid agenda-grid" style="margin-top:4px;">
+          <div class="dash-main">
+            ${blocParametresTcoHtml()}
+            ${tcoDonutCarteHtml()}
+          </div>
+          <div class="dash-side">
+            ${blocCatalogueTcoHtml()}
+            ${tcoTipCarteHtml()}
+          </div>
         </div>
       </div>`;
   },
@@ -12530,26 +12843,38 @@ VIEWS.tco = {
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
 
-    // Cartes devise : même motif visuel que les cartes radio de l'assistant
-    // machine (marquerCarteSelectionnee), reposé ici en local — cette fonction-là
-    // est une fermeture de openAddWizard, pas réutilisable depuis cette vue.
+    // Cartes devise : reprend le motif du mockup (cercle-coche + fond teinté
+    // + pastille « Actif ») — la pastille suit RÉELLEMENT la devise choisie
+    // (contrairement au mockup statique, où elle restait figée sur XPF même
+    // après avoir sélectionné EUR : afficher « Actif » sur une devise qui ne
+    // l'est plus serait une information fausse, pas juste une différence de
+    // style — donc corrigé ici, pas reproduit à l'identique).
     const majDeviseCards = () => {
-      root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => {
-        radio.closest('.mform-card')?.classList.toggle('is-selected', radio.checked);
+      const valeur = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
+      root.querySelectorAll('.tco-devise-carte').forEach((carte) => {
+        const active = carte.dataset.deviseCarte === valeur;
+        carte.classList.toggle('is-selected', active);
+        let pastille = carte.querySelector('.tco-devise-actif');
+        if (active && !pastille) {
+          pastille = document.createElement('span');
+          pastille.className = 'tco-devise-actif';
+          pastille.textContent = trad('Actif');
+          carte.appendChild(pastille);
+        } else if (!active && pastille) {
+          pastille.remove();
+        }
       });
     };
-    // Les 3 libellés de champ ci-dessous portent la devise EN TEXTE (« …/h) »,
-    // « … (€) ») : ils doivent suivre le choix du radio TOUT DE SUITE, avant
-    // même d'enregistrer — sinon l'utilisateur choisit XPF et voit encore
-    // « € » jusqu'au prochain rendu complet, ce qui a l'air figé/cassé.
+    // Les libellés de champ/unité portent la devise EN TEXTE (« XPF/h », « € »)
+    // : ils doivent suivre le choix du radio TOUT DE SUITE, avant même
+    // d'enregistrer — sinon l'utilisateur choisit XPF et voit encore « € »
+    // jusqu'au prochain rendu complet, ce qui a l'air figé/cassé.
     const majLibellesDevise = () => {
       const devise = root.querySelector('input[name="tco-devise"]:checked')?.value === 'XPF' ? 'XPF' : '€';
-      const taux = root.querySelector('#tco-taux-horaire-label');
-      const assurance = root.querySelector('#tco-assurance-label');
-      const stockage = root.querySelector('#tco-stockage-label');
-      if (taux) taux.textContent = tR('Taux horaire main d\'œuvre ({devise}/h)', { devise });
-      if (assurance) assurance.textContent = tR('Assurance — barème annuel suggéré ({devise})', { devise });
-      if (stockage) stockage.textContent = tR('Stockage — barème annuel suggéré ({devise})', { devise });
+      const tag = root.querySelector('#tco-taux-horaire-tag');
+      if (tag) tag.textContent = `${devise} / ${trad('HEURE')}`;
+      const paires = [['#tco-taux-horaire-unite', `${devise}/h`], ['#tco-assurance-unite', `${devise}/an`], ['#tco-stockage-unite', `${devise}/an`], ['#tco-piece-prix-unite', devise]];
+      paires.forEach(([sel, texte]) => { const el = root.querySelector(sel); if (el) el.textContent = texte; });
     };
     majDeviseCards();
     root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', () => {
@@ -12563,15 +12888,25 @@ VIEWS.tco = {
       activerSeparateurMilliers(root.querySelector(sel));
     });
 
+    // Recherche du catalogue : filtre client, comme le mockup — sur la
+    // référence ET la désignation.
+    root.querySelector('#tco-piece-filtre')?.addEventListener('input', (e) => {
+      const terme = e.target.value.trim().toLowerCase();
+      root.querySelectorAll('#tco-catalogue-liste .tco-part-ligne').forEach((ligne) => {
+        ligne.style.display = ligne.textContent.toLowerCase().includes(terme) ? '' : 'none';
+      });
+    });
+
     root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
+      const label = btn.querySelector('span');
       const msg = root.querySelector('#tco-parametres-msg');
       const taux = nombreDepuisTexte(root.querySelector('#tco-taux-horaire').value);
       const assurance = nombreDepuisTexte(root.querySelector('#tco-assurance').value);
       const stockage = nombreDepuisTexte(root.querySelector('#tco-stockage').value);
       const devise = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
       btn.disabled = true;
-      btn.textContent = trad('Enregistrement…');
+      if (label) label.textContent = trad('Enregistrement…');
       try {
         const { error } = await sb.rpc('update_my_tco_settings', {
           p_labor_hourly_rate: taux,
@@ -12593,7 +12928,7 @@ VIEWS.tco = {
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
         btn.disabled = false;
-        btn.textContent = trad('Enregistrer');
+        if (label) label.textContent = trad('Enregistrer les paramètres');
       }
     });
 
@@ -12607,14 +12942,15 @@ VIEWS.tco = {
     const champPrix = root.querySelector('#tco-piece-prix');
     const titreForm = root.querySelector('#tco-piece-form-titre');
     const boutonAjouter = root.querySelector('#tco-piece-ajouter');
+    const boutonAjouterLabel = boutonAjouter?.querySelector('span');
     const boutonAnnuler = root.querySelector('#tco-piece-annuler');
     const sortirDuModeEdition = () => {
       pieceEnEdition = null;
       if (champRef) champRef.value = '';
       if (champDesignation) champDesignation.value = '';
       if (champPrix) champPrix.value = '';
-      if (titreForm) titreForm.textContent = trad('Ajouter une pièce');
-      if (boutonAjouter) boutonAjouter.textContent = trad('Ajouter au catalogue');
+      if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
+      if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
       if (boutonAnnuler) boutonAnnuler.hidden = true;
     };
     boutonAnnuler?.addEventListener('click', sortirDuModeEdition);
@@ -12627,7 +12963,7 @@ VIEWS.tco = {
       const prix = nombreDepuisTexte(champPrix.value) ?? 0;
       if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
       btn.disabled = true;
-      btn.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
+      if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
       try {
         if (pieceEnEdition) {
           const { data, error } = await sb.from('parts_catalog')
@@ -12654,7 +12990,7 @@ VIEWS.tco = {
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
         btn.disabled = false;
-        btn.textContent = pieceEnEdition ? trad('Enregistrer les modifications') : trad('Ajouter au catalogue');
+        if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrer les modifications') : trad('Ajouter au catalogue');
       }
     });
 
@@ -12669,7 +13005,7 @@ VIEWS.tco = {
         if (champDesignation) champDesignation.value = piece.designation || '';
         if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
         if (titreForm) titreForm.textContent = trad('Modifier une pièce');
-        if (boutonAjouter) boutonAjouter.textContent = trad('Enregistrer les modifications');
+        if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
         if (boutonAnnuler) boutonAnnuler.hidden = false;
         champDesignation?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
