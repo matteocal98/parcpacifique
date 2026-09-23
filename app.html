@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-syiSlilezMk4bBGa2Tl/osr1xljdP7W6uE43gWuOnqk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Tz2ApwJveb8B1prEIA06q8BKDuHtX0lPD3gk4F1TQas=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -15934,6 +15934,19 @@ function openNextMaintenanceView(machine) {
     });
 }
 
+// L'ÉQUIPE, POUR ATTRIBUER UN ENTRETIEN — PAS POUR LA GÉRER. equipe_pour_
+// attribution() (côté serveur) est délibérément OUVERTE À TOUTE LA SOCIÉTÉ,
+// contrairement à membres_de_ma_societe() (réservée au gérant, avec un
+// commentaire serveur qui le dit explicitement) : n'importe quel opérateur
+// peut enregistrer un entretien et doit pouvoir dire qui l'a fait, y
+// compris lui-même. Elle ne renvoie QUE id + un nom affiché déjà composé
+// côté serveur (jamais l'email, le rôle ou le métier) — le strict
+// nécessaire pour un menu déroulant, rien de plus.
+async function equipePourAttribution() {
+  const { data, error } = await sb.rpc('equipe_pour_attribution');
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
 function openLogInterventionModal(machine, tache) {
   // « Marquer fait » / enregistrer un entretien écrit dans l'historique et
   // recalcule l'échéance. `tache` (optionnel) pré-coche la ligne du bandeau
@@ -16001,15 +16014,14 @@ function openLogInterventionModal(machine, tache) {
             </div>
           </div>` : ''}
 
-          <!-- Qui a fait l'entretien, dans l'équipe : le CHAMP seulement pour
-               l'instant, comme convenu — la sélection réelle (liste de
-               l'équipe) et l'enregistrement viendront dans une prochaine
-               passe. Désactivé plutôt qu'actif-mais-muet : un champ qui a
-               l'air de fonctionner et n'enregistre rien est le piège que ce
-               produit refuse déjà ailleurs (compteur, photo…). -->
+          <!-- Qui a fait l'entretien, dans l'équipe : equipe_pour_attribution()
+               (voir plus bas) — ouverte à TOUTE la société, pas seulement au
+               gérant comme membres_de_ma_societe(), puisque n'importe quel
+               opérateur peut enregistrer un entretien. Optionnel : « Non
+               précisé » reste un choix valide, on n'invente jamais un nom. -->
           <label for="log-operateur"><span class="label-ico">${picto('equipe')}</span>${trad('Effectué par')}</label>
           <select id="log-operateur" disabled>
-            <option value="">${trad('Choix dans l\'équipe — bientôt disponible')}</option>
+            <option value="">${trad('Chargement de l\'équipe…')}</option>
           </select>
         </div>
 
@@ -16065,6 +16077,20 @@ function openLogInterventionModal(machine, tache) {
 
   overlay.querySelector('#cancel-log').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#cancel-log-x').addEventListener('click', () => overlay.remove());
+
+  (async () => {
+    const select = overlay.querySelector('#log-operateur');
+    if (!select) return;
+    try {
+      const equipe = await equipePourAttribution();
+      if (!overlay.isConnected) return;
+      select.innerHTML = `<option value="">${trad('Non précisé')}</option>`
+        + equipe.map(m => `<option value="${esc(m.id)}">${esc(m.nom_affiche)}</option>`).join('');
+      select.disabled = false;
+    } catch (err) {
+      select.innerHTML = `<option value="">${trad('Équipe indisponible')}</option>`;
+    }
+  })();
 
   // Compteur de cases cochées + prévision de la prochaine échéance : une
   // VRAIE prévision, calculée par la même fonction pure que l'enregistrement
@@ -16123,6 +16149,7 @@ function openLogInterventionModal(machine, tache) {
       ? Array.from(overlay.querySelectorAll('.checklist input:checked')).map(c => c.value)
       : [];
     const notes = overlay.querySelector('#log-notes').value.trim();
+    const operateur = overlay.querySelector('#log-operateur')?.value || null;
 
     try {
       const { error: logErr } = await sb.from(trad('interventions')).insert({
@@ -16133,6 +16160,7 @@ function openLogInterventionModal(machine, tache) {
         ...(unit2 ? { hours_at_intervention_2: hoursValue2 } : {}),
         description: notes || null,
         items_done: checkedItems.length ? checkedItems : null,
+        performed_by: operateur,
       });
       if (logErr) throw logErr;
 
@@ -16193,7 +16221,7 @@ async function fetchAllInterventions(machineId) {
   const all = [];
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await sb.from(trad('interventions'))
-      .select('id, performed_at, hours_at_intervention, description, items_done')
+      .select('id, performed_at, hours_at_intervention, description, items_done, performed_by')
       .eq('machine_id', machineId)
       .order('performed_at', { ascending: false })
       .order('id', { ascending: false })
@@ -16601,13 +16629,18 @@ function openPlanView(machine, companyId, categories) {
   }
 
   let historyData = [];
+  // id -> nom affiché, rempli une fois avec l'historique (voir plus bas) :
+  // une seule requête équipe pour tout l'écran (table, CSV, email).
+  let nomsEquipe = new Map();
+  const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
   const buildHistoryCsv = () => {
-    const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Remarques')];
+    const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Operateur'), trad('Remarques')];
     const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const rows = historyData.map(h => [
       h.performed_at,
       h.hours_at_intervention ?? '',
       Array.isArray(h.items_done) ? h.items_done.join('; ') : '',
+      nomOperateurTexte(h),
       h.description ?? '',
     ]);
     return [header, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
@@ -16647,7 +16680,7 @@ function openPlanView(machine, companyId, categories) {
       }
     }
     const subject = encodeURIComponent(`tR('Historique entretien — {machine}', { machine: machine.name })`);
-    const bodyLines = historyData.slice(0, 20).map(h => `${h.performed_at} — ${h.hours_at_intervention != null ? h.hours_at_intervention + trad('h') : ''} — ${(h.items_done || []).join(', ')} — ${h.description || ''}`);
+    const bodyLines = historyData.slice(0, 20).map(h => `${h.performed_at} — ${h.hours_at_intervention != null ? h.hours_at_intervention + trad('h') : ''} — ${(h.items_done || []).join(', ')}${nomOperateurTexte(h) ? ' — ' + nomOperateurTexte(h) : ''} — ${h.description || ''}`);
     const body = encodeURIComponent(`tR('Historique des entretiens pour {machine}', { machine: machine.name }) :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si tu veux le joindre en pièce jointe.)')}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   });
@@ -16657,8 +16690,16 @@ function openPlanView(machine, companyId, categories) {
     if (!section) return;
     const valueEl = section.querySelector('.value');
     try {
-      // Historique COMPLET : l'export CSV ne doit jamais être tronqué.
-      historyData = await fetchAllInterventions(machine.id);
+      // Historique COMPLET : l'export CSV ne doit jamais être tronqué. L'équipe
+      // se charge EN MÊME TEMPS : si elle échoue (hors connexion, etc.), la
+      // colonne « Opérateur » reste vide — l'historique lui-même s'affiche
+      // quand même, jamais bloqué par un souci qui lui est étranger.
+      const [interventions, equipe] = await Promise.all([
+        fetchAllInterventions(machine.id),
+        equipePourAttribution().catch(() => []),
+      ]);
+      historyData = interventions;
+      nomsEquipe = new Map(equipe.map(m => [m.id, m.nom_affiche]));
     } catch (error) {
       if (valueEl) valueEl.textContent = trad('Erreur de chargement de l\'historique :') + " " + error.message;
       return;
@@ -16681,7 +16722,7 @@ function openPlanView(machine, companyId, categories) {
               <td class="item-label">${esc(h.performed_at)}</td>
               ${isCounterMode ? `<td>${h.hours_at_intervention != null ? esc(h.hours_at_intervention) + ' ' + counterShort(unit) : '<span class="muted">—</span>'}</td>` : ''}
               <td>${Array.isArray(h.items_done) && h.items_done.length ? esc(h.items_done.join(', ')) : '<span class="muted">—</span>'}</td>
-              <td><span class="muted">—</span></td>
+              <td>${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
               <td>${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
             </tr>`).join('')}
         </tbody>
