@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FVnkuEYQV0f+yOcP71GdCXwHABBSqh0MrNjYU90UK2s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-aV9/qeKJyolG4cuTGCuDyZBYaqe2Mn7q+e1RFYeQUzU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5452,6 +5452,29 @@ function classerDepuisTexte(frequency) {
 function classerFrequence(item) {
   return classerDepuisStructure(item && item.frequence)
     || classerDepuisTexte(item && item.frequency);
+}
+
+// Le carnet mélange-t-il une SECONDE unité de compteur (heures ET km), ou une
+// unité de compteur alors que le mode proposé est calendaire ? Pur calcul,
+// sans toucher l'Edge Function déployée : elle classe déjà chaque tâche dans
+// SA propre unité (classerFrequence, structuré ou texte) — on regarde juste
+// si une unité de compteur AUTRE que le mode principal apparaît. Une seule
+// candidate distincte : on la propose. Deux (heures ET km, toutes deux
+// différentes d'un principal calendaire) : cas rarissime, on ne devine pas —
+// null, l'utilisateur choisira lui-même dans la section « Second suivi ».
+function detecterUniteSecondaire(items, modePrincipal) {
+  if (!Array.isArray(items) || !items.length) return null;
+  const enCode = (uniteInterne) => uniteInterne === 'heures' ? 'hours' : (uniteInterne === 'km' ? 'km' : null);
+  const vues = new Set();
+  const noter = (unite) => { const c = enCode(unite); if (c) vues.add(c); };
+  for (const item of items) {
+    const classement = classerFrequence(item);
+    if (!classement) continue;
+    if (classement.nature === 'periodique') noter(classement.unite);
+    if (classement.nature === 'a_choisir') (classement.options || []).forEach(o => noter(o.unite));
+  }
+  if (modePrincipal === 'hours' || modePrincipal === 'km') vues.delete(modePrincipal);
+  return vues.size === 1 ? [...vues][0] : null;
 }
 
 // Échéance PROPRE d'une tâche, calculée dans SON unité : une date pour les unités
@@ -13684,9 +13707,30 @@ async function analyzeManualAndFill(overlay, fileOrBlob, mode = 'days', context 
     if (data.tasks) overlay.querySelector('#f-tasks').value = data.tasks;
     overlay._aiItems = Array.isArray(data.items) && data.items.length ? data.items : null;
     overlay._aiNotes = data.notes || '';
+    // LE CARNET MÉLANGE-T-IL UNE SECONDE UNITÉ DE COMPTEUR ? Pur calcul sur ce
+    // que l'analyse a déjà classé tâche par tâche — proposé, pas imposé (même
+    // principe que le mode principal) : l'étape « Mode de suivi » pré-coche
+    // la section « Second suivi » d'après cette détection, sans empêcher
+    // l'utilisateur de la décocher ou de choisir une autre unité.
+    overlay._aiUniteSecondaire = SCHEMA.hasCounter2 ? detecterUniteSecondaire(overlay._aiItems, modeRecommande) : null;
+    overlay._secondaireToucheForce = false;
+    // Si la section existe déjà à l'écran (fiche « Modifier la machine », qui
+    // permet de relancer une analyse sans changer d'écran), on l'applique
+    // directement — le wizard, lui, ne l'affiche qu'à l'étape suivante et la
+    // lira depuis overlay._aiUniteSecondaire à ce moment-là.
+    const caseSecondaireExistante = overlay.querySelector('#f-secondaire-active');
+    if (overlay._aiUniteSecondaire && caseSecondaireExistante && !caseSecondaireExistante.checked) {
+      caseSecondaireExistante.checked = true;
+      caseSecondaireExistante.dispatchEvent(new Event('change'));
+      const radioUnite = overlay.querySelector(`input[name=tm2][value="${overlay._aiUniteSecondaire}"]`);
+      if (radioUnite) { radioUnite.checked = true; radioUnite.dispatchEvent(new Event('change')); }
+    }
     const detailMsg = overlay._aiItems ? ` ${tR('{n} élément(s) détaillé(s) extrait(s), consultables via « Voir le plan » une fois enregistré.', { n: overlay._aiItems.length })}` : '';
     const modeMsg = ` ℹ️ ${tR('Le carnet exprime ses échéances en {mode} : ce mode de suivi te sera proposé à l\'étape suivante, et tu pourras le corriger.', { mode: modeRecommande === 'hours' ? trad('heures') : trad('jours') })}`;
-    analysisEl.textContent = `✅ ${tR('Suggestion de notre algorithme appliquée (confiance {valeur})', { valeur: data.confidence || '—' })}${data.notes ? ' — ' + data.notes : ''}.${detailMsg}${modeMsg} ${trad('Vérifie les champs ci-dessus avant d\'enregistrer.')}`;
+    const secondaireMsg = overlay._aiUniteSecondaire
+      ? ` ℹ️ ${tR('Le carnet mélange aussi une échéance en {unite} : un second suivi te sera proposé, tu pourras le retirer.', { unite: overlay._aiUniteSecondaire === 'km' ? trad('kilomètres') : trad('heures') })}`
+      : '';
+    analysisEl.textContent = `✅ ${tR('Suggestion de notre algorithme appliquée (confiance {valeur})', { valeur: data.confidence || '—' })}${data.notes ? ' — ' + data.notes : ''}.${detailMsg}${modeMsg}${secondaireMsg} ${trad('Vérifie les champs ci-dessus avant d\'enregistrer.')}`;
     // LE MANUEL VOLUMINEUX N'EST PAS GARDÉ — et on le dit sans détour : le client
     // doit savoir qu'il devra le redéposer pour le consulter plus tard.
     if (grosDocument) analysisEl.textContent += ' ' + nonConserve;
@@ -13814,6 +13858,19 @@ async function analyserPagesCarnet(overlay, contexte, apresAnalyse) {
       overlay._aiIntervalDays = data.interval_days || null;
       overlay._aiIntervalHours = data.interval_hours || null;
       overlay._aiTrackingSuggestion = data.tracking_mode_suggestion === 'hours' ? 'hours' : 'days';
+    }
+    // Même détection que pour un PDF (voir analyzeManualAndFill) : une
+    // seconde unité de compteur mélangée dans ces pages photographiées.
+    overlay._aiUniteSecondaire = SCHEMA.hasCounter2
+      ? detecterUniteSecondaire(items, overlay._aiTrackingSuggestion || (contexte && contexte.trackingMode) || 'days')
+      : null;
+    overlay._secondaireToucheForce = false;
+    const caseSecondaireExistante = overlay.querySelector('#f-secondaire-active');
+    if (overlay._aiUniteSecondaire && caseSecondaireExistante && !caseSecondaireExistante.checked) {
+      caseSecondaireExistante.checked = true;
+      caseSecondaireExistante.dispatchEvent(new Event('change'));
+      const radioUnite = overlay.querySelector(`input[name=tm2][value="${overlay._aiUniteSecondaire}"]`);
+      if (radioUnite) { radioUnite.checked = true; radioUnite.dispatchEvent(new Event('change')); }
     }
     const resultat = { items: overlay._aiItems, notes: overlay._aiNotes, taches: data?.tasks || '' };
     // ON RETIENT LE DÉCOMPTE renvoyé par la fonction : c'est lui qui permet de
@@ -15121,6 +15178,14 @@ function openAddWizard(companyId, categories) {
     const mode = state.trackingMode;
     const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
     const isCounter = mode !== 'days';
+    // Second suivi suggéré par l'analyse (voir detecterUniteSecondaire),
+    // proposé — pas imposé : pré-coché tant que l'utilisateur n'a pas
+    // touché la section lui-même, jamais s'il coïncide avec le principal
+    // (le kilométrage a pu remplacer « heures » entre-temps, ligne 15170).
+    if (overlay._aiUniteSecondaire && overlay._aiUniteSecondaire !== mode
+        && !overlay._secondaireToucheForce && !state.secondaryUnit) {
+      state.secondaryUnit = overlay._aiUniteSecondaire;
+    }
     const mention = recoRetenue
       ? `<div class="hint" id="mode-reco">${recoRetenue === 'km'
         ? trad('Le carnet décrit un suivi au kilométrage : ce mode est proposé, tu peux le corriger.')
@@ -15267,10 +15332,14 @@ function openAddWizard(companyId, categories) {
       const caseSecondaire = overlay.querySelector('#f-secondaire-active');
       const champsSecondaire = overlay.querySelector('#secondaire-champs');
       caseSecondaire?.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
         if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
         if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
       });
-      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => marquerCarteSelectionnee('tm2')));
+      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
+        marquerCarteSelectionnee('tm2');
+      }));
       marquerCarteSelectionnee('tm2');
     }
     const champIntervalleWizard = overlay.querySelector('#f-interval');
@@ -16744,10 +16813,14 @@ function openMachineModal(companyId, categories, existing) {
     const caseSecondaire = overlay.querySelector('#f-secondaire-active');
     const champsSecondaire = overlay.querySelector('#secondaire-champs');
     caseSecondaire?.addEventListener('change', () => {
+      overlay._secondaireToucheForce = true;
       if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
       if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
     });
-    overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => marquerCarteSelectionnee('tm2')));
+    overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
+      overlay._secondaireToucheForce = true;
+      marquerCarteSelectionnee('tm2');
+    }));
     marquerCarteSelectionnee('tm2');
   }
 
