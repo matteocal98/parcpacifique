@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1b8JavDVdcSlWsqag51w/vwadV1HDgrppzJeqzrvtG0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xsLzuiOxUp42QDrUGMQnxFggXK/DmnyjqCBJdP5ZC3k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1762,84 +1762,131 @@
   .signup-login-line .link-inline{font-weight:700;}
 
   /* ══════════════════════════════════════════════════════════════════════
-     ★ ENREGISTRER UN ENTRETIEN (Stitch « modale_enregistrer_un_entretien ») */
-  .log-modal .modal{max-width:760px;}
-  .log-machine-ligne{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 16px;}
-  .log-machine-ligne .badge{font-size:12.5px;}
-  .log-machine-texte{font-size:13.5px;color:var(--ink-2);}
-  .log-modal label .label-ico{color:var(--primary-dark);}
+     ★ ENREGISTRER UN ENTRETIEN — reprise à l'identique de la maquette Stitch
+     « WEB Modales/modale_enregistrer_un_entretien/code.html » (voir
+     keeva-tco-feature) : mêmes substitutions déjà établies sur les deux
+     reprises précédentes — aucune police d'icônes (icônes retracées à la
+     main, voir PICTOS), Figtree/Space Grotesk déjà embarquées, couleurs
+     mappées 1:1 sur les jetons --ink/--ok/--bleu-roi/--primary/--dark-ink
+     déjà déclarés (douze teintes officielles, aucune nouvelle couleur). Le
+     menu « Effectué par » reste alimenté UNIQUEMENT par equipe_pour_
+     attribution() — l'option factice « Prestataire agréé Orec » du mockup
+     n'a pas été reprise, aucune donnée de prestataire n'existe. */
+  .log-modal .modal{max-width:900px;padding:0;overflow:hidden;}
+  .log-topband{height:6px;background:linear-gradient(90deg,var(--bleu-roi),var(--ok) 50%,var(--olive));}
+  .log-header2{padding:20px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .log-header2-titre-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .log-header2 h2{font-family:'Space Grotesk',sans-serif;font-size:25px;line-height:32px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:0;}
+  .log-chip-machine{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .log-chip-machine .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:tco-pulse 1.8s ease-in-out infinite;}
+  .log-chip-serial{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-2);font-size:12px;}
+  .log-chip-serial svg{width:15px;height:15px;color:var(--bleu-roi);flex:0 0 auto;}
+  .log-header2-sub{font-size:15px;color:var(--ink-2);display:flex;align-items:center;gap:8px;margin-top:6px;}
+  .log-header2-sub svg{width:18px;height:18px;color:var(--ok);flex:0 0 auto;}
+  .log-close2{width:40px;height:40px;border-radius:50%;border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
+  .log-close2:hover{background:var(--line);}
+  .log-close2 svg{width:20px;height:20px;}
+  .log-body2{padding:0 24px 24px;display:flex;flex-direction:column;gap:20px;}
 
-  /* Un fond par bloc, comme sur la fiche machine — plus foncé là où le bloc
-     porte surtout du texte à LIRE (spécifications, remarques) que là où il
-     ne porte que des champs courts (date, compteur). */
-  .log-bloc{margin:16px 0 0;padding:16px 18px;border-radius:var(--r-card);border:1.5px solid var(--line-3);}
-  .log-bloc:first-of-type{margin-top:16px;}
-  .log-bloc-quand{background:rgba(91,82,223,.05);}
-  .log-bloc-elements{background:rgba(36,181,168,.09);}
-  .log-bloc-remarques{background:rgba(35,111,224,.12);}
+  .log-bloc{margin:0;padding:16px 20px;border-radius:var(--r-card);border:none;}
+  .log-bloc-quand{background:var(--surface-soft);}
+  .log-bloc-elements{background:var(--surface);box-shadow:var(--shadow-soft);}
+  .log-bloc-cout{background:var(--surface-soft);}
+  .log-bloc-remarques{background:var(--surface);box-shadow:var(--shadow-soft);}
 
-  .log-compteur-ligne{display:flex;align-items:stretch;}
-  .log-compteur-ligne input{border-top-right-radius:0;border-bottom-right-radius:0;}
+  .log-section-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .log-section-tete-gauche{display:flex;align-items:center;gap:10px;}
+  .log-section-icone{width:32px;height:32px;border-radius:var(--r-chip);background:var(--surface);color:var(--ok);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .log-section-icone svg{width:20px;height:20px;}
+  .log-section-icone.is-indigo{color:var(--primary-dark);}
+  .log-section-titre{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:28px;font-weight:700;letter-spacing:-.01em;color:var(--ink);}
+  .log-section-soustitre{font-size:12px;color:var(--ink-2);margin-top:1px;}
+  .log-step-tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;}
+  .log-optionnel{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);background:var(--line);padding:2px 8px;border-radius:var(--r-pill);}
+
+  .log-modal label{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 5px;}
+  .log-modal label svg{width:16px;height:16px;flex:0 0 auto;color:var(--dark-ink);}
+  .log-modal .hint{font-size:12px;color:var(--ink-2);margin-top:5px;}
+
+  .log-compteur-ligne{display:flex;align-items:stretch;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-soft);}
+  .log-compteur-ligne input{border:none;font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;border-top-right-radius:0;border-bottom-right-radius:0;}
   .log-compteur-unite{
-    display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:0 10px;
-    font-size:16px;font-weight:800;color:#fff;background:var(--ink);border-radius:0 var(--r-chip) var(--r-chip) 0;
+    display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:0 12px;
+    font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;background:var(--ink);
   }
 
-  .log-elements-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;}
+  .log-elements-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .log-elements-tete label{margin:0;}
-  #log-coches-compte{font-size:11.5px;}
+  .log-progress-capsule{display:inline-flex;align-items:center;gap:8px;background:var(--surface-soft);padding:6px 12px;border-radius:var(--r-pill);}
+  .log-progress-piste{width:64px;height:8px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;flex:0 0 auto;}
+  .log-progress-remplie{height:100%;background:var(--ok);border-radius:var(--r-pill);transition:width .2s;}
+  #log-coches-compte{font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--ink);text-transform:uppercase;}
+  .log-tout-cocher{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--bleu-roi);background:none;border:none;cursor:pointer;padding:4px;font-family:inherit;}
+  .log-tout-cocher:hover{text-decoration:underline;}
 
-  .log-checklist{display:flex;flex-direction:column;gap:9px;margin:8px 0 18px;}
+  .log-checklist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+  @media (max-width:640px){.log-checklist{grid-template-columns:1fr;}}
   .log-item-carte{
-    display:flex;align-items:flex-start;gap:11px;padding:12px 14px;margin:0;
-    border:1.5px solid var(--line-3);border-radius:var(--r-chip);background:var(--surface);cursor:pointer;
-    transition:border-color .15s ease,background .15s ease;
+    display:flex;align-items:flex-start;gap:11px;padding:14px;margin:0;
+    border:none;border-radius:var(--r-md);background:var(--surface-soft);cursor:pointer;
+    transition:background .15s ease;
   }
-  /* :has() en secours, mais la mise en évidence réelle est posée en JS
-     (classe .is-checked) : son repaint s'est montré peu fiable ici sur un
-     changement déclenché par script plutôt qu'un vrai clic (même défaut que
-     les cartes de la fiche machine). */
-  .log-item-carte:has(input:checked),.log-item-carte.is-checked{border-color:var(--ok);background:var(--ok-bg);}
-  .log-item-carte input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ok);}
-  /* Colonnes à largeur FIXE (70 / 30 exactement) : un conteneur prend toute
-     la place restante une fois la case cochée posée (flex:1, sans quoi un
-     pourcentage du CONTENEUR ENTIER déborderait de la largeur de la case),
-     et c'est À L'INTÉRIEUR de ce conteneur que le produit et l'échéance se
-     partagent 70 / 30 en largeur réelle — pas une proportion de croissance
-     flex, que le contenu peut fausser. C'est l'échéance qui doit passer à
-     la ligne quand elle est longue, jamais le produit d'entretien : avant
-     ce correctif, un long libellé de cycle (non coupé) écrasait la colonne
-     du produit et lui faisait perdre la ligne, mot par mot. */
-  .log-item-colonnes{flex:1 1 0;min-width:0;display:flex;gap:11px;}
-  .log-item-corps{flex:0 0 70%;width:70%;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;min-width:0;}
-  /* Sans échéance à afficher (tâche sans cycle connu), le produit reprend
-     toute la largeur au lieu de laisser 30 % vides. */
-  .log-item-corps.log-item-corps-pleine{flex:1 1 auto;width:auto;}
-  .log-item-titre{font-weight:700;font-size:14.5px;color:var(--ink);}
-  .log-item-spec{font-size:12.5px;color:var(--ink-2);}
+  .log-item-carte:hover{background:var(--line);}
+  .log-item-carte:has(input:checked),.log-item-carte.is-checked{background:var(--ok-bg);}
+  .log-item-carte input{position:absolute;opacity:0;width:0;height:0;}
+  .log-item-check{width:20px;height:20px;border-radius:6px;background:var(--surface-container-highest,var(--line));display:flex;align-items:center;justify-content:center;color:transparent;flex:0 0 auto;margin-top:1px;transition:all .15s;}
+  .log-item-carte:has(input:checked) .log-item-check,.log-item-carte.is-checked .log-item-check{background:var(--ink);color:#fff;}
+  .log-item-check svg{width:14px;height:14px;}
+  .log-item-colonnes,.log-item-corps-pleine{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
+  .log-item-titre-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .log-item-titre{font-weight:600;font-size:15px;color:var(--ink);}
   .log-item-cycle{
-    flex:0 0 30%;width:30%;min-width:0;box-sizing:border-box;font-size:11px;font-weight:800;text-align:left;line-height:1.4;
-    padding:5px 9px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink-2);
-    white-space:normal;overflow-wrap:break-word;align-self:center;
+    font-size:10.5px;font-weight:700;text-align:right;line-height:1.3;
+    padding:2px 8px;border-radius:6px;background:var(--surface);color:var(--ink);white-space:nowrap;flex:0 0 auto;
   }
-  .log-item-carte:has(input:checked) .log-item-cycle,.log-item-carte.is-checked .log-item-cycle{background:var(--ok);color:var(--ok-ink);}
+  .log-item-spec-ligne{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .log-item-spec-prefixe{font-size:12px;color:var(--ink-2);}
+  .log-item-spec{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--ink);background:var(--surface);padding:1px 6px;border-radius:5px;}
 
-  .log-optionnel{
-    float:right;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);
-  }
+  .log-cout-champ-icone{position:relative;}
+  .log-cout-champ-icone input{padding-right:74px;font-family:'Space Grotesk',sans-serif;font-weight:700;}
+  .log-cout-champ-icone .unite{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--dark-ink);pointer-events:none;}
 
-  .log-info-box{
-    /* Un peu plus foncé que les autres blocs : celui-ci porte un paragraphe
-       à lire, pas seulement des champs courts. */
-    display:flex;gap:10px;margin-top:16px;padding:13px 15px;
-    border:1.5px solid var(--primary-tint-2);border-radius:var(--r-chip);background:#D9D6F9;
-  }
-  .log-info-box .card-ico{color:var(--primary-dark);margin-top:1px;}
-  .log-info-titre{font-weight:700;font-size:13.5px;color:var(--ink);}
-  .log-info-box p{margin:4px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-2);}
+  .log-bento-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:2px;}
+  @media (max-width:640px){.log-bento-grid{grid-template-columns:1fr;}}
+  .log-bento-btn{height:140px;padding:16px;background:var(--surface);border:none;border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;cursor:pointer;box-shadow:var(--shadow-soft);transition:background .12s;font-family:inherit;}
+  .log-bento-btn:hover{background:var(--surface-soft);}
+  .log-bento-icone{width:48px;height:48px;border-radius:50%;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;transition:all .12s;}
+  .log-bento-icone svg{width:24px;height:24px;}
+  .log-bento-btn:hover .log-bento-icone{background:var(--ink);color:#fff;}
+  .log-bento-titre{font-size:15px;font-weight:600;color:var(--ink);}
+  .log-bento-btn:hover .log-bento-titre{color:var(--bleu-roi);}
+  .log-bento-sub{font-size:12px;color:var(--ink-2);}
+  .log-bento-badge{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;background:var(--voile-ambre);color:var(--late);margin-left:5px;}
 
-  .log-modal .modal-actions button[type=submit]{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-  .log-modal .modal-actions button[type=submit] svg{width:17px;height:17px;flex:0 0 auto;}
+  .log-pieces-liste{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .log-piece-ligne{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+  .log-piece-icone{width:28px;height:28px;border-radius:6px;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .log-piece-icone svg{width:16px;height:16px;}
+  .log-piece-ligne select{flex:1;min-width:0;}
+  .log-piece-ligne .log-piece-qte{width:60px;flex:0 0 auto;text-align:center;padding:0 4px;}
+  .log-piece-ligne .log-piece-prix{width:100px;flex:0 0 auto;text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:700;}
+  .log-piece-retirer{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--dark-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
+  .log-piece-retirer:hover{background:var(--voile-ambre);color:var(--late);}
+  .log-piece-retirer svg{width:17px;height:17px;}
+  .log-pieces-total-ligne{display:flex;align-items:center;justify-content:space-between;padding:10px 4px 0;}
+  .log-pieces-total-ligne .montant{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:var(--ink);}
+
+  .log-info-box{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--primary-tint);}
+  .log-info-box .card-ico{width:32px;height:32px;border-radius:50%;background:var(--bleu-roi);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px;}
+  .log-info-box .card-ico svg{width:18px;height:18px;}
+  .log-info-titre{font-weight:600;font-size:15px;color:var(--ink);}
+  .log-info-box p{margin:2px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-2);}
+  .log-info-box strong{color:var(--ink);font-family:'Space Grotesk',sans-serif;}
+
+  .log-footer2{padding:14px 24px;background:var(--surface-soft);display:flex;flex-wrap:wrap-reverse;align-items:center;justify-content:space-between;gap:12px;}
+  .log-footer2 button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .log-footer2 button svg{width:18px;height:18px;flex:0 0 auto;}
   /* Assistant d'ajout de machine : bouton « Suivant » avec flèche. */
   .machine-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
   .machine-modal .modal-actions button[type=submit]{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
@@ -9630,6 +9677,15 @@ const PICTOS = {
   aideCercle: '<circle cx="12" cy="12" r="9"/><path d="M9.3 9.2a2.7 2.7 0 1 1 3.9 2.4c-.8.4-1.2 1-1.2 1.9v.3"/><path d="M12 17.2h.01"/>',
   ampoule: '<path d="M9 18.5h6"/><path d="M10 21.3h4"/><path d="M12 3a6 6 0 0 0-3.4 10.9c.5.35.7.9.7 1.5v.6h5.4v-.6c0-.6.2-1.15.7-1.5A6 6 0 0 0 12 3z"/>',
   coche: '<path d="M5 13l4 4L19 7"/>',
+  // ── Reprise du mockup Stitch « modale enregistrer un entretien » — mêmes
+  // raisons que les précédentes reprises (voir keeva-tco-feature) : aucune
+  // police d'icônes, retracées à la main, même grille 24×24 / trait 2px.
+  calendrier: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  personne: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  paiement: '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5a7 3 0 0 0 14 0V7"/><path d="M5 12v5a7 3 0 0 0 14 0v-5"/>',
+  croix: '<path d="M12 5v14M5 12h14"/>',
+  calculatrice: '<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 6.5h8"/><circle cx="8.3" cy="11.5" r=".6"/><circle cx="12" cy="11.5" r=".6"/><circle cx="15.7" cy="11.5" r=".6"/><circle cx="8.3" cy="15.5" r=".6"/><circle cx="12" cy="15.5" r=".6"/><circle cx="15.7" cy="15.5" r=".6"/>',
+  etincelle: '<path d="M12 2c.6 3.6 1.8 6.6 4.5 8.5C19.2 12.4 22 12 22 12s-2.8.4-5.5 2.3C13.8 16.2 12.6 19.2 12 22.8 11.4 19.2 10.2 16.2 7.5 14.3 4.8 12.4 2 12 2 12s2.8.4 5.5-1.5C10.2 8.6 11.4 5.6 12 2z"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -11949,6 +12005,14 @@ const CATEGORIES_PRODUIT = [
 // les filtres, la goutte pour ce qui se verse (huiles, liquides), le réglage
 // pour les pièces d'usure, la boîte pour tout le reste.
 const PICTO_CATEGORIE = { filtres: 'filtre', huiles: 'goutte', graisses: 'goutte', liquides: 'goutte', usure: 'reglages', autres: 'boite' };
+// Même classement, pour l'intitulé qui précède la spec d'une tâche dans
+// « Enregistrer un entretien » (reprise du mockup Stitch, qui varie ce
+// libellé par tâche — « Spécification »/« Graisse »/« Contrôle »/« État » —
+// mais sans donnée de catégorie réelle par tâche en base). Réutilise le
+// classement par mots-clés déjà en place pour l'icône plutôt que d'inventer
+// une catégorisation séparée : la valeur affichée (`it.spec`) reste
+// TOUJOURS la vraie donnée, seul l'intitulé qui la précède s'adapte.
+const PREFIXE_SPEC_CATEGORIE = { filtres: () => trad('État :'), huiles: () => trad('Spécification :'), graisses: () => trad('Graisse :'), liquides: () => trad('Spécification :'), usure: () => trad('Contrôle :'), autres: () => trad('Détail :') };
 
 function categorieProduit(label) {
   const texte = String(label || '');
@@ -17098,22 +17162,15 @@ function ligneLogPieceHtml(idx) {
   const options = (UI.partsCatalog || []).map((p) =>
     `<option value="${esc(p.id)}" data-prix="${Number(p.unit_price) || 0}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`
   ).join('');
-  return `<div class="field-row log-piece-ligne" data-piece-ligne="${idx}">
-      <div>
-        <select class="log-piece-select">
-          <option value="">${trad('— Choisir une pièce du catalogue —')}</option>
-          ${options}
-        </select>
-      </div>
-      <div style="max-width:90px;">
-        <label class="hint">${trad('Qté')}</label>
-        <input type="number" class="log-piece-qte" min="0" step="0.01" value="1">
-      </div>
-      <div style="max-width:120px;">
-        <label class="hint">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
-        <input type="text" inputmode="decimal" class="log-piece-prix" value="0">
-      </div>
-      <button type="button" class="link-inline log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}">${trad('Retirer')}</button>
+  return `<div class="log-piece-ligne" data-piece-ligne="${idx}">
+      <div class="log-piece-icone">${picto('boite')}</div>
+      <select class="log-piece-select" aria-label="${esc(trad('Pièce du catalogue'))}">
+        <option value="">${trad('— Choisir une pièce du catalogue —')}</option>
+        ${options}
+      </select>
+      <input type="number" class="log-piece-qte" min="0" step="0.01" value="1" aria-label="${esc(trad('Quantité'))}" title="${esc(trad('Quantité'))}">
+      <input type="text" inputmode="decimal" class="log-piece-prix" value="0" aria-label="${esc(tR('Prix unitaire ({devise})', { devise: deviseCourte() }))}" title="${esc(tR('Prix unitaire ({devise})', { devise: deviseCourte() }))}">
+      <button type="button" class="log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}" title="${esc(trad('Retirer cette pièce'))}">${picto('corbeille')}</button>
     </div>`;
 }
 
@@ -17144,38 +17201,55 @@ function openLogInterventionModal(machine, tache) {
   // quand ils existent, sinon un simple libellé.
   const itemsRiches = planItems.length ? planItems : items.map(label => ({ label }));
 
+  const identifiant = identifiantAffiche(machine);
   overlay.innerHTML = `
     <div class="modal">
-      <div class="mform-tete">
-        <div class="mform-tete-titre"><h2>${trad('Enregistrer un entretien')}</h2></div>
-        <button type="button" class="mform-close" id="cancel-log-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      </div>
-      <div class="log-machine-ligne">
-        <span class="badge neutral">${esc(machine.name)}</span>
-        <span class="log-machine-texte">${trad('coche ce qui a été fait, ça met à jour la prochaine échéance.')}</span>
+      <div class="log-topband"></div>
+      <div class="log-header2">
+        <div>
+          <div class="log-header2-titre-ligne">
+            <h2>${trad('Enregistrer un entretien')}</h2>
+            <span class="log-chip-machine"><span class="dot"></span>${esc(machine.name)}</span>
+            ${identifiant ? `<span class="log-chip-serial">${picto('compteur')}${esc(identifiant)}</span>` : ''}
+          </div>
+          <p class="log-header2-sub">${picto('info')}${trad('Cochez les tâches réalisées pour recalculer automatiquement les prochains jalons d\'alerte.')}</p>
+        </div>
+        <button type="button" class="log-close2" id="cancel-log-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
       <form id="log-form">
+      <div class="log-body2">
         <div class="log-bloc log-bloc-quand">
+          <div class="log-section-tete" style="margin-bottom:2px;">
+            <span class="log-section-tete-gauche"><span class="log-section-icone">${picto('calendrier')}</span><span style="font-weight:600;color:var(--ink);">${trad('Paramètres du relevé sur site')}</span></span>
+            <span class="log-step-tag">STEP 01</span>
+          </div>
           <div class="field-row">
             <div>
-              <label for="log-date"><span class="label-ico">${picto('prochain')}</span>${trad('Date de l\'entretien')}</label>
+              <label for="log-date">${picto('calendrier')}${trad('Date de l\'entretien')}</label>
               <input id="log-date" type="date" value="${today}" required>
               <div class="hint">${trad('Date d\'intervention sur site')}</div>
             </div>
             ${isCounter ? `
             <div>
-              <label for="log-hours"><span class="label-ico">${picto('compteur')}</span>${trad('Compteur au moment de l\'entretien')}</label>
+              <label for="log-hours">${picto('compteur')}${trad('Compteur au moment de l\'entretien')}</label>
               <div class="log-compteur-ligne">
                 <input id="log-hours" type="number" min="0" step="${COUNTER_UNITS[unit].step}" value="${esc(machineCounter(machine) ?? '')}" required>
                 <span class="log-compteur-unite">${esc(COUNTER_UNITS[unit].short)}</span>
               </div>
               ${machineCounter(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter(machine), unit) })}</div>` : ''}
             </div>` : ''}
+            <div>
+              <label for="log-operateur">${picto('personne')}${trad('Effectué par')}</label>
+              <select id="log-operateur" disabled>
+                <option value="">${trad('Chargement de l\'équipe…')}</option>
+              </select>
+              <div class="hint">${trad('Attribution de la fiche d\'intervention')}</div>
+            </div>
           </div>
           ${unit2 ? `
           <div class="field-row">
             <div>
-              <label for="log-hours-2"><span class="label-ico">${picto('compteur')}</span>${tR('Second compteur ({unite})', { unite: trad((COUNTER_UNITS[unit2] || {}).word || unit2) })}</label>
+              <label for="log-hours-2">${picto('compteur')}${tR('Second compteur ({unite})', { unite: trad((COUNTER_UNITS[unit2] || {}).word || unit2) })}</label>
               <div class="log-compteur-ligne">
                 <input id="log-hours-2" type="number" min="0" step="${COUNTER_UNITS[unit2].step}" value="${esc(machineCounter2(machine) ?? '')}" required>
                 <span class="log-compteur-unite">${esc(COUNTER_UNITS[unit2].short)}</span>
@@ -17183,41 +17257,39 @@ function openLogInterventionModal(machine, tache) {
               ${machineCounter2(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter2(machine), unit2) })}</div>` : ''}
             </div>
           </div>` : ''}
-
-          <!-- Qui a fait l'entretien, dans l'équipe : equipe_pour_attribution()
-               (voir plus bas) — ouverte à TOUTE la société, pas seulement au
-               gérant comme membres_de_ma_societe(), puisque n'importe quel
-               opérateur peut enregistrer un entretien. Optionnel : « Non
-               précisé » reste un choix valide, on n'invente jamais un nom. -->
-          <label for="log-operateur"><span class="label-ico">${picto('equipe')}</span>${trad('Effectué par')}</label>
-          <select id="log-operateur" disabled>
-            <option value="">${trad('Chargement de l\'équipe…')}</option>
-          </select>
         </div>
 
         ${items.length ? `
         <div class="log-bloc log-bloc-elements">
           <div class="log-elements-tete">
-            <label><span class="label-ico">${picto('case')}</span>${trad('Éléments traités')}</label>
-            <span class="badge neutral" id="log-coches-compte"></span>
+            <span class="log-section-tete-gauche">
+              <span class="log-section-icone is-indigo">${picto('case')}</span>
+              <span><span class="log-section-titre" style="display:block;">${trad('Éléments traités & opérations')}</span><span class="log-section-soustitre">${trad('Sélectionnez chaque poste vérifié ou remplacé')}</span></span>
+            </span>
+            <span style="display:flex;align-items:center;gap:12px;">
+              <span class="log-progress-capsule">
+                <span class="log-progress-piste"><span class="log-progress-remplie" id="log-progress-bar" style="width:0%;"></span></span>
+                <span id="log-coches-compte"></span>
+              </span>
+              <button type="button" class="log-tout-cocher" id="log-tout-cocher">${trad('Tout cocher')}</button>
+            </span>
           </div>
           <div class="checklist log-checklist" id="log-checklist">
-            ${itemsRiches.map(it => `
+            ${itemsRiches.map((it) => {
+              const prefixe = PREFIXE_SPEC_CATEGORIE[categorieProduit(it.label)] || PREFIXE_SPEC_CATEGORIE.autres;
+              return `
               <label class="log-item-carte">
                 <input type="checkbox" value="${esc(it.label)}"${it.label === tache ? ' checked' : ''}>
-                ${it.frequency ? `
-                <span class="log-item-colonnes">
-                  <span class="log-item-corps">
+                <span class="log-item-check">${picto('coche')}</span>
+                <span class="${it.frequency ? 'log-item-colonnes' : 'log-item-corps-pleine'}">
+                  <span class="log-item-titre-ligne">
                     <span class="log-item-titre">${esc(it.label)}</span>
-                    ${it.spec ? `<span class="log-item-spec">${esc(it.spec)}</span>` : ''}
+                    ${it.frequency ? `<span class="log-item-cycle">${esc(it.frequency)}</span>` : ''}
                   </span>
-                  <span class="log-item-cycle">${esc(it.frequency)}</span>
-                </span>` : `
-                <span class="log-item-corps log-item-corps-pleine">
-                  <span class="log-item-titre">${esc(it.label)}</span>
-                  ${it.spec ? `<span class="log-item-spec">${esc(it.spec)}</span>` : ''}
-                </span>`}
-              </label>`).join('')}
+                  ${it.spec ? `<span class="log-item-spec-ligne"><span class="log-item-spec-prefixe">${esc(prefixe())}</span><span class="log-item-spec">${esc(it.spec)}</span></span>` : ''}
+                </span>
+              </label>`;
+            }).join('')}
           </div>
         </div>
         ` : ''}
@@ -17225,51 +17297,65 @@ function openLogInterventionModal(machine, tache) {
         ${SCHEMA.hasTco ? `
         <div class="log-bloc log-bloc-cout">
           <div class="log-elements-tete">
-            <label><span class="label-ico">${picto('reglages')}</span>${trad('Coûts')}</label>
-            <span class="log-optionnel">${trad('Optionnel')}</span>
+            <span class="log-section-tete-gauche">
+              <span class="log-section-icone is-indigo">${picto('paiement')}</span>
+              <span><span class="log-section-titre" style="display:block;">${trad('Coûts d\'intervention & TCO')}<span class="log-optionnel" style="margin-left:8px;">${trad('Optionnel')}</span></span><span class="log-section-soustitre">${trad('Renseignez la main d\'œuvre et les consommables pour le suivi comptable')}</span></span>
+            </span>
+            <span class="log-step-tag">STEP 02</span>
           </div>
           <div class="field-row">
             <div>
-              <label for="log-heures-mo">${trad('Heures de main d\'œuvre')}</label>
-              <input id="log-heures-mo" type="number" inputmode="decimal" min="0" step="0.25" placeholder="${trad('Ex. 1.5')}">
+              <label for="log-heures-mo">${picto('bientot')}${trad('Heures de main d\'œuvre')}</label>
+              <div class="log-cout-champ-icone">
+                <input id="log-heures-mo" type="number" inputmode="decimal" min="0" step="0.25" placeholder="${trad('Ex. 1.5')}">
+                <span class="unite">${trad('heures')}</span>
+              </div>
             </div>
             <div>
-              <label for="log-cout-mo">${tR('Coût main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
-              <input id="log-cout-mo" type="text" inputmode="decimal" placeholder="${trad('Ex. 67.50')}">
+              <label for="log-cout-mo">${picto('calculatrice')}${tR('Coût horaire main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
+              <div class="log-cout-champ-icone">
+                <input id="log-cout-mo" type="text" inputmode="decimal" placeholder="${trad('Ex. 67.50')}">
+                <span class="unite">${tR('{devise} / h', { devise: deviseCourte() })}</span>
+              </div>
             </div>
           </div>
-          <label>${trad('Pièces utilisées')}</label>
-          <div id="log-pieces-liste"></div>
-          <div class="modal-actions" style="justify-content:flex-start;gap:8px;">
-            <button type="button" class="secondary" id="log-piece-ajouter">${trad('+ Ajouter une pièce')}</button>
-            <button type="button" class="secondary" id="log-facture-photo-btn">${picto('photo')}<span>${trad('Lire une facture')}</span></button>
+          <label>${picto('boite')}${trad('Pièces détachées & consommables')}</label>
+          <div class="log-bento-grid">
+            <button type="button" class="log-bento-btn" id="log-piece-ajouter">
+              <span class="log-bento-icone">${picto('croix')}</span>
+              <span><span class="log-bento-titre">${trad('+ Ajouter une pièce')}</span><br><span class="log-bento-sub">${trad('Catalogue ou référence libre')}</span></span>
+            </button>
+            <button type="button" class="log-bento-btn" id="log-facture-photo-btn">
+              <span class="log-bento-icone">${picto('photo')}</span>
+              <span><span class="log-bento-titre">${trad('Scanner une facture')}</span><span class="log-bento-badge">${trad('OCR IA')}</span><br><span class="log-bento-sub">${trad('Lecture automatique du montant')}</span></span>
+            </button>
           </div>
           <input id="log-facture-photo" type="file" accept="image/*" capture="environment" hidden>
           <div class="hint" id="log-facture-statut" role="status" aria-live="polite"></div>
-          <div class="field-row">
-            <div>
-              <label for="log-pieces-total">${tR('Total pièces ({devise})', { devise: deviseCourte() })}</label>
-              <input id="log-pieces-total" type="text" inputmode="decimal" value="0">
-            </div>
+          <div class="log-pieces-liste" id="log-pieces-liste"></div>
+          <div class="log-pieces-total-ligne">
+            <label style="margin:0;" for="log-pieces-total">${trad('Total pièces & consommables')} <span style="font-weight:400;color:var(--ink-2);">(${deviseCourte()})</span></label>
+            <input id="log-pieces-total" class="montant" type="text" inputmode="decimal" value="0" style="width:110px;text-align:right;border:none;background:transparent;">
           </div>
         </div>` : ''}
 
         <div class="log-bloc log-bloc-remarques">
-          <label for="log-notes"><span class="label-ico">${picto('message')}</span>${trad('Remarques')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
+          <label for="log-notes">${picto('crayon')}${trad('Remarques')}<span class="log-optionnel" style="margin-left:8px;">${trad('Optionnel')}</span></label>
           <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
         </div>
         <div class="hint" id="log-error"></div>
 
         ${planItems.length && machine.plan ? `
         <div class="log-info-box">
-          <span class="card-ico">${picto('info')}</span>
+          <span class="card-ico">${picto('etincelle')}</span>
           <div>
-            <div class="log-info-titre">${trad('Calcul automatique du plan de maintenance')}</div>
+            <div class="log-info-titre">${trad('Calcul automatique du plan d\'entretien')}</div>
             <p id="log-preview-texte"></p>
           </div>
         </div>` : ''}
+      </div>
 
-        <div class="modal-actions">
+        <div class="log-footer2">
           <button type="button" class="secondary" id="cancel-log">${trad('Annuler')}</button>
           <button type="submit" class="primary">${picto('ajuste')}<span>${trad('Enregistrer l\'entretien')}</span></button>
         </div>
@@ -17304,6 +17390,10 @@ function openLogInterventionModal(machine, tache) {
     const checkedNow = overlay.querySelectorAll('.log-checklist input:checked').length;
     const compteEl = overlay.querySelector('#log-coches-compte');
     if (compteEl) compteEl.textContent = tR('{n} / {total} cochés', { n: checkedNow, total: items.length });
+    const barreEl = overlay.querySelector('#log-progress-bar');
+    if (barreEl) barreEl.style.width = `${items.length ? Math.round((checkedNow / items.length) * 100) : 0}%`;
+    const toutCocherBtn = overlay.querySelector('#log-tout-cocher');
+    if (toutCocherBtn) toutCocherBtn.textContent = checkedNow === items.length && items.length > 0 ? trad('Tout décocher') : trad('Tout cocher');
 
     const previewEl = overlay.querySelector('#log-preview-texte');
     if (!previewEl) return;
@@ -17336,6 +17426,16 @@ function openLogInterventionModal(machine, tache) {
   overlay.querySelector('#log-hours')?.addEventListener('input', majApercu);
   overlay.querySelector('#log-hours-2')?.addEventListener('input', majApercu);
   majApercu();
+
+  // « Tout cocher » / « Tout décocher » — bascule selon l'état actuel (le
+  // libellé du bouton, mis à jour par majApercu, dit déjà lequel des deux
+  // s'applique).
+  overlay.querySelector('#log-tout-cocher')?.addEventListener('click', () => {
+    const cases = overlay.querySelectorAll('.log-checklist input[type=checkbox]');
+    const toutCoche = Array.from(cases).every((c) => c.checked);
+    cases.forEach((c) => { c.checked = !toutCoche; });
+    majApercu();
+  });
 
   // ── Coûts (optionnel, voir SCHEMA.hasTco) ──────────────────────
   if (SCHEMA.hasTco) {
