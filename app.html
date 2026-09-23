@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xsLzuiOxUp42QDrUGMQnxFggXK/DmnyjqCBJdP5ZC3k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qAcJ0tuepRDcd+ECshiNsfsAgiuyXeXkDWu2tqhuRvc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1772,7 +1772,7 @@
      menu « Effectué par » reste alimenté UNIQUEMENT par equipe_pour_
      attribution() — l'option factice « Prestataire agréé Orec » du mockup
      n'a pas été reprise, aucune donnée de prestataire n'existe. */
-  .log-modal .modal{max-width:900px;padding:0;overflow:hidden;}
+  .log-modal .modal{max-width:1080px;padding:0;overflow:hidden;}
   .log-topband{height:6px;background:linear-gradient(90deg,var(--bleu-roi),var(--ok) 50%,var(--olive));}
   .log-header2{padding:20px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
   .log-header2-titre-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
@@ -1842,15 +1842,28 @@
   .log-item-titre{font-weight:600;font-size:15px;color:var(--ink);}
   .log-item-cycle{
     font-size:10.5px;font-weight:700;text-align:right;line-height:1.3;
-    padding:2px 8px;border-radius:6px;background:var(--surface);color:var(--ink);white-space:nowrap;flex:0 0 auto;
+    padding:2px 8px;border-radius:6px;background:var(--surface);color:var(--ink);
+    /* Les fréquences réelles d'un carnet dépassent largement les exemples
+       courts ("Vidange 20h puis /100h") : un long libellé ("Reportez-vous
+       au manuel spécifique...") doit passer à la ligne, jamais déborder de
+       la carte ni forcer la modale à s'élargir toute seule. */
+    white-space:normal;max-width:150px;flex:0 0 auto;
   }
   .log-item-spec-ligne{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
   .log-item-spec-prefixe{font-size:12px;color:var(--ink-2);}
   .log-item-spec{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--ink);background:var(--surface);padding:1px 6px;border-radius:5px;}
 
   .log-cout-champ-icone{position:relative;}
-  .log-cout-champ-icone input{padding-right:74px;font-family:'Space Grotesk',sans-serif;font-weight:700;}
+  .log-cout-champ-icone input{padding-right:50px;font-family:'Space Grotesk',sans-serif;font-weight:700;}
   .log-cout-champ-icone .unite{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--dark-ink);pointer-events:none;}
+  /* Bouton « Ajouter » (main d'œuvre → total pièces) : ne s'étire pas comme
+     les 2 champs voisins (flex:1 par défaut sur .field-row > div) — c'est
+     ce qui les rétrécit mécaniquement pour lui faire de la place, sans
+     largeur fixe à ajuster à la main. */
+  .log-mo-ajouter-zone{flex:0 0 auto;}
+  .log-mo-ajouter{height:44px;padding:0 18px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .log-mo-ajouter:hover{background:var(--dark);}
+  .log-mo-ajouter svg{width:16px;height:16px;flex:0 0 auto;}
 
   .log-bento-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:2px;}
   @media (max-width:640px){.log-bento-grid{grid-template-columns:1fr;}}
@@ -17312,11 +17325,14 @@ function openLogInterventionModal(machine, tache) {
               </div>
             </div>
             <div>
-              <label for="log-cout-mo">${picto('calculatrice')}${tR('Coût horaire main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
+              <label for="log-cout-mo">${picto('calculatrice')}${tR('Coût main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
               <div class="log-cout-champ-icone">
                 <input id="log-cout-mo" type="text" inputmode="decimal" placeholder="${trad('Ex. 67.50')}">
-                <span class="unite">${tR('{devise} / h', { devise: deviseCourte() })}</span>
+                <span class="unite">${deviseCourte()}</span>
               </div>
+            </div>
+            <div class="log-mo-ajouter-zone">
+              <button type="button" class="log-mo-ajouter" id="log-mo-ajouter" title="${esc(trad('Ajoute ce montant au total pièces & consommables ci-dessous, et remet ces deux champs à zéro'))}">${picto('croix')}<span>${trad('Ajouter')}</span></button>
             </div>
           </div>
           <label>${picto('boite')}${trad('Pièces détachées & consommables')}</label>
@@ -17448,9 +17464,15 @@ function openLogInterventionModal(machine, tache) {
     // un champ éditable : une facture globale sans détail pièce par pièce, ou
     // le montant proposé par la lecture de photo, doivent pouvoir s'y écrire
     // directement sans passer par une ligne.
+    // Part du total qui ne vient PAS d'une ligne de pièce — la main d'œuvre
+    // « Ajoutée » (bouton #log-mo-ajouter) et les montants lus par photo de
+    // facture. Sans ce suivi séparé, ajouter/retirer une pièce ensuite
+    // RECALCULE le total depuis les seules lignes et efface silencieusement
+    // ce qui avait été ajouté par ailleurs — bug réel constaté en testant.
+    let montantHorsPieces = 0;
     const recalcTotalPieces = () => {
       if (!piecesListe || !totalPiecesChamp) return;
-      let total = 0;
+      let total = montantHorsPieces;
       piecesListe.querySelectorAll('.log-piece-ligne').forEach((ligne) => {
         const qte = Number(ligne.querySelector('.log-piece-qte')?.value) || 0;
         const prix = nombreDepuisTexte(ligne.querySelector('.log-piece-prix')?.value) || 0;
@@ -17492,6 +17514,25 @@ function openLogInterventionModal(machine, tache) {
       const taux = Number(UI.company?.labor_hourly_rate) || 0;
       const coutChamp = overlay.querySelector('#log-cout-mo');
       if (coutChamp && taux > 0) coutChamp.value = texteAvecSeparateurs(heures * taux);
+    });
+
+    // « Ajouter » (main d'œuvre → total pièces & consommables) : DÉPLACE le
+    // montant, ne le copie pas — il s'ajoute au total affiché puis les deux
+    // champs main d'œuvre repassent à vide. C'est ce qui évite un double
+    // compte à l'enregistrement (labor_cost est lu directement de ces deux
+    // champs, voir plus bas ; s'ils sont vides, labor_cost est null et
+    // seul le total pièces porte le montant). Permet aussi plusieurs
+    // passages de main d'œuvre dans la même intervention (deux
+    // techniciens, deux tarifs) : chaque clic ajoute au même total.
+    overlay.querySelector('#log-mo-ajouter')?.addEventListener('click', () => {
+      const heuresChamp = overlay.querySelector('#log-heures-mo');
+      const coutChamp = overlay.querySelector('#log-cout-mo');
+      const montant = nombreDepuisTexte(coutChamp?.value);
+      if (!montant || montant <= 0) return;
+      montantHorsPieces += montant;
+      recalcTotalPieces();
+      if (coutChamp) coutChamp.value = '';
+      if (heuresChamp) heuresChamp.value = '';
     });
 
     // Lecture d'une facture par photo : même famille que la lecture de
@@ -17537,7 +17578,11 @@ function openLogInterventionModal(machine, tache) {
         dire(trad('Je n\'ai pas réussi à lire la facture — saisis le montant à la main.'));
         return;
       }
-      if (totalPiecesChamp) totalPiecesChamp.value = texteAvecSeparateurs(reponse.montant_ttc);
+      // Ajouté au total (comme le bouton « Ajouter » de la main d'œuvre),
+      // pas écrasé — une pièce ajoutée ensuite ne doit pas faire disparaître
+      // ce montant lu (même correctif que #log-mo-ajouter, voir plus haut).
+      montantHorsPieces += Number(reponse.montant_ttc) || 0;
+      recalcTotalPieces();
       dire(tR('Montant lu : {valeur} — vérifie avant d\'enregistrer.', { valeur: formatMontant(reponse.montant_ttc) }));
     });
   }
