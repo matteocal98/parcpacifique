@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l+NZRDGTQZzF9Wj4UnOxbyQu3anx1DuqT+eYcCNuVmw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dk+iT6HXkuhEi2L6t+PJj77vZzokH8H7qomLNTjVZic=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3732,6 +3732,18 @@
   /* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
      léger voile de couleur plutôt qu'un blanc plat, comme sur « Mon compte ». */
   .vue-agenda button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
+
+  /* Coûts & TCO : pas de colonne latérale (.dash-side) sur cette vue — la
+     laisser sur le partage doré 1.618fr/1fr de .dash-grid.agenda-grid
+     réservait une colonne vide et écrasait le tableau du catalogue de pièces
+     (référence/désignation/prix/actions) dans ~62 % de la largeur, jusqu'à
+     forcer un défilement horizontal. Pleine largeur ici, + mêmes champs et
+     boutons secondaires teintés que « Mon compte »/« Agenda ». */
+  .vue-couts-tco{grid-template-columns:1fr;}
+  .vue-couts-tco input:not([type=checkbox]),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
+  .vue-couts-tco input:not([type=checkbox]):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
+  .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
+  .vue-couts-tco button.secondary:hover{background:var(--primary-tint-2);}
   .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
 </style>
 </head>
@@ -12502,7 +12514,7 @@ VIEWS.tco = {
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Paramètres & catalogue')}</span>
       </div>
-      <div class="dash-grid agenda-grid">
+      <div class="dash-grid agenda-grid vue-couts-tco">
         <div class="dash-main">
           ${blocParametresTcoHtml()}
           ${blocCatalogueTcoHtml()}
