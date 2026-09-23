@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-OrpvgUhyra9x8Ek7CONb33ymQxBj8+Eu0b5Je3TRU7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Jvj9bL3niTCWkNLq60L4PCPNl87hQLWtI1NDl28haw0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16237,6 +16237,32 @@ async function equipePourAttribution() {
   if (error) throw error;
   return Array.isArray(data) ? data : [];
 }
+// Une ligne de pièce dans « Enregistrer un entretien » : sélection dans le
+// catalogue (le prix se propose, reste modifiable — une remise ponctuelle ou
+// une pièce hors catalogue ne doit pas être bloquée), quantité, sous-total.
+function ligneLogPieceHtml(idx) {
+  const options = (UI.partsCatalog || []).map((p) =>
+    `<option value="${esc(p.id)}" data-prix="${Number(p.unit_price) || 0}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`
+  ).join('');
+  return `<div class="field-row log-piece-ligne" data-piece-ligne="${idx}">
+      <div>
+        <select class="log-piece-select">
+          <option value="">${trad('— Choisir une pièce du catalogue —')}</option>
+          ${options}
+        </select>
+      </div>
+      <div style="max-width:90px;">
+        <label class="hint">${trad('Qté')}</label>
+        <input type="number" class="log-piece-qte" min="0" step="1" value="1">
+      </div>
+      <div style="max-width:120px;">
+        <label class="hint">${trad('Prix unitaire (€)')}</label>
+        <input type="number" class="log-piece-prix" min="0" step="0.01" value="0">
+      </div>
+      <button type="button" class="link-inline log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}">${trad('Retirer')}</button>
+    </div>`;
+}
+
 function openLogInterventionModal(machine, tache) {
   // « Marquer fait » / enregistrer un entretien écrit dans l'historique et
   // recalcule l'échéance. `tache` (optionnel) pré-coche la ligne du bandeau
@@ -16342,6 +16368,38 @@ function openLogInterventionModal(machine, tache) {
         </div>
         ` : ''}
 
+        ${SCHEMA.hasTco ? `
+        <div class="log-bloc log-bloc-cout">
+          <div class="log-elements-tete">
+            <label><span class="label-ico">${picto('reglages')}</span>${trad('Coûts')}</label>
+            <span class="log-optionnel">${trad('Optionnel')}</span>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="log-heures-mo">${trad('Heures de main d\'œuvre')}</label>
+              <input id="log-heures-mo" type="number" inputmode="decimal" min="0" step="0.25" placeholder="${trad('Ex. 1.5')}">
+            </div>
+            <div>
+              <label for="log-cout-mo">${trad('Coût main d\'œuvre (€)')}</label>
+              <input id="log-cout-mo" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 67.50')}">
+            </div>
+          </div>
+          <label>${trad('Pièces utilisées')}</label>
+          <div id="log-pieces-liste"></div>
+          <div class="modal-actions" style="justify-content:flex-start;gap:8px;">
+            <button type="button" class="secondary" id="log-piece-ajouter">${trad('+ Ajouter une pièce')}</button>
+            <button type="button" class="secondary" id="log-facture-photo-btn">${picto('photo')}<span>${trad('Lire une facture')}</span></button>
+          </div>
+          <input id="log-facture-photo" type="file" accept="image/*" capture="environment" hidden>
+          <div class="hint" id="log-facture-statut" role="status" aria-live="polite"></div>
+          <div class="field-row">
+            <div>
+              <label for="log-pieces-total">${trad('Total pièces (€)')}</label>
+              <input id="log-pieces-total" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+            </div>
+          </div>
+        </div>` : ''}
+
         <div class="log-bloc log-bloc-remarques">
           <label for="log-notes"><span class="label-ico">${picto('message')}</span>${trad('Remarques')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
           <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
@@ -16425,6 +16483,107 @@ function openLogInterventionModal(machine, tache) {
   overlay.querySelector('#log-hours-2')?.addEventListener('input', majApercu);
   majApercu();
 
+  // ── Coûts (optionnel, voir SCHEMA.hasTco) ──────────────────────
+  if (SCHEMA.hasTco) {
+    let pieceIdx = 0;
+    const piecesListe = overlay.querySelector('#log-pieces-liste');
+    const totalPiecesChamp = overlay.querySelector('#log-pieces-total');
+    // Le total est RECALCULÉ depuis les lignes à chaque changement, mais reste
+    // un champ éditable : une facture globale sans détail pièce par pièce, ou
+    // le montant proposé par la lecture de photo, doivent pouvoir s'y écrire
+    // directement sans passer par une ligne.
+    const recalcTotalPieces = () => {
+      if (!piecesListe || !totalPiecesChamp) return;
+      let total = 0;
+      piecesListe.querySelectorAll('.log-piece-ligne').forEach((ligne) => {
+        const qte = Number(ligne.querySelector('.log-piece-qte')?.value) || 0;
+        const prix = Number(ligne.querySelector('.log-piece-prix')?.value) || 0;
+        total += qte * prix;
+      });
+      totalPiecesChamp.value = total ? total.toFixed(2) : '0';
+    };
+    overlay.querySelector('#log-piece-ajouter')?.addEventListener('click', () => {
+      if (!piecesListe) return;
+      pieceIdx += 1;
+      piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
+    });
+    piecesListe?.addEventListener('change', (e) => {
+      if (e.target.classList.contains('log-piece-select')) {
+        const ligne = e.target.closest('.log-piece-ligne');
+        const option = e.target.selectedOptions[0];
+        const prixChamp = ligne?.querySelector('.log-piece-prix');
+        // Le prix du catalogue se PROPOSE dans la ligne — il reste un champ
+        // normal, modifiable ensuite (remise, prix négocié ce jour-là…).
+        if (prixChamp && option && option.dataset.prix !== undefined) prixChamp.value = option.dataset.prix;
+      }
+      recalcTotalPieces();
+    });
+    piecesListe?.addEventListener('input', recalcTotalPieces);
+    piecesListe?.addEventListener('click', (e) => {
+      const retirer = e.target.closest('.log-piece-retirer');
+      if (!retirer) return;
+      retirer.closest('.log-piece-ligne')?.remove();
+      recalcTotalPieces();
+    });
+
+    // Coût main d'œuvre : proposé depuis heures × taux horaire de la société
+    // (Coûts & TCO), mais reste modifiable — le taux peut être absent, ou ne
+    // pas convenir ce jour-là (heures supplémentaires, sous-traitant…).
+    overlay.querySelector('#log-heures-mo')?.addEventListener('input', () => {
+      const heures = Number(overlay.querySelector('#log-heures-mo').value) || 0;
+      const taux = Number(UI.company?.labor_hourly_rate) || 0;
+      const coutChamp = overlay.querySelector('#log-cout-mo');
+      if (coutChamp && taux > 0) coutChamp.value = (heures * taux).toFixed(2);
+    });
+
+    // Lecture d'une facture par photo : même famille que la lecture de
+    // compteur par photo (lireCompteurSurPhoto) — propose un montant, ne
+    // l'enregistre jamais sans que l'utilisateur ait vu et pu corriger.
+    // ⚠️ Dépendance : suppose une Edge Function `lire-facture` déployée
+    // séparément (voir keeva-tco-feature) ; message d'erreur clair et saisie
+    // manuelle disponible tant qu'elle ne l'est pas.
+    overlay.querySelector('#log-facture-photo-btn')?.addEventListener('click', () => {
+      overlay.querySelector('#log-facture-photo')?.click();
+    });
+    overlay.querySelector('#log-facture-photo')?.addEventListener('change', async (e) => {
+      const fichier = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!fichier) return;
+      const statut = overlay.querySelector('#log-facture-statut');
+      const dire = (texte) => { if (statut) statut.textContent = texte || ''; };
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        dire(trad('La lecture d\'une photo nécessite une connexion — saisis le montant à la main.'));
+        return;
+      }
+      dire(trad('Lecture de la photo…'));
+      let base64 = '';
+      try {
+        const reduite = await reduirePhotoCarnet(fichier);
+        const dataUrl = await blobVersDataUrl(reduite.blob);
+        base64 = String(dataUrl).split(',')[1] || '';
+      } catch (err) {
+        dire(tR('Photo illisible ({erreur}) — saisis le montant à la main.', { erreur: (err && err.message) || err }));
+        return;
+      }
+      if (!base64) { dire(trad('Photo illisible — saisis le montant à la main.')); return; }
+      let reponse = null;
+      try {
+        const { data, error } = await sb.functions.invoke('lire-facture', { body: { imageBase64: base64, mimeType: 'image/jpeg' } });
+        if (error) throw new Error(await functionErrorMessage(error, trad('lecture impossible')));
+        reponse = data;
+      } catch (err) {
+        dire(tR('Lecture impossible ({erreur}) — saisis le montant à la main.', { erreur: (err && err.message) || err }));
+        return;
+      }
+      if (!reponse || reponse.lisible === false || reponse.montant_ttc == null) {
+        dire(trad('Je n\'ai pas réussi à lire la facture — saisis le montant à la main.'));
+        return;
+      }
+      if (totalPiecesChamp) totalPiecesChamp.value = Number(reponse.montant_ttc).toFixed(2);
+      dire(tR('Montant lu : {valeur} — vérifie avant d\'enregistrer.', { valeur: formatMontant(reponse.montant_ttc) }));
+    });
+  }
+
   overlay.querySelector('#log-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = e.target.querySelector('button[type=submit]');
@@ -16440,9 +16599,28 @@ function openLogInterventionModal(machine, tache) {
       : [];
     const notes = overlay.querySelector('#log-notes').value.trim();
     const operateur = overlay.querySelector('#log-operateur')?.value || null;
+    // Coûts (optionnel, voir SCHEMA.hasTco) : le total pièces vient du champ
+    // (recalculé depuis les lignes, mais éditable — voir le câblage
+    // ci-dessus), les lignes elles-mêmes de intervention_parts pour le détail.
+    const laborHours = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-heures-mo')?.value) || null) : null;
+    const laborCost = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-cout-mo')?.value) || null) : null;
+    const partsCost = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-pieces-total')?.value) || null) : null;
+    const pieceLignes = SCHEMA.hasTco
+      ? Array.from(overlay.querySelectorAll('.log-piece-ligne'))
+          .map((ligne) => ({
+            partId: ligne.querySelector('.log-piece-select')?.value || null,
+            designation: ligne.querySelector('.log-piece-select')?.selectedOptions[0]?.textContent || '',
+            quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 0,
+            unitPrice: Number(ligne.querySelector('.log-piece-prix')?.value) || 0,
+          }))
+          // Une ligne sans pièce choisie (option vide encore sélectionnée)
+          // n'est pas une pièce utilisée : `partId` est vide tant que rien
+          // n'a été choisi, c'est le seul signal fiable ici.
+          .filter((l) => l.partId && l.quantity > 0)
+      : [];
 
     try {
-      const { error: logErr } = await sb.from(trad('interventions')).insert({
+      const { data: intervention, error: logErr } = await sb.from(trad('interventions')).insert({
         machine_id: machine.id,
         plan_id: machine.plan?.id || null,
         performed_at: performedAt,
@@ -16451,8 +16629,24 @@ function openLogInterventionModal(machine, tache) {
         description: notes || null,
         items_done: checkedItems.length ? checkedItems : null,
         performed_by: operateur,
-      });
+        ...(SCHEMA.hasTco ? { parts_cost: partsCost, labor_cost: laborCost, labor_hours: laborHours } : {}),
+      }).select('id').single();
       if (logErr) throw logErr;
+
+      if (SCHEMA.hasTco && pieceLignes.length && intervention?.id) {
+        // Détail des pièces : jamais bloquant pour l'enregistrement de
+        // l'entretien lui-même — une erreur ici est signalée, pas fatale.
+        const { error: piecesErr } = await sb.from('intervention_parts').insert(
+          pieceLignes.map((l) => ({
+            intervention_id: intervention.id,
+            part_id: l.partId,
+            designation: l.designation,
+            quantity: l.quantity,
+            unit_price: l.unitPrice,
+          }))
+        );
+        if (piecesErr) console.warn('Détail des pièces non enregistré :', piecesErr.message);
+      }
 
       if (isCounter && hoursValue != null) {
         const { error: machErr } = await sb.from(trad('machines')).update(machineCounterPatch(hoursValue, machine)).eq('id', machine.id);
@@ -16511,6 +16705,18 @@ function openLogInterventionModal(machine, tache) {
       submitBtn.textContent = trad('Enregistrer');
     }
   });
+}
+
+// Coûts d'exploitation d'une machine (carburant, assurance, taxes…) — une
+// ligne par événement réel, jamais un total recalculé silencieusement (voir
+// keeva-tco-feature). Absent tant que SCHEMA.hasTco est faux.
+async function fetchOperatingCosts(machineId) {
+  const { data, error } = await sb.from('operating_costs')
+    .select('id, kind, amount, incurred_at, notes')
+    .eq('machine_id', machineId)
+    .order('incurred_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
 
 // Récupère l'historique complet d'une machine : l'export CSV ne doit jamais
@@ -16863,6 +17069,12 @@ function openPlanView(machine, companyId, categories) {
         </div>` : ''}
       </div>
 
+      ${SCHEMA.hasTco ? `
+      <div class="plan-field" id="tco-scorecard-section">
+        <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Scorecard TCO')}</div>
+        <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
+      </div>` : ''}
+
       ${machine.plan ? `
         <div class="plan-field">
           <div class="label">${hasItemDetail ? trad('Tableau de référence entretien') : trad('Tâches de maintenance')}</div>
@@ -16881,6 +17093,46 @@ function openPlanView(machine, companyId, categories) {
           </div>
         ` : ''}
       ` : `<div class="plan-field"><div class="value" style="color:var(--ink-soft);">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></div>`}
+
+      ${SCHEMA.hasTco ? `
+      <div class="plan-field" id="operating-costs-section">
+        <div class="history-head">
+          <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Coûts d\'exploitation')}</div>
+          <div class="history-actions">
+            <button type="button" class="icon-btn" id="operating-cost-ajouter">${picto('ajuste')}<span>${trad('Ajouter un coût')}</span></button>
+          </div>
+        </div>
+        <div id="operating-cost-form" hidden>
+          <div class="field-row">
+            <div>
+              <label for="oc-type">${trad('Type')}</label>
+              <select id="oc-type">
+                <option value="fuel">${trad('Carburant')}</option>
+                <option value="insurance">${trad('Assurance')}</option>
+                <option value="tax">${trad('Taxe')}</option>
+                <option value="storage">${trad('Stockage')}</option>
+                <option value="other">${trad('Autre')}</option>
+              </select>
+            </div>
+            <div>
+              <label for="oc-montant">${trad('Montant (€)')}</label>
+              <input id="oc-montant" type="number" inputmode="decimal" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="oc-date">${trad('Date')}</label>
+              <input id="oc-date" type="date" value="${todayIso()}">
+            </div>
+          </div>
+          <label for="oc-note">${trad('Note')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
+          <input id="oc-note" placeholder="${trad('Ex. Plein gazole, contrôle technique…')}">
+          <div class="hint" id="operating-cost-msg" role="status" aria-live="polite"></div>
+          <div class="modal-actions">
+            <button type="button" class="secondary" id="operating-cost-annuler">${trad('Annuler')}</button>
+            <button type="button" class="primary" id="operating-cost-enregistrer">${trad('Enregistrer')}</button>
+          </div>
+        </div>
+        <div class="value" style="color:var(--ink-soft);" id="operating-costs-liste">${trad('Chargement…')}</div>
+      </div>` : ''}
 
       <div class="plan-field" id="history-section">
         <div class="history-head">
@@ -16909,6 +17161,59 @@ function openPlanView(machine, companyId, categories) {
     overlay.remove();
     openLogInterventionModal(machine);
   });
+  if (SCHEMA.hasTco) {
+    const ocForm = overlay.querySelector('#operating-cost-form');
+    overlay.querySelector('#operating-cost-ajouter')?.addEventListener('click', () => {
+      if (ocForm) ocForm.hidden = !ocForm.hidden;
+    });
+    overlay.querySelector('#operating-cost-annuler')?.addEventListener('click', () => {
+      if (ocForm) ocForm.hidden = true;
+    });
+    // Barème suggéré (voir Coûts & TCO) : propose le montant quand le type
+    // choisi est assurance/stockage et qu'un barème existe — jamais imposé,
+    // l'utilisateur voit la valeur proposée et peut la corriger avant
+    // d'enregistrer.
+    overlay.querySelector('#oc-type')?.addEventListener('change', (e) => {
+      const montantChamp = overlay.querySelector('#oc-montant');
+      if (!montantChamp || montantChamp.value) return;
+      const bareme = e.target.value === 'insurance' ? UI.company?.default_insurance_yearly
+        : e.target.value === 'storage' ? UI.company?.default_storage_yearly : null;
+      if (bareme != null) montantChamp.value = bareme;
+    });
+    overlay.querySelector('#operating-cost-enregistrer')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const msg = overlay.querySelector('#operating-cost-msg');
+      const kind = overlay.querySelector('#oc-type').value;
+      const amount = parseFloat(overlay.querySelector('#oc-montant').value);
+      const incurredAt = overlay.querySelector('#oc-date').value;
+      const notes = overlay.querySelector('#oc-note').value.trim();
+      if (!amount || amount <= 0) {
+        if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Le montant doit être supérieur à 0.'); }
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = trad('Enregistrement…');
+      try {
+        const { data, error } = await sb.from('operating_costs')
+          .insert({ machine_id: machine.id, kind, amount, incurred_at: incurredAt || todayIso(), notes: notes || null })
+          .select('id, kind, amount, incurred_at, notes')
+          .single();
+        if (error) throw error;
+        operatingCosts = [data, ...operatingCosts];
+        renderOperatingCosts();
+        renderScorecardTco();
+        if (ocForm) ocForm.hidden = true;
+        overlay.querySelector('#oc-montant').value = '';
+        overlay.querySelector('#oc-note').value = '';
+        if (msg) msg.textContent = '';
+        showToast(trad('Coût d\'exploitation enregistré'));
+      } catch (err) {
+        if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Erreur :') + ' ' + (err.message || err); }
+      }
+      btn.disabled = false;
+      btn.textContent = trad('Enregistrer');
+    });
+  }
   // Une tâche dont le carnet laisse un choix : on DEMANDE, on ne devine pas.
   overlay.querySelectorAll('.choisir-frequence').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -16932,6 +17237,43 @@ function openPlanView(machine, companyId, categories) {
   // id -> nom affiché, rempli une fois avec l'historique (voir plus bas) :
   // une seule requête équipe pour tout l'écran (table, CSV, email).
   let nomsEquipe = new Map();
+  // Coûts d'exploitation (voir SCHEMA.hasTco) : chargés en même temps que
+  // l'historique, réutilisés par la scorecard TCO ci-dessous.
+  let operatingCosts = [];
+  const OC_LABELS = { fuel: trad('Carburant'), insurance: trad('Assurance'), tax: trad('Taxe'), storage: trad('Stockage'), other: trad('Autre') };
+  const renderOperatingCosts = () => {
+    const liste = overlay.querySelector('#operating-costs-liste');
+    if (!liste) return;
+    if (!operatingCosts.length) { liste.textContent = trad('Aucun coût d\'exploitation enregistré pour l\'instant.'); return; }
+    liste.innerHTML = `<div class="ref-scroll"><table class="ref-table">
+        <thead><tr><th>${trad('Date')}</th><th>${trad('Type')}</th><th>${trad('Montant')}</th><th>${trad('Note')}</th></tr></thead>
+        <tbody>${operatingCosts.map(c => `<tr>
+            <td class="item-label">${esc(c.incurred_at)}</td>
+            <td>${esc(OC_LABELS[c.kind] || c.kind)}</td>
+            <td>${formatMontant(c.amount)}</td>
+            <td>${c.notes ? esc(c.notes) : '<span class="muted">—</span>'}</td>
+          </tr>`).join('')}</tbody>
+      </table></div>`;
+  };
+  // Scorecard TCO : `null` sans prix d'achat renseigné, et la section entière
+  // disparaît alors — jamais un calcul affiché sur une base à moitié connue
+  // (même garde-fou que vueCompteurSecondaire sans second suivi).
+  const renderScorecardTco = () => {
+    const section = overlay.querySelector('#tco-scorecard-section');
+    if (!section) return;
+    const tco = tcoMachine(machine, historyData, operatingCosts);
+    if (!tco) { section.remove(); return; }
+    const uniteCourte = counterShort(counterUnitOf(machine));
+    section.innerHTML = `
+      <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Scorecard TCO')}</div>
+      <div class="plan-hero-champs">
+        <div class="plan-hero-champ"><span class="label">${trad('TCO Total')}</span><span class="value">${formatMontant(tco.total)}</span></div>
+        <div class="plan-hero-champ"><span class="label">${trad('Coût / unité d\'usage')}</span><span class="value">${tco.coutParUnite != null ? tR('{valeur} / {unite}', { valeur: formatMontant(tco.coutParUnite), unite: uniteCourte }) : '—'}</span></div>
+        <div class="plan-hero-champ"><span class="label">${trad('Ratio entretien / achat')}</span><span class="value">${tco.ratioMaintenanceAchat != null ? tR('{n} %', { n: Math.round(tco.ratioMaintenanceAchat * 100) }) : '—'}${tco.ratioMaintenanceAchat != null && tco.ratioMaintenanceAchat >= 0.5 ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</span></div>
+      </div>
+      ${jaugeTcoHtml(tco)}
+    `;
+  };
   const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
   const buildHistoryCsv = () => {
     const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Operateur'), trad('Remarques')];
@@ -16994,17 +17336,23 @@ function openPlanView(machine, companyId, categories) {
       // se charge EN MÊME TEMPS : si elle échoue (hors connexion, etc.), la
       // colonne « Opérateur » reste vide — l'historique lui-même s'affiche
       // quand même, jamais bloqué par un souci qui lui est étranger.
-      const [interventions, equipe] = await Promise.all([
+      const [interventions, equipe, coutsExploitation] = await Promise.all([
         fetchAllInterventions(machine.id),
         equipePourAttribution().catch(() => []),
+        // La scorecard TCO ne doit pas attendre un second aller-retour : elle
+        // se calcule dès que l'historique (déjà nécessaire à l'écran) est là.
+        SCHEMA.hasTco ? fetchOperatingCosts(machine.id).catch(() => []) : Promise.resolve([]),
       ]);
       historyData = interventions;
       nomsEquipe = new Map(equipe.map(m => [m.id, m.nom_affiche]));
+      operatingCosts = coutsExploitation;
     } catch (error) {
       if (valueEl) valueEl.textContent = trad('Erreur de chargement de l\'historique :') + " " + error.message;
       return;
     }
     if (!overlay.isConnected || !section.isConnected) return;
+    renderOperatingCosts();
+    renderScorecardTco();
     if (!historyData.length) { if (valueEl) valueEl.textContent = trad('Aucun entretien enregistré pour l\'instant.'); return; }
 
     overlay.querySelector('#export-history-csv').disabled = false;
