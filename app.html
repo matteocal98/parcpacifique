@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-aV9/qeKJyolG4cuTGCuDyZBYaqe2Mn7q+e1RFYeQUzU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+MiAnIXvWpClAlbh2NrBiA95SQKv8dIh18G70zQtm2k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4729,12 +4729,25 @@ function planNextDueCounterPatch(nextDue) {
   return SCHEMA.hasCounter ? { next_due_counter: nextDue } : { next_due_hours: nextDue };
 }
 
-// SECOND COMPTEUR (optionnel) — mêmes principes que ci-dessus, mais SANS repli
-// historique : la fonctionnalité n'existe qu'après la migration dédiée, donc
-// rien à lire ni à écrire tant que SCHEMA.hasCounter2 est faux (les patches
-// renvoient {} : ils s'assemblent sans effet dans un payload d'écriture).
+// SECOND SUIVI (optionnel) — mêmes principes que le principal, mais SANS
+// repli historique : la fonctionnalité n'existe qu'après la migration
+// dédiée, donc rien à lire ni à écrire tant que SCHEMA.hasCounter2 est faux
+// (les patches renvoient {} : ils s'assemblent sans effet dans un payload
+// d'écriture). Trois formes possibles, comme le suivi principal :
+// 'hours' | 'km' (un second COMPTEUR, avec son propre relevé) ou 'days' (un
+// second suivi CALENDAIRE — pas de relevé, chaque tâche porte sa propre date
+// comme le fait déjà le calendaire principal). counter_unit_2 sert de
+// marqueur pour les trois cas ; counter_value_2 ne compte que pour les deux
+// premiers.
+function modeSecondaireDe(machine) {
+  const m = machine && machine.counter_unit_2;
+  return (m === 'km' || m === 'hours' || m === 'days') ? m : null;
+}
+// Restreint au cas COMPTEUR (jamais 'days') : c'est ce que veulent la plupart
+// des appelants existants (relevé à afficher/saisir, compatibilité d'unité).
 function counterUnit2Of(machine) {
-  return (machine && (machine.counter_unit_2 === 'km' || machine.counter_unit_2 === 'hours')) ? machine.counter_unit_2 : null;
+  const m = modeSecondaireDe(machine);
+  return (m === 'km' || m === 'hours') ? m : null;
 }
 function machineCounter2(machine) {
   if (!machine || !SCHEMA.hasCounter2) return null;
@@ -4764,6 +4777,33 @@ function planCounter2Patch(interval, reminder) {
 function planNextDueCounter2Patch(nextDue) {
   if (!SCHEMA.hasCounter2) return {};
   return { next_due_counter_2: nextDue };
+}
+// Le pendant CALENDAIRE des mêmes accesseurs, colonnes _2 dédiées.
+function planIntervalDays2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return null;
+  return plan.interval_days_2 ?? null;
+}
+function planNextDueAt2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return null;
+  return plan.next_due_at_2 ?? null;
+}
+function planReminderDays2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return FALLBACK_REMINDER_DAYS;
+  return plan.reminder_days_before_2 ?? FALLBACK_REMINDER_DAYS;
+}
+function planJours2Patch(interval, reminder) {
+  if (!SCHEMA.hasCounter2) return {};
+  return { interval_days_2: interval, reminder_days_before_2: reminder };
+}
+function planNextDueAt2Patch(nextDue) {
+  if (!SCHEMA.hasCounter2) return {};
+  return { next_due_at_2: nextDue };
+}
+// Compatibilité d'une unité de TÂCHE (jours/semaines/mois/ans) avec un second
+// suivi CALENDAIRE : seulement si ce second suivi est bien réglé sur 'days'.
+function uniteCompatibleCalendaireSecondaire(unite, machine) {
+  const info = UNITES_INTERVALLE[unite];
+  return !!info && info.genre === 'date' && modeSecondaireDe(machine) === 'days';
 }
 // L'échéance du plan n'avance QUE si au moins un élément de CE plan a réellement
 // été coché. Règle volontairement prudente : enregistrer un entretien sans rien
@@ -5165,8 +5205,14 @@ function infoTache(item, plan, machine) {
     const machineVueParLeSecond = { ...machine, counter_unit: item.interval_unite, counter_value: machineCounter2(machine) };
     return { ...dueInfo(planVuParLeSecond, machineVueParLeSecond), secondaire: true };
   }
+  // SUIVIE PAR LE SECOND SUIVI CALENDAIRE : même principe, sans relevé à
+  // synthétiser — dueInfo() n'a besoin que de l'échéance de LA tâche.
+  if (item && item.interval_unite && item.due_at
+      && uniteCompatibleCalendaireSecondaire(item.interval_unite, machine)) {
+    return { ...dueInfo({ tracking_mode: 'days', next_due_at: item.due_at }, machine), secondaire: true };
+  }
   // Échéance dans une AUTRE unité que celle du plan (et pas davantage suivie
-  // par le second compteur) : elle est lue dans SON unité, marquée horsPlan
+  // par le second suivi) : elle est lue dans SON unité, marquée horsPlan
   // (l'écran le dit) et n'entre pas dans le minimum.
   const propre = echeancePropreTache(item, plan);
   if (propre) {
@@ -5317,15 +5363,27 @@ function echeancePlanDepuisTaches(items, plan) {
   }
   return suivies.reduce((min, it) => (String(it.due_at) < min ? String(it.due_at) : min), String(suivies[0].due_at));
 }
-// La même règle, mais pour le SECOND compteur de la machine (voir
-// SCHEMA.hasCounter2) : le minimum des due_counter des tâches dont l'unité
-// correspond à CE second relevé — jamais à celui du plan principal.
+// La même règle, mais pour le SECOND suivi de la machine (voir
+// SCHEMA.hasCounter2) : le minimum des échéances des tâches dont l'unité
+// correspond à CE second suivi — jamais à celui du plan principal. Compteur
+// (heures/km) ou calendaire (jours/semaines/mois/ans), selon ce que
+// modeSecondaireDe() renvoie.
 function echeancePlanDepuisTachesSecondaire(items, machine) {
-  const u2 = counterUnit2Of(machine);
-  if (!u2) return null;
-  const suivies = normalizeItems(items).filter(it => it.interval_unite === u2 && Number.isFinite(Number(it.due_counter)));
+  const mode2 = modeSecondaireDe(machine);
+  if (!mode2) return null;
+  if (mode2 === 'days') {
+    const suivies = normalizeItems(items).filter(it =>
+      it.due_at && UNITES_INTERVALLE[it.interval_unite]?.genre === 'date');
+    if (!suivies.length) return null;
+    return suivies.reduce((min, it) => (String(it.due_at) < min ? String(it.due_at) : min), String(suivies[0].due_at));
+  }
+  const suivies = normalizeItems(items).filter(it => it.interval_unite === mode2 && Number.isFinite(Number(it.due_counter)));
   if (!suivies.length) return null;
   return suivies.reduce((min, it) => Math.min(min, Number(it.due_counter)), Number.POSITIVE_INFINITY);
+}
+// Le patch à écrire pour cette échéance secondaire, selon son genre.
+function echeancePlanPatch2(valeur, machine) {
+  return modeSecondaireDe(machine) === 'days' ? planNextDueAt2Patch(valeur) : planNextDueCounter2Patch(valeur);
 }
 function echeancePlanPatch(valeur, plan) {
   return planIsCounter(plan) ? planNextDueCounterPatch(valeur) : { next_due_at: valeur };
@@ -5454,26 +5512,36 @@ function classerFrequence(item) {
     || classerDepuisTexte(item && item.frequency);
 }
 
-// Le carnet mélange-t-il une SECONDE unité de compteur (heures ET km), ou une
-// unité de compteur alors que le mode proposé est calendaire ? Pur calcul,
-// sans toucher l'Edge Function déployée : elle classe déjà chaque tâche dans
-// SA propre unité (classerFrequence, structuré ou texte) — on regarde juste
-// si une unité de compteur AUTRE que le mode principal apparaît. Une seule
-// candidate distincte : on la propose. Deux (heures ET km, toutes deux
-// différentes d'un principal calendaire) : cas rarissime, on ne devine pas —
-// null, l'utilisateur choisira lui-même dans la section « Second suivi ».
+// Le carnet mélange-t-il un SECOND suivi (une seconde unité de compteur, ou
+// une unité calendaire quand le principal est un compteur — cas fréquent
+// d'un véhicule : kilométrage ET échéances en années) ? Pur calcul, sans
+// toucher l'Edge Function déployée : elle classe déjà chaque tâche dans SA
+// propre unité (classerFrequence, structuré ou texte) — on regarde juste si
+// une unité AUTRE que le mode principal apparaît. Une seule candidate
+// distincte : on la propose. Plusieurs : cas ambigu, on ne devine pas — null,
+// l'utilisateur choisira lui-même dans la section « Second suivi ».
 function detecterUniteSecondaire(items, modePrincipal) {
   if (!Array.isArray(items) || !items.length) return null;
-  const enCode = (uniteInterne) => uniteInterne === 'heures' ? 'hours' : (uniteInterne === 'km' ? 'km' : null);
+  const enCode = (uniteInterne) => {
+    if (uniteInterne === 'heures') return 'hours';
+    if (uniteInterne === 'km') return 'km';
+    return UNITES_INTERVALLE[uniteInterne]?.genre === 'date' ? 'days' : null;
+  };
   const vues = new Set();
   const noter = (unite) => { const c = enCode(unite); if (c) vues.add(c); };
   for (const item of items) {
+    // Un choix DÉJÀ résolu (repris d'un plan existant) prime sur une
+    // reclassification à chaud — sinon un « X km / Y ans » déjà tranché en
+    // km ferait croire à un mélange à cause de sa forme a_choisir d'origine.
+    if (item && item.interval_unite) { noter(item.interval_unite); continue; }
     const classement = classerFrequence(item);
-    if (!classement) continue;
-    if (classement.nature === 'periodique') noter(classement.unite);
-    if (classement.nature === 'a_choisir') (classement.options || []).forEach(o => noter(o.unite));
+    // 'a_choisir' est une ambiguïté PROPRE à cette tâche (une seule
+    // s'appliquera) : pas un signal de plan mélangé tant que rien n'est
+    // choisi, on ne la compte donc pas.
+    if (classement && classement.nature === 'periodique') noter(classement.unite);
   }
   if (modePrincipal === 'hours' || modePrincipal === 'km') vues.delete(modePrincipal);
+  else vues.delete('days');
   return vues.size === 1 ? [...vues][0] : null;
 }
 
@@ -5554,6 +5622,20 @@ function preparerTaches(items, plan, machine, duePlan, unite, duePlanSecondaire)
           return t;
         }
         if (Number.isFinite(Number(t.due_counter))) return t;
+        return echeancePropreTacheAppliquee(t, machine);
+      }
+      // Le SECOND suivi CALENDAIRE de la machine : même principe, mais sans
+      // relevé à porter — chaque tâche calendaire garde déjà sa propre date
+      // (echeancePropreTacheAppliquee repart de last_done_at/aujourd'hui,
+      // exactement comme le calendaire principal, sans rien devoir à la
+      // machine). La reprise ne sert qu'à hériter l'échéance DU PLAN
+      // secondaire si la tâche n'a encore rien de son côté.
+      if (uniteCompatibleCalendaireSecondaire(classement.unite, machine)) {
+        if (!t.due_at && duePlanSecondaire != null) {
+          t.due_at = duePlanSecondaire;
+          return t;
+        }
+        if (t.due_at) return t;
         return echeancePropreTacheAppliquee(t, machine);
       }
       // Autre unité : sa propre échéance, dans son unité, hors du minimum du plan.
@@ -10882,12 +10964,19 @@ VIEWS.machines = {
 // duplication de la logique d'échéance ni de son affichage. null si la
 // machine n'a pas ce second suivi : rien ne s'affiche alors.
 function vueCompteurSecondaire(m) {
-  const unite2 = counterUnit2Of(m);
-  if (!unite2 || !m.plan) return null;
+  const mode2 = modeSecondaireDe(m);
+  if (!mode2 || !m.plan) return null;
+  if (mode2 === 'days') {
+    // Calendaire : pas de relevé à synthétiser, juste l'échéance du plan
+    // secondaire (interval_days_2 / next_due_at_2), comme le calendaire
+    // principal.
+    const machineVue = { ...m, plan: { tracking_mode: 'days', next_due_at: planNextDueAt2(m.plan), interval_days: planIntervalDays2(m.plan), reminder_days_before: planReminderDays2(m.plan) } };
+    return { info: dueInfo(machineVue.plan, machineVue), machineVue };
+  }
   const machineVue = {
-    ...m, counter_unit: unite2, counter_value: machineCounter2(m),
+    ...m, counter_unit: mode2, counter_value: machineCounter2(m),
     plan: {
-      tracking_mode: unite2, next_due_at: null,
+      tracking_mode: mode2, next_due_at: null,
       ...planNextDueCounterPatch(planNextDueCounter2(m.plan)),
       interval_counter: planIntervalCounter2(m.plan),
       reminder_counter_before: planReminderCounter2(m.plan),
@@ -14784,6 +14873,7 @@ function openAddWizard(companyId, categories) {
     // Second suivi, optionnel (voir SCHEMA.hasCounter2) : null tant qu'il
     // n'est pas activé, ni proposé par l'analyse ni choisi à la main.
     secondaryUnit: null, secondaryValue: null, secondaryIntervalCounter: 100, secondaryReminderCounter: 10,
+    secondaryIntervalDays: FALLBACK_INTERVAL_DAYS, secondaryReminderDays: FALLBACK_REMINDER_DAYS,
     // Recherche d'une photo sur le web : desactivee par defaut, car elle
     // consomme un credit et n'a de sens que sans carnet PDF a scanner.
     searchPhoto: false,
@@ -15256,15 +15346,26 @@ function openAddWizard(companyId, categories) {
               <span class="mform-card-ico">${picto('vehicule')}</span>
               <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
             </label>
+            <label class="mform-card" id="carte-secondaire-days" style="display:${mode === 'days' ? 'none' : 'flex'};">
+              <input type="radio" name="tm2" value="days" ${state.secondaryUnit === 'days' ? 'checked' : ''}>
+              <span class="mform-card-ico">${picto('prochain')}</span>
+              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Calendaire')}</span><span class="mform-card-texte">${trad('Jours / semaines')}</span></span>
+            </label>
           </div>
-          <div class="field-row">
+          <div class="field-row" id="secondaire-valeur-row" style="display:${state.secondaryUnit === 'days' ? 'none' : 'flex'};">
             <div>
               <label for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
               <input id="f-secondaire-valeur" type="number" min="0" value="${state.secondaryValue ?? ''}">
             </div>
+          </div>
+          <div class="field-row">
             <div>
-              <label for="f-secondaire-interval">${trad('Échéance tous les')}</label>
-              <input id="f-secondaire-interval" type="number" min="1" value="${state.secondaryIntervalCounter}">
+              <label for="f-secondaire-interval" id="f-secondaire-interval-label">${tR('Échéance tous les ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+              <input id="f-secondaire-interval" type="number" min="1" value="${state.secondaryUnit === 'days' ? state.secondaryIntervalDays : state.secondaryIntervalCounter}">
+            </div>
+            <div>
+              <label for="f-secondaire-reminder" id="f-secondaire-reminder-label">${tR('Rappel avant ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+              <input id="f-secondaire-reminder" type="number" min="0" value="${state.secondaryUnit === 'days' ? state.secondaryReminderDays : state.secondaryReminderCounter}">
             </div>
           </div>
         </div>` : ''}
@@ -15315,19 +15416,33 @@ function openAddWizard(companyId, categories) {
         // carte devenue redondante se cache, et se décoche si elle l'était.
         const carteSecH = overlay.querySelector('#carte-secondaire-hours');
         const carteSecK = overlay.querySelector('#carte-secondaire-km');
+        const carteSecJ = overlay.querySelector('#carte-secondaire-days');
         if (carteSecH) carteSecH.style.display = choix === 'hours' ? 'none' : 'flex';
         if (carteSecK) carteSecK.style.display = choix === 'km' ? 'none' : 'flex';
-        if (choix !== 'days') {
-          const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
-          if (radioDevenuInvalide && radioDevenuInvalide.checked) {
-            radioDevenuInvalide.checked = false;
-            marquerCarteSelectionnee('tm2');
-          }
+        if (carteSecJ) carteSecJ.style.display = choix === 'days' ? 'none' : 'flex';
+        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
+        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+          radioDevenuInvalide.checked = false;
+          marquerCarteSelectionnee('tm2');
+          if (typeof majLabelsSecondaire === 'function') majLabelsSecondaire();
         }
       });
     });
     // Second suivi, optionnel : repliable, sans rien écrire tant qu'il n'est
-    // pas coché (voir SCHEMA.hasCounter2).
+    // pas coché (voir SCHEMA.hasCounter2). Une unité calendaire n'a pas de
+    // relevé à saisir (chaque tâche porte déjà sa propre date) : la ligne
+    // « Relevé actuel » se cache, et les libellés d'intervalle/rappel suivent
+    // l'unité choisie (jours, ou l'unité du compteur).
+    function majLabelsSecondaire() {
+      const uniteChoisie = overlay.querySelector('input[name=tm2]:checked')?.value || null;
+      const ligneValeur = overlay.querySelector('#secondaire-valeur-row');
+      if (ligneValeur) ligneValeur.style.display = uniteChoisie === 'days' ? 'none' : 'flex';
+      const mot = uniteChoisie === 'days' ? trad('jours') : (COUNTER_UNITS[uniteChoisie || 'hours'] || COUNTER_UNITS.hours).word;
+      const labelInterval = overlay.querySelector('#f-secondaire-interval-label');
+      const labelReminder = overlay.querySelector('#f-secondaire-reminder-label');
+      if (labelInterval) labelInterval.textContent = tR('Échéance tous les ({unite})', { unite: mot });
+      if (labelReminder) labelReminder.textContent = tR('Rappel avant ({unite})', { unite: mot });
+    }
     if (SCHEMA.hasCounter2) {
       const caseSecondaire = overlay.querySelector('#f-secondaire-active');
       const champsSecondaire = overlay.querySelector('#secondaire-champs');
@@ -15339,8 +15454,10 @@ function openAddWizard(companyId, categories) {
       overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
         overlay._secondaireToucheForce = true;
         marquerCarteSelectionnee('tm2');
+        majLabelsSecondaire();
       }));
       marquerCarteSelectionnee('tm2');
+      majLabelsSecondaire();
     }
     const champIntervalleWizard = overlay.querySelector('#f-interval');
     if (champIntervalleWizard) {
@@ -15392,14 +15509,22 @@ function openAddWizard(companyId, categories) {
       const photo = overlay.querySelector('#f-search-photo');
       state.searchPhoto = photo ? !!photo.checked : false;
       // Second suivi, optionnel : rien n'est écrit s'il n'a pas été coché.
+      // Calendaire n'a pas de relevé (chaque tâche porte déjà sa propre
+      // date) : seul l'intervalle/rappel (en jours) est retenu.
       const caseSecondaireActive = overlay.querySelector('#f-secondaire-active');
       if (caseSecondaireActive?.checked) {
         const radioSecondaire = overlay.querySelector('input[name=tm2]:checked');
         state.secondaryUnit = radioSecondaire ? radioSecondaire.value : null;
-        state.secondaryValue = state.secondaryUnit ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
-        state.secondaryIntervalCounter = state.secondaryUnit
-          ? (parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS)
-          : state.secondaryIntervalCounter;
+        const enCalendrier = state.secondaryUnit === 'days';
+        state.secondaryValue = (state.secondaryUnit && !enCalendrier)
+          ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
+        if (enCalendrier) {
+          state.secondaryIntervalDays = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_DAYS;
+          state.secondaryReminderDays = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_DAYS;
+        } else if (state.secondaryUnit) {
+          state.secondaryIntervalCounter = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS;
+          state.secondaryReminderCounter = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_HOURS;
+        }
       } else {
         state.secondaryUnit = null;
         state.secondaryValue = null;
@@ -15557,26 +15682,31 @@ function openAddWizard(companyId, categories) {
         // contienne jamais une affirmation qui vieillira.
         notes: notesUtiles(state.notes, state.currentHours),
       };
-      // Second compteur, optionnel : vu par le moteur d'échéances comme des
+      // Second suivi, optionnel : vu par le moteur d'échéances comme des
       // champs supplémentaires sur une machine « synthétique » (la vraie
       // machine n'existe pas encore comme objet complet à ce stade).
-      const machineVue2 = { counter_unit_2: state.secondaryUnit || null, counter_value_2: state.secondaryValue ?? null };
+      // Calendaire n'a pas de relevé (marqueur counter_unit_2:'days' seul).
       const secondaireActif = !!state.secondaryUnit;
-      const intervalSecondaire = state.secondaryIntervalCounter || FALLBACK_INTERVAL_HOURS;
+      const secondaireCalendrier = state.secondaryUnit === 'days';
+      const machineVue2 = { counter_unit_2: state.secondaryUnit || null, counter_value_2: secondaireCalendrier ? null : (state.secondaryValue ?? null) };
       if (secondaireActif) {
-        Object.assign(planPayload, planCounter2Patch(intervalSecondaire, state.secondaryReminderCounter ?? FALLBACK_REMINDER_HOURS));
+        Object.assign(planPayload, secondaireCalendrier
+          ? planJours2Patch(state.secondaryIntervalDays || FALLBACK_INTERVAL_DAYS, state.secondaryReminderDays ?? FALLBACK_REMINDER_DAYS)
+          : planCounter2Patch(state.secondaryIntervalCounter || FALLBACK_INTERVAL_HOURS, state.secondaryReminderCounter ?? FALLBACK_REMINDER_HOURS));
       }
+      const duePlanSecondaire = !secondaireActif ? null
+        : secondaireCalendrier ? addDaysIso(state.serviceDate, state.secondaryIntervalDays || FALLBACK_INTERVAL_DAYS)
+        : (state.secondaryValue || 0) + (state.secondaryIntervalCounter || FALLBACK_INTERVAL_HOURS);
       if (state.trackingMode !== 'days') {
         const intervalCounter = state.intervalHours || FALLBACK_INTERVAL_HOURS;
         const reminderCounter = state.reminderHoursBefore ?? FALLBACK_REMINDER_HOURS;
         const dueCounter = (state.currentHours || 0) + intervalCounter;
-        const duePlanSecondaire = secondaireActif ? (state.secondaryValue || 0) + intervalSecondaire : null;
         Object.assign(planPayload,
           planCounterPatch(intervalCounter, reminderCounter),
           planNextDueCounterPatch(dueCounter));
         // Une échéance par tâche : la passe CLASSE chaque fréquence (conditionnelle,
         // périodique, à choisir) et ne donne l'échéance du plan qu'aux tâches qui
-        // ont un vrai rythme dans l'unité du plan (ou dans celle du second compteur).
+        // ont un vrai rythme dans l'unité du plan (ou dans celle du second suivi).
         planPayload.items = preparerTaches(state.items, planPayload,
           { counter_unit: counterUnitFromMode(state.trackingMode), counter_value: state.currentHours, ...machineVue2 },
           dueCounter, counterUnitFromMode(state.trackingMode), duePlanSecondaire);
@@ -15584,7 +15714,7 @@ function openAddWizard(companyId, categories) {
         // quand aucune ne la porte (toutes conditionnelles, ou dans une autre
         // unité) : l'intervalle général du carnet ne doit pas rester en vestige.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
-        if (secondaireActif) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2)));
+        if (secondaireActif) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
         // On conserve aussi un intervalle calendaire cohérent : il servira si la
         // machine bascule plus tard en suivi calendaire.
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
@@ -15593,11 +15723,10 @@ function openAddWizard(companyId, categories) {
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
         planPayload.reminder_days_before = state.reminderDays ?? FALLBACK_REMINDER_DAYS;
         planPayload.next_due_at = addDaysIso(state.serviceDate, planPayload.interval_days);
-        const duePlanSecondaire = secondaireActif ? (state.secondaryValue || 0) + intervalSecondaire : null;
         // Une échéance par tâche : même passe, même classement (mode calendaire).
         planPayload.items = preparerTaches(state.items, planPayload,
           { counter_unit: 'hours', counter_value: null, ...machineVue2 }, planPayload.next_due_at, 'days', duePlanSecondaire);
-        if (secondaireActif) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2)));
+        if (secondaireActif) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
         // Même règle en mode calendaire : le plan suit le minimum de ses tâches.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
         // L'intervalle affiché (jauge, fiche) suit la tâche qui gouverne
@@ -16280,8 +16409,9 @@ function openPlanView(machine, companyId, categories) {
             <div class="plan-hero-champ"><span class="label">${trad('Rappel anticipé')}</span><span class="value">${isCounterMode ? tR('{n} avant', { n: formatCounter(planReminderCounter(machine.plan), unit) }) : tR('{n} jour(s) avant', { n: machine.plan.reminder_days_before })}</span></div>
             <div class="plan-hero-champ"><span class="label">${trad('Mode de suivi')}</span><span class="value">${(() => {
               const principal = machine.plan.tracking_mode === 'days' ? trad('Calendaire (jours)') : (unit === 'km' ? trad('Kilométrage') : trad('Compteur horaire'));
-              const unite2 = counterUnit2Of(machine);
-              return unite2 ? tR('{principal} + {second}', { principal, second: unite2 === 'km' ? trad('Kilométrage') : trad('Compteur horaire') }) : principal;
+              const mode2 = modeSecondaireDe(machine);
+              const libelleMode2 = { km: trad('Kilométrage'), hours: trad('Compteur horaire'), days: trad('Calendaire') };
+              return mode2 ? tR('{principal} + {second}', { principal, second: libelleMode2[mode2] }) : principal;
             })()}</span></div>
           </div>` : ''}
         </div>
@@ -16495,11 +16625,14 @@ function openMachineModal(companyId, categories, existing) {
         : (existing.plan?.reminder_days_before ?? FALLBACK_REMINDER_DAYS))
     : FALLBACK_REMINDER_DAYS;
   // Second suivi, optionnel (voir SCHEMA.hasCounter2) : déjà actif si la
-  // machine porte un second relevé.
-  const editSecondaryUnit = isEdit ? counterUnit2Of(existing) : null;
+  // machine porte un second suivi — compteur (avec relevé) ou calendaire
+  // (sans relevé, chaque tâche porte déjà sa propre date).
+  const editSecondaryUnit = isEdit ? modeSecondaireDe(existing) : null;
   const editSecondaryValue = isEdit ? machineCounter2(existing) : null;
   const editSecondaryInterval = isEdit ? (planIntervalCounter2(existing.plan) || FALLBACK_INTERVAL_HOURS) : FALLBACK_INTERVAL_HOURS;
   const editSecondaryReminder = isEdit ? planReminderCounter2(existing.plan) : FALLBACK_REMINDER_HOURS;
+  const editSecondaryIntervalDays = isEdit ? (planIntervalDays2(existing.plan) || FALLBACK_INTERVAL_DAYS) : FALLBACK_INTERVAL_DAYS;
+  const editSecondaryReminderDays = isEdit ? planReminderDays2(existing.plan) : FALLBACK_REMINDER_DAYS;
 
   const kindActuel = isEdit ? machineKind(existing) : TYPE_MACHINE;
   overlay.innerHTML = `
@@ -16689,15 +16822,26 @@ function openMachineModal(companyId, categories, existing) {
                 <span class="mform-card-ico">${picto('vehicule')}</span>
                 <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
               </label>
+              <label class="mform-card" id="carte-secondaire-days" style="display:${editMode === 'days' ? 'none' : 'flex'};">
+                <input type="radio" name="tm2" value="days" ${editSecondaryUnit === 'days' ? 'checked' : ''}>
+                <span class="mform-card-ico">${picto('prochain')}</span>
+                <span class="mform-card-corps"><span class="mform-card-titre">${trad('Calendaire')}</span><span class="mform-card-texte">${trad('Jours / semaines')}</span></span>
+              </label>
             </div>
-            <div class="field-row">
+            <div class="field-row" id="secondaire-valeur-row" style="display:${editSecondaryUnit === 'days' ? 'none' : 'flex'};">
               <div>
                 <label for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
                 <input id="f-secondaire-valeur" type="number" min="0" value="${editSecondaryValue ?? ''}">
               </div>
+            </div>
+            <div class="field-row">
               <div>
-                <label for="f-secondaire-interval">${trad('Échéance tous les')}</label>
-                <input id="f-secondaire-interval" type="number" min="1" value="${editSecondaryInterval}">
+                <label for="f-secondaire-interval" id="f-secondaire-interval-label">${tR('Échéance tous les ({unite})', { unite: editSecondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[editSecondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                <input id="f-secondaire-interval" type="number" min="1" value="${editSecondaryUnit === 'days' ? editSecondaryIntervalDays : editSecondaryInterval}">
+              </div>
+              <div>
+                <label for="f-secondaire-reminder" id="f-secondaire-reminder-label">${tR('Rappel avant ({unite})', { unite: editSecondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[editSecondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                <input id="f-secondaire-reminder" type="number" min="0" value="${editSecondaryUnit === 'days' ? editSecondaryReminderDays : editSecondaryReminder}">
               </div>
             </div>
           </div>` : ''}
@@ -16792,14 +16936,15 @@ function openMachineModal(companyId, categories, existing) {
       // Le second suivi ne peut pas être la MÊME unité que le principal.
       const carteSecH = overlay.querySelector('#carte-secondaire-hours');
       const carteSecK = overlay.querySelector('#carte-secondaire-km');
+      const carteSecJ = overlay.querySelector('#carte-secondaire-days');
       if (carteSecH) carteSecH.style.display = mode === 'hours' ? 'none' : 'flex';
       if (carteSecK) carteSecK.style.display = mode === 'km' ? 'none' : 'flex';
-      if (mode !== 'days') {
-        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${mode}"]`);
-        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
-          radioDevenuInvalide.checked = false;
-          marquerCarteSelectionnee('tm2');
-        }
+      if (carteSecJ) carteSecJ.style.display = mode === 'days' ? 'none' : 'flex';
+      const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${mode}"]`);
+      if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+        radioDevenuInvalide.checked = false;
+        marquerCarteSelectionnee('tm2');
+        if (typeof majLabelsSecondaire === 'function') majLabelsSecondaire();
       }
     });
   });
@@ -16808,7 +16953,20 @@ function openMachineModal(companyId, categories, existing) {
     champIntervalleEdit.addEventListener('input', () => { overlay._intervalTouche = true; });
   }
   // Second suivi, optionnel : repliable, sans rien écrire tant qu'il n'est
-  // pas coché (voir SCHEMA.hasCounter2).
+  // pas coché (voir SCHEMA.hasCounter2). Une unité calendaire n'a pas de
+  // relevé à saisir (chaque tâche porte déjà sa propre date) : la ligne
+  // « Relevé actuel » se cache, et les libellés d'intervalle/rappel suivent
+  // l'unité choisie (jours, ou l'unité du compteur).
+  function majLabelsSecondaire() {
+    const uniteChoisie = overlay.querySelector('input[name=tm2]:checked')?.value || null;
+    const ligneValeur = overlay.querySelector('#secondaire-valeur-row');
+    if (ligneValeur) ligneValeur.style.display = uniteChoisie === 'days' ? 'none' : 'flex';
+    const mot = uniteChoisie === 'days' ? trad('jours') : (COUNTER_UNITS[uniteChoisie || 'hours'] || COUNTER_UNITS.hours).word;
+    const labelInterval = overlay.querySelector('#f-secondaire-interval-label');
+    const labelReminder = overlay.querySelector('#f-secondaire-reminder-label');
+    if (labelInterval) labelInterval.textContent = tR('Échéance tous les ({unite})', { unite: mot });
+    if (labelReminder) labelReminder.textContent = tR('Rappel avant ({unite})', { unite: mot });
+  }
   if (SCHEMA.hasCounter2) {
     const caseSecondaire = overlay.querySelector('#f-secondaire-active');
     const champsSecondaire = overlay.querySelector('#secondaire-champs');
@@ -16820,8 +16978,10 @@ function openMachineModal(companyId, categories, existing) {
     overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
       overlay._secondaireToucheForce = true;
       marquerCarteSelectionnee('tm2');
+      majLabelsSecondaire();
     }));
     marquerCarteSelectionnee('tm2');
+    majLabelsSecondaire();
   }
 
   if (isEdit) {
@@ -17124,16 +17284,25 @@ function openMachineModal(companyId, categories, existing) {
     const secondaryUnit = secondaireActiveMaintenant
       ? (overlay.querySelector('input[name=tm2]:checked')?.value || null)
       : null;
-    const secondaryValue = secondaryUnit
+    // Calendaire n'a pas de relevé (chaque tâche porte déjà sa propre date) :
+    // seuls interval_days_2/reminder_days_before_2 sont renseignés.
+    const secondaireCalendrier = secondaryUnit === 'days';
+    const secondaryValue = (secondaryUnit && !secondaireCalendrier)
       ? (editSecondaryUnit === secondaryUnit
           ? (machineCounter2(existing) ?? 0)
           : (parseFloat(overlay.querySelector('#f-secondaire-valeur')?.value) || 0))
       : null;
-    const secondaryIntervalCounter = secondaryUnit
+    const secondaryIntervalCounter = (secondaryUnit && !secondaireCalendrier)
       ? (parseInt(overlay.querySelector('#f-secondaire-interval')?.value, 10) || FALLBACK_INTERVAL_HOURS)
       : null;
-    const secondaryReminderCounter = secondaryUnit
-      ? (existing?.plan ? planReminderCounter2(existing.plan) : FALLBACK_REMINDER_HOURS)
+    const secondaryReminderCounter = (secondaryUnit && !secondaireCalendrier)
+      ? (parseInt(overlay.querySelector('#f-secondaire-reminder')?.value, 10) || FALLBACK_REMINDER_HOURS)
+      : null;
+    const secondaryIntervalDays = secondaireCalendrier
+      ? (parseInt(overlay.querySelector('#f-secondaire-interval')?.value, 10) || FALLBACK_INTERVAL_DAYS)
+      : null;
+    const secondaryReminderDays = secondaireCalendrier
+      ? (parseInt(overlay.querySelector('#f-secondaire-reminder')?.value, 10) || FALLBACK_REMINDER_DAYS)
       : null;
     const intervalValue = parseInt(overlay.querySelector('#f-interval').value, 10);
     const reminderValue = parseInt(overlay.querySelector('#f-reminder').value, 10);
@@ -17242,11 +17411,14 @@ function openMachineModal(companyId, categories, existing) {
         Object.assign(planUpdate, planCounterPatch(intervalCounter, reminderCounter));
         if (overlay._aiItems) { planUpdate.items = overlay._aiItems; planUpdate.notes = notesUtiles(overlay._aiNotes, machineCounter(existing)); }
         // Second suivi, optionnel : sa propre échéance de reprise, comme le
-        // principal — voir machineVue2 et duePlanSecondaire plus bas.
+        // principal — voir machineVue2 et duePlanSecondaire plus bas. Change
+        // de dimension (compteur <-> calendaire) : l'ancienne est nettoyée,
+        // pas seulement remplacée, sinon des colonnes _2 périmées restent.
+        const secondaireCalendrierActif = secondaryUnit === 'days';
         if (SCHEMA.hasCounter2) {
-          Object.assign(planUpdate, secondaryUnit
-            ? planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter)
-            : planCounter2Patch(null, null));
+          Object.assign(planUpdate,
+            secondaireCalendrierActif ? planJours2Patch(secondaryIntervalDays, secondaryReminderDays) : planJours2Patch(null, null),
+            (secondaryUnit && !secondaireCalendrierActif) ? planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter) : planCounter2Patch(null, null));
         }
         const machineVue2 = { ...existing, counter_unit_2: secondaryUnit, counter_value_2: secondaryValue };
         const secondaireInchange = secondaryUnit && secondaryUnit === editSecondaryUnit;
@@ -17324,8 +17496,9 @@ function openMachineModal(companyId, categories, existing) {
         // change pas, ou toute nouvelle échéance (valeur + intervalle) s'il
         // vient d'être activé ou changé d'unité.
         const duePlanSecondaire = !secondaryUnit ? null
-          : secondaireInchange ? planNextDueCounter2(existing.plan)
-          : (secondaryValue || 0) + secondaryIntervalCounter;
+          : secondaireCalendrierActif
+            ? (secondaireInchange ? planNextDueAt2(existing.plan) : addDaysIso(serviceDate, secondaryIntervalDays))
+            : (secondaireInchange ? planNextDueCounter2(existing.plan) : (secondaryValue || 0) + secondaryIntervalCounter);
         const itemsMaj = preparerTaches(overlay._aiItems || itemsSource,
           { ...existing.plan, ...planUpdate }, machineVue2, duePlanMaj, counterUnit, duePlanSecondaire);
         if (itemsMaj) {
@@ -17335,7 +17508,7 @@ function openMachineModal(companyId, categories, existing) {
           Object.assign(planUpdate, echeancePlanPatch(
             echeancePlanDepuisTaches(itemsMaj, { ...existing.plan, ...planUpdate }),
             { ...existing.plan, ...planUpdate }));
-          if (secondaryUnit) Object.assign(planUpdate, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2)));
+          if (secondaryUnit) Object.assign(planUpdate, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2), machineVue2));
           // L'INTERVALLE AFFICHÉ (jauge, fiche) doit être celui de la tâche qui
           // gouverne réellement cette échéance, pas la valeur saisie à part
           // dans le formulaire — demandé le 23/09 après avoir constaté qu'un
@@ -17364,14 +17537,19 @@ function openMachineModal(companyId, categories, existing) {
           reminder_days_before: reminderDays,
         };
         Object.assign(planPayload, planCounterPatch(intervalCounter, reminderCounter));
+        const secondaireCalendrierNouveau = secondaryUnit === 'days';
         if (SCHEMA.hasCounter2 && secondaryUnit) {
-          Object.assign(planPayload, planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter));
+          Object.assign(planPayload, secondaireCalendrierNouveau
+            ? planJours2Patch(secondaryIntervalDays, secondaryReminderDays)
+            : planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter));
         }
         const machineVue2Nouveau = { counter_unit_2: secondaryUnit, counter_value_2: secondaryValue };
-        const duePlanSecondaireNouveau = secondaryUnit ? (secondaryValue || 0) + secondaryIntervalCounter : null;
         const duePlanNouveau = isCounterMode
           ? (currentHours || 0) + intervalCounter
           : addDaysIso(serviceDate, intervalDays);
+        const duePlanSecondaireNouveau = !secondaryUnit ? null
+          : secondaireCalendrierNouveau ? addDaysIso(serviceDate, secondaryIntervalDays)
+          : (secondaryValue || 0) + secondaryIntervalCounter;
         if (isCounterMode) {
           Object.assign(planPayload, planNextDueCounterPatch(duePlanNouveau));
         } else {
@@ -17379,14 +17557,14 @@ function openMachineModal(companyId, categories, existing) {
         }
         // Une échéance par tâche : la passe CLASSE chaque fréquence et ne donne
         // l'échéance du plan qu'aux tâches qui ont un vrai rythme dans son unité
-        // (ou dans celle du second compteur, s'il est actif).
+        // (ou dans celle du second suivi, s'il est actif).
         planPayload.items = preparerTaches(overlay._aiItems, planPayload,
           { counter_unit: counterUnit, counter_value: currentHours, ...machineVue2Nouveau },
           duePlanNouveau, counterUnit, duePlanSecondaireNouveau);
         // L'échéance du plan suit le minimum de ses tâches comparables — et
         // disparaît si aucune ne la porte (aucune tâche périodique dans l'unité).
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
-        if (secondaryUnit) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau)));
+        if (secondaryUnit) Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau), machineVue2Nouveau));
         // Même règle que sur une modification : l'intervalle affiché suit la
         // tâche qui gouverne réellement l'échéance, pas la saisie à part.
         if (!isCounterMode) {
@@ -17583,7 +17761,8 @@ async function boot(toastMessage) {
       ? ['interval_counter', 'next_due_counter', 'reminder_counter_before']
       : ['interval_hours', 'next_due_hours', 'reminder_hours_before']),
     ...(SCHEMA.hasCounter2
-      ? ['interval_counter_2', 'next_due_counter_2', 'reminder_counter_before_2']
+      ? ['interval_counter_2', 'next_due_counter_2', 'reminder_counter_before_2',
+         'interval_days_2', 'next_due_at_2', 'reminder_days_before_2']
       : []),
   ].join(', ');
 
