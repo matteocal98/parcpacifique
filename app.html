@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3k0iSyz7yVLVFSEtd0pCe6cxEkT27asyPcgNm0MeZzE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rgVHv1FjwWWPokuOkl/qBoNmU/QcJq/3KcguhSQJwXs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3960,6 +3960,16 @@ function daysUntil(isoDateStr) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.round((target - today) / 86400000);
+}
+// Écart, en jours, entre deux dates ISO (isoB - isoA). 0 si l'une des deux est
+// illisible ou absente : un écart inconnu ne doit jamais décaler une échéance.
+function joursEntreIso(isoA, isoB) {
+  const [ay, am, ad] = String(isoA || '').split('-').map(Number);
+  const [by, bm, bd] = String(isoB || '').split('-').map(Number);
+  if (!ay || !am || !ad || !by || !bm || !bd) return 0;
+  const a = new Date(ay, am - 1, ad);
+  const b = new Date(by, bm - 1, bd);
+  return Math.round((b - a) / 86400000);
 }
 
 // Les items du plan viennent soit de l'analyse (objets), soit d'anciens enregistrements
@@ -16772,7 +16782,14 @@ function openMachineModal(companyId, categories, existing) {
             Object.assign(planUpdate, planNextDueCounterPatch(currentHours + intervalCounter));
           }
         } else if (existing.plan.next_due_at && existing.plan.interval_days != null) {
-          planUpdate.next_due_at = addDaysIso(existing.plan.next_due_at, intervalDays - existing.plan.interval_days);
+          // Le delta d'intervalle, ET le delta de date de mise en service : sans
+          // ce second terme, corriger la date de mise en service (ex. une saisie
+          // initiale erronée, remontée de 6 mois) n'avait AUCUN effet sur
+          // l'échéance affichée — signalé le 23/09. Les deux décalages
+          // s'additionnent, ce qui préserve un entretien déjà réellement
+          // effectué (journalAvanceEcheance) au lieu de repartir de zéro.
+          const decalageService = joursEntreIso(existing.service_date, serviceDate);
+          planUpdate.next_due_at = addDaysIso(existing.plan.next_due_at, (intervalDays - existing.plan.interval_days) + decalageService);
         } else {
           planUpdate.next_due_at = addDaysIso(serviceDate, intervalDays);
         }
