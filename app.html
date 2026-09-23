@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Tz2ApwJveb8B1prEIA06q8BKDuHtX0lPD3gk4F1TQas=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KyBvqrjjhFB4xqHEnsoc8+LsVByreA9Mgm1mJikfv4A=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16188,9 +16188,14 @@ function openLogInterventionModal(machine, tache) {
         if (suivi) {
           planUpdate.items = suivi.items;
           Object.assign(planUpdate, echeancePlanPatch(suivi.echeance, machine.plan));
-          // Même règle pour le second compteur, s'il existe : son échéance suit
+          // Même règle pour le second suivi, s'il existe : son échéance suit
           // aussi le minimum de SES tâches, et disparaît si aucune ne la porte.
-          if (unit2) Object.assign(planUpdate, planNextDueCounter2Patch(suivi.echeanceSecondaire));
+          // echeancePlanPatch2 écrit la bonne colonne selon son genre (date ou
+          // compteur) — planNextDueCounter2Patch écrivait TOUJOURS dans la
+          // colonne compteur, même pour un second suivi calendaire, qui ne
+          // se mettait donc jamais à jour après un entretien (signalé le
+          // 23/09, sur la Peugeot 208 après un entretien complet).
+          if (unit2) Object.assign(planUpdate, echeancePlanPatch2(suivi.echeanceSecondaire, machine));
         } else if (journalAvanceEcheance(items, checkedItems)) {
           // Plan sans élément détaillé : comportement d'avant, inchangé.
           if (isCounter) {
