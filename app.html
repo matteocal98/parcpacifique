@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1nt8N4U6SidryfX8ndOvPQpM7nt5OiJ7s9BkTysz7gY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l+NZRDGTQZzF9Wj4UnOxbyQu3anx1DuqT+eYcCNuVmw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4750,6 +4750,70 @@ function planNextDueCounterPatch(nextDue) {
 // société active. XPF n'a pas de sous-unité : Intl le sait déjà nativement,
 // `maximumFractionDigits: 0` aligne simplement l'EUR sur la même convention
 // d'affichage déjà en place dans le reste de l'app (jamais de centimes).
+// ── Séparateurs de milliers sur les champs de saisie ─────────────
+// `<input type="number">` ne peut PAS afficher « 20 300 » (le navigateur
+// refuse tout caractère qui n'est pas un chiffre/point) : les champs
+// concernés passent donc en `type="text" inputmode="decimal"`, formatés au
+// blur et remis en brut au focus (pour rester éditables sans se battre avec
+// la position du curseur pendant la frappe).
+//
+// Distinct de formatMontant : ceci n'affiche jamais de symbole monétaire, et
+// sert la SAISIE, pas l'affichage d'une valeur déjà enregistrée.
+function separateursLocale(locale) {
+  const parts = new Intl.NumberFormat(locale || localeActive()).formatToParts(1234.5);
+  return {
+    groupe: parts.find(p => p.type === 'group')?.value || ' ',
+    decimal: parts.find(p => p.type === 'decimal')?.value || '.',
+  };
+}
+// Lit un texte saisi (avec ou sans séparateurs) et rend un nombre JS, ou
+// `null` si vide/illisible — jamais NaN, pour que l'appelant garde le même
+// réflexe « valeur vide = pas de coût » qu'avec un champ number.
+//
+// ⚠️ Ne dépend PAS des séparateurs exacts de la locale, à dessein :
+// `toLocaleString('fr-FR')` groupe avec une espace fine INSÉCABLE (U+202F),
+// invisible à l'œil et différente d'une espace normale — si l'utilisateur
+// tape lui-même une espace normale pour se relire (réflexe naturel sur un
+// gros montant), ou un point décimal (clavier numérique, habitude perso, un
+// « . » au lieu d'une « , »), une lecture stricte fondée sur la locale
+// rejetait toute la saisie. Heuristique retenue : la DERNIÈRE virgule ou le
+// DERNIER point rencontré est LE séparateur décimal (0 à 2 chiffres après,
+// en pratique) ; tout le reste (espace de toute nature, virgule/point
+// antérieurs) est un séparateur de milliers, ignoré.
+function nombreDepuisTexte(texte) {
+  if (texte == null || texte === '') return null;
+  const s = String(texte).trim();
+  if (s === '') return null;
+  const negatif = s.charAt(0) === '-';
+  const dernierSep = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+  const partieEntiere = (dernierSep === -1 ? s : s.slice(0, dernierSep)).replace(/[^0-9]/g, '');
+  const partieDecimale = (dernierSep === -1 ? '' : s.slice(dernierSep + 1)).replace(/[^0-9]/g, '');
+  if (partieEntiere === '' && partieDecimale === '') return null;
+  const n = Number(`${partieEntiere || '0'}.${partieDecimale || '0'}`) * (negatif ? -1 : 1);
+  return isFinite(n) ? n : null;
+}
+// L'inverse : un nombre → un texte avec séparateurs de milliers, pour
+// affichage dans un champ de saisie (jamais de devise ici, voir formatMontant).
+function texteAvecSeparateurs(valeur, locale) {
+  if (valeur == null || valeur === '') return '';
+  const n = Number(valeur);
+  if (!isFinite(n)) return '';
+  return n.toLocaleString(locale || localeActive(), { maximumFractionDigits: 2 });
+}
+// Câble un champ texte : brut (sans séparateur) au focus pour une édition
+// simple, reformaté avec séparateurs au blur. Suppose `type="text"
+// inputmode="decimal"` — jamais `type="number"`, qui rejette les espaces.
+function activerSeparateurMilliers(input) {
+  if (!input) return;
+  input.addEventListener('focus', () => {
+    const n = nombreDepuisTexte(input.value);
+    input.value = n == null ? '' : String(n);
+  });
+  input.addEventListener('blur', () => {
+    input.value = texteAvecSeparateurs(nombreDepuisTexte(input.value));
+  });
+  input.value = texteAvecSeparateurs(nombreDepuisTexte(input.value));
+}
 // Court libellé de la devise active (pour un intitulé de champ, ex. « Prix
 // unitaire (XPF) ») — même source que formatMontant (UI.company.currency).
 function deviseCourte() {
@@ -12364,15 +12428,15 @@ function blocParametresTcoHtml() {
       <div class="field-row">
         <div>
           <label for="tco-taux-horaire" id="tco-taux-horaire-label">${tR('Taux horaire main d\'œuvre ({devise}/h)', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-taux-horaire" type="number" inputmode="decimal" min="0" step="0.5" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
+          <input id="tco-taux-horaire" type="text" inputmode="decimal" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
         </div>
         <div>
           <label for="tco-assurance" id="tco-assurance-label">${tR('Assurance — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-assurance" type="number" inputmode="decimal" min="0" step="1" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
+          <input id="tco-assurance" type="text" inputmode="decimal" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
         </div>
         <div>
           <label for="tco-stockage" id="tco-stockage-label">${tR('Stockage — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
-          <input id="tco-stockage" type="number" inputmode="decimal" min="0" step="1" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
+          <input id="tco-stockage" type="text" inputmode="decimal" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
         </div>
       </div>
       <div class="hint" id="tco-parametres-msg" role="status" aria-live="polite"></div>
@@ -12386,7 +12450,10 @@ function ligneCatalogueTcoHtml(piece) {
       <td>${piece.reference ? esc(piece.reference) : '<span class="muted">—</span>'}</td>
       <td>${esc(piece.designation)}</td>
       <td>${formatMontant(piece.unit_price)}</td>
-      <td><button type="button" class="link-inline" data-piece-retirer="${esc(piece.id)}">${trad('Retirer')}</button></td>
+      <td>
+        <button type="button" class="link-inline" data-piece-modifier="${esc(piece.id)}">${trad('Modifier')}</button>
+        <button type="button" class="link-inline" data-piece-retirer="${esc(piece.id)}">${trad('Retirer')}</button>
+      </td>
     </tr>`;
 }
 function blocCatalogueTcoHtml() {
@@ -12406,7 +12473,8 @@ function blocCatalogueTcoHtml() {
         </table></div>` : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
       </div>
       <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
-      <div class="field-row" style="margin-top:10px;">
+      <div class="label" id="tco-piece-form-titre" style="margin-top:10px;">${trad('Ajouter une pièce')}</div>
+      <div class="field-row">
         <div>
           <label for="tco-piece-reference">${trad('Référence')}</label>
           <input id="tco-piece-reference" placeholder="${trad('Ex. FLT-0142')}">
@@ -12417,10 +12485,11 @@ function blocCatalogueTcoHtml() {
         </div>
         <div>
           <label for="tco-piece-prix">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
-          <input id="tco-piece-prix" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 18.90')}">
+          <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Ex. 18.90')}">
         </div>
       </div>
       <div class="modal-actions">
+        <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
         <button type="button" class="secondary" id="tco-piece-ajouter">${trad('Ajouter au catalogue')}</button>
       </div>
     </section>`;
@@ -12476,26 +12545,32 @@ VIEWS.tco = {
       majLibellesDevise();
     }));
 
+    // Séparateurs de milliers : ces champs sont passés en type="text" (un
+    // type="number" refuse tout espace) — voir activerSeparateurMilliers.
+    ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage', '#tco-piece-prix'].forEach((sel) => {
+      activerSeparateurMilliers(root.querySelector(sel));
+    });
+
     root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const msg = root.querySelector('#tco-parametres-msg');
-      const taux = root.querySelector('#tco-taux-horaire').value.trim();
-      const assurance = root.querySelector('#tco-assurance').value.trim();
-      const stockage = root.querySelector('#tco-stockage').value.trim();
+      const taux = nombreDepuisTexte(root.querySelector('#tco-taux-horaire').value);
+      const assurance = nombreDepuisTexte(root.querySelector('#tco-assurance').value);
+      const stockage = nombreDepuisTexte(root.querySelector('#tco-stockage').value);
       const devise = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
       btn.disabled = true;
       btn.textContent = trad('Enregistrement…');
       try {
         const { error } = await sb.rpc('update_my_tco_settings', {
-          p_labor_hourly_rate: taux !== '' ? Number(taux) : null,
-          p_default_insurance_yearly: assurance !== '' ? Number(assurance) : null,
-          p_default_storage_yearly: stockage !== '' ? Number(stockage) : null,
+          p_labor_hourly_rate: taux,
+          p_default_insurance_yearly: assurance,
+          p_default_storage_yearly: stockage,
           p_currency: devise,
         });
         if (error) throw error;
-        UI.company.labor_hourly_rate = taux !== '' ? Number(taux) : null;
-        UI.company.default_insurance_yearly = assurance !== '' ? Number(assurance) : null;
-        UI.company.default_storage_yearly = stockage !== '' ? Number(stockage) : null;
+        UI.company.labor_hourly_rate = taux;
+        UI.company.default_insurance_yearly = assurance;
+        UI.company.default_storage_yearly = stockage;
         UI.company.currency = devise;
         showToast(trad('Paramètres TCO enregistrés'));
         message(msg, trad('Enregistré.'), false);
@@ -12510,32 +12585,83 @@ VIEWS.tco = {
       }
     });
 
-    root.querySelector('#tco-piece-ajouter')?.addEventListener('click', async (e) => {
+    // Ajout ET modification d'une pièce partagent le même petit formulaire
+    // (pas de deuxième formulaire, pas de modale à part) : `pieceEnEdition`
+    // porte l'id de la pièce en cours de modification, ou `null` en mode
+    // ajout — c'est lui qui décide si le bouton fait un insert ou un update.
+    let pieceEnEdition = null;
+    const champRef = root.querySelector('#tco-piece-reference');
+    const champDesignation = root.querySelector('#tco-piece-designation');
+    const champPrix = root.querySelector('#tco-piece-prix');
+    const titreForm = root.querySelector('#tco-piece-form-titre');
+    const boutonAjouter = root.querySelector('#tco-piece-ajouter');
+    const boutonAnnuler = root.querySelector('#tco-piece-annuler');
+    const sortirDuModeEdition = () => {
+      pieceEnEdition = null;
+      if (champRef) champRef.value = '';
+      if (champDesignation) champDesignation.value = '';
+      if (champPrix) champPrix.value = '';
+      if (titreForm) titreForm.textContent = trad('Ajouter une pièce');
+      if (boutonAjouter) boutonAjouter.textContent = trad('Ajouter au catalogue');
+      if (boutonAnnuler) boutonAnnuler.hidden = true;
+    };
+    boutonAnnuler?.addEventListener('click', sortirDuModeEdition);
+
+    boutonAjouter?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const msg = root.querySelector('#tco-catalogue-msg');
-      const reference = root.querySelector('#tco-piece-reference').value.trim();
-      const designation = root.querySelector('#tco-piece-designation').value.trim();
-      const prix = root.querySelector('#tco-piece-prix').value.trim();
+      const reference = champRef.value.trim();
+      const designation = champDesignation.value.trim();
+      const prix = nombreDepuisTexte(champPrix.value) ?? 0;
       if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
       btn.disabled = true;
-      btn.textContent = trad('Ajout…');
+      btn.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
       try {
-        const { data, error } = await sb.from('parts_catalog')
-          .insert({ company_id: UI.companyId, reference: reference || null, designation, unit_price: prix !== '' ? Number(prix) : 0 })
-          .select('id, reference, designation, unit_price')
-          .single();
-        if (error) throw error;
-        UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
-        showToast(trad('Pièce ajoutée au catalogue'));
+        if (pieceEnEdition) {
+          const { data, error } = await sb.from('parts_catalog')
+            .update({ reference: reference || null, designation, unit_price: prix })
+            .eq('id', pieceEnEdition)
+            .select('id, reference, designation, unit_price')
+            .single();
+          if (error) throw error;
+          UI.partsCatalog = (UI.partsCatalog || [])
+            .map((p) => (String(p.id) === String(pieceEnEdition) ? data : p))
+            .sort((a, b) => a.designation.localeCompare(b.designation));
+          showToast(trad('Pièce modifiée'));
+        } else {
+          const { data, error } = await sb.from('parts_catalog')
+            .insert({ company_id: UI.companyId, reference: reference || null, designation, unit_price: prix })
+            .select('id, reference, designation, unit_price')
+            .single();
+          if (error) throw error;
+          UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
+          showToast(trad('Pièce ajoutée au catalogue'));
+        }
+        sortirDuModeEdition();
         renderApp();
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
         btn.disabled = false;
-        btn.textContent = trad('Ajouter au catalogue');
+        btn.textContent = pieceEnEdition ? trad('Enregistrer les modifications') : trad('Ajouter au catalogue');
       }
     });
 
     root.querySelector('#tco-catalogue-liste')?.addEventListener('click', async (e) => {
+      const modifier = e.target.closest('[data-piece-modifier]');
+      if (modifier) {
+        const id = modifier.getAttribute('data-piece-modifier');
+        const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(id));
+        if (!piece) return;
+        pieceEnEdition = id;
+        if (champRef) champRef.value = piece.reference || '';
+        if (champDesignation) champDesignation.value = piece.designation || '';
+        if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
+        if (titreForm) titreForm.textContent = trad('Modifier une pièce');
+        if (boutonAjouter) boutonAjouter.textContent = trad('Enregistrer les modifications');
+        if (boutonAnnuler) boutonAnnuler.hidden = false;
+        champDesignation?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       const bouton = e.target.closest('[data-piece-retirer]');
       if (!bouton) return;
       const id = bouton.getAttribute('data-piece-retirer');
@@ -12545,6 +12671,7 @@ VIEWS.tco = {
         const { error } = await sb.from('parts_catalog').delete().eq('id', id);
         if (error) throw error;
         UI.partsCatalog = (UI.partsCatalog || []).filter((p) => String(p.id) !== String(id));
+        if (pieceEnEdition === id) sortirDuModeEdition();
         renderApp();
       } catch (err) {
         message(root.querySelector('#tco-catalogue-msg'), trad('Erreur :') + ' ' + (err.message || err), true);
@@ -15410,7 +15537,7 @@ function openAddWizard(companyId, categories) {
           <div class="field-row">
             <div>
               <label for="f-prix-achat" class="label-avec-note"><span>${trad('Prix d\'achat')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
-              <input id="f-prix-achat" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
+              <input id="f-prix-achat" type="text" inputmode="decimal" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
             </div>
             <div>
               <label for="f-date-achat">${trad('Date d\'achat')}</label>
@@ -15463,7 +15590,8 @@ function openAddWizard(companyId, categories) {
       state.kind = radiosKind.length ? (overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE) : TYPE_MACHINE;
       state.serviceDate = overlay.querySelector('#f-service-date').value;
       if (SCHEMA.hasTco) {
-        state.purchasePrice = overlay.querySelector('#f-prix-achat')?.value.trim() || '';
+        const prix = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
+        state.purchasePrice = prix == null ? '' : prix;
         state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
       }
       // Le MODE et la PHOTO ne sont plus demandés ici : ils viennent après le
@@ -15478,6 +15606,7 @@ function openAddWizard(companyId, categories) {
     preparerChampsMajuscules(overlay);
     normaliserMajusculesAEnregistrement(overlay);
     brancherCategorie(overlay, categories, state.category);
+    if (SCHEMA.hasTco) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
   }
 
   function stepChoice() {
@@ -16315,7 +16444,7 @@ function ligneLogPieceHtml(idx) {
       </div>
       <div style="max-width:120px;">
         <label class="hint">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
-        <input type="number" class="log-piece-prix" min="0" step="0.01" value="0">
+        <input type="text" inputmode="decimal" class="log-piece-prix" value="0">
       </div>
       <button type="button" class="link-inline log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}">${trad('Retirer')}</button>
     </div>`;
@@ -16439,7 +16568,7 @@ function openLogInterventionModal(machine, tache) {
             </div>
             <div>
               <label for="log-cout-mo">${tR('Coût main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
-              <input id="log-cout-mo" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 67.50')}">
+              <input id="log-cout-mo" type="text" inputmode="decimal" placeholder="${trad('Ex. 67.50')}">
             </div>
           </div>
           <label>${trad('Pièces utilisées')}</label>
@@ -16453,7 +16582,7 @@ function openLogInterventionModal(machine, tache) {
           <div class="field-row">
             <div>
               <label for="log-pieces-total">${tR('Total pièces ({devise})', { devise: deviseCourte() })}</label>
-              <input id="log-pieces-total" type="number" inputmode="decimal" min="0" step="0.01" value="0">
+              <input id="log-pieces-total" type="text" inputmode="decimal" value="0">
             </div>
           </div>
         </div>` : ''}
@@ -16546,6 +16675,8 @@ function openLogInterventionModal(machine, tache) {
     let pieceIdx = 0;
     const piecesListe = overlay.querySelector('#log-pieces-liste');
     const totalPiecesChamp = overlay.querySelector('#log-pieces-total');
+    activerSeparateurMilliers(overlay.querySelector('#log-cout-mo'));
+    activerSeparateurMilliers(totalPiecesChamp);
     // Le total est RECALCULÉ depuis les lignes à chaque changement, mais reste
     // un champ éditable : une facture globale sans détail pièce par pièce, ou
     // le montant proposé par la lecture de photo, doivent pouvoir s'y écrire
@@ -16555,15 +16686,17 @@ function openLogInterventionModal(machine, tache) {
       let total = 0;
       piecesListe.querySelectorAll('.log-piece-ligne').forEach((ligne) => {
         const qte = Number(ligne.querySelector('.log-piece-qte')?.value) || 0;
-        const prix = Number(ligne.querySelector('.log-piece-prix')?.value) || 0;
+        const prix = nombreDepuisTexte(ligne.querySelector('.log-piece-prix')?.value) || 0;
         total += qte * prix;
       });
-      totalPiecesChamp.value = total ? total.toFixed(2) : '0';
+      totalPiecesChamp.value = texteAvecSeparateurs(total || 0);
     };
     overlay.querySelector('#log-piece-ajouter')?.addEventListener('click', () => {
       if (!piecesListe) return;
       pieceIdx += 1;
       piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
+      const nouvelleLigne = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
+      activerSeparateurMilliers(nouvelleLigne?.querySelector('.log-piece-prix'));
     });
     piecesListe?.addEventListener('change', (e) => {
       if (e.target.classList.contains('log-piece-select')) {
@@ -16572,7 +16705,7 @@ function openLogInterventionModal(machine, tache) {
         const prixChamp = ligne?.querySelector('.log-piece-prix');
         // Le prix du catalogue se PROPOSE dans la ligne — il reste un champ
         // normal, modifiable ensuite (remise, prix négocié ce jour-là…).
-        if (prixChamp && option && option.dataset.prix !== undefined) prixChamp.value = option.dataset.prix;
+        if (prixChamp && option && option.dataset.prix !== undefined) prixChamp.value = texteAvecSeparateurs(option.dataset.prix);
       }
       recalcTotalPieces();
     });
@@ -16591,7 +16724,7 @@ function openLogInterventionModal(machine, tache) {
       const heures = Number(overlay.querySelector('#log-heures-mo').value) || 0;
       const taux = Number(UI.company?.labor_hourly_rate) || 0;
       const coutChamp = overlay.querySelector('#log-cout-mo');
-      if (coutChamp && taux > 0) coutChamp.value = (heures * taux).toFixed(2);
+      if (coutChamp && taux > 0) coutChamp.value = texteAvecSeparateurs(heures * taux);
     });
 
     // Lecture d'une facture par photo : même famille que la lecture de
@@ -16637,7 +16770,7 @@ function openLogInterventionModal(machine, tache) {
         dire(trad('Je n\'ai pas réussi à lire la facture — saisis le montant à la main.'));
         return;
       }
-      if (totalPiecesChamp) totalPiecesChamp.value = Number(reponse.montant_ttc).toFixed(2);
+      if (totalPiecesChamp) totalPiecesChamp.value = texteAvecSeparateurs(reponse.montant_ttc);
       dire(tR('Montant lu : {valeur} — vérifie avant d\'enregistrer.', { valeur: formatMontant(reponse.montant_ttc) }));
     });
   }
@@ -16661,15 +16794,15 @@ function openLogInterventionModal(machine, tache) {
     // (recalculé depuis les lignes, mais éditable — voir le câblage
     // ci-dessus), les lignes elles-mêmes de intervention_parts pour le détail.
     const laborHours = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-heures-mo')?.value) || null) : null;
-    const laborCost = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-cout-mo')?.value) || null) : null;
-    const partsCost = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-pieces-total')?.value) || null) : null;
+    const laborCost = SCHEMA.hasTco ? nombreDepuisTexte(overlay.querySelector('#log-cout-mo')?.value) : null;
+    const partsCost = SCHEMA.hasTco ? nombreDepuisTexte(overlay.querySelector('#log-pieces-total')?.value) : null;
     const pieceLignes = SCHEMA.hasTco
       ? Array.from(overlay.querySelectorAll('.log-piece-ligne'))
           .map((ligne) => ({
             partId: ligne.querySelector('.log-piece-select')?.value || null,
             designation: ligne.querySelector('.log-piece-select')?.selectedOptions[0]?.textContent || '',
             quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 0,
-            unitPrice: Number(ligne.querySelector('.log-piece-prix')?.value) || 0,
+            unitPrice: nombreDepuisTexte(ligne.querySelector('.log-piece-prix')?.value) || 0,
           }))
           // Une ligne sans pièce choisie (option vide encore sélectionnée)
           // n'est pas une pièce utilisée : `partId` est vide tant que rien
@@ -17174,7 +17307,7 @@ function openPlanView(machine, companyId, categories) {
             </div>
             <div>
               <label for="oc-montant">${tR('Montant ({devise})', { devise: deviseCourte() })}</label>
-              <input id="oc-montant" type="number" inputmode="decimal" min="0" step="0.01">
+              <input id="oc-montant" type="text" inputmode="decimal">
             </div>
             <div>
               <label for="oc-date">${trad('Date')}</label>
@@ -17221,6 +17354,7 @@ function openPlanView(machine, companyId, categories) {
   });
   if (SCHEMA.hasTco) {
     const ocForm = overlay.querySelector('#operating-cost-form');
+    activerSeparateurMilliers(overlay.querySelector('#oc-montant'));
     overlay.querySelector('#operating-cost-ajouter')?.addEventListener('click', () => {
       if (ocForm) ocForm.hidden = !ocForm.hidden;
     });
@@ -17236,13 +17370,13 @@ function openPlanView(machine, companyId, categories) {
       if (!montantChamp || montantChamp.value) return;
       const bareme = e.target.value === 'insurance' ? UI.company?.default_insurance_yearly
         : e.target.value === 'storage' ? UI.company?.default_storage_yearly : null;
-      if (bareme != null) montantChamp.value = bareme;
+      if (bareme != null) montantChamp.value = texteAvecSeparateurs(bareme);
     });
     overlay.querySelector('#operating-cost-enregistrer')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const msg = overlay.querySelector('#operating-cost-msg');
       const kind = overlay.querySelector('#oc-type').value;
-      const amount = parseFloat(overlay.querySelector('#oc-montant').value);
+      const amount = nombreDepuisTexte(overlay.querySelector('#oc-montant').value);
       const incurredAt = overlay.querySelector('#oc-date').value;
       const notes = overlay.querySelector('#oc-note').value.trim();
       if (!amount || amount <= 0) {
@@ -17567,7 +17701,7 @@ function openMachineModal(companyId, categories, existing) {
           <div class="field-row">
             <div>
               <label for="f-prix-achat" class="label-avec-note"><span>${trad('Prix d\'achat')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
-              <input id="f-prix-achat" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 25000')}" value="${isEdit && existing.purchase_price != null ? esc(existing.purchase_price) : ''}">
+              <input id="f-prix-achat" type="text" inputmode="decimal" placeholder="${trad('Ex. 25000')}" value="${isEdit && existing.purchase_price != null ? esc(existing.purchase_price) : ''}">
             </div>
             <div>
               <label for="f-date-achat">${trad('Date d\'achat')}</label>
@@ -17575,11 +17709,11 @@ function openMachineModal(companyId, categories, existing) {
             </div>
             <div>
               <label for="f-revente-estimee">${trad('Valeur de revente estimée')}</label>
-              <input id="f-revente-estimee" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 5000')}" value="${isEdit && existing.estimated_resale_value != null ? esc(existing.estimated_resale_value) : ''}">
+              <input id="f-revente-estimee" type="text" inputmode="decimal" placeholder="${trad('Ex. 5000')}" value="${isEdit && existing.estimated_resale_value != null ? esc(existing.estimated_resale_value) : ''}">
             </div>
             <div>
               <label for="f-duree-vie">${tR('Durée de vie estimée ({unite})', { unite: counterUnitOf(isEdit ? existing : { counter_unit: 'hours' }) === 'km' ? trad('km') : trad('heures') })}</label>
-              <input id="f-duree-vie" type="number" inputmode="numeric" min="0" step="1" placeholder="${trad('Ex. 10000')}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
+              <input id="f-duree-vie" type="text" inputmode="numeric" placeholder="${trad('Ex. 10000')}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
             </div>
           </div>
           <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laisse vide ce que tu ne connais pas encore.')}</div>` : ''}
@@ -17740,6 +17874,11 @@ function openMachineModal(companyId, categories, existing) {
   preparerChampsMajuscules(overlay);
   normaliserMajusculesAEnregistrement(overlay);
   brancherCategorie(overlay, categories, isEdit ? (existing.category?.name || '') : '');
+  if (SCHEMA.hasTco) {
+    ['#f-prix-achat', '#f-revente-estimee', '#f-duree-vie'].forEach((sel) => {
+      activerSeparateurMilliers(overlay.querySelector(sel));
+    });
+  }
 
   overlay.querySelector('#cancel-add').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#mform-close')?.addEventListener('click', () => overlay.remove());
@@ -18250,14 +18389,11 @@ function openMachineModal(companyId, categories, existing) {
           : { counter_value_2: null, counter_unit_2: null });
       }
       if (SCHEMA.hasTco) {
-        const prixAchat = overlay.querySelector('#f-prix-achat')?.value.trim() || '';
         const dateAchat = overlay.querySelector('#f-date-achat')?.value || '';
-        const reventeEstimee = overlay.querySelector('#f-revente-estimee')?.value.trim() || '';
-        const dureeVie = overlay.querySelector('#f-duree-vie')?.value.trim() || '';
-        updatePayload.purchase_price = prixAchat !== '' ? Number(prixAchat) : null;
+        updatePayload.purchase_price = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
         updatePayload.purchase_date = dateAchat || null;
-        updatePayload.estimated_resale_value = reventeEstimee !== '' ? Number(reventeEstimee) : null;
-        updatePayload.expected_lifespan_counter = dureeVie !== '' ? Number(dureeVie) : null;
+        updatePayload.estimated_resale_value = nombreDepuisTexte(overlay.querySelector('#f-revente-estimee')?.value);
+        updatePayload.expected_lifespan_counter = nombreDepuisTexte(overlay.querySelector('#f-duree-vie')?.value);
       }
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb
