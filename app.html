@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUthBH6iqFZjzCX3yGnXMAQ+DMe4kcgchiHUYV6T24U=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Spplnv76pnFBdn353w9W10FHzP/ovCA9PEKmOuVRV/k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3888,6 +3888,13 @@
   .tco-tip-icone svg{width:20px;height:20px;}
   .tco-tip-titre{font-size:17px;font-weight:600;color:var(--ink);}
   .tco-tip-texte{font-size:12px;color:var(--ink-2);margin-top:2px;line-height:1.5;}
+
+  /* Classement TCO du parc (phase 2) */
+  .tco-classement-resume{display:flex;flex-wrap:wrap;gap:20px;padding:4px 0 2px;}
+  .tco-classement-chiffre{display:flex;flex-direction:column;gap:2px;}
+  .tco-classement-chiffre .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-classement-chiffre .value{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .tco-classement-chiffre .value.is-alerte{color:var(--late);}
 </style>
 </head>
 <body>
@@ -12814,35 +12821,96 @@ function blocParametresTcoHtml() {
       </div>
     </section>`;
 }
-// Donut EXPLICITEMENT étiqueté « modèle » — comme dans le mockup lui-même
-// (badge « MODÈLE KEEVA ») : ce n'est pas une mesure des machines réelles de
-// la société, la vraie répartition agrégée suppose de sommer les coûts de
-// TOUTES les interventions/coûts d'exploitation du parc (phase 2, voir
-// keeva-tco-feature) — même précédent que l'aperçu WhatsApp de l'app.
-function tcoDonutCarteHtml() {
+// Donut RÉEL (phase 2) — remplace l'illustration « MODÈLE KEEVA » statique
+// de la phase 1. Factorisé : réutilisé par la page Coûts & TCO (grand) ET
+// la carte du tableau de bord (petit, voir tcoDashboardCarteHtml) — une
+// seule trace SVG, jamais deux qui divergent.
+function donutTcoSvgHtml(repartition, taille) {
+  if (!repartition) return '';
+  const d = repartition;
+  const offsetMo = -d.pctPieces;
+  const offsetFixes = -(d.pctPieces + d.pctMainOeuvre);
   return `
-    <div class="tco-donut-carte">
-      <div style="width:88px;height:88px;flex:0 0 auto;position:relative;display:flex;align-items:center;justify-content:center;">
-        <svg viewBox="0 0 36 36" style="width:88px;height:88px;transform:rotate(-90deg);">
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--surface-soft)" stroke-width="4.5"/>
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bleu-roi)" stroke-width="4.5" stroke-dasharray="45,100" stroke-linecap="round"/>
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-dasharray="35,100" stroke-dashoffset="-45" stroke-linecap="round"/>
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--late)" stroke-width="4.5" stroke-dasharray="20,100" stroke-dashoffset="-80" stroke-linecap="round"/>
-        </svg>
-        <span style="position:absolute;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);">100%</span>
-      </div>
-      <div style="flex:1;min-width:180px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition indicative TCO par machine')}</span>
-          <span class="tco-donut-badge">${trad('MODÈLE KEEVA')}</span>
-        </div>
-        <div class="tco-donut-legende">
-          <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${trad('Pièces (45%)')}</span>
-          <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${trad('MO atelier (35%)')}</span>
-          <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${trad('Fixes (20%)')}</span>
-        </div>
-      </div>
+    <div style="width:${taille}px;height:${taille}px;flex:0 0 auto;position:relative;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 36 36" style="width:${taille}px;height:${taille}px;transform:rotate(-90deg);">
+        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--surface-soft)" stroke-width="4.5"/>
+        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bleu-roi)" stroke-width="4.5" stroke-dasharray="${d.pctPieces},100" stroke-linecap="round"/>
+        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-dasharray="${d.pctMainOeuvre},100" stroke-dashoffset="${offsetMo}" stroke-linecap="round"/>
+        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--late)" stroke-width="4.5" stroke-dasharray="${d.pctFixes},100" stroke-dashoffset="${offsetFixes}" stroke-linecap="round"/>
+      </svg>
     </div>`;
+}
+// Une ligne du classement flotte — même idiome que alertRowHtml
+// ([app.html:10360]), réutilise .alert-row/.alert-bar/.pill (déjà stylées
+// ok/soon/late) et wireAlertRows() pour le clic → fiche machine (même
+// délégation, [data-machine] sans [data-alerte]) : pas de composant/
+// écouteur dupliqué, juste un contenu différent (TCO plutôt qu'échéance).
+function ligneClassementTcoHtml(machine, tco, decision) {
+  const etat = decision ? etatTco(decision.ratio, decision.base) : 'ok';
+  // La base du ratio est TOUJOURS affichée à côté du chiffre : « 62 % de la
+  // dépréciation » et « 41 % du prix d'achat » ne mesurent pas la même
+  // chose, jamais le pourcentage seul.
+  const ratioTexte = decision
+    ? tR('{n} % {base}', { n: Math.round(decision.ratio * 100), base: decision.base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
+    : '—';
+  const uniteCourte = counterShort(counterUnitOf(machine));
+  return `
+    <button type="button" class="alert-row" data-machine="${esc(machine.id)}">
+      <span class="alert-bar ${etat}"></span>
+      <span class="alert-main">
+        <span class="alert-tete">
+          <span class="alert-title">${esc(machine.name)}</span>
+          <span class="pill ${etat}">${ratioTexte}</span>
+        </span>
+        <span class="alert-sub">${tR('TCO {total}{parUnite}', {
+          total: formatMontant(tco.total),
+          parUnite: tco.coutParUnite != null ? ` · ${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '',
+        })}</span>
+      </span>
+    </button>`;
+}
+// Export CSV du classement — réutilise EXACTEMENT csvToUtf16Buffer (déjà
+// utilisée par l'historique d'une machine et la préparation), pas une 3ᵉ
+// copie du motif BOM/UTF-16LE.
+function exporterClassementTcoCsv(flotte) {
+  const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = flotte.lignes.map(({ machine, tco, decision }) => [
+    machine.name, machine.purchase_price ?? '', machine.purchase_date ?? '', machine.estimated_resale_value ?? '',
+    Math.round(tco.parEntretien), Math.round(tco.parExploitation), Math.round(tco.total),
+    tco.coutAnnuel != null ? Math.round(tco.coutAnnuel) : '', tco.coutParUnite != null ? Math.round(tco.coutParUnite) : '',
+    decision ? Math.round(decision.ratio * 100) : '', decision ? (decision.base === 'amortissement' ? trad('Dépréciation') : trad('Prix d\'achat')) : '',
+    decision ? etatTco(decision.ratio, decision.base) : '',
+  ]);
+  const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tco_flotte_${todayIso()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+// Section pleine largeur, placeholder synchrone rempli en asynchrone dans
+// VIEWS.tco.mount() (même motif que la scorecard/coûts d'exploitation de
+// openPlanView) : la flotte AVANT les réglages — c'est l'information
+// actionnable, les réglages sont secondaires.
+function tcoClassementFlotteHtml() {
+  return `
+    <section class="card" id="tco-classement-section">
+      <div class="tco-card-tete">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-indigo">${picto('graphique')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Classement TCO du parc')}</h2>
+            <div class="tco-card-soustitre">${trad('Comparaison des machines, la moins rentable en premier')}</div>
+          </div>
+        </div>
+      </div>
+      <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
+    </section>`;
 }
 // Une ligne = un item compact (icône + désignation/référence à gauche, prix
 // + actions à droite) plutôt qu'un tableau à 4 colonnes : tient sur une
@@ -12938,10 +13006,10 @@ VIEWS.tco = {
       <div class="vue-couts-tco">
         ${tcoEyebrowToolbarHtml()}
         ${tcoKpiGridHtml()}
+        ${SCHEMA.hasTco ? tcoClassementFlotteHtml() : ''}
         <div class="dash-grid agenda-grid" style="margin-top:4px;">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
-            ${tcoDonutCarteHtml()}
           </div>
           <div class="dash-side">
             ${blocCatalogueTcoHtml()}
@@ -12958,6 +13026,65 @@ VIEWS.tco = {
       el.textContent = texte;
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
+
+    // ── Classement TCO du parc (phase 2) — chargé en asynchrone : un fetch
+    // en masse sur toute la flotte (§1), jamais fait ailleurs sur cette
+    // page. Section absente si SCHEMA.hasTco est faux (voir render()).
+    if (SCHEMA.hasTco) {
+      (async () => {
+        const section = root.querySelector('#tco-classement-section');
+        if (!section) return;
+        const valueEl = section.querySelector('.value');
+        const machineIds = (UI.machines || []).map((m) => m.id);
+        let flotte = null;
+        let repartition = null;
+        try {
+          const [interventionsFlotte, coutsFlotte] = await Promise.all([
+            fetchToutesInterventionsFlotte(machineIds),
+            fetchTousCoutsExploitationFlotte(machineIds),
+          ]);
+          const interventionsParMachine = grouperParMachine(interventionsFlotte);
+          const coutsParMachine = grouperParMachine(coutsFlotte);
+          flotte = calculerFlotteTco(UI.machines || [], interventionsParMachine, coutsParMachine);
+          repartition = repartitionFlotteTco(interventionsFlotte, coutsFlotte);
+        } catch (err) {
+          if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
+          return;
+        }
+        if (!root.isConnected || !section.isConnected) return;
+        if (!flotte) {
+          if (valueEl) valueEl.textContent = trad('Aucune machine avec un prix d\'achat renseigné pour l\'instant — ajoute-le sur la fiche d\'une machine pour la voir apparaître ici.');
+          return;
+        }
+        if (valueEl) valueEl.remove();
+        section.insertAdjacentHTML('beforeend', `
+          <div class="tco-classement-resume">
+            <div class="tco-classement-chiffre"><span class="label">${trad('TCO moyen annualisé')}</span><span class="value">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
+            <div class="tco-classement-chiffre"><span class="label">${trad('Machines suivies')}</span><span class="value">${flotte.lignes.length}</span></div>
+            <div class="tco-classement-chiffre"><span class="label">${trad('En alerte')}</span><span class="value${flotte.nbAlertes ? ' is-alerte' : ''}">${flotte.nbAlertes}</span></div>
+          </div>
+          ${repartition ? `
+          <div class="tco-donut-carte">
+            ${donutTcoSvgHtml(repartition, 88)}
+            <div style="flex:1;min-width:180px;">
+              <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition des coûts du parc')}</span>
+              <div class="tco-donut-legende">
+                <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${tR('Pièces ({n}%)', { n: Math.round(repartition.pctPieces) })}</span>
+                <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${tR('MO atelier ({n}%)', { n: Math.round(repartition.pctMainOeuvre) })}</span>
+                <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${tR('Fixes ({n}%)', { n: Math.round(repartition.pctFixes) })}</span>
+              </div>
+            </div>
+          </div>` : ''}
+          <div class="alert-list">${flotte.lignes.map(({ machine, tco, decision }) => ligneClassementTcoHtml(machine, tco, decision)).join('')}</div>
+          ${flotte.exclues.length ? `<div class="hint">${tR('{n} machine(s) sans prix d\'achat, non incluses.', { n: flotte.exclues.length })}</div>` : ''}
+          <div class="modal-actions">
+            <button type="button" class="secondary" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+          </div>
+        `);
+        wireAlertRows(section);
+        section.querySelector('#tco-export-classement')?.addEventListener('click', () => exporterClassementTcoCsv(flotte));
+      })();
+    }
 
     // Cartes devise : reprend le motif du mockup (cercle-coche + fond teinté
     // + pastille « Actif ») — la pastille suit RÉELLEMENT la devise choisie
