@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+e+jnWqHnufqKVuAMybhyE2FWgLuyyqWr5USrmnRzVA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kKkTES+d8nTYeyujrgJpV8FB7gzDEzM0xZcI5a6NgqI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4992,6 +4992,26 @@ function coutsInterventionsMachine(interventions) {
 function coutsExploitationMachine(operatingCosts) {
   return (operatingCosts || []).reduce((total, c) => total + (Number(c.amount) || 0), 0);
 }
+// Durée écoulée depuis l'achat, en années — plancher 1 mois pour ne pas
+// extrapoler follement une machine achetée la semaine dernière.
+// joursEntreIso existe déjà (calcul de dates, voir plus haut dans le fichier).
+function anneesDepuisAchat(machine) {
+  if (!machine || !machine.purchase_date) return null;
+  const jours = joursEntreIso(machine.purchase_date, todayIso());
+  return Math.max(jours / 365.25, 1 / 12);
+}
+// Dépréciation comptable ANNUELLE : (achat − revente estimée) / durée
+// d'amortissement (nouveau champ, en années — distinct de
+// expected_lifespan_counter qui est une durée de vie D'USAGE en heures/km,
+// pas une notion comptable). `null` tant que la durée n'est pas renseignée
+// — jamais un chiffre inventé à partir d'un barème par catégorie qu'on n'a
+// pas (voir keeva-tco-feature phase 2).
+function depreciationAnnuelle(machine) {
+  if (!machine || machine.amortization_years == null || Number(machine.amortization_years) <= 0) return null;
+  const achat = Number(machine.purchase_price) || 0;
+  const revente = Number(machine.estimated_resale_value) || 0;
+  return Math.max(achat - revente, 0) / Number(machine.amortization_years);
+}
 // Le TCO d'une machine. Retourne `null` sans prix d'achat : c'est ce `null`
 // qui décide, partout, si un bloc TCO s'affiche — jamais un calcul sur une
 // base à moitié connue.
@@ -5005,32 +5025,71 @@ function tcoMachine(machine, interventions, operatingCosts) {
   const usage = machineCounter(machine);
   const coutParUnite = usage ? total / usage : null;
   const ratioMaintenanceAchat = achat > 0 ? parEntretien / achat : null;
-  return { total, parAcquisition: achat, parEntretien, parExploitation, revente, coutParUnite, ratioMaintenanceAchat };
+  // Phase 2 : dépréciation annuelle — le signal que le brief d'origine décrit
+  // réellement pour Garder/Remplacer (« l'entretien coûte plus cher que la
+  // dépréciation »), distinct du cumul entretien/achat ci-dessus (une autre
+  // statistique, utile mais différente — voir ratioDecisionTco).
+  const annees = anneesDepuisAchat(machine);
+  const coutEntretienAnnuel = annees ? parEntretien / annees : null;
+  const depreciation = depreciationAnnuelle(machine);
+  const ratioAmortissement = (depreciation && coutEntretienAnnuel != null) ? coutEntretienAnnuel / depreciation : null;
+  return {
+    total, parAcquisition: achat, parEntretien, parExploitation, revente, coutParUnite, ratioMaintenanceAchat,
+    coutAnnuel: annees ? total / annees : null, coutEntretienAnnuel, depreciationAnnuelle: depreciation, ratioAmortissement,
+  };
 }
-// Seuils du brief : 30 %/50 % du prix d'achat consommés en entretien. On
-// réutilise le vocabulaire d'état déjà en place (ok/soon/late — vert/orange/
-// rouge, mêmes variables CSS que la jauge d'intervalle) plutôt que d'en
-// inventer un nouveau.
-function etatTco(ratioMaintenanceAchat) {
-  if (ratioMaintenanceAchat == null || !isFinite(ratioMaintenanceAchat)) return 'ok';
-  if (ratioMaintenanceAchat >= 0.5) return 'late';
-  if (ratioMaintenanceAchat >= 0.3) return 'soon';
+// Le ratio qui pilote VRAIMENT la jauge : priorité à la dépréciation (le
+// plus proche du brief) quand elle est calculable, repli sur le cumul
+// entretien/achat sinon — jamais bloquant, une machine sans durée
+// d'amortissement garde son indicateur (phase 1 inchangée pour elle).
+function ratioDecisionTco(tco) {
+  if (!tco) return null;
+  if (tco.ratioAmortissement != null) return { ratio: tco.ratioAmortissement, base: 'amortissement' };
+  if (tco.ratioMaintenanceAchat != null) return { ratio: tco.ratioMaintenanceAchat, base: 'achat' };
+  return null;
+}
+// Seuils : 30 %/50 % du prix d'achat cumulés en entretien (repli, inchangé
+// depuis la phase 1) ; 50 %/100 % de la dépréciation ANNUELLE quand elle
+// est calculable — 100 % y est le point exact où l'entretien coûte déjà
+// aussi cher que la dépréciation, ce que le brief appelle le
+// « point d'inflexion ». Vocabulaire d'état déjà en place (ok/soon/late —
+// vert/orange/rouge, mêmes variables CSS que la jauge d'intervalle).
+function etatTco(ratio, base) {
+  if (ratio == null || !isFinite(ratio)) return 'ok';
+  if (base === 'amortissement') {
+    if (ratio >= 1) return 'late';
+    if (ratio >= 0.5) return 'soon';
+    return 'ok';
+  }
+  if (ratio >= 0.5) return 'late';
+  if (ratio >= 0.3) return 'soon';
   return 'ok';
 }
+// Libellés distincts par base : l'utilisateur doit TOUJOURS savoir sur quoi
+// le voyant se base, jamais un chiffre silencieux qui change de sens.
 const TCO_ETAT_LABEL = {
-  ok: () => trad('Rentable'),
-  soon: () => trad('Point d\'inflexion'),
-  late: () => trad('Pensez au remplacement'),
+  achat: {
+    ok: () => trad('Rentable'),
+    soon: () => trad('Point d\'inflexion'),
+    late: () => trad('Pensez au remplacement'),
+  },
+  amortissement: {
+    ok: () => trad('Rentable'),
+    soon: () => trad('Entretien proche de la dépréciation annuelle'),
+    late: () => trad('Entretien dépasse la dépréciation — envisager le remplacement'),
+  },
 };
 // Jauge « Garder / Remplacer » — même idiome que jaugeIntervalleHtml
 // (.machine-jauge, .is-ok/.is-soon/.is-late déjà stylées), jamais de
 // pourcentage brut affiché.
 function jaugeTcoHtml(tco) {
-  if (!tco || tco.ratioMaintenanceAchat == null) return '';
-  const etat = etatTco(tco.ratioMaintenanceAchat);
-  const part = Math.max(4, Math.min(100, Math.round(tco.ratioMaintenanceAchat * 100)));
-  return `<div class="machine-jauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(TCO_ETAT_LABEL[etat]())}">
-      <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Garder / Remplacer')}</span><span class="machine-jauge-valeur">${TCO_ETAT_LABEL[etat]()}</span></span>
+  const decision = ratioDecisionTco(tco);
+  if (!decision) return '';
+  const etat = etatTco(decision.ratio, decision.base);
+  const part = Math.max(4, Math.min(100, Math.round(decision.ratio * 100)));
+  const libelles = TCO_ETAT_LABEL[decision.base] || TCO_ETAT_LABEL.achat;
+  return `<div class="machine-jauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(libelles[etat]())}">
+      <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Garder / Remplacer')}</span><span class="machine-jauge-valeur">${libelles[etat]()}</span></span>
       <span class="machine-jauge-piste"><span class="machine-jauge-part is-${etat}" style="width:${part}%"></span></span>
     </div>`;
 }
@@ -17827,6 +17886,8 @@ function openPlanView(machine, companyId, categories) {
         <div class="plan-hero-champ"><span class="label">${trad('TCO Total')}</span><span class="value">${formatMontant(tco.total)}</span></div>
         <div class="plan-hero-champ"><span class="label">${trad('Coût / unité d\'usage')}</span><span class="value">${tco.coutParUnite != null ? tR('{valeur} / {unite}', { valeur: formatMontant(tco.coutParUnite), unite: uniteCourte }) : '—'}</span></div>
         <div class="plan-hero-champ"><span class="label">${trad('Ratio entretien / achat')}</span><span class="value">${tco.ratioMaintenanceAchat != null ? tR('{n} %', { n: Math.round(tco.ratioMaintenanceAchat * 100) }) : '—'}${tco.ratioMaintenanceAchat != null && tco.ratioMaintenanceAchat >= 0.5 ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</span></div>
+        ${tco.ratioAmortissement != null ? `
+        <div class="plan-hero-champ"><span class="label">${trad('Entretien annuel / dépréciation')}</span><span class="value">${tR('{n} %', { n: Math.round(tco.ratioAmortissement * 100) })}${tco.ratioAmortissement >= 1 ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</span></div>` : ''}
       </div>
       ${jaugeTcoHtml(tco)}
     `;
@@ -18080,7 +18141,12 @@ function openMachineModal(companyId, categories, existing) {
               <label for="f-duree-vie">${tR('Durée de vie estimée ({unite})', { unite: counterUnitOf(isEdit ? existing : { counter_unit: 'hours' }) === 'km' ? trad('km') : trad('heures') })}</label>
               <input id="f-duree-vie" type="text" inputmode="numeric" placeholder="${trad('Ex. 10000')}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
             </div>
+            <div>
+              <label for="f-amortissement" class="label-avec-note"><span>${trad('Durée d\'amortissement (années)')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
+              <input id="f-amortissement" type="text" inputmode="numeric" placeholder="${trad('Ex. 5')}" value="${isEdit && existing.amortization_years != null ? esc(existing.amortization_years) : ''}">
+            </div>
           </div>
+          <div class="hint">${trad('Sert à comparer le coût d\'entretien à la dépréciation annuelle de la machine (jauge Garder/Remplacer) — sans cette durée, la jauge se base sur le cumul entretien/prix d\'achat.')}</div>
           <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laisse vide ce que tu ne connais pas encore.')}</div>` : ''}
         </section>
 
@@ -18759,6 +18825,7 @@ function openMachineModal(companyId, categories, existing) {
         updatePayload.purchase_date = dateAchat || null;
         updatePayload.estimated_resale_value = nombreDepuisTexte(overlay.querySelector('#f-revente-estimee')?.value);
         updatePayload.expected_lifespan_counter = nombreDepuisTexte(overlay.querySelector('#f-duree-vie')?.value);
+        updatePayload.amortization_years = nombreDepuisTexte(overlay.querySelector('#f-amortissement')?.value);
       }
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb
@@ -19186,7 +19253,7 @@ async function boot(toastMessage) {
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
     ...(SCHEMA.hasTco
-      ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter']
+      ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
       : []),
   ].join(', ');
   const colonnesPlan = [
