@@ -3780,6 +3780,12 @@
      navigateur — potentiellement énorme dans un bouton flex. Chaque bouton
      de cette page qui pose une icône directement (pas dans un conteneur
      déjà dimensionné comme .tco-kpi-icone) a besoin de cette contrainte. */
+  /* button.primary/.secondary (règle générale, ~ligne 2012) n'ont ni
+     display:flex ni gap : une icône posée directement à côté du <span> de
+     texte (motif déjà utilisé ailleurs, ex. .plan-toolbar-btn) collait donc
+     au texte sans espace. Ce fut le cas ici — corrigé en scope, sans
+     toucher la règle générale utilisée par des dizaines d'autres boutons. */
+  .vue-couts-tco .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .vue-couts-tco .modal-actions button svg{width:20px;height:20px;flex:0 0 auto;}
 
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
