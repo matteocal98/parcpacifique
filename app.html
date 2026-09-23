@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3p5Ubx/U30tvRrZR1bZXVa8x79W89YfkcHAvyBlPO+8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-OrpvgUhyra9x8Ek7CONb33ymQxBj8+Eu0b5Je3TRU7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4085,6 +4085,15 @@ SCHEMA.hasCounter2 = false;
 // réglage a été enregistré.
 SCHEMA.hasReminders = false;
 
+// TCO (coût total de possession) : machines.purchase_price/purchase_date/
+// estimated_resale_value/expected_lifespan_counter, interventions.parts_cost/
+// labor_cost/labor_hours, companies.labor_hourly_rate/default_insurance_yearly/
+// default_storage_yearly, et les tables parts_catalog/intervention_parts/
+// operating_costs. Même garde-fou que hasCounter2 : faux tant que la sonde
+// n'a pas trouvé les colonnes, et aucun bloc TCO ne s'affiche ni ne s'écrit
+// alors — comportement d'avant inchangé pour qui n'a pas encore la migration.
+SCHEMA.hasTco = false;
+
 // --- Version affichée, et filet de sécurité ----------------------------------
 //
 // LA VERSION, C'EST UN NUMÉRO — ET IL NE BOUGE PAS.
@@ -4727,6 +4736,72 @@ function planCounterPatch(interval, reminder) {
 }
 function planNextDueCounterPatch(nextDue) {
   return SCHEMA.hasCounter ? { next_due_counter: nextDue } : { next_due_hours: nextDue };
+}
+
+// ── TCO (coût total de possession), optionnel ────────────────────
+// Rien de tout ça ne s'affiche ni ne se calcule tant que SCHEMA.hasTco est
+// faux (colonnes absentes) OU que machine.purchase_price n'est pas renseigné
+// — une machine sans donnée d'acquisition ne montre AUCUN bloc TCO nulle
+// part, même philosophie que vueCompteurSecondaire sans second suivi
+// (voir keeva-tco-feature).
+function formatMontant(valeur) {
+  if (valeur == null || valeur === '') return '—';
+  const n = Number(valeur);
+  if (!isFinite(n)) return '—';
+  return n.toLocaleString(localeActive(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+}
+// Somme des coûts d'ENTRETIEN (pièces + main d'œuvre) d'une machine, à partir
+// de la liste d'interventions déjà chargée pour l'historique — aucune requête
+// supplémentaire.
+function coutsInterventionsMachine(interventions) {
+  return (interventions || []).reduce((total, it) => total + (Number(it.parts_cost) || 0) + (Number(it.labor_cost) || 0), 0);
+}
+// Somme des coûts d'EXPLOITATION (carburant, assurance, taxes…) d'une
+// machine, à partir des lignes déjà chargées pour la fiche.
+function coutsExploitationMachine(operatingCosts) {
+  return (operatingCosts || []).reduce((total, c) => total + (Number(c.amount) || 0), 0);
+}
+// Le TCO d'une machine. Retourne `null` sans prix d'achat : c'est ce `null`
+// qui décide, partout, si un bloc TCO s'affiche — jamais un calcul sur une
+// base à moitié connue.
+function tcoMachine(machine, interventions, operatingCosts) {
+  if (!machine || machine.purchase_price == null || machine.purchase_price === '') return null;
+  const achat = Number(machine.purchase_price) || 0;
+  const revente = Number(machine.estimated_resale_value) || 0;
+  const parEntretien = coutsInterventionsMachine(interventions);
+  const parExploitation = coutsExploitationMachine(operatingCosts);
+  const total = achat + parEntretien + parExploitation - revente;
+  const usage = machineCounter(machine);
+  const coutParUnite = usage ? total / usage : null;
+  const ratioMaintenanceAchat = achat > 0 ? parEntretien / achat : null;
+  return { total, parAcquisition: achat, parEntretien, parExploitation, revente, coutParUnite, ratioMaintenanceAchat };
+}
+// Seuils du brief : 30 %/50 % du prix d'achat consommés en entretien. On
+// réutilise le vocabulaire d'état déjà en place (ok/soon/late — vert/orange/
+// rouge, mêmes variables CSS que la jauge d'intervalle) plutôt que d'en
+// inventer un nouveau.
+function etatTco(ratioMaintenanceAchat) {
+  if (ratioMaintenanceAchat == null || !isFinite(ratioMaintenanceAchat)) return 'ok';
+  if (ratioMaintenanceAchat >= 0.5) return 'late';
+  if (ratioMaintenanceAchat >= 0.3) return 'soon';
+  return 'ok';
+}
+const TCO_ETAT_LABEL = {
+  ok: () => trad('Rentable'),
+  soon: () => trad('Point d\'inflexion'),
+  late: () => trad('Pensez au remplacement'),
+};
+// Jauge « Garder / Remplacer » — même idiome que jaugeIntervalleHtml
+// (.machine-jauge, .is-ok/.is-soon/.is-late déjà stylées), jamais de
+// pourcentage brut affiché.
+function jaugeTcoHtml(tco) {
+  if (!tco || tco.ratioMaintenanceAchat == null) return '';
+  const etat = etatTco(tco.ratioMaintenanceAchat);
+  const part = Math.max(4, Math.min(100, Math.round(tco.ratioMaintenanceAchat * 100)));
+  return `<div class="machine-jauge" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(TCO_ETAT_LABEL[etat]())}">
+      <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Garder / Remplacer')}</span><span class="machine-jauge-valeur">${TCO_ETAT_LABEL[etat]()}</span></span>
+      <span class="machine-jauge-piste"><span class="machine-jauge-part is-${etat}" style="width:${part}%"></span></span>
+    </div>`;
 }
 
 // SECOND SUIVI (optionnel) — mêmes principes que le principal, mais SANS
@@ -9087,8 +9162,17 @@ const NAV_ITEMS = [
   { id: 'manuals', label: trad('Manuels & carnets'), short: trad('Manuels'), icon: 'manuels' },
   { id: 'agenda', label: trad('Agenda'), short: trad('Agenda'), icon: 'agenda' },
   { id: 'reminders', label: trad('Rappels'), short: trad('Rappels'), icon: 'rappels' },
+  { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
+// NAV_ITEMS est une constante évaluée une seule fois, AVANT que SCHEMA.hasTco
+// ne soit connu (la sonde tourne au boot, bien après) : on ne peut donc pas
+// filtrer ici. `navItemsVisibles()` refait le filtre à CHAQUE rendu — même
+// garde-fou que le reste de la fonctionnalité (rien tant que la migration
+// n'est pas visible), mais recalculé au bon moment.
+function navItemsVisibles() {
+  return NAV_ITEMS.filter((item) => item.id !== 'tco' || SCHEMA.hasTco);
+}
 
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
 const TABS = [
@@ -9119,6 +9203,10 @@ const NAV_ICONES = {
   plus: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
+  // Coûts & TCO : une pile de pièces (cylindre empilé), lecture immédiate
+  // « argent » sans glyphe de police — même grille 24×24 / trait 2px que le
+  // reste de NAV_ICONES.
+  couts: '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5a7 3 0 0 0 14 0V7"/><path d="M5 12v5a7 3 0 0 0 14 0v-5"/>',
   compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
 // ★ LOT 9 — LES PICTOs DE LA CARTE MACHINE, DESSINÉS COMME CEUX DE LA NAVIGATION.
@@ -9355,7 +9443,7 @@ function marqueSvg(idDegrade, couleurBarre) {
 function sidebarHtml() {
   return `
     <span class="wordmark"><span class="wm-logo" aria-hidden="true">${marqueSvg('keeva-barre', '#0E1333')}</span><span>KEEVA</span></span>
-    ${NAV_ITEMS.map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}"><span class="nav-ico" aria-hidden="true">${navIcone(item.icon)}</span>${esc(item.label)}</button>`).join('')}
+    ${navItemsVisibles().map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}"><span class="nav-ico" aria-hidden="true">${navIcone(item.icon)}</span>${esc(item.label)}</button>`).join('')}
     <div class="sidebar-foot">
       <div class="version-ligne"><span>${trad('Version')}</span><span>v${esc(versionAffichee())}</span></div>
       <button type="button" id="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>${trad('Se déconnecter')}</span></button>
@@ -12232,6 +12320,182 @@ VIEWS.reminders = {
   },
 };
 
+// ── Vue : Coûts & TCO ─────────────────────────────────────────
+// Page à part (bandeau vertical), pas une carte de plus dans « Mon compte » :
+// les réglages financiers ne doivent pas se noyer dans les réglages
+// d'identité de société. N'existe dans NAV_ITEMS/le menu mobile que si
+// SCHEMA.hasTco (voir navItemsVisibles) — même garde-fou que le reste de la
+// fonctionnalité (voir keeva-tco-feature).
+function blocParametresTcoHtml() {
+  const c = UI.company || {};
+  const gerant = UI.role === 'gerant';
+  const bloque = gerant ? '' : ' disabled';
+  return `
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('reglages')}</span><span>${trad('Paramètres TCO')}</span></h2>
+      </div>
+      <p class="muted-text">${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs SUGGÉRÉES lors de l\'ajout d\'un coût d\'exploitation — jamais insérées automatiquement.')}</p>
+      ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
+      <div class="field-row">
+        <div>
+          <label for="tco-taux-horaire">${trad('Taux horaire main d\'œuvre (€/h)')}</label>
+          <input id="tco-taux-horaire" type="number" inputmode="decimal" min="0" step="0.5" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
+        </div>
+        <div>
+          <label for="tco-assurance">${trad('Assurance — barème annuel suggéré (€)')}</label>
+          <input id="tco-assurance" type="number" inputmode="decimal" min="0" step="1" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
+        </div>
+        <div>
+          <label for="tco-stockage">${trad('Stockage — barème annuel suggéré (€)')}</label>
+          <input id="tco-stockage" type="number" inputmode="decimal" min="0" step="1" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
+        </div>
+      </div>
+      <div class="hint" id="tco-parametres-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="primary" id="tco-save-parametres"${bloque}>${trad('Enregistrer')}</button>
+      </div>
+    </section>`;
+}
+function ligneCatalogueTcoHtml(piece) {
+  return `<tr data-piece-id="${esc(piece.id)}">
+      <td>${piece.reference ? esc(piece.reference) : '<span class="muted">—</span>'}</td>
+      <td>${esc(piece.designation)}</td>
+      <td>${formatMontant(piece.unit_price)}</td>
+      <td><button type="button" class="link-inline" data-piece-retirer="${esc(piece.id)}">${trad('Retirer')}</button></td>
+    </tr>`;
+}
+function blocCatalogueTcoHtml() {
+  const pieces = UI.partsCatalog || [];
+  return `
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('carnet')}</span><span>${trad('Catalogue de pièces')}</span></h2>
+        <span class="spacer"></span>
+        <span class="pill neutral">${tR('{n} référence(s)', { n: pieces.length })}</span>
+      </div>
+      <p class="muted-text">${trad('Sélectionnable sur chaque entretien (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces utilisées.')}</p>
+      <div id="tco-catalogue-liste">
+        ${pieces.length ? `<div class="ref-scroll"><table class="ref-table">
+          <thead><tr><th>${trad('Référence')}</th><th>${trad('Désignation')}</th><th>${trad('Prix unitaire')}</th><th></th></tr></thead>
+          <tbody>${pieces.map(ligneCatalogueTcoHtml).join('')}</tbody>
+        </table></div>` : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
+      </div>
+      <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
+      <div class="field-row" style="margin-top:10px;">
+        <div>
+          <label for="tco-piece-reference">${trad('Référence')}</label>
+          <input id="tco-piece-reference" placeholder="${trad('Ex. FLT-0142')}">
+        </div>
+        <div>
+          <label for="tco-piece-designation">${trad('Désignation')}</label>
+          <input id="tco-piece-designation" required placeholder="${trad('Ex. Filtre à huile')}">
+        </div>
+        <div>
+          <label for="tco-piece-prix">${trad('Prix unitaire (€)')}</label>
+          <input id="tco-piece-prix" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 18.90')}">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="tco-piece-ajouter">${trad('Ajouter au catalogue')}</button>
+      </div>
+    </section>`;
+}
+VIEWS.tco = {
+  title: trad('Coûts & TCO'),
+  subtitle: () => trad('Réglages financiers de la société et catalogue de pièces, utilisés pour calculer le coût total de possession de chaque machine.'),
+  render() {
+    return `
+      <div class="agenda-toolbar">
+        <span class="agenda-eyebrow">${trad('Paramètres & catalogue')}</span>
+      </div>
+      <div class="dash-grid agenda-grid">
+        <div class="dash-main">
+          ${blocParametresTcoHtml()}
+          ${blocCatalogueTcoHtml()}
+        </div>
+      </div>`;
+  },
+  mount() {
+    const root = document.getElementById('view-root');
+    if (!root) return;
+    const message = (el, texte, erreur) => {
+      if (!el) return;
+      el.textContent = texte;
+      el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+    };
+
+    root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const msg = root.querySelector('#tco-parametres-msg');
+      const taux = root.querySelector('#tco-taux-horaire').value.trim();
+      const assurance = root.querySelector('#tco-assurance').value.trim();
+      const stockage = root.querySelector('#tco-stockage').value.trim();
+      btn.disabled = true;
+      btn.textContent = trad('Enregistrement…');
+      try {
+        const { error } = await sb.rpc('update_my_tco_settings', {
+          p_labor_hourly_rate: taux !== '' ? Number(taux) : null,
+          p_default_insurance_yearly: assurance !== '' ? Number(assurance) : null,
+          p_default_storage_yearly: stockage !== '' ? Number(stockage) : null,
+        });
+        if (error) throw error;
+        UI.company.labor_hourly_rate = taux !== '' ? Number(taux) : null;
+        UI.company.default_insurance_yearly = assurance !== '' ? Number(assurance) : null;
+        UI.company.default_storage_yearly = stockage !== '' ? Number(stockage) : null;
+        showToast(trad('Paramètres TCO enregistrés'));
+        message(msg, trad('Enregistré.'), false);
+      } catch (err) {
+        message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+      }
+      btn.disabled = false;
+      btn.textContent = trad('Enregistrer');
+    });
+
+    root.querySelector('#tco-piece-ajouter')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const msg = root.querySelector('#tco-catalogue-msg');
+      const reference = root.querySelector('#tco-piece-reference').value.trim();
+      const designation = root.querySelector('#tco-piece-designation').value.trim();
+      const prix = root.querySelector('#tco-piece-prix').value.trim();
+      if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
+      btn.disabled = true;
+      btn.textContent = trad('Ajout…');
+      try {
+        const { data, error } = await sb.from('parts_catalog')
+          .insert({ company_id: UI.companyId, reference: reference || null, designation, unit_price: prix !== '' ? Number(prix) : 0 })
+          .select('id, reference, designation, unit_price')
+          .single();
+        if (error) throw error;
+        UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
+        showToast(trad('Pièce ajoutée au catalogue'));
+        renderApp();
+      } catch (err) {
+        message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+        btn.disabled = false;
+        btn.textContent = trad('Ajouter au catalogue');
+      }
+    });
+
+    root.querySelector('#tco-catalogue-liste')?.addEventListener('click', async (e) => {
+      const bouton = e.target.closest('[data-piece-retirer]');
+      if (!bouton) return;
+      const id = bouton.getAttribute('data-piece-retirer');
+      if (!window.confirm(trad('Retirer cette pièce du catalogue ?'))) return;
+      bouton.disabled = true;
+      try {
+        const { error } = await sb.from('parts_catalog').delete().eq('id', id);
+        if (error) throw error;
+        UI.partsCatalog = (UI.partsCatalog || []).filter((p) => String(p.id) !== String(id));
+        renderApp();
+      } catch (err) {
+        message(root.querySelector('#tco-catalogue-msg'), trad('Erreur :') + ' ' + (err.message || err), true);
+        bouton.disabled = false;
+      }
+    });
+  },
+};
+
 // Sous-bloc teinté « e-mail de notification des rappels », reposé dans la
 // carte « Contact & Alertes » : reprend TEL QUEL le réglage de l'écran
 // « Rappels » (mêmes id, donc wireReglagesRappelsEmail() suffit aux deux).
@@ -13417,6 +13681,7 @@ function openPlusSheet() {
       <button type="button" class="sheet-item" data-nav="manuals"><span aria-hidden="true">✦&nbsp;</span>${trad('Manuels & carnets')}</button>
       <button type="button" class="sheet-item" data-nav="agenda"><span aria-hidden="true">◔&nbsp;</span>${trad('Agenda')}</button>
       <button type="button" class="sheet-item" data-nav="reminders"><span aria-hidden="true">☰&nbsp;</span>${trad('Rappels')}</button>
+      ${SCHEMA.hasTco ? `<button type="button" class="sheet-item" data-nav="tco"><span aria-hidden="true">◈&nbsp;</span>${trad('Coûts & TCO')}</button>` : ''}
       <div class="sheet-title" style="padding-top:10px;">${trad('Compte')}</div>
       <button type="button" class="sheet-item" data-nav="account"><span aria-hidden="true">◉&nbsp;</span>${trad('Mon compte')}</button>
       <button type="button" class="sheet-item" id="sheet-logout">${trad('Se déconnecter')}</button>
@@ -14957,6 +15222,10 @@ function openAddWizard(companyId, categories) {
     // consomme un credit et n'a de sens que sans carnet PDF a scanner.
     searchPhoto: false,
     model: '',
+    // TCO, facultatif (voir SCHEMA.hasTco) : strict minimum à la création,
+    // le reste (revente estimée, durée de vie) se règle plus tard sur la
+    // fiche machine — pas de formulaire interminable ici.
+    purchasePrice: '', purchaseDate: '',
   };
 
   function shell(inner) { overlay.innerHTML = `<div class="modal">${inner}</div>`; }
@@ -15078,6 +15347,19 @@ function openAddWizard(companyId, categories) {
 
           <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
           <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
+
+          ${SCHEMA.hasTco ? `
+          <div class="field-row">
+            <div>
+              <label for="f-prix-achat" class="label-avec-note"><span>${trad('Prix d\'achat')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
+              <input id="f-prix-achat" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
+            </div>
+            <div>
+              <label for="f-date-achat">${trad('Date d\'achat')}</label>
+              <input id="f-date-achat" type="date" value="${esc(state.purchaseDate || state.serviceDate)}">
+            </div>
+          </div>
+          <div class="hint">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laisse vide si tu ne le sais pas, tu pourras le renseigner plus tard.')}</div>` : ''}
         </section>
 
         <div class="modal-actions">
@@ -15122,6 +15404,10 @@ function openAddWizard(companyId, categories) {
       state.serial = overlay.querySelector('#f-serial').value.trim();
       state.kind = radiosKind.length ? (overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE) : TYPE_MACHINE;
       state.serviceDate = overlay.querySelector('#f-service-date').value;
+      if (SCHEMA.hasTco) {
+        state.purchasePrice = overlay.querySelector('#f-prix-achat')?.value.trim() || '';
+        state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
+      }
       // Le MODE et la PHOTO ne sont plus demandés ici : ils viennent après le
       // carnet (voir stepMode). Personne ne sait s'il faut un compteur ou un
       // calendrier avant d'avoir vu ce que dit le manuel, et la photo trouvée sur
@@ -15712,6 +15998,10 @@ function openAddWizard(companyId, categories) {
             { counter_unit: counterUnitFromMode(state.trackingMode) }
           ),
           ...(state.secondaryUnit ? machineCounter2Patch(state.secondaryValue, state.secondaryUnit) : {}),
+          ...(SCHEMA.hasTco && state.purchasePrice !== '' ? {
+            purchase_price: Number(state.purchasePrice),
+            purchase_date: state.purchaseDate || state.serviceDate,
+          } : {}),
         })
         .select('id')
         .single();
@@ -16228,9 +16518,10 @@ function openLogInterventionModal(machine, tache) {
 async function fetchAllInterventions(machineId) {
   const pageSize = 1000;
   const all = [];
+  const colonnesCout = SCHEMA.hasTco ? ', parts_cost, labor_cost, labor_hours' : '';
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await sb.from(trad('interventions'))
-      .select('id, performed_at, hours_at_intervention, description, items_done, performed_by')
+      .select(`id, performed_at, hours_at_intervention, description, items_done, performed_by${colonnesCout}`)
       .eq('machine_id', machineId)
       .order('performed_at', { ascending: false })
       .order('id', { ascending: false })
@@ -16864,6 +17155,28 @@ function openMachineModal(companyId, categories, existing) {
               <input id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
             </div>
           </div>
+
+          ${SCHEMA.hasTco ? `
+          <label>${trad('Acquisition & TCO')}</label>
+          <div class="field-row">
+            <div>
+              <label for="f-prix-achat" class="label-avec-note"><span>${trad('Prix d\'achat')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
+              <input id="f-prix-achat" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 25000')}" value="${isEdit && existing.purchase_price != null ? esc(existing.purchase_price) : ''}">
+            </div>
+            <div>
+              <label for="f-date-achat">${trad('Date d\'achat')}</label>
+              <input id="f-date-achat" type="date" value="${isEdit && existing.purchase_date ? esc(existing.purchase_date) : ''}">
+            </div>
+            <div>
+              <label for="f-revente-estimee">${trad('Valeur de revente estimée')}</label>
+              <input id="f-revente-estimee" type="number" inputmode="decimal" min="0" step="1" placeholder="${trad('Ex. 5000')}" value="${isEdit && existing.estimated_resale_value != null ? esc(existing.estimated_resale_value) : ''}">
+            </div>
+            <div>
+              <label for="f-duree-vie">${tR('Durée de vie estimée ({unite})', { unite: counterUnitOf(isEdit ? existing : { counter_unit: 'hours' }) === 'km' ? trad('km') : trad('heures') })}</label>
+              <input id="f-duree-vie" type="number" inputmode="numeric" min="0" step="1" placeholder="${trad('Ex. 10000')}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
+            </div>
+          </div>
+          <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laisse vide ce que tu ne connais pas encore.')}</div>` : ''}
         </section>
 
         <section class="mform-section mform-section-2">
@@ -17530,6 +17843,16 @@ function openMachineModal(companyId, categories, existing) {
           ? machineCounter2Patch(secondaryValue, secondaryUnit)
           : { counter_value_2: null, counter_unit_2: null });
       }
+      if (SCHEMA.hasTco) {
+        const prixAchat = overlay.querySelector('#f-prix-achat')?.value.trim() || '';
+        const dateAchat = overlay.querySelector('#f-date-achat')?.value || '';
+        const reventeEstimee = overlay.querySelector('#f-revente-estimee')?.value.trim() || '';
+        const dureeVie = overlay.querySelector('#f-duree-vie')?.value.trim() || '';
+        updatePayload.purchase_price = prixAchat !== '' ? Number(prixAchat) : null;
+        updatePayload.purchase_date = dateAchat || null;
+        updatePayload.estimated_resale_value = reventeEstimee !== '' ? Number(reventeEstimee) : null;
+        updatePayload.expected_lifespan_counter = dureeVie !== '' ? Number(dureeVie) : null;
+      }
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb
         .from(trad('machines'))
@@ -17799,6 +18122,7 @@ function afficherDepuisCache(cache) {
   UI.contactName = cache.contactName || '';
   UI.email = cache.email || '';
   UI.categories = cache.categories || [];
+  UI.partsCatalog = cache.partsCatalog || [];
   UI.machines = cache.machines || [];
   UI.reminders = loadReminders();
   UI.horsLigne = { depuis: cache.savedAt };
@@ -17848,6 +18172,13 @@ async function boot(toastMessage) {
   const { error: sondeRappels } = await sb.from('companies').select('notification_email').limit(1);
   SCHEMA.hasReminders = !sondeRappels;
 
+  // TCO : une seule sonde, côté société (labor_hourly_rate), suffit à savoir si
+  // TOUTE la migration TCO est en place — colonnes machines/interventions et
+  // tables parts_catalog/intervention_parts/operating_costs ont été ajoutées
+  // ensemble, jamais séparément (voir keeva-tco-feature).
+  const { error: sondeTco } = await sb.from('companies').select('labor_hourly_rate').limit(1);
+  SCHEMA.hasTco = !sondeTco;
+
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
   // au plus pauvre : la première tentative qui passe gagne, et les suivantes ne
@@ -17857,7 +18188,10 @@ async function boot(toastMessage) {
   const colonnesContact = SCHEMA.hasContactNames ? ['contact_first_name', 'contact_last_name'] : [];
   const colonnesRappels = SCHEMA.hasReminders
     ? ['notification_email', 'reminders_email', 'reminders_whatsapp'] : [];
+  const colonnesTco = SCHEMA.hasTco
+    ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly'] : [];
   const tentatives = [
+    [...colonnesEtendues, ...colonnesContact, ...colonnesRappels, ...colonnesTco],
     [...colonnesEtendues, ...colonnesContact, ...colonnesRappels],
     [...colonnesEtendues, ...colonnesContact],
     [...colonnesEtendues, ...colonnesRappels],
@@ -17944,6 +18278,9 @@ async function boot(toastMessage) {
     // L'ordre de création : c'est lui qui décide quelles machines une offre
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
+    ...(SCHEMA.hasTco
+      ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter']
+      : []),
   ].join(', ');
   const colonnesPlan = [
     'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
@@ -17976,6 +18313,19 @@ async function boot(toastMessage) {
     .select('id, name')
     .eq('company_id', profile.company_id);
 
+  // Catalogue de pièces : chargé une fois ici (même endroit que les
+  // catégories), réutilisé partout où une pièce se sélectionne (voir
+  // keeva-tco-feature). Absent tant que la migration TCO n'est pas visible.
+  let partsCatalog = [];
+  if (SCHEMA.hasTco) {
+    const { data: pieces } = await sb
+      .from('parts_catalog')
+      .select('id, reference, designation, unit_price')
+      .eq('company_id', profile.company_id)
+      .order('designation');
+    partsCatalog = pieces || [];
+  }
+
   UI.companyId = profile.company_id;
   UI.companyName = company?.name || trad('Ta société');
   UI.companyPlan = company?.plan || 'free';
@@ -18000,11 +18350,17 @@ async function boot(toastMessage) {
     notification_email: company?.notification_email || '',
     reminders_email: company?.reminders_email !== false,
     reminders_whatsapp: company?.reminders_whatsapp === true,
+    // TCO : taux horaire main d'œuvre + barèmes suggérés (jamais imposés —
+    // voir keeva-tco-feature). Nuls tant qu'aucun réglage n'a été enregistré.
+    labor_hourly_rate: company?.labor_hourly_rate ?? null,
+    default_insurance_yearly: company?.default_insurance_yearly ?? null,
+    default_storage_yearly: company?.default_storage_yearly ?? null,
   };
   UI.contactName = company?.contact_name || '';
   UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
   UI.categories = categories || [];
+  UI.partsCatalog = partsCatalog;
   UI.machines = (machines || []).map(m => ({
     ...m,
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
@@ -18022,6 +18378,7 @@ async function boot(toastMessage) {
     contactName: UI.contactName,
     email: UI.email,
     categories: UI.categories,
+    partsCatalog: UI.partsCatalog,
     machines: UI.machines,
   });
 
