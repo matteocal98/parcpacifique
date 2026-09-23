@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Nwb84SVKdpReh0l9m31Bth35oLEuXbYOsavNXC17jTo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3k0iSyz7yVLVFSEtd0pCe6cxEkT27asyPcgNm0MeZzE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -10665,33 +10665,39 @@ VIEWS.machines = {
 // prochaine échéance — les trois mêmes valeurs que dueInfo(). La barre ne dit
 // donc rien qu'elle ne puisse prouver, et le dépassement s'écrit en UNITÉ
 // RÉELLE (« +18 h ») dans la phrase d'échéance, jamais en « 101,2 % ».
-// Elle n'existe que pour un suivi AU COMPTEUR : un suivi calendaire n'a pas
-// d'intervalle consommable, et une barre y serait un ornement.
+// LE CALENDAIRE A LA MÊME PREUVE, EN JOURS : la base contient déjà
+// `next_due_at` et `interval_days` (les mêmes valeurs que dueInfo()) ; le
+// début de cycle se déduit sans nouvelle donnée : next_due_at − interval_days.
 function jaugeIntervalleHtml(info, m, detaille) {
-  if (!m || !planIsCounter(m.plan)) return '';
-  const intervalle = planIntervalCounter(m.plan);
+  if (!m || !m.plan) return '';
+  const enCompteur = planIsCounter(m.plan);
+  const intervalle = enCompteur ? planIntervalCounter(m.plan) : (m.plan.interval_days ?? null);
   const reste = info.sortKey;
   if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(reste)) return '';
   const fait = intervalle - reste;
   const part = Math.max(0, Math.min(100, Math.round((fait / intervalle) * 100)));
   // ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, EN CLAIR.
-  // Le bloc PORTE la valeur de l'échéance (« Échéance 250 h ») et laisse voir la
-  // consommation par le remplissage coloré. Il n'écrit AUCUN pourcentage : le
-  // travers systématique des maquettes est d'annoncer un taux que personne ne
-  // mesure (« 100 % d'extraction », « 99,4 % de confiance », §5.2 de l'audit), et
-  // une barre déjà pleine pour une échéance dépassée dirait « 100 % » là où la
-  // vérité est « +18 h ». Le libellé accessible reste la phrase du produit.
-  const unite = counterUnitOf(m);
-  const echeance = formatCounter(planNextDueCounter(m.plan), unite);
+  // Le bloc PORTE la valeur de l'échéance (« Échéance 250 h » / « Échéance 23 sept. »)
+  // et laisse voir la consommation par le remplissage coloré. Il n'écrit AUCUN
+  // pourcentage : le travers systématique des maquettes est d'annoncer un taux
+  // que personne ne mesure (« 100 % d'extraction », « 99,4 % de confiance »,
+  // §5.2 de l'audit), et une barre déjà pleine pour une échéance dépassée
+  // dirait « 100 % » là où la vérité est « +18 h » (ou « +3 j »). Le libellé
+  // accessible reste la phrase du produit.
+  const unite = enCompteur ? counterUnitOf(m) : null;
+  const echeance = enCompteur ? formatCounter(planNextDueCounter(m.plan), unite) : formatShortDate(m.plan.next_due_at);
   // Mode détaillé (fiche du plan) : les mêmes trois repères que la maquette,
   // tous réels (début de cycle à 0, dépassement s'il existe, objectif) —
   // jamais le taux qu'elle affiche en plus, pour la même raison qu'au-dessus.
+  const debut = enCompteur ? formatCounter(0, unite) : formatShortDate(addDaysIso(m.plan.next_due_at, -intervalle));
+  const objectif = enCompteur ? formatCounter(intervalle, unite) : tR('{n} j', { n: intervalle });
+  const depassement = enCompteur ? formatCounter(-reste, unite) : tR('{n} j', { n: -reste });
   const detailTete = detaille ? `<span class="machine-jauge-reperes">
-      <span>${tR('Dernier cycle ({valeur})', { valeur: formatCounter(0, unite) })}</span>
-      ${reste < 0 ? `<span class="is-late">${tR('Dépassement +{valeur}', { valeur: formatCounter(-reste, unite) })}</span>` : ''}
-      <span>${tR('Objectif {valeur}', { valeur: formatCounter(intervalle, unite) })}</span>
+      <span>${tR('Dernier cycle ({valeur})', { valeur: debut })}</span>
+      ${reste < 0 ? `<span class="is-late">${tR('Dépassement +{valeur}', { valeur: depassement })}</span>` : ''}
+      <span>${tR('Objectif {valeur}', { valeur: objectif })}</span>
     </span>` : '';
-  const detailPied = detaille ? `<span class="machine-jauge-pied">${tR('Cycle standard {valeur}', { valeur: formatCounter(intervalle, unite) })}</span>` : '';
+  const detailPied = detaille ? `<span class="machine-jauge-pied">${tR('Cycle standard {valeur}', { valeur: objectif })}</span>` : '';
   return `<div class="machine-jauge${detaille ? ' machine-jauge-detaillee' : ''}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${part}" aria-label="${esc(info.label)}">
       ${detailTete}
       <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Intervalle')}</span><span class="machine-jauge-valeur">${tR('Échéance {valeur}', { valeur: echeance })}</span></span>
@@ -15888,8 +15894,8 @@ function openPlanView(machine, companyId, categories) {
             <span class="phc-valeur">${releveCompteur}</span>
             <span class="phc-valeur phc-valeur-seuil">${seuilCompteur}</span>
           </div>
-          ${jaugeIntervalleHtml(info, machine, true)}
           ` : ''}
+          ${jaugeIntervalleHtml(info, machine, true)}
           ${compteurHtml(machine, 'bureau', 'Mettre à jour', 'Valider')}${compteurHtml(machine, 'mobile', 'Mettre à jour', 'Valider')}
         </div>` : ''}
       </div>
