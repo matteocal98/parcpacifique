@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IGBcK20SO/nm8FeYFrUORIPbFvYpTrG19eZIm5GHgyY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-BQ7RPigZWERvjuIv85xCuxA7jYyFXVR0xYBVvRgKuQE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16796,18 +16796,25 @@ function openMachineModal(companyId, categories, existing) {
             Object.assign(planUpdate, planNextDueCounterPatch(currentHours + intervalCounter));
           }
         } else if (existing.plan.next_due_at && existing.plan.interval_days != null) {
-          // Le delta d'intervalle, ET le delta de date de mise en service : sans
-          // ce second terme, corriger la date de mise en service (ex. une saisie
-          // initiale erronée, remontée de 6 mois) n'avait AUCUN effet sur
-          // l'échéance affichée — signalé le 23/09. Les deux décalages
-          // s'additionnent, ce qui préserve un entretien déjà réellement
-          // effectué (journalAvanceEcheance) au lieu de repartir de zéro.
-          const decalageService = joursEntreIso(existing.service_date, serviceDate);
-          const decalage = (intervalDays - existing.plan.interval_days) + decalageService;
-          planUpdate.next_due_at = addDaysIso(existing.plan.next_due_at, decalage);
-          if (decalage) {
+          // Le plan est-il encore PROPRE (son échéance vaut exactement
+          // service_date + intervalle, comme à sa création), ou a-t-elle déjà
+          // été avancée par un entretien réellement enregistré
+          // (journalAvanceEcheance, qui l'ancre sur la date réelle de
+          // l'intervention) ? Un plan propre se RECALCULE intégralement depuis
+          // la nouvelle date de mise en service : un simple décalage relatif
+          // (ancienne échéance + delta) dérive au fil des modifications
+          // successives et finit par ne plus correspondre au calcul direct —
+          // signalé le 23/09 sur une machine éditée plusieurs fois de suite.
+          // Un plan déjà avancé, lui, garde son avance réelle en se décalant
+          // proportionnellement plutôt qu'en l'effaçant.
+          const echeancePropre = addDaysIso(existing.service_date, existing.plan.interval_days);
+          const dejaAvancee = existing.plan.next_due_at !== echeancePropre;
+          planUpdate.next_due_at = dejaAvancee
+            ? addDaysIso(existing.plan.next_due_at, (intervalDays - existing.plan.interval_days) + joursEntreIso(existing.service_date, serviceDate))
+            : addDaysIso(serviceDate, intervalDays);
+          if (planUpdate.next_due_at !== existing.plan.next_due_at) {
             itemsSource = normalizeItems(itemsSource).map(it =>
-              it.due_at === existing.plan.next_due_at ? { ...it, due_at: addDaysIso(it.due_at, decalage) } : it);
+              it.due_at === existing.plan.next_due_at ? { ...it, due_at: planUpdate.next_due_at } : it);
           }
         } else {
           planUpdate.next_due_at = addDaysIso(serviceDate, intervalDays);
