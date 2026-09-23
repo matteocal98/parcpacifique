@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KBP/mTqcXLE7+CixlDZVyDnKFq2VRgfS9Utm+bm1HPI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1nt8N4U6SidryfX8ndOvPQpM7nt5OiJ7s9BkTysz7gY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -12363,15 +12363,15 @@ function blocParametresTcoHtml() {
       <div class="hint">${trad('S\'applique à tous les montants TCO de la société (scorecard, catalogue de pièces, coûts d\'exploitation). Changer de devise ne reconvertit pas les montants déjà saisis.')}</div>
       <div class="field-row">
         <div>
-          <label for="tco-taux-horaire">${tR('Taux horaire main d\'œuvre ({devise}/h)', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
+          <label for="tco-taux-horaire" id="tco-taux-horaire-label">${tR('Taux horaire main d\'œuvre ({devise}/h)', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-taux-horaire" type="number" inputmode="decimal" min="0" step="0.5" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
         </div>
         <div>
-          <label for="tco-assurance">${tR('Assurance — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
+          <label for="tco-assurance" id="tco-assurance-label">${tR('Assurance — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-assurance" type="number" inputmode="decimal" min="0" step="1" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
         </div>
         <div>
-          <label for="tco-stockage">${tR('Stockage — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
+          <label for="tco-stockage" id="tco-stockage-label">${tR('Stockage — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-stockage" type="number" inputmode="decimal" min="0" step="1" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
         </div>
       </div>
@@ -12457,8 +12457,24 @@ VIEWS.tco = {
         radio.closest('.mform-card')?.classList.toggle('is-selected', radio.checked);
       });
     };
+    // Les 3 libellés de champ ci-dessous portent la devise EN TEXTE (« …/h) »,
+    // « … (€) ») : ils doivent suivre le choix du radio TOUT DE SUITE, avant
+    // même d'enregistrer — sinon l'utilisateur choisit XPF et voit encore
+    // « € » jusqu'au prochain rendu complet, ce qui a l'air figé/cassé.
+    const majLibellesDevise = () => {
+      const devise = root.querySelector('input[name="tco-devise"]:checked')?.value === 'XPF' ? 'XPF' : '€';
+      const taux = root.querySelector('#tco-taux-horaire-label');
+      const assurance = root.querySelector('#tco-assurance-label');
+      const stockage = root.querySelector('#tco-stockage-label');
+      if (taux) taux.textContent = tR('Taux horaire main d\'œuvre ({devise}/h)', { devise });
+      if (assurance) assurance.textContent = tR('Assurance — barème annuel suggéré ({devise})', { devise });
+      if (stockage) stockage.textContent = tR('Stockage — barème annuel suggéré ({devise})', { devise });
+    };
     majDeviseCards();
-    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', majDeviseCards));
+    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', () => {
+      majDeviseCards();
+      majLibellesDevise();
+    }));
 
     root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
