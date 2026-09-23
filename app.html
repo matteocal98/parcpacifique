@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Pyk20aDiNs0Bb4WEtFdyjG5GsaN22NSBW6XYAOniv7E=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FVnkuEYQV0f+yOcP71GdCXwHABBSqh0MrNjYU90UK2s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4070,6 +4070,15 @@ function optionsCategorieListe(choisie, chargees) {
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
 const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
 
+// SECOND COMPTEUR, optionnel : machines.counter_value_2 + counter_unit_2, et
+// sur le plan interval_counter_2 / next_due_counter_2 /
+// reminder_counter_before_2 — pour les machines dont le plan mélange deux
+// unités de compteur (ex. heures ET km), ou une unité de compteur sur une
+// machine par ailleurs suivie au calendrier. Même garde-fou que hasCounter :
+// faux tant que la sonde n'a pas trouvé les colonnes, et rien de ce qui en
+// dépend ne s'affiche ni ne s'écrit alors — comportement d'avant inchangé.
+SCHEMA.hasCounter2 = false;
+
 // Colonnes de rappel (notification_email, reminders_email, reminders_whatsapp),
 // ajoutées par migration-rappels-email.sql. Faux tant que la sonde ne les a pas
 // trouvées : l'écran des rappels le dit alors, au lieu de laisser croire qu'un
@@ -4719,6 +4728,43 @@ function planCounterPatch(interval, reminder) {
 function planNextDueCounterPatch(nextDue) {
   return SCHEMA.hasCounter ? { next_due_counter: nextDue } : { next_due_hours: nextDue };
 }
+
+// SECOND COMPTEUR (optionnel) — mêmes principes que ci-dessus, mais SANS repli
+// historique : la fonctionnalité n'existe qu'après la migration dédiée, donc
+// rien à lire ni à écrire tant que SCHEMA.hasCounter2 est faux (les patches
+// renvoient {} : ils s'assemblent sans effet dans un payload d'écriture).
+function counterUnit2Of(machine) {
+  return (machine && (machine.counter_unit_2 === 'km' || machine.counter_unit_2 === 'hours')) ? machine.counter_unit_2 : null;
+}
+function machineCounter2(machine) {
+  if (!machine || !SCHEMA.hasCounter2) return null;
+  const v = machine.counter_value_2;
+  return v == null ? null : Number(v);
+}
+function machineCounter2Patch(value, unit) {
+  if (!SCHEMA.hasCounter2) return {};
+  return { counter_value_2: value, counter_unit_2: unit };
+}
+function planIntervalCounter2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return null;
+  return plan.interval_counter_2 ?? null;
+}
+function planNextDueCounter2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return null;
+  return plan.next_due_counter_2 ?? null;
+}
+function planReminderCounter2(plan) {
+  if (!plan || !SCHEMA.hasCounter2) return FALLBACK_REMINDER_HOURS;
+  return plan.reminder_counter_before_2 ?? FALLBACK_REMINDER_HOURS;
+}
+function planCounter2Patch(interval, reminder) {
+  if (!SCHEMA.hasCounter2) return {};
+  return { interval_counter_2: interval, reminder_counter_before_2: reminder };
+}
+function planNextDueCounter2Patch(nextDue) {
+  if (!SCHEMA.hasCounter2) return {};
+  return { next_due_counter_2: nextDue };
+}
 // L'échéance du plan n'avance QUE si au moins un élément de CE plan a réellement
 // été coché. Règle volontairement prudente : enregistrer un entretien sans rien
 // cocher (graissage, réparation, autre travail) ne doit pas effacer une échéance
@@ -4899,6 +4945,13 @@ function uniteCompatiblePlan(unite, plan, machine) {
   if (planIsCounter(plan)) return unite === uniteIntervalleDuPlan(plan, machine);
   return info.genre === 'date';
 }
+// L'unité du SECOND compteur de la machine (voir SCHEMA.hasCounter2) : une
+// tâche de genre compteur qui n'est PAS dans l'unité du suivi principal peut
+// quand même être réellement suivie si elle correspond à ce second relevé.
+function uniteCompatibleCompteur2(unite, machine) {
+  const u2 = counterUnit2Of(machine);
+  return !!u2 && unite === u2;
+}
 // Découpe une fréquence en morceaux candidats : « a : 3 mois / b : 6 mois ».
 function morceauxFrequence(frequency) {
   return String(frequency || '')
@@ -5073,10 +5126,13 @@ function echeancePropreTache(item, plan) {
 
 // Échéance propre, écrite dans SON unité : une date pour les unités calendaires,
 // un relevé de compteur sinon. C'est le texte affiché sur la ligne de la tâche.
-function echeancePropreTexte(propre, machine) {
+// `uniteReelle` (l'unité PROPRE de la tâche, ex. « km ») prime sur celle de la
+// machine : sans ça, un relevé km s'affichait étiqueté « h » (l'unité de la
+// machine), un nombre juste sous une unité fausse — trouvé le 23/09.
+function echeancePropreTexte(propre, machine, uniteReelle) {
   if (!propre) return '';
   if (propre.genre === 'jours') return formatShortDate(propre.valeur);
-  return formatCounter(propre.valeur, counterUnitOf(machine));
+  return formatCounter(propre.valeur, uniteReelle || counterUnitOf(machine));
 }
 
 // État d'une tâche : on présente à dueInfo un plan « vu par la tâche » (même
@@ -5100,14 +5156,26 @@ function infoTache(item, plan, machine) {
   if (item && estPointDeControle(item.frequency)) {
     return { ...inconnu, state: 'controle', label: trad('Point de contrôle'), short: trad('Point de contrôle') };
   }
-  // Échéance dans une AUTRE unité que celle du plan : elle est lue dans son
-  // unité, marquée horsPlan (l'écran le dit) et n'entre pas dans le minimum.
+  // SUIVIE PAR LE SECOND COMPTEUR : l'unité de la tâche ne correspond pas au
+  // suivi principal, mais correspond au second relevé de la machine — elle
+  // EST réellement suivie (voir preparerTaches), pas seulement « hors plan ».
+  if (item && item.interval_unite && Number.isFinite(Number(item.due_counter))
+      && uniteCompatibleCompteur2(item.interval_unite, machine)) {
+    const planVuParLeSecond = { tracking_mode: item.interval_unite, next_due_at: null, ...planNextDueCounterPatch(Number(item.due_counter)) };
+    const machineVueParLeSecond = { ...machine, counter_unit: item.interval_unite, counter_value: machineCounter2(machine) };
+    return { ...dueInfo(planVuParLeSecond, machineVueParLeSecond), secondaire: true };
+  }
+  // Échéance dans une AUTRE unité que celle du plan (et pas davantage suivie
+  // par le second compteur) : elle est lue dans SON unité, marquée horsPlan
+  // (l'écran le dit) et n'entre pas dans le minimum.
   const propre = echeancePropreTache(item, plan);
   if (propre) {
+    const uniteReelle = item && item.interval_unite;
     const vuParLaTache = propre.genre === 'jours'
       ? { ...plan, tracking_mode: 'days', next_due_at: propre.valeur }
-      : { ...plan, tracking_mode: 'hours', next_due_at: null, ...planNextDueCounterPatch(propre.valeur) };
-    return { ...dueInfo(vuParLaTache, machine), horsPlan: true, propre };
+      : { ...plan, tracking_mode: uniteReelle || 'hours', next_due_at: null, ...planNextDueCounterPatch(propre.valeur) };
+    const machineVue = (propre.genre === 'jours' || !uniteReelle) ? machine : { ...machine, counter_unit: uniteReelle };
+    return { ...dueInfo(vuParLaTache, machineVue), horsPlan: true, propre };
   }
   const echeance = echeanceTache(item, plan);
   if (echeance.genre === 'compteur') {
@@ -5161,7 +5229,7 @@ function etatTacheHtml(item, plan, machine, disposition) {
   // Échéance propre (unité différente de celle du plan) : écrite dans SON unité,
   // suivie de la phrase qui dit qu'elle ne compte pas dans l'échéance du plan.
   const echeanceHtml = info.horsPlan
-    ? `<span class="muted">${esc(tR('Échéance : {echeance}', { echeance: echeancePropreTexte(info.propre, machine) }))}</span>`
+    ? `<span class="muted">${esc(tR('Échéance : {echeance}', { echeance: echeancePropreTexte(info.propre, machine, item && item.interval_unite) }))}</span>`
       + `<span class="muted">${trad('ne compte pas dans l\'échéance du plan')}</span>`
     : `<span class="${info.state === 'late' ? 'echeance-retard' : 'muted'}">${esc(info.short)}</span>`;
   return cellule(`<span class="badge ${badgeClass(info.state)}">${esc(badgeLabel(info.state))}</span>`
@@ -5173,8 +5241,16 @@ function etatTacheHtml(item, plan, machine, disposition) {
 function blocChoixTache(item, plan, machine) {
   const options = optionsTache(item, plan, machine);
   const lignes = options.map(o => {
-    const compatible = uniteCompatiblePlan(o.unite, plan, machine);
-    const note = compatible ? '' : ` <span class="muted">(${esc(tR('pas dans l\'unité de ce plan ({unite}) : la tâche resterait un point de contrôle', { unite: trad((UNITES_INTERVALLE[o.unite] || {}).mot || '') }))})</span>`;
+    // Une option qui n'est pas dans l'unité du plan n'est PAS forcément un
+    // point de contrôle : si elle correspond au second compteur de la
+    // machine, elle sera réellement suivie (voir preparerTaches) — le dire
+    // au lieu de décourager un choix qui serait pourtant suivi.
+    if (uniteCompatiblePlan(o.unite, plan, machine)) return `<li>${esc(libelleOption(o))}</li>`;
+    if (uniteCompatibleCompteur2(o.unite, machine)) {
+      const note = ` <span class="muted">(${esc(tR('suivie par le second compteur ({unite})', { unite: trad((UNITES_INTERVALLE[o.unite] || {}).mot || '') }))})</span>`;
+      return `<li>${esc(libelleOption(o))}${note}</li>`;
+    }
+    const note = ` <span class="muted">(${esc(tR('pas dans l\'unité de ce plan ({unite}) : la tâche resterait un point de contrôle', { unite: trad((UNITES_INTERVALLE[o.unite] || {}).mot || '') }))})</span>`;
     return `<li>${esc(libelleOption(o))}${note}</li>`;
   }).join('');
   return `
@@ -5186,12 +5262,30 @@ function blocChoixTache(item, plan, machine) {
     </div>`;
 }
 
+// Comme uniteCompatiblePlan, mais sans avoir besoin de la machine : le
+// tracking_mode du plan DIT déjà l'unité de compteur (hours/km) quand le plan
+// en est un — inutile de redemander à la machine, et ça évite de la faire
+// circuler jusque dans des fonctions qui ne l'ont pas sous la main.
+function uniteCompatiblePlanTM(unite, plan) {
+  const info = UNITES_INTERVALLE[unite];
+  if (!info) return false;
+  if (!planIsCounter(plan)) return info.genre === 'date';
+  return unite === (plan.tracking_mode === 'km' ? 'km' : 'heures');
+}
 // Tâches dont l'échéance est exploitable : ce sont les seules qui entrent dans
-// le calcul de la plus proche (et donc dans l'état de la machine).
+// le calcul de la plus proche (et donc dans l'état de la machine). LA MÊME
+// DIMENSION QUE LE PLAN, VRAIMENT : sans le filtre d'unité, une tâche « hors
+// plan » de genre compteur (ex. km sur un plan en heures) avait bien un
+// due_counter — et se retrouvait comptée dans le minimum du plan aux côtés de
+// due_counter en heures, deux unités mélangées dans le même Math.min. Un item
+// SANS interval_unite (données d'avant ce classement) n'est pas filtré : il
+// se comportait déjà ainsi, on ne régresse pas des plans anciens pour un
+// souci qui ne les concernait pas.
 function tachesSuivies(items, plan) {
   const liste = normalizeItems(items);
-  if (planIsCounter(plan)) return liste.filter(it => Number.isFinite(Number(it.due_counter)));
-  return liste.filter(it => it.due_at);
+  const compatibleUnite = (it) => !it.interval_unite || uniteCompatiblePlanTM(it.interval_unite, plan);
+  if (planIsCounter(plan)) return liste.filter(it => Number.isFinite(Number(it.due_counter)) && compatibleUnite(it));
+  return liste.filter(it => it.due_at && compatibleUnite(it));
 }
 
 // Tâche la plus urgente : c'est elle qui porte l'état affiché pour la machine.
@@ -5222,6 +5316,16 @@ function echeancePlanDepuisTaches(items, plan) {
     return suivies.reduce((min, it) => Math.min(min, Number(it.due_counter)), Number.POSITIVE_INFINITY);
   }
   return suivies.reduce((min, it) => (String(it.due_at) < min ? String(it.due_at) : min), String(suivies[0].due_at));
+}
+// La même règle, mais pour le SECOND compteur de la machine (voir
+// SCHEMA.hasCounter2) : le minimum des due_counter des tâches dont l'unité
+// correspond à CE second relevé — jamais à celui du plan principal.
+function echeancePlanDepuisTachesSecondaire(items, machine) {
+  const u2 = counterUnit2Of(machine);
+  if (!u2) return null;
+  const suivies = normalizeItems(items).filter(it => it.interval_unite === u2 && Number.isFinite(Number(it.due_counter)));
+  if (!suivies.length) return null;
+  return suivies.reduce((min, it) => Math.min(min, Number(it.due_counter)), Number.POSITIVE_INFINITY);
 }
 function echeancePlanPatch(valeur, plan) {
   return planIsCounter(plan) ? planNextDueCounterPatch(valeur) : { next_due_at: valeur };
@@ -5360,9 +5464,17 @@ function echeancePropreTacheAppliquee(t, machine) {
     t.due_at = ajouterIntervalleIso(depart, t.interval, t.interval_unite);
     delete t.due_counter;
   } else {
+    // Le SECOND compteur de la machine, si l'unité de la tâche y correspond :
+    // c'est SON relevé qui sert de point de départ — pas celui du suivi
+    // principal (une autre unité), et pas 0 par défaut. Sans ça, une tâche en
+    // km sur une machine suivie en heures repartait du relevé horaire comme
+    // s'il s'agissait de kilomètres (constaté le 23/09).
+    const relevePropre = uniteCompatibleCompteur2(t.interval_unite, machine)
+      ? machineCounter2(machine)
+      : machineCounter(machine);
     const depart = Number.isFinite(Number(t.last_done_counter))
       ? Number(t.last_done_counter)
-      : (Number(machineCounter(machine)) || 0);
+      : (Number(relevePropre) || 0);
     t.due_counter = depart + Number(t.interval);
     delete t.due_at;
   }
@@ -5371,7 +5483,10 @@ function echeancePropreTacheAppliquee(t, machine) {
 
 // LA PASSE, sur les éléments déjà en base comme sur ceux qui arrivent d'une
 // analyse. Idempotente, et elle ne touche JAMAIS un choix déjà fait.
-function preparerTaches(items, plan, machine, duePlan, unite) {
+// `duePlanSecondaire` : l'échéance ACTUELLE du second compteur du plan (voir
+// echeancePlanDepuisTachesSecondaire) — sert de reprise pour une tâche déjà
+// suivie par ce second compteur, exactement comme `duePlan` pour le principal.
+function preparerTaches(items, plan, machine, duePlan, unite, duePlanSecondaire) {
   const liste = normalizeItems(items);
   if (!liste.length) return null;
   const contreur = planIsCounter(plan);
@@ -5407,6 +5522,17 @@ function preparerTaches(items, plan, machine, duePlan, unite) {
         }
         return t;
       }
+      // Le SECOND compteur de la machine : une unité différente de celle du
+      // plan, mais réellement suivie via ce second relevé — même règle de
+      // reprise que le principal, sur SON échéance à lui.
+      if (uniteCompatibleCompteur2(classement.unite, machine)) {
+        if (!Number.isFinite(Number(t.due_counter)) && duePlanSecondaire != null) {
+          t.due_counter = duePlanSecondaire;
+          return t;
+        }
+        if (Number.isFinite(Number(t.due_counter))) return t;
+        return echeancePropreTacheAppliquee(t, machine);
+      }
       // Autre unité : sa propre échéance, dans son unité, hors du minimum du plan.
       delete t.due_at; delete t.due_counter;
       return echeancePropreTacheAppliquee(t, machine);
@@ -5434,7 +5560,7 @@ function projectionTaches(items, plan, machine) {
   const liste = normalizeItems(items);
   if (!liste.length) return liste;
   const duePlan = planIsCounter(plan) ? planNextDueCounter(plan) : (plan ? plan.next_due_at : null);
-  return preparerTaches(liste, plan, machine, duePlan, uniteSuivi(plan, machine)) || liste;
+  return preparerTaches(liste, plan, machine, duePlan, uniteSuivi(plan, machine), planNextDueCounter2(plan)) || liste;
 }
 
 // Le même classement, à partir du plan : c'est LA fonction qu'emploient les
@@ -5448,11 +5574,14 @@ function tachesAffichees(plan, machine) {
 // relevé saisi + leur intervalle). Les autres ne bougent pas — une tâche en
 // retard le reste tant qu'elle n'a pas été cochée. Renvoie null quand le plan
 // n'a aucun élément détaillé : le comportement d'avant s'applique alors.
-function tachesApresEntretien(items, plan, machine, cochees, releve, dateEntretien) {
+// `releve2` : le relevé du SECOND compteur, saisi au même moment (voir
+// SCHEMA.hasCounter2) — sert aux tâches dont l'unité correspond à ce second
+// compteur, jamais au principal.
+function tachesApresEntretien(items, plan, machine, cochees, releve, dateEntretien, releve2) {
   const unite = uniteSuivi(plan, machine);
   const contreur = planIsCounter(plan);
   const duePlan = contreur ? planNextDueCounter(plan) : (plan ? plan.next_due_at : null);
-  const taches = preparerTaches(items, plan, machine, duePlan, unite);
+  const taches = preparerTaches(items, plan, machine, duePlan, unite, planNextDueCounter2(plan));
   if (!taches) return null;
   const faites = Array.isArray(cochees) ? cochees : [];
   const apres = taches.map(t => {
@@ -5473,12 +5602,17 @@ function tachesApresEntretien(items, plan, machine, cochees, releve, dateEntreti
       delete tache.due_counter;
       return tache;
     }
-    tache.last_done_counter = releve;
-    tache.due_counter = Number(releve) + Number(resolu.interval);
+    // LEQUEL des deux relevés de la machine correspond à l'unité réelle de
+    // cette tâche ? Sans cette distinction, une tâche en km avançait avec le
+    // relevé saisi pour le suivi principal, même quand il était en heures —
+    // même bug que la lecture de l'échéance, constaté le 23/09.
+    const releveApplicable = uniteCompatibleCompteur2(resolu.unite, machine) ? releve2 : releve;
+    tache.last_done_counter = releveApplicable;
+    tache.due_counter = Number(releveApplicable) + Number(resolu.interval);
     delete tache.due_at;
     return tache;
   });
-  return { items: apres, echeance: echeancePlanDepuisTaches(apres, plan) };
+  return { items: apres, echeance: echeancePlanDepuisTaches(apres, plan), echeanceSecondaire: echeancePlanDepuisTachesSecondaire(apres, machine) };
 }
 
 // Le choix de l'utilisateur sur une tâche ambiguë. `choix` :
@@ -10216,6 +10350,26 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
     </div>`;
 }
 
+// Le SECOND compteur (voir SCHEMA.hasCounter2) : lecture seule ici, à
+// dessein — le premier compteur a tout un câblage dédié (photo, file
+// d'attente hors ligne, bouton d'enregistrement délégué au document) que
+// dupliquer aurait doublé sans nécessité. Le second se met à jour via
+// « Enregistrer un entretien » (openLogInterventionModal), qui écrit déjà
+// counter_value_2. Ne s'affiche que si la machine a réellement ce suivi.
+function compteur2Html(m, emplacement) {
+  const unite2 = counterUnit2Of(m);
+  if (!unite2) return '';
+  const id = esc(m.id);
+  const u2 = COUNTER_UNITS[unite2] || COUNTER_UNITS.hours;
+  const valeur2 = machineCounter2(m);
+  return `
+    <div class="compteur compteur-${emplacement} compteur-lecture compteur-secondaire" data-compteur2="${id}">
+      <span class="compteur-titre">${tR('Second compteur ({unite})', { unite: trad(u2.word) })}</span>
+      <span class="compteur-jour-valeur">${esc(valeur2 == null ? '—' : formatCounter(valeur2, unite2))}</span>
+      <span class="compteur-note">${trad('Mis à jour via « Enregistrer un entretien ».')}</span>
+    </div>`;
+}
+
 // Au retour du réseau, ce qui attend part tout seul.
 if (typeof window !== 'undefined' && window.addEventListener) {
   window.addEventListener('online', () => { viderCompteursEnAttente(); });
@@ -10699,6 +10853,25 @@ VIEWS.machines = {
 // LE CALENDAIRE A LA MÊME PREUVE, EN JOURS : la base contient déjà
 // `next_due_at` et `interval_days` (les mêmes valeurs que dueInfo()) ; le
 // début de cycle se déduit sans nouvelle donnée : next_due_at − interval_days.
+// Le SECOND compteur (voir SCHEMA.hasCounter2), vu comme dueInfo() et
+// jaugeIntervalleHtml() voient le principal : un couple {info, machineVue}
+// synthétique qui réutilise telles quelles les mêmes fonctions — aucune
+// duplication de la logique d'échéance ni de son affichage. null si la
+// machine n'a pas ce second suivi : rien ne s'affiche alors.
+function vueCompteurSecondaire(m) {
+  const unite2 = counterUnit2Of(m);
+  if (!unite2 || !m.plan) return null;
+  const machineVue = {
+    ...m, counter_unit: unite2, counter_value: machineCounter2(m),
+    plan: {
+      tracking_mode: unite2, next_due_at: null,
+      ...planNextDueCounterPatch(planNextDueCounter2(m.plan)),
+      interval_counter: planIntervalCounter2(m.plan),
+      reminder_counter_before: planReminderCounter2(m.plan),
+    },
+  };
+  return { info: dueInfo(machineVue.plan, machineVue), machineVue };
+}
 function jaugeIntervalleHtml(info, m, detaille) {
   if (!m || !m.plan) return '';
   const enCompteur = planIsCounter(m.plan);
@@ -10807,6 +10980,8 @@ function machineCardHtml(m) {
         </div>` : ''}
         ${compteurHtml(m, 'mobile')}
         ${compteurHtml(m, 'bureau')}
+        ${compteur2Html(m, 'mobile')}
+        ${compteur2Html(m, 'bureau')}
       </div>
       </div>
       <div class="m-side">
@@ -10822,6 +10997,7 @@ function machineCardHtml(m) {
             </span>
           </div>
           ${jaugeIntervalleHtml(info, m)}
+          ${(() => { const v2 = vueCompteurSecondaire(m); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue) : ''; })()}
         </div>
         <div class="m-actions">
           <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}${trad('Enregistrer un entretien')}</button>
@@ -14548,6 +14724,9 @@ function openAddWizard(companyId, categories) {
     intervalDays: 90, reminderDays: 7, tasks: '', pendingFile: null, pendingPhotoBlob: null,
     items: null, notes: '',
     trackingMode: 'days', currentHours: null, intervalHours: 100, reminderHoursBefore: 10,
+    // Second suivi, optionnel (voir SCHEMA.hasCounter2) : null tant qu'il
+    // n'est pas activé, ni proposé par l'analyse ni choisi à la main.
+    secondaryUnit: null, secondaryValue: null, secondaryIntervalCounter: 100, secondaryReminderCounter: 10,
     // Recherche d'une photo sur le web : desactivee par defaut, car elle
     // consomme un credit et n'a de sens que sans carnet PDF a scanner.
     searchPhoto: false,
@@ -14993,6 +15172,37 @@ function openAddWizard(companyId, categories) {
             <input id="f-reminder" type="number" min="0" value="${isCounter ? state.reminderHoursBefore : state.reminderDays}" required>
           </div>
         </div>
+        ${SCHEMA.hasCounter2 ? `
+        <label class="mform-photo-web" for="f-secondaire-active" style="margin-top:10px;">
+          <input type="checkbox" id="f-secondaire-active" ${state.secondaryUnit ? 'checked' : ''}>
+          <span class="mform-photo-web-corps">
+            <span>${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</span>
+          </span>
+        </label>
+        <div id="secondaire-champs" style="display:${state.secondaryUnit ? 'flex' : 'none'};flex-direction:column;gap:10px;margin-top:10px;">
+          <div class="mform-cards">
+            <label class="mform-card" id="carte-secondaire-hours" style="display:${mode === 'hours' ? 'none' : 'flex'};">
+              <input type="radio" name="tm2" value="hours" ${state.secondaryUnit === 'hours' ? 'checked' : ''}>
+              <span class="mform-card-ico">${picto('compteur')}</span>
+              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Compteur horaire')}</span><span class="mform-card-texte">${trad('Heures')}</span></span>
+            </label>
+            <label class="mform-card" id="carte-secondaire-km" style="display:${mode === 'km' ? 'none' : 'flex'};">
+              <input type="radio" name="tm2" value="km" ${state.secondaryUnit === 'km' ? 'checked' : ''}>
+              <span class="mform-card-ico">${picto('vehicule')}</span>
+              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
+            </label>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
+              <input id="f-secondaire-valeur" type="number" min="0" value="${state.secondaryValue ?? ''}">
+            </div>
+            <div>
+              <label for="f-secondaire-interval">${trad('Échéance tous les')}</label>
+              <input id="f-secondaire-interval" type="number" min="1" value="${state.secondaryIntervalCounter}">
+            </div>
+          </div>
+        </div>` : ''}
       </section>
 
       <section class="mform-section mform-section-2">
@@ -15036,8 +15246,33 @@ function openAddWizard(companyId, categories) {
         if (champIntervalle && !overlay._intervalTouche) {
           champIntervalle.value = intervallePropose(choix, intervallesIA(overlay));
         }
+        // Le second suivi ne peut pas être la MÊME unité que le principal : la
+        // carte devenue redondante se cache, et se décoche si elle l'était.
+        const carteSecH = overlay.querySelector('#carte-secondaire-hours');
+        const carteSecK = overlay.querySelector('#carte-secondaire-km');
+        if (carteSecH) carteSecH.style.display = choix === 'hours' ? 'none' : 'flex';
+        if (carteSecK) carteSecK.style.display = choix === 'km' ? 'none' : 'flex';
+        if (choix !== 'days') {
+          const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
+          if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+            radioDevenuInvalide.checked = false;
+            marquerCarteSelectionnee('tm2');
+          }
+        }
       });
     });
+    // Second suivi, optionnel : repliable, sans rien écrire tant qu'il n'est
+    // pas coché (voir SCHEMA.hasCounter2).
+    if (SCHEMA.hasCounter2) {
+      const caseSecondaire = overlay.querySelector('#f-secondaire-active');
+      const champsSecondaire = overlay.querySelector('#secondaire-champs');
+      caseSecondaire?.addEventListener('change', () => {
+        if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
+        if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
+      });
+      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => marquerCarteSelectionnee('tm2')));
+      marquerCarteSelectionnee('tm2');
+    }
     const champIntervalleWizard = overlay.querySelector('#f-interval');
     if (champIntervalleWizard) {
       champIntervalleWizard.addEventListener('input', () => { overlay._intervalTouche = true; });
@@ -15087,6 +15322,19 @@ function openAddWizard(companyId, categories) {
       }
       const photo = overlay.querySelector('#f-search-photo');
       state.searchPhoto = photo ? !!photo.checked : false;
+      // Second suivi, optionnel : rien n'est écrit s'il n'a pas été coché.
+      const caseSecondaireActive = overlay.querySelector('#f-secondaire-active');
+      if (caseSecondaireActive?.checked) {
+        const radioSecondaire = overlay.querySelector('input[name=tm2]:checked');
+        state.secondaryUnit = radioSecondaire ? radioSecondaire.value : null;
+        state.secondaryValue = state.secondaryUnit ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
+        state.secondaryIntervalCounter = state.secondaryUnit
+          ? (parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS)
+          : state.secondaryIntervalCounter;
+      } else {
+        state.secondaryUnit = null;
+        state.secondaryValue = null;
+      }
       if (aUnCarnet) {
         saveMachine(e.target.querySelector('button[type=submit]'), overlay.querySelector('#f-error'));
       } else {
@@ -15190,6 +15438,7 @@ function openAddWizard(companyId, categories) {
             state.trackingMode !== 'days' ? state.currentHours : null,
             { counter_unit: counterUnitFromMode(state.trackingMode) }
           ),
+          ...(state.secondaryUnit ? machineCounter2Patch(state.secondaryValue, state.secondaryUnit) : {}),
         })
         .select('id')
         .single();
@@ -15239,23 +15488,34 @@ function openAddWizard(companyId, categories) {
         // contienne jamais une affirmation qui vieillira.
         notes: notesUtiles(state.notes, state.currentHours),
       };
+      // Second compteur, optionnel : vu par le moteur d'échéances comme des
+      // champs supplémentaires sur une machine « synthétique » (la vraie
+      // machine n'existe pas encore comme objet complet à ce stade).
+      const machineVue2 = { counter_unit_2: state.secondaryUnit || null, counter_value_2: state.secondaryValue ?? null };
+      const secondaireActif = !!state.secondaryUnit;
+      const intervalSecondaire = state.secondaryIntervalCounter || FALLBACK_INTERVAL_HOURS;
+      if (secondaireActif) {
+        Object.assign(planPayload, planCounter2Patch(intervalSecondaire, state.secondaryReminderCounter ?? FALLBACK_REMINDER_HOURS));
+      }
       if (state.trackingMode !== 'days') {
         const intervalCounter = state.intervalHours || FALLBACK_INTERVAL_HOURS;
         const reminderCounter = state.reminderHoursBefore ?? FALLBACK_REMINDER_HOURS;
         const dueCounter = (state.currentHours || 0) + intervalCounter;
+        const duePlanSecondaire = secondaireActif ? (state.secondaryValue || 0) + intervalSecondaire : null;
         Object.assign(planPayload,
           planCounterPatch(intervalCounter, reminderCounter),
           planNextDueCounterPatch(dueCounter));
         // Une échéance par tâche : la passe CLASSE chaque fréquence (conditionnelle,
         // périodique, à choisir) et ne donne l'échéance du plan qu'aux tâches qui
-        // ont un vrai rythme dans l'unité du plan.
+        // ont un vrai rythme dans l'unité du plan (ou dans celle du second compteur).
         planPayload.items = preparerTaches(state.items, planPayload,
-          { counter_unit: counterUnitFromMode(state.trackingMode), counter_value: state.currentHours },
-          dueCounter, counterUnitFromMode(state.trackingMode));
+          { counter_unit: counterUnitFromMode(state.trackingMode), counter_value: state.currentHours, ...machineVue2 },
+          dueCounter, counterUnitFromMode(state.trackingMode), duePlanSecondaire);
         // L'échéance du plan est le MINIMUM de ses tâches comparables, et RIEN
         // quand aucune ne la porte (toutes conditionnelles, ou dans une autre
         // unité) : l'intervalle général du carnet ne doit pas rester en vestige.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
+        if (secondaireActif) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2)));
         // On conserve aussi un intervalle calendaire cohérent : il servira si la
         // machine bascule plus tard en suivi calendaire.
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
@@ -15264,9 +15524,11 @@ function openAddWizard(companyId, categories) {
         planPayload.interval_days = state.intervalDays || FALLBACK_INTERVAL_DAYS;
         planPayload.reminder_days_before = state.reminderDays ?? FALLBACK_REMINDER_DAYS;
         planPayload.next_due_at = addDaysIso(state.serviceDate, planPayload.interval_days);
+        const duePlanSecondaire = secondaireActif ? (state.secondaryValue || 0) + intervalSecondaire : null;
         // Une échéance par tâche : même passe, même classement (mode calendaire).
         planPayload.items = preparerTaches(state.items, planPayload,
-          { counter_unit: 'hours', counter_value: null }, planPayload.next_due_at, 'days');
+          { counter_unit: 'hours', counter_value: null, ...machineVue2 }, planPayload.next_due_at, 'days', duePlanSecondaire);
+        if (secondaireActif) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2)));
         // Même règle en mode calendaire : le plan suit le minimum de ses tâches.
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
         // L'intervalle affiché (jauge, fiche) suit la tâche qui gouverne
@@ -15382,6 +15644,9 @@ function openLogInterventionModal(machine, tache) {
   const today = todayIso();
   const isCounter = planIsCounter(machine.plan);
   const unit = counterUnitOf(machine);
+  // Second compteur : n'existe que si la machine en a un (voir
+  // SCHEMA.hasCounter2) — sinon aucun champ, aucune question en plus.
+  const unit2 = counterUnit2Of(machine);
   const overlay = document.createElement('div');
   overlay.className = 'overlay log-modal';
   document.body.appendChild(overlay);
@@ -15426,6 +15691,17 @@ function openLogInterventionModal(machine, tache) {
               ${machineCounter(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter(machine), unit) })}</div>` : ''}
             </div>` : ''}
           </div>
+          ${unit2 ? `
+          <div class="field-row">
+            <div>
+              <label for="log-hours-2"><span class="label-ico">${picto('compteur')}</span>${tR('Second compteur ({unite})', { unite: trad((COUNTER_UNITS[unit2] || {}).word || unit2) })}</label>
+              <div class="log-compteur-ligne">
+                <input id="log-hours-2" type="number" min="0" step="${COUNTER_UNITS[unit2].step}" value="${esc(machineCounter2(machine) ?? '')}" required>
+                <span class="log-compteur-unite">${esc(COUNTER_UNITS[unit2].short)}</span>
+              </div>
+              ${machineCounter2(machine) != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(machineCounter2(machine), unit2) })}</div>` : ''}
+            </div>
+          </div>` : ''}
 
           <!-- Qui a fait l'entretien, dans l'équipe : le CHAMP seulement pour
                l'instant, comme convenu — la sélection réelle (liste de
@@ -15512,7 +15788,12 @@ function openLogInterventionModal(machine, tache) {
       previewEl.textContent = trad('Indique le relevé du compteur pour voir la prochaine échéance.');
       return;
     }
-    const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursVal, dateVal);
+    const hoursVal2 = unit2 ? parseFloat(overlay.querySelector('#log-hours-2')?.value) : null;
+    if (unit2 && !Number.isFinite(hoursVal2)) {
+      previewEl.textContent = trad('Indique le relevé du second compteur pour voir la prochaine échéance.');
+      return;
+    }
+    const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursVal, dateVal, hoursVal2);
     const echeance = suivi ? suivi.echeance : null;
     if (echeance == null) {
       previewEl.textContent = checkedItems.length
@@ -15527,6 +15808,7 @@ function openLogInterventionModal(machine, tache) {
   overlay.querySelectorAll('.log-checklist input').forEach((c) => c.addEventListener('change', majApercu));
   overlay.querySelector('#log-date')?.addEventListener('input', majApercu);
   overlay.querySelector('#log-hours')?.addEventListener('input', majApercu);
+  overlay.querySelector('#log-hours-2')?.addEventListener('input', majApercu);
   majApercu();
 
   overlay.querySelector('#log-form').addEventListener('submit', async (e) => {
@@ -15538,6 +15820,7 @@ function openLogInterventionModal(machine, tache) {
 
     const performedAt = overlay.querySelector('#log-date').value;
     const hoursValue = isCounter ? parseFloat(overlay.querySelector('#log-hours').value) : null;
+    const hoursValue2 = unit2 ? parseFloat(overlay.querySelector('#log-hours-2').value) : null;
     const checkedItems = items.length
       ? Array.from(overlay.querySelectorAll('.checklist input:checked')).map(c => c.value)
       : [];
@@ -15549,6 +15832,7 @@ function openLogInterventionModal(machine, tache) {
         plan_id: machine.plan?.id || null,
         performed_at: performedAt,
         hours_at_intervention: hoursValue,
+        ...(unit2 ? { hours_at_intervention_2: hoursValue2 } : {}),
         description: notes || null,
         items_done: checkedItems.length ? checkedItems : null,
       });
@@ -15557,6 +15841,10 @@ function openLogInterventionModal(machine, tache) {
       if (isCounter && hoursValue != null) {
         const { error: machErr } = await sb.from(trad('machines')).update(machineCounterPatch(hoursValue, machine)).eq('id', machine.id);
         if (machErr) throw machErr;
+      }
+      if (unit2 && hoursValue2 != null) {
+        const { error: mach2Err } = await sb.from(trad('machines')).update(machineCounter2Patch(hoursValue2, unit2)).eq('id', machine.id);
+        if (mach2Err) throw mach2Err;
       }
 
       if (machine.plan?.id) {
@@ -15570,10 +15858,13 @@ function openLogInterventionModal(machine, tache) {
         // ou des échéances d'une autre unité n'a plus d'échéance générale, et
         // garder l'ancienne valeur en ferait un vestige qui rend la machine « en
         // retard » à tort (cas réel : « Vehicule du PDG », 1 470 km fantômes).
-        const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursValue, performedAt);
+        const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursValue, performedAt, hoursValue2);
         if (suivi) {
           planUpdate.items = suivi.items;
           Object.assign(planUpdate, echeancePlanPatch(suivi.echeance, machine.plan));
+          // Même règle pour le second compteur, s'il existe : son échéance suit
+          // aussi le minimum de SES tâches, et disparaît si aucune ne la porte.
+          if (unit2) Object.assign(planUpdate, planNextDueCounter2Patch(suivi.echeanceSecondaire));
         } else if (journalAvanceEcheance(items, checkedItems)) {
           // Plan sans élément détaillé : comportement d'avant, inchangé.
           if (isCounter) {
@@ -15918,7 +16209,11 @@ function openPlanView(machine, companyId, categories) {
           <div class="plan-hero-champs">
             <div class="plan-hero-champ"><span class="label">${trad('Cadence')}</span><span class="value">${isCounterMode ? tR('Tous les {n}', { n: formatCounter(planIntervalCounter(machine.plan), unit) }) : tR('Tous les {n} jours', { n: machine.plan.interval_days })}</span></div>
             <div class="plan-hero-champ"><span class="label">${trad('Rappel anticipé')}</span><span class="value">${isCounterMode ? tR('{n} avant', { n: formatCounter(planReminderCounter(machine.plan), unit) }) : tR('{n} jour(s) avant', { n: machine.plan.reminder_days_before })}</span></div>
-            <div class="plan-hero-champ"><span class="label">${trad('Mode de suivi')}</span><span class="value">${machine.plan.tracking_mode === 'days' ? trad('Calendaire (jours)') : (unit === 'km' ? trad('Kilométrage') : trad('Compteur horaire'))}</span></div>
+            <div class="plan-hero-champ"><span class="label">${trad('Mode de suivi')}</span><span class="value">${(() => {
+              const principal = machine.plan.tracking_mode === 'days' ? trad('Calendaire (jours)') : (unit === 'km' ? trad('Kilométrage') : trad('Compteur horaire'));
+              const unite2 = counterUnit2Of(machine);
+              return unite2 ? tR('{principal} + {second}', { principal, second: unite2 === 'km' ? trad('Kilométrage') : trad('Compteur horaire') }) : principal;
+            })()}</span></div>
           </div>` : ''}
         </div>
         ${machine.plan ? `<div class="plan-hero-compteur">
@@ -15933,7 +16228,9 @@ function openPlanView(machine, companyId, categories) {
           </div>
           ` : ''}
           ${jaugeIntervalleHtml(info, machine, true)}
+          ${(() => { const v2 = vueCompteurSecondaire(machine); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue, true) : ''; })()}
           ${compteurHtml(machine, 'bureau', 'Mettre à jour', 'Valider')}${compteurHtml(machine, 'mobile', 'Mettre à jour', 'Valider')}
+          ${compteur2Html(machine, 'bureau')}${compteur2Html(machine, 'mobile')}
         </div>` : ''}
       </div>
 
@@ -16128,6 +16425,12 @@ function openMachineModal(companyId, categories, existing) {
         ? planReminderCounter(existing.plan)
         : (existing.plan?.reminder_days_before ?? FALLBACK_REMINDER_DAYS))
     : FALLBACK_REMINDER_DAYS;
+  // Second suivi, optionnel (voir SCHEMA.hasCounter2) : déjà actif si la
+  // machine porte un second relevé.
+  const editSecondaryUnit = isEdit ? counterUnit2Of(existing) : null;
+  const editSecondaryValue = isEdit ? machineCounter2(existing) : null;
+  const editSecondaryInterval = isEdit ? (planIntervalCounter2(existing.plan) || FALLBACK_INTERVAL_HOURS) : FALLBACK_INTERVAL_HOURS;
+  const editSecondaryReminder = isEdit ? planReminderCounter2(existing.plan) : FALLBACK_REMINDER_HOURS;
 
   const kindActuel = isEdit ? machineKind(existing) : TYPE_MACHINE;
   overlay.innerHTML = `
@@ -16298,6 +16601,37 @@ function openMachineModal(companyId, categories, existing) {
               <input id="f-reminder" type="number" min="0" value="${isEdit ? esc(editReminder) : FALLBACK_REMINDER_DAYS}" required>
             </div>
           </div>
+          ${SCHEMA.hasCounter2 ? `
+          <label class="mform-photo-web" for="f-secondaire-active" style="margin-top:10px;">
+            <input type="checkbox" id="f-secondaire-active" ${editSecondaryUnit ? 'checked' : ''}>
+            <span class="mform-photo-web-corps">
+              <span>${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</span>
+            </span>
+          </label>
+          <div id="secondaire-champs" style="display:${editSecondaryUnit ? 'flex' : 'none'};flex-direction:column;gap:10px;margin-top:10px;">
+            <div class="mform-cards">
+              <label class="mform-card" id="carte-secondaire-hours" style="display:${editMode === 'hours' ? 'none' : 'flex'};">
+                <input type="radio" name="tm2" value="hours" ${editSecondaryUnit === 'hours' ? 'checked' : ''}>
+                <span class="mform-card-ico">${picto('compteur')}</span>
+                <span class="mform-card-corps"><span class="mform-card-titre">${trad('Compteur horaire')}</span><span class="mform-card-texte">${trad('Heures')}</span></span>
+              </label>
+              <label class="mform-card" id="carte-secondaire-km" style="display:${editMode === 'km' ? 'none' : 'flex'};">
+                <input type="radio" name="tm2" value="km" ${editSecondaryUnit === 'km' ? 'checked' : ''}>
+                <span class="mform-card-ico">${picto('vehicule')}</span>
+                <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
+              </label>
+            </div>
+            <div class="field-row">
+              <div>
+                <label for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
+                <input id="f-secondaire-valeur" type="number" min="0" value="${editSecondaryValue ?? ''}">
+              </div>
+              <div>
+                <label for="f-secondaire-interval">${trad('Échéance tous les')}</label>
+                <input id="f-secondaire-interval" type="number" min="1" value="${editSecondaryInterval}">
+              </div>
+            </div>
+          </div>` : ''}
 
           <label for="f-tasks">${trad('Tâches de maintenance')}</label>
           <textarea id="f-tasks" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
@@ -16386,11 +16720,35 @@ function openMachineModal(companyId, categories, existing) {
       if (champIntervalle && !overlay._intervalTouche) {
         champIntervalle.value = intervallePropose(mode, intervallesIA(overlay));
       }
+      // Le second suivi ne peut pas être la MÊME unité que le principal.
+      const carteSecH = overlay.querySelector('#carte-secondaire-hours');
+      const carteSecK = overlay.querySelector('#carte-secondaire-km');
+      if (carteSecH) carteSecH.style.display = mode === 'hours' ? 'none' : 'flex';
+      if (carteSecK) carteSecK.style.display = mode === 'km' ? 'none' : 'flex';
+      if (mode !== 'days') {
+        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${mode}"]`);
+        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+          radioDevenuInvalide.checked = false;
+          marquerCarteSelectionnee('tm2');
+        }
+      }
     });
   });
   const champIntervalleEdit = overlay.querySelector('#f-interval');
   if (champIntervalleEdit) {
     champIntervalleEdit.addEventListener('input', () => { overlay._intervalTouche = true; });
+  }
+  // Second suivi, optionnel : repliable, sans rien écrire tant qu'il n'est
+  // pas coché (voir SCHEMA.hasCounter2).
+  if (SCHEMA.hasCounter2) {
+    const caseSecondaire = overlay.querySelector('#f-secondaire-active');
+    const champsSecondaire = overlay.querySelector('#secondaire-champs');
+    caseSecondaire?.addEventListener('change', () => {
+      if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
+      if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
+    });
+    overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => marquerCarteSelectionnee('tm2')));
+    marquerCarteSelectionnee('tm2');
   }
 
   if (isEdit) {
@@ -16685,6 +17043,25 @@ function openMachineModal(companyId, categories, existing) {
     // « Modifier » l'effacerait (machineCounterPatch écrit null quand la valeur
     // est nulle), et le client perdrait son relevé sans le moindre message.
     const currentHours = isCounterMode ? (machineCounter(existing) ?? null) : null;
+    // Second suivi, optionnel (voir SCHEMA.hasCounter2). Même règle que le
+    // compteur principal : la VALEUR ne se ressaisit pas une fois le suivi
+    // déjà actif (elle a son champ sur la carte) — seule l'ACTIVATION
+    // initiale, ou un changement d'unité, capture une valeur de départ ici.
+    const secondaireActiveMaintenant = SCHEMA.hasCounter2 && !!overlay.querySelector('#f-secondaire-active')?.checked;
+    const secondaryUnit = secondaireActiveMaintenant
+      ? (overlay.querySelector('input[name=tm2]:checked')?.value || null)
+      : null;
+    const secondaryValue = secondaryUnit
+      ? (editSecondaryUnit === secondaryUnit
+          ? (machineCounter2(existing) ?? 0)
+          : (parseFloat(overlay.querySelector('#f-secondaire-valeur')?.value) || 0))
+      : null;
+    const secondaryIntervalCounter = secondaryUnit
+      ? (parseInt(overlay.querySelector('#f-secondaire-interval')?.value, 10) || FALLBACK_INTERVAL_HOURS)
+      : null;
+    const secondaryReminderCounter = secondaryUnit
+      ? (existing?.plan ? planReminderCounter2(existing.plan) : FALLBACK_REMINDER_HOURS)
+      : null;
     const intervalValue = parseInt(overlay.querySelector('#f-interval').value, 10);
     const reminderValue = parseInt(overlay.querySelector('#f-reminder').value, 10);
     // Les deux unités sont toujours renseignées : une machine suivie au compteur
@@ -16754,6 +17131,11 @@ function openMachineModal(companyId, categories, existing) {
       };
       Object.assign(updatePayload, brandModelPatch(brand, model));
       Object.assign(updatePayload, machineCounterPatch(currentHours, { counter_unit: counterUnit }));
+      if (SCHEMA.hasCounter2) {
+        Object.assign(updatePayload, secondaryUnit
+          ? machineCounter2Patch(secondaryValue, secondaryUnit)
+          : { counter_value_2: null, counter_unit_2: null });
+      }
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb
         .from(trad('machines'))
@@ -16786,6 +17168,15 @@ function openMachineModal(companyId, categories, existing) {
         };
         Object.assign(planUpdate, planCounterPatch(intervalCounter, reminderCounter));
         if (overlay._aiItems) { planUpdate.items = overlay._aiItems; planUpdate.notes = notesUtiles(overlay._aiNotes, machineCounter(existing)); }
+        // Second suivi, optionnel : sa propre échéance de reprise, comme le
+        // principal — voir machineVue2 et duePlanSecondaire plus bas.
+        if (SCHEMA.hasCounter2) {
+          Object.assign(planUpdate, secondaryUnit
+            ? planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter)
+            : planCounter2Patch(null, null));
+        }
+        const machineVue2 = { ...existing, counter_unit_2: secondaryUnit, counter_value_2: secondaryValue };
+        const secondaireInchange = secondaryUnit && secondaryUnit === editSecondaryUnit;
 
         const aiJustRefreshed = !!(overlay._aiItems || overlay._aiIntervalHours || overlay._aiIntervalDays);
         const modeChanged = existing.plan.tracking_mode !== trackingMode;
@@ -16856,8 +17247,14 @@ function openMachineModal(companyId, categories, existing) {
         const duePlanMaj = isCounterMode
           ? planNextDueCounter({ ...existing.plan, ...planUpdate })
           : (planUpdate.next_due_at || existing.plan.next_due_at);
+        // Le second compteur : reprise sur SON échéance actuelle s'il ne
+        // change pas, ou toute nouvelle échéance (valeur + intervalle) s'il
+        // vient d'être activé ou changé d'unité.
+        const duePlanSecondaire = !secondaryUnit ? null
+          : secondaireInchange ? planNextDueCounter2(existing.plan)
+          : (secondaryValue || 0) + secondaryIntervalCounter;
         const itemsMaj = preparerTaches(overlay._aiItems || itemsSource,
-          { ...existing.plan, ...planUpdate }, existing, duePlanMaj, counterUnit);
+          { ...existing.plan, ...planUpdate }, machineVue2, duePlanMaj, counterUnit, duePlanSecondaire);
         if (itemsMaj) {
           planUpdate.items = itemsMaj;
           // Même règle : l'échéance du plan suit le minimum de ses tâches
@@ -16865,6 +17262,7 @@ function openMachineModal(companyId, categories, existing) {
           Object.assign(planUpdate, echeancePlanPatch(
             echeancePlanDepuisTaches(itemsMaj, { ...existing.plan, ...planUpdate }),
             { ...existing.plan, ...planUpdate }));
+          if (secondaryUnit) Object.assign(planUpdate, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2)));
           // L'INTERVALLE AFFICHÉ (jauge, fiche) doit être celui de la tâche qui
           // gouverne réellement cette échéance, pas la valeur saisie à part
           // dans le formulaire — demandé le 23/09 après avoir constaté qu'un
@@ -16893,6 +17291,11 @@ function openMachineModal(companyId, categories, existing) {
           reminder_days_before: reminderDays,
         };
         Object.assign(planPayload, planCounterPatch(intervalCounter, reminderCounter));
+        if (SCHEMA.hasCounter2 && secondaryUnit) {
+          Object.assign(planPayload, planCounter2Patch(secondaryIntervalCounter, secondaryReminderCounter));
+        }
+        const machineVue2Nouveau = { counter_unit_2: secondaryUnit, counter_value_2: secondaryValue };
+        const duePlanSecondaireNouveau = secondaryUnit ? (secondaryValue || 0) + secondaryIntervalCounter : null;
         const duePlanNouveau = isCounterMode
           ? (currentHours || 0) + intervalCounter
           : addDaysIso(serviceDate, intervalDays);
@@ -16902,12 +17305,15 @@ function openMachineModal(companyId, categories, existing) {
           planPayload.next_due_at = duePlanNouveau;
         }
         // Une échéance par tâche : la passe CLASSE chaque fréquence et ne donne
-        // l'échéance du plan qu'aux tâches qui ont un vrai rythme dans son unité.
+        // l'échéance du plan qu'aux tâches qui ont un vrai rythme dans son unité
+        // (ou dans celle du second compteur, s'il est actif).
         planPayload.items = preparerTaches(overlay._aiItems, planPayload,
-          { counter_unit: counterUnit, counter_value: currentHours }, duePlanNouveau, counterUnit);
+          { counter_unit: counterUnit, counter_value: currentHours, ...machineVue2Nouveau },
+          duePlanNouveau, counterUnit, duePlanSecondaireNouveau);
         // L'échéance du plan suit le minimum de ses tâches comparables — et
         // disparaît si aucune ne la porte (aucune tâche périodique dans l'unité).
         Object.assign(planPayload, echeancePlanPatch(echeancePlanDepuisTaches(planPayload.items, planPayload), planPayload));
+        if (secondaryUnit) Object.assign(planPayload, planNextDueCounter2Patch(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau)));
         // Même règle que sur une modification : l'intervalle affiché suit la
         // tâche qui gouverne réellement l'échéance, pas la saisie à part.
         if (!isCounterMode) {
@@ -17062,8 +17468,11 @@ async function boot(toastMessage) {
   // Capacités du schéma, détectées par deux requêtes minuscules (une ligne,
   // aucune donnée lue). Cela remplace l'ancienne cascade de repli, qui devenait
   // ingérable à mesure que des colonnes optionnelles s'ajoutaient.
-  const [sondeCompteur, sondeMarque, sondeType, sondeAnnee, sondeCreation] = await Promise.all([
+  const [sondeCompteur, sondeCompteur2, sondeMarque, sondeType, sondeAnnee, sondeCreation] = await Promise.all([
     sb.from('machines').select('counter_unit').limit(1),
+    // Second compteur : sondé séparément, la migration peut être appliquée
+    // sans que l'autre le soit (voir SCHEMA.hasCounter2).
+    sb.from('machines').select('counter_value_2').limit(1),
     sb.from('machines').select('brand, model').limit(1),
     sb.from('machines').select('kind, plate').limit(1),
     sb.from('machines').select('model_year').limit(1),
@@ -17073,6 +17482,7 @@ async function boot(toastMessage) {
     sb.from('machines').select('created_at').limit(1),
   ]);
   SCHEMA.hasCounter = !sondeCompteur.error;
+  SCHEMA.hasCounter2 = !sondeCompteur2.error;
   SCHEMA.hasBrandModel = !sondeMarque.error;
   SCHEMA.hasKind = !sondeType.error;
   SCHEMA.hasPlate = !sondeType.error;
@@ -17084,6 +17494,7 @@ async function boot(toastMessage) {
     'service_date', 'image_url',
     SCHEMA.hasCounter ? 'counter_unit' : 'current_hours',
     ...(SCHEMA.hasCounter ? ['counter_value'] : []),
+    ...(SCHEMA.hasCounter2 ? ['counter_value_2', 'counter_unit_2'] : []),
     ...(SCHEMA.hasBrandModel ? ['brand', 'model'] : []),
     ...(SCHEMA.hasKind ? ['kind'] : []),
     ...(SCHEMA.hasPlate ? ['plate'] : []),
@@ -17098,6 +17509,9 @@ async function boot(toastMessage) {
     ...(SCHEMA.hasCounter
       ? ['interval_counter', 'next_due_counter', 'reminder_counter_before']
       : ['interval_hours', 'next_due_hours', 'reminder_hours_before']),
+    ...(SCHEMA.hasCounter2
+      ? ['interval_counter_2', 'next_due_counter_2', 'reminder_counter_before_2']
+      : []),
   ].join(', ');
 
   const { data: machines, error: machinesErr } = await sb
