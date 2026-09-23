@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-L12YbAabiOMrCaC/BeOxkTImxkt8/uEDdkgC2/857fQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-pz4MYk1hoiWbBCYTxFMGKJ8HIoLZBa3JuMq9VF6ESxQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5338,17 +5338,31 @@ function tachesSuivies(items, plan) {
   return liste.filter(it => it.due_at && compatibleUnite(it));
 }
 
-// Tâche la plus urgente : c'est elle qui porte l'état affiché pour la machine.
+// Tâche la plus urgente : c'est elle qui porte l'état affiché pour la
+// machine — PRINCIPALE ou SECONDAIRE, la première tâche vraiment suivie qui
+// arrive. Sans ça, une machine dont seul le second suivi est en retard
+// affichait quand même la tâche (à jour) du suivi principal — signalé le
+// 23/09, en même temps que la carte/le tri qui ne remontaient pas la
+// machine (voir infoMachine()).
 function tacheLaPlusUrgente(items, plan, machine) {
   // Les tâches sont PROJETÉES avant d'être classées : l'état de la machine vient
   // donc du même classement que celui qu'un enregistrement écrirait (voir
   // projectionTaches), et une consultation ne peut pas raconter autre chose.
-  const suivies = tachesSuivies(projectionTaches(items, plan, machine), plan);
+  const projetees = projectionTaches(items, plan, machine);
   let meilleure = null;
   let meilleureInfo = null;
-  suivies.forEach(it => {
+  projetees.forEach(it => {
     const info = infoTache(it, plan, machine);
-    if (!meilleureInfo || info.sortKey < meilleureInfo.sortKey) { meilleure = it; meilleureInfo = info; }
+    // Exploitable = une vraie échéance, principale OU secondaire — jamais un
+    // point de contrôle, un choix en attente, une tâche inconnue, ou une
+    // tâche vraiment hors plan (aucun suivi, ni principal ni secondaire) :
+    // celle-là ne doit pas se faire passer pour LA tâche prévue.
+    if (info.state !== 'late' && info.state !== 'soon' && info.state !== 'ok') return;
+    if (info.horsPlan) return;
+    // `urgency`, pas `sortKey` : la seule mesure comparable entre deux
+    // dimensions différentes (heures, km, jours) — la même que dueInfo()
+    // documente pour classer ensemble compteur et calendrier.
+    if (!meilleureInfo || info.urgency < meilleureInfo.urgency) { meilleure = it; meilleureInfo = info; }
   });
   return meilleure ? { item: meilleure, info: meilleureInfo } : null;
 }
@@ -9264,7 +9278,7 @@ function nextTaskLabel(machine) {
 function machineCounts(machines) {
   const c = { late: 0, soon: 0, ok: 0, manuals: 0, analysed: 0 };
   machines.forEach(m => {
-    const info = dueInfo(m.plan, m);
+    const info = infoMachine(m);
     if (info.state === 'late') c.late++;
     else if (info.state === 'soon') c.soon++;
     else c.ok++;                       // à jour + plans non renseignés : rien à traiter
@@ -9277,14 +9291,14 @@ function machineCounts(machines) {
 // Échéances à traiter, les plus urgentes d'abord.
 function openAlerts() {
   return UI.machines
-    .map(m => ({ machine: m, info: dueInfo(m.plan, m) }))
+    .map(m => ({ machine: m, info: infoMachine(m) }))
     .filter(x => x.info.state === 'late' || x.info.state === 'soon')
     .sort((a, b) => {
       const rank = (s) => (s === 'late' ? 0 : 1);
       if (rank(a.info.state) !== rank(b.info.state)) return rank(a.info.state) - rank(b.info.state);
-      // En retard : le plus dépassé d'abord. Bientôt : le plus proche de
-      // l'échéance d'abord, à fenêtre comparable (heures et jours mélangés).
-      if (a.info.state === 'late') return a.info.sortKey - b.info.sortKey;
+      // Le plus urgent d'abord, dans un cas comme dans l'autre — `urgency`
+      // reste comparable même quand deux machines sont en retard sur des
+      // dimensions différentes (l'une en heures, l'autre en jours).
       return a.info.urgency - b.info.urgency;
     });
 }
@@ -9302,7 +9316,7 @@ function openAlerts() {
 function echeancesListe() {
   const rang = (s) => (s === 'late' ? 0 : s === 'soon' ? 1 : 2);
   return UI.machines
-    .map(m => ({ machine: m, info: dueInfo(m.plan, m) }))
+    .map(m => ({ machine: m, info: infoMachine(m) }))
     .sort((a, b) => {
       if (rang(a.info.state) !== rang(b.info.state)) return rang(a.info.state) - rang(b.info.state);
       if (a.info.urgency !== b.info.urgency) return a.info.urgency - b.info.urgency;
@@ -10780,7 +10794,9 @@ function fleetMatches() {
   const f = fleetFilters();
   const q = (f.q || '').trim().toLowerCase();
   return UI.machines.filter(m => {
-    const state = dueInfo(m.plan, m).state;
+    // L'état GLOBAL (le pire des deux suivis) : un filtre « En retard » ne
+    // doit pas cacher une machine dont seul le second suivi est en retard.
+    const state = infoMachine(m).state;
     if (f.status === 'late' && state !== 'late') return false;
     if (f.status === 'soon' && state !== 'soon') return false;
     if (f.status === 'ok' && (state === 'late' || state === 'soon')) return false;
@@ -10794,7 +10810,7 @@ function fleetMatches() {
 function fleetSorted(list) {
   const f = fleetFilters();
   const rankOf = (m) => {
-    const s = dueInfo(m.plan, m).state;
+    const s = infoMachine(m).state;
     return s === 'late' ? 0 : (s === 'soon' ? 1 : 2);
   };
   const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'fr');
@@ -10814,8 +10830,9 @@ function fleetSorted(list) {
     const ra = rankOf(a);
     const rb = rankOf(b);
     if (ra !== rb) return ra - rb;
-    if (ra === 0) return dueInfo(a.plan, a).sortKey - dueInfo(b.plan, b).sortKey;
-    if (ra === 1) return dueInfo(a.plan, a).urgency - dueInfo(b.plan, b).urgency;
+    // `urgency`, comparable même quand une machine est classée sur son
+    // second suivi (une autre dimension que l'autre machine comparée).
+    if (ra !== 2) return infoMachine(a).urgency - infoMachine(b).urgency;
     return byName(a, b);
   });
 }
@@ -11030,6 +11047,19 @@ function vueCompteurSecondaire(m) {
   };
   return { info: dueInfo(machineVue.plan, machineVue), machineVue };
 }
+// L'ÉTAT GLOBAL D'UNE MACHINE : le PIRE de ses DEUX suivis quand elle en a
+// deux — un retard sur le second suivi doit colorer la carte, la remonter
+// dans le tri et compter dans le bandeau/les compteurs, même si le suivi
+// principal est à jour. Sans ça, l'appli ferait justement manquer
+// l'entretien qu'un second suivi existe pour ne plus manquer (signalé le
+// 23/09). `urgency` est la seule mesure comparable entre deux dimensions
+// différentes (heures, km, jours) — documentée dans dueInfo() pour ça.
+function infoMachine(m) {
+  const principale = dueInfo(m.plan, m);
+  const v2 = vueCompteurSecondaire(m);
+  if (!v2) return principale;
+  return v2.info.urgency < principale.urgency ? { ...v2.info, secondaire: true } : principale;
+}
 function jaugeIntervalleHtml(info, m, detaille) {
   if (!m || !m.plan) return '';
   const enCompteur = planIsCounter(m.plan);
@@ -11080,7 +11110,10 @@ function jaugeIntervalleHtml(info, m, detaille) {
 // mêmes valeurs qu'avant, rangées autrement. Aucun taux, aucune télémétrie,
 // aucune marque, aucun chantier.
 function machineCardHtml(m) {
-  const info = dueInfo(m.plan, m);
+  // L'état GLOBAL (voir infoMachine) : un retard sur le second suivi doit
+  // colorer la carte, la déplier d'emblée et remonter dans le tri — pas
+  // seulement un retard du suivi principal.
+  const info = infoMachine(m);
   const identifiant = identifiantAffiche(m);
   const valeurId = machineIdentifiant(m);
   const anneeModele = machineYear(m);
@@ -16372,7 +16405,9 @@ function notesUtiles(notes, compteur) {
 }
 
 function openPlanView(machine, companyId, categories) {
-  const info = dueInfo(machine.plan, machine);
+  // L'état GLOBAL (voir infoMachine), pour rester cohérent avec la carte :
+  // les deux jauges plus bas détaillent ensuite CHAQUE suivi séparément.
+  const info = infoMachine(machine);
   const isCounterMode = planIsCounter(machine.plan);
   const unit = counterUnitOf(machine);
   const overlay = document.createElement('div');
