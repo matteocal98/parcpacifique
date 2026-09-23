@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d6+W3ObtLa3R1TCfsCffoaubu7TIUZZ6pM4yBnbWGoE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-L12YbAabiOMrCaC/BeOxkTImxkt8/uEDdkgC2/857fQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -17559,13 +17559,31 @@ function openMachineModal(companyId, categories, existing) {
         const duePlanMaj = isCounterMode
           ? planNextDueCounter({ ...existing.plan, ...planUpdate })
           : (planUpdate.next_due_at || existing.plan.next_due_at);
-        // Le second compteur : reprise sur SON échéance actuelle s'il ne
-        // change pas, ou toute nouvelle échéance (valeur + intervalle) s'il
-        // vient d'être activé ou changé d'unité.
-        const duePlanSecondaire = !secondaryUnit ? null
-          : secondaireCalendrierActif
-            ? (secondaireInchange ? planNextDueAt2(existing.plan) : addDaysIso(serviceDate, secondaryIntervalDays))
-            : (secondaireInchange ? planNextDueCounter2(existing.plan) : (secondaryValue || 0) + secondaryIntervalCounter);
+        // Le SECOND suivi : reprise sur SON échéance actuelle s'il ne change
+        // pas, ou toute nouvelle échéance (valeur + intervalle, ou date de
+        // mise en service) s'il vient d'être activé ou changé d'unité. Pour
+        // un suivi CALENDAIRE déjà actif, MÊME recalcul que le principal
+        // quand la date de mise en service change (aDejaUnEntretienReel,
+        // décalage des tâches qui héritaient l'ancienne échéance) — sans ça,
+        // changer la date de mise en circulation n'avait aucun effet sur ce
+        // second suivi (signalé le 23/09, après l'avoir déjà corrigé pour le
+        // suivi principal).
+        let duePlanSecondaire = null;
+        if (secondaryUnit && secondaireCalendrierActif) {
+          if (secondaireInchange && existing.plan.next_due_at_2 && existing.plan.interval_days_2 != null) {
+            duePlanSecondaire = aDejaUnEntretienReel
+              ? addDaysIso(existing.plan.next_due_at_2, (secondaryIntervalDays - existing.plan.interval_days_2) + joursEntreIso(existing.service_date, serviceDate))
+              : addDaysIso(serviceDate, secondaryIntervalDays);
+            if (duePlanSecondaire !== existing.plan.next_due_at_2) {
+              itemsSource = normalizeItems(itemsSource).map(it =>
+                it.due_at === existing.plan.next_due_at_2 ? { ...it, due_at: duePlanSecondaire } : it);
+            }
+          } else {
+            duePlanSecondaire = addDaysIso(serviceDate, secondaryIntervalDays);
+          }
+        } else if (secondaryUnit) {
+          duePlanSecondaire = secondaireInchange ? planNextDueCounter2(existing.plan) : (secondaryValue || 0) + secondaryIntervalCounter;
+        }
         const itemsMaj = preparerTaches(overlay._aiItems || itemsSource,
           { ...existing.plan, ...planUpdate }, machineVue2, duePlanMaj, counterUnit, duePlanSecondaire);
         if (itemsMaj) {
