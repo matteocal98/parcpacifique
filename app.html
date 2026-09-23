@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+MiAnIXvWpClAlbh2NrBiA95SQKv8dIh18G70zQtm2k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l1tEiL2otr010xXOcfdCop5yTlQdt7xVf32wa2o9XFY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5296,6 +5296,10 @@ function blocChoixTache(item, plan, machine) {
       const note = ` <span class="muted">(${esc(tR('suivie par le second compteur ({unite})', { unite: trad((UNITES_INTERVALLE[o.unite] || {}).mot || '') }))})</span>`;
       return `<li>${esc(libelleOption(o))}${note}</li>`;
     }
+    if (uniteCompatibleCalendaireSecondaire(o.unite, machine)) {
+      const note = ` <span class="muted">(${esc(trad('suivie par le second suivi calendaire'))})</span>`;
+      return `<li>${esc(libelleOption(o))}${note}</li>`;
+    }
     const note = ` <span class="muted">(${esc(tR('pas dans l\'unité de ce plan ({unite}) : la tâche resterait un point de contrôle', { unite: trad((UNITES_INTERVALLE[o.unite] || {}).mot || '') }))})</span>`;
     return `<li>${esc(libelleOption(o))}${note}</li>`;
   }).join('');
@@ -5738,7 +5742,17 @@ function appliquerChoixTache(items, label, choix, plan, machine) {
   return normalizeItems(items).map(it => {
     if (it.label !== label) return it;
     const t = { ...it };
-    const compatible = choix.pointDeControle ? false : uniteCompatiblePlan(choix.unite, plan, machine);
+    // Compatible avec le plan PRINCIPAL, ou avec le SECOND suivi (compteur ou
+    // calendaire) : les trois comptent comme « suivi », pas seulement le
+    // principal — sinon un choix résolu avant l'existence du second suivi
+    // (ou simplement dans son unité) restait figé en point de contrôle,
+    // même une fois ce second suivi actif. Signalé le 23/09 sur « Filtre
+    // d'habitacle » (Peugeot 208, 20 000 km / 1 an, résolu en années).
+    const compatible = choix.pointDeControle ? false : (
+      uniteCompatiblePlan(choix.unite, plan, machine)
+      || uniteCompatibleCompteur2(choix.unite, machine)
+      || uniteCompatibleCalendaireSecondaire(choix.unite, machine)
+    );
     if (choix.pointDeControle || (!compatible && !choix.libre)) {
       delete t.interval;
       delete t.interval_unite;
