@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kKkTES+d8nTYeyujrgJpV8FB7gzDEzM0xZcI5a6NgqI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUthBH6iqFZjzCX3yGnXMAQ+DMe4kcgchiHUYV6T24U=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5092,6 +5092,57 @@ function jaugeTcoHtml(tco) {
       <span class="machine-jauge-tete"><span class="machine-jauge-mot">${trad('Garder / Remplacer')}</span><span class="machine-jauge-valeur">${libelles[etat]()}</span></span>
       <span class="machine-jauge-piste"><span class="machine-jauge-part is-${etat}" style="width:${part}%"></span></span>
     </div>`;
+}
+
+// ── TCO flotte (phase 2) — agrégation pure, pas d'accès réseau ici ──
+// Sépare pièces/main d'œuvre — nécessaire pour le donut réel de la flotte ;
+// tcoMachine()/coutsInterventionsMachine() les somment ENSEMBLE dans
+// parEntretien, à dessein pour le ratio d'une machine (pas touché, cette
+// fonction est un ajout à part).
+function ventilationCoutsInterventions(interventions) {
+  return (interventions || []).reduce((acc, it) => {
+    acc.pieces += Number(it.parts_cost) || 0;
+    acc.mainOeuvre += Number(it.labor_cost) || 0;
+    return acc;
+  }, { pieces: 0, mainOeuvre: 0 });
+}
+// Classe les machines de la flotte par TCO — pire ratio d'abord (le ratio
+// de dépréciation quand il existe, sinon le repli cumul/achat, jamais les
+// deux mélangés dans un même tri : `decision.base` dit lequel, voir
+// ratioDecisionTco). Une machine sans purchase_price est EXCLUE (tcoMachine
+// retourne null) et comptée séparément — jamais cachée en silence.
+// `interventionsParMachine`/`coutsParMachine` : Map(machine_id -> lignes),
+// voir grouperParMachine().
+function calculerFlotteTco(machines, interventionsParMachine, coutsParMachine) {
+  const exclues = [];
+  const lignes = (machines || [])
+    .map((m) => {
+      const tco = tcoMachine(m, interventionsParMachine.get(m.id) || [], coutsParMachine.get(m.id) || []);
+      if (!tco) { exclues.push(m); return null; }
+      return { machine: m, tco, decision: ratioDecisionTco(tco) };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.decision?.ratio ?? -Infinity) - (a.decision?.ratio ?? -Infinity));
+  if (!lignes.length) return null;
+  const moyenne = (sel) => lignes.reduce((s, l) => s + (sel(l) ?? 0), 0) / lignes.length;
+  return {
+    lignes,
+    exclues,
+    coutAnnuelMoyen: moyenne((l) => l.tco.coutAnnuel),
+    ratioMoyen: moyenne((l) => l.decision?.ratio),
+    nbAlertes: lignes.filter((l) => l.decision && etatTco(l.decision.ratio, l.decision.base) === 'late').length,
+  };
+}
+// Répartition RÉELLE pièces / main d'œuvre / coûts d'exploitation sur toute
+// la flotte, en pourcentages — remplace le donut « MODÈLE KEEVA » (statique,
+// phase 1) par un calcul sur les coûts effectivement enregistrés. `null`
+// si rien n'a encore été saisi (jamais 0/0/0 présenté comme un vrai zéro).
+function repartitionFlotteTco(interventionsToutes, coutsToutes) {
+  const { pieces, mainOeuvre } = ventilationCoutsInterventions(interventionsToutes);
+  const fixes = (coutsToutes || []).reduce((s, c) => s + (Number(c.amount) || 0), 0);
+  const total = pieces + mainOeuvre + fixes;
+  if (!total) return null;
+  return { pieces, mainOeuvre, fixes, total, pctPieces: (pieces / total) * 100, pctMainOeuvre: (mainOeuvre / total) * 100, pctFixes: (fixes / total) * 100 };
 }
 
 // SECOND SUIVI (optionnel) — mêmes principes que le principal, mais SANS
@@ -17352,6 +17403,57 @@ async function fetchAllInterventions(machineId) {
     if (!data || data.length < pageSize) break;
   }
   return all;
+}
+
+// ── TCO flotte (phase 2) — fetch en masse ────────────────────────
+// Jusqu'ici (fetchAllInterventions/fetchOperatingCosts ci-dessus)
+// toujours UNE machine à la fois. Le classement flotte a besoin des coûts
+// de TOUTES les machines de la société : deux nouvelles fonctions, même
+// pagination (PostgREST plafonne à 1000 lignes), colonnes réduites au
+// strict nécessaire à l'agrégat — pas description/items_done/notes, qui
+// ne serviraient à rien ici et alourdiraient la requête pour rien.
+async function fetchToutesInterventionsFlotte(machineIds) {
+  if (!machineIds || !machineIds.length) return [];
+  const pageSize = 1000;
+  const all = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await sb.from(trad('interventions'))
+      .select('machine_id, parts_cost, labor_cost')
+      .in('machine_id', machineIds)
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+    all.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+  return all;
+}
+async function fetchTousCoutsExploitationFlotte(machineIds) {
+  if (!machineIds || !machineIds.length) return [];
+  const pageSize = 1000;
+  const all = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await sb.from('operating_costs')
+      .select('machine_id, amount')
+      .in('machine_id', machineIds)
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+    all.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+  return all;
+}
+// Regroupe une liste plate { machine_id, ... } en Map(machine_id -> [lignes])
+// — même forme que ce qu'attendent tcoMachine()/coutsInterventionsMachine()
+// pour une seule machine, réutilisable telle quelle par machine une fois
+// regroupée.
+function grouperParMachine(lignes) {
+  const carte = new Map();
+  (lignes || []).forEach((ligne) => {
+    const id = ligne.machine_id;
+    if (!carte.has(id)) carte.set(id, []);
+    carte.get(id).push(ligne);
+  });
+  return carte;
 }
 
 // ── Choix de la fréquence d'une tâche ────────────────────────────
