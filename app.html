@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Jvj9bL3niTCWkNLq60L4PCPNl87hQLWtI1NDl28haw0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KBP/mTqcXLE7+CixlDZVyDnKFq2VRgfS9Utm+bm1HPI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4744,11 +4744,23 @@ function planNextDueCounterPatch(nextDue) {
 // — une machine sans donnée d'acquisition ne montre AUCUN bloc TCO nulle
 // part, même philosophie que vueCompteurSecondaire sans second suivi
 // (voir keeva-tco-feature).
-function formatMontant(valeur) {
+// Devise définie une fois par société (carte « Paramètres TCO »), jamais par
+// machine ni par visiteur — voir UI.company.currency. `currency` en second
+// paramètre permet de forcer une devise précise (rare), sinon celle de la
+// société active. XPF n'a pas de sous-unité : Intl le sait déjà nativement,
+// `maximumFractionDigits: 0` aligne simplement l'EUR sur la même convention
+// d'affichage déjà en place dans le reste de l'app (jamais de centimes).
+// Court libellé de la devise active (pour un intitulé de champ, ex. « Prix
+// unitaire (XPF) ») — même source que formatMontant (UI.company.currency).
+function deviseCourte() {
+  return (typeof UI !== 'undefined' && UI.company && UI.company.currency === 'XPF') ? 'XPF' : '€';
+}
+function formatMontant(valeur, currency) {
   if (valeur == null || valeur === '') return '—';
   const n = Number(valeur);
   if (!isFinite(n)) return '—';
-  return n.toLocaleString(localeActive(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const devise = currency || (typeof UI !== 'undefined' && UI.company && UI.company.currency) || 'EUR';
+  return n.toLocaleString(localeActive(), { style: 'currency', currency: devise, maximumFractionDigits: 0 });
 }
 // Somme des coûts d'ENTRETIEN (pièces + main d'œuvre) d'une machine, à partir
 // de la liste d'interventions déjà chargée pour l'historique — aucune requête
@@ -12337,17 +12349,29 @@ function blocParametresTcoHtml() {
       </div>
       <p class="muted-text">${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs SUGGÉRÉES lors de l\'ajout d\'un coût d\'exploitation — jamais insérées automatiquement.')}</p>
       ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
+      <label>${trad('Devise')}</label>
+      <div class="mform-cards" id="tco-devise-cards">
+        <label class="mform-card">
+          <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
+          <span class="mform-card-corps"><span class="mform-card-titre">${trad('Euros (€)')}</span></span>
+        </label>
+        <label class="mform-card">
+          <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
+          <span class="mform-card-corps"><span class="mform-card-titre">${trad('Francs Pacifique (XPF)')}</span></span>
+        </label>
+      </div>
+      <div class="hint">${trad('S\'applique à tous les montants TCO de la société (scorecard, catalogue de pièces, coûts d\'exploitation). Changer de devise ne reconvertit pas les montants déjà saisis.')}</div>
       <div class="field-row">
         <div>
-          <label for="tco-taux-horaire">${trad('Taux horaire main d\'œuvre (€/h)')}</label>
+          <label for="tco-taux-horaire">${tR('Taux horaire main d\'œuvre ({devise}/h)', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-taux-horaire" type="number" inputmode="decimal" min="0" step="0.5" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
         </div>
         <div>
-          <label for="tco-assurance">${trad('Assurance — barème annuel suggéré (€)')}</label>
+          <label for="tco-assurance">${tR('Assurance — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-assurance" type="number" inputmode="decimal" min="0" step="1" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
         </div>
         <div>
-          <label for="tco-stockage">${trad('Stockage — barème annuel suggéré (€)')}</label>
+          <label for="tco-stockage">${tR('Stockage — barème annuel suggéré ({devise})', { devise: c.currency === 'XPF' ? 'XPF' : '€' })}</label>
           <input id="tco-stockage" type="number" inputmode="decimal" min="0" step="1" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
         </div>
       </div>
@@ -12392,7 +12416,7 @@ function blocCatalogueTcoHtml() {
           <input id="tco-piece-designation" required placeholder="${trad('Ex. Filtre à huile')}">
         </div>
         <div>
-          <label for="tco-piece-prix">${trad('Prix unitaire (€)')}</label>
+          <label for="tco-piece-prix">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
           <input id="tco-piece-prix" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 18.90')}">
         </div>
       </div>
@@ -12425,12 +12449,24 @@ VIEWS.tco = {
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
 
+    // Cartes devise : même motif visuel que les cartes radio de l'assistant
+    // machine (marquerCarteSelectionnee), reposé ici en local — cette fonction-là
+    // est une fermeture de openAddWizard, pas réutilisable depuis cette vue.
+    const majDeviseCards = () => {
+      root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => {
+        radio.closest('.mform-card')?.classList.toggle('is-selected', radio.checked);
+      });
+    };
+    majDeviseCards();
+    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', majDeviseCards));
+
     root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const msg = root.querySelector('#tco-parametres-msg');
       const taux = root.querySelector('#tco-taux-horaire').value.trim();
       const assurance = root.querySelector('#tco-assurance').value.trim();
       const stockage = root.querySelector('#tco-stockage').value.trim();
+      const devise = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
       btn.disabled = true;
       btn.textContent = trad('Enregistrement…');
       try {
@@ -12438,18 +12474,24 @@ VIEWS.tco = {
           p_labor_hourly_rate: taux !== '' ? Number(taux) : null,
           p_default_insurance_yearly: assurance !== '' ? Number(assurance) : null,
           p_default_storage_yearly: stockage !== '' ? Number(stockage) : null,
+          p_currency: devise,
         });
         if (error) throw error;
         UI.company.labor_hourly_rate = taux !== '' ? Number(taux) : null;
         UI.company.default_insurance_yearly = assurance !== '' ? Number(assurance) : null;
         UI.company.default_storage_yearly = stockage !== '' ? Number(stockage) : null;
+        UI.company.currency = devise;
         showToast(trad('Paramètres TCO enregistrés'));
         message(msg, trad('Enregistré.'), false);
+        // Les libellés (€) → XPF et tous les montants affichés dépendent de
+        // UI.company.currency : un ré-affichage est nécessaire pour que le
+        // changement se voie partout, pas seulement sur cette carte.
+        renderApp();
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+        btn.disabled = false;
+        btn.textContent = trad('Enregistrer');
       }
-      btn.disabled = false;
-      btn.textContent = trad('Enregistrer');
     });
 
     root.querySelector('#tco-piece-ajouter')?.addEventListener('click', async (e) => {
@@ -16253,10 +16295,10 @@ function ligneLogPieceHtml(idx) {
       </div>
       <div style="max-width:90px;">
         <label class="hint">${trad('Qté')}</label>
-        <input type="number" class="log-piece-qte" min="0" step="1" value="1">
+        <input type="number" class="log-piece-qte" min="0" step="0.01" value="1">
       </div>
       <div style="max-width:120px;">
-        <label class="hint">${trad('Prix unitaire (€)')}</label>
+        <label class="hint">${tR('Prix unitaire ({devise})', { devise: deviseCourte() })}</label>
         <input type="number" class="log-piece-prix" min="0" step="0.01" value="0">
       </div>
       <button type="button" class="link-inline log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}">${trad('Retirer')}</button>
@@ -16380,7 +16422,7 @@ function openLogInterventionModal(machine, tache) {
               <input id="log-heures-mo" type="number" inputmode="decimal" min="0" step="0.25" placeholder="${trad('Ex. 1.5')}">
             </div>
             <div>
-              <label for="log-cout-mo">${trad('Coût main d\'œuvre (€)')}</label>
+              <label for="log-cout-mo">${tR('Coût main d\'œuvre ({devise})', { devise: deviseCourte() })}</label>
               <input id="log-cout-mo" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${trad('Ex. 67.50')}">
             </div>
           </div>
@@ -16394,7 +16436,7 @@ function openLogInterventionModal(machine, tache) {
           <div class="hint" id="log-facture-statut" role="status" aria-live="polite"></div>
           <div class="field-row">
             <div>
-              <label for="log-pieces-total">${trad('Total pièces (€)')}</label>
+              <label for="log-pieces-total">${tR('Total pièces ({devise})', { devise: deviseCourte() })}</label>
               <input id="log-pieces-total" type="number" inputmode="decimal" min="0" step="0.01" value="0">
             </div>
           </div>
@@ -17115,7 +17157,7 @@ function openPlanView(machine, companyId, categories) {
               </select>
             </div>
             <div>
-              <label for="oc-montant">${trad('Montant (€)')}</label>
+              <label for="oc-montant">${tR('Montant ({devise})', { devise: deviseCourte() })}</label>
               <input id="oc-montant" type="number" inputmode="decimal" min="0" step="0.01">
             </div>
             <div>
@@ -18537,7 +18579,7 @@ async function boot(toastMessage) {
   const colonnesRappels = SCHEMA.hasReminders
     ? ['notification_email', 'reminders_email', 'reminders_whatsapp'] : [];
   const colonnesTco = SCHEMA.hasTco
-    ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly'] : [];
+    ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly', 'currency'] : [];
   const tentatives = [
     [...colonnesEtendues, ...colonnesContact, ...colonnesRappels, ...colonnesTco],
     [...colonnesEtendues, ...colonnesContact, ...colonnesRappels],
@@ -18703,6 +18745,10 @@ async function boot(toastMessage) {
     labor_hourly_rate: company?.labor_hourly_rate ?? null,
     default_insurance_yearly: company?.default_insurance_yearly ?? null,
     default_storage_yearly: company?.default_storage_yearly ?? null,
+    // Devise des montants TCO (EUR ou XPF, parité fixe) : un seul réglage
+    // par société, défini dans la carte « Paramètres TCO » — jamais par
+    // machine ni par visiteur. 'EUR' par défaut (colonne not null en base).
+    currency: company?.currency || 'EUR',
   };
   UI.contactName = company?.contact_name || '';
   UI.contactFirstName = companyFirstName(UI.company);
