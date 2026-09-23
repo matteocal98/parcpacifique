@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-BQ7RPigZWERvjuIv85xCuxA7jYyFXVR0xYBVvRgKuQE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NJPQejA+uBafFUu75ZbGUyDAu5j4CvRl4vyejgAVSjs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16762,6 +16762,16 @@ function openMachineModal(companyId, categories, existing) {
 
         const aiJustRefreshed = !!(overlay._aiItems || overlay._aiIntervalHours || overlay._aiIntervalDays);
         const modeChanged = existing.plan.tracking_mode !== trackingMode;
+        // A-t-on déjà un VRAI entretien enregistré pour cette machine ? C'est la
+        // seule source fiable pour savoir si l'échéance a été avancée par un
+        // geste réel (journalAvanceEcheance) : comparer l'échéance à la formule
+        // « service_date + intervalle » pour le deviner s'est révélé fragile dès
+        // qu'un plan porte déjà une dérive antérieure (l'échéance ne correspond
+        // plus à la formule alors qu'aucun entretien n'a pourtant eu lieu) —
+        // signalé le 23/09 sur un plan édité plusieurs fois de suite.
+        const { data: interventionExistante } = await sb
+          .from(trad('interventions')).select('id').eq('machine_id', existing.id).limit(1);
+        const aDejaUnEntretienReel = !!(interventionExistante && interventionExistante.length);
 
         // Recalcul de l'échéance. On repart d'aujourd'hui si le mode de suivi
         // change (ou si l'analyse vient de fournir de nouvelles valeurs) ; sinon on
@@ -16796,20 +16806,14 @@ function openMachineModal(companyId, categories, existing) {
             Object.assign(planUpdate, planNextDueCounterPatch(currentHours + intervalCounter));
           }
         } else if (existing.plan.next_due_at && existing.plan.interval_days != null) {
-          // Le plan est-il encore PROPRE (son échéance vaut exactement
-          // service_date + intervalle, comme à sa création), ou a-t-elle déjà
-          // été avancée par un entretien réellement enregistré
-          // (journalAvanceEcheance, qui l'ancre sur la date réelle de
-          // l'intervention) ? Un plan propre se RECALCULE intégralement depuis
-          // la nouvelle date de mise en service : un simple décalage relatif
-          // (ancienne échéance + delta) dérive au fil des modifications
-          // successives et finit par ne plus correspondre au calcul direct —
-          // signalé le 23/09 sur une machine éditée plusieurs fois de suite.
-          // Un plan déjà avancé, lui, garde son avance réelle en se décalant
+          // Aucun entretien réel enregistré : l'échéance se RECALCULE
+          // intégralement depuis la nouvelle date de mise en service —
+          // déterministe, sans dérive possible quel que soit l'historique des
+          // modifications précédentes (voir aDejaUnEntretienReel ci-dessus).
+          // Un entretien réel existe : l'échéance est ancrée sur sa date, pas
+          // sur service_date — on préserve cette avance en la décalant
           // proportionnellement plutôt qu'en l'effaçant.
-          const echeancePropre = addDaysIso(existing.service_date, existing.plan.interval_days);
-          const dejaAvancee = existing.plan.next_due_at !== echeancePropre;
-          planUpdate.next_due_at = dejaAvancee
+          planUpdate.next_due_at = aDejaUnEntretienReel
             ? addDaysIso(existing.plan.next_due_at, (intervalDays - existing.plan.interval_days) + joursEntreIso(existing.service_date, serviceDate))
             : addDaysIso(serviceDate, intervalDays);
           if (planUpdate.next_due_at !== existing.plan.next_due_at) {
