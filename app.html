@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rgVHv1FjwWWPokuOkl/qBoNmU/QcJq/3KcguhSQJwXs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IGBcK20SO/nm8FeYFrUORIPbFvYpTrG19eZIm5GHgyY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16767,6 +16767,15 @@ function openMachineModal(companyId, categories, existing) {
         // change (ou si l'analyse vient de fournir de nouvelles valeurs) ; sinon on
         // décale l'échéance du delta d'intervalle. Sans ça, modifier l'intervalle
         // ou la date de mise en service n'avait aucun effet sur la date affichée.
+        // Les tâches qui HÉRITENT l'échéance du plan (même due_at/due_counter)
+        // doivent suivre le même décalage que lui : preparerTaches() ne touche
+        // JAMAIS un due_at/due_counter déjà posé (voir sa règle plus bas), donc
+        // sans ce pré-décalage la tâche gardait sa date périmée, et
+        // echeancePlanDepuisTaches() écrasait ensuite next_due_at avec cette
+        // valeur périmée — c'est ce qui rendait tout décalage du plan (delta
+        // d'intervalle COMME delta de date de mise en service) invisible à
+        // l'écran dès qu'un plan avait des tâches détaillées (signalé le 23/09).
+        let itemsSource = existing.plan.items;
         if (modeChanged || aiJustRefreshed) {
           if (isCounterMode) {
             Object.assign(planUpdate, planNextDueCounterPatch((currentHours || 0) + intervalCounter));
@@ -16777,7 +16786,12 @@ function openMachineModal(companyId, categories, existing) {
           const oldNext = planNextDueCounter(existing.plan);
           const oldInterval = planIntervalCounter(existing.plan);
           if (oldNext != null && oldInterval != null) {
-            Object.assign(planUpdate, planNextDueCounterPatch(oldNext + (intervalCounter - oldInterval)));
+            const decalage = intervalCounter - oldInterval;
+            Object.assign(planUpdate, planNextDueCounterPatch(oldNext + decalage));
+            if (decalage) {
+              itemsSource = normalizeItems(itemsSource).map(it =>
+                Number(it.due_counter) === oldNext ? { ...it, due_counter: Number(it.due_counter) + decalage } : it);
+            }
           } else if (currentHours != null) {
             Object.assign(planUpdate, planNextDueCounterPatch(currentHours + intervalCounter));
           }
@@ -16789,7 +16803,12 @@ function openMachineModal(companyId, categories, existing) {
           // s'additionnent, ce qui préserve un entretien déjà réellement
           // effectué (journalAvanceEcheance) au lieu de repartir de zéro.
           const decalageService = joursEntreIso(existing.service_date, serviceDate);
-          planUpdate.next_due_at = addDaysIso(existing.plan.next_due_at, (intervalDays - existing.plan.interval_days) + decalageService);
+          const decalage = (intervalDays - existing.plan.interval_days) + decalageService;
+          planUpdate.next_due_at = addDaysIso(existing.plan.next_due_at, decalage);
+          if (decalage) {
+            itemsSource = normalizeItems(itemsSource).map(it =>
+              it.due_at === existing.plan.next_due_at ? { ...it, due_at: addDaysIso(it.due_at, decalage) } : it);
+          }
         } else {
           planUpdate.next_due_at = addDaysIso(serviceDate, intervalDays);
         }
@@ -16799,7 +16818,7 @@ function openMachineModal(companyId, categories, existing) {
         const duePlanMaj = isCounterMode
           ? planNextDueCounter({ ...existing.plan, ...planUpdate })
           : (planUpdate.next_due_at || existing.plan.next_due_at);
-        const itemsMaj = preparerTaches(overlay._aiItems || existing.plan.items,
+        const itemsMaj = preparerTaches(overlay._aiItems || itemsSource,
           { ...existing.plan, ...planUpdate }, existing, duePlanMaj, counterUnit);
         if (itemsMaj) {
           planUpdate.items = itemsMaj;
