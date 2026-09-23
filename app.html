@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eNBuAW+zMg4jibSI7CynElCf8jJ2xtLl0V5cUUee56w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+e+jnWqHnufqKVuAMybhyE2FWgLuyyqWr5USrmnRzVA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -12598,15 +12598,15 @@ function tcoKpiGridHtml() {
       <div class="tco-kpi-tile">
         <div>
           <div class="tco-kpi-eyebrow">${trad('Devise d\'exploitation')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${esc(c.currency || 'EUR')}</span></div>
-          <div class="tco-kpi-sub">${esc(zone)}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur" id="tco-kpi-devise-valeur">${esc(c.currency || 'EUR')}</span></div>
+          <div class="tco-kpi-sub" id="tco-kpi-devise-zone">${esc(zone)}</div>
         </div>
         <div class="tco-kpi-icone is-fr">${picto('devise')}</div>
       </div>
       <div class="tco-kpi-tile">
         <div>
           <div class="tco-kpi-eyebrow">${trad('Taux main d\'œuvre')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${tauxActif ? texteAvecSeparateurs(c.labor_hourly_rate) : '—'}</span><span class="tco-kpi-unite">${deviseCourte()}/h</span></div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${tauxActif ? texteAvecSeparateurs(c.labor_hourly_rate) : '—'}</span><span class="tco-kpi-unite" id="tco-kpi-taux-unite">${deviseCourte()}/h</span></div>
           <div class="tco-kpi-sub${tauxActif ? ' is-ok' : ''}">${tauxActif ? picto('coche') + trad('Barème actif') : trad('Non renseigné')}</div>
         </div>
         <div class="tco-kpi-icone is-roi">${picto('entretien')}</div>
@@ -12876,11 +12876,22 @@ VIEWS.tco = {
     // d'enregistrer — sinon l'utilisateur choisit XPF et voit encore « € »
     // jusqu'au prochain rendu complet, ce qui a l'air figé/cassé.
     const majLibellesDevise = () => {
-      const devise = root.querySelector('input[name="tco-devise"]:checked')?.value === 'XPF' ? 'XPF' : '€';
+      const codeDevise = root.querySelector('input[name="tco-devise"]:checked')?.value === 'XPF' ? 'XPF' : 'EUR';
+      const devise = codeDevise === 'XPF' ? 'XPF' : '€';
       const tag = root.querySelector('#tco-taux-horaire-tag');
       if (tag) tag.textContent = `${devise} / ${trad('HEURE')}`;
       const paires = [['#tco-taux-horaire-unite', `${devise}/h`], ['#tco-assurance-unite', `${devise}/an`], ['#tco-stockage-unite', `${devise}/an`], ['#tco-piece-prix-unite', devise]];
       paires.forEach(([sel, texte]) => { const el = root.querySelector(sel); if (el) el.textContent = texte; });
+      // La tuile KPI « Devise d'exploitation » (tout en haut) doit suivre le
+      // choix EN DIRECT elle aussi — sinon elle continue d'annoncer l'ancienne
+      // devise pendant que la carte plus bas montre déjà la nouvelle comme
+      // « Actif », ce qui se lit comme deux endroits en désaccord.
+      const kpiValeur = root.querySelector('#tco-kpi-devise-valeur');
+      const kpiZone = root.querySelector('#tco-kpi-devise-zone');
+      if (kpiValeur) kpiValeur.textContent = codeDevise;
+      if (kpiZone) kpiZone.textContent = codeDevise === 'XPF' ? trad('Calédonie, Polynésie, Wallis') : trad('Europe');
+      const kpiTauxUnite = root.querySelector('#tco-kpi-taux-unite');
+      if (kpiTauxUnite) kpiTauxUnite.textContent = `${devise}/h`;
     };
     majDeviseCards();
     root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', () => {
