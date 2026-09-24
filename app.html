@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-y7+kA6XxepLyLtxdSOc/PQNNf/Aq+2f++Iv4/awJdzY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ebb3gz9ygvrCAZ8OEc/kGHRSiDvDzRfi2N5xfHjy58Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11880,7 +11880,7 @@ function wireMachineCards(root) {
     if (!m) return;
     const kind = btn.dataset.open;
     if (kind === 'plan') openPlanView(m, UI.companyId, UI.categories);
-    else if (kind === 'log') openLogInterventionModal(m);
+    else if (kind === 'log') ouvrirChoixEnregistrement(m);
     else if (kind === 'next') openNextMaintenanceView(m);
     else if (kind === 'edit') openMachineModal(UI.companyId, UI.categories, m);
   }));
@@ -18210,6 +18210,154 @@ function ligneLogPieceHtml(idx) {
     </div>`;
 }
 
+// Choix du type d'enregistrement — appelé UNIQUEMENT depuis le bouton
+// générique « Enregistrer un entretien » de la carte machine (Parc,
+// data-open="log"). Deux natures de données bien distinctes derrière un
+// seul bouton : un entretien alimente interventions/l'historique de
+// maintenance (openLogInterventionModal, inchangée), un coût
+// d'exploitation alimente operating_costs — carburant/assurance/taxe/
+// stockage, indépendant de toute tâche du plan (openLogOperatingCostModal,
+// ci-dessous). Fusionner les DONNÉES aurait mélangé deux historiques que
+// le TCO ventile séparément (Pièces/MO/Frais Fixes, voir
+// repartitionFlotteTco) ; ce choix fusionne seulement la PORTE D'ENTRÉE,
+// sur demande explicite de l'utilisateur (trop de boutons différents à
+// retenir sur la carte machine). Les AUTRES points d'entrée du fichier
+// (bandeau prioritaire, échéances, « Prochain entretien », toolbar de la
+// fiche) pré-remplissent déjà une tâche précise ou portent un libellé
+// explicite « Enregistrer un entretien » — l'intention y est déjà sans
+// ambiguïté, ils restent donc des appels directs à
+// openLogInterventionModal, jamais routés par ce choix.
+function ouvrirChoixEnregistrement(machine) {
+  if (!SCHEMA.hasTco) { openLogInterventionModal(machine); return; }
+  if (refuserSiNonCouverte(machine)) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay choix-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:440px;">
+      <div class="mform-tete">
+        <div class="mform-tete-titre"><h2>${trad('Qu\'est-ce que tu veux enregistrer ?')}</h2></div>
+        <button type="button" class="mform-close" id="choix-enr-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <div class="choix-carte">
+        <span class="choix-carte-ico">${picto('entretien')}</span>
+        <div class="choix-carte-corps">
+          <span class="choix-carte-valeur">${trad('Un entretien')}</span>
+          <div class="hint">${trad('Pièces, main d\'œuvre, tâches réalisées')}</div>
+        </div>
+        <button type="button" class="view-manual choix-option" id="choix-enr-entretien">${trad('Choisir')}</button>
+      </div>
+      <div class="choix-carte">
+        <span class="choix-carte-ico">${picto('argent')}</span>
+        <div class="choix-carte-corps">
+          <span class="choix-carte-valeur">${trad('Un coût d\'exploitation')}</span>
+          <div class="hint">${trad('Carburant, assurance, taxe, stockage…')}</div>
+        </div>
+        <button type="button" class="view-manual choix-option" id="choix-enr-cout">${trad('Choisir')}</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="choix-enr-annuler">${trad('Annuler')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#choix-enr-close-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#choix-enr-annuler').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#choix-enr-entretien').addEventListener('click', () => { overlay.remove(); openLogInterventionModal(machine); });
+  overlay.querySelector('#choix-enr-cout').addEventListener('click', () => { overlay.remove(); openLogOperatingCostModal(machine); });
+}
+
+// Formulaire de coût d'exploitation, en modale autonome — même table, mêmes
+// champs et même barème suggéré (assurance/stockage, voir UI.company) que
+// l'ancien formulaire intégré à la fiche machine ; seule la présentation
+// change, pour ne plus être caché dans « Voir le plan ». La fiche garde
+// SON historique en lecture seule (#operating-costs-liste, voir
+// openPlanView) — ajouter un coût ne se fait plus que d'ici.
+function openLogOperatingCostModal(machine) {
+  if (refuserSiNonCouverte(machine)) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay choix-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const identifiant = identifiantAffiche(machine);
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:480px;">
+      <div class="mform-tete">
+        <div class="mform-tete-titre">
+          <h2>${trad('Coût d\'exploitation')}</h2>
+          <p class="sub">${esc(machine.name)}${identifiant ? ' · ' + esc(identifiant) : ''}</p>
+        </div>
+        <button type="button" class="mform-close" id="oc-modal-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <div class="field-row">
+        <div>
+          <label for="oc-type">${trad('Type')}</label>
+          <select id="oc-type">
+            <option value="fuel">${trad('Carburant')}</option>
+            <option value="insurance">${trad('Assurance')}</option>
+            <option value="tax">${trad('Taxe')}</option>
+            <option value="storage">${trad('Stockage')}</option>
+            <option value="other">${trad('Autre')}</option>
+          </select>
+        </div>
+        <div>
+          <label for="oc-montant">${tR('Montant ({devise})', { devise: deviseCourte() })}</label>
+          <input id="oc-montant" type="text" inputmode="decimal">
+        </div>
+        <div>
+          <label for="oc-date">${trad('Date')}</label>
+          <input id="oc-date" type="date" value="${todayIso()}">
+        </div>
+      </div>
+      <label for="oc-note">${trad('Note')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
+      <input id="oc-note" placeholder="${trad('Ex. Plein gazole, contrôle technique…')}">
+      <div class="hint" id="oc-modal-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="oc-modal-annuler">${trad('Annuler')}</button>
+        <button type="button" class="primary" id="oc-modal-enregistrer">${picto('disquette')}<span>${trad('Enregistrer')}</span></button>
+      </div>
+    </div>`;
+  overlay.querySelector('#oc-modal-close-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#oc-modal-annuler').addEventListener('click', () => overlay.remove());
+  activerSeparateurMilliers(overlay.querySelector('#oc-montant'));
+  // Barème suggéré (voir Coûts & TCO) : propose le montant quand le type
+  // choisi est assurance/stockage et qu'un barème existe — jamais imposé,
+  // l'utilisateur voit la valeur proposée et peut la corriger avant
+  // d'enregistrer. Même logique que l'ancien formulaire de la fiche.
+  overlay.querySelector('#oc-type').addEventListener('change', (e) => {
+    const montantChamp = overlay.querySelector('#oc-montant');
+    if (!montantChamp || montantChamp.value) return;
+    const bareme = e.target.value === 'insurance' ? UI.company?.default_insurance_yearly
+      : e.target.value === 'storage' ? UI.company?.default_storage_yearly : null;
+    if (bareme != null) montantChamp.value = texteAvecSeparateurs(bareme);
+  });
+  overlay.querySelector('#oc-modal-enregistrer').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const label = btn.querySelector('span');
+    const msg = overlay.querySelector('#oc-modal-msg');
+    const kind = overlay.querySelector('#oc-type').value;
+    const amount = nombreDepuisTexte(overlay.querySelector('#oc-montant').value);
+    const incurredAt = overlay.querySelector('#oc-date').value;
+    const notes = overlay.querySelector('#oc-note').value.trim();
+    if (!amount || amount <= 0) {
+      if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Le montant doit être supérieur à 0.'); }
+      return;
+    }
+    btn.disabled = true;
+    if (label) label.textContent = trad('Enregistrement…');
+    try {
+      const { error } = await sb.from('operating_costs')
+        .insert({ machine_id: machine.id, kind, amount, incurred_at: incurredAt || todayIso(), notes: notes || null });
+      if (error) throw error;
+      showToast(trad('Coût d\'exploitation enregistré'));
+      overlay.remove();
+    } catch (err) {
+      if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Erreur :') + ' ' + (err.message || err); }
+      btn.disabled = false;
+      if (label) label.textContent = trad('Enregistrer');
+    }
+  });
+}
+
 function openLogInterventionModal(machine, tache) {
   // « Marquer fait » / enregistrer un entretien écrit dans l'historique et
   // recalcule l'échéance. `tache` (optionnel) pré-coche la ligne du bandeau
@@ -19179,39 +19327,8 @@ function openPlanView(machine, companyId, categories) {
       <div class="plan-field" id="operating-costs-section">
         <div class="history-head">
           <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Coûts d\'exploitation')}</div>
-          <div class="history-actions">
-            <button type="button" class="icon-btn" id="operating-cost-ajouter">${picto('ajuste')}<span>${trad('Ajouter un coût')}</span></button>
-          </div>
         </div>
-        <div id="operating-cost-form" hidden>
-          <div class="field-row">
-            <div>
-              <label for="oc-type">${trad('Type')}</label>
-              <select id="oc-type">
-                <option value="fuel">${trad('Carburant')}</option>
-                <option value="insurance">${trad('Assurance')}</option>
-                <option value="tax">${trad('Taxe')}</option>
-                <option value="storage">${trad('Stockage')}</option>
-                <option value="other">${trad('Autre')}</option>
-              </select>
-            </div>
-            <div>
-              <label for="oc-montant">${tR('Montant ({devise})', { devise: deviseCourte() })}</label>
-              <input id="oc-montant" type="text" inputmode="decimal">
-            </div>
-            <div>
-              <label for="oc-date">${trad('Date')}</label>
-              <input id="oc-date" type="date" value="${todayIso()}">
-            </div>
-          </div>
-          <label for="oc-note">${trad('Note')}<span class="log-optionnel">${trad('Optionnel')}</span></label>
-          <input id="oc-note" placeholder="${trad('Ex. Plein gazole, contrôle technique…')}">
-          <div class="hint" id="operating-cost-msg" role="status" aria-live="polite"></div>
-          <div class="modal-actions">
-            <button type="button" class="secondary" id="operating-cost-annuler">${trad('Annuler')}</button>
-            <button type="button" class="primary" id="operating-cost-enregistrer">${trad('Enregistrer')}</button>
-          </div>
-        </div>
+        <p class="muted-text" style="margin-top:-4px;">${trad('Carburant, assurance, taxe, stockage… Pour en ajouter un, utilise « Enregistrer un entretien » sur la carte de cette machine.')}</p>
         <div class="value" style="color:var(--ink-soft);" id="operating-costs-liste">${trad('Chargement…')}</div>
       </div>` : ''}
 
@@ -19242,60 +19359,11 @@ function openPlanView(machine, companyId, categories) {
     overlay.remove();
     openLogInterventionModal(machine);
   });
-  if (SCHEMA.hasTco) {
-    const ocForm = overlay.querySelector('#operating-cost-form');
-    activerSeparateurMilliers(overlay.querySelector('#oc-montant'));
-    overlay.querySelector('#operating-cost-ajouter')?.addEventListener('click', () => {
-      if (ocForm) ocForm.hidden = !ocForm.hidden;
-    });
-    overlay.querySelector('#operating-cost-annuler')?.addEventListener('click', () => {
-      if (ocForm) ocForm.hidden = true;
-    });
-    // Barème suggéré (voir Coûts & TCO) : propose le montant quand le type
-    // choisi est assurance/stockage et qu'un barème existe — jamais imposé,
-    // l'utilisateur voit la valeur proposée et peut la corriger avant
-    // d'enregistrer.
-    overlay.querySelector('#oc-type')?.addEventListener('change', (e) => {
-      const montantChamp = overlay.querySelector('#oc-montant');
-      if (!montantChamp || montantChamp.value) return;
-      const bareme = e.target.value === 'insurance' ? UI.company?.default_insurance_yearly
-        : e.target.value === 'storage' ? UI.company?.default_storage_yearly : null;
-      if (bareme != null) montantChamp.value = texteAvecSeparateurs(bareme);
-    });
-    overlay.querySelector('#operating-cost-enregistrer')?.addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      const msg = overlay.querySelector('#operating-cost-msg');
-      const kind = overlay.querySelector('#oc-type').value;
-      const amount = nombreDepuisTexte(overlay.querySelector('#oc-montant').value);
-      const incurredAt = overlay.querySelector('#oc-date').value;
-      const notes = overlay.querySelector('#oc-note').value.trim();
-      if (!amount || amount <= 0) {
-        if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Le montant doit être supérieur à 0.'); }
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = trad('Enregistrement…');
-      try {
-        const { data, error } = await sb.from('operating_costs')
-          .insert({ machine_id: machine.id, kind, amount, incurred_at: incurredAt || todayIso(), notes: notes || null })
-          .select('id, kind, amount, incurred_at, notes')
-          .single();
-        if (error) throw error;
-        operatingCosts = [data, ...operatingCosts];
-        renderOperatingCosts();
-        renderScorecardTco();
-        if (ocForm) ocForm.hidden = true;
-        overlay.querySelector('#oc-montant').value = '';
-        overlay.querySelector('#oc-note').value = '';
-        if (msg) msg.textContent = '';
-        showToast(trad('Coût d\'exploitation enregistré'));
-      } catch (err) {
-        if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Erreur :') + ' ' + (err.message || err); }
-      }
-      btn.disabled = false;
-      btn.textContent = trad('Enregistrer');
-    });
-  }
+  // L'ajout d'un coût d'exploitation se fait maintenant exclusivement via
+  // openLogOperatingCostModal (bouton « Enregistrer un entretien » de la
+  // carte machine, voir ouvrirChoixEnregistrement) — la fiche n'affiche
+  // plus que l'historique en lecture seule (renderOperatingCosts, plus
+  // bas), il n'y a donc plus de formulaire ni d'écouteurs à câbler ici.
   // Une tâche dont le carnet laisse un choix : on DEMANDE, on ne devine pas.
   overlay.querySelectorAll('.choisir-frequence').forEach(btn => {
     btn.addEventListener('click', () => {
