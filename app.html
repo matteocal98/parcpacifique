@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-a6/GyvUOXsHYuOrfbLC1vY+uvnG0Ly4PwkFuBrhJk1w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NdGnwYBCTKIdgtiYM+roKCS48tBeRTJBWFKppxd9LK0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2245,7 +2245,7 @@
   .choix-bloc-controle .view-manual svg{width:15px;height:15px;flex:0 0 auto;}
   .choix-bloc .muted-text{margin-top:4px;}
   .choix-carte{
-    display:flex;align-items:center;gap:11px;margin-top:10px;padding:12px 14px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:11px;margin-top:10px;padding:12px 14px;
     border:1.5px solid var(--line-3);border-radius:var(--r-chip);background:var(--surface);
   }
   .choix-carte:first-of-type{margin-top:12px;}
@@ -2255,6 +2255,14 @@
   .choix-carte-corps{flex:1;min-width:0;}
   .choix-carte-valeur{font-weight:800;font-size:15px;color:var(--ink);}
   .choix-carte .badge{flex:0 0 auto;}
+  /* .view-manual{width:100%} en mobile (≤520px, voir plus haut) prend le
+     pas sur ce bouton précis : il n'est pas censé prendre toute la largeur
+     de la carte (icône + texte de l'option juste à côté) — sans cette
+     contrainte, .choix-carte-corps (flex:1) se retrouvait écrasé à
+     quelques pixels, un mot par ligne. Même piège que .mstrip-btn-icone
+     .view-manual, déjà rencontré et corrigé de la même façon (sélecteur
+     composé, plus spécifique que la règle générique). */
+  .choix-carte .view-manual{width:auto;flex:0 0 auto;}
   .choix-info-box{
     display:flex;gap:10px;margin-top:16px;padding:12px 14px;
     border:1.5px solid var(--primary-tint-2);border-radius:var(--r-chip);background:#E6E5FA;
@@ -11881,10 +11889,18 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
   // empilés de la version fiche (qui débordaient sur plusieurs lignes
   // dans ce contexte étroit). Même contrat data-compteur-* que la version
   // fiche — le câblage global (document.addEventListener, plus bas) ne
-  // change pas d'une ligne. Un seul bouton photo (source « galerie » —
-  // sur mobile, le sélecteur natif propose quand même appareil ET
-  // galerie sans capture= dédiée), comme le fichier fourni par
-  // l'utilisateur.
+  // change pas d'une ligne.
+  // Un seul bouton visible (pas de place pour 2 dans une ligne compacte) :
+  // il ouvre l'APPAREIL PHOTO quand appareilPhotoDisponible() le permet —
+  // PAS la galerie. Correction du 2026-09-25 : l'hypothèse précédente
+  // (« sur mobile, le sélecteur natif propose quand même appareil ET
+  // galerie sans capture= dédiée ») s'est révélée FAUSSE dans ce WebView
+  // Capacitor précis, constaté sur un vrai téléphone — un <input
+  // type=file> sans capture= n'y ouvrait QUE la galerie, jamais l'appareil.
+  // Même logique conditionnelle que la version fiche juste en dessous
+  // (bouton « Prendre la photo » avec capture="environment"), pas une
+  // nouvelle règle. L'accès galerie reste possible depuis la fiche machine
+  // complète (2 boutons), jamais supprimé, juste plus la voie rapide ici.
   if (emplacement === 'strip') {
     return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
@@ -11897,8 +11913,9 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
           <span class="compteur-strip-unite" aria-hidden="true">${esc(u.short)}</span>
         </div>
         <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}</button>
-        <button type="button" class="compteur-strip-icone is-photo" data-compteur-photo="${id}" data-compteur-photo-source="galerie" title="${esc(trad('Photo du compteur'))}" aria-label="${esc(trad('Photo du compteur'))}">${picto('photo')}</button>
-        <input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
+        <button type="button" class="compteur-strip-icone is-photo" data-compteur-photo="${id}" data-compteur-photo-source="${appareil ? 'appareil' : 'galerie'}" title="${esc(trad(appareil ? 'Prendre la photo' : 'Photo du compteur'))}" aria-label="${esc(trad(appareil ? 'Prendre la photo' : 'Photo du compteur'))}">${picto('photo')}</button>
+        ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
+        ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
       </div>
       <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
