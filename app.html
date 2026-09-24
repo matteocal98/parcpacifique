@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uSJ8uSfo7CK9uiv2VLCIYdliFxg0cuSj5DAdcX+gxek=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-y7+kA6XxepLyLtxdSOc/PQNNf/Aq+2f++Iv4/awJdzY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3921,6 +3921,10 @@
      le cadre d'encre 2px générique de TOUS les .card — plus dur, pas
      harmonieux avec le reste. Même valeur exacte que .dash-grid .card. */
   #tco-classement-section{border:1.5px solid var(--line);}
+  /* Même cas pour « Catalogue de pièces » depuis qu'elle est passée en
+     pleine largeur hors .dash-grid (voir plus haut) — oublié à ce
+     moment-là, corrigé ici avec la même règle exacte. */
+  #tco-catalogue-section{border:1.5px solid var(--line);}
 
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
@@ -3972,7 +3976,7 @@
   .tco-devise-carte.is-selected .tco-devise-coche{background:var(--ink);}
   .tco-devise-coche svg{width:14px;height:14px;color:transparent;}
   .tco-devise-carte.is-selected .tco-devise-coche svg{color:#fff;}
-  .tco-devise-nom{font-size:17px;line-height:24px;font-weight:600;color:var(--ink);}
+  .tco-devise-nom{font-size:14px;line-height:20px;font-weight:600;color:var(--ink);}
   .tco-devise-code{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink);}
   .tco-devise-carte.is-selected .tco-devise-code{background:var(--ink);color:#fff;}
   .tco-devise-zone{font-size:12px;color:var(--dark-ink);}
@@ -4237,8 +4241,15 @@
      colonne large quand il contient beaucoup d'articles), 2 colonnes y
      seraient trop à l'étroit. 2 colonnes réapparaissent seulement sur les
      très grands écrans, où dash-side a lui-même assez de largeur. */
-  .tco-seuils-liste{display:grid;grid-template-columns:1fr;gap:14px;}
-  @media (min-width:1400px){.tco-seuils-liste{grid-template-columns:repeat(2,1fr);}}
+  /* repeat(auto-fit, minmax(...)) plutôt qu'un seuil sur la largeur de LA
+     FENÊTRE : depuis que ce bloc partage 50/50 avec Paramètres TCO (au
+     lieu des 38,2% de la proportion φ d'origine), un seuil basé sur le
+     viewport ne correspond plus à la largeur RÉELLE de cette colonne —
+     à 1400px de fenêtre, la colonne ne fait plus que ~540px, trop étroit
+     pour 2 cartes cote à cote (icônes/badges qui se chevauchaient). Ce
+     motif s'adapte à la largeur réelle du conteneur, quel que soit le
+     ratio de la grille parente. */
+  .tco-seuils-liste{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
   .tco-seuil-carte{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
   .tco-seuil-carte-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
   .tco-seuil-carte-tete>div{display:flex;flex-direction:column;gap:1px;}
@@ -13769,7 +13780,7 @@ function ligneCatalogueTcoHtml(piece) {
 function blocCatalogueTcoHtml() {
   const pieces = UI.partsCatalog || [];
   return `
-    <section class="card">
+    <section class="card" id="tco-catalogue-section">
       <div class="tco-card-tete" style="margin-bottom:2px;">
         <div class="tco-card-tete-gauche">
           <div class="tco-card-icone-carre is-indigo">${picto('boite')}</div>
