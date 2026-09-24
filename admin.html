@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KEEVA — Console Superviseur</title>
+<!--
+  CONSOLE SUPERVISEUR — fichier séparé de app.html, jamais mélangé au
+  bundle livré aux clients (voir keeva-redesign-project.md pour le
+  pourquoi). Design repris verbatim de la maquette Stitch
+  console_superviseur_clients_support_keeva_sans_t_l_m_trie/code.html
+  (Tailwind CDN + tokens conservés tels quels, pas de portage vers le
+  système de variables CSS de app.html) — seules les données affichées
+  changent : tout ce qui est fabriqué par la maquette (48 organisations,
+  IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
+  d'implémentation pour le détail gardé/retiré.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-44XXCB7Q85CF7gCD9JQNQ+V9+jXHCEw3qHb1HBVG5/s=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}[hidden]{display:none!important;}</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+
+<!-- ═══════════════════════ ÉCRAN DE CONNEXION ═══════════════════════ -->
+<div id="ecran-connexion" class="fixed inset-0 z-[100] bg-surface flex items-center justify-center p-4">
+  <div class="w-full max-w-sm flex flex-col gap-5">
+    <div class="flex items-center gap-3 justify-center">
+      <div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-on-primary">
+        <span class="material-symbols-outlined text-2xl">shield_person</span>
+      </div>
+      <div>
+        <div class="font-headline-sm text-headline-sm font-bold text-on-surface">KEEVA</div>
+        <div class="font-label-sm text-label-sm text-on-surface-variant">Console Superviseur</div>
+      </div>
+    </div>
+    <form id="form-connexion" class="flex flex-col gap-3 p-5 rounded-xl bg-surface-container-lowest shadow-sm">
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface-variant">Identifiant</label>
+        <input id="cx-login" type="text" autocomplete="username" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/50" required/>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm font-semibold text-on-surface-variant">Mot de passe</label>
+        <input id="cx-mdp" type="password" autocomplete="current-password" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/50" required/>
+      </div>
+      <div id="cx-erreur" class="hidden font-label-sm text-label-sm text-error"></div>
+      <button type="submit" id="cx-bouton" class="h-11 mt-1 rounded bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors">Se connecter</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ ÉCRAN « ACCÈS REFUSÉ » ═══════════════════ -->
+<div id="ecran-refuse" class="hidden fixed inset-0 z-[100] bg-surface flex items-center justify-center p-4">
+  <div class="w-full max-w-sm flex flex-col items-center gap-4 p-6 rounded-xl bg-surface-container-lowest shadow-sm text-center">
+    <div class="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center">
+      <span class="material-symbols-outlined text-2xl">block</span>
+    </div>
+    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Accès réservé</h2>
+    <p class="font-body-sm text-body-sm text-on-surface-variant">Ce compte n'a pas les droits de supervision KEEVA. Cette console est réservée à l'équipe KEEVA.</p>
+    <button id="refuse-deconnexion" type="button" class="h-11 px-5 rounded bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ CONSOLE ═══════════════════════════ -->
+<div id="console" class="hidden">
+<aside class="fixed left-0 top-0 h-full w-72 bg-[#0D1424] z-50 flex flex-col justify-between select-none shadow-[0_1px_8px_rgba(0,0,0,0.12)]">
+  <div class="flex flex-col">
+    <div class="h-16 px-space-lg flex items-center justify-between bg-[#0A0F1D]">
+      <div class="flex items-center gap-space-sm">
+        <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-white text-[20px]">precision_manufacturing</span>
+        </div>
+        <span class="font-headline-sm text-headline-sm font-bold tracking-tight text-white">KEEVA</span>
+      </div>
+      <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded-sm bg-tertiary-container text-on-tertiary-container tracking-wider font-semibold">HQ</span>
+    </div>
+    <div class="px-space-lg pt-space-md pb-space-sm">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#162038] text-white border border-[#233154]">
+        <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-slate-200">Super Admin / Support</span>
+      </div>
+    </div>
+    <nav class="flex flex-col gap-1 px-space-sm py-space-sm" id="nav-console">
+      <a data-path="clients" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">corporate_fare</span><span>Vue Clients &amp; Organisations</span>
+      </a>
+      <a data-path="support" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">contact_support</span><span>Support &amp; Tickets</span>
+      </a>
+      <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">agriculture</span><span>Parc Matériel &amp; Flottes</span>
+      </a>
+      <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Audit TCO &amp; Facturation</span>
+      </a>
+      <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">document_scanner</span><span>Carnets &amp; OCR IA</span>
+      </a>
+    </nav>
+  </div>
+  <div class="p-space-md m-space-sm rounded-lg bg-[#141C30] border border-[#1E2B4A] flex flex-col gap-2">
+    <div class="flex items-center justify-between">
+      <span class="font-label-sm text-label-sm uppercase tracking-wide text-slate-400">Session</span>
+      <span class="inline-flex items-center gap-1 font-code-sm text-code-sm text-tertiary-fixed-dim"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>Active</span>
+    </div>
+    <p class="font-body-sm text-body-sm text-slate-300 leading-tight">Console de supervision multi-locataire KEEVA</p>
+  </div>
+</aside>
+
+<div class="pl-72">
+  <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg gap-space-md">
+    <div class="flex-1 max-w-xl">
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined absolute left-3 text-outline text-[20px]">search</span>
+        <input id="recherche-clients" type="search" placeholder="Rechercher un compte client…" class="w-full h-11 pl-10 pr-4 bg-surface-container-lowest text-on-surface font-body-sm text-body-sm rounded-lg border border-outline-variant focus:outline-none focus:border-primary shadow-sm"/>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-md">
+      <div class="flex items-center gap-space-sm pl-1">
+        <div class="flex flex-col text-right">
+          <span id="staff-nom" class="font-headline-sm text-label-md text-on-surface leading-tight">—</span>
+          <span class="font-body-sm text-label-sm text-on-surface-variant">Superviseur KEEVA</span>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        </div>
+      </div>
+      <button id="bouton-deconnexion" type="button" class="h-9 px-3 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold transition-colors">Quitter</button>
+    </div>
+  </header>
+
+  <main class="relative pt-16 w-full min-h-screen bg-surface">
+    <div class="p-space-lg max-w-[1560px] mx-auto w-full flex flex-col gap-space-lg">
+
+      <!-- ═══════ VUE : Bientôt disponible ═══════ -->
+      <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant">construction</span>
+        <h2 class="font-headline-md text-headline-md text-on-surface">Bientôt disponible</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Cette page réutilisera les fonctions déjà existantes de l'application (TCO, carnets OCR) — pas encore branchée dans cette console.</p>
+      </section>
+
+      <!-- ═══════ VUE : Clients & Organisations ═══════ -->
+      <section id="vue-clients" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col gap-1">
+          <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-surface-container text-primary font-bold tracking-wider self-start">Supervision Multi-Tenant</span>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Console Superviseur &amp; Support KEEVA</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">Vue d'ensemble des organisations clientes réelles et de leur parc.</p>
+        </div>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Organisations</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[22px]">corporate_fare</span></div>
+            </div>
+            <span id="kpi-organisations" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Machines suivies</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[22px]">agriculture</span></div>
+            </div>
+            <span id="kpi-machines" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Interventions ce mois</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[22px]">verified</span></div>
+            </div>
+            <span id="kpi-interventions" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Tickets ouverts</span>
+              <div class="w-9 h-9 rounded bg-error-container flex items-center justify-center text-on-error-container"><span class="material-symbols-outlined text-[22px]">support_agent</span></div>
+            </div>
+            <span id="kpi-tickets" class="font-display text-display text-error font-bold leading-none">—</span>
+          </div>
+        </section>
+
+        <section id="bandeau-incident" class="hidden rounded-lg bg-surface-container-lowest p-space-md shadow-sm relative overflow-hidden">
+          <div class="absolute left-0 top-0 bottom-0 w-2 bg-error"></div>
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
+            <div class="flex items-start gap-space-md">
+              <div class="w-11 h-11 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[26px]">warning</span></div>
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold tracking-wider">Ticket prioritaire</span>
+                  <span id="incident-org" class="font-headline-sm text-headline-sm font-bold text-on-surface"></span>
+                </div>
+                <p id="incident-sujet" class="font-body-md text-body-md text-on-surface"></p>
+              </div>
+            </div>
+            <button id="incident-ouvrir" type="button" class="h-11 px-4 rounded bg-primary-container text-on-primary font-headline-sm text-label-md hover:bg-primary transition-colors flex items-center gap-2 shrink-0">
+              <span class="material-symbols-outlined text-[20px]">open_in_new</span><span>Ouvrir le ticket</span>
+            </button>
+          </div>
+        </section>
+
+        <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Répertoire</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Portefeuille Clients</h2>
+            </div>
+          </div>
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider h-10">
+                  <th class="py-2.5 px-4 rounded-l">Organisation / Forfait</th>
+                  <th class="py-2.5 px-4">Référent</th>
+                  <th class="py-2.5 px-4">Parc suivi</th>
+                  <th class="py-2.5 px-4">Tickets ouverts</th>
+                  <th class="py-2.5 px-4 text-right rounded-r">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="corps-tableau-clients" class="divide-y divide-surface-container font-body-sm text-body-sm"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="p-space-md rounded-lg bg-surface-container flex items-start gap-space-md shadow-sm">
+          <div class="w-10 h-10 rounded bg-tertiary text-on-tertiary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[22px]">verified_user</span></div>
+          <div class="flex flex-col gap-1">
+            <span class="font-headline-sm text-label-md font-bold text-on-surface">Protocole Zéro-Capteur KEEVA</span>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Tous les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés. Aucune sonde matérielle ni module connecté requis.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VUE : Support & Tickets ═══════ -->
+      <section id="vue-support" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col gap-1">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Support Client &amp; Tickets</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">File des demandes d'assistance des organisations clientes.</p>
+        </div>
+
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Ouverts</span>
+            <span id="kpi-t-ouverts" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">En cours</span>
+            <span id="kpi-t-encours" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Résolus</span>
+            <span id="kpi-t-resolus" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
+          </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          <div class="lg:col-span-7 flex flex-col gap-space-md">
+            <div class="rounded bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-md">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h2 class="font-headline-sm text-headline-sm text-on-surface">File des Tickets</h2>
+                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded" id="onglets-tickets">
+                  <button data-filtre="all" class="onglet-ticket px-3 py-1 rounded bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold" type="button">Tous</button>
+                  <button data-filtre="ouvert" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">Ouverts</button>
+                  <button data-filtre="en_cours" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">En cours</button>
+                  <button data-filtre="resolu" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">Résolus</button>
+                </div>
+              </div>
+              <div id="liste-tickets" class="flex flex-col gap-space-sm"></div>
+              <p id="tickets-vide" class="hidden font-body-sm text-body-sm text-on-surface-variant text-center py-6">Aucun ticket pour ce filtre.</p>
+            </div>
+          </div>
+
+          <aside class="lg:col-span-5 flex flex-col gap-space-lg">
+            <div id="panneau-ticket" class="rounded bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-md">
+              <p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Sélectionne un ticket pour voir le fil et répondre.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+</div>
+
+<template id="tpl-ligne-client">
+  <tr class="hover:bg-surface-container-low/70 transition-colors">
+    <td class="py-3.5 px-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded bg-surface-container text-primary flex items-center justify-center font-bold font-headline-sm text-headline-sm shrink-0" data-slot="initiales"></div>
+        <div class="flex flex-col">
+          <span class="font-headline-sm text-label-md font-bold text-on-surface" data-slot="nom"></span>
+          <span class="text-on-surface-variant font-body-sm text-body-sm" data-slot="plan"></span>
+        </div>
+      </div>
+    </td>
+    <td class="py-3.5 px-4">
+      <div class="flex flex-col">
+        <span class="font-headline-sm text-label-md font-semibold text-on-surface" data-slot="gerant-nom"></span>
+        <span class="text-on-surface-variant font-body-sm text-label-sm" data-slot="gerant-email"></span>
+      </div>
+    </td>
+    <td class="py-3.5 px-4"><span class="font-code-sm text-code-sm font-bold text-on-surface" data-slot="machines"></span></td>
+    <td class="py-3.5 px-4"><span class="font-code-sm text-code-sm font-bold" data-slot="tickets"></span></td>
+    <td class="py-3.5 px-4 text-right">
+      <button class="btn-connecter-en-tant-que h-9 px-3 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-colors" type="button" title="Se connecter en tant que le gérant">
+        <span class="material-symbols-outlined text-[16px] align-middle">login</span> Se connecter en tant que
+      </button>
+    </td>
+  </tr>
+</template>
+
+<script>
+tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "background": "#fbf8ff", "on-primary": "#ffffff", "surface-container": "#edecff", "tertiary": "#005952", "primary": "#4236c6", "on-tertiary-fixed-variant": "#00504a", "on-error-container": "#93000a", "inverse-primary": "#c4c0ff", "on-secondary-container": "#fefcff", "surface-container-high": "#e6e6ff", "error-container": "#ffdad6", "on-background": "#141939", "on-surface-variant": "#464554", "surface-container-lowest": "#ffffff", "secondary-fixed-dim": "#aec6ff", "surface": "#fbf8ff", "on-tertiary": "#ffffff", "on-primary-fixed": "#110068", "primary-fixed-dim": "#c4c0ff", "tertiary-fixed": "#78f7e8", "inverse-surface": "#292e4f", "on-surface": "#141939", "tertiary-container": "#00746b", "error": "#ba1a1a", "surface-variant": "#dfe0ff", "on-primary-container": "#e7e4ff", "surface-tint": "#5248d6", "secondary-fixed": "#d8e2ff", "on-tertiary-fixed": "#00201d", "primary-fixed": "#e3dfff", "outline": "#777586", "on-primary-fixed-variant": "#392abd", "on-secondary-fixed": "#001a42", "tertiary-fixed-dim": "#58dacc", "on-error": "#ffffff", "outline-variant": "#c8c4d7", "secondary": "#0058be", "on-tertiary-container": "#7cfbec", "surface-container-highest": "#dfe0ff", "surface-dim": "#d4d7ff", "on-secondary-fixed-variant": "#004395", "surface-bright": "#fbf8ff", "secondary-container": "#2671e2", "primary-container": "#5b52df", "surface-container-low": "#f4f2ff", "on-secondary": "#ffffff", "inverse-on-surface": "#f0efff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-md": "1rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "margin": "1.5rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "gutter": "1.25rem" }, "fontFamily": { "body-md": [ "Hanken Grotesk" ], "code-sm": [ "Space Grotesk" ], "headline-sm": [ "Space Grotesk" ], "label-sm": [ "Hanken Grotesk" ], "telemetry-stat": [ "Space Grotesk" ], "display-mobile": [ "Space Grotesk" ], "display": [ "Space Grotesk" ], "headline-md": [ "Space Grotesk" ], "body-sm": [ "Hanken Grotesk" ], "body-lg": [ "Hanken Grotesk" ], "headline-lg-mobile": [ "Space Grotesk" ], "headline-lg": [ "Space Grotesk" ], "telemetry-stat-compact": [ "Space Grotesk" ], "label-md": [ "Hanken Grotesk" ] }, "fontSize": { "body-md": [ "0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" } ], "code-sm": [ "0.8125rem", { "lineHeight": "1rem", "fontWeight": "500" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.625rem", "fontWeight": "600" } ], "label-sm": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "600" } ], "telemetry-stat": [ "1.5rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-mobile": [ "2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display": [ "3rem", { "lineHeight": "3.5rem", "letterSpacing": "-0.03em", "fontWeight": "700" } ], "headline-md": [ "1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.25rem", "fontWeight": "400" } ], "body-lg": [ "1.125rem", { "lineHeight": "1.75rem", "fontWeight": "400" } ], "headline-lg-mobile": [ "1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "headline-lg": [ "2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "telemetry-stat-compact": [ "1rem", { "lineHeight": "1.25rem", "fontWeight": "600" } ], "label-md": [ "0.875rem", { "lineHeight": "1.25rem", "fontWeight": "600" } ] } } } };
+
+// ═══════════════════════════════════════════════════════════════════════
+// CONSOLE SUPERVISEUR — logique. Même client Supabase que app.html (mêmes
+// identifiants keeva.work), mais la barrière réelle est côté base
+// (profiles.is_staff + RLS is_staff(), voir migration dans
+// keeva-redesign-project.md) : cet écran n'est qu'un confort, jamais la
+// vraie protection.
+const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
+const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
+let sb = null;
+let MOI = null; // { id, full_name, is_staff }
+let SOCIETES = [];
+let TICKETS = [];
+let FILTRE_TICKET = 'all';
+let TICKET_OUVERT = null;
+
+function el(id) { return document.getElementById(id); }
+function echapper(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function initiales(nom) {
+  return String(nom ?? '?').trim().split(/\s+/).map((m) => m[0]).slice(0, 2).join('').toUpperCase() || '?';
+}
+function ilYA(iso) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.round(diffMs / 60000);
+  if (min < 1) return "à l'instant";
+  if (min < 60) return `il y a ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `il y a ${h} h`;
+  return `il y a ${Math.round(h / 24)} j`;
+}
+
+async function demarrer() {
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    setTimeout(demarrer, 100);
+    return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  el('form-connexion').addEventListener('submit', gererConnexion);
+  el('bouton-deconnexion').addEventListener('click', () => sb.auth.signOut());
+  el('refuse-deconnexion').addEventListener('click', () => sb.auth.signOut());
+  document.querySelectorAll('.nav-lien').forEach((a) => a.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    allerA(a.dataset.path);
+  }));
+  document.querySelectorAll('.onglet-ticket').forEach((btn) => btn.addEventListener('click', () => {
+    FILTRE_TICKET = btn.dataset.filtre;
+    document.querySelectorAll('.onglet-ticket').forEach((b) => b.className = 'onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium');
+    btn.className = 'onglet-ticket px-3 py-1 rounded bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold';
+    rendreListeTickets();
+  }));
+  el('incident-ouvrir').addEventListener('click', () => {
+    allerA('support');
+    if (window.__incidentTicketId) ouvrirTicket(window.__incidentTicketId);
+  });
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) verifierAccesEtCharger(session.user.id);
+    else afficherConnexion();
+  });
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) verifierAccesEtCharger(session.user.id);
+  else afficherConnexion();
+}
+
+function afficherConnexion() {
+  MOI = null;
+  el('ecran-connexion').classList.remove('hidden');
+  el('ecran-refuse').classList.add('hidden');
+  el('console').classList.add('hidden');
+}
+
+async function gererConnexion(ev) {
+  ev.preventDefault();
+  const bouton = el('cx-bouton');
+  const erreur = el('cx-erreur');
+  erreur.classList.add('hidden');
+  bouton.disabled = true;
+  bouton.textContent = 'Connexion…';
+  const loginBrut = el('cx-login').value.trim();
+  const email = loginBrut.includes('@') ? loginBrut : `${loginBrut}@membres.keeva.work`;
+  const { error } = await sb.auth.signInWithPassword({ email, password: el('cx-mdp').value });
+  bouton.disabled = false;
+  bouton.textContent = 'Se connecter';
+  if (error) {
+    erreur.textContent = "Identifiants incorrects.";
+    erreur.classList.remove('hidden');
+  }
+}
+
+async function verifierAccesEtCharger(userId) {
+  const { data: profil, error } = await sb.from('profiles').select('id, full_name, login, is_staff').eq('id', userId).maybeSingle();
+  if (error || !profil?.is_staff) {
+    el('ecran-connexion').classList.add('hidden');
+    el('console').classList.add('hidden');
+    el('ecran-refuse').classList.remove('hidden');
+    return;
+  }
+  MOI = profil;
+  el('ecran-connexion').classList.add('hidden');
+  el('ecran-refuse').classList.add('hidden');
+  el('console').classList.remove('hidden');
+  el('staff-nom').textContent = profil.full_name || profil.login;
+  await Promise.all([chargerSocietes(), chargerTickets()]);
+  allerA('clients');
+}
+
+function allerA(chemin) {
+  document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : 'vue-bientot';
+  el(cible).classList.remove('hidden');
+}
+
+// ── Clients & Organisations ─────────────────────────────────────────────
+async function chargerSocietes() {
+  const { data, error } = await sb.rpc('admin_lister_societes');
+  if (error) { console.error(error); return; }
+  SOCIETES = data || [];
+  const [{ count: nbMachines }, { count: nbInterventionsMois }] = await Promise.all([
+    sb.from('machines').select('id', { count: 'exact', head: true }),
+    sb.from('interventions').select('id', { count: 'exact', head: true }).gte('performed_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+  ]);
+  el('kpi-organisations').textContent = SOCIETES.length;
+  el('kpi-machines').textContent = nbMachines ?? '—';
+  el('kpi-interventions').textContent = nbInterventionsMois ?? '—';
+  el('kpi-tickets').textContent = SOCIETES.reduce((s, o) => s + Number(o.tickets_ouverts || 0), 0);
+  rendreTableauClients();
+}
+
+function rendreTableauClients() {
+  const corps = el('corps-tableau-clients');
+  const tpl = el('tpl-ligne-client');
+  corps.innerHTML = '';
+  const filtre = (el('recherche-clients').value || '').toLowerCase();
+  SOCIETES.filter((o) => !filtre || o.nom.toLowerCase().includes(filtre)).forEach((o) => {
+    const noeud = tpl.content.cloneNode(true);
+    noeud.querySelector('[data-slot="initiales"]').textContent = initiales(o.nom);
+    noeud.querySelector('[data-slot="nom"]').textContent = o.nom;
+    noeud.querySelector('[data-slot="plan"]').textContent = `${o.plan || '—'} · ${o.devise || ''}`;
+    noeud.querySelector('[data-slot="gerant-nom"]').textContent = o.gerant_nom || o.gerant_login || '(aucun gérant)';
+    noeud.querySelector('[data-slot="gerant-email"]').textContent = o.gerant_email || '';
+    noeud.querySelector('[data-slot="machines"]').textContent = `${o.nb_machines} machine(s)`;
+    const puceTickets = noeud.querySelector('[data-slot="tickets"]');
+    puceTickets.textContent = o.tickets_ouverts;
+    puceTickets.className = 'font-code-sm text-code-sm font-bold ' + (o.tickets_ouverts > 0 ? 'text-error' : 'text-on-surface-variant');
+    const btn = noeud.querySelector('.btn-connecter-en-tant-que');
+    if (!o.gerant_login) { btn.disabled = true; btn.classList.add('opacity-40', 'cursor-not-allowed'); }
+    else btn.addEventListener('click', () => connecterEnTantQue(o));
+    corps.appendChild(noeud);
+  });
+}
+el('recherche-clients')?.addEventListener?.('input', () => rendreTableauClients());
+
+// ── Impersonation ("Se connecter en tant que") ──────────────────────────
+async function connecterEnTantQue(societe) {
+  if (!confirm(`Ouvrir une session support pour "${societe.nom}" (gérant : ${societe.gerant_nom || societe.gerant_login}) ?\n\nCette action est tracée dans le journal d'audit.`)) return;
+  const { data: { session } } = await sb.auth.getSession();
+  const { data: profilGerant } = await sb.from('profiles').select('id').eq('company_id', societe.company_id).eq('role', 'gerant').order('created_at', { ascending: true }).limit(1).maybeSingle();
+  if (!profilGerant) { alert("Aucun gérant trouvé pour cette société."); return; }
+  const reponse = await fetch(`${SUPABASE_URL}/functions/v1/impersonate-tenant`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_KEY },
+    body: JSON.stringify({ target_profile_id: profilGerant.id }),
+  });
+  const corps = await reponse.json().catch(() => ({}));
+  if (!reponse.ok) { alert('Échec : ' + (corps.error || reponse.status)); return; }
+  const url = new URL('app.html', location.href);
+  url.searchParams.set('mode_support', '1');
+  url.searchParams.set('support_email', corps.email);
+  url.searchParams.set('support_token', corps.hashed_token);
+  window.open(url.toString(), '_blank');
+}
+
+// ── Support & Tickets ────────────────────────────────────────────────────
+async function chargerTickets() {
+  const { data, error } = await sb
+    .from('support_tickets')
+    .select('id, company_id, subject, priority, status, created_at, assigned_to, companies(name), created_by_profile:profiles!support_tickets_created_by_fkey(full_name,login)')
+    .order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  TICKETS = data || [];
+  el('kpi-t-ouverts').textContent = TICKETS.filter((t) => t.status === 'ouvert').length;
+  el('kpi-t-encours').textContent = TICKETS.filter((t) => t.status === 'en_cours').length;
+  el('kpi-t-resolus').textContent = TICKETS.filter((t) => t.status === 'resolu').length;
+  const prioritaire = TICKETS.find((t) => t.priority === 'haute' && t.status !== 'resolu');
+  if (prioritaire) {
+    window.__incidentTicketId = prioritaire.id;
+    el('incident-org').textContent = prioritaire.companies?.name || '';
+    el('incident-sujet').textContent = prioritaire.subject;
+    el('bandeau-incident').classList.remove('hidden');
+  } else {
+    el('bandeau-incident').classList.add('hidden');
+  }
+  rendreListeTickets();
+}
+
+function rendreListeTickets() {
+  const liste = el('liste-tickets');
+  liste.innerHTML = '';
+  const visibles = TICKETS.filter((t) => FILTRE_TICKET === 'all' || t.status === FILTRE_TICKET);
+  el('tickets-vide').classList.toggle('hidden', visibles.length > 0);
+  const couleurPriorite = { haute: 'bg-error', normale: 'bg-secondary', basse: 'bg-outline-variant' };
+  const libellePriorite = { haute: 'Priorité Haute', normale: 'Normale', basse: 'Basse' };
+  visibles.forEach((t) => {
+    const carte = document.createElement('div');
+    carte.className = 'p-space-md rounded bg-surface-container-low/60 hover:bg-surface-container-low transition-colors shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm cursor-pointer';
+    carte.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-2.5 h-2.5 rounded-full ${couleurPriorite[t.priority] || 'bg-outline-variant'} mt-1.5 shrink-0"></div>
+        <div class="flex flex-col gap-0.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(t.companies?.name)}</span>
+            <span class="text-on-surface-variant font-body-sm text-body-sm">• ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
+            <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">${libellePriorite[t.priority] || t.priority}</span>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface">${echapper(t.subject)}</p>
+          <span class="font-code-sm text-code-sm text-on-surface-variant">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'} • ${ilYA(t.created_at)}</span>
+        </div>
+      </div>`;
+    carte.addEventListener('click', () => ouvrirTicket(t.id));
+    liste.appendChild(carte);
+  });
+}
+
+async function ouvrirTicket(ticketId) {
+  TICKET_OUVERT = ticketId;
+  const t = TICKETS.find((x) => x.id === ticketId);
+  const panneau = el('panneau-ticket');
+  panneau.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Chargement…</p>';
+  const { data: messages, error } = await sb
+    .from('support_ticket_messages')
+    .select('id, body, created_at, author_id, profiles(full_name, login)')
+    .eq('ticket_id', ticketId)
+    .order('created_at', { ascending: true });
+  if (error) { panneau.innerHTML = `<p class="font-body-sm text-body-sm text-error">Erreur : ${echapper(error.message)}</p>`; return; }
+  panneau.innerHTML = `
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="font-headline-sm text-headline-sm text-on-surface">${echapper(t?.companies?.name)}</h3>
+      <select id="ticket-statut" class="h-9 px-2 rounded bg-surface-container-low text-on-surface font-label-sm text-label-sm">
+        <option value="ouvert" ${t?.status === 'ouvert' ? 'selected' : ''}>Ouvert</option>
+        <option value="en_cours" ${t?.status === 'en_cours' ? 'selected' : ''}>En cours</option>
+        <option value="resolu" ${t?.status === 'resolu' ? 'selected' : ''}>Résolu</option>
+      </select>
+    </div>
+    <p class="font-body-md text-body-md text-on-surface font-semibold">${echapper(t?.subject)}</p>
+    <div id="fil-messages" class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1"></div>
+    <form id="form-reponse" class="flex flex-col gap-2 pt-2 border-t border-surface-container">
+      <textarea id="reponse-texte" rows="2" placeholder="Répondre…" class="p-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/40"></textarea>
+      <button type="submit" class="h-10 rounded bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors">Envoyer</button>
+    </form>`;
+  const fil = panneau.querySelector('#fil-messages');
+  (messages || []).forEach((m) => {
+    const bulle = document.createElement('div');
+    const deMoi = m.author_id === MOI.id;
+    bulle.className = 'p-2.5 rounded ' + (deMoi ? 'bg-primary/10 self-end' : 'bg-surface-container-low');
+    bulle.innerHTML = `<div class="font-label-sm text-label-sm font-semibold text-on-surface">${echapper(m.profiles?.full_name || m.profiles?.login || '?')}</div><p class="font-body-sm text-body-sm text-on-surface">${echapper(m.body)}</p><div class="font-code-sm text-[11px] text-on-surface-variant">${ilYA(m.created_at)}</div>`;
+    fil.appendChild(bulle);
+  });
+  fil.scrollTop = fil.scrollHeight;
+  panneau.querySelector('#ticket-statut').addEventListener('change', async (ev) => {
+    const statut = ev.target.value;
+    const { error: errMaj } = await sb.from('support_tickets').update({ status: statut, assigned_to: MOI.id, resolved_at: statut === 'resolu' ? new Date().toISOString() : null }).eq('id', ticketId);
+    if (errMaj) { alert('Erreur : ' + errMaj.message); return; }
+    await chargerTickets();
+  });
+  panneau.querySelector('#form-reponse').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const texte = panneau.querySelector('#reponse-texte').value.trim();
+    if (!texte) return;
+    const { error: errMsg } = await sb.from('support_ticket_messages').insert({ ticket_id: ticketId, author_id: MOI.id, body: texte });
+    if (errMsg) { alert('Erreur : ' + errMsg.message); return; }
+    if (t?.status === 'ouvert') await sb.from('support_tickets').update({ status: 'en_cours', assigned_to: MOI.id }).eq('id', ticketId);
+    await chargerTickets();
+    ouvrirTicket(ticketId);
+  });
+}
+
+demarrer();
+</script>
+</body>
+</html>

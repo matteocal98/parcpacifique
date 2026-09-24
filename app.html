@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kBb0YtgRgxzLt5lOA4gmqk5q40lZfxpRnX3UU6hwG0M=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d3PBa1tRb7/XewtlMYiOnt9QpK0RTxanTzVunR/biKM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4693,6 +4693,11 @@
 <script>
 // ── Configuration ─────────────────────────────────────────────
 const __isPasswordRecovery = window.location.hash.includes('type=recovery');
+// « Se connecter en tant que » depuis la console superviseur (admin.html) :
+// un jeton à usage unique dans l'URL (jamais un mot de passe) échangé UNE
+// fois contre une vraie session, voir activerModeSupport() plus bas.
+const __paramsSupport = new URLSearchParams(window.location.search);
+const __isModeSupport = __paramsSupport.has('mode_support');
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const app = document.getElementById('app');
@@ -15610,6 +15615,14 @@ VIEWS.account = {
         </div>` : ''}
       </section>
 
+      <section class="card">
+        <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('aideCercle')}</span><span>${trad('Support')}</span></h2></div>
+        <p class="muted-text">${trad('Une question, une difficulté ? Écris-nous : on te répond directement ici.')}</p>
+        <div class="modal-actions">
+          <button type="button" class="primary" id="acc-support-ouvrir"><span class="card-ico">${picto('message')}</span><span>${trad('Contacter le support')}</span></button>
+        </div>
+      </section>
+
       <section class="card compte-danger">
         <div class="card-head"><h2 class="card-title"><span class="card-ico">${picto('alerte')}</span><span>${trad('Zone sensible')}</span></h2></div>
         <p class="muted-text">${trad('Clôture d\'entreprise et suppression.')}</p>
@@ -15644,6 +15657,7 @@ VIEWS.account = {
     });
   }
     root.querySelector('#acc-portail')?.addEventListener('click', () => ouvrirPortailAbonnement());
+    root.querySelector('#acc-support-ouvrir')?.addEventListener('click', () => openSupportModal());
     preparerCarteEquipe(root);
 
     // ── CE QUE CHAQUE RÔLE PEUT FAIRE, ET CE QU'ON EN DIT ────────────────────
@@ -21780,6 +21794,44 @@ function afficherDepuisCache(cache) {
   renderApp();
 }
 
+// ── Mode support (« Se connecter en tant que » depuis admin.html) ───────
+// Échange le jeton à usage unique reçu dans l'URL contre une VRAIE session
+// (jamais un mode « lecture seule » simulé) — voir impersonate-tenant/
+// index.ts pour la génération de ce jeton côté serveur, et
+// keeva-redesign-project.md pour le contexte. Nettoie l'URL immédiatement,
+// jeton ou pas : il ne doit jamais rester dans l'historique du navigateur.
+async function activerModeSupport() {
+  const email = __paramsSupport.get('support_email');
+  const token = __paramsSupport.get('support_token');
+  history.replaceState(null, '', window.location.pathname);
+  if (!email || !token) return;
+  const { error } = await sb.auth.verifyOtp({ email, token, type: 'magiclink' });
+  if (error) {
+    alert("Le lien d'accès support a expiré ou est invalide. Redemande un accès depuis la console superviseur.");
+    return;
+  }
+  sessionStorage.setItem('mode_support', '1');
+}
+
+// Bandeau permanent, posé une seule fois après le premier rendu réussi —
+// jamais discret : quiconque utilise l'appli en mode support doit toujours
+// voir qu'il agit pour le compte d'un client, et pouvoir en sortir en un clic.
+function afficherBandeauSupportSiActif() {
+  if (sessionStorage.getItem('mode_support') !== '1' || document.getElementById('bandeau-mode-support')) return;
+  const bandeau = document.createElement('div');
+  bandeau.id = 'bandeau-mode-support';
+  bandeau.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#ba1a1a;color:#fff;padding:9px 14px;font:600 13px/1.3 "Hanken Grotesk",sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.25);';
+  bandeau.innerHTML = `<span>${trad('Mode support')} — ${esc(UI.companyName || '')}</span><button type="button" id="quitter-mode-support" style="background:#fff;color:#ba1a1a;border:none;border-radius:4px;padding:5px 12px;font-weight:700;cursor:pointer;font:inherit;">${trad('Quitter')}</button>`;
+  document.body.prepend(bandeau);
+  document.body.style.paddingTop = bandeau.offsetHeight + 'px';
+  document.getElementById('quitter-mode-support').addEventListener('click', async () => {
+    sessionStorage.removeItem('mode_support');
+    await sb.auth.signOut();
+    window.close();
+    setTimeout(() => { location.href = 'about:blank'; }, 200);
+  });
+}
+
 async function boot(toastMessage) {
   // VERROU : avant toute lecture et tout rendu. Ni le parc, ni la copie hors
   // connexion ne doivent apparaître avant une vérification réussie.
@@ -22064,6 +22116,7 @@ async function boot(toastMessage) {
   });
 
   renderApp();
+  afficherBandeauSupportSiActif();
   if (toastMessage) showToast(toastMessage);
 
   // Retour de paiement Stripe : la confirmation vient APRÈS le rendu du parc,
@@ -22090,6 +22143,11 @@ changerLangue(langueInitiale(), { silencieux: true });
 if (sb) {
   if (__isPasswordRecovery) {
     renderSetNewPassword();
+  } else if (__isModeSupport) {
+    activerModeSupport().then(() => {
+      boot();
+      verifierVersionPubliee();
+    });
   } else {
     boot();
     // L'avis « une nouvelle version est disponible » est vérifié à CHAQUE
