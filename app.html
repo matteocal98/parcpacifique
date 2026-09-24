@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-TwAM+iI5Xkg4sTxZFPQcpOy+06VTqkeOJ7/jBdenrTE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-p9b161CXuEc4UyzIkhMbTyT27//RSAQz2x+FaHIrNmk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13340,11 +13340,11 @@ function blocParametresTcoHtml() {
       </div>
       <div class="tco-callout is-warn">
         ${picto('alerte')}
-        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise convertit automatiquement TOUS les montants déjà enregistrés, au taux fixe 1 € = 119,3317 XPF, au moment où vous cliquez sur Enregistrer.')}</p>
+        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise convertit automatiquement TOUS les montants déjà enregistrés, au taux fixe 1 € = 119,3317 XPF, au moment où vous cliquez sur « Enregistrer les paramètres » ci-dessous.')}</p>
       </div>
       <div class="tco-callout is-warn" id="tco-devise-avertissement" hidden>
         ${picto('alerte')}
-        <p><strong>${trad('Devise sélectionnée non enregistrée.')}</strong> ${trad('Les montants affichés restent dans l\'ancienne devise tant que vous n\'avez pas cliqué sur Enregistrer — la conversion se fait en une seule fois, pour toutes les données à la fois.')}</p>
+        <p><strong>${trad('Devise sélectionnée non enregistrée.')}</strong> ${trad('Les montants affichés restent dans l\'ancienne devise tant que vous n\'avez pas cliqué sur « Enregistrer les paramètres » ci-dessous (pas « Enregistrer les seuils », qui ne change jamais la devise) — la conversion se fait en une seule fois, pour toutes les données à la fois.')}</p>
       </div>
       <div class="field-row" style="grid-template-columns:repeat(3,1fr);">
         <div>
