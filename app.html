@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MKC9SddY8kZqnb939YfXGh6886AioAZ7clUXn5eTsBY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1qUVRMkh16a2+3XZAnKC+V0xIUtnu5nFzU+JMRKYgWA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -909,6 +909,133 @@
   }
   .switch span{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s ease;}
   .switch.on{background:var(--primary);justify-content:flex-end;}
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ★ REPRISE STITCH « Machines (Parc) — bandeau horizontal compact »
+     (voir keeva-redesign-project) : remplace l'ancienne carte verticale
+     pliable ci-dessous par un bandeau horizontal par machine (identité,
+     compteur, jauge, actions en une ligne sur bureau, empilé sur mobile).
+     L'ancien bloc `.machine`/`.m-*` reste déclaré plus bas (mort, plus
+     référencé par machineCardHtml) — pas retiré pour limiter le risque
+     sur cette passe, à nettoyer plus tard si utile. */
+  .parc-toolbar{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
+  .parc-toolbar-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .parc-toolbar-titre-ligne{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .parc-toolbar-titre-ligne h1{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin:0;}
+  .parc-count-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-2);font-size:12px;font-weight:600;}
+  .parc-count-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
+  .parc-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .parc-export-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-weight:600;font-size:13.5px;cursor:pointer;box-shadow:var(--shadow-soft);font-family:inherit;}
+  .parc-export-btn:hover{background:var(--line);}
+  .parc-export-btn svg{width:18px;height:18px;flex:0 0 auto;}
+
+  .parc-filtres{background:var(--surface);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:14px;}
+  @media (min-width:1100px){.parc-filtres{flex-direction:row;align-items:center;justify-content:space-between;}}
+  .parc-recherche{position:relative;flex:1;min-width:240px;}
+  .parc-recherche svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--dark-ink);pointer-events:none;}
+  .parc-recherche input{width:100%;height:44px;padding:0 16px 0 42px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:14px;font-family:inherit;}
+  .parc-recherche input:focus{background:#fff;outline:2px solid var(--primary-dark);outline-offset:0;}
+  .parc-pills-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .parc-pill{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink-2);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;}
+  .parc-pill.is-active{background:var(--ink);color:#fff;}
+  .parc-pill .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+  .parc-pill .compte{padding:1px 6px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;background:var(--line);color:var(--ink);}
+  .parc-pill.is-active .compte{background:rgba(255,255,255,.2);color:#fff;}
+  .parc-tri{display:flex;align-items:center;gap:8px;}
+  @media (min-width:1100px){.parc-tri{padding-left:14px;border-left:1px solid var(--line);}}
+  .parc-tri label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dark-ink);white-space:nowrap;}
+  .parc-tri select{height:40px;padding:0 30px 0 12px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13.5px;font-weight:600;appearance:none;cursor:pointer;font-family:inherit;}
+
+  .mstrip-liste{display:flex;flex-direction:column;gap:12px;}
+  .mstrip{position:relative;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s;}
+  .mstrip:hover{box-shadow:0 4px 16px rgba(14,19,51,.1);}
+  @media (min-width:1180px){.mstrip{flex-direction:row;align-items:stretch;}}
+  .mstrip-accent{width:100%;height:5px;flex:0 0 auto;}
+  @media (min-width:1180px){.mstrip-accent{width:6px;height:auto;}}
+  .mstrip-accent.is-late{background:var(--late);}
+  .mstrip-accent.is-soon{background:var(--primary);}
+  .mstrip-accent.is-ok{background:var(--ok);}
+  .mstrip-corps{flex:1;min-width:0;padding:14px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;}
+  @media (min-width:1180px){.mstrip-corps{flex-direction:row;align-items:center;justify-content:space-between;}}
+
+  .mstrip-identite{display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 260px;}
+  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .mstrip-photo img{width:100%;height:100%;object-fit:cover;}
+  .mstrip-photo-tag{position:absolute;bottom:3px;left:3px;right:3px;padding:2px 5px;border-radius:4px;background:rgba(14,19,51,.82);color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mstrip-photo-vide{color:var(--dark-ink);}
+  .mstrip-photo-vide svg{width:26px;height:26px;}
+  .mstrip-info{min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .mstrip-nom-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .mstrip-nom{font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:700;letter-spacing:-.01em;color:var(--ink);}
+  .mstrip-meta{font-size:12px;color:var(--ink-2);}
+  .mstrip-meta .id{font-family:'Space Grotesk',sans-serif;color:var(--dark-ink);}
+  .mstrip-tache{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;font-weight:600;}
+  .mstrip-tache svg{width:15px;height:15px;flex:0 0 auto;}
+  .mstrip-tache.is-late{color:var(--late);}
+  .mstrip-tache.is-soon{color:var(--primary-dark);}
+  .mstrip-tache.is-ok{color:var(--ok-ink);}
+
+  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:var(--r-md);padding:8px 10px;width:100%;}
+  @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;}}
+  .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;}
+  .mstrip-compteur-bloc .compteur-titre{font-size:9.5px;}
+  .mstrip-compteur-bloc .compteur-saisie{gap:6px;}
+  .mstrip-compteur-bloc .compteur-champ{width:72px;height:34px;font-size:14px;}
+  .mstrip-compteur-bloc .compteur-enregistrer{height:34px;padding:0 10px;font-size:12px;}
+  .mstrip-compteur-bloc .compteur-lire{margin-top:4px;}
+  .mstrip-compteur-bloc .compteur-photo{height:30px;padding:0 8px;font-size:11px;}
+  .mstrip-compteur-bloc .compteur-photo svg{width:14px;height:14px;}
+
+  .mstrip-jauge{flex:0 0 auto;width:100%;display:flex;flex-direction:column;gap:4px;}
+  @media (min-width:1180px){.mstrip-jauge{width:170px;}}
+  .mstrip-jauge-tete{display:flex;align-items:baseline;justify-content:space-between;font-size:12px;color:var(--ink-2);gap:8px;}
+  .mstrip-jauge-delta{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;}
+  .mstrip-jauge-delta.is-late{color:var(--late);}
+  .mstrip-jauge-delta.is-soon{color:var(--primary-dark);}
+  .mstrip-jauge-delta.is-ok{color:var(--ok-ink);}
+  .mstrip-jauge-piste{width:100%;height:8px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
+  .mstrip-jauge-part{height:100%;border-radius:var(--r-pill);}
+  .mstrip-jauge-part.is-late{background:var(--late);}
+  .mstrip-jauge-part.is-soon{background:var(--primary);}
+  .mstrip-jauge-part.is-ok{background:var(--ok);}
+  .mstrip-jauge-note{font-size:10.5px;color:var(--ink-2);display:flex;align-items:center;gap:4px;}
+  .mstrip-jauge-note svg{width:13px;height:13px;flex:0 0 auto;}
+  .mstrip-jauge-note.is-late{color:var(--late);}
+
+  .mstrip-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:100%;}
+  @media (min-width:1180px){.mstrip-actions{width:auto;}}
+  /* min-width:0 : un item flex avec white-space:nowrap ne se comprime
+     jamais sous sa largeur de contenu par défaut (min-width:auto) — sans
+     ça, ce bouton + les 2 boutons icône à côté débordaient hors de la
+     carte sur mobile (trouvé en testant à 375px). */
+  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
+  @media (max-width:480px){.mstrip-btn-principal{white-space:normal;text-align:center;line-height:1.25;height:auto;min-height:40px;padding:8px 12px;}}
+  .mstrip-btn-principal:hover{background:var(--dark);}
+  .mstrip-btn-principal svg{width:17px;height:17px;flex:0 0 auto;}
+  .mstrip-btn-icone{width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  /* Le bouton carnet réutilise .view-manual (comportement réel existant,
+     voir viewManual) — dont la règle mobile @(max-width:520px){width:100%}
+     bat .mstrip-btn-icone seule à spécificité égale (même une classe,
+     mais plus bas dans la feuille). Sélecteur composé, plus spécifique,
+     pour que la taille icône (40×40) l'emporte ici précisément — trouvé
+     en testant à 375px, le bouton carnet avalait toute la largeur de la
+     ligne d'actions et écrasait le bouton principal à 24px. */
+  .mstrip-btn-icone.view-manual{width:40px;padding:0;}
+  @media (max-width:520px){.mstrip-btn-icone.view-manual{width:40px;}}
+  .mstrip-btn-icone:hover{background:var(--line);}
+  .mstrip-btn-icone svg{width:19px;height:19px;}
+
+  .mstrip-badge{display:inline-flex;align-items:center;gap:5px;}
+  .mstrip-badge .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
+  .mstrip-badge.alert .dot{background:var(--late);animation:tco-pulse 1.8s ease-in-out infinite;}
+  .mstrip-badge.soon .dot{background:var(--primary);}
+  .mstrip-badge.ok .dot{background:var(--ok);}
+
+  .parc-resume{margin-top:20px;padding:16px 20px;background:var(--surface-soft);border-radius:var(--r-lg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
+  .parc-resume-gauche{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);}
+  .parc-resume-gauche svg{width:18px;height:18px;color:var(--primary-dark);flex:0 0 auto;}
+  .parc-resume-droite{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);}
+  .parc-resume-valeur{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;color:var(--ok-ink);}
 
   /* ------------------------------------------------------------
      Vue Parc : cartes machine (compat. avec le JS existant)
@@ -2686,6 +2813,10 @@
   .toolbar-parc .search-wrap{flex:1 1 auto;min-width:140px;}
   .toolbar-parc .search-wrap input[type=search]{min-width:0;}
   .toolbar-parc .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:46px;}
+  /* Même règle, pour le nouveau bandeau .parc-toolbar-actions (reprise
+     Stitch « Parc Machines ») — .toolbar-parc n'existe plus dans son
+     balisage, cette règle-ci ne l'aurait donc jamais visé. */
+  .parc-toolbar-actions .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:44px;}
 
   /* ★ LOT 7 — LA COULEUR DES FILTRES DE L'ÉTAT. Quatre pastilles à compteur :
      chacune porte sa teinte d'état (un point) et son compteur sur un voile, la
@@ -11913,6 +12044,16 @@ function chipHtml(status, label, count) {
   const active = fleetFilters().status === status;
   return `<button type="button" class="chip chip-${status}${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="chip-mot">${esc(label)}</span><span class="chip-count">${count}</span></button>`;
 }
+// Reprise Stitch « Parc Machines » (voir keeva-redesign-project) : même
+// logique/état que chipHtml (fleetFilters().status), nouvelle présentation
+// en pilule avec pastille de couleur — `teinte` (null pour « Toutes ») fixe
+// la couleur du point, réutilisant les mêmes classes d'état que le reste
+// de l'app (late/soon/ok), jamais une nouvelle couleur.
+function parcPillHtml(status, label, count, teinte) {
+  const active = fleetFilters().status === status;
+  const couleurDot = teinte === 'late' ? 'var(--late)' : teinte === 'soon' ? 'var(--primary)' : teinte === 'ok' ? 'var(--ok)' : 'var(--dark-ink)';
+  return `<button type="button" class="parc-pill${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="dot" style="background:${couleurDot};"></span><span>${esc(label)}</span><span class="compte">${count}</span></button>`;
+}
 
 function fleetListHtml() {
   const matches = fleetSorted(fleetMatches());
@@ -11944,6 +12085,18 @@ function wireMachineCards(root) {
     else if (kind === 'log') openLogInterventionModal(m);
     else if (kind === 'next') openNextMaintenanceView(m);
     else if (kind === 'edit') openMachineModal(UI.companyId, UI.categories, m);
+  }));
+  // Reprise Stitch « bandeau horizontal » (voir machineCardHtml) : la
+  // maquette ne montre plus de bouton dédié « Voir le plan »/« Prochain
+  // entretien » (3 actions seulement : entretien, carnet, réglages) — pour
+  // ne pas perdre cet accès réel, le bandeau lui-même (identité de la
+  // machine) reste cliquable vers la fiche, comme .chrono-carte déjà
+  // utilisée sur l'Agenda. stopPropagation sur les boutons/champs internes
+  // (compteur, actions) évite qu'un clic dessus ouvre aussi la fiche.
+  root.querySelectorAll('.mstrip-identite').forEach(zone => zone.addEventListener('click', () => {
+    const carte = zone.closest('.mstrip');
+    const m = carte && UI.machines.find(x => x.id === carte.dataset.machineId);
+    if (m) openPlanView(m, UI.companyId, UI.categories);
   }));
   // ★ LOT 3 — LE PLI D'UNE CARTE DU PARC.
   //   L'état du pli vit dans le DOM de la carte, et NULLE PART AILLEURS, pour
@@ -11980,7 +12133,7 @@ function refreshFleetList() {
     if (input) input.value = '';
     const select = document.getElementById('fleet-sort');
     if (select) select.value = 'urgence';
-    document.querySelectorAll('#view-root .chip').forEach(c => {
+    document.querySelectorAll('#view-root .parc-pill').forEach(c => {
       const active = c.dataset.status === 'all';
       c.classList.toggle('is-active', active);
       c.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -11998,39 +12151,50 @@ VIEWS.machines = {
     }
     const c = UI.counts;
     const f = fleetFilters();
+    // Reprise Stitch « Parc Machines » (voir keeva-redesign-project) : même
+    // logique de filtres/tri/recherche qu'avant (fleetFilters/chipHtml),
+    // seule la présentation change. Le badge « Sync télématique active » du
+    // mockup n'est pas repris (aucune télémétrie réelle dans l'app).
     return `
-      <div class="toolbar toolbar-parc">
-        <div class="toolbar-top">
-          <div class="search-wrap">
-            <span class="search-icon" aria-hidden="true">⌕</span>
-            <!-- Pas d'autofocus : sur téléphone il ouvrirait le clavier à chaque
-                 venue sur l'onglet Parc. -->
+      <div class="parc-toolbar">
+        <div class="parc-toolbar-tete">
+          <div class="parc-toolbar-titre-ligne">
+            <h1>${trad('Parc Machines')}</h1>
+            <span class="parc-count-pill"><span class="dot"></span>${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
+          </div>
+          <div class="parc-toolbar-actions">
+            <button type="button" class="parc-export-btn" id="fleet-export">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
+            <button type="button" class="btn-primary fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
+          </div>
+        </div>
+        <div class="parc-filtres">
+          <div class="parc-recherche">
+            ${picto('recherche')}
             <input id="fleet-search" type="search" value="${esc(f.q)}"
                    placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
                    aria-label="${trad('Rechercher dans le parc')}">
           </div>
-          <span class="fleet-pill">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
-          <button type="button" class="btn-primary fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg><span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
-        </div>
-        <div class="toolbar-bottom">
-        <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
-          <span class="chips-picto" aria-hidden="true">${picto('filtre')}</span>
-          ${chipHtml('all', trad('Toutes'), UI.machines.length)}
-          ${chipHtml('late', trad('En retard'), c.late)}
-          ${chipHtml('soon', trad('Bientôt'), c.soon)}
-          ${chipHtml('ok', trad('À jour'), c.ok)}
-        </div>
-        <div class="sort-wrap">
-          <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
-          <select id="fleet-sort">
-            <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
-            <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
-            <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
-          </select>
-        </div>
+          <div class="parc-pills-ligne" role="group" aria-label="${trad('Filtrer par état')}">
+            ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
+            ${parcPillHtml('late', trad('En retard'), c.late, 'late')}
+            ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
+            ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
+          </div>
+          <div class="parc-tri">
+            <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
+            <select id="fleet-sort">
+              <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
+              <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
+              <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div id="fleet-list"></div>`;
+      <div id="fleet-list" class="mstrip-liste"></div>
+      <div class="parc-resume">
+        <div class="parc-resume-gauche">${picto('ajuste')}<span>${trad('Part de la flotte sans entretien en retard')}</span></div>
+        <div class="parc-resume-droite"><span>${trad('Disponibilité du parc :')}</span><span class="parc-resume-valeur">${UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100}%</span></div>
+      </div>`;
   },
   mount() {
     const root = document.getElementById('view-root');
@@ -12042,6 +12206,7 @@ VIEWS.machines = {
     // Chaque branchement est tolérant : un élément absent ne doit pas empêcher
     // l'affichage de la liste, qui est l'essentiel de cette vue.
     root.querySelector('#fleet-add')?.addEventListener('click', handleAddMachine);
+    root.querySelector('#fleet-export')?.addEventListener('click', exporterParcCsv);
 
     const search = root.querySelector('#fleet-search');
     if (search) {
@@ -12057,11 +12222,11 @@ VIEWS.machines = {
       });
     }
 
-    root.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
-      fleetFilters().status = chip.dataset.status;
+    root.querySelectorAll('.parc-pill').forEach(pill => pill.addEventListener('click', () => {
+      fleetFilters().status = pill.dataset.status;
       fleetFilters().limit = FLEET_PAGE_SIZE;
-      root.querySelectorAll('.chip').forEach(c => {
-        const active = c === chip;
+      root.querySelectorAll('.parc-pill').forEach(c => {
+        const active = c === pill;
         c.classList.toggle('is-active', active);
         c.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
@@ -12128,14 +12293,28 @@ function infoMachine(m) {
   if (!v2) return principale;
   return v2.info.urgency < principale.urgency ? { ...v2.info, secondaire: true } : principale;
 }
+// Factorisée hors de jaugeIntervalleHtml (reprise Stitch « Machines (Parc)
+// horizontal », voir keeva-redesign-project) : la nouvelle carte machine
+// compacte a besoin de la MÊME part consommée réelle pour sa propre barre,
+// sans reprendre tout le balisage détaillé de jaugeIntervalleHtml — jamais
+// un second calcul divergent. `null` si aucune part n'est calculable
+// (mêmes gardes que jaugeIntervalleHtml).
+function pourcentageIntervalle(info, m) {
+  if (!m || !m.plan) return null;
+  const enCompteur = planIsCounter(m.plan);
+  const intervalle = enCompteur ? planIntervalCounter(m.plan) : (m.plan.interval_days ?? null);
+  const reste = info.sortKey;
+  if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(reste)) return null;
+  const fait = intervalle - reste;
+  return Math.max(0, Math.min(100, Math.round((fait / intervalle) * 100)));
+}
 function jaugeIntervalleHtml(info, m, detaille) {
   if (!m || !m.plan) return '';
   const enCompteur = planIsCounter(m.plan);
   const intervalle = enCompteur ? planIntervalCounter(m.plan) : (m.plan.interval_days ?? null);
   const reste = info.sortKey;
   if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(reste)) return '';
-  const fait = intervalle - reste;
-  const part = Math.max(0, Math.min(100, Math.round((fait / intervalle) * 100)));
+  const part = pourcentageIntervalle(info, m);
   // ★ LOT 7 — LA CONSOMMATION DE L'INTERVALLE, EN CLAIR.
   // Le bloc PORTE la valeur de l'échéance (« Échéance 250 h » / « Échéance 23 sept. »)
   // et laisse voir la consommation par le remplissage coloré. Il n'écrit AUCUN
@@ -12177,92 +12356,77 @@ function jaugeIntervalleHtml(info, m, detaille) {
 // `nextTaskLabel()`, la jauge de l'intervalle du plan et du compteur relevé — les
 // mêmes valeurs qu'avant, rangées autrement. Aucun taux, aucune télémétrie,
 // aucune marque, aucun chantier.
+// Reprise Stitch « Machines (Parc) — bandeau horizontal compact » (voir
+// keeva-redesign-project) : remplace l'ancienne carte pliable verticale.
+// AUCUNE DONNÉE NOUVELLE — mêmes fonctions pures qu'avant (infoMachine,
+// nextTaskLabel, dueInfo, pourcentageIntervalle), seule la mise en page
+// change. « La partie télémétrie » de la maquette (badge « Sync
+// télématique active », widget « Système Télémétrie » de la barre
+// latérale) n'est pas reprise, sur demande explicite — l'app n'a aucune
+// télémétrie réelle (règle du chantier depuis le début).
 function machineCardHtml(m) {
-  // L'état GLOBAL (voir infoMachine) : un retard sur le second suivi doit
-  // colorer la carte, la déplier d'emblée et remonter dans le tri — pas
-  // seulement un retard du suivi principal.
   const info = infoMachine(m);
   const identifiant = identifiantAffiche(m);
-  const valeurId = machineIdentifiant(m);
-  const anneeModele = machineYear(m);
-  const baseLine = [esc(machineBrandModel(m)), anneeModele ? String(anneeModele) : null].filter(Boolean).join(' · ');
-  const line1 = baseLine + (identifiant ? `<span class="m-id">${baseLine ? ' · ' : ''}${esc(identifiant)}</span>` : '');
-  const cat = esc(m.category?.name) || trad('Sans catégorie');
-  const meta = line1 ? `${line1}<br>${cat}` : cat;
+  const brandModel = machineBrandModel(m);
+  const annee = machineYear(m);
+  const metaLigne = [brandModel, annee ? String(annee) : null].filter(Boolean).join(' · ');
+  const cat = m.category?.name || trad('Sans catégorie');
   const photo = safeUrl(m.image_url);
-  // Machine non couverte : on la montre TOUJOURS, avec une mention discrète.
   const horsOffre = !machineCouverte(m);
-  // ★ LOT 3 — CE QUI EST DÉPLIÉ, CE QUI EST REPLIÉ.
-  //   L'URGENCE DÉCIDE : une machine en retard est ouverte d'emblée — bande
-  //   d'alerte, photo, échéance, compteur et actions sous les yeux ; les autres
-  //   s'affichent en carte courte, et c'est le chevron qui les ouvre. Le repli
-  //   est un état de la CARTE (classe « is-replie »), posé et retiré par le
-  //   plieur, et il n'a d'effet qu'au téléphone : au-dessus de 900 px, la
-  //   feuille ne replie rien, l'écran a la place.
-  //   AUCUNE DONNÉE NOUVELLE ICI : la bande d'alerte reprend la tâche de
-  //   nextTaskLabel() et l'échéance de dueInfo() ; la jauge est calculée à
-  //   partir de l'intervalle du plan. Rien n'est inventé, rien n'est écrit en
-  //   dur, et il n'y a pas l'ombre d'un taux.
-  const replie = info.state !== 'late';
   const tache = nextTaskLabel(m);
+
+  // Delta réel signé (voir dueInfo) : « -3 h »/« +100 h » pour un suivi au
+  // compteur, « -3 j »/« +12 j » pour un suivi calendaire — jamais un taux,
+  // toujours la même unité que la grandeur suivie.
+  const deltaTexte = (info.unit && Number.isFinite(info.sortKey) && Math.abs(info.sortKey) !== Infinity)
+    ? `${info.sortKey < 0 ? '-' : '+'}${info.unit === 'days' ? tR('{n} j', { n: Math.round(Math.abs(info.sortKey)) }) : formatCounter(Math.abs(info.sortKey), info.unit)}`
+    : null;
+  const NOTE_ETAT = { late: trad('Dépassement critique'), soon: trad('Intervention imminente'), ok: trad('Conforme au plan préventif'), unknown: '' };
+  const part = pourcentageIntervalle(info, m);
+
   return `
-    <article class="machine is-${info.state}${replie ? ' is-replie' : ''}" data-machine-id="${esc(m.id)}">
-      <span class="m-bande" aria-hidden="true"></span>
-      <div class="m-corps">
-      <div class="m-tete">
-        ${photo ? `<div class="machine-tete-photo" data-conteneur="photo"><img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy"><span class="photo-tag">${cat}</span></div>` : ''}
-        <div class="m-titre machine-tete-droite">
-          <div class="m-nomligne"><div class="name">${esc(m.name)}</div>${valeurId ? `<span class="m-plaque">${esc(valeurId)}</span>` : ''}</div>
-          <div class="meta">${meta}</div>
-          ${m.manual_url ? `<button type="button" class="view-manual machine-tete-carnet" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet d\'entretien (PDF)')}</span></button>` : ''}
-        </div>
-        <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
-        <button type="button" class="machine-plieur" data-plier="${esc(m.id)}" aria-expanded="${replie ? 'false' : 'true'}" aria-label="${esc(tR('Détails de {machine}', { machine: m.name }))}"><span class="machine-chevron" aria-hidden="true">${replie ? '▸' : '▾'}</span></button>
-      </div>
-      <div class="m-main">
-        ${info.state === 'late' || info.state === 'soon' || info.state === 'ok' ? `
-        <div class="machine-alerte${info.state === 'late' ? '' : (info.state === 'soon' ? ' is-soon' : ' is-ok')}">
-          <span class="machine-alerte-ligne"><span class="machine-alerte-picto" aria-hidden="true">${info.state === 'late' ? picto('alerte') : (info.state === 'soon' ? picto('bientot') : pictoEtat('ok'))}</span><span class="machine-alerte-titre">${esc(tache)}</span></span>
-          <span class="machine-alerte-texte">${info.state === 'ok' ? `${esc(badgeLabel('ok'))} · ` : ''}${esc(info.label)}</span>
-        </div>` : ''}
-        ${horsOffre ? '<div class="hint">Non couverte par ton offre</div>' : ''}
-        ${photo ? `
-        <div class="machine-photo-cadre" data-conteneur="photo">
-          <img class="machine-photo" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">
-          ${m.manual_url ? `<button type="button" class="carnet-badge view-manual" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Carnet PDF')}</span></button>` : ''}
-        </div>`
-          : (m.manual_url ? `<button type="button" class="view-manual machine-carnet-lien" data-path="${esc(m.manual_url)}">${picto('carnet')}<span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : '')}
-        ${tache ? `
-        <div class="machine-tache">
-          <span class="machine-tache-mot">${picto('entretien')}${trad('Tâche prévue')}</span>
-          <span class="machine-tache-valeur">${esc(tache)}</span>
-        </div>` : ''}
-        ${compteurHtml(m, 'mobile')}
-        ${compteurHtml(m, 'bureau')}
-        ${compteur2Html(m, 'mobile')}
-        ${compteur2Html(m, 'bureau')}
-      </div>
-      </div>
-      <div class="m-side">
-        <div class="m-etat">
-          <div class="m-etat-ligne">
-            <div class="m-etat-col">
-              <span class="m-etat-mot">${trad('État opérationnel')}</span>
-              <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${badgeLabel(info.state)}</span></span>
-            </div>
-            <span class="m-echeance">
-              <span class="machine-echeance-mot">${trad('Échéance')}</span>
-              <span class="due">${esc(info.short)}</span>
-            </span>
+    <article class="mstrip" data-machine-id="${esc(m.id)}">
+      <span class="mstrip-accent is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}" aria-hidden="true"></span>
+      <div class="mstrip-corps">
+        <div class="mstrip-identite">
+          <div class="mstrip-photo">
+            ${photo ? `<img src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">` : `<span class="mstrip-photo-vide">${picto('boite')}</span>`}
+            <span class="mstrip-photo-tag">${esc(cat)}</span>
           </div>
-          ${jaugeIntervalleHtml(dueInfo(m.plan, m), m)}
-          ${(() => { const v2 = vueCompteurSecondaire(m); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue) : ''; })()}
+          <div class="mstrip-info">
+            <div class="mstrip-nom-ligne">
+              <span class="mstrip-nom">${esc(m.name)}</span>
+              <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>
+            </div>
+            ${metaLigne || identifiant ? `<div class="mstrip-meta">${[metaLigne, identifiant ? `<span class="id">${esc(identifiant)}</span>` : null].filter(Boolean).join(' &bull; ')}</div>` : ''}
+            ${horsOffre ? `<div class="hint">${trad('Non couverte par ton offre')}</div>` : ''}
+            ${tache ? `
+            <div class="mstrip-tache is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">
+              ${info.state === 'late' ? picto('alerte') : (info.state === 'soon' ? picto('bientot') : pictoEtat('ok'))}
+              <span>${trad('Tâche :')} ${esc(tache)}</span>
+            </div>` : ''}
+          </div>
         </div>
-        <div class="m-actions">
-          <button class="btn-row-action btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}${trad('Enregistrer une intervention')}</button>
-          <button class="btn-row-action next-maint-btn" data-open="next" data-id="${esc(m.id)}">${picto('prochain')}${trad('Prochain entretien')}</button>
-          <button class="btn-row-action view-plan-btn" data-open="plan" data-id="${esc(m.id)}">${picto('plan')}${trad('Voir le plan')}</button>
-          <button class="btn-row-action" data-open="edit" data-id="${esc(m.id)}">${picto('reglages')}${trad('Modifier la machine')}</button>
+
+        <div class="mstrip-compteur-bloc">
+          ${compteurHtml(m, 'strip')}
+          ${compteur2Html(m, 'strip')}
+        </div>
+
+        ${m.plan && part != null ? `
+        <div class="mstrip-jauge">
+          <div class="mstrip-jauge-tete">
+            <span>${tR('Échéance {valeur}', { valeur: esc(info.state === 'unknown' ? info.short : (info.unit === 'days' ? formatShortDate(m.plan.next_due_at) : formatCounter(planNextDueCounter(m.plan), info.unit))) })}</span>
+            ${deltaTexte ? `<span class="mstrip-jauge-delta is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">${deltaTexte}</span>` : ''}
+          </div>
+          <span class="mstrip-jauge-piste"><span class="mstrip-jauge-part is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}" style="width:${part}%"></span></span>
+          ${NOTE_ETAT[info.state] ? `<span class="mstrip-jauge-note is-${info.state}">${info.state === 'late' ? picto('alerte') : ''}${NOTE_ETAT[info.state]}</span>` : ''}
+        </div>` : `<div class="mstrip-jauge"><span class="mstrip-jauge-note">${esc(info.short)}</span></div>`}
+
+        <div class="mstrip-actions">
+          <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
+          ${m.manual_url ? `<button type="button" class="view-manual mstrip-btn-icone" data-path="${esc(m.manual_url)}" title="${esc(trad('Consulter le carnet numérique (PDF)'))}">${picto('carnet')}</button>` : ''}
+          <button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>
         </div>
       </div>
     </article>`;
@@ -13643,6 +13807,39 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
 // Export CSV du classement — réutilise EXACTEMENT csvToUtf16Buffer (déjà
 // utilisée par l'historique d'une machine et la préparation), pas une 3ᵉ
 // copie du motif BOM/UTF-16LE.
+// Reprise Stitch « Parc Machines » (voir keeva-redesign-project) : le
+// mockup montre un bouton « Exporter (CSV) » qui n'existait pas encore
+// pour la liste du parc elle-même (seuls le classement TCO et l'historique
+// d'une machine avaient un export) — rendu réel ici plutôt que retiré,
+// même motif que exporterClassementTcoCsv juste en dessous (une seule
+// fonction csvToUtf16Buffer, jamais réécrite). Exporte exactement les
+// machines actuellement filtrées/triées (fleetSorted(fleetMatches())),
+// pas systématiquement la flotte entière — l'export reflète ce que
+// l'utilisateur regarde à l'instant du clic.
+function exporterParcCsv() {
+  const header = [trad('Machine'), trad('Catégorie'), trad('Marque / Modèle'), trad('Identifiant'), trad('État'), trad('Compteur'), trad('Échéance'), trad('Carnet PDF')];
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const liste = fleetSorted(fleetMatches());
+  const rows = liste.map((m) => {
+    const info = infoMachine(m);
+    const unite = planIsCounter(m.plan) ? counterUnitOf(m) : null;
+    const compteur = unite ? formatCounter(machineCounter(m), unite) : '';
+    return [
+      m.name, m.category?.name || '', machineBrandModel(m) || '', identifiantAffiche(m) || '',
+      badgeLabel(info.state), compteur, info.short, m.manual_url ? trad('Oui') : trad('Non'),
+    ];
+  });
+  const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `parc_machines_${todayIso()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 function exporterClassementTcoCsv(flotte) {
   const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
