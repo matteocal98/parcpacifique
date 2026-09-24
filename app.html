@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NdGnwYBCTKIdgtiYM+roKCS48tBeRTJBWFKppxd9LK0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-nkW5ge2R1FA2S5gghFnkykIYWFdh0Uzm+SlwsSmALGs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -20136,12 +20136,36 @@ function openChoixFrequence(machine, item, companyId, categories) {
       </div>
     </div>
   `;
-  overlay.querySelector('#choix-close-x')?.addEventListener('click', () => {
+  // VERROU pendant l'enregistrement : signalé sur un vrai téléphone (4G) —
+  // aucun bouton n'était désactivé pendant l'écriture, et fermer la fenêtre
+  // (X / Annuler) PENDANT que la requête était encore en vol rouvrait la
+  // fiche AVANT que l'écriture n'ait eu le temps d'aboutir, donnant
+  // l'impression que le choix « ne s'enregistre pas » — alors que
+  // appliquerChoixTache() elle-même est correcte (vérifié isolément). Tant
+  // que enregistrementEnCours est vrai, fermer/annuler REND la fenêtre au
+  // lieu de fermer dans le vide : la prochaine fermeture, une fois
+  // l'écriture terminée, rouvre alors la fiche à jour.
+  let enregistrementEnCours = false;
+  let fermetureDemandee = false;
+  const fermerEtRouvrir = () => {
+    if (enregistrementEnCours) { fermetureDemandee = true; return; }
+    // Idempotent : si l'écriture a déjà réussi entre-temps (voir `finally`
+    // dans appliquer()), l'overlay est déjà détaché — un second appel ne
+    // doit pas rouvrir une DEUXIÈME fiche par-dessus.
+    if (!overlay.isConnected) return;
     overlay.remove();
     openPlanView(machine, companyId, categories);
-  });
+  };
+  overlay.querySelector('#choix-close-x')?.addEventListener('click', fermerEtRouvrir);
+  overlay.querySelector('#choix-annuler').addEventListener('click', fermerEtRouvrir);
 
-  const appliquer = async (choix) => {
+  const boutonsActionnables = () => [
+    ...overlay.querySelectorAll('.choix-option'),
+    overlay.querySelector('#choix-enregistrer'),
+    overlay.querySelector('#choix-controle'),
+  ].filter(Boolean);
+
+  const appliquer = async (choix, boutonClique) => {
     const erreur = overlay.querySelector('#choix-erreur');
     if (!choix.pointDeControle && !(Number(choix.interval) > 0)) {
       erreur.textContent = trad('Renseigne une valeur supérieure à zéro.');
@@ -20151,6 +20175,11 @@ function openChoixFrequence(machine, item, companyId, categories) {
     const maj = { items };
     const echeance = echeancePlanDepuisTaches(items, plan);
     if (echeance != null) Object.assign(maj, echeancePlanPatch(echeance, plan));
+    erreur.textContent = '';
+    enregistrementEnCours = true;
+    const texteInitial = boutonClique ? boutonClique.textContent : null;
+    boutonsActionnables().forEach((b) => { b.disabled = true; });
+    if (boutonClique) boutonClique.textContent = trad('Enregistrement…');
     try {
       if (plan.id) {
         const { error } = await sb.from('maintenance_plans').update(maj).eq('id', plan.id);
@@ -20163,11 +20192,20 @@ function openChoixFrequence(machine, item, companyId, categories) {
       openPlanView(machine, companyId, categories);
     } catch (err) {
       erreur.textContent = trad('Erreur :') + ' ' + err.message;
+      boutonsActionnables().forEach((b) => { b.disabled = false; });
+      if (boutonClique && texteInitial != null) boutonClique.textContent = texteInitial;
+    } finally {
+      enregistrementEnCours = false;
+      // Fermeture demandée PENDANT l'écriture (X ou Annuler tapés entre-temps) :
+      // honorée maintenant. Si l'écriture a réussi, le chemin ci-dessus a déjà
+      // retiré l'overlay et rouvert la fiche à jour — fermerEtRouvrir() sur un
+      // overlay déjà détaché ne fait alors plus rien d'utile mais ne casse rien.
+      if (fermetureDemandee) fermerEtRouvrir();
     }
   };
 
   overlay.querySelectorAll('.choix-option').forEach(btn => {
-    btn.addEventListener('click', () => appliquer(options[Number(btn.dataset.choix)]));
+    btn.addEventListener('click', () => appliquer(options[Number(btn.dataset.choix)], btn));
   });
   overlay.querySelector('#choix-enregistrer').addEventListener('click', () => {
     const valeur = parseFloat(overlay.querySelector('#choix-valeur').value);
@@ -20175,13 +20213,9 @@ function openChoixFrequence(machine, item, companyId, categories) {
     // `libre: true` : c'est un intervalle exprimé par l'utilisateur, avec son
     // unité — il est accepté même si l'unité n'est pas celle du plan, et la tâche
     // reçoit sa propre échéance dans cette unité.
-    appliquer({ interval: valeur, unite, libelle: null, libre: true });
+    appliquer({ interval: valeur, unite, libelle: null, libre: true }, overlay.querySelector('#choix-enregistrer'));
   });
-  overlay.querySelector('#choix-controle').addEventListener('click', () => appliquer({ pointDeControle: true }));
-  overlay.querySelector('#choix-annuler').addEventListener('click', () => {
-    overlay.remove();
-    openPlanView(machine, companyId, categories);
-  });
+  overlay.querySelector('#choix-controle').addEventListener('click', (e) => appliquer({ pointDeControle: true }, e.currentTarget));
 }
 
 // Les « points d'attention » viennent de l'analyse du carnet : ils ont été écrits
