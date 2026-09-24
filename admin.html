@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8"/>
@@ -15,7 +15,7 @@
   IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
   d'implémentation pour le détail gardé/retiré.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-iPwMEVDmDLcG6HshHv4T5WSWOtHw/2Z6iUsWmc3pZNE=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KAdlhKbOpqxYYCA0Jnm4ZpVcxfg5vW8m1f03PAYS7Wk=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -91,7 +91,7 @@
       <a data-path="support" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
         <span class="material-symbols-outlined text-[20px]">contact_support</span><span>Support &amp; Tickets</span>
       </a>
-      <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+      <a data-path="parc" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
         <span class="material-symbols-outlined text-[20px]">agriculture</span><span>Parc Matériel &amp; Flottes</span>
       </a>
       <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
@@ -135,6 +135,95 @@
 
   <main class="relative pt-16 w-full min-h-screen bg-surface">
     <div class="p-space-lg max-w-[1560px] mx-auto w-full flex flex-col gap-space-lg">
+
+      <!-- ═══════ VUE : Parc Matériel & Flottes ═══════ -->
+      <section id="vue-parc" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col gap-1">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Parc Matériel &amp; Flottes</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">Surveillance consolidée de toutes les machines déclarées, tous clients confondus.</p>
+        </div>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Parc consolidé</span>
+            <span id="parc-kpi-total" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Carnets indexés</span>
+            <span id="parc-kpi-carnets" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-bold">Anomalies de cadence</span>
+            <span id="parc-kpi-anomalies" class="font-display text-display text-error font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Volume entretien ce mois</span>
+            <span id="parc-kpi-volume" class="font-headline-md text-headline-md text-on-surface font-bold leading-none">—</span>
+          </div>
+        </section>
+
+        <section id="parc-anomalie-banniere" class="hidden rounded-lg bg-surface-container-lowest p-space-md shadow-sm relative overflow-hidden">
+          <div class="absolute left-0 top-0 bottom-0 w-2 bg-error"></div>
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
+            <div class="flex items-start gap-space-md">
+              <div class="w-11 h-11 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[26px]">speed</span></div>
+              <div class="flex flex-col gap-1">
+                <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold tracking-wider self-start">Cadence implausible</span>
+                <p id="parc-anomalie-texte" class="font-body-md text-body-md text-on-surface mt-1"></p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Seuil de repérage : plus de 16 h de compteur déclarées par jour entre deux relevés — une estimation, pas une preuve ; à vérifier avec le client.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm">
+            <div class="md:col-span-5 relative">
+              <input id="parc-recherche" type="search" placeholder="Machine, série, organisation…" class="w-full h-11 pl-4 pr-4 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"/>
+            </div>
+            <div class="md:col-span-4">
+              <select id="parc-filtre-org" class="w-full h-11 px-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">Toutes les organisations</option>
+              </select>
+            </div>
+            <div class="md:col-span-3">
+              <select id="parc-filtre-categorie" class="w-full h-11 px-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">Toutes les catégories</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="parc-statuts">
+            <button data-etat="" class="parc-statut-chip h-8 px-3 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0" type="button">Tous</button>
+            <button data-etat="anomalie" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Anomalie de cadence</button>
+            <button data-etat="retard" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">En retard</button>
+            <button data-etat="bientot" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Échéance &lt; 15j / proche</button>
+            <button data-etat="ok" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">À jour</button>
+          </div>
+        </section>
+
+        <div class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden">
+          <div class="p-space-md flex items-center justify-between bg-surface-container-low">
+            <span class="font-headline-sm text-headline-sm text-on-surface">Registre global des équipements</span>
+            <span id="parc-compte-affiche" class="font-code-sm text-code-sm text-outline"></span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                  <th class="py-3 px-4">Matériel &amp; Série</th>
+                  <th class="py-3 px-4">Organisation</th>
+                  <th class="py-3 px-4">Dernier relevé</th>
+                  <th class="py-3 px-4">Carnet</th>
+                  <th class="py-3 px-4">Échéance</th>
+                  <th class="py-3 px-4 text-right">TCO déclaré</th>
+                </tr>
+              </thead>
+              <tbody id="parc-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
+            </table>
+          </div>
+          <p id="parc-vide" class="hidden p-space-lg text-center font-body-sm text-body-sm text-on-surface-variant">Aucune machine pour ce filtre.</p>
+        </div>
+      </section>
 
       <!-- ═══════ VUE : Bientôt disponible ═══════ -->
       <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
@@ -425,8 +514,9 @@ async function verifierAccesEtCharger(userId) {
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : 'vue-bientot';
   el(cible).classList.remove('hidden');
+  if (chemin === 'parc') chargerParc();
 }
 
 // ── Clients & Organisations ─────────────────────────────────────────────
@@ -468,6 +558,15 @@ function rendreTableauClients() {
   });
 }
 el('recherche-clients')?.addEventListener?.('input', () => rendreTableauClients());
+el('parc-recherche')?.addEventListener?.('input', () => rendreTableauParc());
+el('parc-filtre-org')?.addEventListener?.('change', () => rendreTableauParc());
+el('parc-filtre-categorie')?.addEventListener?.('change', () => rendreTableauParc());
+document.querySelectorAll('.parc-statut-chip').forEach((btn) => btn.addEventListener('click', () => {
+  PARC_FILTRE_ETAT = btn.dataset.etat;
+  document.querySelectorAll('.parc-statut-chip').forEach((b) => b.className = 'parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0');
+  btn.className = 'parc-statut-chip h-8 px-3 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0';
+  rendreTableauParc();
+}));
 
 // ── Impersonation ("Se connecter en tant que") ──────────────────────────
 async function connecterEnTantQue(societe) {
@@ -595,6 +694,120 @@ async function ouvrirTicket(ticketId) {
     await chargerTickets();
     ouvrirTicket(ticketId);
   });
+}
+
+// ── Parc Matériel & Flottes ──────────────────────────────────────────────
+let PARC = [];
+let PARC_FILTRE_ETAT = '';
+
+function formatMontant(valeur, devise) {
+  const n = Number(valeur);
+  if (!isFinite(n) || n === 0) return `0 ${devise || ''}`.trim();
+  return `${Math.round(n).toLocaleString('fr-FR')} ${devise || ''}`.trim();
+}
+function formatCompteurParc(valeur, unite) {
+  if (valeur == null) return '—';
+  const u = unite === 'km' ? 'km' : 'h';
+  return `${Number(valeur).toLocaleString('fr-FR')} ${u}`;
+}
+function libelleEcheanceParc(m) {
+  if (m.etat === 'inconnu' || m.restant == null) return 'Plan à définir';
+  const compteurBase = (m.tracking_mode || 'counter') !== 'days';
+  const unite = compteurBase ? (m.counter_unit === 'km' ? 'km' : 'h') : 'j';
+  const abs = Math.abs(Math.round(m.restant * 10) / 10);
+  const valeur = `${abs.toLocaleString('fr-FR')} ${unite}`;
+  if (m.etat === 'retard') return `En retard de ${valeur}`;
+  return `Dans ${valeur}`;
+}
+
+async function chargerParc() {
+  const [{ data: parc, error }, { data: volume }] = await Promise.all([
+    sb.rpc('admin_lister_parc'),
+    sb.rpc('admin_volume_maintenance_mois'),
+  ]);
+  if (error) { console.error(error); return; }
+  PARC = parc || [];
+
+  el('parc-kpi-total').textContent = PARC.length;
+  const nbCarnets = PARC.filter((m) => m.manuel_indexe).length;
+  el('parc-kpi-carnets').textContent = PARC.length ? `${nbCarnets}/${PARC.length}` : '0/0';
+  const nbAnomalies = PARC.filter((m) => m.anomalie_cadence).length;
+  el('parc-kpi-anomalies').textContent = nbAnomalies;
+  el('parc-kpi-volume').innerHTML = (volume && volume.length)
+    ? volume.map((v) => echapper(formatMontant(v.total, v.devise))).join('<br>')
+    : '0';
+
+  const premiereAnomalie = PARC.find((m) => m.anomalie_cadence);
+  if (premiereAnomalie) {
+    el('parc-anomalie-texte').innerHTML = `<strong>${echapper(premiereAnomalie.company_name)}</strong> — ${echapper(premiereAnomalie.machine_name)} : cadence de ${echapper(String(premiereAnomalie.cadence_jour))} ${premiereAnomalie.counter_unit === 'km' ? 'km' : 'h'}/jour entre le ${echapper(premiereAnomalie.derniere_saisie_le)} et le relevé précédent.`;
+    el('parc-anomalie-banniere').classList.remove('hidden');
+  } else {
+    el('parc-anomalie-banniere').classList.add('hidden');
+  }
+
+  // Filtres org/catégorie : construits depuis les vraies valeurs du parc, pas
+  // une liste statique — jamais une organisation ou catégorie qui n'existe pas.
+  const selectOrg = el('parc-filtre-org');
+  const orgActuelle = selectOrg.value;
+  const orgs = [...new Map(PARC.map((m) => [m.company_id, m.company_name])).entries()];
+  selectOrg.innerHTML = '<option value="">Toutes les organisations</option>'
+    + orgs.map(([id, nom]) => `<option value="${echapper(id)}">${echapper(nom)}</option>`).join('');
+  selectOrg.value = orgActuelle;
+
+  const selectCat = el('parc-filtre-categorie');
+  const catActuelle = selectCat.value;
+  const categories = [...new Set(PARC.map((m) => m.category_name).filter(Boolean))].sort();
+  selectCat.innerHTML = '<option value="">Toutes les catégories</option>'
+    + categories.map((c) => `<option value="${echapper(c)}">${echapper(c)}</option>`).join('');
+  selectCat.value = catActuelle;
+
+  rendreTableauParc();
+}
+
+function rendreTableauParc() {
+  const recherche = (el('parc-recherche').value || '').toLowerCase();
+  const org = el('parc-filtre-org').value;
+  const categorie = el('parc-filtre-categorie').value;
+  const visibles = PARC.filter((m) => {
+    if (org && m.company_id !== org) return false;
+    if (categorie && m.category_name !== categorie) return false;
+    if (PARC_FILTRE_ETAT === 'anomalie' && !m.anomalie_cadence) return false;
+    if (PARC_FILTRE_ETAT === 'retard' && m.etat !== 'retard') return false;
+    if (PARC_FILTRE_ETAT === 'bientot' && m.etat !== 'bientot') return false;
+    if (PARC_FILTRE_ETAT === 'ok' && m.etat !== 'ok') return false;
+    if (recherche) {
+      const texte = `${m.machine_name} ${m.brand || ''} ${m.model || ''} ${m.serial_number || ''} ${m.plate || ''} ${m.company_name}`.toLowerCase();
+      if (!texte.includes(recherche)) return false;
+    }
+    return true;
+  });
+  el('parc-compte-affiche').textContent = `Affichage de ${visibles.length} sur ${PARC.length} matériels`;
+  el('parc-vide').classList.toggle('hidden', visibles.length > 0);
+
+  const couleurEtat = { retard: 'bg-error-container text-on-error-container', bientot: 'bg-secondary-fixed text-on-secondary-fixed', ok: 'bg-tertiary-container/15 text-tertiary', inconnu: 'bg-surface-container text-on-surface-variant' };
+  el('parc-corps-tableau').innerHTML = visibles.map((m) => `
+    <tr class="hover:bg-surface-container-low/70 transition-colors ${m.anomalie_cadence ? 'bg-error-container/10' : ''}">
+      <td class="py-3.5 px-4">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(m.machine_name)}${m.anomalie_cadence ? ' <span class="px-1.5 py-0.5 rounded bg-error text-on-error font-code-sm text-[10px] font-bold align-middle">ANOMALIE</span>' : ''}</span>
+          <span class="font-code-sm text-code-sm text-outline">${echapper([m.brand, m.model].filter(Boolean).join(' ') || m.kind || '')}${m.serial_number ? ' • ' + echapper(m.serial_number) : m.plate ? ' • ' + echapper(m.plate) : ''}</span>
+        </div>
+      </td>
+      <td class="py-3.5 px-4 font-label-md text-label-md text-on-surface">${echapper(m.company_name)}</td>
+      <td class="py-3.5 px-4">
+        <div class="flex flex-col">
+          <span class="font-code-sm text-telemetry-stat-compact text-on-surface font-semibold">${echapper(formatCompteurParc(m.counter_value, m.counter_unit))}</span>
+          ${m.derniere_saisie_le ? `<span class="font-body-sm text-body-sm text-outline">Saisi ${echapper(ilYA(m.derniere_saisie_le))}</span>` : ''}
+        </div>
+      </td>
+      <td class="py-3.5 px-4">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full ${m.manuel_indexe ? 'bg-tertiary-container/15 text-tertiary' : 'bg-surface-container-high text-on-surface-variant'} font-label-sm text-label-sm">${m.manuel_indexe ? 'Carnet indexé' : 'Sans carnet'}</span>
+      </td>
+      <td class="py-3.5 px-4">
+        <span class="font-label-md text-label-md font-semibold ${couleurEtat[m.etat] ? '' : ''}" style="color:${m.etat === 'retard' ? '#ba1a1a' : m.etat === 'bientot' ? '#004395' : ''}">${echapper(libelleEcheanceParc(m))}</span>
+      </td>
+      <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${echapper(formatMontant(m.tco_total, m.devise))}</td>
+    </tr>`).join('');
 }
 
 demarrer();
