@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/khQRGjPGVgws0vhf/z00mzc1x5K79ryMitiQee8K7Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IrX7wZBZ61RodfWyk/1pJL4GGgPUgS+ZM2vFmprGxmE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4198,8 +4198,14 @@
   .tco-clst-export-btn.is-primaire svg{color:var(--ok);}
 
   /* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
-  .tco-seuils-liste{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
-  @media (max-width:640px){.tco-seuils-liste{grid-template-columns:1fr;}}
+  /* Colonne unique par défaut : depuis que ce bloc vit dans dash-side (la
+     colonne étroite, ~38%) après avoir échangé de place avec le Catalogue
+     de pièces (signalé par l'utilisateur — le catalogue a besoin de la
+     colonne large quand il contient beaucoup d'articles), 2 colonnes y
+     seraient trop à l'étroit. 2 colonnes réapparaissent seulement sur les
+     très grands écrans, où dash-side a lui-même assez de largeur. */
+  .tco-seuils-liste{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media (min-width:1400px){.tco-seuils-liste{grid-template-columns:repeat(2,1fr);}}
   .tco-seuil-carte{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
   .tco-seuil-carte-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
   .tco-seuil-carte-tete>div{display:flex;flex-direction:column;gap:1px;}
@@ -13778,10 +13784,10 @@ VIEWS.tco = {
         <div class="dash-grid agenda-grid">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
-            ${blocSeuilsCategorieTcoHtml()}
+            ${blocCatalogueTcoHtml()}
           </div>
           <div class="dash-side">
-            ${blocCatalogueTcoHtml()}
+            ${blocSeuilsCategorieTcoHtml()}
             ${tcoTipCarteHtml()}
           </div>
         </div>
