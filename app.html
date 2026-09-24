@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1qUVRMkh16a2+3XZAnKC+V0xIUtnu5nFzU+JMRKYgWA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NW2eaodidOlVv3JVn73fVP3OM5FKWNboPTx0DDTCAlo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -180,6 +180,14 @@
     --r-chip:10px;
     --r-card:16px;
     --r-pill:20px;
+    /* --r-lg n'a jamais été déclarée alors qu'elle est utilisée depuis les
+       reprises TCO (tco-clst-kpi-carte, tco-donut-bloc, tco-seuil-carte…) :
+       var(--r-lg) sans secours résout en valeur invalide, donc
+       border-radius ne s'appliquait PAS DU TOUT sur ces blocs — trouvé en
+       réutilisant la même variable pour le nouveau bandeau Parc Machines.
+       Alias de --r-card (16px), la même « grande » valeur déjà utilisée
+       partout ailleurs pour ce rôle. */
+    --r-lg:16px;
 
     /* Ombres : l'encre en transparence, jamais de noir inventé. */
     --shadow-card:0 1px 3px rgba(14,19,51,.06);
@@ -975,16 +983,32 @@
   .mstrip-tache.is-soon{color:var(--primary-dark);}
   .mstrip-tache.is-ok{color:var(--ok-ink);}
 
-  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:var(--r-md);padding:8px 10px;width:100%;}
-  @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;}}
+  /* Cadre élargi (était trop étriqué, notamment pour la date en mode
+     calendaire) + coins arrondis (voir --r-lg plus haut, manquante). */
+  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 14px;width:100%;min-width:0;}
+  @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:196px;}}
   .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;}
-  .mstrip-compteur-bloc .compteur-titre{font-size:9.5px;}
-  .mstrip-compteur-bloc .compteur-saisie{gap:6px;}
-  .mstrip-compteur-bloc .compteur-champ{width:72px;height:34px;font-size:14px;}
-  .mstrip-compteur-bloc .compteur-enregistrer{height:34px;padding:0 10px;font-size:12px;}
-  .mstrip-compteur-bloc .compteur-lire{margin-top:4px;}
-  .mstrip-compteur-bloc .compteur-photo{height:30px;padding:0 8px;font-size:11px;}
-  .mstrip-compteur-bloc .compteur-photo svg{width:14px;height:14px;}
+  .mstrip-compteur-bloc .compteur-titre{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--dark-ink);display:block;margin-bottom:5px;}
+  /* Suivi calendaire : la date reprend .compteur-jour-valeur (22px) taillée
+     pour le hero de la fiche machine — trop grande pour ce bandeau étroit,
+     réduite ici spécifiquement. */
+  .mstrip-compteur-bloc .compteur-jour-valeur{font-size:15px;font-weight:800;}
+  .mstrip-compteur-bloc .compteur-jour,.mstrip-compteur-bloc .compteur-lecture{min-width:0;}
+
+  /* Compteur au format « une ligne » : saisie + 2 boutons icône (voir
+     compteurHtml, branche emplacement==='strip'). */
+  .compteur-strip-ligne{display:flex;align-items:center;gap:6px;}
+  .compteur-strip-saisie{position:relative;display:flex;align-items:center;flex:1;min-width:64px;}
+  .compteur-strip-saisie .compteur-champ{width:100%;height:36px;padding:0 26px 0 10px;border-radius:var(--r-chip);border:1px solid var(--line);background:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;text-align:center;color:var(--ink);}
+  .compteur-strip-unite{position:absolute;right:9px;font-size:10.5px;font-weight:600;color:var(--dark-ink);pointer-events:none;}
+  .compteur-strip-icone{width:36px;height:36px;flex:0 0 auto;border-radius:var(--r-chip);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .compteur-strip-icone svg{width:17px;height:17px;}
+  .compteur-strip-icone.is-valider{background:var(--ink);color:#fff;}
+  .compteur-strip-icone.is-valider:hover{background:var(--dark);}
+  .compteur-strip-icone.is-photo{background:var(--surface);color:var(--ink-2);box-shadow:var(--shadow-soft);}
+  .compteur-strip-icone.is-photo:hover{background:var(--line);}
+  .mstrip-compteur-bloc .compteur-lecture:not(:empty){margin-top:6px;font-size:11px;}
+  .mstrip-compteur-bloc .compteur-note{font-size:10.5px;margin-top:3px;}
 
   .mstrip-jauge{flex:0 0 auto;width:100%;display:flex;flex-direction:column;gap:4px;}
   @media (min-width:1180px){.mstrip-jauge{width:170px;}}
@@ -993,7 +1017,7 @@
   .mstrip-jauge-delta.is-late{color:var(--late);}
   .mstrip-jauge-delta.is-soon{color:var(--primary-dark);}
   .mstrip-jauge-delta.is-ok{color:var(--ok-ink);}
-  .mstrip-jauge-piste{width:100%;height:8px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
+  .mstrip-jauge-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
   .mstrip-jauge-part{height:100%;border-radius:var(--r-pill);}
   .mstrip-jauge-part.is-late{background:var(--late);}
   .mstrip-jauge-part.is-soon{background:var(--primary);}
@@ -11692,6 +11716,35 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         <span class="compteur-jour-valeur">${esc(valeur == null ? '—' : formatCounter(valeur, unite))}</span>
         <span class="compteur-note">${trad('Non couverte par ton offre : le relevé n\'est pas enregistré.')}</span>
       </div>`;
+  }
+  // Reprise Stitch « Machines (Parc) » (voir keeva-redesign-project) : sur
+  // le bandeau compact, le compteur tient sur UNE ligne — saisie + 2
+  // boutons icône (valider / photo), plutôt que les 2 boutons texte
+  // empilés de la version fiche (qui débordaient sur plusieurs lignes
+  // dans ce contexte étroit). Même contrat data-compteur-* que la version
+  // fiche — le câblage global (document.addEventListener, plus bas) ne
+  // change pas d'une ligne. Un seul bouton photo (source « galerie » —
+  // sur mobile, le sélecteur natif propose quand même appareil ET
+  // galerie sans capture= dédiée), comme le fichier fourni par
+  // l'utilisateur.
+  if (emplacement === 'strip') {
+    return `
+    <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
+      <span class="compteur-titre">${trad(libelle || 'Compteur')}</span>
+      <div class="compteur-strip-ligne">
+        <div class="compteur-strip-saisie">
+          <input id="${champId}" class="compteur-champ" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
+            value="${montre == null ? '' : esc(montre)}" placeholder="—"
+            aria-label="${esc(tR('Relevé du compteur de {machine}', { machine: m.name }))}">
+          <span class="compteur-strip-unite" aria-hidden="true">${esc(u.short)}</span>
+        </div>
+        <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}</button>
+        <button type="button" class="compteur-strip-icone is-photo" data-compteur-photo="${id}" data-compteur-photo-source="galerie" title="${esc(trad('Photo du compteur'))}" aria-label="${esc(trad('Photo du compteur'))}">${picto('photo')}</button>
+        <input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
+      </div>
+      <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
+    </div>`;
   }
   return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
