@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EsyBJenCj1al1R/+8wpWfC0JppoTDSSrxFJGfH7vv4Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/khQRGjPGVgws0vhf/z00mzc1x5K79ryMitiQee8K7Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -14180,7 +14180,7 @@ VIEWS.tco = {
       const btn = e.currentTarget;
       const label = btn.querySelector('span');
       const msg = root.querySelector('#tco-seuils-msg');
-      const lignes = [...root.querySelectorAll('.tco-seuil-ligne')];
+      const lignes = [...root.querySelectorAll('.tco-seuil-carte')];
       const modifiees = lignes.map((ligne) => {
         const id = ligne.dataset.categorieId;
         const valeur = nombreDepuisTexte(ligne.querySelector('.tco-seuil-input').value);
