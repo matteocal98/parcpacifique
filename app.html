@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1a0vgKY54Li5j9ik1fk8KnZgcE6uD0p+XEZDSgevsPY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-SV5iGJMg35zlgSrMzj6nlBzS2riJcoAFveVF/sncXG0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3971,39 +3971,153 @@
   .tco-classement-chiffre .value.is-alerte{color:var(--late);}
   .tco-carte-dashboard-corps{display:flex;align-items:center;gap:16px;}
 
-  /* Classement TCO du parc — filtres et cartes machine (phase 3) */
-  .tco-classement-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:4px 0 10px;}
-  .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--surface-soft);padding:3px;gap:2px;}
-  .tco-filtre-btn{border:none;background:none;padding:7px 12px;border-radius:calc(var(--r-chip) - 3px);font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;}
-  .tco-filtre-btn.is-active{background:#fff;color:var(--ink);box-shadow:var(--shadow-soft);}
-  .tco-classement-toolbar select{height:36px;padding:0 10px;border-radius:var(--r-chip);border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;color:var(--ink);}
-  .tco-classement-carte{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-2);cursor:pointer;}
-  .tco-classement-carte:last-child{border-bottom:none;}
-  .tco-classement-carte:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
-  .tco-classement-photo{flex:0 0 auto;width:48px;height:48px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);}
-  .tco-classement-photo img{width:100%;height:100%;object-fit:cover;}
-  .tco-classement-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-  .tco-classement-tete{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
-  .tco-classement-nom{font-size:14.5px;font-weight:700;color:var(--ink);}
-  .tco-classement-note{font-size:11px;color:var(--ink-2);font-style:italic;}
-  .tco-classement-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--ink-2);}
-  .tco-classement-chiffres{flex:0 0 auto;display:flex;align-items:center;gap:14px;}
-  .tco-classement-montant{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-  .tco-classement-montant .label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-classement-montant .value{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .tco-classement-ajout{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .tco-classement-ajout svg{width:18px;height:18px;}
+  /* Classement TCO du parc — reprise Stitch (phase 3, re-skin) */
+  .tco-card-icone-carre.is-lg{width:52px;height:52px;border-radius:var(--r-lg);}
+  .tco-card-icone-carre.is-lg svg{width:26px;height:26px;}
+  .tco-card-icone-carre.is-gradient-roi{background:linear-gradient(135deg,var(--bleu-roi),var(--primary));}
+  .tco-eyebrow-pill.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
+  .tco-eyebrow-pill.is-roi .dot{background:var(--bleu-roi);}
+  .tco-clst-live{font-size:11px;color:var(--dark-ink);font-weight:500;}
+
+  .tco-clst-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px 0 2px;}
+  @media (max-width:760px){.tco-clst-kpi-grid{grid-template-columns:1fr;}}
+  .tco-clst-kpi-carte{padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
+  .tco-clst-kpi-carte.is-alerte{background:var(--late-bg);border-color:rgba(222,122,22,.25);}
+  .tco-clst-kpi-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+  .tco-clst-kpi-tete .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-clst-kpi-icone{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-chip);display:flex;align-items:center;justify-content:center;}
+  .tco-clst-kpi-icone svg{width:17px;height:17px;}
+  .tco-clst-kpi-icone.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
+  .tco-clst-kpi-icone.is-ok,.tco-clst-kpi-icone.ok{background:var(--ok-bg);color:var(--ok);}
+  .tco-clst-kpi-icone.late{background:var(--late-bg);color:var(--late);}
+  .tco-clst-kpi-carte .valeur-ligne{display:flex;align-items:baseline;gap:6px;}
+  .tco-clst-kpi-carte .valeur{font-family:'Space Grotesk',sans-serif;font-size:26px;line-height:1.1;font-weight:700;color:var(--ink);letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+  .tco-clst-kpi-carte .valeur.late{color:var(--late);}
+  .tco-clst-kpi-carte .unite{font-size:11.5px;color:var(--dark-ink);font-weight:500;}
+  .tco-clst-kpi-sub{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-2);}
+  .tco-clst-kpi-sub svg{width:14px;height:14px;flex:0 0 auto;}
+  .tco-clst-kpi-sub .rond{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
+  .tco-clst-kpi-sub.ok{color:var(--ok);}
+  .tco-clst-kpi-sub.soon{color:var(--soon);}
+  .tco-clst-kpi-sub.late{color:var(--late);}
+
+  .tco-clst-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-lg);background:var(--surface-soft);}
+  .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--line-2);padding:3px;gap:2px;}
+  .tco-filtre-btn{display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:8px 13px;border-radius:calc(var(--r-chip) - 3px);font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+  .tco-filtre-btn svg{width:15px;height:15px;}
+  .tco-filtre-btn.is-active{background:#fff;color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
+  .tco-clst-selects{display:flex;flex-wrap:wrap;gap:8px;}
+  .tco-clst-select-wrap{position:relative;display:flex;align-items:center;}
+  .tco-clst-select-wrap>svg:first-child{position:absolute;left:10px;width:16px;height:16px;color:var(--dark-ink);pointer-events:none;}
+  .tco-clst-select-wrap>svg:last-child{position:absolute;right:8px;width:16px;height:16px;color:var(--dark-ink);pointer-events:none;}
+  .tco-clst-select-wrap select{height:38px;padding:0 30px 0 32px;border-radius:var(--r-chip);border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer;}
+
+  .tco-donut-bloc{padding:18px 20px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
+  .tco-donut-bloc-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .tco-donut-bloc-titre h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin:0;}
+  .tco-donut-bloc-titre p{font-size:12px;color:var(--ink-2);margin:2px 0 0;}
+  .tco-donut-total-badge{font-size:11.5px;font-weight:600;color:var(--ink-2);background:#fff;padding:5px 10px;border-radius:var(--r-chip);border:1px solid var(--line);white-space:nowrap;}
+  .tco-donut-corps{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .tco-donut-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;gap:1px;}
+  .tco-donut-centre-eyebrow{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-donut-centre-valeur{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);}
+  .tco-donut-centre-note{font-size:8.5px;font-weight:600;text-transform:uppercase;color:var(--ink-2);}
+  .tco-donut-details{flex:1;min-width:220px;display:flex;flex-direction:column;gap:12px;}
+  .tco-donut-barre{width:100%;height:7px;border-radius:var(--r-pill);background:var(--line-2);overflow:hidden;display:flex;}
+  .tco-donut-legende-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+  .tco-donut-legende-carte{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:var(--r-md);background:#fff;border:1px solid var(--line-2);}
+  .tco-donut-legende-carte .gauche{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink);}
+  .tco-donut-legende-carte .gauche .rond{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .tco-donut-legende-carte .droite{display:flex;align-items:center;gap:6px;}
+  .tco-donut-legende-carte .heures{font-size:10px;color:var(--dark-ink);font-weight:500;}
+  .tco-donut-legende-carte .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:var(--r-chip);}
+
+  .tco-clst-carte{position:relative;overflow:hidden;border-radius:var(--r-lg);background:#fff;border:1px solid var(--line);cursor:pointer;transition:box-shadow .15s,border-color .15s;}
+  .tco-clst-carte:hover{border-color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
+  .tco-clst-carte:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+  .tco-clst-carte-accent{position:absolute;left:0;top:0;bottom:0;width:5px;}
+  .tco-clst-carte-accent.ok{background:var(--ok);}
+  .tco-clst-carte-accent.soon{background:var(--soon);}
+  .tco-clst-carte-accent.late{background:var(--late);}
+  .tco-clst-carte-corps{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px 16px 22px;}
+  .tco-clst-carte-identite{display:flex;align-items:center;gap:14px;min-width:0;}
+  .tco-clst-carte-photo{position:relative;flex:0 0 auto;width:64px;height:64px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;}
+  .tco-clst-carte-photo img{width:100%;height:100%;object-fit:cover;}
+  .tco-clst-carte-photo-vide{color:var(--dark-ink);}
+  .tco-clst-carte-photo svg{width:26px;height:26px;flex:0 0 auto;}
+  .tco-clst-carte-dot{position:absolute;bottom:3px;right:3px;width:9px;height:9px;border-radius:50%;border:2px solid #fff;}
+  .tco-clst-carte-dot.ok{background:var(--ok);}
+  .tco-clst-carte-dot.soon{background:var(--soon);}
+  .tco-clst-carte-dot.late{background:var(--late);}
+  .tco-clst-carte-texte{min-width:0;}
+  .tco-clst-carte-tete{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .tco-clst-carte-nom{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
+  .tco-clst-badge-ratio{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--r-pill);}
+  .tco-clst-badge-ratio svg{width:13px;height:13px;}
+  .tco-clst-badge-ratio.ok{background:var(--ok-bg);color:var(--ok);}
+  .tco-clst-badge-ratio.soon{background:var(--soon-bg);color:var(--soon);}
+  .tco-clst-badge-ratio.late{background:var(--late-bg);color:var(--late);}
+  .tco-clst-badge-categorie{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-chip);background:var(--line-2);color:var(--ink-2);}
+  .tco-clst-carte-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:5px;font-size:12px;color:var(--ink-2);}
+  .tco-clst-carte-meta span{display:inline-flex;align-items:center;gap:4px;}
+  .tco-clst-carte-meta svg{width:14px;height:14px;flex:0 0 auto;color:var(--dark-ink);}
+  .tco-clst-carte-meta .is-fort{color:var(--ink);font-weight:600;}
+  .tco-clst-carte-meta .is-fort svg{color:var(--bleu-roi);}
+  .tco-clst-sep{color:var(--line-3);}
+  .tco-clst-meta-pieces{color:var(--bleu-roi);font-weight:600;}
+  .tco-clst-note{font-style:italic;}
+  .tco-clst-carte-chiffres{flex:0 0 auto;display:flex;align-items:center;gap:18px;}
+  .tco-clst-carte-stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+  .tco-clst-carte-stat .label{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-clst-carte-stat .valeur-ligne{display:flex;align-items:baseline;gap:4px;}
+  .tco-clst-carte-stat .valeur{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .tco-clst-carte-stat .valeur.is-roi{color:var(--bleu-roi);}
+  .tco-clst-carte-divider{width:1px;height:36px;background:var(--line);flex:0 0 auto;}
+  .tco-clst-tendance{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;}
+  .tco-clst-tendance svg{width:12px;height:12px;}
+  .tco-clst-tendance.ok{color:var(--ok);}
+  .tco-clst-tendance.soon{color:var(--soon);}
+  .tco-clst-tendance.late{color:var(--late);}
+  .tco-clst-carte-statut{flex:0 0 auto;width:42px;height:42px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);}
+  .tco-clst-carte-statut svg{width:20px;height:20px;}
+  .tco-clst-carte-statut.ok{background:var(--ok-bg);color:var(--ok);}
+  .tco-clst-carte-statut.soon{background:var(--soon-bg);color:var(--soon);}
+  .tco-clst-carte-statut.late{background:var(--late-bg);color:var(--late);}
   @media (max-width:640px){
-    .tco-classement-carte{flex-wrap:wrap;}
-    .tco-classement-chiffres{width:100%;justify-content:space-between;}
+    .tco-clst-carte-corps{padding:14px;}
+    .tco-clst-carte-chiffres{width:100%;justify-content:space-between;}
   }
 
-  /* Seuils cibles par catégorie (phase 3, §5) */
-  .tco-seuils-liste{display:flex;flex-direction:column;gap:10px;}
-  .tco-seuil-ligne{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-2);}
-  .tco-seuil-ligne:last-child{border-bottom:none;}
-  .tco-seuil-nom{font-size:13.5px;font-weight:600;color:var(--ink);}
-  .tco-seuil-ligne .tco-champ-unite{width:160px;flex:0 0 auto;}
+  .tco-clst-banniere{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--late-bg);border:1px solid rgba(222,122,22,.25);}
+  .tco-clst-banniere .gauche{display:flex;align-items:center;gap:10px;}
+  .tco-clst-banniere .gauche svg{flex:0 0 auto;width:20px;height:20px;color:var(--late);background:rgba(222,122,22,.15);border-radius:var(--r-chip);padding:6px;box-sizing:content-box;}
+  .tco-clst-banniere p{font-size:12.5px;color:var(--ink);margin:0;}
+  .tco-clst-banniere-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:var(--r-chip);background:#fff;color:var(--late);font-weight:700;font-size:12px;border:1px solid rgba(222,122,22,.4);cursor:pointer;white-space:nowrap;}
+  .tco-clst-banniere-btn svg{width:15px;height:15px;}
+
+  .tco-clst-export-btn{width:100%;height:48px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
+  .tco-clst-export-btn svg{width:18px;height:18px;color:var(--bleu-roi);}
+  .tco-clst-export-btn.is-primaire{background:var(--ink);color:#fff;border:none;}
+  .tco-clst-export-btn.is-primaire svg{color:var(--ok);}
+
+  /* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
+  .tco-seuils-liste{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media (max-width:640px){.tco-seuils-liste{grid-template-columns:1fr;}}
+  .tco-seuil-carte{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
+  .tco-seuil-carte-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .tco-seuil-carte-tete>div{display:flex;flex-direction:column;gap:1px;}
+  .tco-seuil-icone{flex:0 0 auto;width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;}
+  .tco-seuil-icone svg{width:20px;height:20px;}
+  .tco-seuil-icone.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
+  .tco-seuil-icone.is-ok{background:var(--ok-bg);color:var(--ok);}
+  .tco-seuil-icone.is-amber{background:var(--late-bg);color:var(--late);}
+  .tco-seuil-icone.is-indigo{background:var(--soon-bg);color:var(--soon);}
+  .tco-seuil-nom{font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--ink);display:block;}
+  .tco-seuil-sous{font-size:11px;color:var(--dark-ink);font-weight:500;}
+  .tco-seuil-moyenne-tag{font-size:10.5px;font-weight:600;color:var(--ink-2);background:#fff;padding:3px 8px;border-radius:var(--r-chip);border:1px solid var(--line);white-space:nowrap;}
+  .tco-seuil-moyenne-tag:empty{display:none;}
+  .tco-seuil-carte .tco-champ-unite{width:100%;background:#fff;border-radius:var(--r-md);border:1px solid var(--line);padding:5px;}
+  .tco-seuil-carte .tco-champ-unite input{border:none;background:none;}
 </style>
 </head>
 <body>
@@ -4276,6 +4390,22 @@ const CATEGORIES_DEPART = [
   'PELLETEUSE', 'TRACTEUR', 'REMORQUE', 'VÉHICULE', 'ÉLAGUEUSE',
   'GROUPE ÉLECTROGÈNE', 'COMPRESSEUR',
 ];
+// Icône approchée pour une catégorie de machine (bloc « Seuils cibles de
+// coût horaire », reprise Stitch phase 3) — mots-clés simples sur le nom,
+// jamais une catégorie inventée : un repli générique si rien ne
+// correspond, jamais une icône qui prétend à tort une correspondance
+// précise (même esprit que categorieProduit(), mais pour les catégories de
+// MACHINE plutôt que les tâches de carnet).
+function iconeCategorieMachine(nom) {
+  const n = (nom || '').toLowerCase();
+  if (n.includes('débrous') || n.includes('debrous')) return 'ciseaux';
+  if (n.includes('véhicul') || n.includes('vehicul') || n.includes('camion') || n.includes('utilitaire')) return 'vehicule';
+  if (n.includes('tronçon') || n.includes('troncon') || n.includes('élagu') || n.includes('elagu')) return 'scie';
+  if (n.includes('tondeuse') || n.includes('motocult') || n.includes('broyeur')) return 'herbe';
+  if (n.includes('pelle') || n.includes('tracteur') || n.includes('remorque')) return 'parcMachine';
+  if (n.includes('compresseur') || n.includes('groupe') || n.includes('électro') || n.includes('electro')) return 'reglages';
+  return 'boite';
+}
 
 function categoriesLocales() {
   try {
@@ -5096,6 +5226,18 @@ function formatMontant(valeur, currency) {
   if (!isFinite(n)) return '—';
   const devise = currency || (typeof UI !== 'undefined' && UI.company && UI.company.currency) || 'EUR';
   return n.toLocaleString(localeActive(), { style: 'currency', currency: devise, maximumFractionDigits: 0 });
+}
+// Version compacte (« 878k », « 1,2M ») pour un affichage décoratif très
+// contraint en espace (centre du donut, reprise Stitch phase 3) — jamais
+// utilisée pour un montant qu'on veut exact, formatMontant reste la seule
+// référence pour ça partout ailleurs.
+function montantAbrege(valeur) {
+  const n = Number(valeur);
+  if (!isFinite(n)) return '—';
+  const abs = Math.abs(n);
+  if (abs >= 1000000) return `${(n / 1000000).toLocaleString(localeActive(), { maximumFractionDigits: 1 })}M`;
+  if (abs >= 1000) return `${Math.round(n / 1000)}k`;
+  return String(Math.round(n));
 }
 // Somme des coûts d'ENTRETIEN (pièces + main d'œuvre) d'une machine, à partir
 // de la liste d'interventions déjà chargée pour l'historique — aucune requête
@@ -9762,6 +9904,26 @@ const PICTOS = {
   croix: '<path d="M12 5v14M5 12h14"/>',
   calculatrice: '<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 6.5h8"/><circle cx="8.3" cy="11.5" r=".6"/><circle cx="12" cy="11.5" r=".6"/><circle cx="15.7" cy="11.5" r=".6"/><circle cx="8.3" cy="15.5" r=".6"/><circle cx="12" cy="15.5" r=".6"/><circle cx="15.7" cy="15.5" r=".6"/>',
   etincelle: '<path d="M12 2c.6 3.6 1.8 6.6 4.5 8.5C19.2 12.4 22 12 22 12s-2.8.4-5.5 2.3C13.8 16.2 12.6 19.2 12 22.8 11.4 19.2 10.2 16.2 7.5 14.3 4.8 12.4 2 12 2 12s2.8.4 5.5-1.5C10.2 8.6 11.4 5.6 12 2z"/>',
+  // ── Reprise du mockup Stitch « refonte Classement TCO / Seuils cibles »
+  // (voir keeva-tco-feature, phase 3 re-skin) — mêmes raisons que les
+  // reprises précédentes : aucune police d'icônes, retracées à la main,
+  // même grille 24×24 / trait 2px. Beaucoup de Material Symbols du mockup
+  // ont déjà un équivalent tracé plus haut (bar_chart→graphique,
+  // local_shipping→vehicule, expand_more→chevron, category→filtre,
+  // download→export, arrow_forward→flecheDroite, check_circle/verified→
+  // ajuste, history/schedule→bientot, calendar_today→calendrier,
+  // info→info) — réutilisés tels quels, pas redessinés une 2ᵉ fois.
+  argent: '<rect x="3" y="6" width="15" height="10" rx="2"/><rect x="6" y="9" width="15" height="10" rx="2" fill="none"/><circle cx="13.5" cy="14" r="2"/>',
+  parcMachine: '<rect x="2.5" y="13" width="15" height="7" rx="1.5"/><path d="M8 13V9h7l3.5 4"/><circle cx="6.5" cy="20.5" r="2"/><circle cx="16.5" cy="20.5" r="2"/>',
+  tendanceHausse: '<path d="M3.5 16.5 10 10l4 4 6.5-6.5"/><path d="M15 7.5h5.5V13"/>',
+  trier: '<path d="M7 6v12"/><path d="M4 9l3-3 3 3"/><path d="M17 18V6"/><path d="M14 15l3 3 3-3"/>',
+  ciseaux: '<circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8l11 8M8 16l11-8"/>',
+  scie: '<path d="M3 15.5h14l4-3.5-4-3.5H3z"/><path d="M6 12h.01M9.5 12h.01M13 12h.01"/>',
+  herbe: '<path d="M6 21c0-6 1-10 0-15"/><path d="M12 21c0-8 2-13 0-18"/><path d="M18 21c0-6-1-10 0-15"/>',
+  curseurs: '<path d="M4 7h9M17 7h3"/><circle cx="14" cy="7" r="2.3"/><path d="M4 12h3M11 12h9"/><circle cx="8" cy="12" r="2.3"/><path d="M4 17h12M20 17h0"/><circle cx="18" cy="17" r="2.3"/>',
+  camembert: '<circle cx="12" cy="12" r="9"/><path d="M12 12V3a9 9 0 0 1 9 9z"/>',
+  flecheBas: '<path d="M12 5v14"/><path d="M6 13l6 6 6-6"/>',
+  flecheHaut: '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -12986,44 +13148,66 @@ function blocParametresTcoHtml() {
 // : un gérant peut préparer un seuil avant même d'avoir ajouté de machine
 // dans cette catégorie. Champ vide = aucun seuil = aucun badge d'écart nulle
 // part (voir ligneClassementTcoHtml) — jamais un seuil inventé.
+// Reprise Stitch (phase 3, re-skin, voir keeva-tco-feature) : le tag
+// « Recommandé ~X » du mockup n'a aucune donnée réelle derrière (aucun
+// barème par catégorie de machine à disposition) — remplacé par une
+// « Moyenne actuelle » calculée sur les VRAIES machines de la catégorie,
+// remplie en asynchrone une fois le classement chargé (voir mount(), même
+// donnée que flotte.lignes, pas un second calcul). Le sous-titre
+// descriptif du mockup (« Outillage à conducteur »…) n'existe pas non plus
+// comme donnée réelle — remplacé par le nombre réel de machines suivies
+// dans cette catégorie.
 function blocSeuilsCategorieTcoHtml() {
   const gerant = UI.role === 'gerant';
   const bloque = gerant ? '' : ' disabled';
   const categories = UI.categories || [];
   if (!categories.length) return '';
+  const TEINTES = ['is-roi', 'is-ok', 'is-amber', 'is-indigo'];
   return `
     <section class="card">
       <div class="tco-card-tete">
         <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-indigo">${picto('devise')}</div>
+          <div class="tco-card-icone-carre is-lg is-ok">${picto('curseurs')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Seuils cibles de coût horaire')}</h2>
+            <span class="tco-eyebrow-pill">${trad('Paramétrage de rentabilité')}</span>
+            <h2 class="tco-card-titre" style="margin-top:4px;">${trad('Seuils cibles de coût horaire')}</h2>
             <div class="tco-card-soustitre">${trad('Par catégorie de machine — utilisé pour l\'écart affiché dans le classement TCO')}</div>
           </div>
         </div>
       </div>
       ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
       <div class="tco-seuils-liste">
-        ${categories.map((cat) => `
-          <div class="tco-seuil-ligne" data-categorie-id="${esc(cat.id)}">
-            <span class="tco-seuil-nom">${esc(cat.name)}</span>
+        ${categories.map((cat, i) => {
+          const nbMachines = (UI.machines || []).filter((m) => m.category?.id === cat.id).length;
+          return `
+          <div class="tco-seuil-carte" data-categorie-id="${esc(cat.id)}">
+            <div class="tco-seuil-carte-tete">
+              <div class="tco-seuil-icone ${TEINTES[i % TEINTES.length]}">${picto(iconeCategorieMachine(cat.name))}</div>
+              <div>
+                <span class="tco-seuil-nom">${esc(cat.name)}</span>
+                <span class="tco-seuil-sous">${tR('{n} machine(s) suivie(s)', { n: nbMachines })}</span>
+              </div>
+              <span class="tco-seuil-moyenne-tag" data-seuil-moyenne-categorie="${esc(cat.id)}"></span>
+            </div>
             <div class="tco-champ-unite">
               <input type="text" inputmode="decimal" class="tco-seuil-input" value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
               <span class="tco-unite-tag">${deviseCourte()}/h</span>
             </div>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
       <div class="hint" id="tco-seuils-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="tco-save-seuils"${bloque}>${picto('disquette')}<span>${trad('Enregistrer les seuils')}</span></button>
-      </div>
+      <button type="button" class="tco-clst-export-btn is-primaire" id="tco-save-seuils"${bloque}>${picto('coche')}<span>${trad('Enregistrer les seuils')}</span></button>
     </section>`;
 }
 // Donut RÉEL (phase 2) — remplace l'illustration « MODÈLE KEEVA » statique
 // de la phase 1. Factorisé : réutilisé par la page Coûts & TCO (grand) ET
 // la carte du tableau de bord (petit, voir tcoDashboardCarteHtml) — une
-// seule trace SVG, jamais deux qui divergent.
-function donutTcoSvgHtml(repartition, taille) {
+// seule trace SVG, jamais deux qui divergent. `centreHtml` (phase 3, re-skin
+// Stitch) : contenu optionnel superposé au centre (ex. « Total TCO » +
+// montant) — absent par défaut, donc tous les appels existants sans ce
+// 3ᵉ argument gardent EXACTEMENT le même rendu qu'avant.
+function donutTcoSvgHtml(repartition, taille, centreHtml) {
   if (!repartition) return '';
   const d = repartition;
   const offsetMo = -d.pctPieces;
@@ -13036,13 +13220,12 @@ function donutTcoSvgHtml(repartition, taille) {
         <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ok)" stroke-width="4.5" stroke-dasharray="${d.pctMainOeuvre},100" stroke-dashoffset="${offsetMo}" stroke-linecap="round"/>
         <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--late)" stroke-width="4.5" stroke-dasharray="${d.pctFixes},100" stroke-dashoffset="${offsetFixes}" stroke-linecap="round"/>
       </svg>
+      ${centreHtml ? `<div class="tco-donut-centre">${centreHtml}</div>` : ''}
     </div>`;
 }
 // Une carte du classement flotte (phase 3 — remplace la ligne plate de la
 // phase 2). Clic → fiche machine via wireAlertRows() (même délégation,
-// [data-machine] sans [data-alerte], voir mount() de VIEWS.tco) ; le
-// bouton "Ajouter un coût" est câblé séparément (stopPropagation, sinon il
-// déclencherait aussi la navigation de la carte).
+// [data-machine] sans [data-alerte], voir mount() de VIEWS.tco).
 // `ventilation` : { pieces, mainOeuvre, heures } de ventilationCoutsInterventions()
 // — sur la fenêtre affichée (lifetime si aucun filtre de période actif).
 // `periodeInfo` : null si aucun filtre de période actif (comportement
@@ -13051,15 +13234,24 @@ function donutTcoSvgHtml(repartition, taille) {
 // REPLIE sur le ratio lifetime et on le DIT explicitement (jamais un
 // chiffre silencieux qui change de sens sans prévenir, voir
 // ratioDecisionTcoSurPeriode).
+// Reprise Stitch (phase 3, re-skin, voir keeva-tco-feature) : le bouton
+// « Ajouter un coût » de la version précédente n'existe plus — le mockup
+// utilise ce même emplacement (le cercle à droite) pour le badge d'état
+// verified/attention/alerte, qui n'est PAS une donnée fabriquée (repli
+// direct sur `etat`, déjà calculé pour la pastille). L'action reste
+// accessible via le clic sur la carte → fiche machine → « Enregistrer un
+// entretien ».
 function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo) {
   const decisionAffichee = periodeInfo ? (periodeInfo.decision || decision) : decision;
   const periodeRepliee = !!periodeInfo && !periodeInfo.decision;
-  const etat = decisionAffichee ? etatTco(decisionAffichee.ratio, decisionAffichee.base) : 'ok';
+  const base = decisionAffichee ? decisionAffichee.base : null;
+  const etat = decisionAffichee ? etatTco(decisionAffichee.ratio, base) : 'ok';
+  const libelles = TCO_ETAT_LABEL[base] || TCO_ETAT_LABEL.achat;
   // La base du ratio est TOUJOURS affichée à côté du chiffre : « 62 % de la
   // dépréciation » et « 41 % du prix d'achat » ne mesurent pas la même
   // chose, jamais le pourcentage seul.
   const ratioTexte = decisionAffichee
-    ? tR('{n} % {base}', { n: Math.round(decisionAffichee.ratio * 100), base: decisionAffichee.base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
+    ? tR('{n} % {base}', { n: Math.round(decisionAffichee.ratio * 100), base: base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
     : '—';
   const uniteCourte = counterShort(counterUnitOf(machine));
   const photo = safeUrl(machine.image_url);
@@ -13072,34 +13264,51 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
   // seuil réellement défini pour CETTE catégorie précise.
   const seuil = machine.category?.target_hourly_cost;
   const ecart = (seuil != null && tco.coutParUnite != null) ? tco.coutParUnite - Number(seuil) : null;
+  // Tendance affichée à côté du coût horaire (mockup « Optimal » + flèche)
+  // : reformulation du MÊME état ok/soon/late, jamais un jugement séparé.
+  const TENDANCE = {
+    ok: { texte: trad('Optimal'), fleche: 'flecheBas' },
+    soon: { texte: trad('À surveiller'), fleche: null },
+    late: { texte: trad('Dérive'), fleche: 'flecheHaut' },
+  };
+  const tendance = TENDANCE[etat];
   return `
-    <div class="tco-classement-carte" data-machine="${esc(machine.id)}">
-      <span class="alert-bar ${etat}"></span>
-      ${photo ? `<div class="tco-classement-photo"><img src="${esc(photo)}" alt="${esc(machine.name)}" loading="lazy"></div>` : ''}
-      <div class="tco-classement-corps">
-        <div class="tco-classement-tete">
-          <span class="tco-classement-nom">${esc(machine.name)}</span>
-          <span class="pill ${etat}">${ratioTexte}</span>
-          ${periodeRepliee ? `<span class="tco-classement-note">${trad('(basé sur tout l\'historique)')}</span>` : ''}
+    <div class="tco-clst-carte" data-machine="${esc(machine.id)}">
+      <span class="tco-clst-carte-accent ${etat}"></span>
+      <div class="tco-clst-carte-corps">
+        <div class="tco-clst-carte-identite">
+          <div class="tco-clst-carte-photo${photo ? '' : ' tco-clst-carte-photo-vide'}">
+            ${photo ? `<img src="${esc(photo)}" alt="${esc(machine.name)}" loading="lazy">` : picto('boite')}
+            <span class="tco-clst-carte-dot ${etat}"></span>
+          </div>
+          <div class="tco-clst-carte-texte">
+            <div class="tco-clst-carte-tete">
+              <span class="tco-clst-carte-nom">${esc(machine.name)}</span>
+              <span class="tco-clst-badge-ratio ${etat}">${picto('camembert')}<span>${ratioTexte}</span></span>
+              ${machine.category?.name ? `<span class="tco-clst-badge-categorie">${esc(machine.category.name)}</span>` : ''}
+            </div>
+            <div class="tco-clst-carte-meta">
+              ${heures != null ? `<span class="is-fort">${picto('bientot')}<span>${tR('{n} {unite} cumulé(e)s', { n: esc(heures), unite: uniteCourte })}</span></span>` : ''}
+              ${machine.service_date ? `<span class="tco-clst-sep">•</span><span>${picto('calendrier')}<span>${tR('Mise en service : {date}', { date: esc(machine.service_date) })}</span></span>` : ''}
+              ${pctPieces != null ? `<span class="tco-clst-sep">•</span><span class="tco-clst-meta-pieces">${tR('Pièces {n}%', { n: pctPieces })}</span>` : ''}
+              ${periodeRepliee ? `<span class="tco-clst-sep">•</span><span class="tco-clst-note">${trad('(basé sur tout l\'historique)')}</span>` : ''}
+            </div>
+          </div>
         </div>
-        <div class="tco-classement-meta">
-          ${machine.category?.name ? `<span>${esc(machine.category.name)}</span>` : ''}
-          ${heures != null ? `<span>${tR('{n} {unite} cumulé(e)s', { n: esc(heures), unite: uniteCourte })}</span>` : ''}
-          ${machine.service_date ? `<span>${tR('Mise en service : {date}', { date: esc(machine.service_date) })}</span>` : ''}
-          ${pctPieces != null ? `<span>${tR('Pièces {n}%', { n: pctPieces })}</span>` : ''}
+        <div class="tco-clst-carte-chiffres">
+          <div class="tco-clst-carte-stat">
+            <span class="label">${libelleMontant}</span>
+            <div class="valeur-ligne"><span class="valeur">${formatMontant(montantPrincipal)}</span></div>
+          </div>
+          <span class="tco-clst-carte-divider"></span>
+          <div class="tco-clst-carte-stat">
+            <span class="label">${trad('Coût horaire')}${periodeInfo ? ` · ${trad('depuis l\'achat')}` : ''}</span>
+            <div class="valeur-ligne"><span class="valeur is-roi">${tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '—'}</span></div>
+            ${decisionAffichee ? `<span class="tco-clst-tendance ${etat}">${tendance.fleche ? picto(tendance.fleche) : ''}<span>${tendance.texte}</span></span>` : ''}
+            ${ecart != null ? `<span class="pill ${ecart > 0 ? 'late' : 'ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
+          </div>
+          <div class="tco-clst-carte-statut ${etat}" title="${esc(libelles[etat]())}">${pictoEtat(etat)}</div>
         </div>
-      </div>
-      <div class="tco-classement-chiffres">
-        <div class="tco-classement-montant">
-          <span class="label">${libelleMontant}</span>
-          <span class="value">${formatMontant(montantPrincipal)}</span>
-        </div>
-        <div class="tco-classement-montant">
-          <span class="label">${trad('Coût horaire')}${periodeInfo ? ` · ${trad('depuis l\'achat')}` : ''}</span>
-          <span class="value">${tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '—'}</span>
-          ${ecart != null ? `<span class="pill ${ecart > 0 ? 'late' : 'ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
-        </div>
-        <button type="button" class="tco-classement-ajout" data-machine-ajout="${esc(machine.id)}" title="${esc(trad('Ajouter un coût'))}">${picto('ajuste')}</button>
       </div>
     </div>`;
 }
@@ -13136,10 +13345,14 @@ function tcoClassementFlotteHtml() {
     <section class="card" id="tco-classement-section">
       <div class="tco-card-tete">
         <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-indigo">${picto('graphique')}</div>
+          <div class="tco-card-icone-carre is-lg is-gradient-roi">${picto('graphique')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Classement TCO du parc')}</h2>
-            <div class="tco-card-soustitre">${trad('Comparaison des machines, la moins rentable en premier')}</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="tco-eyebrow-pill is-roi"><span class="dot"></span>${trad('Analyse de flotte')}</span>
+              <span class="tco-clst-live">${trad('• Temps réel')}</span>
+            </div>
+            <h2 class="tco-card-titre" style="margin-top:4px;">${trad('Classement TCO du parc')}</h2>
+            <div class="tco-card-soustitre">${trad('Comparaison analytique des machines, de la moins rentable à la plus optimisée')}</div>
           </div>
         </div>
       </div>
@@ -13344,6 +13557,22 @@ VIEWS.tco = {
         }
         if (valueEl) valueEl.remove();
 
+        // Moyenne actuelle de coût horaire par catégorie (reprise Stitch,
+        // §5) — remplit les tags du bloc « Seuils cibles », rendu ailleurs
+        // sur la page (root, pas section) au même montage. Mêmes données
+        // que flotte.lignes, toujours lifetime (un seuil cible est une
+        // référence stable, pas une valeur qui bouge avec le filtre
+        // d'affichage) — jamais un second calcul, jamais un chiffre sans
+        // machine réelle derrière.
+        root.querySelectorAll('[data-seuil-moyenne-categorie]').forEach((tag) => {
+          const valeurs = flotte.lignes
+            .filter((l) => l.machine.category?.id === tag.dataset.seuilMoyenneCategorie && l.tco.coutParUnite != null)
+            .map((l) => l.tco.coutParUnite);
+          if (!valeurs.length) return;
+          const moyenne = valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
+          tag.textContent = tR('Moy. actuelle {m}', { m: formatMontant(Math.round(moyenne)) });
+        });
+
         // Regroupement PAR MACHINE des tableaux flotte-entière — pour le
         // filtre de période (recalcul en mémoire, jamais un second fetch).
         const interventionsParMachineTout = grouperParMachine(interventionsFlotte);
@@ -13404,6 +13633,7 @@ VIEWS.tco = {
           const cleTri = (l) => {
             if (tri === 'coutHoraire') return l.tco.coutParUnite ?? -Infinity;
             if (tri === 'tcoTotal') return l.tco.total ?? -Infinity;
+            if (tri === 'heures') return machineCounter(l.machine) ?? -Infinity;
             return l.periodeInfo?.decision?.ratio ?? l.decision?.ratio ?? -Infinity;
           };
           lignes = lignes.slice().sort((a, b) => cleTri(b) - cleTri(a));
@@ -13411,16 +13641,44 @@ VIEWS.tco = {
           const lignesAffichees = lignes.slice(0, limite);
           const reste = lignes.length - lignesAffichees.length;
 
+          const centreDonut = repartition ? `
+            <span class="tco-donut-centre-eyebrow">${trad('Dépenses parc')}</span>
+            <span class="tco-donut-centre-valeur">${montantAbrege(repartition.total)}</span>
+            <span class="tco-donut-centre-note">${trad('100% Déclaré')}</span>
+          ` : '';
+
           dynamique.innerHTML = `
             ${repartition ? `
-            <div class="tco-donut-carte">
-              ${donutTcoSvgHtml(repartition, 88)}
-              <div style="flex:1;min-width:180px;">
-                <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition des coûts du parc')}</span>
-                <div class="tco-donut-legende">
-                  <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${tR('Pièces ({n}%)', { n: Math.round(repartition.pctPieces) })}</span>
-                  <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${tR('MO atelier ({n}%) · {h} h déclarées', { n: Math.round(repartition.pctMainOeuvre), h: Math.round(repartition.heures) })}</span>
-                  <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${tR('Fixes ({n}%)', { n: Math.round(repartition.pctFixes) })}</span>
+            <div class="tco-donut-bloc">
+              <div class="tco-donut-bloc-tete">
+                <div class="tco-donut-bloc-titre">
+                  <h3>${trad('Répartition des charges du parc')}</h3>
+                  <p>${trad('Ventilation par nature de dépense enregistrée sur la flotte')}</p>
+                </div>
+                <span class="tco-donut-total-badge">${tR('{montant} cumulés', { montant: formatMontant(repartition.total) })}</span>
+              </div>
+              <div class="tco-donut-corps">
+                ${donutTcoSvgHtml(repartition, 128, centreDonut)}
+                <div class="tco-donut-details">
+                  <div class="tco-donut-barre">
+                    <span style="width:${repartition.pctPieces}%;background:var(--bleu-roi);"></span>
+                    <span style="width:${repartition.pctMainOeuvre}%;background:var(--ok);"></span>
+                    <span style="width:${repartition.pctFixes}%;background:var(--late);"></span>
+                  </div>
+                  <div class="tco-donut-legende-grille">
+                    <div class="tco-donut-legende-carte">
+                      <span class="gauche"><span class="rond" style="background:var(--bleu-roi);"></span>${trad('Pièces')}</span>
+                      <span class="badge" style="color:var(--bleu-roi);background:rgba(35,111,224,.1);">${Math.round(repartition.pctPieces)}%</span>
+                    </div>
+                    <div class="tco-donut-legende-carte">
+                      <span class="gauche"><span class="rond" style="background:var(--ok);"></span>${trad('MO Atelier')}</span>
+                      <span class="droite"><span class="heures">${Math.round(repartition.heures)} h</span><span class="badge" style="color:var(--ok);background:var(--ok-bg);">${Math.round(repartition.pctMainOeuvre)}%</span></span>
+                    </div>
+                    <div class="tco-donut-legende-carte">
+                      <span class="gauche"><span class="rond" style="background:var(--late);"></span>${trad('Frais Fixes')}</span>
+                      <span class="badge" style="color:var(--late);background:var(--late-bg);">${Math.round(repartition.pctFixes)}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>` : `<div class="hint">${trad('Aucune dépense enregistrée sur cette période.')}</div>`}
@@ -13430,17 +13688,10 @@ VIEWS.tco = {
             ` : `<div class="hint">${trad('Aucune machine dans cette catégorie.')}</div>`}
           `;
           wireAlertRows(dynamique);
-          dynamique.querySelectorAll('.tco-classement-carte[data-machine]').forEach((carte) => {
+          dynamique.querySelectorAll('.tco-clst-carte[data-machine]').forEach((carte) => {
             carte.setAttribute('tabindex', '0');
             carte.setAttribute('role', 'button');
             carte.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); carte.click(); } });
-          });
-          dynamique.querySelectorAll('[data-machine-ajout]').forEach((btn) => {
-            btn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const machine = (UI.machines || []).find((m) => m.id === btn.dataset.machineAjout);
-              if (machine) openLogInterventionModal(machine);
-            });
           });
           dynamique.querySelector('#tco-classement-plus')?.addEventListener('click', () => {
             limite += TCO_CLASSEMENT_PAGE_SIZE;
@@ -13448,35 +13699,76 @@ VIEWS.tco = {
           });
         };
 
+        // Sous-ligne du KPI 1 : reformule le MÊME ratio moyen déjà calculé
+        // (flotte.ratioMoyen), jamais un jugement inventé séparé — le
+        // mockup affiche un texte qualitatif fixe, ici c'est un vrai signal.
+        const ratioEtatMoyen = flotte.ratioMoyen != null ? etatTco(flotte.ratioMoyen) : 'ok';
+        const RATIO_LABEL_MOYEN = { ok: trad('Ratio moyen sain'), soon: trad('Ratio à surveiller'), late: trad('Ratio élevé') }[ratioEtatMoyen];
+        const RATIO_ICONE_MOYEN = { ok: 'flecheBas', soon: 'chevron', late: 'flecheHaut' }[ratioEtatMoyen];
+        const alerteEtat = flotte.nbAlertes > 0 ? 'late' : 'ok';
+
         section.insertAdjacentHTML('beforeend', `
-          <div class="tco-classement-resume">
-            <div class="tco-classement-chiffre"><span class="label">${trad('TCO moyen annualisé')}</span><span class="value">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
-            <div class="tco-classement-chiffre"><span class="label">${trad('Machines suivies')}</span><span class="value">${flotte.lignes.length}</span></div>
-            <div class="tco-classement-chiffre"><span class="label">${trad('En alerte')}</span><span class="value${flotte.nbAlertes ? ' is-alerte' : ''}">${flotte.nbAlertes}</span></div>
-          </div>
-          <div class="tco-classement-toolbar">
-            <div class="tco-filtre-periode" id="tco-filtre-periode" role="group" aria-label="${esc(trad('Période'))}">
-              <button type="button" class="tco-filtre-btn is-active" data-periode="total">${trad('Depuis mise en service')}</button>
-              <button type="button" class="tco-filtre-btn" data-periode="12m">${trad('12 derniers mois')}</button>
-              <button type="button" class="tco-filtre-btn" data-periode="annee">${trad('Année en cours')}</button>
+          <div class="tco-clst-kpi-grid">
+            <div class="tco-clst-kpi-carte">
+              <div class="tco-clst-kpi-tete">
+                <span class="label">${trad('TCO Moyen Annualisé')}</span>
+                <div class="tco-clst-kpi-icone is-roi">${picto('argent')}</div>
+              </div>
+              <div class="valeur-ligne"><span class="valeur">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
+              <div class="tco-clst-kpi-sub ${ratioEtatMoyen}">${picto(RATIO_ICONE_MOYEN)}<span>${RATIO_LABEL_MOYEN}</span></div>
             </div>
-            ${categoriesPresentes.length ? `
-            <select id="tco-filtre-categorie">
-              <option value="toutes">${trad('Toutes catégories')}</option>
-              ${categoriesPresentes.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
-            </select>` : ''}
-            <select id="tco-filtre-tri">
-              <option value="ratio">${trad('Ratio de dépréciation')}</option>
-              <option value="tcoTotal">${trad('TCO total')}</option>
-              <option value="coutHoraire">${trad('Coût horaire')}</option>
-            </select>
+            <div class="tco-clst-kpi-carte">
+              <div class="tco-clst-kpi-tete">
+                <span class="label">${trad('Machines Suivies')}</span>
+                <div class="tco-clst-kpi-icone is-ok">${picto('parcMachine')}</div>
+              </div>
+              <div class="valeur-ligne"><span class="valeur">${flotte.lignes.length}</span><span class="unite">${tR('/ {n} machines totales', { n: (UI.machines || []).length })}</span></div>
+              <div class="tco-clst-kpi-sub"><span class="rond"></span><span>${tR('{n} actif(s) calculé(s) avec données d\'achat', { n: flotte.lignes.length })}</span></div>
+            </div>
+            <div class="tco-clst-kpi-carte${flotte.nbAlertes ? ' is-alerte' : ''}">
+              <div class="tco-clst-kpi-tete">
+                <span class="label">${trad('En Alerte')}</span>
+                <div class="tco-clst-kpi-icone ${alerteEtat}">${picto(flotte.nbAlertes ? 'alerte' : 'ajuste')}</div>
+              </div>
+              <div class="valeur-ligne"><span class="valeur ${alerteEtat}">${flotte.nbAlertes}</span></div>
+              <div class="tco-clst-kpi-sub ${alerteEtat}">${picto(flotte.nbAlertes ? 'alerte' : 'coche')}<span>${flotte.nbAlertes ? tR('{n} machine(s) dépassent leur seuil', { n: flotte.nbAlertes }) : trad('Sous les seuils opérationnels')}</span></div>
+            </div>
+          </div>
+          <div class="tco-clst-toolbar">
+            <div class="tco-filtre-periode" id="tco-filtre-periode" role="group" aria-label="${esc(trad('Période'))}">
+              <button type="button" class="tco-filtre-btn is-active" data-periode="total">${picto('bientot')}<span>${trad('Depuis mise en service')}</span></button>
+              <button type="button" class="tco-filtre-btn" data-periode="12m"><span>${trad('12 derniers mois')}</span></button>
+              <button type="button" class="tco-filtre-btn" data-periode="annee"><span>${trad('Année en cours')}</span></button>
+            </div>
+            <div class="tco-clst-selects">
+              ${categoriesPresentes.length ? `
+              <div class="tco-clst-select-wrap">
+                ${picto('filtre')}
+                <select id="tco-filtre-categorie">
+                  <option value="toutes">${trad('Toutes catégories')}</option>
+                  ${categoriesPresentes.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+                </select>
+                ${picto('chevron')}
+              </div>` : ''}
+              <div class="tco-clst-select-wrap">
+                ${picto('trier')}
+                <select id="tco-filtre-tri">
+                  <option value="ratio">${trad('Ratio de dépréciation')}</option>
+                  <option value="tcoTotal">${trad('Coût total décroissant')}</option>
+                  <option value="coutHoraire">${trad('Coût horaire décroissant')}</option>
+                  <option value="heures">${trad('Heures moteur')}</option>
+                </select>
+                ${picto('chevron')}
+              </div>
+            </div>
           </div>
           <div id="tco-classement-dynamique"></div>
           ${flotte.exclues.length ? `
-          <div class="hint">${tR('{n} machine(s) sans prix d\'achat, non incluses.', { n: flotte.exclues.length })} <button type="button" class="link-inline" data-nav="machines">${trad('Régulariser les prix')}</button></div>` : ''}
-          <div class="modal-actions">
-            <button type="button" class="secondary" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
-          </div>
+          <div class="tco-clst-banniere">
+            <div class="gauche">${picto('info')}<p><strong>${tR('{n} machine(s) sans prix d\'achat', { n: flotte.exclues.length })}</strong>, ${trad('non incluses dans ce classement analytique.')}</p></div>
+            <button type="button" class="tco-clst-banniere-btn" data-nav="machines"><span>${trad('Régulariser les prix')}</span>${picto('flecheDroite')}</button>
+          </div>` : ''}
+          <button type="button" class="tco-clst-export-btn" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
         `);
         dynamique = section.querySelector('#tco-classement-dynamique');
 
