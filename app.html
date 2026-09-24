@@ -245,9 +245,16 @@
   html{
     /* Le navigateur du téléphone ne réécrit pas la taille des textes. */
     -webkit-text-size-adjust:100%;
-    /* Dans l'application Android, la page vit dans une vue qui occupe tout
-       l'écran : sans cela, tirer vers le bas déclenche le rafraîchissement. */
-    overscroll-behavior-y:contain;
+    /* « contain » empêche seulement le tiré-vers-le-bas de CHAÎNER vers le
+       rafraîchissement natif — il n'empêche PAS le rebond élastique
+       lui-même : la page (html/body est le SEUL scroller ici, .content n'a
+       pas son propre overflow) rebondissait visiblement en butée, révélant
+       le fond derrière l'en-tête un instant — la sensation d'écran « qui
+       flotte » signalée sur un vrai téléphone, plus visible en arrivant sur
+       le Tableau de bord (première position de défilement, en haut).
+       « none » supprime le rebond ET la chaîne — page fixe, sans perdre la
+       protection déjà obtenue. */
+    overscroll-behavior-y:none;
   }
   body{
     background:var(--bg);
@@ -256,6 +263,7 @@
     -webkit-font-smoothing:antialiased;
     /* Pas de halo gris au toucher : l'interface signale déjà ses états. */
     -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:none;
   }
   h1,h2,h3{font-family:inherit;letter-spacing:-0.02em;}
   button{font-family:inherit;}
