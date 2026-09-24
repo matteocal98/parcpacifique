@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d3PBa1tRb7/XewtlMYiOnt9QpK0RTxanTzVunR/biKM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZprUEZ5ldxz4CkeFAl3sw65myfClLmKtb8wfapqbJsc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8643,6 +8643,187 @@ function contactEnterprise(companyId) {
   const sujet = trad('Offre') + ' ' + trad(offre.offre) + ' — ' + trad('demande d\'informations');
   return 'mailto:support@keeva.work?subject=' + encodeURIComponent(sujet)
     + '&body=' + encodeURIComponent(corpsContactOffre(offre, companyId));
+}
+
+// ── Support côté client (tickets) ────────────────────────────────────────
+// Remplace le seul contact possible jusqu'ici (un lien mailto:) par un vrai
+// fil de discussion, lu et répondu depuis la console superviseur
+// (admin.html) — voir support_tickets/support_ticket_messages,
+// keeva-redesign-project.md.
+function ilYaSupport(iso) {
+  const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diffMin < 1) return trad('à l\'instant');
+  if (diffMin < 60) return tR('il y a {n} min', { n: diffMin });
+  const h = Math.round(diffMin / 60);
+  if (h < 24) return tR('il y a {n} h', { n: h });
+  return tR('il y a {n} j', { n: Math.round(h / 24) });
+}
+const LIBELLE_STATUT_TICKET = {
+  ouvert: () => trad('Ouvert'),
+  en_cours: () => trad('En cours'),
+  resolu: () => trad('Résolu'),
+};
+
+async function openSupportModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const { data: sessionCourante } = await sb.auth.getUser();
+  const moi = sessionCourante?.user?.id || null;
+  await afficherListeTickets(overlay, moi);
+}
+
+async function afficherListeTickets(overlay, moi) {
+  overlay.innerHTML = `<div class="modal">
+    <h2>${trad('Support')}</h2>
+    <p class="sub">${trad('Tes demandes précédentes, et une nouvelle si besoin.')}</p>
+    <div id="support-liste">${trad('Chargement…')}</div>
+    <div class="modal-actions">
+      <button type="button" class="primary" id="support-nouveau">${trad('Nouveau ticket')}</button>
+      <button type="button" class="secondary" id="support-fermer">${trad('Fermer')}</button>
+    </div>
+  </div>`;
+  overlay.querySelector('#support-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#support-nouveau').addEventListener('click', () => afficherNouveauTicket(overlay, moi));
+
+  const { data: tickets, error } = await sb
+    .from('support_tickets')
+    .select('id, subject, status, created_at')
+    .eq('company_id', UI.companyId)
+    .order('created_at', { ascending: false });
+  const zone = overlay.querySelector('#support-liste');
+  if (!zone) return;
+  if (error) {
+    zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger tes demandes pour le moment.')}</div>`;
+    return;
+  }
+  if (!tickets || !tickets.length) {
+    zone.innerHTML = `<div class="hint">${trad('Aucune demande pour l\'instant.')}</div>`;
+    return;
+  }
+  zone.innerHTML = tickets.map((t) => `
+    <button type="button" class="support-ticket-ligne" data-id="${esc(t.id)}" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft);text-align:left;cursor:pointer;">
+      <span style="min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.subject)}</span>
+      <span class="pill ${t.status === 'resolu' ? 'ok' : 'neutral'}" style="flex:0 0 auto;">${LIBELLE_STATUT_TICKET[t.status]?.() || t.status}</span>
+    </button>`).join('');
+  zone.querySelectorAll('.support-ticket-ligne').forEach((btn) => {
+    btn.addEventListener('click', () => afficherFilTicket(overlay, moi, btn.dataset.id));
+  });
+}
+
+function afficherNouveauTicket(overlay, moi) {
+  overlay.innerHTML = `<div class="modal">
+    <h2>${trad('Nouveau ticket')}</h2>
+    <div class="plan-field">
+      <label for="support-sujet">${trad('Sujet')}</label>
+      <input id="support-sujet" required maxlength="140">
+    </div>
+    ${UI.machines.length ? `<div class="plan-field">
+      <label for="support-machine">${trad('Machine concernée (optionnel)')}</label>
+      <select id="support-machine">
+        <option value="">${trad('Aucune en particulier')}</option>
+        ${UI.machines.map((m) => `<option value="${esc(m.id)}">${esc(m.name || m.brand || '')}</option>`).join('')}
+      </select>
+    </div>` : ''}
+    <div class="plan-field">
+      <label for="support-message">${trad('Message')}</label>
+      <textarea id="support-message" rows="4" required></textarea>
+    </div>
+    <div class="hint" id="support-nouveau-msg" role="status" aria-live="polite"></div>
+    <div class="modal-actions">
+      <button type="button" class="primary" id="support-envoyer">${trad('Envoyer')}</button>
+      <button type="button" class="secondary" id="support-annuler">${trad('Annuler')}</button>
+    </div>
+  </div>`;
+  overlay.querySelector('#support-annuler').addEventListener('click', () => afficherListeTickets(overlay, moi));
+  overlay.querySelector('#support-envoyer').addEventListener('click', async () => {
+    const sujet = overlay.querySelector('#support-sujet').value.trim();
+    const message = overlay.querySelector('#support-message').value.trim();
+    const machineId = overlay.querySelector('#support-machine')?.value || null;
+    const annonce = overlay.querySelector('#support-nouveau-msg');
+    if (!sujet || !message) {
+      annonce.textContent = trad('Le sujet et le message sont nécessaires.');
+      annonce.className = 'hint is-late';
+      return;
+    }
+    const bouton = overlay.querySelector('#support-envoyer');
+    bouton.disabled = true;
+    const { data: ticket, error: erreurTicket } = await sb
+      .from('support_tickets')
+      .insert({ company_id: UI.companyId, created_by: moi, machine_id: machineId, subject: sujet })
+      .select('id').single();
+    if (erreurTicket || !ticket) {
+      annonce.textContent = trad('L\'envoi a échoué. Réessaie dans un instant.');
+      annonce.className = 'hint is-late';
+      bouton.disabled = false;
+      return;
+    }
+    const { error: erreurMessage } = await sb
+      .from('support_ticket_messages')
+      .insert({ ticket_id: ticket.id, author_id: moi, body: message });
+    if (erreurMessage) {
+      annonce.textContent = trad('Le ticket a été créé, mais le message n\'a pas pu être envoyé. Rouvre-le pour réessayer.');
+      annonce.className = 'hint is-late';
+      bouton.disabled = false;
+      return;
+    }
+    afficherFilTicket(overlay, moi, ticket.id);
+  });
+}
+
+async function afficherFilTicket(overlay, moi, ticketId) {
+  overlay.innerHTML = `<div class="modal">
+    <h2>${trad('Ticket')}</h2>
+    <div id="support-fil" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;margin-bottom:10px;">${trad('Chargement…')}</div>
+    <div class="plan-field">
+      <label for="support-reponse">${trad('Répondre')}</label>
+      <textarea id="support-reponse" rows="2"></textarea>
+    </div>
+    <div class="hint" id="support-fil-msg" role="status" aria-live="polite"></div>
+    <div class="modal-actions">
+      <button type="button" class="primary" id="support-repondre">${trad('Envoyer')}</button>
+      <button type="button" class="secondary" id="support-retour">${trad('Retour')}</button>
+    </div>
+  </div>`;
+  overlay.querySelector('#support-retour').addEventListener('click', () => afficherListeTickets(overlay, moi));
+
+  const { data: messages, error } = await sb
+    .from('support_ticket_messages')
+    .select('id, body, created_at, author_id, profiles(full_name, login, is_staff)')
+    .eq('ticket_id', ticketId)
+    .order('created_at', { ascending: true });
+  const fil = overlay.querySelector('#support-fil');
+  if (error || !fil) {
+    if (fil) fil.innerHTML = `<div class="hint is-late">${trad('Impossible de charger ce ticket.')}</div>`;
+  } else {
+    fil.innerHTML = (messages || []).map((m) => {
+      const deMoi = m.author_id === moi;
+      const auteur = m.profiles?.is_staff ? trad('Support KEEVA') : (deMoi ? trad('Toi') : (m.profiles?.full_name || m.profiles?.login || '?'));
+      return `<div style="align-self:${deMoi ? 'flex-end' : 'flex-start'};max-width:85%;padding:8px 10px;border-radius:10px;background:${deMoi ? 'var(--primary-tint)' : 'var(--surface-soft)'};">
+        <div style="font-weight:700;font-size:12.5px;">${esc(auteur)}</div>
+        <div>${esc(m.body)}</div>
+        <div style="font-size:11px;color:var(--ink-2);margin-top:2px;">${ilYaSupport(m.created_at)}</div>
+      </div>`;
+    }).join('') || `<div class="hint">${trad('Aucun message.')}</div>`;
+  }
+  overlay.querySelector('#support-repondre').addEventListener('click', async () => {
+    const texte = overlay.querySelector('#support-reponse').value.trim();
+    const annonce = overlay.querySelector('#support-fil-msg');
+    if (!texte) return;
+    const bouton = overlay.querySelector('#support-repondre');
+    bouton.disabled = true;
+    const { error: erreurReponse } = await sb
+      .from('support_ticket_messages')
+      .insert({ ticket_id: ticketId, author_id: moi, body: texte });
+    bouton.disabled = false;
+    if (erreurReponse) {
+      annonce.textContent = trad('L\'envoi a échoué. Réessaie dans un instant.');
+      annonce.className = 'hint is-late';
+      return;
+    }
+    afficherFilTicket(overlay, moi, ticketId);
+  });
 }
 
 // `message` (facultatif) : la raison de l'ouverture, quand la fenêtre s'ouvre
