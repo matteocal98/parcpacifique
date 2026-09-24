@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qAcJ0tuepRDcd+ECshiNsfsAgiuyXeXkDWu2tqhuRvc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-W622KsHsgwl4jfvrj9a39oBSZzPFKuUBCqlkjQ6td5k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -18334,14 +18334,21 @@ function openPlanView(machine, companyId, categories) {
   const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
   const buildHistoryCsv = () => {
     const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Operateur'), trad('Remarques')];
+    if (SCHEMA.hasTco) header.push(trad('Cout total'));
     const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const rows = historyData.map(h => [
-      h.performed_at,
-      h.hours_at_intervention ?? '',
-      Array.isArray(h.items_done) ? h.items_done.join('; ') : '',
-      nomOperateurTexte(h),
-      h.description ?? '',
-    ]);
+    const rows = historyData.map(h => {
+      const row = [
+        h.performed_at,
+        h.hours_at_intervention ?? '',
+        Array.isArray(h.items_done) ? h.items_done.join('; ') : '',
+        nomOperateurTexte(h),
+        h.description ?? '',
+      ];
+      if (SCHEMA.hasTco) {
+        row.push((h.parts_cost != null || h.labor_cost != null) ? (Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0) : '');
+      }
+      return row;
+    });
     return [header, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
   };
 
@@ -18420,7 +18427,7 @@ function openPlanView(machine, companyId, categories) {
     const hidden = historyData.length - shown.length;
     section.insertAdjacentHTML('beforeend', `
       <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th></tr></thead>
+        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th>${SCHEMA.hasTco ? `<th>${trad('Coût total')}</th>` : ''}</tr></thead>
         <tbody>
           ${shown.map(h => `
             <tr>
@@ -18429,6 +18436,7 @@ function openPlanView(machine, companyId, categories) {
               <td>${Array.isArray(h.items_done) && h.items_done.length ? esc(h.items_done.join(', ')) : '<span class="muted">—</span>'}</td>
               <td>${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
               <td>${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
+              ${SCHEMA.hasTco ? `<td>${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
             </tr>`).join('')}
         </tbody>
       </table></div>
