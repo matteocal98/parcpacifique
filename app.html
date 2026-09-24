@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-nkW5ge2R1FA2S5gghFnkykIYWFdh0Uzm+SlwsSmALGs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-E3OsViU1a3fcXIGSd1GGK6MCtfLaL1U0L41gX9hnBM4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1726,7 +1726,13 @@
   }
   .modal h2{font-size:21px;font-weight:800;margin:0 0 5px;}
   .modal .sub{color:var(--ink-2);font-size:14.5px;margin:0 0 18px;line-height:1.5;}
-  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  /* flex-wrap:wrap : même piège que .log-header2/.choix-carte plus haut —
+     une rangée de 3 boutons texte (équipe : « Générer un nouveau mot de
+     passe » / « Changer le rôle » / « Retirer ») les écrasait à un mot
+     par ligne sur téléphone au lieu de passer à la ligne. Sans risque pour
+     les autres .modal-actions (1-2 boutons courts) : ne change rien tant
+     que tout tient déjà sur une ligne. */
+  .modal-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
   /* Élargie : une largeur proche de la maquette, pour que le tableau de
      référence (6 colonnes) tienne sans ascenseur horizontal — c'est cet
      ascenseur qui donnait l'impression de défaut d'affichage sous le
@@ -14583,7 +14589,7 @@ function tcoDashboardCarteHtml() {
         <span class="spacer"></span>
         <button type="button" class="link-inline" data-nav="tco">${trad('Détail')}</button>
       </div>
-      <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
+      <div class="value" style="color:var(--ink-soft);min-height:174px;">${trad('Chargement…')}</div>
     </section>`;
 }
 async function chargerCarteTcoDashboard(root) {
