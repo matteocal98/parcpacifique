@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-7HxAs/NVAcNx1zfQCLXY1RcDQvVCQ3xhieLtH4IzOA8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-pgOh38uddhDYmlN42lRVnV/HcY8iqq7PxBhL8SykuBg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3948,12 +3948,16 @@
   }
   .agenda-jour.is-hors-mois{opacity:.35;}
   .agenda-jour.is-weekend{background:rgba(14,19,51,.02);}
+  /* Toute la case est cliquable pour programmer un entretien sur ce jour
+     (pas seulement une icône) — fonctionne au doigt, pas seulement au hover. */
+  .agenda-jour.is-cliquable{cursor:pointer;}
+  .agenda-jour.is-cliquable:hover{background:rgba(99,102,241,.06);}
   .agenda-jour-tete{display:flex;align-items:center;justify-content:space-between;}
   .agenda-jour-num{font-weight:700;font-size:13.5px;font-family:'Space Grotesk',sans-serif;}
   .agenda-jour.is-aujourdhui .agenda-jour-num{color:var(--primary-dark);}
-  .agenda-jour-ajout{width:20px;height:20px;border:none;background:none;color:var(--ink-3);opacity:0;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease;}
-  .agenda-jour-ajout svg{width:14px;height:14px;}
-  .agenda-jour:hover .agenda-jour-ajout{opacity:1;}
+  .agenda-jour-ajout{width:14px;height:14px;color:var(--ink-3);opacity:0;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease;}
+  .agenda-jour-ajout svg{width:12px;height:12px;}
+  .agenda-jour.is-cliquable:hover .agenda-jour-ajout{opacity:1;}
   .agenda-jour.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.3);}
   .agenda-jour.is-soon{background:var(--soon-bg);border-color:rgba(99,102,241,.25);}
   .agenda-jour.is-ok{background:var(--ok-bg);border-color:rgba(36,181,168,.25);}
@@ -3961,6 +3965,10 @@
     display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:5px 6px;
     border-radius:8px;background:var(--surface);border:1px solid var(--line);cursor:pointer;text-align:left;font-family:inherit;
   }
+  /* Entretien programmé À LA MAIN (scheduled_maintenances) plutôt qu'échéance
+     du plan : un simple liseret pour le distinguer, jamais une couleur d'état
+     différente — l'état affiché reste toujours celui, réel, de la machine. */
+  .agenda-evt.is-programme{border-left:3px solid var(--primary-dark);}
   .agenda-evt-nom{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2;}
   .agenda-evt-tache{font-size:10.5px;color:var(--ink-2);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
   .agenda-evt-badge{font-size:9.5px;padding:2px 6px;}
@@ -13376,31 +13384,47 @@ function agendaParJour(datedFiltres) {
 }
 
 const AGENDA_JOUR_MAX = 2;
-function agendaEvenementMiniHtml(m, info) {
-  const tache = nextTaskLabel(m);
+// `programme` (une ligne de scheduled_maintenances) quand cette carte vient
+// d'une programmation manuelle plutôt que de l'échéance du plan — sa couleur
+// reste TOUJOURS l'état RÉEL ACTUEL de la machine (info vient d'infoMachine,
+// jamais figé au moment de la programmation), comme demandé.
+function agendaEvenementMiniHtml(m, info, programme) {
+  const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
+  const titre = programme
+    ? tR('{machine} — programmé le {date}', { machine: m.name, date: formatShortDate(programme.scheduled_date) })
+    : info.label;
   return `
-    <button type="button" class="agenda-evt is-${info.state}" data-machine-id="${esc(m.id)}" title="${esc(info.label)}">
+    <button type="button" class="agenda-evt is-${info.state}${programme ? ' is-programme' : ''}"
+      data-machine-id="${esc(m.id)}"${programme ? ` data-programme-id="${esc(programme.id)}"` : ''} title="${esc(titre)}">
       <span class="agenda-evt-nom">${esc(m.name)}</span>
       ${tache ? `<span class="agenda-evt-tache">${esc(tache)}</span>` : ''}
       <span class="badge ${badgeClass(info.state)} agenda-evt-badge">${badgeLabel(info.state)}</span>
     </button>`;
 }
+// La case entière (pas juste une icône) est cliquable pour programmer un
+// entretien sur ce jour — plus simple à découvrir, et fonctionne au doigt
+// (un hover n'existe pas sur tablette/téléphone). `data-jour` seulement sur
+// les jours du mois affiché : cliquer un jour grisé (mois voisin) ne fait
+// rien de surprenant.
 function agendaJourHtml(jour, evenements) {
   const jourNum = jour.iso.slice(8, 10);
   const classes = ['agenda-jour'];
   if (!jour.dansLeMois) classes.push('is-hors-mois');
-  else if (jour.weekend) classes.push('is-weekend');
+  else {
+    classes.push('is-cliquable');
+    if (jour.weekend) classes.push('is-weekend');
+  }
   if (jour.iso === todayIso()) classes.push('is-aujourdhui');
   if (evenements.length) classes.push(`is-${evenements[0].info.state}`);
   const visibles = evenements.slice(0, AGENDA_JOUR_MAX);
   const reste = evenements.length - visibles.length;
   return `
-    <div class="${classes.join(' ')}">
+    <div class="${classes.join(' ')}"${jour.dansLeMois ? ` data-jour="${esc(jour.iso)}"` : ''}>
       <div class="agenda-jour-tete">
         <span class="agenda-jour-num">${jourNum}</span>
-        ${jour.dansLeMois && !evenements.length ? `<button type="button" class="agenda-jour-ajout" data-jour-ajout="${esc(jour.iso)}" aria-label="${esc(trad('Planifier un entretien'))}">${picto('croix')}</button>` : ''}
+        ${jour.dansLeMois ? `<span class="agenda-jour-ajout" aria-hidden="true">${picto('croix')}</span>` : ''}
       </div>
-      ${visibles.map(({ m, info }) => agendaEvenementMiniHtml(m, info)).join('')}
+      ${visibles.map(({ m, info, programme }) => agendaEvenementMiniHtml(m, info, programme)).join('')}
       ${reste > 0 ? `<span class="agenda-jour-plus">${esc(tR('+ {n} autre(s)', { n: reste }))}</span>` : ''}
     </div>`;
 }
@@ -13489,6 +13513,24 @@ function agendaListeHtml(datedFiltres, countersFiltres) {
     ${sorted.length ? `<div class="agenda-souscompteur"><span class="card-ico">${picto('compteur')}</span><span>${trad('Suivi au compteur')}</span></div>` : ''}
     ${countersFiltres.map(({ m, info }) => chronologieCarteHtml(m, info)).join('')}` : ''}`;
 }
+// Entretiens PROGRAMMÉS (table scheduled_maintenances, saisie manuelle par
+// jour de calendrier) — groupés par jour comme agendaParJour(), mais depuis
+// une source distincte : ils n'ont pas d'échéance de plan, juste une date
+// choisie à la main. La couleur/état reste TOUJOURS celui, réel et actuel,
+// de la machine (infoMachine) — jamais calculé depuis la date programmée.
+function agendaProgrammesParJour(statutFiltre) {
+  const map = new Map();
+  (UI.scheduledMaintenances || []).forEach((p) => {
+    if (p.status === 'annule') return;
+    const m = UI.machines.find((x) => x.id === p.machine_id);
+    if (!m) return;
+    const info = infoMachine(m);
+    if (statutFiltre !== 'tous' && info.state !== statutFiltre) return;
+    if (!map.has(p.scheduled_date)) map.set(p.scheduled_date, []);
+    map.get(p.scheduled_date).push({ m, info, programme: p });
+  });
+  return map;
+}
 function agendaContenuHtml() {
   const vue = agendaVueActive();
   const statut = agendaStatutActif();
@@ -13499,7 +13541,11 @@ function agendaContenuHtml() {
   if (vue === 'liste') return agendaListeHtml(datedFiltres, countersFiltres);
   const ref = agendaRefIso();
   const jours = vue === 'semaine' ? agendaSemaineGrille(ref) : agendaMoisGrille(ref);
-  return agendaGrilleHtml(jours, agendaParJour(datedFiltres)) + agendaLegendeHtml();
+  const parJourEcheances = agendaParJour(datedFiltres);
+  const parJourProgrammes = agendaProgrammesParJour(statut);
+  const parJour = new Map();
+  jours.forEach((j) => parJour.set(j.iso, [...(parJourEcheances.get(j.iso) || []), ...(parJourProgrammes.get(j.iso) || [])]));
+  return agendaGrilleHtml(jours, parJour) + agendaLegendeHtml();
 }
 
 // Carte « Surveillance au compteur » : les échéances SANS date (heures/km),
@@ -13532,7 +13578,7 @@ function agendaSurveillanceHtml(counters) {
       <div class="card-head"><h2 class="card-title-sm"><span class="card-ico card-ico-plein">${picto('compteur')}</span><span>${trad('Surveillance au compteur')}</span></h2></div>
       <p class="muted-text">${trad('Prédictions sans date de calendrier fixe : ces machines sont suivies à l\'usage, pas au mois.')}</p>
       <div class="agenda-surv-liste">${counters.map(item).join('')}</div>
-      <button type="button" class="primary agenda-surv-cta" data-nav="machines">${picto('croix')}<span>${trad('Saisir un relevé compteur')}</span></button>
+      <button type="button" class="primary agenda-surv-cta" data-nav="machines"><span class="card-ico">${picto('croix')}</span><span>${trad('Saisir un relevé compteur')}</span></button>
     </section>`;
 }
 // Le détail complet (préparation par produit, export CSV, bon de commande)
@@ -13551,17 +13597,20 @@ function agendaPiecesDetailToggleHtml() {
     </div>` : ''}`;
 }
 
-// « Planifier un entretien » n'a pas d'existence indépendante d'une machine
-// dans le modèle de données (aucun évènement de calendrier autonome) :
-// l'échéance affichée vient TOUJOURS du plan de maintenance d'une machine
-// précise. Cette fenêtre choisit laquelle, puis ouvre sa fiche — là où
-// l'échéance se règle réellement.
-function ouvrirChoixMachinePourPlan() {
+// « Planifier un entretien » : choisit une date (préremplie si on vient d'un
+// clic sur un jour du calendrier, sinon aujourd'hui) puis une machine — écrit
+// une ligne dans scheduled_maintenances. Distinct de l'échéance du plan
+// (plan.next_due_at, qui se déplace toute seule quand un entretien est
+// enregistré) : ceci est une programmation manuelle, annulable indépendamment,
+// affichée dans la case du jour choisi avec la couleur d'état RÉELLE et
+// ACTUELLE de la machine (jamais figée à la programmation).
+function ouvrirProgrammerEntretien(dateInitiale) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const machines = [...UI.machines].sort((a, b) => a.name.localeCompare(b.name));
+  const dateDefaut = dateInitiale || todayIso();
   const ligneHtml = (m) => {
     const info = infoMachine(m);
     return `<button type="button" class="agenda-choix-machine" data-machine-id="${esc(m.id)}">
@@ -13572,18 +13621,67 @@ function ouvrirChoixMachinePourPlan() {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${trad('Planifier un entretien')}</h2>
-      <p class="sub">${trad('Choisis la machine : sa fiche ouvre directement son plan de maintenance.')}</p>
+      <p class="sub">${trad('Choisis la date puis la machine : la programmation apparaît dans le calendrier, colorée selon l\'état réel de la machine.')}</p>
+      <label for="prog-date">${trad('Date')}</label>
+      <input id="prog-date" type="date" value="${esc(dateDefaut)}">
       <div class="agenda-choix-liste">${machines.length ? machines.map(ligneHtml).join('') : `<p class="muted-text">${trad('Aucune machine enregistrée.')}</p>`}</div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="agenda-choix-fermer">${trad('Fermer')}</button>
       </div>
     </div>`;
   overlay.querySelector('#agenda-choix-fermer').addEventListener('click', () => overlay.remove());
-  overlay.querySelectorAll('[data-machine-id]').forEach((btn) => btn.addEventListener('click', () => {
+  overlay.querySelectorAll('[data-machine-id]').forEach((btn) => btn.addEventListener('click', async () => {
     const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
+    if (!m) return;
+    const dateChoisie = overlay.querySelector('#prog-date').value || dateDefaut;
+    overlay.querySelectorAll('[data-machine-id]').forEach((b) => { b.disabled = true; });
+    const { data, error } = await sb.from('scheduled_maintenances')
+      .insert({ machine_id: m.id, scheduled_date: dateChoisie })
+      .select('id, machine_id, scheduled_date, label, status, created_at')
+      .single();
+    if (error) {
+      showToast(trad('Programmation impossible : ') + error.message);
+      overlay.querySelectorAll('[data-machine-id]').forEach((b) => { b.disabled = false; });
+      return;
+    }
+    UI.scheduledMaintenances = [...(UI.scheduledMaintenances || []), data];
     overlay.remove();
-    if (m) openPlanView(m, UI.companyId, UI.categories);
+    renderApp();
+    showToast(trad('Entretien programmé'));
   }));
+}
+// Clic sur une carte « programmée » dans une case du calendrier : voir la
+// fiche ou annuler CETTE programmation (jamais l'échéance du plan lui-même,
+// qui n'a pas d'équivalent « annuler » — elle se déplace en enregistrant
+// l'entretien, pas en la supprimant).
+function ouvrirProgrammeActions(programme, m) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>${esc(m.name)}</h2>
+      <p class="sub">${esc(tR('Entretien programmé le {date}{label}', { date: formatShortDate(programme.scheduled_date), label: programme.label ? ` — ${programme.label}` : '' }))}</p>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="prog-annuler">${trad('Annuler cette programmation')}</button>
+        <button type="button" class="primary" id="prog-fiche">${trad('Voir la fiche')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#prog-fiche').addEventListener('click', () => {
+    overlay.remove();
+    openPlanView(m, UI.companyId, UI.categories);
+  });
+  overlay.querySelector('#prog-annuler').addEventListener('click', async () => {
+    const btn = overlay.querySelector('#prog-annuler');
+    btn.disabled = true;
+    const { error } = await sb.from('scheduled_maintenances').delete().eq('id', programme.id);
+    if (error) { showToast(trad('Suppression impossible : ') + error.message); btn.disabled = false; return; }
+    UI.scheduledMaintenances = (UI.scheduledMaintenances || []).filter((p) => p.id !== programme.id);
+    overlay.remove();
+    renderApp();
+    showToast(trad('Programmation annulée'));
+  });
 }
 
 // Export .ics : un événement par échéance DATÉE (jamais les machines au
@@ -13653,13 +13751,18 @@ function wireAgenda(root) {
   root.querySelectorAll('.agenda-evt').forEach((btn) => btn.addEventListener('click', (e) => {
     e.stopPropagation();
     const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
-    if (m) openPlanView(m, UI.companyId, UI.categories);
+    if (!m) return;
+    if (btn.dataset.programmeId) {
+      const programme = (UI.scheduledMaintenances || []).find((p) => p.id === btn.dataset.programmeId);
+      if (programme) { ouvrirProgrammeActions(programme, m); return; }
+    }
+    openPlanView(m, UI.companyId, UI.categories);
   }));
-  root.querySelectorAll('[data-jour-ajout]').forEach((btn) => btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    ouvrirChoixMachinePourPlan();
+  root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => cell.addEventListener('click', (e) => {
+    if (e.target.closest('.agenda-evt')) return;
+    ouvrirProgrammerEntretien(cell.dataset.jour);
   }));
-  root.querySelector('#agenda-planifier')?.addEventListener('click', ouvrirChoixMachinePourPlan);
+  root.querySelector('#agenda-planifier')?.addEventListener('click', () => ouvrirProgrammerEntretien());
   root.querySelector('#agenda-export-ics')?.addEventListener('click', telechargerPlanningIcs);
   root.querySelector('#agenda-pieces-detail-toggle')?.addEventListener('click', () => {
     UI.agendaPiecesDetail = !UI.agendaPiecesDetail;
@@ -13671,10 +13774,14 @@ VIEWS.agenda = {
   title: trad('Agenda'),
   subtitle: () => trad('Échéances datées et compteurs à surveiller'),
   render() {
-    const { dated, counters } = agendaEvenements();
-    if (!dated.length && !counters.length) {
-      return `<div class="empty">${trad('Aucune échéance enregistrée. Renseigne un plan de maintenance sur une machine.')}</div>`;
+    // Vide seulement quand il n'y a AUCUNE machine : le calendrier reste
+    // utile même sans échéance de plan, puisqu'on peut y programmer un
+    // entretien à la main (scheduled_maintenances) — une raison de plus de
+    // ne jamais bloquer l'écran tant qu'au moins une machine existe.
+    if (!UI.machines.length) {
+      return `<div class="empty">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div>`;
     }
+    const { counters } = agendaEvenements();
     const piecesHtml = preparationResumeHtml();
     return `
       <div class="vue-agenda">
@@ -21523,6 +21630,7 @@ function afficherDepuisCache(cache) {
   UI.categories = cache.categories || [];
   UI.partsCatalog = cache.partsCatalog || [];
   UI.machines = cache.machines || [];
+  UI.scheduledMaintenances = cache.scheduledMaintenances || [];
   UI.reminders = loadReminders();
   UI.horsLigne = { depuis: cache.savedAt };
   renderApp();
@@ -21773,6 +21881,20 @@ async function boot(toastMessage) {
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
     category: Array.isArray(m.category) ? m.category[0] : m.category,
   }));
+
+  // Entretiens programmés (calendrier Agenda) : un jeu de données léger par
+  // société, chargé une fois ici comme le catalogue de pièces — jamais
+  // rechargé à chaque clic sur un jour du calendrier.
+  let scheduledMaintenances = [];
+  if (UI.machines.length) {
+    const { data: programmes } = await sb
+      .from('scheduled_maintenances')
+      .select('id, machine_id, scheduled_date, label, status, created_at')
+      .in('machine_id', UI.machines.map((m) => m.id))
+      .order('scheduled_date');
+    scheduledMaintenances = programmes || [];
+  }
+  UI.scheduledMaintenances = scheduledMaintenances;
   UI.reminders = loadReminders();
   UI.horsLigne = null;
 
@@ -21787,6 +21909,7 @@ async function boot(toastMessage) {
     categories: UI.categories,
     partsCatalog: UI.partsCatalog,
     machines: UI.machines,
+    scheduledMaintenances: UI.scheduledMaintenances,
   });
 
   renderApp();
