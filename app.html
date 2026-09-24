@@ -694,6 +694,12 @@
   .priority-actions button{
     flex:1;font-size:13.5px;font-weight:700;padding:12px 0;border-radius:12px;cursor:pointer;
   }
+  /* Reprise Stitch « Tableau de bord » — les icônes picto() de ces boutons
+     (ajuste/flecheDroite) n'ont pas de taille par défaut, contrairement aux
+     anciens SVG à width/height codés en dur qu'elles remplacent : sans cette
+     règle elles gonflent au rendu SVG par défaut du navigateur (déjà vu
+     plusieurs fois cette session, voir keeva-tco-feature). */
+  .priority-actions button svg{width:18px;height:18px;flex:0 0 auto;}
   .priority-actions .do{background:#fff;color:var(--primary-dark);border:none;}
   .priority-actions .see{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}
   @media (min-width:900px){
@@ -3139,8 +3145,12 @@
       order:2;font-size:13.5px;font-weight:500;letter-spacing:0;color:var(--ink-2);margin-top:2px;
     }
 
-    /* Bandeau prioritaire : nuit, outil en coin, boîte tâche + compteur */
-    .priority{position:relative;background:linear-gradient(160deg,var(--dark),var(--ink));border-radius:var(--r-card);padding:18px;}
+    /* Bandeau prioritaire : outil en coin, boîte tâche + compteur.
+       Reprise Stitch « Tableau de bord » : fond violet (signature-en), pas
+       le dégradé nuit d'origine — cette règle mobile écrasait sinon le fond
+       posé en base (bug remonté par l'utilisateur : le bandeau restait
+       sombre en dessous de 900px). */
+    .priority{position:relative;background:var(--primary-dark);border-radius:var(--r-card);padding:18px;}
     .priorities{margin-bottom:0;}
     .priority-outil{
       position:absolute;top:16px;right:16px;display:flex;align-items:center;justify-content:center;
