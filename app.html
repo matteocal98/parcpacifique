@@ -985,7 +985,12 @@
 
   /* Cadre élargi (était trop étriqué, notamment pour la date en mode
      calendaire) + coins arrondis (voir --r-lg plus haut, manquante). */
-  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 14px;width:100%;min-width:0;}
+  /* Valeurs REPRISES À L'OCTET du fichier fourni (bg-surface-container-low
+     px-3 py-2 rounded-lg) plutôt qu'approchées avec les jetons --r-chip/
+     --r-md existants — l'utilisateur a explicitement demandé le compteur
+     EXACT, pas une approximation. rounded-lg de CE fichier = 8px (voir
+     son DESIGN.md : rounded.lg = 0.5rem), pas --r-card (16px). */
+  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:8px;padding:8px 12px;width:100%;min-width:0;}
   @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:196px;}}
   /* .compteur (fiche machine) porte un cadre 2px solid var(--ink) + marge
      + fond propres, pensés pour le grand hero de la fiche — jamais
@@ -993,7 +998,7 @@
      signalé sur cette carte compacte. .mstrip-compteur-bloc porte déjà
      SON PROPRE fond/rayon ; .compteur, à l'intérieur, doit être nu. */
   .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;margin-top:0;border:none;border-radius:0;}
-  .mstrip-compteur-bloc .compteur-titre{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--dark-ink);display:block;margin-bottom:5px;}
+  .mstrip-compteur-bloc .compteur-titre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--dark-ink);display:block;margin-bottom:2px;}
   /* Suivi calendaire : la date reprend .compteur-jour-valeur (22px) taillée
      pour le hero de la fiche machine — trop grande pour ce bandeau étroit,
      réduite ici spécifiquement. */
@@ -1002,15 +1007,26 @@
 
   /* Compteur au format « une ligne » : saisie + 2 boutons icône (voir
      compteurHtml, branche emplacement==='strip'). */
+  /* Ligne : gap-1.5 (6px) du fichier fourni. « h » est un TEXTE À CÔTÉ de
+     l'input (ml-1.5), pas une pastille superposée dedans — d'où
+     .compteur-strip-saisie en flex (input + span), non plus en position
+     relative/absolute. */
   .compteur-strip-ligne{display:flex;align-items:center;gap:6px;}
-  .compteur-strip-saisie{position:relative;display:flex;align-items:center;flex:1;min-width:64px;}
-  .compteur-strip-saisie .compteur-champ{width:100%;height:36px;padding:0 26px 0 10px;border-radius:var(--r-chip);border:1px solid var(--line);background:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;text-align:center;color:var(--ink);}
-  .compteur-strip-unite{position:absolute;right:9px;font-size:10.5px;font-weight:600;color:var(--dark-ink);pointer-events:none;}
-  .compteur-strip-icone{width:36px;height:36px;flex:0 0 auto;border-radius:var(--r-chip);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .compteur-strip-icone svg{width:17px;height:17px;}
-  .compteur-strip-icone.is-valider{background:var(--ink);color:#fff;}
-  .compteur-strip-icone.is-valider:hover{background:var(--dark);}
-  .compteur-strip-icone.is-photo{background:var(--surface);color:var(--ink-2);box-shadow:var(--shadow-soft);}
+  .compteur-strip-saisie{display:flex;align-items:center;flex:1;min-width:64px;}
+  /* w-20 h-9 px-2.5 rounded (4px, PAS --r-chip=10px) shadow-sm — le fichier
+     n'arrondit presque pas l'input, contrairement à ma première passe. */
+  .compteur-strip-saisie .compteur-champ{width:80px;flex:0 0 auto;height:36px;padding:0 10px;border-radius:4px;border:1px solid var(--line);background:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;text-align:center;color:var(--ink);box-shadow:var(--shadow-soft);}
+  .compteur-strip-unite{margin-left:6px;font-size:15px;font-weight:600;color:var(--ink-2);flex:0 0 auto;}
+  /* h-9 w-9 rounded (4px) — carré, pas la pastille --r-chip d'avant. Bouton
+     valider = bg-on-background (var(--dark)) ; bouton photo =
+     bg-surface-container, un gris clair distinct du fond du bloc parent
+     (surface-soft), pas du blanc pur avec ombre comme la première passe. */
+  .compteur-strip-icone{width:36px;height:36px;flex:0 0 auto;border-radius:4px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .compteur-strip-icone svg{width:16px;height:16px;}
+  .compteur-strip-icone.is-photo svg{width:18px;height:18px;}
+  .compteur-strip-icone.is-valider{background:var(--dark);color:#fff;}
+  .compteur-strip-icone.is-valider:hover{background:var(--ink);}
+  .compteur-strip-icone.is-photo{background:var(--line-2);color:var(--ink-2);}
   .compteur-strip-icone.is-photo:hover{background:var(--line);}
   .mstrip-compteur-bloc .compteur-lecture:not(:empty){margin-top:6px;font-size:11px;}
   .mstrip-compteur-bloc .compteur-note{font-size:10.5px;margin-top:3px;}
@@ -1023,7 +1039,12 @@
   .mstrip-jauge-delta.is-soon{color:var(--primary-dark);}
   .mstrip-jauge-delta.is-ok{color:var(--ok-ink);}
   .mstrip-jauge-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
-  .mstrip-jauge-part{height:100%;border-radius:var(--r-pill);}
+  /* min-width:4px : à une part très basse (5%) ou nulle (0%, un cycle qui
+     vient de repartir à zéro — vérifié réel sur plusieurs machines de
+     test, pas un bug de calcul), le remplissage devenait visuellement
+     indiscernable d'une barre vide sur un écran/zoom réduit. Un repère
+     minimal, jamais un pourcentage inventé. */
+  .mstrip-jauge-part{height:100%;min-width:4px;border-radius:var(--r-pill);}
   .mstrip-jauge-part.is-late{background:var(--late);}
   .mstrip-jauge-part.is-soon{background:var(--primary);}
   .mstrip-jauge-part.is-ok{background:var(--ok);}
