@@ -2252,7 +2252,16 @@
   .choix-carte.is-actuel{border-color:var(--ok);background:var(--ok-bg);}
   .choix-carte-ico{display:inline-flex;flex:0 0 auto;color:var(--primary-dark);}
   .choix-carte-ico svg{width:18px;height:18px;display:block;}
-  .choix-carte-corps{flex:1;min-width:0;}
+  /* min-width réel (pas 0) : avec flex-wrap:wrap sur .choix-carte, un
+     min-width:0 ici empêchait le retour à la ligne de se déclencher —
+     l'algorithme flex peut TOUJOURS satisfaire « tout tient sur une
+     ligne » en réduisant ce bloc à presque rien, donc le bouton (flex:0 0
+     auto, jamais réduit) ne passait jamais à la ligne : sur une option
+     hors unité du plan (long texte d'avertissement), le texte s'écrasait
+     à un mot par ligne au lieu de laisser le bouton descendre dessous.
+     140px suffit à lire 2-3 mots par ligne avant que le retour à la
+     ligne prenne le relais. */
+  .choix-carte-corps{flex:1;min-width:140px;}
   .choix-carte-valeur{font-weight:800;font-size:15px;color:var(--ink);}
   .choix-carte .badge{flex:0 0 auto;}
   /* .view-manual{width:100%} en mobile (≤520px, voir plus haut) prend le
@@ -2332,8 +2341,12 @@
   /* Photo agrandie de 50 %, boutons à sa droite (Choisir/Prendre en ligne,
      Chercher sur le web en dessous), comme demandé. */
   .mform-photo-ligne{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:8px;}
-  .mform-photo-ligne #photo-preview{margin:0;flex:0 0 auto;}
-  .mform-photo-ligne .machine-photo{max-width:330px;margin-top:0;}
+  /* flex:0 1 330px (pas 0 0 auto) + max-width:100% : #photo-preview préfère
+     330px (desktop) mais PEUT rétrécir — sans ça, il réclamait 330px pleins
+     quoi qu'il arrive et débordait la modale sur téléphone (la photo
+     dépassait le cadre, constaté sur un vrai appareil). */
+  .mform-photo-ligne #photo-preview{margin:0;flex:0 1 330px;min-width:0;max-width:100%;}
+  .mform-photo-ligne .machine-photo{max-width:100%;margin-top:0;}
   .mform-photo-boutons{flex:1 1 220px;min-width:220px;display:flex;flex-direction:column;gap:8px;}
   .mform-photo-btn-row{display:flex;gap:8px;flex-wrap:wrap;}
   .mform-photo-btn-row .view-manual{flex:1 1 auto;text-align:center;}
