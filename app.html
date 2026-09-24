@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-p9b161CXuEc4UyzIkhMbTyT27//RSAQz2x+FaHIrNmk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uSJ8uSfo7CK9uiv2VLCIYdliFxg0cuSj5DAdcX+gxek=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4034,6 +4034,20 @@
     .tco-catalogue-grid{flex-direction:row;align-items:flex-start;}
     .tco-catalogue-colonne{width:700px;flex:0 0 700px;}
     .tco-quick-add{flex:1;min-width:0;}
+  }
+
+  /* Paramètres TCO / Seuils cibles : répartition 50/50 demandée par
+     l'utilisateur, contrairement à la proportion φ (1.618fr/1fr) par
+     défaut de .dash-grid — override scopé à CE bloc précis (jamais sur
+     .dash-grid ni .agenda-grid directement, partagées avec Agenda/
+     Rappels/le reste de la page TCO, où le ratio φ reste voulu).
+     .dash-side (contrairement à .dash-main) n'a pas de min-width:0 —
+     sans lui, un track 1fr grandit selon le min-content de son contenu
+     (ici les cartes de seuils) et casse le 50/50 ; ajouté ici, scopé au
+     même titre plutôt que sur .dash-side partagée. */
+  @media (min-width:900px){
+    .tco-parametres-grid{grid-template-columns:1fr 1fr;}
+    .tco-parametres-grid > .dash-side{min-width:0;}
   }
 
   .tco-tip-carte{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-container,var(--primary-tint));}
@@ -13824,7 +13838,7 @@ VIEWS.tco = {
         ${tcoEyebrowToolbarHtml()}
         ${tcoKpiGridHtml()}
         ${SCHEMA.hasTco ? tcoClassementFlotteHtml() : ''}
-        <div class="dash-grid agenda-grid">
+        <div class="dash-grid agenda-grid tco-parametres-grid">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
           </div>
