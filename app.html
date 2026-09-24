@@ -2484,8 +2484,12 @@
   }
   /* Dans l'application, l'écran de connexion n'a plus la présentation publique :
      le centrage « 10vh » de la page web ne se justifie plus et coûtait une
-     cinquantaine de pixels sur un téléphone. La règle web (10vh) reste intacte. */
-  .login-box.dans-app{margin-top:4vh;}
+     cinquantaine de pixels sur un téléphone. La règle web (10vh) reste intacte.
+     Le cadre (bordure + ombre portée, pensés pour une carte posée SUR une page
+     web) n'a pas non plus de sens ici : l'application EST déjà tout l'écran —
+     un cadre qui « flotte » avec du fond visible autour n'a rien à encadrer.
+     Signalé par l'utilisateur sur un vrai téléphone. */
+  .login-box.dans-app{margin-top:4vh;border:none;box-shadow:none;}
   /* ── ÉCRAN DE CONNEXION — HABILLAGE STITCH (« Field Precision System ») ──────
      En-tête de page sur le web, champ e-mail avec icône, libellé du mot de passe
      et lien « oublié » sur une même ligne, bouton principal fléché. Aucune
