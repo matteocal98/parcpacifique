@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-SV5iGJMg35zlgSrMzj6nlBzS2riJcoAFveVF/sncXG0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EsyBJenCj1al1R/+8wpWfC0JppoTDSSrxFJGfH7vv4Q=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -583,6 +583,9 @@
   /* Le mot de la maquette, sous le chiffre (« intervention », « à planifier »,
      « machines », « indexés ») : petit texte, donc à l'encre — 18,11 sur blanc. */
   .stat-card .stat-mot{font-size:12px;font-weight:600;color:var(--ink-2);}
+  /* Reprise Stitch « Tableau de bord » — la phrase complète sous le chiffre
+     (« 0 intervention en retard »), en plus du mot court déjà là. */
+  .stat-card .stat-sub{display:block;font-size:11px;font-weight:500;color:var(--ink-2);margin-top:2px;}
   /* La vignette d'icône teintée du 4ᵉ bloc, et la pastille d'état de la
      maquette. Sur téléphone la pastille s'efface au profit des mots : deux
      pastilles de plus sur 390 px ne se liraient pas. */
@@ -628,10 +631,23 @@
      ne portait que du blanc, à 5,65:1. La nuit fait mieux, et elle sépare
      franchement l'urgence du reste de l'écran. */
   .priority{
-    background:var(--dark);border-radius:14px;padding:16px;color:#fff;
-    display:flex;flex-direction:column;gap:12px;
+    background:var(--primary-dark);border-radius:14px;padding:16px;color:#fff;
+    display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+    border:2px solid var(--ink);
   }
-  .priority-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  /* Lueur décorative du mockup (dégradé signature-fr en coin, flouté) — pure
+     décoration, jamais un signal, placée derrière le contenu (z-index). */
+  .priority-glow{position:absolute;right:-40px;bottom:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(36,181,168,.35),transparent 70%);pointer-events:none;}
+  .priority-icone{position:relative;flex:0 0 auto;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+  .priority-icone svg{width:28px;height:28px;}
+  .priority-texte{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+  .priority-eyebrow-pill{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:var(--primary-dark);padding:3px 10px;border-radius:var(--r-pill);}
+  .priority-nom{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.01em;color:#fff;}
+  .priority-id{font-size:12px;color:rgba(255,255,255,.7);font-family:'Space Grotesk',sans-serif;}
+  .priority-phrase{margin:2px 0 0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.92);}
+  .priority-phrase strong{color:#fff;font-weight:700;}
+  .priority-corps{display:flex;gap:14px;position:relative;}
+  .priority-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
   .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--sur-primaire);}
   /* Le genre d'engin, en légende : c'est le mot que le client a saisi dans la
      catégorie de la machine (« PELLE HYDRAULIQUE »), jamais une marque. */
@@ -814,6 +830,33 @@
      d'ellipse, mais rien ne les empêchait de déborder sur un mot insécable. */
   .machine .m-main .name{overflow-wrap:anywhere;}
   .prep-ligne-nom, .prep-ligne-machine{overflow-wrap:anywhere;}
+
+  /* Reprise Stitch « Tableau de bord » — familles regroupées (icône + badge
+     « N machines ») au lieu de lignes de produits isolées. Réutilise les
+     classes .prep-ligne-nom/-machine/-total (mêmes tailles/couleurs) mais
+     réagence .prep-ligne en ligne unique dans ce contexte précis, sans
+     toucher au .prep-ligne EMPILÉ de l'écran Préparation complet. */
+  .prep-groupes-liste{display:flex;flex-direction:column;gap:10px;}
+  .prep-famille{background:var(--surface-soft);border:1px solid var(--line-2);border-radius:var(--r-md);padding:12px 14px;}
+  .prep-famille-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+  .prep-famille-gauche{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--ink);}
+  .prep-famille-icone{flex:0 0 auto;width:26px;height:26px;border-radius:var(--r-chip);display:flex;align-items:center;justify-content:center;}
+  .prep-famille-icone svg{width:15px;height:15px;}
+  .prep-famille-icone.is-roi{background:rgba(35,111,224,.12);color:var(--bleu-roi);}
+  .prep-famille-icone.is-amber{background:var(--late-bg);color:var(--late);}
+  .prep-famille-icone.is-ok{background:var(--ok-bg);color:var(--ok);}
+  .prep-famille-icone.is-indigo{background:var(--soon-bg);color:var(--soon);}
+  .prep-famille-badge{font-size:10.5px;font-weight:800;text-transform:uppercase;padding:2px 8px;border-radius:var(--r-pill);background:var(--line-2);color:var(--ink-2);white-space:nowrap;}
+  .prep-famille .prep-ligne{flex-direction:row;align-items:baseline;flex-wrap:wrap;gap:6px;border-left:none;background:none;padding:6px 0 0;border-top:1px solid var(--line-2);border-radius:0;}
+  .prep-famille .prep-ligne-puce{width:6px;height:6px;border-radius:50%;background:var(--dark-ink);flex:0 0 auto;align-self:center;}
+  .prep-famille .prep-ligne-machine{color:var(--dark-ink);font-weight:500;}
+  .prep-famille .prep-ligne-total{margin-left:auto;}
+  .prep-pied{margin-top:6px;padding-top:12px;border-top:1px solid var(--line-2);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;}
+  .prep-pied-note{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dark-ink);}
+  .prep-pied-note svg{width:14px;height:14px;color:var(--ok);}
+  .prep-pied-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .prep-copier-btn svg{width:16px;height:16px;}
 
   /* ★ LOT 4 — LA LIGNE COMPACTE DU BLOC « PIÈCES & CONSOMMABLES ». */
   .pieces-legende{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);}
@@ -2485,9 +2528,12 @@
   .dash-main > .card, .dash-side > .card{padding:16px 20px;gap:8px;}
 
   /* Le résumé de préparation se sépare du reste : il ANNONCE, il ne détaille
-     pas — la liste complète vit dans l'Agenda, où « Voir la liste » mène. */
-  .dash-preparation{border-style:dashed;border-color:var(--line-3);}
-  .dash-preparation .card-head{gap:8px;}
+     pas — la liste complète vit dans l'Agenda, où « Voir la liste » mène.
+     Reprise Stitch « Tableau de bord » : le pointillé distinctif n'est pas
+     dans le mockup (carte pleine comme les autres, demandé « à l'octet
+     près ») — neutralisé ici, sans toucher .card.dash-preparation ailleurs. */
+  .dash-preparation{border-style:solid;border-color:var(--ink);}
+  .dash-preparation .card-head{gap:8px;align-items:flex-start;}
   .dash-preparation .pieces-legende{font-size:11px;font-weight:700;letter-spacing:.1em;}
   .dash-preparation .card-title{font-size:15px;}
   .dash-preparation .muted-text{font-size:12px;line-height:1.45;}
@@ -3618,6 +3664,10 @@
     .chrono-corps{flex-basis:100%;}
     .chrono-cta{flex:1 1 auto;justify-content:center;min-height:40px;}
   }
+  /* Reprise Stitch « Tableau de bord » : chronologieCarteHtml réutilisée hors
+     de l'Agenda (dans #echeances-zone) — même reset de marge sur la 1ʳᵉ carte. */
+  #echeances-zone .chrono-carte:first-of-type{margin-top:0;}
+  .echeances-compte{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ RAPPELS (maquette Stitch « WEB rappel » / « mobile rappel »)
@@ -3970,6 +4020,43 @@
   .tco-classement-chiffre .value{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
   .tco-classement-chiffre .value.is-alerte{color:var(--late);}
   .tco-carte-dashboard-corps{display:flex;align-items:center;gap:16px;}
+
+  /* Reprise Stitch « Tableau de bord » — widget TCO enrichi (voir
+     keeva-tco-feature) */
+  .card-ico.is-roi{width:36px;height:36px;border-radius:var(--r-md);background:rgba(35,111,224,.14);color:var(--bleu-roi);}
+  .tco-dash-pill{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:var(--r-pill);background:var(--ok-bg);color:var(--ok);}
+  .tco-dash-sous{font-size:11px;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;}
+  .tco-dash-metriques{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .tco-dash-metrique{display:flex;flex-direction:column;justify-content:space-between;gap:4px;padding:12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);}
+  .tco-dash-metrique .label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-dash-metrique .valeur-ligne .valeur{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
+  .tco-dash-tendance{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;}
+  .tco-dash-tendance svg{width:13px;height:13px;}
+  .tco-dash-tendance.ok{color:var(--ok);}
+  .tco-dash-tendance.soon{color:var(--soon);}
+  .tco-dash-tendance.late{color:var(--late);}
+  .tco-dash-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .tco-dash-dot.ok{background:var(--ok);}
+  .tco-dash-dot.late{background:var(--late);}
+  .tco-dash-repartition{padding:12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);display:flex;flex-direction:column;gap:8px;}
+  .tco-dash-repartition-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .tco-dash-repartition-titre{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);}
+  .tco-dash-repartition-total{font-size:10.5px;font-weight:700;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;}
+  .tco-dash-legende{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:10.5px;font-weight:600;color:var(--ink-2);}
+  .tco-dash-legende span{display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tco-dash-legende .rond{width:8px;height:8px;border-radius:2px;flex:0 0 auto;}
+  .tco-dash-spotlight{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);}
+  .tco-dash-spotlight-gauche{display:flex;align-items:center;gap:9px;min-width:0;}
+  .tco-dash-spotlight-icone{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-chip);background:rgba(91,82,223,.12);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;}
+  .tco-dash-spotlight-icone svg{width:17px;height:17px;}
+  .tco-dash-spotlight .nom{display:block;font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tco-dash-spotlight .sous{display:block;font-size:11px;color:var(--dark-ink);}
+  .tco-dash-note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid var(--line-2);font-size:11px;color:var(--dark-ink);}
+  .tco-dash-note .gauche{display:inline-flex;align-items:center;gap:6px;}
+  .tco-dash-note .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
+  .tco-dash-note .dot.ok{background:var(--ok);}
+  .tco-dash-note .dot.late{background:var(--late);}
+  .tco-dash-note .droite{font-family:'Space Grotesk',sans-serif;font-weight:600;}
 
   /* Classement TCO du parc — reprise Stitch (phase 3, re-skin) */
   .tco-card-icone-carre.is-lg{width:52px;height:52px;border-radius:var(--r-lg);}
@@ -5419,6 +5506,51 @@ function calculerFlotteTco(machines, interventionsParMachine, coutsParMachine) {
     ratioMoyen: moyenne((l) => l.decision?.ratio),
     nbAlertes: lignes.filter((l) => l.decision && etatTco(l.decision.ratio, l.decision.base) === 'late').length,
   };
+}
+// Tendance du ratio moyen de la flotte (mockup Stitch « Ratio moyen sain ») —
+// reformule le MÊME flotte.ratioMoyen déjà calculé, jamais un jugement séparé.
+// Factorisée : utilisée par la page Coûts & TCO (KPI) ET le widget TCO du
+// tableau de bord, pour ne jamais avoir deux libellés qui divergent sur le
+// même chiffre.
+function tendanceRatioMoyenFlotte(flotte) {
+  const etat = flotte.ratioMoyen != null ? etatTco(flotte.ratioMoyen) : 'ok';
+  const LABEL = { ok: trad('Ratio moyen sain'), soon: trad('Ratio à surveiller'), late: trad('Ratio élevé') };
+  const ICONE = { ok: 'flecheBas', soon: 'chevron', late: 'flecheHaut' };
+  return { etat, label: LABEL[etat], icone: ICONE[etat] };
+}
+// Machines de la flotte dont le coût horaire dépasse le seuil cible de LEUR
+// PROPRE catégorie (phase 3, §5) — jamais comparées à un seuil unique flotte
+// (les catégories sont hétérogènes, voir keeva-tco-feature). `[]` si aucune
+// catégorie n'a de seuil défini : jamais un compte fabriqué.
+function machinesAuDessusSeuilCategorie(flotte) {
+  return flotte.lignes.filter(({ machine, tco }) => {
+    const seuil = machine.category?.target_hourly_cost;
+    return seuil != null && tco.coutParUnite != null && tco.coutParUnite > Number(seuil);
+  });
+}
+// La catégorie à mettre en avant sur le widget TCO du tableau de bord
+// (mockup : une carte « Motoculture & Espaces verts · Seuil cible… »). Choisit
+// la catégorie réelle la PLUS EN ÉCART par rapport à SON seuil (positif =
+// au-dessus, à surveiller en premier) parmi celles qui ont À LA FOIS un seuil
+// défini ET au moins une machine avec un coût horaire calculable — jamais une
+// catégorie choisie au hasard ou sans donnée réelle derrière. `null` si
+// aucune catégorie ne remplit ces deux conditions (le sous-bloc ne s'affiche
+// alors pas du tout, voir tcoDashboardCarteHtml).
+function categorieTcoAMettreEnAvant(flotte) {
+  const parCategorie = new Map();
+  flotte.lignes.forEach(({ machine, tco }) => {
+    const cat = machine.category;
+    if (!cat || cat.target_hourly_cost == null || tco.coutParUnite == null) return;
+    if (!parCategorie.has(cat.id)) parCategorie.set(cat.id, { categorie: cat, valeurs: [] });
+    parCategorie.get(cat.id).valeurs.push(tco.coutParUnite);
+  });
+  let meilleure = null;
+  parCategorie.forEach(({ categorie, valeurs }) => {
+    const moyenne = valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
+    const ecart = moyenne - Number(categorie.target_hourly_cost);
+    if (!meilleure || ecart > meilleure.ecart) meilleure = { categorie, moyenne, ecart };
+  });
+  return meilleure;
 }
 // Répartition RÉELLE pièces / main d'œuvre / coûts d'exploitation sur toute
 // la flotte, en pourcentages — remplace le donut « MODÈLE KEEVA » (statique,
@@ -9924,6 +10056,11 @@ const PICTOS = {
   camembert: '<circle cx="12" cy="12" r="9"/><path d="M12 12V3a9 9 0 0 1 9 9z"/>',
   flecheBas: '<path d="M12 5v14"/><path d="M6 13l6 6 6-6"/>',
   flecheHaut: '<path d="M12 19V5"/><path d="M6 11l6-6 6 6"/>',
+  // ── Reprise Stitch « Tableau de bord » (voir keeva-tco-feature) — deux
+  // icônes réellement nouvelles, le reste du mockup réutilise des icônes déjà
+  // tracées (chronologieCarteHtml, PICTO_CATEGORIE, iconeCategorieMachine…).
+  sablier: '<path d="M6 3h12M6 21h12"/><path d="M7 3v3.5a5 5 0 0 0 2.2 4.15L12 12.5l2.8 1.85A5 5 0 0 1 17 18.5V21"/><path d="M17 3v3.5a5 5 0 0 1-2.2 4.15L12 12.5l-2.8 1.85A5 5 0 0 0 7 18.5V21"/>',
+  copier: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -10160,7 +10297,7 @@ function dashHeadHtml() {
         <span class="avatar dash-avatar" aria-hidden="true">${initialsFrom(UI.contactName || UI.companyName)}</span>
         <div class="dash-head-mots">
           <h1>${greetingLabel()}</h1>
-          <span class="dash-head-compte">${tR('{n} machine(s) suivie(s)', { n })}</span>
+          <span class="dash-head-compte">${UI.companyName ? tR('{societe} · {n} machine(s) suivie(s)', { societe: esc(UI.companyName), n }) : tR('{n} machine(s) suivie(s)', { n })}</span>
         </div>
         <button type="button" class="dash-ajouter" id="dash-add"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>${trad('Ajouter une machine')}</span></button>
         <button type="button" class="dash-compte" id="dash-compte" aria-label="${trad('Mon compte')}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></button>
@@ -10788,20 +10925,24 @@ VIEWS.dashboard = {
 
       <div class="stat-grid">
         <div class="stat-card tuile-late">
-          <div class="stat-tete"><span class="lbl">${trad('En retard')}</span><span class="stat-ico ico-late" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></span></div>
+          <div class="stat-tete"><span class="lbl">${trad('En retard')}</span><span class="stat-ico ico-late" aria-hidden="true">${picto('alerte')}</span></div>
           <div class="num-ligne"><span class="num etat-late">${c.late}</span><span class="stat-mot">${c.late > 1 ? trad('interventions') : trad('intervention')}</span><span class="stat-etat">${trad('URGENT')}</span></div>
+          <span class="stat-sub">${tR('{n} intervention(s) en retard', { n: c.late })}</span>
         </div>
         <div class="stat-card tuile-soon">
-          <div class="stat-tete"><span class="lbl">${tR('Sous {n} jours', { n: SOON_DAYS })}</span><span class="stat-ico ico-soon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div>
+          <div class="stat-tete"><span class="lbl">${tR('Sous {n} jours', { n: SOON_DAYS })}</span><span class="stat-ico ico-soon" aria-hidden="true">${picto('bientot')}</span></div>
           <div class="num-ligne"><span class="num etat-soon">${c.soon}</span><span class="stat-mot">${trad('à planifier')}</span><span class="stat-etat">${trad('À PLANIFIER')}</span></div>
+          <span class="stat-sub">${tR('{n} machine(s) proche échéance', { n: c.soon })}</span>
         </div>
         <div class="stat-card tuile-ok">
-          <div class="stat-tete"><span class="lbl">${trad('À jour')}</span><span class="stat-ico ico-ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg></span></div>
+          <div class="stat-tete"><span class="lbl">${trad('À jour')}</span><span class="stat-ico ico-ok" aria-hidden="true">${picto('ajuste')}</span></div>
           <div class="num-ligne"><span class="num etat-ok">${c.ok}</span><span class="stat-mot">${c.ok > 1 ? trad('machines') : trad('machine')}</span><span class="stat-etat">${trad('NOMINAL')}</span></div>
+          <span class="stat-sub">${UI.machines.length ? tR('{pct}% de la flotte opérationnelle', { pct: Math.round(100 * c.ok / UI.machines.length) }) : trad('Aucune machine suivie')}</span>
         </div>
         <div class="stat-card tuile-primary">
           <div class="stat-tete"><span class="lbl">${trad('Manuels analysés')}</span><span class="stat-ico ico-manuels" aria-hidden="true">${navIcone('manuels')}</span></div>
           <div class="num-ligne"><span class="num etat-manuels">${c.analysed}</span><span class="stat-mot">${trad('indexés')}</span>${UI.machines.length ? `<span class="stat-etat">${tR('{n} % du parc', { n: Math.round(100 * c.analysed / UI.machines.length) })}</span>` : ''}</div>
+          <span class="stat-sub">${tR('{n} manuel(s) numérisé(s) par OCR', { n: c.analysed })}</span>
         </div>
       </div>
 
@@ -10809,13 +10950,15 @@ VIEWS.dashboard = {
         <div class="dash-main">
         <section class="card">
           <div class="card-head">
+            <span class="card-ico">${navIcone('agenda')}</span>
             <h2 class="card-title">${trad('Échéances d\'entretien')}</h2>
             <span class="spacer"></span>
-            <button type="button" class="link-inline" data-nav="agenda">${trad('Tout voir')}</button>
+            ${affichees.length ? `<span class="echeances-compte">${tR('{n} échéance(s) prioritaire(s)', { n: affichees.length })}</span>` : ''}
+            <button type="button" class="link-inline" data-nav="agenda">${trad('Tout voir')} →</button>
           </div>
           <div id="echeances-zone">
           ${affichees.length
-            ? `<div class="alert-list">${affichees.map(x => alertRowHtml(x.machine, x.info, true)).join('')}</div>`
+            ? affichees.map(x => chronologieCarteHtml(x.machine, x.info)).join('')
             : `<div class="empty echeances-vide"><span class="vide-ico" aria-hidden="true">${navIcone('agenda')}</span>${trad('Aucune échéance dans les prochaines semaines.')}</div>`}
           </div>
         </section>
@@ -10837,8 +10980,10 @@ VIEWS.dashboard = {
   mount() {
     const root = document.getElementById('view-root');
     wireReminderSwitches(root);
-    wireAlertRows(root);
-    monterAlertes(root);
+    // Reprise Stitch : la liste des échéances réutilise chronologieCarteHtml
+    // (déjà en prod sur l'Agenda) au lieu de l'accordéon alertRowHtml/
+    // monterAlertes — même câblage que l'Agenda, wireChronologie().
+    wireChronologie(root);
     wirePreparation(root);
     root.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => goTo(btn.dataset.nav)));
     attachDropzone(root.querySelector('#dash-drop'), (file) => openManualUploadModal(null, file));
@@ -10982,32 +11127,56 @@ function prioritiesHtml(retards) {
   return `<div class="priorities">${retards.map(({ machine, item, info, planEntier }) => priorityTaskCardHtml(machine, item, info, planEntier)).join('')}</div>`;
 }
 
+// Reprise Stitch « Tableau de bord » (voir keeva-tco-feature) — même bandeau
+// prioritaire, sur le fond signature-en (violet) du mockup au lieu du fond
+// sombre précédent : choix confirmé par l'utilisateur (le contraste blanc/
+// signature-en mesuré à 5,65:1 reste conforme, seule la teinte change).
+// Phrase enrichie ("Échéance à 135 h (Compteur relevé à 130.0 h · 5.0 h
+// restant)") construite à partir des MÊMES valeurs que `info`/`machineCounter`
+// — aucune donnée nouvelle, juste assemblées en une seule phrase au lieu de
+// deux chiffres séparés.
 function priorityCardHtml(machine, info) {
   const late = info.state === 'late';
   const isCounterInfo = info.unit === 'hours' || info.unit === 'km';
-  // 'compteur' et 'échéance' sont aussi des VALEURS comparées plus loin
-  // (`sort === 'compteur'`) : les traduire sur place casserait le filtre. Le
-  // libellé passe donc par une clé d'affichage distincte, que rien ne compare.
-  const counterLabel = isCounterInfo ? trad('Compteur') : trad('Échéance');
-  const counterValue = isCounterInfo ? formatCounter(machineCounter(machine), info.unit) : formatShortDate(machine.plan?.next_due_at);
+  const identifiant = identifiantAffiche(machine);
   const secondLabel = late ? trad('de dépassement') : trad('restant');
+  const tacheForte = `<strong>${esc(nextTaskLabel(machine))}</strong>`;
+  let phrase;
+  if (isCounterInfo) {
+    const nextDue = planNextDueCounter(machine.plan);
+    const current = machineCounter(machine);
+    phrase = tR('Tâche requise : {tache} · Échéance à {seuil} (Compteur relevé à {actuel} · {delai} {mot})', {
+      tache: tacheForte,
+      seuil: nextDue != null ? esc(formatCounter(nextDue, info.unit)) : '—',
+      actuel: current != null ? esc(formatCounter(current, info.unit)) : '—',
+      delai: esc(info.short),
+      mot: secondLabel,
+    });
+  } else {
+    phrase = tR('Tâche requise : {tache} · Échéance le {date} ({delai} {mot})', {
+      tache: tacheForte,
+      date: esc(formatShortDate(machine.plan?.next_due_at)),
+      delai: esc(info.short),
+      mot: secondLabel,
+    });
+  }
   return `
     <section class="priority">
-      <div class="priority-body">
-        <div class="priority-top">
-          <span class="eyebrow">${trad('PROCHAIN ENTRETIEN')}</span>
-          <span class="${late ? 'pill-late' : 'pill-soon'}">${late ? trad('EN RETARD') : trad('BIENTÔT')}</span>
-        </div>
-        <h2>${esc(nextTaskLabel(machine))}</h2>
-        <span class="machine-name">${esc(machine.name)}</span>
-        <div class="priority-stats">
-          <div class="stat"><span class="val">${esc(counterValue)}</span><span class="key">${counterLabel}</span></div>
-          <div class="stat"><span class="val">${esc(info.short)}</span><span class="key">${secondLabel}</span></div>
+      <div class="priority-glow" aria-hidden="true"></div>
+      <div class="priority-corps">
+        <div class="priority-icone" aria-hidden="true">${picto('sablier')}</div>
+        <div class="priority-texte">
+          <div class="priority-top">
+            <span class="priority-eyebrow-pill">${trad('PROCHAIN ENTRETIEN')} · ${late ? trad('EN RETARD') : trad('BIENTÔT')}</span>
+            <span class="priority-nom">${esc(machine.name)}</span>
+            ${identifiant ? `<span class="priority-id">${esc(identifiant)}</span>` : ''}
+          </div>
+          <p class="priority-phrase">${phrase}</p>
         </div>
       </div>
       <div class="priority-actions">
-        <button type="button" class="do" id="priority-done">${trad('Marquer fait')}</button>
-        <button type="button" class="see" id="priority-details">${trad('Détails')}</button>
+        <button type="button" class="do" id="priority-done">${picto('ajuste')}<span>${trad('Marquer fait')}</span></button>
+        <button type="button" class="see" id="priority-details"><span>${trad('Détails')}</span>${picto('flecheDroite')}</button>
       </div>
     </section>`;
 }
@@ -11015,10 +11184,11 @@ function priorityCardHtml(machine, info) {
 function emptyPriorityCardHtml() {
   return `
     <section class="priority" style="background:var(--dark);">
-      <div class="priority-body">
-        <div class="priority-top"><span class="eyebrow" style="color:var(--dark-ink);">${trad('PROCHAIN ENTRETIEN')}</span></div>
-        <h2>${trad('Rien à signaler')}</h2>
-        <span class="machine-name" style="color:var(--dark-ink);">${UI.machines.length ? trad('Aucune échéance dans les prochaines semaines.') : trad('Aucune machine suivie pour l\'instant.')}</span>
+      <div class="priority-corps">
+        <div class="priority-texte">
+          <div class="priority-top"><span class="priority-eyebrow-pill" style="background:rgba(255,255,255,.12);color:var(--dark-ink);">${trad('PROCHAIN ENTRETIEN')}</span></div>
+          <p class="priority-phrase">${trad('Rien à signaler')} — ${UI.machines.length ? trad('Aucune échéance dans les prochaines semaines.') : trad('Aucune machine suivie pour l\'instant.')}</p>
+        </div>
       </div>
       <div class="priority-actions">
         <button type="button" class="do" id="priority-add">${trad('Ajouter une machine')}</button>
@@ -12515,57 +12685,78 @@ function bonCommandeHtml() {
 // fonctionnalité que l'utilisateur ne trouve pas ne sert à rien — constat fait
 // en usage réel, l'utilisateur ayant demandé où elle était. Cette carte annonce
 // donc l'essentiel dès l'accueil, et renvoie à la liste détaillée.
+// Reprise Stitch « Tableau de bord » (voir keeva-tco-feature) — le mockup
+// groupe l'aperçu PAR FAMILLE (icône + badge « N machines ») plutôt que par
+// produit isolé : réutilise `liste.groupes` (grouperProduits(), déjà calculé
+// pour l'écran Préparation et le texte copié — aucun regroupement inventé
+// ici, ni de nouvelle catégorisation). Les 3 familles de l'exemple du mockup
+// (« Pièces d'usure & Allumage », « Alimentation & Carburation », « Filtres à
+// air ») sont celles de LEUR jeu de données fictif — ici, ce sont les
+// vraies familles présentes (CATEGORIES_PRODUIT), avec leur icône déjà
+// établie (PICTO_CATEGORIE) plutôt qu'un nom/icône inventés pour coller au
+// mockup à l'identique.
+const TEINTES_FAMILLE = ['is-roi', 'is-amber', 'is-ok', 'is-indigo'];
 function preparationResumeHtml() {
   const jours = UI.preparationJours || 90;
   const liste = listePreparation(UI.machines, jours);
   const nombre = liste.produits.length;
   if (!nombre && !liste.sansItems.length) return '';
 
-  // ★ LOT 6 — LE DÉBUT DE LA LISTE, PAS SEULEMENT SON RÉSUMÉ. Trois lignes, dans
-  // l'ordre de la liste complète (la famille la plus urgente d'abord), avec la
-  // quantité totale et la machine concernée : c'est ce que le client veut voir
-  // avant de cliquer, et c'est le MÊME objet que l'écran de préparation emploie —
-  // aucune donnée n'est recalculée ici.
-  const lignes = liste.produits.slice(0, 3).map((produit) => {
-    const famille = categorieProduit(produit.label);
+  const groupes = (liste.groupes || []).slice(0, 3).map((groupe, i) => {
+    const machinesDistinctes = new Set();
+    groupe.produits.forEach((p) => (p.besoins || []).forEach((b) => machinesDistinctes.add(b.machine.id)));
+    const produit = groupe.produits[0];
     const total = produit.total ? formatteTotal(produit.total) : '';
     const besoins = produit.besoins || [];
     const machines = besoins.slice(0, 2).map((b) => esc(b.machine.name)).join(', ');
     const autres = besoins.length > 2 ? tR(' + {n} autre(s)', { n: besoins.length - 2 }) : '';
     return `
-      <div class="prep-ligne famille-${esc(famille)}">
-        <span class="prep-ligne-nom">${esc(produit.label)}</span>
-        ${total ? `<span class="prep-ligne-total">${esc(total)}</span>` : ''}
-        ${machines ? `<span class="prep-ligne-machine">${machines}${autres}</span>` : ''}
+      <div class="prep-famille">
+        <div class="prep-famille-tete">
+          <div class="prep-famille-gauche">
+            <span class="prep-famille-icone ${TEINTES_FAMILLE[i % TEINTES_FAMILLE.length]}">${picto(PICTO_CATEGORIE[groupe.cle] || 'boite')}</span>
+            <span class="prep-famille-nom">${tR('Famille : {nom}', { nom: esc(groupe.nom) })}</span>
+          </div>
+          <span class="prep-famille-badge">${tR('{n} machine(s)', { n: machinesDistinctes.size })}</span>
+        </div>
+        <div class="prep-ligne">
+          <span class="prep-ligne-puce"></span>
+          <span class="prep-ligne-nom">${esc(produit.label)}</span>
+          ${machines ? `<span class="prep-ligne-machine">${tR('· Pour {liste}', { liste: machines + autres })}</span>` : ''}
+          ${total ? `<span class="prep-ligne-total">${esc(total)}</span>` : ''}
+        </div>
       </div>`;
   }).join('');
-  const apercu = lignes ? `<div class="prep-apercu">${lignes}</div>` : '';
   const noms = liste.produits.slice(0, 3).map((p) => p.label).join(', ');
   const reste = nombre > 3 ? tR(', + {n} autre(s)', { n: nombre - 3 }) : '';
   const resume = nombre
-    ? tR('{n} produit(s) à prévoir pour les {jours} prochains jours : {noms}{reste}.', { n: nombre, jours, noms, reste })
+    ? tR('{n} produit(s) à prévoir pour les {jours} prochains jours ({horizon}).', { n: nombre, jours, horizon: trad('consolidation automatique') })
     : tR('Rien à commander pour l\'instant, mais {n} plan(s) sans liste de produits.', { n: liste.sansItems.length });
-  // ★ LOT 4 — LE BLOC « PIÈCES & CONSOMMABLES » DE LA MAQUETTE : le compte en
-  // gras, la phrase telle quelle, et « Voir la liste » vers l'Agenda — qui est
-  // déjà la liste complète, avec ses horizons. « Préparation » reste écrit en
-  // légende : c'est le nom que le produit donne à cette liste depuis toujours.
-  const resumeHtml = esc(resume).replace(/^([^:]+)/, '<strong>$1</strong>');
+  const resumeHtml = esc(resume);
 
   return `
     <section class="card dash-preparation">
       <div class="card-head">
         <div class="pieces-tete">
-          <span class="pieces-legende">${trad('Préparation')}</span>
-          <h2 class="card-title">${trad('Pièces & consommables')}</h2>
+          <span class="card-ico" aria-hidden="true">${picto('boite')}</span>
+          <div>
+            <h2 class="card-title">${trad('Pièces & consommables')}</h2>
+            <p class="muted-text" style="margin:1px 0 0;">${resumeHtml}</p>
+          </div>
         </div>
         <span class="spacer"></span>
         <div class="seg-horizon" role="group" aria-label="${trad('Période')}">
-          ${PREPARATION_HORIZON.map((j) => `<button type="button" class="seg-btn${j === jours ? ' is-active' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${j} j</button>`).join('')}
+          ${PREPARATION_HORIZON.map((j) => `<button type="button" class="seg-btn${j === jours ? ' is-active' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${j} j${j === jours ? ` (${trad('Actif')})` : ''}</button>`).join('')}
         </div>
       </div>
-      <p class="muted-text">${resumeHtml}</p>
-      ${apercu}
-      <div class="prep-pied"><button type="button" class="link-inline" data-nav="agenda">${trad('Voir la liste')} →</button></div>
+      ${groupes ? `<div class="prep-groupes-liste">${groupes}</div>` : ''}
+      <div class="prep-pied">
+        <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
+        <div class="prep-pied-actions">
+          <button type="button" class="link-inline" data-nav="agenda">${tR('Voir la liste complète ({n}) →', { n: nombre })}</button>
+          <button type="button" class="prep-copier-btn" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button>
+        </div>
+      </div>
     </section>`;
 }
 
@@ -13365,13 +13556,32 @@ function tcoClassementFlotteHtml() {
 // VIEWS.tco : chaque vue fait son propre fetch à son montage, pas de cache
 // partagé entre pages (cohérent avec le reste de l'app, ex. l'historique
 // d'une fiche machine est toujours rechargé à l'ouverture).
+// Reprise Stitch « Tableau de bord » (voir keeva-tco-feature) — widget très
+// enrichi par rapport à la carte précédente (donut + 2 chiffres). Chaque
+// nouveau chiffre réutilise une fonction pure déjà écrite pour la page
+// Coûts & TCO (tendanceRatioMoyenFlotte, machinesAuDessusSeuilCategorie,
+// categorieTcoAMettreEnAvant) — jamais un calcul dupliqué qui pourrait
+// diverger. Le mockup compare le coût horaire à UN seuil unique
+// (« < Seuil 6 500 FCFP ») : impossible ici honnêtement, les seuils sont
+// PAR CATÉGORIE (§5) — remplacé par le compte réel de machines au-dessus de
+// LEUR seuil, et la carte « catégorie à surveiller » (bloc 3) porte le
+// seuil concret d'UNE catégorie réelle, jamais une comparaison globale
+// inventée.
 function tcoDashboardCarteHtml() {
+  const tauxActif = UI.company?.labor_hourly_rate != null;
   return `
     <section class="card" id="tco-dashboard-carte">
       <div class="card-head">
-        <h2 class="card-title">${trad('Suivi TCO')}</h2>
+        <span class="card-ico is-roi" aria-hidden="true">${picto('argent')}</span>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <h2 class="card-title" style="margin:0;">${trad('Suivi TCO & Rentabilité')}</h2>
+            <span class="tco-dash-pill">${trad('Temps réel')}</span>
+          </div>
+          <span class="tco-dash-sous">${tauxActif ? trad('Basé sur le barème atelier actif') : trad('Taux horaire non renseigné')}</span>
+        </div>
         <span class="spacer"></span>
-        <button type="button" class="link-inline" data-nav="tco">${trad('Voir le détail')}</button>
+        <button type="button" class="link-inline" data-nav="tco">${trad('Détail')}</button>
       </div>
       <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
     </section>`;
@@ -13398,13 +13608,66 @@ async function chargerCarteTcoDashboard(root) {
   if (!root.isConnected || !carte.isConnected) return;
   if (!flotte) { carte.remove(); return; }
   if (valueEl) valueEl.remove();
+
+  const tauxActif = UI.company?.labor_hourly_rate != null;
+  const coutHoraireValeurs = flotte.lignes.map((l) => l.tco.coutParUnite).filter((v) => v != null);
+  const coutHoraireMoyen = coutHoraireValeurs.length ? coutHoraireValeurs.reduce((s, v) => s + v, 0) / coutHoraireValeurs.length : null;
+  const auDessusSeuil = machinesAuDessusSeuilCategorie(flotte);
+  const coutHoraireEtat = auDessusSeuil.length > 0 ? 'late' : 'ok';
+  const tendance = tendanceRatioMoyenFlotte(flotte);
+  const spotlight = categorieTcoAMettreEnAvant(flotte);
+  // Unité (h/km) : celle d'une vraie machine de cette catégorie — jamais
+  // supposée, prise sur la première trouvée.
+  const machineSpotlight = spotlight ? flotte.lignes.find((l) => l.machine.category?.id === spotlight.categorie.id)?.machine : null;
+  const uniteCourteSpotlight = machineSpotlight ? counterShort(counterUnitOf(machineSpotlight)) : 'h';
+
   carte.insertAdjacentHTML('beforeend', `
-    <div class="tco-carte-dashboard-corps">
-      ${repartition ? donutTcoSvgHtml(repartition, 64) : ''}
-      <div>
-        <div class="tco-classement-chiffre"><span class="label">${trad('TCO moyen')}</span><span class="value">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
-        <div class="tco-classement-chiffre" style="margin-top:8px;"><span class="label">${trad('En alerte')}</span><span class="value${flotte.nbAlertes ? ' is-alerte' : ''}">${flotte.nbAlertes ? tR('{n} machine(s)', { n: flotte.nbAlertes }) : trad('Aucune')}</span></div>
+    <div class="tco-dash-metriques">
+      <div class="tco-dash-metrique">
+        <span class="label">${trad('TCO Moyen Annuel')}</span>
+        <div class="valeur-ligne"><span class="valeur">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
+        <span class="tco-dash-tendance ${tendance.etat}">${picto(tendance.icone)}<span>${tendance.label}</span></span>
       </div>
+      <div class="tco-dash-metrique">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span class="label">${trad('Coût Horaire')}</span>
+          <span class="tco-dash-dot ${coutHoraireEtat}" title="${esc(coutHoraireEtat === 'ok' ? trad('Optimal') : trad('À surveiller'))}"></span>
+        </div>
+        <div class="valeur-ligne"><span class="valeur">${coutHoraireMoyen != null ? formatMontant(Math.round(coutHoraireMoyen)) : '—'}</span></div>
+        <span class="tco-dash-tendance ${coutHoraireEtat}">${auDessusSeuil.length > 0 ? tR('{n} machine(s) au-dessus du seuil', { n: auDessusSeuil.length }) : trad('Aucune machine au-dessus du seuil')}</span>
+      </div>
+    </div>
+    ${repartition ? `
+    <div class="tco-dash-repartition">
+      <div class="tco-dash-repartition-tete">
+        <span class="tco-dash-repartition-titre">${trad('Répartition réelle des charges')}</span>
+        <span class="tco-dash-repartition-total">${tR('{montant} cumulés', { montant: formatMontant(repartition.total) })}</span>
+      </div>
+      <div class="tco-donut-barre">
+        <span style="width:${repartition.pctPieces}%;background:var(--bleu-roi);"></span>
+        <span style="width:${repartition.pctMainOeuvre}%;background:var(--ok);"></span>
+        <span style="width:${repartition.pctFixes}%;background:var(--late);"></span>
+      </div>
+      <div class="tco-dash-legende">
+        <span><span class="rond" style="background:var(--bleu-roi);"></span>${tR('Pièces {n}%', { n: Math.round(repartition.pctPieces) })}</span>
+        <span><span class="rond" style="background:var(--ok);"></span>${tR('M.O. {n}% ({h}h)', { n: Math.round(repartition.pctMainOeuvre), h: Math.round(repartition.heures) })}</span>
+        <span><span class="rond" style="background:var(--late);"></span>${tR('Fixes {n}%', { n: Math.round(repartition.pctFixes) })}</span>
+      </div>
+    </div>` : ''}
+    ${spotlight ? `
+    <div class="tco-dash-spotlight">
+      <div class="tco-dash-spotlight-gauche">
+        <span class="tco-dash-spotlight-icone">${picto(iconeCategorieMachine(spotlight.categorie.name))}</span>
+        <div>
+          <span class="nom">${esc(spotlight.categorie.name)}</span>
+          <span class="sous">${tR('Seuil cible max. : {seuil}/{unite}', { seuil: formatMontant(Number(spotlight.categorie.target_hourly_cost)), unite: uniteCourteSpotlight || 'h' })}</span>
+        </div>
+      </div>
+      <span class="pill ${spotlight.ecart > 0 ? 'late' : 'ok'}">${spotlight.ecart > 0 ? trad('À surveiller') : trad('Optimal')}</span>
+    </div>` : ''}
+    <div class="tco-dash-note">
+      <span class="gauche"><span class="dot ${auDessusSeuil.length > 0 ? 'late' : 'ok'}"></span>${tR('{n} machine(s) au-dessus du seuil cible', { n: auDessusSeuil.length })}</span>
+      <span class="droite">${tauxActif ? tR('Taux M.O : {taux}/h', { taux: formatMontant(UI.company.labor_hourly_rate) }) : trad('Taux M.O. non renseigné')}</span>
     </div>`);
 }
 // Une ligne = un item compact (icône + désignation/référence à gauche, prix
@@ -13702,9 +13965,9 @@ VIEWS.tco = {
         // Sous-ligne du KPI 1 : reformule le MÊME ratio moyen déjà calculé
         // (flotte.ratioMoyen), jamais un jugement inventé séparé — le
         // mockup affiche un texte qualitatif fixe, ici c'est un vrai signal.
-        const ratioEtatMoyen = flotte.ratioMoyen != null ? etatTco(flotte.ratioMoyen) : 'ok';
-        const RATIO_LABEL_MOYEN = { ok: trad('Ratio moyen sain'), soon: trad('Ratio à surveiller'), late: trad('Ratio élevé') }[ratioEtatMoyen];
-        const RATIO_ICONE_MOYEN = { ok: 'flecheBas', soon: 'chevron', late: 'flecheHaut' }[ratioEtatMoyen];
+        // Factorisée (tendanceRatioMoyenFlotte) : réutilisée telle quelle par
+        // le widget TCO du tableau de bord, jamais deux libellés divergents.
+        const tendanceRatio = tendanceRatioMoyenFlotte(flotte);
         const alerteEtat = flotte.nbAlertes > 0 ? 'late' : 'ok';
 
         section.insertAdjacentHTML('beforeend', `
@@ -13715,7 +13978,7 @@ VIEWS.tco = {
                 <div class="tco-clst-kpi-icone is-roi">${picto('argent')}</div>
               </div>
               <div class="valeur-ligne"><span class="valeur">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
-              <div class="tco-clst-kpi-sub ${ratioEtatMoyen}">${picto(RATIO_ICONE_MOYEN)}<span>${RATIO_LABEL_MOYEN}</span></div>
+              <div class="tco-clst-kpi-sub ${tendanceRatio.etat}">${picto(tendanceRatio.icone)}<span>${tendanceRatio.label}</span></div>
             </div>
             <div class="tco-clst-kpi-carte">
               <div class="tco-clst-kpi-tete">
