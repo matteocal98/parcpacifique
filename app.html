@@ -2019,6 +2019,12 @@
   .choix-info-box p{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);}
   #choix-enregistrer{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   #choix-enregistrer svg{width:16px;height:16px;flex:0 0 auto;display:block;}
+  /* openLogOperatingCostModal (choix-modal) : même gotcha récurrent qu'à
+     chaque nouvel emplacement d'icône — sans cette règle, le picto()
+     ajouté au bouton Enregistrer hérite du rendu SVG par défaut du
+     navigateur et gonfle tout le bouton. */
+  #oc-modal-enregistrer{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  #oc-modal-enregistrer svg{width:16px;height:16px;flex:0 0 auto;display:block;}
   .choix-modal .modal-actions #choix-annuler{
     color:var(--primary-dark);background:var(--primary-tint);border-color:var(--primary-tint-2);
   }
