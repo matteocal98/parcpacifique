@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NW2eaodidOlVv3JVn73fVP3OM5FKWNboPTx0DDTCAlo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-7HxAs/NVAcNx1zfQCLXY1RcDQvVCQ3xhieLtH4IzOA8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3915,6 +3915,100 @@
      de l'Agenda (dans #echeances-zone) — même reset de marge sur la 1ʳᵉ carte. */
   #echeances-zone .chrono-carte:first-of-type{margin-top:0;}
   .echeances-compte{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ AGENDA — reprise « grille mensuelle » (round 2). Toolbar (vues Mois/
+     Semaine/Liste, navigateur de mois, pastilles de statut réutilisant
+     .parc-pill), grille de 42 cases (agendaMoisGrille), carte « Surveillance
+     au compteur » (jauge identique à .mstrip-jauge-part, voir la note sur
+     display:block plus bas — même bug déjà rencontré, évité ici d'emblée).
+     ══════════════════════════════════════════════════════════════════════════ */
+  .agenda-outils{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 16px;}
+  .agenda-vues{flex:0 0 auto;}
+  .agenda-nav{display:flex;align-items:center;gap:4px;flex:0 0 auto;}
+  .agenda-nav-btn{width:36px;height:36px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-2);cursor:pointer;padding:0;}
+  .agenda-nav-btn svg{width:18px;height:18px;}
+  .agenda-nav-btn.is-prev svg{transform:rotate(90deg);}
+  .agenda-nav-btn.is-next svg{transform:rotate(-90deg);}
+  .agenda-nav-label{min-width:140px;text-align:center;font-weight:700;font-size:14.5px;font-family:'Space Grotesk',sans-serif;}
+  .agenda-nav-today{height:36px;padding:0 12px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;}
+  .agenda-pills{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;}
+  .agenda-pills-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-right:2px;}
+
+  /* minmax(0,1fr), pas 1fr seul : une piste 1fr garde un minimum "auto" (la
+     largeur max-content de son contenu) — un badge ou un nom de machine qui
+     ne se coupe pas force alors la colonne plus large que l'espace
+     disponible et fait déborder la grille horizontalement (vu à 375px). */
+  .agenda-semaine-noms{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:8px;}
+  .agenda-semaine-noms span{text-align:center;font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;}
+  .agenda-grille{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;}
+  .agenda-jour{
+    min-width:0;min-height:112px;padding:8px;border-radius:var(--r-md);background:var(--surface-soft);
+    display:flex;flex-direction:column;gap:5px;border:1px solid transparent;
+  }
+  .agenda-jour.is-hors-mois{opacity:.35;}
+  .agenda-jour.is-weekend{background:rgba(14,19,51,.02);}
+  .agenda-jour-tete{display:flex;align-items:center;justify-content:space-between;}
+  .agenda-jour-num{font-weight:700;font-size:13.5px;font-family:'Space Grotesk',sans-serif;}
+  .agenda-jour.is-aujourdhui .agenda-jour-num{color:var(--primary-dark);}
+  .agenda-jour-ajout{width:20px;height:20px;border:none;background:none;color:var(--ink-3);opacity:0;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease;}
+  .agenda-jour-ajout svg{width:14px;height:14px;}
+  .agenda-jour:hover .agenda-jour-ajout{opacity:1;}
+  .agenda-jour.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.3);}
+  .agenda-jour.is-soon{background:var(--soon-bg);border-color:rgba(99,102,241,.25);}
+  .agenda-jour.is-ok{background:var(--ok-bg);border-color:rgba(36,181,168,.25);}
+  .agenda-evt{
+    display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:5px 6px;
+    border-radius:8px;background:var(--surface);border:1px solid var(--line);cursor:pointer;text-align:left;font-family:inherit;
+  }
+  .agenda-evt-nom{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .agenda-evt-tache{font-size:10.5px;color:var(--ink-2);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+  .agenda-evt-badge{font-size:9.5px;padding:2px 6px;}
+  .agenda-jour-plus{font-size:10.5px;font-weight:700;color:var(--ink-3);}
+
+  .agenda-legende{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2);}
+  .agenda-legende-item{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink-2);}
+  .agenda-legende-item .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
+  .agenda-pills .dot{width:8px;height:8px;border-radius:50%;}
+
+  @media (max-width:640px){
+    .agenda-jour{min-height:76px;padding:6px;}
+    .agenda-evt-tache{display:none;}
+    .agenda-nav-label{min-width:auto;font-size:13px;}
+  }
+
+  /* Carte « Surveillance au compteur » : même jauge que .mstrip-jauge-part
+     (bandeau Parc), avec le display:block explicite d'emblée — cette classe
+     a été le bug trouvé et corrigé ailleurs (span inline ignorant width). */
+  .agenda-surveillance{display:flex;flex-direction:column;gap:12px;}
+  .agenda-surv-liste{display:flex;flex-direction:column;gap:14px;}
+  .agenda-surv-item{padding:12px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:8px;}
+  .agenda-surv-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .agenda-surv-mots{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .agenda-surv-nom{font-weight:700;font-size:13.5px;}
+  .agenda-surv-reste{font-size:12px;font-weight:600;color:var(--ink-2);}
+  .agenda-surv-reste.is-late{color:var(--late);}
+  .agenda-surv-reste.is-soon{color:var(--soon);}
+  .agenda-surv-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
+  .agenda-surv-part{display:block;height:100%;min-width:4px;border-radius:var(--r-pill);}
+  .agenda-surv-part.is-late{background:var(--late);}
+  .agenda-surv-part.is-soon{background:var(--soon);}
+  .agenda-surv-part.is-ok{background:var(--ok);}
+  .agenda-surv-meta{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--ink-3);font-family:'Space Grotesk',sans-serif;font-feature-settings:"tnum" 1;}
+  .agenda-surv-cta{width:100%;justify-content:center;}
+
+  .agenda-pieces-bloc{display:flex;flex-direction:column;}
+  .agenda-pieces-detail-toggle{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:700;align-self:flex-start;}
+  .agenda-pieces-detail-toggle[aria-expanded="true"] .prep-groupes-chevron svg{transform:rotate(180deg);}
+  .agenda-pieces-detail{display:flex;flex-direction:column;gap:16px;margin-top:12px;}
+
+  .agenda-choix-liste{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;margin-top:10px;}
+  .agenda-choix-machine{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;
+    border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);text-align:left;min-height:44px;
+  }
+  .agenda-choix-machine:hover{background:var(--surface-soft);}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ RAPPELS (maquette Stitch « WEB rappel » / « mobile rappel »)
@@ -13219,70 +13313,387 @@ function wireChronologie(root) {
   }));
 }
 
+// ── Agenda : calendrier mensuel réel ─────────────────────────────────────
+// Reprise Stitch « WEB agenda » (grille mensuelle + colonne latérale) — voir
+// keeva-tco-feature pour le détail. Base commune à la grille (Mois/Semaine)
+// ET à la liste chronologique déjà en prod : `agendaEvenements()` reste
+// l'unique calcul des échéances, jamais dupliqué entre les deux affichages.
+// EXCLU DÉLIBÉRÉMENT (aucune donnée réelle derrière, comme documenté plus
+// haut pour l'ancienne version de cet écran) : les machines AU COMPTEUR
+// (heures/km) ne sont JAMAIS placées sur une case du calendrier — leur
+// échéance n'a justement pas de date réelle à y afficher (le mockup le fait,
+// en inventant une date de calendrier pour une échéance qui n'en a pas :
+// pas repris) ; elles vivent uniquement dans la carte « Surveillance au
+// compteur ». Pas de contrôle « VGP », pas de bandeau de rythme d'usage
+// prédictif (aucun historique de relevé compteur n'est tracé pour le
+// calculer honnêtement — voir le plan TCO phase 3, §2) : ni l'un ni l'autre
+// n'existe dans le produit.
+function agendaEvenements() {
+  const dated = UI.machines
+    .filter(m => m.plan && !planIsCounter(m.plan) && m.plan.next_due_at)
+    .map(m => ({ m, info: dueInfo(m.plan, m) }));
+  const counters = UI.machines
+    .filter(m => m.plan && planIsCounter(m.plan))
+    .map(m => ({ m, info: dueInfo(m.plan, m) }))
+    .sort((a, b) => a.info.sortKey - b.info.sortKey);
+  return { dated, counters };
+}
+function agendaVueActive() { return UI.agendaVue || 'mois'; }
+function agendaStatutActif() { return UI.agendaStatut || 'tous'; }
+function agendaRefIso() { return UI.agendaRefIso || todayIso(); }
+
+// Lundi de la semaine contenant `iso` — même convention que la grille
+// (Lun→Dim), affichée dans le mockup fourni.
+function agendaDebutSemaine(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number);
+  const jsDay = new Date(y, m - 1, d).getDay();
+  return addDaysIso(iso, -((jsDay + 6) % 7));
+}
+// 42 jours (6 semaines) : une grille de hauteur CONSTANTE d'un mois à
+// l'autre, que le mois commence un lundi ou compte 5 vs 6 semaines visibles.
+function agendaMoisGrille(refIso) {
+  const cible = String(refIso).slice(0, 7);
+  const debut = agendaDebutSemaine(`${cible}-01`);
+  return Array.from({ length: 42 }, (_, i) => {
+    const iso = addDaysIso(debut, i);
+    return { iso, dansLeMois: iso.slice(0, 7) === cible, weekend: i % 7 >= 5 };
+  });
+}
+function agendaSemaineGrille(refIso) {
+  const debut = agendaDebutSemaine(refIso);
+  return Array.from({ length: 7 }, (_, i) => ({ iso: addDaysIso(debut, i), dansLeMois: true, weekend: i >= 5 }));
+}
+// Échéances datées, groupées par jour ISO exact — une seule passe, réutilisée
+// par la grille mensuelle et la grille hebdomadaire.
+function agendaParJour(datedFiltres) {
+  const map = new Map();
+  datedFiltres.forEach((entree) => {
+    const iso = entree.m.plan.next_due_at;
+    if (!map.has(iso)) map.set(iso, []);
+    map.get(iso).push(entree);
+  });
+  return map;
+}
+
+const AGENDA_JOUR_MAX = 2;
+function agendaEvenementMiniHtml(m, info) {
+  const tache = nextTaskLabel(m);
+  return `
+    <button type="button" class="agenda-evt is-${info.state}" data-machine-id="${esc(m.id)}" title="${esc(info.label)}">
+      <span class="agenda-evt-nom">${esc(m.name)}</span>
+      ${tache ? `<span class="agenda-evt-tache">${esc(tache)}</span>` : ''}
+      <span class="badge ${badgeClass(info.state)} agenda-evt-badge">${badgeLabel(info.state)}</span>
+    </button>`;
+}
+function agendaJourHtml(jour, evenements) {
+  const jourNum = jour.iso.slice(8, 10);
+  const classes = ['agenda-jour'];
+  if (!jour.dansLeMois) classes.push('is-hors-mois');
+  else if (jour.weekend) classes.push('is-weekend');
+  if (jour.iso === todayIso()) classes.push('is-aujourdhui');
+  if (evenements.length) classes.push(`is-${evenements[0].info.state}`);
+  const visibles = evenements.slice(0, AGENDA_JOUR_MAX);
+  const reste = evenements.length - visibles.length;
+  return `
+    <div class="${classes.join(' ')}">
+      <div class="agenda-jour-tete">
+        <span class="agenda-jour-num">${jourNum}</span>
+        ${jour.dansLeMois && !evenements.length ? `<button type="button" class="agenda-jour-ajout" data-jour-ajout="${esc(jour.iso)}" aria-label="${esc(trad('Planifier un entretien'))}">${picto('croix')}</button>` : ''}
+      </div>
+      ${visibles.map(({ m, info }) => agendaEvenementMiniHtml(m, info)).join('')}
+      ${reste > 0 ? `<span class="agenda-jour-plus">${esc(tR('+ {n} autre(s)', { n: reste }))}</span>` : ''}
+    </div>`;
+}
+function agendaGrilleHtml(jours, parJour) {
+  const noms = [trad('Lun'), trad('Mar'), trad('Mer'), trad('Jeu'), trad('Ven'), trad('Sam'), trad('Dim')];
+  return `
+    <div class="agenda-semaine-noms">${noms.map((n) => `<span>${esc(n)}</span>`).join('')}</div>
+    <div class="agenda-grille">${jours.map((j) => agendaJourHtml(j, parJour.get(j.iso) || [])).join('')}</div>`;
+}
+function agendaLegendeHtml() {
+  return `
+    <div class="agenda-legende">
+      <div class="agenda-legende-item"><span class="dot" style="background:var(--late);"></span>${trad('En retard')}</div>
+      <div class="agenda-legende-item"><span class="dot" style="background:var(--soon);"></span>${trad('Échéance sous 15 jours')}</div>
+      <div class="agenda-legende-item"><span class="dot" style="background:var(--ok);"></span>${trad('À jour')}</div>
+    </div>`;
+}
+function agendaPillsHtml() {
+  const { dated, counters } = agendaEvenements();
+  const tous = [...dated, ...counters];
+  const compte = (statut) => (statut === 'tous' ? tous.length : tous.filter((e) => e.info.state === statut).length);
+  const actif = agendaStatutActif();
+  const pill = (statut, label, teinte) => {
+    const active = actif === statut;
+    const dot = teinte ? `<span class="dot" style="background:var(--${teinte});"></span>` : '';
+    return `<button type="button" class="parc-pill${active ? ' is-active' : ''}" data-agenda-statut="${statut}" aria-pressed="${active}">${dot}<span>${esc(label)}</span><span class="compte">${compte(statut)}</span></button>`;
+  };
+  return `
+    <div class="agenda-pills">
+      <span class="agenda-pills-label">${trad('Statut :')}</span>
+      ${pill('tous', trad('Tous'), null)}${pill('late', trad('En retard'), 'late')}${pill('soon', trad('Bientôt'), 'soon')}${pill('ok', trad('À jour'), 'ok')}
+    </div>`;
+}
+function agendaNavHtml() {
+  const ref = agendaRefIso();
+  const vue = agendaVueActive();
+  const [y, m] = ref.split('-').map(Number);
+  const labelMois = `${moisLong(m - 1)} ${y}`;
+  const debutSemaine = agendaDebutSemaine(ref);
+  const labelSemaine = `${formatShortDate(debutSemaine)} – ${formatShortDate(addDaysIso(debutSemaine, 6))}`;
+  return `
+    <div class="agenda-outils">
+      <div class="agenda-vues seg-horizon" role="group" aria-label="${trad('Affichage')}">
+        <button type="button" class="seg-btn${vue === 'mois' ? ' is-active' : ''}" data-agenda-vue="mois">${trad('Mois')}</button>
+        <button type="button" class="seg-btn${vue === 'semaine' ? ' is-active' : ''}" data-agenda-vue="semaine">${trad('Semaine')}</button>
+        <button type="button" class="seg-btn${vue === 'liste' ? ' is-active' : ''}" data-agenda-vue="liste">${trad('Liste chronologique')}</button>
+      </div>
+      ${vue !== 'liste' ? `
+      <div class="agenda-nav">
+        <button type="button" class="agenda-nav-btn is-prev" id="agenda-prev" aria-label="${esc(trad(vue === 'mois' ? 'Mois précédent' : 'Semaine précédente'))}">${picto('chevron')}</button>
+        <span class="agenda-nav-label">${esc(vue === 'mois' ? labelMois : labelSemaine)}</span>
+        <button type="button" class="agenda-nav-btn is-next" id="agenda-next" aria-label="${esc(trad(vue === 'mois' ? 'Mois suivant' : 'Semaine suivante'))}">${picto('chevron')}</button>
+        <button type="button" class="agenda-nav-today" id="agenda-today">${trad('Aujourd\'hui')}</button>
+      </div>` : ''}
+      ${agendaPillsHtml()}
+    </div>`;
+}
+// Liste chronologique : la vue d'origine (une carte par échéance, groupées
+// par mois), désormais aussi filtrable par statut — elle ne l'était pas.
+function agendaListeHtml(datedFiltres, countersFiltres) {
+  if (!datedFiltres.length && !countersFiltres.length) {
+    return `<div class="empty">${trad('Aucune échéance ne correspond à ce filtre.')}</div>`;
+  }
+  const moisMois = (iso) => {
+    const mi = Number(String(iso).slice(5, 7)) - 1;
+    return moisLong(mi) ? `${moisLong(mi)} ${String(iso).slice(0, 4)}` : trad('Date inconnue');
+  };
+  const sorted = [...datedFiltres].sort((a, b) => (a.m.plan.next_due_at < b.m.plan.next_due_at ? -1 : 1));
+  const moisComptes = new Map();
+  sorted.forEach(({ m }) => {
+    const mois = moisMois(m.plan.next_due_at);
+    moisComptes.set(mois, (moisComptes.get(mois) || 0) + 1);
+  });
+  let currentMonth = '';
+  const datedHtml = sorted.map(({ m, info }) => {
+    const mois = moisMois(m.plan.next_due_at);
+    const header = mois !== currentMonth
+      ? `<div class="agenda-month"><span>${esc(mois)}</span><span class="agenda-month-compte">${tR('{n} intervention(s)', { n: moisComptes.get(mois) })}</span></div>`
+      : '';
+    currentMonth = mois;
+    return header + chronologieCarteHtml(m, info);
+  }).join('');
+  return `
+    ${datedHtml}
+    ${countersFiltres.length ? `
+    ${sorted.length ? `<div class="agenda-souscompteur"><span class="card-ico">${picto('compteur')}</span><span>${trad('Suivi au compteur')}</span></div>` : ''}
+    ${countersFiltres.map(({ m, info }) => chronologieCarteHtml(m, info)).join('')}` : ''}`;
+}
+function agendaContenuHtml() {
+  const vue = agendaVueActive();
+  const statut = agendaStatutActif();
+  const { dated, counters } = agendaEvenements();
+  const passe = (info) => statut === 'tous' || info.state === statut;
+  const datedFiltres = dated.filter(({ info }) => passe(info));
+  const countersFiltres = counters.filter(({ info }) => passe(info));
+  if (vue === 'liste') return agendaListeHtml(datedFiltres, countersFiltres);
+  const ref = agendaRefIso();
+  const jours = vue === 'semaine' ? agendaSemaineGrille(ref) : agendaMoisGrille(ref);
+  return agendaGrilleHtml(jours, agendaParJour(datedFiltres)) + agendaLegendeHtml();
+}
+
+// Carte « Surveillance au compteur » : les échéances SANS date (heures/km),
+// séparées du calendrier pour la raison expliquée plus haut. Même jauge que
+// le bandeau Parc (pourcentageIntervalle, déjà réel et vérifié) — jamais un
+// second calcul de pourcentage.
+function agendaSurveillanceHtml(counters) {
+  if (!counters.length) return '';
+  const item = ({ m, info }) => {
+    const part = pourcentageIntervalle(info, m) ?? 0;
+    const unit = counterUnitOf(m);
+    return `
+      <div class="agenda-surv-item">
+        <div class="agenda-surv-tete">
+          <div class="agenda-surv-mots">
+            <span class="agenda-surv-nom">${esc(m.name)}</span>
+            <span class="agenda-surv-reste is-${info.state}">${esc(info.label)}</span>
+          </div>
+          <span class="pill ${info.state === 'late' ? 'late' : info.state === 'soon' ? 'soon' : 'ok'}">${part}%</span>
+        </div>
+        <div class="agenda-surv-piste"><div class="agenda-surv-part is-${info.state}" style="width:${part}%"></div></div>
+        <div class="agenda-surv-meta">
+          <span>${esc(tR('Relevé actuel : {v}', { v: formatCounter(machineCounter(m), unit) }))}</span>
+          <span>${esc(tR('Palier cible : {v}', { v: formatCounter(planNextDueCounter(m.plan), unit) }))}</span>
+        </div>
+      </div>`;
+  };
+  return `
+    <section class="card agenda-surveillance">
+      <div class="card-head"><h2 class="card-title-sm"><span class="card-ico card-ico-plein">${picto('compteur')}</span><span>${trad('Surveillance au compteur')}</span></h2></div>
+      <p class="muted-text">${trad('Prédictions sans date de calendrier fixe : ces machines sont suivies à l\'usage, pas au mois.')}</p>
+      <div class="agenda-surv-liste">${counters.map(item).join('')}</div>
+      <button type="button" class="primary agenda-surv-cta" data-nav="machines">${picto('croix')}<span>${trad('Saisir un relevé compteur')}</span></button>
+    </section>`;
+}
+// Le détail complet (préparation par produit, export CSV, bon de commande)
+// reste entièrement accessible, replié par défaut sous la carte compacte —
+// aucune fonctionnalité perdue en adoptant la carte condensée du mockup.
+function agendaPiecesDetailToggleHtml() {
+  const ouvert = !!UI.agendaPiecesDetail;
+  return `
+    <button type="button" class="link-inline agenda-pieces-detail-toggle" id="agenda-pieces-detail-toggle" aria-expanded="${ouvert}">
+      <span class="card-ico prep-groupes-chevron">${picto('chevron')}</span>
+      <span>${ouvert ? trad('Réduire le détail') : trad('Détail complet, export et bon de commande')}</span>
+    </button>
+    ${ouvert ? `<div class="agenda-pieces-detail">
+      <button type="button" class="secondary" id="prep-export"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter la liste (CSV)')}</span></button>
+      ${preparationHtml()}${bonCommandeHtml()}
+    </div>` : ''}`;
+}
+
+// « Planifier un entretien » n'a pas d'existence indépendante d'une machine
+// dans le modèle de données (aucun évènement de calendrier autonome) :
+// l'échéance affichée vient TOUJOURS du plan de maintenance d'une machine
+// précise. Cette fenêtre choisit laquelle, puis ouvre sa fiche — là où
+// l'échéance se règle réellement.
+function ouvrirChoixMachinePourPlan() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const machines = [...UI.machines].sort((a, b) => a.name.localeCompare(b.name));
+  const ligneHtml = (m) => {
+    const info = infoMachine(m);
+    return `<button type="button" class="agenda-choix-machine" data-machine-id="${esc(m.id)}">
+      <span class="agenda-choix-nom">${esc(m.name)}</span>
+      <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+    </button>`;
+  };
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>${trad('Planifier un entretien')}</h2>
+      <p class="sub">${trad('Choisis la machine : sa fiche ouvre directement son plan de maintenance.')}</p>
+      <div class="agenda-choix-liste">${machines.length ? machines.map(ligneHtml).join('') : `<p class="muted-text">${trad('Aucune machine enregistrée.')}</p>`}</div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="agenda-choix-fermer">${trad('Fermer')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#agenda-choix-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelectorAll('[data-machine-id]').forEach((btn) => btn.addEventListener('click', () => {
+    const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
+    overlay.remove();
+    if (m) openPlanView(m, UI.companyId, UI.categories);
+  }));
+}
+
+// Export .ics : un événement par échéance DATÉE (jamais les machines au
+// compteur, qui n'ont justement pas de date à exporter) — même esprit que
+// l'export CSV de préparation déjà en place, aucune dépendance externe.
+function planningIcsTexte() {
+  const { dated } = agendaEvenements();
+  const pad = (n) => String(n).padStart(2, '0');
+  const d = new Date();
+  const horodatage = `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+  const echapper = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  const lignes = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//KEEVA//Agenda//FR', 'CALSCALE:GREGORIAN'];
+  dated.forEach(({ m, info }) => {
+    const iso = m.plan.next_due_at;
+    const dateEvt = iso.replace(/-/g, '');
+    const dateFin = addDaysIso(iso, 1).replace(/-/g, '');
+    lignes.push(
+      'BEGIN:VEVENT',
+      `UID:${m.id}-${dateEvt}@keeva.work`,
+      `DTSTAMP:${horodatage}`,
+      `DTSTART;VALUE=DATE:${dateEvt}`,
+      `DTEND;VALUE=DATE:${dateFin}`,
+      `SUMMARY:${echapper(`${m.name} — ${nextTaskLabel(m)}`)}`,
+      `DESCRIPTION:${echapper(info.label)}`,
+      'END:VEVENT',
+    );
+  });
+  lignes.push('END:VCALENDAR');
+  return lignes.join('\r\n');
+}
+function telechargerPlanningIcs() {
+  const { dated } = agendaEvenements();
+  if (!dated.length) { showToast(trad('Aucune échéance datée à exporter.')); return; }
+  const blob = new Blob([planningIcsTexte()], { type: 'text/calendar;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'planning-keeva.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function wireAgenda(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-agenda-vue]').forEach((btn) => btn.addEventListener('click', () => {
+    UI.agendaVue = btn.dataset.agendaVue;
+    renderApp();
+  }));
+  root.querySelectorAll('[data-agenda-statut]').forEach((btn) => btn.addEventListener('click', () => {
+    UI.agendaStatut = btn.dataset.agendaStatut;
+    renderApp();
+  }));
+  root.querySelector('#agenda-prev')?.addEventListener('click', () => {
+    UI.agendaRefIso = agendaVueActive() === 'semaine' ? addDaysIso(agendaRefIso(), -7) : addMonthsIso(agendaRefIso(), -1);
+    renderApp();
+  });
+  root.querySelector('#agenda-next')?.addEventListener('click', () => {
+    UI.agendaRefIso = agendaVueActive() === 'semaine' ? addDaysIso(agendaRefIso(), 7) : addMonthsIso(agendaRefIso(), 1);
+    renderApp();
+  });
+  root.querySelector('#agenda-today')?.addEventListener('click', () => {
+    UI.agendaRefIso = todayIso();
+    renderApp();
+  });
+  root.querySelectorAll('.agenda-evt').forEach((btn) => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
+    if (m) openPlanView(m, UI.companyId, UI.categories);
+  }));
+  root.querySelectorAll('[data-jour-ajout]').forEach((btn) => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    ouvrirChoixMachinePourPlan();
+  }));
+  root.querySelector('#agenda-planifier')?.addEventListener('click', ouvrirChoixMachinePourPlan);
+  root.querySelector('#agenda-export-ics')?.addEventListener('click', telechargerPlanningIcs);
+  root.querySelector('#agenda-pieces-detail-toggle')?.addEventListener('click', () => {
+    UI.agendaPiecesDetail = !UI.agendaPiecesDetail;
+    renderApp();
+  });
+}
+
 VIEWS.agenda = {
   title: trad('Agenda'),
   subtitle: () => trad('Échéances datées et compteurs à surveiller'),
   render() {
-    const dated = UI.machines
-      .filter(m => m.plan && !planIsCounter(m.plan) && m.plan.next_due_at)
-      .map(m => ({ m, info: dueInfo(m.plan, m) }))
-      .sort((a, b) => (a.m.plan.next_due_at < b.m.plan.next_due_at ? -1 : 1));
-
-    const counters = UI.machines
-      .filter(m => m.plan && planIsCounter(m.plan))
-      .map(m => ({ m, info: dueInfo(m.plan, m) }))
-      .sort((a, b) => a.info.sortKey - b.info.sortKey);
-
+    const { dated, counters } = agendaEvenements();
     if (!dated.length && !counters.length) {
       return `<div class="empty">${trad('Aucune échéance enregistrée. Renseigne un plan de maintenance sur une machine.')}</div>`;
     }
-
-    // Le décompte par mois se lit d'un coup d'œil (« Octobre 2024 · 3
-    // interventions ») : un premier passage le calcule, avant que le second
-    // n'écrive les lignes — le mois change en cours de liste, son compte non.
-    const moisMois = (iso) => {
-      const monthIndex = Number(String(iso).slice(5, 7)) - 1;
-      return moisLong(monthIndex) ? `${moisLong(monthIndex)} ${String(iso).slice(0, 4)}` : trad('Date inconnue');
-    };
-    const moisComptes = new Map();
-    dated.forEach(({ m }) => {
-      const mois = moisMois(m.plan.next_due_at);
-      moisComptes.set(mois, (moisComptes.get(mois) || 0) + 1);
-    });
-    let currentMonth = '';
-    const datedHtml = dated.map(({ m, info }) => {
-      const mois = moisMois(m.plan.next_due_at);
-      const header = mois !== currentMonth
-        ? `<div class="agenda-month"><span>${esc(mois)}</span><span class="agenda-month-compte">${tR('{n} intervention(s)', { n: moisComptes.get(mois) })}</span></div>`
-        : '';
-      currentMonth = mois;
-      return header + chronologieCarteHtml(m, info);
-    }).join('');
-
+    const piecesHtml = preparationResumeHtml();
     return `
       <div class="vue-agenda">
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Planification & logistique')}</span>
         <div class="agenda-toolbar-actions">
-          <button type="button" class="secondary" id="prep-copier"><span class="card-ico">${picto('carnet')}</span><span>${trad('Copier la liste')}</span></button>
-          <button type="button" class="secondary" id="prep-export"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter CSV')}</span></button>
-          <button type="button" class="secondary" id="prep-partager"><span class="card-ico">${picto('partage')}</span><span>${trad('Partager')}</span></button>
+          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter le planning (.ics)')}</span></button>
+          <button type="button" class="primary" id="agenda-planifier"><span class="card-ico">${picto('croix')}</span><span>${trad('Planifier un entretien')}</span></button>
         </div>
       </div>
+      ${agendaNavHtml()}
       <div class="dash-grid agenda-grid">
         <div class="dash-main">
-          ${preparationHtml()}
-          <section class="card agenda-chronologie">
-            <div class="card-head"><h2 class="card-title"><span class="card-ico">${navIcone('agenda')}</span><span>${trad('Chronologie des échéances')}</span></h2></div>
-            ${dated.length ? datedHtml : ''}
-            ${counters.length ? `
-            ${dated.length ? `<div class="agenda-souscompteur"><span class="card-ico">${picto('compteur')}</span><span>${trad('Suivi au compteur')}</span></div>` : ''}
-            ${counters.map(({ m, info }) => chronologieCarteHtml(m, info)).join('')}` : ''}
-          </section>
+          <section class="card agenda-calendrier">${agendaContenuHtml()}</section>
         </div>
         <div class="dash-side">
+          ${piecesHtml ? `<div class="agenda-pieces-bloc">${piecesHtml}${agendaPiecesDetailToggleHtml()}</div>` : ''}
+          ${agendaSurveillanceHtml(counters)}
           ${remindersCardHtml()}
-          ${bonCommandeHtml()}
         </div>
       </div>
       </div>`;
@@ -13292,6 +13703,7 @@ VIEWS.agenda = {
     wireChronologie(racine);
     wirePreparation(racine);
     wireReminderSwitches(racine);
+    wireAgenda(racine);
   },
 };
 
