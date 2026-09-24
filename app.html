@@ -987,7 +987,12 @@
      calendaire) + coins arrondis (voir --r-lg plus haut, manquante). */
   .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:var(--r-md);padding:10px 14px;width:100%;min-width:0;}
   @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:196px;}}
-  .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;}
+  /* .compteur (fiche machine) porte un cadre 2px solid var(--ink) + marge
+     + fond propres, pensés pour le grand hero de la fiche — jamais
+     annulés ici jusqu'à présent, d'où le cadre noir épais et disproportionné
+     signalé sur cette carte compacte. .mstrip-compteur-bloc porte déjà
+     SON PROPRE fond/rayon ; .compteur, à l'intérieur, doit être nu. */
+  .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;margin-top:0;border:none;border-radius:0;}
   .mstrip-compteur-bloc .compteur-titre{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--dark-ink);display:block;margin-bottom:5px;}
   /* Suivi calendaire : la date reprend .compteur-jour-valeur (22px) taillée
      pour le hero de la fiche machine — trop grande pour ce bandeau étroit,
