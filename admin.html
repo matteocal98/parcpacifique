@@ -15,7 +15,7 @@
   IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
   d'implémentation pour le détail gardé/retiré.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-44XXCB7Q85CF7gCD9JQNQ+V9+jXHCEw3qHb1HBVG5/s=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-iPwMEVDmDLcG6HshHv4T5WSWOtHw/2Z6iUsWmc3pZNE=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -547,7 +547,7 @@ async function ouvrirTicket(ticketId) {
   panneau.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Chargement…</p>';
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
-    .select('id, body, created_at, author_id, profiles(full_name, login)')
+    .select('id, body, created_at, author_id, profiles(full_name, login, is_staff)')
     .eq('ticket_id', ticketId)
     .order('created_at', { ascending: true });
   if (error) { panneau.innerHTML = `<p class="font-body-sm text-body-sm text-error">Erreur : ${echapper(error.message)}</p>`; return; }
@@ -571,7 +571,11 @@ async function ouvrirTicket(ticketId) {
     const bulle = document.createElement('div');
     const deMoi = m.author_id === MOI.id;
     bulle.className = 'p-2.5 rounded ' + (deMoi ? 'bg-primary/10 self-end' : 'bg-surface-container-low');
-    bulle.innerHTML = `<div class="font-label-sm text-label-sm font-semibold text-on-surface">${echapper(m.profiles?.full_name || m.profiles?.login || '?')}</div><p class="font-body-sm text-body-sm text-on-surface">${echapper(m.body)}</p><div class="font-code-sm text-[11px] text-on-surface-variant">${ilYA(m.created_at)}</div>`;
+    // « Toi » l'emporte toujours sur le nom réel : un compte staff qui a AUSSI
+    // un accès client (cas réel ici, gérant ET superviseur du même compte) doit
+    // se voir lui-même, jamais confondu avec « le client » côté admin.
+    const auteur = deMoi ? 'Toi' : (m.profiles?.is_staff ? 'Support KEEVA' : (m.profiles?.full_name || m.profiles?.login || '?'));
+    bulle.innerHTML = `<div class="font-label-sm text-label-sm font-semibold text-on-surface">${echapper(auteur)}</div><p class="font-body-sm text-body-sm text-on-surface">${echapper(m.body)}</p><div class="font-code-sm text-[11px] text-on-surface-variant">${ilYA(m.created_at)}</div>`;
     fil.appendChild(bulle);
   });
   fil.scrollTop = fil.scrollHeight;

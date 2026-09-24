@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZprUEZ5ldxz4CkeFAl3sw65myfClLmKtb8wfapqbJsc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9vhZlR+W7Zy2xN6Fc8QWcyJUlZr/5Hj8A8fqiMPav3w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8799,7 +8799,10 @@ async function afficherFilTicket(overlay, moi, ticketId) {
   } else {
     fil.innerHTML = (messages || []).map((m) => {
       const deMoi = m.author_id === moi;
-      const auteur = m.profiles?.is_staff ? trad('Support KEEVA') : (deMoi ? trad('Toi') : (m.profiles?.full_name || m.profiles?.login || '?'));
+      // « Toi » l'emporte TOUJOURS sur « Support KEEVA » : un compte staff qui
+      // écrit depuis SON PROPRE espace client (cas réel sur ce compte, gérant
+      // ET superviseur à la fois) doit se voir lui-même, pas son autre rôle.
+      const auteur = deMoi ? trad('Toi') : (m.profiles?.is_staff ? trad('Support KEEVA') : (m.profiles?.full_name || m.profiles?.login || '?'));
       return `<div style="align-self:${deMoi ? 'flex-end' : 'flex-start'};max-width:85%;padding:8px 10px;border-radius:10px;background:${deMoi ? 'var(--primary-tint)' : 'var(--surface-soft)'};">
         <div style="font-weight:700;font-size:12.5px;">${esc(auteur)}</div>
         <div>${esc(m.body)}</div>
