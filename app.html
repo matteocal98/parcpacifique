@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-W622KsHsgwl4jfvrj9a39oBSZzPFKuUBCqlkjQ6td5k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1a0vgKY54Li5j9ik1fk8KnZgcE6uD0p+XEZDSgevsPY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3970,6 +3970,40 @@
   .tco-classement-chiffre .value{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
   .tco-classement-chiffre .value.is-alerte{color:var(--late);}
   .tco-carte-dashboard-corps{display:flex;align-items:center;gap:16px;}
+
+  /* Classement TCO du parc — filtres et cartes machine (phase 3) */
+  .tco-classement-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:4px 0 10px;}
+  .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--surface-soft);padding:3px;gap:2px;}
+  .tco-filtre-btn{border:none;background:none;padding:7px 12px;border-radius:calc(var(--r-chip) - 3px);font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+  .tco-filtre-btn.is-active{background:#fff;color:var(--ink);box-shadow:var(--shadow-soft);}
+  .tco-classement-toolbar select{height:36px;padding:0 10px;border-radius:var(--r-chip);border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;color:var(--ink);}
+  .tco-classement-carte{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-2);cursor:pointer;}
+  .tco-classement-carte:last-child{border-bottom:none;}
+  .tco-classement-carte:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+  .tco-classement-photo{flex:0 0 auto;width:48px;height:48px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);}
+  .tco-classement-photo img{width:100%;height:100%;object-fit:cover;}
+  .tco-classement-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .tco-classement-tete{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  .tco-classement-nom{font-size:14.5px;font-weight:700;color:var(--ink);}
+  .tco-classement-note{font-size:11px;color:var(--ink-2);font-style:italic;}
+  .tco-classement-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--ink-2);}
+  .tco-classement-chiffres{flex:0 0 auto;display:flex;align-items:center;gap:14px;}
+  .tco-classement-montant{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+  .tco-classement-montant .label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark-ink);}
+  .tco-classement-montant .value{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .tco-classement-ajout{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .tco-classement-ajout svg{width:18px;height:18px;}
+  @media (max-width:640px){
+    .tco-classement-carte{flex-wrap:wrap;}
+    .tco-classement-chiffres{width:100%;justify-content:space-between;}
+  }
+
+  /* Seuils cibles par catégorie (phase 3, §5) */
+  .tco-seuils-liste{display:flex;flex-direction:column;gap:10px;}
+  .tco-seuil-ligne{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-2);}
+  .tco-seuil-ligne:last-child{border-bottom:none;}
+  .tco-seuil-nom{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .tco-seuil-ligne .tco-champ-unite{width:160px;flex:0 0 auto;}
 </style>
 </head>
 <body>
@@ -5130,6 +5164,31 @@ function ratioDecisionTco(tco) {
   if (tco.ratioMaintenanceAchat != null) return { ratio: tco.ratioMaintenanceAchat, base: 'achat' };
   return null;
 }
+// Phase 3 — filtre de période de la page Coûts & TCO : ratio Garder/
+// Remplacer sur une FENÊTRE (12 derniers mois / année en cours) plutôt que
+// sur toute la vie de la machine. Même dénominateur que ratioDecisionTco
+// (depreciationAnnuelle, un taux comptable CONSTANT, indépendant de la
+// période affichée) — seul le numérateur change : l'entretien de la
+// fenêtre choisie, ramené à un rythme annuel par nbAnnees (1 pour
+// « 12 derniers mois », fraction de l'année écoulée pour « Année en
+// cours »). Pas de repli sur le cumul entretien/achat ici : ce cumul est
+// intrinsèquement lifetime (« quelle part de sa valeur ai-je dépensée en
+// tout »), une variante « période » de cette statistique-là ne voudrait
+// rien dire — l'appelant garde alors le ratio lifetime (voir VIEWS.tco).
+function ratioDecisionTcoSurPeriode(machine, interventionsPeriode, nbAnnees) {
+  const depreciation = depreciationAnnuelle(machine);
+  if (!depreciation || !nbAnnees) return null;
+  const entretienAnnualise = coutsInterventionsMachine(interventionsPeriode) / nbAnnees;
+  return { ratio: entretienAnnualise / depreciation, base: 'amortissement' };
+}
+// Dépenses d'entretien + exploitation sur une fenêtre temporelle — JAMAIS
+// le prix d'achat, qui n'a de sens que sur la durée de vie complète. Ce
+// N'EST PAS un TCO (tco.total inclut toujours achat − revente) : juste
+// « ce qui a été dépensé pendant cette période », affiché sous un libellé
+// différent pour ne jamais confondre les deux notions à l'écran.
+function depensesSurPeriode(interventionsPeriode, coutsPeriode) {
+  return coutsInterventionsMachine(interventionsPeriode) + coutsExploitationMachine(coutsPeriode);
+}
 // Seuils : 30 %/50 % du prix d'achat cumulés en entretien (repli, inchangé
 // depuis la phase 1) ; 50 %/100 % de la dépréciation ANNUELLE quand elle
 // est calculable — 100 % y est le point exact où l'entretien coûte déjà
@@ -5185,8 +5244,12 @@ function ventilationCoutsInterventions(interventions) {
   return (interventions || []).reduce((acc, it) => {
     acc.pieces += Number(it.parts_cost) || 0;
     acc.mainOeuvre += Number(it.labor_cost) || 0;
+    // Phase 3 : heures MO réellement déclarées — affichées telles quelles
+    // dans la légende du donut (remplace un décompte "factures vérifiées"
+    // qu'on ne trace pas par un chiffre qu'on trace vraiment).
+    acc.heures += Number(it.labor_hours) || 0;
     return acc;
-  }, { pieces: 0, mainOeuvre: 0 });
+  }, { pieces: 0, mainOeuvre: 0, heures: 0 });
 }
 // Classe les machines de la flotte par TCO — pire ratio d'abord (le ratio
 // de dépréciation quand il existe, sinon le repli cumul/achat, jamais les
@@ -5220,11 +5283,11 @@ function calculerFlotteTco(machines, interventionsParMachine, coutsParMachine) {
 // phase 1) par un calcul sur les coûts effectivement enregistrés. `null`
 // si rien n'a encore été saisi (jamais 0/0/0 présenté comme un vrai zéro).
 function repartitionFlotteTco(interventionsToutes, coutsToutes) {
-  const { pieces, mainOeuvre } = ventilationCoutsInterventions(interventionsToutes);
+  const { pieces, mainOeuvre, heures } = ventilationCoutsInterventions(interventionsToutes);
   const fixes = (coutsToutes || []).reduce((s, c) => s + (Number(c.amount) || 0), 0);
   const total = pieces + mainOeuvre + fixes;
   if (!total) return null;
-  return { pieces, mainOeuvre, fixes, total, pctPieces: (pieces / total) * 100, pctMainOeuvre: (mainOeuvre / total) * 100, pctFixes: (fixes / total) * 100 };
+  return { pieces, mainOeuvre, fixes, heures, total, pctPieces: (pieces / total) * 100, pctMainOeuvre: (mainOeuvre / total) * 100, pctFixes: (fixes / total) * 100 };
 }
 
 // SECOND SUIVI (optionnel) — mêmes principes que le principal, mais SANS
@@ -12915,6 +12978,47 @@ function blocParametresTcoHtml() {
       </div>
     </section>`;
 }
+// Seuils cibles de coût horaire, PAR CATÉGORIE (phase 3, §5) — pas un
+// seuil unique pour toute la flotte : un parc hétérogène (mini-pelle vs
+// débroussailleuse) n'a pas le même coût horaire "normal", un seul chiffre
+// comparerait des choses incomparables. Une ligne par catégorie CONNUE
+// (UI.categories, pas seulement celles déjà présentes dans le classement)
+// : un gérant peut préparer un seuil avant même d'avoir ajouté de machine
+// dans cette catégorie. Champ vide = aucun seuil = aucun badge d'écart nulle
+// part (voir ligneClassementTcoHtml) — jamais un seuil inventé.
+function blocSeuilsCategorieTcoHtml() {
+  const gerant = UI.role === 'gerant';
+  const bloque = gerant ? '' : ' disabled';
+  const categories = UI.categories || [];
+  if (!categories.length) return '';
+  return `
+    <section class="card">
+      <div class="tco-card-tete">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-indigo">${picto('devise')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Seuils cibles de coût horaire')}</h2>
+            <div class="tco-card-soustitre">${trad('Par catégorie de machine — utilisé pour l\'écart affiché dans le classement TCO')}</div>
+          </div>
+        </div>
+      </div>
+      ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
+      <div class="tco-seuils-liste">
+        ${categories.map((cat) => `
+          <div class="tco-seuil-ligne" data-categorie-id="${esc(cat.id)}">
+            <span class="tco-seuil-nom">${esc(cat.name)}</span>
+            <div class="tco-champ-unite">
+              <input type="text" inputmode="decimal" class="tco-seuil-input" value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
+              <span class="tco-unite-tag">${deviseCourte()}/h</span>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="hint" id="tco-seuils-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="tco-save-seuils"${bloque}>${picto('disquette')}<span>${trad('Enregistrer les seuils')}</span></button>
+      </div>
+    </section>`;
+}
 // Donut RÉEL (phase 2) — remplace l'illustration « MODÈLE KEEVA » statique
 // de la phase 1. Factorisé : réutilisé par la page Coûts & TCO (grand) ET
 // la carte du tableau de bord (petit, voir tcoDashboardCarteHtml) — une
@@ -12934,34 +13038,70 @@ function donutTcoSvgHtml(repartition, taille) {
       </svg>
     </div>`;
 }
-// Une ligne du classement flotte — même idiome que alertRowHtml
-// ([app.html:10360]), réutilise .alert-row/.alert-bar/.pill (déjà stylées
-// ok/soon/late) et wireAlertRows() pour le clic → fiche machine (même
-// délégation, [data-machine] sans [data-alerte]) : pas de composant/
-// écouteur dupliqué, juste un contenu différent (TCO plutôt qu'échéance).
-function ligneClassementTcoHtml(machine, tco, decision) {
-  const etat = decision ? etatTco(decision.ratio, decision.base) : 'ok';
+// Une carte du classement flotte (phase 3 — remplace la ligne plate de la
+// phase 2). Clic → fiche machine via wireAlertRows() (même délégation,
+// [data-machine] sans [data-alerte], voir mount() de VIEWS.tco) ; le
+// bouton "Ajouter un coût" est câblé séparément (stopPropagation, sinon il
+// déclencherait aussi la navigation de la carte).
+// `ventilation` : { pieces, mainOeuvre, heures } de ventilationCoutsInterventions()
+// — sur la fenêtre affichée (lifetime si aucun filtre de période actif).
+// `periodeInfo` : null si aucun filtre de période actif (comportement
+// identique à la phase 2) ; sinon { depenses, decision } — `decision` peut
+// être null si la machine n'a pas de durée d'amortissement, auquel cas on
+// REPLIE sur le ratio lifetime et on le DIT explicitement (jamais un
+// chiffre silencieux qui change de sens sans prévenir, voir
+// ratioDecisionTcoSurPeriode).
+function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo) {
+  const decisionAffichee = periodeInfo ? (periodeInfo.decision || decision) : decision;
+  const periodeRepliee = !!periodeInfo && !periodeInfo.decision;
+  const etat = decisionAffichee ? etatTco(decisionAffichee.ratio, decisionAffichee.base) : 'ok';
   // La base du ratio est TOUJOURS affichée à côté du chiffre : « 62 % de la
   // dépréciation » et « 41 % du prix d'achat » ne mesurent pas la même
   // chose, jamais le pourcentage seul.
-  const ratioTexte = decision
-    ? tR('{n} % {base}', { n: Math.round(decision.ratio * 100), base: decision.base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
+  const ratioTexte = decisionAffichee
+    ? tR('{n} % {base}', { n: Math.round(decisionAffichee.ratio * 100), base: decisionAffichee.base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
     : '—';
   const uniteCourte = counterShort(counterUnitOf(machine));
+  const photo = safeUrl(machine.image_url);
+  const heures = machineCounter(machine);
+  const montantPrincipal = periodeInfo ? periodeInfo.depenses : tco.total;
+  const libelleMontant = periodeInfo ? trad('Dépenses sur la période') : trad('TCO total');
+  const totalVentile = ventilation ? ventilation.pieces + ventilation.mainOeuvre : 0;
+  const pctPieces = totalVentile > 0 ? Math.round((ventilation.pieces / totalVentile) * 100) : null;
+  // Seuil cible par catégorie (phase 3, §5) — jamais un écart affiché sans
+  // seuil réellement défini pour CETTE catégorie précise.
+  const seuil = machine.category?.target_hourly_cost;
+  const ecart = (seuil != null && tco.coutParUnite != null) ? tco.coutParUnite - Number(seuil) : null;
   return `
-    <button type="button" class="alert-row" data-machine="${esc(machine.id)}">
+    <div class="tco-classement-carte" data-machine="${esc(machine.id)}">
       <span class="alert-bar ${etat}"></span>
-      <span class="alert-main">
-        <span class="alert-tete">
-          <span class="alert-title">${esc(machine.name)}</span>
+      ${photo ? `<div class="tco-classement-photo"><img src="${esc(photo)}" alt="${esc(machine.name)}" loading="lazy"></div>` : ''}
+      <div class="tco-classement-corps">
+        <div class="tco-classement-tete">
+          <span class="tco-classement-nom">${esc(machine.name)}</span>
           <span class="pill ${etat}">${ratioTexte}</span>
-        </span>
-        <span class="alert-sub">${tR('TCO {total}{parUnite}', {
-          total: formatMontant(tco.total),
-          parUnite: tco.coutParUnite != null ? ` · ${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '',
-        })}</span>
-      </span>
-    </button>`;
+          ${periodeRepliee ? `<span class="tco-classement-note">${trad('(basé sur tout l\'historique)')}</span>` : ''}
+        </div>
+        <div class="tco-classement-meta">
+          ${machine.category?.name ? `<span>${esc(machine.category.name)}</span>` : ''}
+          ${heures != null ? `<span>${tR('{n} {unite} cumulé(e)s', { n: esc(heures), unite: uniteCourte })}</span>` : ''}
+          ${machine.service_date ? `<span>${tR('Mise en service : {date}', { date: esc(machine.service_date) })}</span>` : ''}
+          ${pctPieces != null ? `<span>${tR('Pièces {n}%', { n: pctPieces })}</span>` : ''}
+        </div>
+      </div>
+      <div class="tco-classement-chiffres">
+        <div class="tco-classement-montant">
+          <span class="label">${libelleMontant}</span>
+          <span class="value">${formatMontant(montantPrincipal)}</span>
+        </div>
+        <div class="tco-classement-montant">
+          <span class="label">${trad('Coût horaire')}${periodeInfo ? ` · ${trad('depuis l\'achat')}` : ''}</span>
+          <span class="value">${tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '—'}</span>
+          ${ecart != null ? `<span class="pill ${ecart > 0 ? 'late' : 'ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
+        </div>
+        <button type="button" class="tco-classement-ajout" data-machine-ajout="${esc(machine.id)}" title="${esc(trad('Ajouter un coût'))}">${picto('ajuste')}</button>
+      </div>
+    </div>`;
 }
 // Export CSV du classement — réutilise EXACTEMENT csvToUtf16Buffer (déjà
 // utilisée par l'historique d'une machine et la préparation), pas une 3ᵉ
@@ -13152,6 +13292,7 @@ VIEWS.tco = {
         <div class="dash-grid agenda-grid">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
+            ${blocSeuilsCategorieTcoHtml()}
           </div>
           <div class="dash-side">
             ${blocCatalogueTcoHtml()}
@@ -13169,26 +13310,29 @@ VIEWS.tco = {
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
 
-    // ── Classement TCO du parc (phase 2) — chargé en asynchrone : un fetch
-    // en masse sur toute la flotte (§1), jamais fait ailleurs sur cette
-    // page. Section absente si SCHEMA.hasTco est faux (voir render()).
+    // ── Classement TCO du parc — chargé en asynchrone : un fetch en masse
+    // sur toute la flotte (§1), jamais fait ailleurs sur cette page, jamais
+    // refait au changement d'un filtre (tout se recalcule en mémoire à
+    // partir des deux tableaux flotte-entière déjà chargés). Section
+    // absente si SCHEMA.hasTco est faux (voir render()).
     if (SCHEMA.hasTco) {
       (async () => {
         const section = root.querySelector('#tco-classement-section');
         if (!section) return;
         const valueEl = section.querySelector('.value');
         const machineIds = (UI.machines || []).map((m) => m.id);
+        const TCO_CLASSEMENT_PAGE_SIZE = 10;
         let flotte = null;
-        let repartition = null;
+        let interventionsFlotte = [];
+        let coutsFlotte = [];
         try {
-          const [interventionsFlotte, coutsFlotte] = await Promise.all([
+          [interventionsFlotte, coutsFlotte] = await Promise.all([
             fetchToutesInterventionsFlotte(machineIds),
             fetchTousCoutsExploitationFlotte(machineIds),
           ]);
           const interventionsParMachine = grouperParMachine(interventionsFlotte);
           const coutsParMachine = grouperParMachine(coutsFlotte);
           flotte = calculerFlotteTco(UI.machines || [], interventionsParMachine, coutsParMachine);
-          repartition = repartitionFlotteTco(interventionsFlotte, coutsFlotte);
         } catch (err) {
           if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
           return;
@@ -13199,32 +13343,165 @@ VIEWS.tco = {
           return;
         }
         if (valueEl) valueEl.remove();
+
+        // Regroupement PAR MACHINE des tableaux flotte-entière — pour le
+        // filtre de période (recalcul en mémoire, jamais un second fetch).
+        const interventionsParMachineTout = grouperParMachine(interventionsFlotte);
+        const coutsParMachineTout = grouperParMachine(coutsFlotte);
+        // Catégories réellement présentes dans le classement (pas
+        // UI.categories : un filtre sur une catégorie sans machine ici ne
+        // servirait à rien — voir §5 pour la liste complète des seuils).
+        const categoriesPresentes = [...new Set(flotte.lignes.map((l) => l.machine.category?.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+
+        // Bornes de la fenêtre temporelle — calculées une fois par rendu,
+        // jamais un fetch réseau. 'total' = aucune borne (comportement
+        // identique à avant ce chantier).
+        const borneDepuis = (cle) => {
+          if (cle === '12m') { const d = new Date(); d.setFullYear(d.getFullYear() - 1); return d.toISOString().slice(0, 10); }
+          if (cle === 'annee') return `${new Date().getFullYear()}-01-01`;
+          return null;
+        };
+        const anneesFenetre = (cle) => {
+          if (cle === '12m') return 1;
+          if (cle === 'annee') {
+            const debut = new Date(new Date().getFullYear(), 0, 1).getTime();
+            return Math.max((Date.now() - debut) / (365.25 * 24 * 3600 * 1000), 1 / 12);
+          }
+          return null;
+        };
+
+        let periode = 'total';
+        let categorie = 'toutes';
+        let tri = 'ratio';
+        let limite = TCO_CLASSEMENT_PAGE_SIZE;
+        // Assigné après l'insertAdjacentHTML plus bas, qui crée l'élément —
+        // rendreDynamique() n'est appelée qu'ensuite, la fermeture le
+        // capture correctement au moment de l'appel.
+        let dynamique;
+
+        const rendreDynamique = () => {
+          const borne = borneDepuis(periode);
+          const annees = anneesFenetre(periode);
+          const interventionsFlat = borne ? interventionsFlotte.filter((it) => it.performed_at >= borne) : interventionsFlotte;
+          const coutsFlat = borne ? coutsFlotte.filter((c) => c.incurred_at >= borne) : coutsFlotte;
+          const repartition = repartitionFlotteTco(interventionsFlat, coutsFlat);
+
+          let lignes = flotte.lignes.map((ligne) => {
+            const interventionsMachine = interventionsParMachineTout.get(ligne.machine.id) || [];
+            const coutsMachine = coutsParMachineTout.get(ligne.machine.id) || [];
+            const interventionsPeriode = borne ? interventionsMachine.filter((it) => it.performed_at >= borne) : interventionsMachine;
+            const coutsPeriode = borne ? coutsMachine.filter((c) => c.incurred_at >= borne) : coutsMachine;
+            const ventilation = ventilationCoutsInterventions(interventionsPeriode);
+            const periodeInfo = borne ? {
+              depenses: depensesSurPeriode(interventionsPeriode, coutsPeriode),
+              decision: ratioDecisionTcoSurPeriode(ligne.machine, interventionsPeriode, annees),
+            } : null;
+            return { ...ligne, ventilation, periodeInfo };
+          });
+
+          if (categorie !== 'toutes') lignes = lignes.filter((l) => (l.machine.category?.name || '') === categorie);
+
+          const cleTri = (l) => {
+            if (tri === 'coutHoraire') return l.tco.coutParUnite ?? -Infinity;
+            if (tri === 'tcoTotal') return l.tco.total ?? -Infinity;
+            return l.periodeInfo?.decision?.ratio ?? l.decision?.ratio ?? -Infinity;
+          };
+          lignes = lignes.slice().sort((a, b) => cleTri(b) - cleTri(a));
+
+          const lignesAffichees = lignes.slice(0, limite);
+          const reste = lignes.length - lignesAffichees.length;
+
+          dynamique.innerHTML = `
+            ${repartition ? `
+            <div class="tco-donut-carte">
+              ${donutTcoSvgHtml(repartition, 88)}
+              <div style="flex:1;min-width:180px;">
+                <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition des coûts du parc')}</span>
+                <div class="tco-donut-legende">
+                  <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${tR('Pièces ({n}%)', { n: Math.round(repartition.pctPieces) })}</span>
+                  <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${tR('MO atelier ({n}%) · {h} h déclarées', { n: Math.round(repartition.pctMainOeuvre), h: Math.round(repartition.heures) })}</span>
+                  <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${tR('Fixes ({n}%)', { n: Math.round(repartition.pctFixes) })}</span>
+                </div>
+              </div>
+            </div>` : `<div class="hint">${trad('Aucune dépense enregistrée sur cette période.')}</div>`}
+            ${lignes.length ? `
+            <div class="alert-list">${lignesAffichees.map(({ machine, tco, decision, ventilation, periodeInfo }) => ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo)).join('')}</div>
+            ${reste > 0 ? `<button type="button" class="btn-tint" id="tco-classement-plus" style="align-self:center;">${tR('Afficher {n} machine(s) de plus', { n: Math.min(reste, TCO_CLASSEMENT_PAGE_SIZE) })}</button>` : ''}
+            ` : `<div class="hint">${trad('Aucune machine dans cette catégorie.')}</div>`}
+          `;
+          wireAlertRows(dynamique);
+          dynamique.querySelectorAll('.tco-classement-carte[data-machine]').forEach((carte) => {
+            carte.setAttribute('tabindex', '0');
+            carte.setAttribute('role', 'button');
+            carte.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); carte.click(); } });
+          });
+          dynamique.querySelectorAll('[data-machine-ajout]').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const machine = (UI.machines || []).find((m) => m.id === btn.dataset.machineAjout);
+              if (machine) openLogInterventionModal(machine);
+            });
+          });
+          dynamique.querySelector('#tco-classement-plus')?.addEventListener('click', () => {
+            limite += TCO_CLASSEMENT_PAGE_SIZE;
+            rendreDynamique();
+          });
+        };
+
         section.insertAdjacentHTML('beforeend', `
           <div class="tco-classement-resume">
             <div class="tco-classement-chiffre"><span class="label">${trad('TCO moyen annualisé')}</span><span class="value">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
             <div class="tco-classement-chiffre"><span class="label">${trad('Machines suivies')}</span><span class="value">${flotte.lignes.length}</span></div>
             <div class="tco-classement-chiffre"><span class="label">${trad('En alerte')}</span><span class="value${flotte.nbAlertes ? ' is-alerte' : ''}">${flotte.nbAlertes}</span></div>
           </div>
-          ${repartition ? `
-          <div class="tco-donut-carte">
-            ${donutTcoSvgHtml(repartition, 88)}
-            <div style="flex:1;min-width:180px;">
-              <span style="font-size:17px;font-weight:600;color:var(--ink);">${trad('Répartition des coûts du parc')}</span>
-              <div class="tco-donut-legende">
-                <span class="tco-donut-puce"><span class="rond" style="background:var(--bleu-roi);"></span>${tR('Pièces ({n}%)', { n: Math.round(repartition.pctPieces) })}</span>
-                <span class="tco-donut-puce"><span class="rond" style="background:var(--ok);"></span>${tR('MO atelier ({n}%)', { n: Math.round(repartition.pctMainOeuvre) })}</span>
-                <span class="tco-donut-puce"><span class="rond" style="background:var(--late);"></span>${tR('Fixes ({n}%)', { n: Math.round(repartition.pctFixes) })}</span>
-              </div>
+          <div class="tco-classement-toolbar">
+            <div class="tco-filtre-periode" id="tco-filtre-periode" role="group" aria-label="${esc(trad('Période'))}">
+              <button type="button" class="tco-filtre-btn is-active" data-periode="total">${trad('Depuis mise en service')}</button>
+              <button type="button" class="tco-filtre-btn" data-periode="12m">${trad('12 derniers mois')}</button>
+              <button type="button" class="tco-filtre-btn" data-periode="annee">${trad('Année en cours')}</button>
             </div>
-          </div>` : ''}
-          <div class="alert-list">${flotte.lignes.map(({ machine, tco, decision }) => ligneClassementTcoHtml(machine, tco, decision)).join('')}</div>
-          ${flotte.exclues.length ? `<div class="hint">${tR('{n} machine(s) sans prix d\'achat, non incluses.', { n: flotte.exclues.length })}</div>` : ''}
+            ${categoriesPresentes.length ? `
+            <select id="tco-filtre-categorie">
+              <option value="toutes">${trad('Toutes catégories')}</option>
+              ${categoriesPresentes.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+            </select>` : ''}
+            <select id="tco-filtre-tri">
+              <option value="ratio">${trad('Ratio de dépréciation')}</option>
+              <option value="tcoTotal">${trad('TCO total')}</option>
+              <option value="coutHoraire">${trad('Coût horaire')}</option>
+            </select>
+          </div>
+          <div id="tco-classement-dynamique"></div>
+          ${flotte.exclues.length ? `
+          <div class="hint">${tR('{n} machine(s) sans prix d\'achat, non incluses.', { n: flotte.exclues.length })} <button type="button" class="link-inline" data-nav="machines">${trad('Régulariser les prix')}</button></div>` : ''}
           <div class="modal-actions">
             <button type="button" class="secondary" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
           </div>
         `);
-        wireAlertRows(section);
+        dynamique = section.querySelector('#tco-classement-dynamique');
+
+        section.querySelectorAll('[data-periode]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            periode = btn.dataset.periode;
+            limite = TCO_CLASSEMENT_PAGE_SIZE;
+            section.querySelectorAll('[data-periode]').forEach((b) => b.classList.toggle('is-active', b === btn));
+            rendreDynamique();
+          });
+        });
+        section.querySelector('#tco-filtre-categorie')?.addEventListener('change', (e) => {
+          categorie = e.currentTarget.value;
+          limite = TCO_CLASSEMENT_PAGE_SIZE;
+          rendreDynamique();
+        });
+        section.querySelector('#tco-filtre-tri')?.addEventListener('change', (e) => {
+          tri = e.currentTarget.value;
+          limite = TCO_CLASSEMENT_PAGE_SIZE;
+          rendreDynamique();
+        });
+        section.querySelectorAll('[data-nav]').forEach((btn) => btn.addEventListener('click', () => goTo(btn.dataset.nav)));
         section.querySelector('#tco-export-classement')?.addEventListener('click', () => exporterClassementTcoCsv(flotte));
+
+        rendreDynamique();
       })();
     }
 
@@ -13283,6 +13560,7 @@ VIEWS.tco = {
     ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage', '#tco-piece-prix'].forEach((sel) => {
       activerSeparateurMilliers(root.querySelector(sel));
     });
+    root.querySelectorAll('.tco-seuil-input').forEach((input) => activerSeparateurMilliers(input));
 
     // Recherche du catalogue : filtre client, comme le mockup — sur la
     // référence ET la désignation.
@@ -13325,6 +13603,48 @@ VIEWS.tco = {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
         btn.disabled = false;
         if (label) label.textContent = trad('Enregistrer les paramètres');
+      }
+    });
+
+    // Seuils cibles par catégorie (phase 3, §5) — écrit directement sur
+    // machine_categories (même motif que sa création, plus haut dans le
+    // fichier : pas de RPC dédiée, la policy UPDATE de la table suffit),
+    // un update par catégorie MODIFIÉE seulement (pas toutes, pour ne pas
+    // écraser une valeur qu'un autre onglet aurait changée entre-temps).
+    root.querySelector('#tco-save-seuils')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const label = btn.querySelector('span');
+      const msg = root.querySelector('#tco-seuils-msg');
+      const lignes = [...root.querySelectorAll('.tco-seuil-ligne')];
+      const modifiees = lignes.map((ligne) => {
+        const id = ligne.dataset.categorieId;
+        const valeur = nombreDepuisTexte(ligne.querySelector('.tco-seuil-input').value);
+        const categorie = (UI.categories || []).find((c) => c.id === id);
+        return { id, valeur, changed: categorie && categorie.target_hourly_cost !== valeur };
+      }).filter((l) => l.changed);
+      if (!modifiees.length) { message(msg, trad('Aucun changement.'), false); return; }
+      btn.disabled = true;
+      if (label) label.textContent = trad('Enregistrement…');
+      try {
+        const resultats = await Promise.all(modifiees.map(({ id, valeur }) =>
+          sb.from('machine_categories').update({ target_hourly_cost: valeur }).eq('id', id)));
+        const erreur = resultats.find((r) => r.error);
+        if (erreur) throw erreur.error;
+        modifiees.forEach(({ id, valeur }) => {
+          const categorie = (UI.categories || []).find((c) => c.id === id);
+          if (categorie) categorie.target_hourly_cost = valeur;
+          // UI.machines[*].category est une copie séparée (jointure Supabase) :
+          // la mettre à jour aussi, sinon le badge d'écart du classement TCO
+          // resterait sur l'ancien seuil jusqu'au prochain rechargement complet.
+          (UI.machines || []).forEach((m) => { if (m.category && m.category.id === id) m.category.target_hourly_cost = valeur; });
+        });
+        showToast(trad('Seuils enregistrés'));
+        message(msg, trad('Enregistré.'), false);
+        renderApp();
+      } catch (err) {
+        message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+        btn.disabled = false;
+        if (label) label.textContent = trad('Enregistrer les seuils');
       }
     });
 
@@ -17749,13 +18069,17 @@ async function fetchAllInterventions(machineId) {
 // pagination (PostgREST plafonne à 1000 lignes), colonnes réduites au
 // strict nécessaire à l'agrégat — pas description/items_done/notes, qui
 // ne serviraient à rien ici et alourdiraient la requête pour rien.
+// `performed_at`/`incurred_at` (phase 3) : nécessaires au filtre de
+// période de la page Coûts & TCO — filtré ensuite entièrement en mémoire,
+// jamais un second fetch par changement de filtre. `labor_hours` (phase 3)
+// : somme réelle affichée dans la légende du donut (heures MO déclarées).
 async function fetchToutesInterventionsFlotte(machineIds) {
   if (!machineIds || !machineIds.length) return [];
   const pageSize = 1000;
   const all = [];
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await sb.from(trad('interventions'))
-      .select('machine_id, parts_cost, labor_cost')
+      .select('machine_id, parts_cost, labor_cost, labor_hours, performed_at')
       .in('machine_id', machineIds)
       .range(from, from + pageSize - 1);
     if (error) throw error;
@@ -17770,7 +18094,7 @@ async function fetchTousCoutsExploitationFlotte(machineIds) {
   const all = [];
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await sb.from('operating_costs')
-      .select('machine_id, amount')
+      .select('machine_id, amount, incurred_at')
       .in('machine_id', machineIds)
       .range(from, from + pageSize - 1);
     if (error) throw error;
@@ -19715,9 +20039,13 @@ async function boot(toastMessage) {
       : []),
   ].join(', ');
 
+  // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
+  // ajouté seulement si SCHEMA.hasTco : la colonne n'existe que pour les
+  // sociétés ayant la migration TCO, comme le reste des champs TCO.
+  const colonnesCategorie = SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name';
   const { data: machines, error: machinesErr } = await sb
     .from(trad('machines'))
-    .select(`${colonnesMachine}, category:machine_categories(id, name), plan:maintenance_plans(${colonnesPlan})`)
+    .select(`${colonnesMachine}, category:machine_categories(${colonnesCategorie}), plan:maintenance_plans(${colonnesPlan})`)
     .eq('company_id', profile.company_id)
     .order('name');
 
@@ -19731,7 +20059,7 @@ async function boot(toastMessage) {
 
   const { data: categories } = await sb
     .from('machine_categories')
-    .select('id, name')
+    .select(colonnesCategorie)
     .eq('company_id', profile.company_id);
 
   // Catalogue de pièces : chargé une fois ici (même endroit que les
