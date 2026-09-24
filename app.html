@@ -2008,7 +2008,12 @@
      n'a pas été reprise, aucune donnée de prestataire n'existe. */
   .log-modal .modal{max-width:1080px;padding:0;overflow:hidden;}
   .log-topband{height:6px;background:linear-gradient(90deg,var(--bleu-roi),var(--ok) 50%,var(--olive));}
-  .log-header2{padding:20px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  /* flex-wrap:wrap, comme .log-section-tete/.log-elements-tete plus bas
+     (même famille de rangée titre+annexe) : le bloc de droite (compteur
+     certifié + fermer) a flex:0 0 auto et ne rétrécit jamais — sans wrap,
+     il débordait hors du cadre sur téléphone (vu en vrai, pas juste en
+     largeur de navigateur) au lieu de passer à la ligne. */
+  .log-header2{padding:20px 24px 12px;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;}
   .log-header2-titre-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
   .log-header2 h2{font-family:'Space Grotesk',sans-serif;font-size:25px;line-height:32px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:0;}
   .log-chip-machine{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--ink);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
@@ -2072,7 +2077,11 @@
   .log-item-carte:has(input:checked) .log-item-check,.log-item-carte.is-checked .log-item-check{background:var(--ink);color:#fff;}
   .log-item-check svg{width:14px;height:14px;}
   .log-item-colonnes,.log-item-corps-pleine{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
-  .log-item-titre-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  /* flex-wrap:wrap : même piège que .log-header2 plus haut — .log-item-cycle
+     est flex:0 0 auto (jamais rétréci) ; sur une carte de checklist étroite
+     (téléphone), le badge de fréquence + le titre dépassaient la carte au
+     lieu de passer à la ligne. */
+  .log-item-titre-ligne{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
   .log-item-titre{font-weight:600;font-size:15px;color:var(--ink);}
   .log-item-cycle{
     font-size:10.5px;font-weight:700;text-align:right;line-height:1.3;
