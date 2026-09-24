@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IrX7wZBZ61RodfWyk/1pJL4GGgPUgS+ZM2vFmprGxmE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ffiulABk2+3DbM682If7TiOCpMl7qM+CT25tM3Q7P58=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5341,6 +5341,20 @@ function montantAbrege(valeur) {
   if (abs >= 1000000) return `${(n / 1000000).toLocaleString(localeActive(), { maximumFractionDigits: 1 })}M`;
   if (abs >= 1000) return `${Math.round(n / 1000)}k`;
   return String(Math.round(n));
+}
+// Parité FIXE (jamais un taux de marché, jamais mise à jour) du franc
+// Pacifique : 1 EUR = 119,3317 XPF — la conversion des montants TCO déjà
+// saisis, demandée explicitement par l'utilisateur au changement de devise
+// (voir keeva-tco-feature). Arrondi à l'unité en XPF (pas de sous-unité
+// dans cette devise), à 2 décimales en EUR (centimes).
+const PARITE_EUR_XPF = 119.3317;
+function convertirDevise(valeur, deviseSource, deviseCible) {
+  if (valeur == null || valeur === '') return valeur;
+  const n = Number(valeur);
+  if (!isFinite(n) || deviseSource === deviseCible) return valeur;
+  const converti = deviseCible === 'EUR' ? n / PARITE_EUR_XPF : n * PARITE_EUR_XPF;
+  const decimales = deviseCible === 'EUR' ? 2 : 0;
+  return Number(converti.toFixed(decimales));
 }
 // Somme des coûts d'ENTRETIEN (pièces + main d'œuvre) d'une machine, à partir
 // de la liste d'interventions déjà chargée pour l'historique — aucune requête
@@ -14121,7 +14135,33 @@ VIEWS.tco = {
       if (kpiTauxUnite) kpiTauxUnite.textContent = `${devise}/h`;
     };
     majDeviseCards();
-    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', () => {
+    // Conversion EN DIRECT des champs affichés (demandée explicitement par
+    // l'utilisateur) — dès le choix du radio, avant même d'enregistrer :
+    // sinon l'utilisateur verrait un taux « 1300 » sous une étiquette
+    // « € » qui n'aurait aucun sens. `deviseAffichee` suit la devise
+    // COURANTE des champs (pas encore celle de la base tant que ce n'est
+    // pas enregistré) pour que la conversion soit toujours juste, même en
+    // cas d'allers-retours EUR→XPF→EUR. Les montants ENREGISTRÉS (base de
+    // données) ne changent qu'au clic sur Enregistrer — voir plus bas.
+    let deviseAffichee = (UI.company && UI.company.currency) || 'EUR';
+    const convertirChampsAffiches = (deviseCible) => {
+      if (deviseCible === deviseAffichee) return;
+      ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage'].forEach((sel) => {
+        const input = root.querySelector(sel);
+        if (!input) return;
+        const valeur = nombreDepuisTexte(input.value);
+        if (valeur == null) return;
+        input.value = texteAvecSeparateurs(convertirDevise(valeur, deviseAffichee, deviseCible));
+      });
+      root.querySelectorAll('.tco-seuil-input').forEach((input) => {
+        const valeur = nombreDepuisTexte(input.value);
+        if (valeur == null) return;
+        input.value = texteAvecSeparateurs(convertirDevise(valeur, deviseAffichee, deviseCible));
+      });
+      deviseAffichee = deviseCible;
+    };
+    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', (e) => {
+      convertirChampsAffiches(e.currentTarget.value === 'XPF' ? 'XPF' : 'EUR');
       majDeviseCards();
       majLibellesDevise();
     }));
@@ -14150,9 +14190,29 @@ VIEWS.tco = {
       const assurance = nombreDepuisTexte(root.querySelector('#tco-assurance').value);
       const stockage = nombreDepuisTexte(root.querySelector('#tco-stockage').value);
       const devise = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
+      // Changement de devise RÉEL (pas juste le radio qui reste sur son
+      // choix d'origine) : demandé explicitement par l'utilisateur, TOUS
+      // les montants TCO déjà enregistrés (seuils, machines, catalogue,
+      // interventions, coûts d'exploitation) sont convertis au taux fixe
+      // — une action large sur des données financières réelles, donc
+      // confirmée explicitement avant d'agir (convert_my_tco_currency, un
+      // seul appel serveur transactionnel plutôt que des allers-retours
+      // table par table depuis le client).
+      const changeDevise = UI.company && UI.company.currency && UI.company.currency !== devise;
+      if (changeDevise) {
+        const ok = window.confirm(tR(
+          'Passer de {ancienne} à {nouvelle} va convertir TOUS les montants TCO déjà enregistrés (seuils par catégorie, prix d\'achat et revente des machines, catalogue de pièces, interventions et coûts d\'exploitation déjà saisis) au taux fixe 1 EUR = 119,3317 XPF. Continuer ?',
+          { ancienne: UI.company.currency, nouvelle: devise }
+        ));
+        if (!ok) return;
+      }
       btn.disabled = true;
       if (label) label.textContent = trad('Enregistrement…');
       try {
+        if (changeDevise) {
+          const { error: convErr } = await sb.rpc('convert_my_tco_currency', { p_new_currency: devise });
+          if (convErr) throw convErr;
+        }
         const { error } = await sb.rpc('update_my_tco_settings', {
           p_labor_hourly_rate: taux,
           p_default_insurance_yearly: assurance,
@@ -14160,6 +14220,17 @@ VIEWS.tco = {
           p_currency: devise,
         });
         if (error) throw error;
+        if (changeDevise) {
+          // Machines/catégories/catalogue viennent d'être convertis côté
+          // serveur : un simple renderApp() laisserait ces données EN
+          // MÉMOIRE sur les anciens montants partout ailleurs dans l'appli
+          // (fiche machine, tableau de bord…) jusqu'au prochain
+          // rechargement — un rechargement complet est le seul moyen sûr
+          // de tout remettre en cohérence d'un coup.
+          showToast(trad('Devise et montants convertis — rechargement…'));
+          setTimeout(() => window.location.reload(), 900);
+          return;
+        }
         UI.company.labor_hourly_rate = taux;
         UI.company.default_insurance_yearly = assurance;
         UI.company.default_storage_yearly = stockage;
