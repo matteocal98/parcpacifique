@@ -550,7 +550,16 @@
     background:var(--surface);border-radius:var(--r-card);padding:18px 20px;
     box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:12px;
   }
-  .card-head{display:flex;align-items:center;gap:10px;}
+  /* flex-wrap:wrap — sans ça, une tête de carte avec titre + badge + bouton
+     (ex. « Échéances d'entretien » sur le tableau de bord) ne rentre pas sur
+     un téléphone étroit et DÉBORDE la largeur de la page de quelques pixels.
+     Ce débordement horizontal, même minime, fait que le navigateur élargit
+     tout le viewport de mise en page (window.innerWidth ET innerHeight) au-
+     delà de ce qui est réellement visible à l'écran : la page entière semble
+     alors « trop grande » et glisse sous le doigt au moindre toucher — bug
+     confirmé en inspectant l'appareil en direct (CDP), pas seulement ici sur
+     le tableau de bord mais partout où une tête de carte a ce trio d'éléments. */
+  .card-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;row-gap:6px;}
   .card-title{margin:0;font-size:16px;font-weight:800;display:inline-flex;align-items:center;gap:9px;}
   /* Icône de titre de carte : la classe est posée sur l'icône elle-même, pas sur
      .card-title en entier — un .card-title-sm porte parfois un SVG déjà dimensionné
