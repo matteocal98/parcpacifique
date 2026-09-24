@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ffiulABk2+3DbM682If7TiOCpMl7qM+CT25tM3Q7P58=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-TwAM+iI5Xkg4sTxZFPQcpOy+06VTqkeOJ7/jBdenrTE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3951,6 +3951,10 @@
   .tco-btn-aide svg{width:20px;height:20px;}
 
   .tco-callout{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);}
+  /* Le [hidden] natif perdrait autrement face à display:flex ci-dessus
+     (même spécificité, la règle d'auteur l'emporte sur la feuille UA) —
+     utilisé par le bandeau d'avertissement devise non enregistrée. */
+  .tco-callout[hidden]{display:none;}
   .tco-callout.is-info{background:var(--surface-soft);}
   .tco-callout.is-warn{background:var(--voile-ambre);color:var(--late);}
   .tco-callout svg{flex:0 0 auto;width:22px;height:22px;margin-top:1px;}
@@ -4016,6 +4020,19 @@
   .tco-quick-add-tete svg{width:18px;height:18px;}
   .tco-quick-add .field-row{grid-template-columns:1fr 1fr;}
   .tco-quick-add input{background:#fff;}
+
+  /* Catalogue de pièces élargi en pleine largeur (voir blocCatalogueTcoHtml)
+     — liste à gauche, formulaire d'ajout à droite, largeur fixe pour le
+     formulaire pour que la liste profite de tout l'espace supplémentaire
+     quand elle contient beaucoup d'articles. Une seule colonne en dessous
+     de 900px (le formulaire passe sous la liste, jamais côte à côte à
+     l'étroit). */
+  .tco-catalogue-grid{display:flex;flex-direction:column;gap:16px;}
+  .tco-catalogue-colonne{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
+  @media (min-width:900px){
+    .tco-catalogue-grid{flex-direction:row;align-items:flex-start;}
+    .tco-quick-add{width:340px;flex:0 0 340px;}
+  }
 
   .tco-tip-carte{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-container,var(--primary-tint));}
   .tco-tip-icone{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:#fff;color:var(--bleu-roi);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);}
@@ -13308,26 +13325,24 @@ function blocParametresTcoHtml() {
           <label class="tco-devise-carte${c.currency === 'XPF' ? ' is-selected' : ''}" data-devise-carte="XPF">
             <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
             <span class="tco-devise-coche">${picto('coche')}</span>
-            <span style="display:flex;flex-direction:column;gap:2px;">
-              <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Franc Pacifique')}</span><span class="tco-devise-code">XPF</span></span>
-              <span class="tco-devise-zone">${trad('Calédonie, Polynésie, Wallis')}</span>
-            </span>
+            <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Franc Pacifique')}</span><span class="tco-devise-code">XPF</span></span>
             ${c.currency === 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
           </label>
           <label class="tco-devise-carte${c.currency !== 'XPF' ? ' is-selected' : ''}" data-devise-carte="EUR">
             <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
             <span class="tco-devise-coche">${picto('coche')}</span>
-            <span style="display:flex;flex-direction:column;gap:2px;">
-              <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Euro Européen')}</span><span class="tco-devise-code">EUR €</span></span>
-              <span class="tco-devise-zone">${trad('Métropole, Antilles, Guyane')}</span>
-            </span>
+            <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Euro')}</span><span class="tco-devise-code">EUR €</span></span>
             ${c.currency !== 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
           </label>
         </div>
       </div>
       <div class="tco-callout is-warn">
         ${picto('alerte')}
-        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise ne reconvertit pas rétroactivement les montants saisis.')}</p>
+        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise convertit automatiquement TOUS les montants déjà enregistrés, au taux fixe 1 € = 119,3317 XPF, au moment où vous cliquez sur Enregistrer.')}</p>
+      </div>
+      <div class="tco-callout is-warn" id="tco-devise-avertissement" hidden>
+        ${picto('alerte')}
+        <p><strong>${trad('Devise sélectionnée non enregistrée.')}</strong> ${trad('Les montants affichés restent dans l\'ancienne devise tant que vous n\'avez pas cliqué sur Enregistrer — la conversion se fait en une seule fois, pour toutes les données à la fois.')}</p>
       </div>
       <div class="field-row" style="grid-template-columns:repeat(3,1fr);">
         <div>
@@ -13727,6 +13742,14 @@ function ligneCatalogueTcoHtml(piece) {
       </div>
     </div>`;
 }
+// Reprise Stitch (voir keeva-tco-feature) — bloc élargi en pleine largeur
+// (hors dash-grid, comme tcoClassementFlotteHtml) plutôt que confiné à une
+// colonne : signalé par l'utilisateur, le catalogue devient difficile à
+// lire dès qu'il contient beaucoup d'articles. Liste à gauche, formulaire
+// d'ajout à droite (principe de positionnement d'une référence fournie par
+// l'utilisateur — pas son design, juste les 2 sous-blocs côte à côte) :
+// même id/structure interne qu'avant, seule l'ORGANISATION change, aucun
+// câblage (wirePreparation-style) à toucher.
 function blocCatalogueTcoHtml() {
   const pieces = UI.partsCatalog || [];
   return `
@@ -13741,34 +13764,38 @@ function blocCatalogueTcoHtml() {
         </div>
       </div>
       <p class="muted-text">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
-      <div class="tco-recherche">
-        ${picto('recherche')}
-        <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
-      </div>
-      <div class="tco-parts-liste" id="tco-catalogue-liste">
-        ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
-      </div>
-      <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
-      <div class="tco-quick-add">
-        <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
-        <div class="field-row">
-          <div>
-            <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
-            <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+      <div class="tco-catalogue-grid">
+        <div class="tco-catalogue-colonne">
+          <div class="tco-recherche">
+            ${picto('recherche')}
+            <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
           </div>
-          <div>
-            <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
-            <div class="tco-champ-unite">
-              <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
-              <span class="tco-unite-tag" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+          <div class="tco-parts-liste" id="tco-catalogue-liste">
+            ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
+          </div>
+          <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
+        </div>
+        <div class="tco-quick-add">
+          <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
+          <div class="field-row">
+            <div>
+              <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
+              <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+            </div>
+            <div>
+              <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
+              <div class="tco-champ-unite">
+                <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
+                <span class="tco-unite-tag" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
-        <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
-        <div class="modal-actions">
-          <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
-          <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
+          <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
+          <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
+          <div class="modal-actions">
+            <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
+            <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
+          </div>
         </div>
       </div>
     </section>`;
@@ -13798,13 +13825,13 @@ VIEWS.tco = {
         <div class="dash-grid agenda-grid">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
-            ${blocCatalogueTcoHtml()}
           </div>
           <div class="dash-side">
             ${blocSeuilsCategorieTcoHtml()}
             ${tcoTipCarteHtml()}
           </div>
         </div>
+        ${blocCatalogueTcoHtml()}
       </div>`;
   },
   mount() {
@@ -14134,36 +14161,27 @@ VIEWS.tco = {
       const kpiTauxUnite = root.querySelector('#tco-kpi-taux-unite');
       if (kpiTauxUnite) kpiTauxUnite.textContent = `${devise}/h`;
     };
-    majDeviseCards();
-    // Conversion EN DIRECT des champs affichés (demandée explicitement par
-    // l'utilisateur) — dès le choix du radio, avant même d'enregistrer :
-    // sinon l'utilisateur verrait un taux « 1300 » sous une étiquette
-    // « € » qui n'aurait aucun sens. `deviseAffichee` suit la devise
-    // COURANTE des champs (pas encore celle de la base tant que ce n'est
-    // pas enregistré) pour que la conversion soit toujours juste, même en
-    // cas d'allers-retours EUR→XPF→EUR. Les montants ENREGISTRÉS (base de
-    // données) ne changent qu'au clic sur Enregistrer — voir plus bas.
-    let deviseAffichee = (UI.company && UI.company.currency) || 'EUR';
-    const convertirChampsAffiches = (deviseCible) => {
-      if (deviseCible === deviseAffichee) return;
-      ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage'].forEach((sel) => {
-        const input = root.querySelector(sel);
-        if (!input) return;
-        const valeur = nombreDepuisTexte(input.value);
-        if (valeur == null) return;
-        input.value = texteAvecSeparateurs(convertirDevise(valeur, deviseAffichee, deviseCible));
-      });
-      root.querySelectorAll('.tco-seuil-input').forEach((input) => {
-        const valeur = nombreDepuisTexte(input.value);
-        if (valeur == null) return;
-        input.value = texteAvecSeparateurs(convertirDevise(valeur, deviseAffichee, deviseCible));
-      });
-      deviseAffichee = deviseCible;
+    // Bandeau d'avertissement quand la devise sélectionnée (radio) diffère
+    // de celle réellement enregistrée : NE PAS convertir les champs affichés
+    // en direct ici (l'ancienne version le faisait, et c'est exactement ce
+    // qui a produit le bug remonté par l'utilisateur — un nombre déjà
+    // converti pouvait être enregistré par le bouton « Enregistrer les
+    // seuils », À CÔTÉ, sans jamais passer par la conversion serveur ni
+    // changer companies.currency, laissant des tables dans des devises
+    // différentes). Les valeurs affichées restent dans la devise
+    // ENREGISTRÉE jusqu'au clic sur Enregistrer — seul moment où TOUT est
+    // converti d'un coup, de façon atomique, côté serveur (voir plus bas).
+    const majAvertissementDevise = () => {
+      const radioValeur = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
+      const bandeau = root.querySelector('#tco-devise-avertissement');
+      if (bandeau) bandeau.hidden = radioValeur === ((UI.company && UI.company.currency) || 'EUR');
     };
-    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', (e) => {
-      convertirChampsAffiches(e.currentTarget.value === 'XPF' ? 'XPF' : 'EUR');
+    majDeviseCards();
+    majAvertissementDevise();
+    root.querySelectorAll('input[name="tco-devise"]').forEach((radio) => radio.addEventListener('change', () => {
       majDeviseCards();
       majLibellesDevise();
+      majAvertissementDevise();
     }));
 
     // Séparateurs de milliers : ces champs sont passés en type="text" (un
@@ -14182,37 +14200,63 @@ VIEWS.tco = {
       });
     });
 
+    // Deux chemins DISTINCTS, jamais mélangés — c'est le bug remonté par
+    // l'utilisateur qui a fait abandonner une 1ʳᵉ version qui tentait de
+    // faire les deux à la fois (convertir ET appliquer les 3 champs tapés,
+    // dans le même appel) : rien ne garantissait alors que le nombre
+    // affiché dans #tco-taux-horaire soit dans la BONNE devise au moment de
+    // l'envoi, et un save via le bouton Seuils cibles (à côté, indépendant)
+    // pouvait écrire une valeur déjà convertie sans jamais faire tourner la
+    // conversion ni changer companies.currency — des tables dans des
+    // devises différentes, en silence.
+    // Chemin A (devise inchangée) : update_my_tco_settings tel quel,
+    // inchangé depuis la phase 1 — les 3 champs tapés sont pris tels quels.
+    // Chemin B (devise changée) : UNIQUEMENT convert_my_tco_currency, qui
+    // convertit TOUT (y compris les 3 champs de companies) en une seule
+    // transaction atomique côté serveur, à partir des valeurs RÉELLEMENT
+    // enregistrées — jamais des 3 champs affichés (qui peuvent être restés
+    // dans l'ancienne devise, voir majAvertissementDevise). Un changement
+    // de devise ignore donc toute frappe simultanée dans ces 3 champs —
+    // annoncé par le bandeau d'avertissement, pas une surprise silencieuse.
     root.querySelector('#tco-save-parametres')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const label = btn.querySelector('span');
       const msg = root.querySelector('#tco-parametres-msg');
-      const taux = nombreDepuisTexte(root.querySelector('#tco-taux-horaire').value);
-      const assurance = nombreDepuisTexte(root.querySelector('#tco-assurance').value);
-      const stockage = nombreDepuisTexte(root.querySelector('#tco-stockage').value);
       const devise = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
-      // Changement de devise RÉEL (pas juste le radio qui reste sur son
-      // choix d'origine) : demandé explicitement par l'utilisateur, TOUS
-      // les montants TCO déjà enregistrés (seuils, machines, catalogue,
-      // interventions, coûts d'exploitation) sont convertis au taux fixe
-      // — une action large sur des données financières réelles, donc
-      // confirmée explicitement avant d'agir (convert_my_tco_currency, un
-      // seul appel serveur transactionnel plutôt que des allers-retours
-      // table par table depuis le client).
       const changeDevise = UI.company && UI.company.currency && UI.company.currency !== devise;
+
       if (changeDevise) {
         const ok = window.confirm(tR(
-          'Passer de {ancienne} à {nouvelle} va convertir TOUS les montants TCO déjà enregistrés (seuils par catégorie, prix d\'achat et revente des machines, catalogue de pièces, interventions et coûts d\'exploitation déjà saisis) au taux fixe 1 EUR = 119,3317 XPF. Continuer ?',
+          'Passer de {ancienne} à {nouvelle} va convertir TOUS les montants TCO déjà enregistrés (taux horaire, assurance, stockage, seuils par catégorie, prix d\'achat et revente des machines, catalogue de pièces, interventions et coûts d\'exploitation) au taux fixe 1 EUR = 119,3317 XPF. Continuer ?',
           { ancienne: UI.company.currency, nouvelle: devise }
         ));
         if (!ok) return;
+        btn.disabled = true;
+        if (label) label.textContent = trad('Conversion…');
+        try {
+          const { error } = await sb.rpc('convert_my_tco_currency', { p_new_currency: devise });
+          if (error) throw error;
+          // Toutes les tables viennent de changer côté serveur : un simple
+          // renderApp() laisserait UI.machines/UI.categories/UI.partsCatalog
+          // sur les anciens montants partout ailleurs dans l'appli jusqu'au
+          // prochain rechargement — un rechargement complet est le seul
+          // moyen sûr de tout remettre en cohérence d'un coup.
+          showToast(trad('Devise et montants convertis — rechargement…'));
+          setTimeout(() => window.location.reload(), 900);
+        } catch (err) {
+          message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+          btn.disabled = false;
+          if (label) label.textContent = trad('Enregistrer les paramètres');
+        }
+        return;
       }
+
+      const taux = nombreDepuisTexte(root.querySelector('#tco-taux-horaire').value);
+      const assurance = nombreDepuisTexte(root.querySelector('#tco-assurance').value);
+      const stockage = nombreDepuisTexte(root.querySelector('#tco-stockage').value);
       btn.disabled = true;
       if (label) label.textContent = trad('Enregistrement…');
       try {
-        if (changeDevise) {
-          const { error: convErr } = await sb.rpc('convert_my_tco_currency', { p_new_currency: devise });
-          if (convErr) throw convErr;
-        }
         const { error } = await sb.rpc('update_my_tco_settings', {
           p_labor_hourly_rate: taux,
           p_default_insurance_yearly: assurance,
@@ -14220,26 +14264,12 @@ VIEWS.tco = {
           p_currency: devise,
         });
         if (error) throw error;
-        if (changeDevise) {
-          // Machines/catégories/catalogue viennent d'être convertis côté
-          // serveur : un simple renderApp() laisserait ces données EN
-          // MÉMOIRE sur les anciens montants partout ailleurs dans l'appli
-          // (fiche machine, tableau de bord…) jusqu'au prochain
-          // rechargement — un rechargement complet est le seul moyen sûr
-          // de tout remettre en cohérence d'un coup.
-          showToast(trad('Devise et montants convertis — rechargement…'));
-          setTimeout(() => window.location.reload(), 900);
-          return;
-        }
         UI.company.labor_hourly_rate = taux;
         UI.company.default_insurance_yearly = assurance;
         UI.company.default_storage_yearly = stockage;
         UI.company.currency = devise;
         showToast(trad('Paramètres TCO enregistrés'));
         message(msg, trad('Enregistré.'), false);
-        // Les libellés (€) → XPF et tous les montants affichés dépendent de
-        // UI.company.currency : un ré-affichage est nécessaire pour que le
-        // changement se voie partout, pas seulement sur cette carte.
         renderApp();
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
