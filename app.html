@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9vhZlR+W7Zy2xN6Fc8QWcyJUlZr/5Hj8A8fqiMPav3w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ekTY6yq3jDDkxIPpmjczhg0cepT6szjXrCAsl9VtEhk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -21985,11 +21985,15 @@ function afficherDepuisCache(cache) {
 // keeva-redesign-project.md pour le contexte. Nettoie l'URL immédiatement,
 // jeton ou pas : il ne doit jamais rester dans l'historique du navigateur.
 async function activerModeSupport() {
-  const email = __paramsSupport.get('support_email');
   const token = __paramsSupport.get('support_token');
   history.replaceState(null, '', window.location.pathname);
-  if (!email || !token) return;
-  const { error } = await sb.auth.verifyOtp({ email, token, type: 'magiclink' });
+  if (!token) return;
+  // `admin.auth.admin.generateLink` (impersonate-tenant/index.ts) rend un
+  // « hashed_token » (jeton long) — il se vérifie avec `token_hash`, PAS avec
+  // `token`+`email` (ce dernier couple est pour un code à 6 chiffres reçu par
+  // e-mail, un mécanisme différent). Confondre les deux rend le jeton
+  // « invalide » même quand il est parfaitement correct.
+  const { error } = await sb.auth.verifyOtp({ token_hash: token, type: 'magiclink' });
   if (error) {
     alert("Le lien d'accès support a expiré ou est invalide. Redemande un accès depuis la console superviseur.");
     return;
