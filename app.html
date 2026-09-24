@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AbGtIgwFeAkcn05efIRNWGD7eyd8cP3DGWRBTN5y/ZE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MKC9SddY8kZqnb939YfXGh6886AioAZ7clUXn5eTsBY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1986,8 +1986,14 @@
   .log-type-texte{font-size:11.5px;color:var(--ink-2);font-weight:500;line-height:1.4;}
 
   .log-gravite-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .log-gravite-carte{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:var(--r-chip);border:1.5px solid var(--line);cursor:pointer;font-size:12.5px;font-weight:700;background:var(--surface-soft);color:var(--ink);}
-  .log-gravite-carte input{accent-color:var(--primary-dark);flex:0 0 auto;}
+  @media (max-width:560px){.log-gravite-grid{grid-template-columns:1fr;}}
+  .log-gravite-carte{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:var(--r-chip);border:1.5px solid var(--line);cursor:pointer;font-size:12.5px;font-weight:700;background:var(--surface-soft);color:var(--ink);min-width:0;}
+  /* Le radio natif sans taille explicite gonfle différemment selon
+     navigateur/OS une fois accent-color posé (même gotcha récurrent que
+     picto() sans règle de taille dédiée) — taille fixée pour ne jamais
+     déborder de sa carte. */
+  .log-gravite-carte input{accent-color:var(--primary-dark);flex:0 0 auto;width:16px;height:16px;margin:0;}
+  .log-gravite-carte span{min-width:0;overflow-wrap:break-word;}
   .log-gravite-carte.is-immobilisant{background:var(--voile-ambre);border-color:rgba(222,122,22,.3);color:var(--late);}
   .log-gravite-carte.is-immobilisant input{accent-color:var(--late);}
 
@@ -18478,25 +18484,23 @@ function openLogInterventionModal(machine, tache) {
 
           ${avecTypes ? `
           <div class="log-panel" id="log-panel-depannage" hidden style="margin-top:10px;">
-            <div class="field-row">
-              <div>
-                <label for="log-organe">${trad('Organe mécanique défaillant')}</label>
-                <select id="log-organe" required>
-                  ${Object.entries(ORGANES).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <label>${trad('Gravité sur le chantier')}</label>
-                <div class="log-gravite-grid">
-                  <label class="log-gravite-carte is-immobilisant">
-                    <input type="radio" name="log-gravite" value="immobilisant" required>
-                    ${trad('Immobilisant (Arrêt)')}
-                  </label>
-                  <label class="log-gravite-carte">
-                    <input type="radio" name="log-gravite" value="partiel" required>
-                    ${trad('Partiel / Dégradé')}
-                  </label>
-                </div>
+            <div>
+              <label for="log-organe">${trad('Organe mécanique défaillant')}</label>
+              <select id="log-organe" required>
+                ${Object.entries(ORGANES).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label>${trad('Gravité sur le chantier')}</label>
+              <div class="log-gravite-grid">
+                <label class="log-gravite-carte is-immobilisant">
+                  <input type="radio" name="log-gravite" value="immobilisant" required>
+                  <span>${trad('Immobilisant (Arrêt)')}</span>
+                </label>
+                <label class="log-gravite-carte">
+                  <input type="radio" name="log-gravite" value="partiel" required>
+                  <span>${trad('Partiel / Dégradé')}</span>
+                </label>
               </div>
             </div>
             <div>
