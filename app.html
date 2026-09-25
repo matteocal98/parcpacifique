@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ekTY6yq3jDDkxIPpmjczhg0cepT6szjXrCAsl9VtEhk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Unc5VoOFDHXLOXJ9hZB0WWQdg3HE5DADTgYDpmKWImY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8517,11 +8517,17 @@ function openSignupWizard() {
 // technique, donc aucun client existant n'est migré.
 //   eco  → Starter / Artisan — 12 €/mois
 //   pro  → Business / Flotte — 39 €/mois
-// Aucun lien n'existe pour Enterprise : l'offre sur mesure se demande par
-// e-mail, et l'absence de lien est DITE plutôt que contournée par un bouton mort.
+// `enterprise` existe côté Stripe (89 €/mois, créé le 2026-09-25) mais N'EST
+// PAS branché sur un bouton : le tarif réel est "89 €/mois + 1,50 €/machine
+// au-delà de 20", un lien de paiement Stripe ne peut représenter qu'un
+// montant FIXE — l'utiliser tel quel sous-facturerait un client >20 machines.
+// Gardé ici pour un envoi manuel après discussion, jamais pour un bouton en
+// libre-service ; contactEnterprise() (mailto) reste le seul chemin côté UI,
+// choix délibéré, pas un oubli.
 const STRIPE_LIENS = {
-  eco: "https://buy.stripe.com/fZu00i3WJ4AofvdgVQf3a03",   // KEEVA Starter / Artisan — 12 €/mois
-  pro: "https://buy.stripe.com/00w9AS9h3c2Q5UD9tof3a04",   // KEEVA Business / Flotte — 39 €/mois
+  eco: "https://buy.stripe.com/7sYdR8ctfc2Q82LbBwf3a06",   // KEEVA Starter / Artisan — 12 €/mois (lien recréé 2026-09-25, l'ancien tarif à 5 € a été archivé)
+  pro: "https://buy.stripe.com/7sYeVc8cZ0k84Qz9tof3a07",   // KEEVA Business / Flotte — 39 €/mois (lien recréé 2026-09-25, l'ancien tarif à 20 € a été archivé)
+  enterprise: "https://buy.stripe.com/cNifZg50N4AogzheNIf3a09",   // KEEVA Enterprise — 89 €/mois fixe, NON branché en UI (voir commentaire ci-dessus)
 };
 
 // LA GRILLE TARIFAIRE, ÉCRITE UNE SEULE FOIS. Quatre offres, et pour chacune
