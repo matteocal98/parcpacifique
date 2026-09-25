@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NIdbT/TaCMRqT+7hHQuwgBQBu8V1j0KYt68ivtlX+WA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Vd5BwhgN2nti/LWm/zNMzlAVPGN16dgHk97RZBxDVO0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1958,6 +1958,20 @@
   .ligne-choix.is-choisie .ligne-choix-pastille::after{
     content:'';position:absolute;inset:3px;border-radius:50%;background:var(--primary);
   }
+  /* CALENDRIER MAISON (ouvrirChoixDate/habillerChampDate) — même raison que
+     la liste de choix ci-dessus, côté <input type="date"> cette fois. */
+  .choix-date-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 8px;}
+  .choix-date-mois{font-weight:700;text-transform:capitalize;}
+  .choix-date-noms{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-bottom:4px;}
+  .choix-date-grille{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .choix-date-jour{
+    aspect-ratio:1;border:none;background:none;border-radius:50%;font-size:14px;font-family:inherit;
+    color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .choix-date-jour:hover{background:var(--surface-soft);}
+  .choix-date-jour.is-hors-mois{color:var(--ink-4);}
+  .choix-date-jour.is-aujourdhui{font-weight:800;color:var(--primary);}
+  .choix-date-jour.is-choisi{background:var(--primary);color:#fff;font-weight:700;}
   /* Deux champs côte à côte n'ont pas toujours des étiquettes de même hauteur :
      « Échéance toutes les (jours) » tient sur deux lignes quand « Rappel avant
      (jours) » n'en occupe qu'une, et les deux champs se retrouvaient décalés
@@ -14099,6 +14113,7 @@ function ouvrirProgrammerEntretien(dateInitiale) {
         <button type="button" class="secondary" id="agenda-choix-fermer">${trad('Fermer')}</button>
       </div>
     </div>`;
+  habillerChampDate(overlay.querySelector('#prog-date'), trad('Date'));
   overlay.querySelector('#agenda-choix-fermer').addEventListener('click', () => overlay.remove());
   overlay.querySelectorAll('[data-machine-id]').forEach((btn) => btn.addEventListener('click', async () => {
     const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
@@ -18703,6 +18718,8 @@ function openAddWizard(companyId, categories) {
       </form>
     `);
     overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
+    habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
+    habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
     forcerMajuscules(overlay.querySelector('#f-brand'));
     forcerMajuscules(overlay.querySelector('#f-model'));
     // Le type d'unité (machine / véhicule) est deux cartes sélectionnables
@@ -19693,6 +19710,95 @@ function habillerSelect(select, titre) {
   new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
 }
 
+// SÉLECTEUR DE DATE MAISON — même raison que ouvrirListeChoix/habillerSelect
+// côté <select> : le calendrier natif Android (<input type="date">) montre
+// LUI AUSSI le logo KEEVA en fond (habillage système/ROM, constaté en test
+// réel sur un vrai téléphone) — deux essais de réglage de thème natif
+// (alertDialogTheme, puis datePickerDialogTheme) n'ont RIEN changé,
+// confirmant que c'est hors de portée de l'appli, comme pour les listes
+// déroulantes. Réutilise les mêmes fonctions de date que l'Agenda
+// (agendaMoisGrille/agendaDebutSemaine/addDaysIso/addMonthsIso/todayIso/
+// moisLong) — aucun nouveau calcul de calendrier, juste un nouvel habillage.
+function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
+  let refIso = /^\d{4}-\d{2}-\d{2}$/.test(valeurActuelle || '') ? valeurActuelle : todayIso();
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const rendre = () => {
+    const [an, mois] = refIso.split('-').map(Number);
+    const jours = agendaMoisGrille(refIso);
+    const noms = [trad('L'), trad('M'), trad('M'), trad('J'), trad('V'), trad('S'), trad('D')];
+    overlay.innerHTML = `
+      <div class="modal" style="max-width:360px;">
+        <h2>${esc(titre)}</h2>
+        <div class="choix-date-nav">
+          <button type="button" class="icon-btn" id="choix-date-prev" aria-label="${esc(trad('Mois précédent'))}">${picto('flecheGauche')}</button>
+          <span class="choix-date-mois">${esc(moisLong(mois - 1))} ${an}</span>
+          <button type="button" class="icon-btn" id="choix-date-next" aria-label="${esc(trad('Mois suivant'))}">${picto('flecheDroite')}</button>
+        </div>
+        <div class="choix-date-noms">${noms.map((n) => `<span>${esc(n)}</span>`).join('')}</div>
+        <div class="choix-date-grille">
+          ${jours.map((j) => `
+            <button type="button" class="choix-date-jour${!j.dansLeMois ? ' is-hors-mois' : ''}${j.iso === todayIso() ? ' is-aujourdhui' : ''}${j.iso === valeurActuelle ? ' is-choisi' : ''}" data-iso="${esc(j.iso)}">${Number(j.iso.slice(8, 10))}</button>`).join('')}
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="secondary" id="choix-date-today">${trad('Aujourd\'hui')}</button>
+          ${valeurActuelle ? `<button type="button" class="secondary" id="choix-date-effacer">${trad('Effacer')}</button>` : ''}
+        </div>
+      </div>`;
+    overlay.querySelector('#choix-date-prev').addEventListener('click', () => { refIso = addMonthsIso(refIso, -1); rendre(); });
+    overlay.querySelector('#choix-date-next').addEventListener('click', () => { refIso = addMonthsIso(refIso, 1); rendre(); });
+    overlay.querySelector('#choix-date-today').addEventListener('click', () => { overlay.remove(); onChoisi(todayIso()); });
+    overlay.querySelector('#choix-date-effacer')?.addEventListener('click', () => { overlay.remove(); onChoisi(''); });
+    overlay.querySelectorAll('.choix-date-jour').forEach((btn) => {
+      btn.addEventListener('click', () => { overlay.remove(); onChoisi(btn.dataset.iso); });
+    });
+  };
+  rendre();
+}
+
+// HABILLAGE D'UN <input type="date"> EXISTANT — même patron que
+// habillerSelect() : l'input original reste dans le DOM (masqué, jamais
+// retiré), son .value/ses écouteurs `input`/`change` continuent de marcher
+// partout ailleurs SANS AUCUN CHANGEMENT (au submit, dans les aperçus
+// live…). Idempotent.
+function habillerChampDate(input, titre) {
+  if (!input || input.dataset.habille) return;
+  input.dataset.habille = '1';
+  input.style.display = 'none';
+  input.setAttribute('aria-hidden', 'true');
+  input.tabIndex = -1;
+
+  const bouton = document.createElement('button');
+  bouton.type = 'button';
+  bouton.className = `champ-select ${input.className}`.trim();
+  if (input.id) bouton.id = `${input.id}-bouton`;
+  input.insertAdjacentElement('afterend', bouton);
+
+  const majBouton = () => {
+    bouton.innerHTML = `<span>${esc(input.value ? formatShortDate(input.value) : trad('Choisir une date…'))}</span>${picto('agenda')}`;
+    bouton.disabled = input.disabled;
+  };
+  majBouton();
+
+  bouton.addEventListener('click', () => {
+    const titreReel = titre || document.querySelector(`label[for="${input.id}"]`)?.textContent?.trim() || trad('Choisir une date');
+    ouvrirChoixDate(titreReel, input.value, (iso) => {
+      input.value = iso;
+      // Deux évènements : certains écouteurs de ce projet réagissent à
+      // `input` (aperçu en direct), d'autres à `change` (recalcul au
+      // changement) — les deux existent déjà ailleurs dans ce fichier.
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      majBouton();
+    });
+  });
+
+  new MutationObserver(majBouton).observe(input, { attributes: true, attributeFilter: ['disabled'] });
+}
+
 function openLogInterventionModal(machine, tache) {
   // « Marquer fait » pré-coche la ligne du bandeau cliqué, toujours sur
   // l'onglet Entretien planifié (seul onglet avec une checklist).
@@ -20013,6 +20119,7 @@ function openLogInterventionModal(machine, tache) {
   overlay.querySelector('#cancel-log-x').addEventListener('click', () => overlay.remove());
 
   habillerSelect(overlay.querySelector('#log-operateur'), trad('Intervenant assigné'));
+  habillerChampDate(overlay.querySelector('#log-date'), trad('Date de l\'intervention'));
   habillerSelect(overlay.querySelector('#log-organe'), trad('Organe mécanique défaillant'));
   habillerSelect(overlay.querySelector('#log-frais-nature'), trad('Nature du frais'));
   (async () => {
@@ -21733,6 +21840,8 @@ function openMachineModal(companyId, categories, existing) {
   preparerChampsMajuscules(overlay);
   normaliserMajusculesAEnregistrement(overlay);
   brancherCategorie(overlay, categories, isEdit ? (existing.category?.name || '') : '');
+  habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
+  habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
   if (SCHEMA.hasTco) {
     ['#f-prix-achat', '#f-revente-estimee', '#f-duree-vie'].forEach((sel) => {
       activerSeparateurMilliers(overlay.querySelector(sel));
