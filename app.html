@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-yIrZmKb/4fNE7Tfc1W+9V7y/LdPh0lTn/FSoaKDVqwA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2uansZS4sbIst6GEYO/pXMjclzelwFqBLqMpOW2zAYA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1962,6 +1962,11 @@
      la liste de choix ci-dessus, côté <input type="date"> cette fois. */
   .choix-date-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 8px;}
   .choix-date-mois{font-weight:700;text-transform:capitalize;}
+  .choix-date-mois-bouton{
+    font-weight:700;text-transform:capitalize;background:none;border:none;font-family:inherit;
+    font-size:15px;color:var(--ink);cursor:pointer;padding:4px 10px;border-radius:8px;
+  }
+  .choix-date-mois-bouton:hover{background:var(--surface-soft);}
   .choix-date-noms{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-bottom:4px;}
   .choix-date-grille{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
   .choix-date-jour{
@@ -19729,6 +19734,11 @@ function habillerSelect(select, titre) {
 // moisLong) — aucun nouveau calcul de calendrier, juste un nouvel habillage.
 function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
   let refIso = /^\d{4}-\d{2}-\d{2}$/.test(valeurActuelle || '') ? valeurActuelle : todayIso();
+  // Cliquer sur l'année bascule vers une liste déroulante d'années (évite
+  // de remonter mois après mois pour une vieille machine) — même liste
+  // que ouvrirListeChoix (.liste-choix/.ligne-choix), juste imbriquée dans
+  // ce même overlay plutôt qu'un second overlay empilé.
+  let modeAnnee = false;
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
@@ -19736,6 +19746,44 @@ function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
 
   const rendre = () => {
     const [an, mois] = refIso.split('-').map(Number);
+
+    if (modeAnnee) {
+      const anneeCourante = Number(todayIso().slice(0, 4));
+      // Large marge vers le passé (équipements anciens) et petite marge
+      // vers le futur (achats/mises en service planifiés à l'avance).
+      const premiereAnnee = Math.min(an, anneeCourante) - 60;
+      const derniereAnnee = Math.max(an, anneeCourante) + 5;
+      const annees = [];
+      for (let a = derniereAnnee; a >= premiereAnnee; a--) annees.push(a);
+      overlay.innerHTML = `
+        <div class="modal" style="max-width:360px;">
+          <h2>${esc(titre)}</h2>
+          <div class="choix-date-nav">
+            <button type="button" class="icon-btn" id="choix-date-retour" aria-label="${esc(trad('Retour au calendrier'))}">${picto('flecheGauche')}</button>
+            <span class="choix-date-mois">${esc(trad('Choisir une année'))}</span>
+            <span style="width:20px;"></span>
+          </div>
+          <div class="liste-choix">
+            ${annees.map((a) => `
+              <button type="button" class="ligne-choix${a === an ? ' is-choisie' : ''}" data-annee="${a}">
+                <span>${a}</span>
+                <span class="ligne-choix-pastille" aria-hidden="true"></span>
+              </button>`).join('')}
+          </div>
+        </div>`;
+      overlay.querySelector('#choix-date-retour').addEventListener('click', () => { modeAnnee = false; rendre(); });
+      overlay.querySelectorAll('.ligne-choix').forEach((ligne) => {
+        ligne.addEventListener('click', () => {
+          const a = Number(ligne.dataset.annee);
+          refIso = `${a}-${String(mois).padStart(2, '0')}-01`; // jour clampé à 1 : évite les dates invalides (ex. 30 fév.)
+          modeAnnee = false;
+          rendre();
+        });
+      });
+      overlay.querySelector('.ligne-choix.is-choisie')?.scrollIntoView({ block: 'center' });
+      return;
+    }
+
     const jours = agendaMoisGrille(refIso);
     const noms = [trad('L'), trad('M'), trad('M'), trad('J'), trad('V'), trad('S'), trad('D')];
     overlay.innerHTML = `
@@ -19743,7 +19791,7 @@ function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
         <h2>${esc(titre)}</h2>
         <div class="choix-date-nav">
           <button type="button" class="icon-btn" id="choix-date-prev" aria-label="${esc(trad('Mois précédent'))}">${picto('flecheGauche')}</button>
-          <span class="choix-date-mois">${esc(moisLong(mois - 1))} ${an}</span>
+          <button type="button" class="choix-date-mois-bouton" id="choix-date-annee-toggle">${esc(moisLong(mois - 1))} ${an}</button>
           <button type="button" class="icon-btn" id="choix-date-next" aria-label="${esc(trad('Mois suivant'))}">${picto('flecheDroite')}</button>
         </div>
         <div class="choix-date-noms">${noms.map((n) => `<span>${esc(n)}</span>`).join('')}</div>
@@ -19758,6 +19806,7 @@ function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
       </div>`;
     overlay.querySelector('#choix-date-prev').addEventListener('click', () => { refIso = addMonthsIso(refIso, -1); rendre(); });
     overlay.querySelector('#choix-date-next').addEventListener('click', () => { refIso = addMonthsIso(refIso, 1); rendre(); });
+    overlay.querySelector('#choix-date-annee-toggle').addEventListener('click', () => { modeAnnee = true; rendre(); });
     overlay.querySelector('#choix-date-today').addEventListener('click', () => { overlay.remove(); onChoisi(todayIso()); });
     overlay.querySelector('#choix-date-effacer')?.addEventListener('click', () => { overlay.remove(); onChoisi(''); });
     overlay.querySelectorAll('.choix-date-jour').forEach((btn) => {
