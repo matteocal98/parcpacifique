@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cMqcIWLVs3Q7MhnkYEvQ3oB2JyXRQf9KdunZpgX1Cpw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUI884DyTQKL1Al/vNFPYB58bKIWK3pV9xoqzh92CwE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11060,6 +11060,9 @@ const PICTOS = {
   // mockup réutilise des icônes déjà tracées (entretien→clé, alerte→triangle,
   // paiement→coûts, boite→pièces, crayon→remarques, carnet→justificatifs).
   essence: '<rect x="4" y="4" width="9" height="16" rx="1.5"/><path d="M7.5 9h2"/><path d="M13 9.5h2a2 2 0 0 1 2 2V17a1.5 1.5 0 0 0 3 0V9.8L17.3 6.5"/>',
+  // Import CSV (catalogue de pièces) — même silhouette que `export`
+  // (flèche + plateau), flèche inversée vers le haut.
+  televerser: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -15259,6 +15262,7 @@ function ligneCatalogueTcoHtml(piece) {
         <div class="tco-part-corps">
           <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece.designation)}</span></span>
           <span class="tco-part-ref">${piece.reference ? esc(piece.reference) : trad('Sans référence')}</span>
+          ${piece.supplier_name || piece.avg_lead_time_days != null ? `<span class="tco-part-ref">${esc([piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' · '))}</span>` : ''}
         </div>
       </div>
       <div class="tco-part-droite">
@@ -15290,6 +15294,7 @@ function blocCatalogueTcoHtml() {
             <span class="tag" id="tco-catalogue-badge" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>
           </div>
         </div>
+        <button type="button" class="parc-export-btn" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
       </div>
       <p class="muted-text">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
       <div class="tco-catalogue-grid">
@@ -15320,6 +15325,19 @@ function blocCatalogueTcoHtml() {
           </div>
           <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
           <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
+          <div class="field-row">
+            <div>
+              <label class="sr-only" for="tco-piece-fournisseur">${trad('Fournisseur')}</label>
+              <input id="tco-piece-fournisseur" placeholder="${trad('Fournisseur (optionnel)')}">
+            </div>
+            <div>
+              <label class="sr-only" for="tco-piece-delai">${trad('Délai moyen de disponibilité')}</label>
+              <div class="tco-champ-unite">
+                <input id="tco-piece-delai" type="text" inputmode="numeric" placeholder="${trad('Délai moyen')}">
+                <span class="tco-unite-tag">${trad('jours')}</span>
+              </div>
+            </div>
+          </div>
           <div class="modal-actions">
             <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
             <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
@@ -15328,6 +15346,209 @@ function blocCatalogueTcoHtml() {
       </div>
     </section>`;
 }
+
+// ── IMPORT CSV DU CATALOGUE DE PIÈCES ──────────────────────────────────
+// Format FIGÉ, documenté dans la modale et le modèle téléchargeable : en-tête
+// EXACT, dans cet ordre précis (demande explicite de l'utilisateur — pas un
+// mappage par nom de colonne, un ordre positionnel strict, plus simple et
+// plus prévisible à documenter qu'un mapping flexible).
+const ENTETE_CSV_PIECES = ['Référence', 'Désignation', 'Prix unitaire', 'Fournisseur', 'Délai moyen (jours)'];
+
+// Un seul champ par appel : gère les champs entre guillemets (avec `""`
+// pour un guillemet littéral, RFC4180), mais PAS un retour à la ligne à
+// l'intérieur d'un champ — un modèle/désignation ne devrait jamais en
+// contenir, et ça garde ce parseur simple.
+function analyserLigneCsv(ligne) {
+  const champs = [];
+  let courant = '';
+  let dansGuillemets = false;
+  for (let i = 0; i < ligne.length; i++) {
+    const c = ligne[i];
+    if (dansGuillemets) {
+      if (c === '"') {
+        if (ligne[i + 1] === '"') { courant += '"'; i++; }
+        else dansGuillemets = false;
+      } else courant += c;
+    } else if (c === '"') {
+      dansGuillemets = true;
+    } else if (c === ',') {
+      champs.push(courant);
+      courant = '';
+    } else {
+      courant += c;
+    }
+  }
+  champs.push(courant);
+  return champs;
+}
+
+// L'en-tête doit correspondre EXACTEMENT (nom ET ordre) — un mauvais fichier
+// est rejeté d'un coup ici, avant de lire une seule ligne de données, plutôt
+// que de deviner une correspondance approximative.
+function analyserCsvCatalogue(texte) {
+  const lignesBrutes = String(texte || '').split(/\r\n|\r|\n/).filter((l) => l.trim() !== '');
+  if (!lignesBrutes.length) return { lignes: [], erreurs: [trad('Fichier vide.')] };
+  const entete = analyserLigneCsv(lignesBrutes[0]).map((c) => c.trim());
+  const enteteOk = entete.length === ENTETE_CSV_PIECES.length
+    && entete.every((c, i) => c.toLowerCase() === ENTETE_CSV_PIECES[i].toLowerCase());
+  if (!enteteOk) {
+    return {
+      lignes: [],
+      erreurs: [tR('En-tête invalide. Attendu : {attendu} — reçu : {recu}', {
+        attendu: ENTETE_CSV_PIECES.join(','), recu: entete.join(',') || trad('(vide)'),
+      })],
+    };
+  }
+  const lignes = [];
+  const erreurs = [];
+  for (let i = 1; i < lignesBrutes.length; i++) {
+    const champs = analyserLigneCsv(lignesBrutes[i]).map((c) => (c || '').trim());
+    const numero = i + 1; // numéro de ligne humain (1 = en-tête)
+    const [reference, designation, prixTexte, fournisseur, delaiTexte] = champs;
+    if (!designation) { erreurs.push(tR('Ligne {n} : désignation manquante, ignorée.', { n: numero })); continue; }
+    const prix = nombreDepuisTexte(prixTexte);
+    if (prix == null) { erreurs.push(tR('Ligne {n} : prix unitaire invalide, ignorée.', { n: numero })); continue; }
+    const delai = delaiTexte ? nombreDepuisTexte(delaiTexte) : null;
+    lignes.push({
+      reference: reference || null,
+      designation,
+      unit_price: prix,
+      supplier_name: fournisseur || null,
+      avg_lead_time_days: delai != null ? Math.round(delai) : null,
+    });
+  }
+  return { lignes, erreurs };
+}
+
+// Lit un fichier texte en reconnaissant son BOM : nos propres exports
+// (csvToUtf16Buffer) sont en UTF-16LE, mais un fichier préparé à la main
+// (Excel, Google Sheets) est le plus souvent en UTF-8 (avec ou sans BOM) —
+// les deux doivent être acceptés sans que l'utilisateur ait à s'en soucier.
+async function lireTexteFichier(file) {
+  const buffer = await file.arrayBuffer();
+  const octets = new Uint8Array(buffer);
+  if (octets[0] === 0xFF && octets[1] === 0xFE) return new TextDecoder('utf-16le').decode(buffer.slice(2));
+  if (octets[0] === 0xFE && octets[1] === 0xFF) return new TextDecoder('utf-16be').decode(buffer.slice(2));
+  if (octets[0] === 0xEF && octets[1] === 0xBB && octets[2] === 0xBF) return new TextDecoder('utf-8').decode(buffer.slice(3));
+  return new TextDecoder('utf-8').decode(buffer);
+}
+
+function modeleCsvCatalogue() {
+  const exemple = ['FLT-0142', 'Filtre à huile moteur', '24.90', 'Motoculture Pacifique', '5'];
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  return [ENTETE_CSV_PIECES, exemple].map((r) => r.map(escape).join(',')).join('\r\n');
+}
+function telechargerModeleCsvCatalogue() {
+  const blob = new Blob([csvToUtf16Buffer(modeleCsvCatalogue())], { type: 'text/csv;charset=utf-16le;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'modele_catalogue_pieces.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Import : un « Référence » déjà présente dans le catalogue de la société
+// est MISE À JOUR (upsert sur company_id+reference, voir la contrainte
+// unique posée en base), pas dupliquée ; une ligne sans référence est
+// toujours ajoutée en neuf (NULL ne matche jamais NULL en SQL — comportement
+// voulu, pas de clé naturelle fiable sans référence).
+function ouvrirImportCatalogue() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:480px;">
+      <h2>${trad('Importer le catalogue depuis un CSV')}</h2>
+      <p class="muted-text">${trad('Fichier CSV avec un en-tête EXACTEMENT dans cet ordre :')}</p>
+      <p style="font-family:monospace;font-size:12.5px;background:var(--surface-soft);padding:10px;border-radius:var(--r-md);word-break:break-all;">${esc(ENTETE_CSV_PIECES.join(','))}</p>
+      <ul class="hint" style="margin:0 0 12px 18px;padding:0;">
+        <li>${trad('Référence et Fournisseur : facultatifs, peuvent rester vides.')}</li>
+        <li>${trad('Prix unitaire : nombre (virgule ou point décimal accepté).')}</li>
+        <li>${trad('Délai moyen (jours) : nombre entier, facultatif.')}</li>
+        <li>${trad('Une pièce dont la Référence existe déjà dans ton catalogue est mise à jour, pas dupliquée.')}</li>
+      </ul>
+      <button type="button" class="secondary" id="import-modele" style="width:100%;justify-content:center;margin-bottom:12px;">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
+      <input id="import-fichier" type="file" accept=".csv,text/csv" hidden>
+      <button type="button" class="secondary" id="import-choisir" style="width:100%;justify-content:center;">${picto('televerser')}<span id="import-choisir-label">${trad('Choisir un fichier…')}</span></button>
+      <div id="import-msg" role="status" aria-live="polite" style="margin-top:10px;font-size:13px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="import-fermer">${trad('Fermer')}</button>
+        <button type="button" class="primary" id="import-go" disabled>${trad('Importer')}</button>
+      </div>
+    </div>`;
+
+  overlay.querySelector('#import-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#import-modele').addEventListener('click', telechargerModeleCsvCatalogue);
+
+  const inputFichier = overlay.querySelector('#import-fichier');
+  const labelChoisir = overlay.querySelector('#import-choisir-label');
+  const boutonGo = overlay.querySelector('#import-go');
+  const msg = overlay.querySelector('#import-msg');
+  let fichierChoisi = null;
+
+  overlay.querySelector('#import-choisir').addEventListener('click', () => inputFichier.click());
+  inputFichier.addEventListener('change', () => {
+    fichierChoisi = inputFichier.files?.[0] || null;
+    labelChoisir.textContent = fichierChoisi ? fichierChoisi.name : trad('Choisir un fichier…');
+    boutonGo.disabled = !fichierChoisi;
+    msg.textContent = '';
+  });
+
+  boutonGo.addEventListener('click', async () => {
+    if (!fichierChoisi) return;
+    boutonGo.disabled = true;
+    boutonGo.textContent = trad('Import en cours…');
+    msg.textContent = '';
+    try {
+      const texte = await lireTexteFichier(fichierChoisi);
+      const { lignes, erreurs } = analyserCsvCatalogue(texte);
+      if (!lignes.length) {
+        msg.style.color = 'var(--danger, #c0392b)';
+        msg.textContent = erreurs.length ? erreurs.join(' ') : trad('Aucune ligne valide trouvée dans ce fichier.');
+        boutonGo.disabled = false;
+        boutonGo.textContent = trad('Importer');
+        return;
+      }
+      const { data, error } = await sb.from('parts_catalog')
+        .upsert(
+          lignes.map((l) => ({ ...l, company_id: UI.companyId })),
+          { onConflict: 'company_id,reference' },
+        )
+        .select('id, reference, designation, unit_price, supplier_name, avg_lead_time_days');
+      if (error) throw error;
+      // Fusion dans UI.partsCatalog par id (remplace les pièces déjà connues,
+      // ajoute les nouvelles) — même esprit que le reste de la vue TCO.
+      const parId = new Map((UI.partsCatalog || []).map((p) => [String(p.id), p]));
+      (data || []).forEach((p) => parId.set(String(p.id), p));
+      UI.partsCatalog = [...parId.values()].sort((a, b) => a.designation.localeCompare(b.designation));
+      renderApp();
+      const succes = tR('{n} pièce(s) importée(s)/mise(s) à jour.', { n: lignes.length });
+      if (erreurs.length) {
+        // Erreurs partielles : la modale reste ouverte pour que le détail
+        // soit lu, pas juste un toast qui disparaît.
+        msg.style.color = '';
+        msg.innerHTML = `<div>${esc(succes)}</div>`
+          + `<div style="margin-top:6px;color:var(--danger, #c0392b);">${esc(tR('{m} ligne(s) ignorée(s) :', { m: erreurs.length }))}</div>`
+          + `<ul style="margin:4px 0 0 18px;padding:0;">${erreurs.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
+        boutonGo.disabled = false;
+        boutonGo.textContent = trad('Importer');
+      } else {
+        showToast(succes);
+        overlay.remove();
+      }
+    } catch (err) {
+      msg.style.color = 'var(--danger, #c0392b)';
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      boutonGo.disabled = false;
+      boutonGo.textContent = trad('Importer');
+    }
+  });
+}
+
 // Astuce honnête : le mockup promettait un scan QR Code inexistant côté web
 // — remplacé par un comportement RÉEL déjà construit (sélection catalogue →
 // prix proposé, quantité décimale acceptée).
@@ -15858,20 +16079,26 @@ VIEWS.tco = {
     const champRef = root.querySelector('#tco-piece-reference');
     const champDesignation = root.querySelector('#tco-piece-designation');
     const champPrix = root.querySelector('#tco-piece-prix');
+    const champFournisseur = root.querySelector('#tco-piece-fournisseur');
+    const champDelai = root.querySelector('#tco-piece-delai');
     const titreForm = root.querySelector('#tco-piece-form-titre');
     const boutonAjouter = root.querySelector('#tco-piece-ajouter');
     const boutonAjouterLabel = boutonAjouter?.querySelector('span');
     const boutonAnnuler = root.querySelector('#tco-piece-annuler');
+    const COLONNES_PIECE = 'id, reference, designation, unit_price, supplier_name, avg_lead_time_days';
     const sortirDuModeEdition = () => {
       pieceEnEdition = null;
       if (champRef) champRef.value = '';
       if (champDesignation) champDesignation.value = '';
       if (champPrix) champPrix.value = '';
+      if (champFournisseur) champFournisseur.value = '';
+      if (champDelai) champDelai.value = '';
       if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
       if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
       if (boutonAnnuler) boutonAnnuler.hidden = true;
     };
     boutonAnnuler?.addEventListener('click', sortirDuModeEdition);
+    root.querySelector('#tco-catalogue-importer')?.addEventListener('click', ouvrirImportCatalogue);
 
     boutonAjouter?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
@@ -15879,15 +16106,20 @@ VIEWS.tco = {
       const reference = champRef.value.trim();
       const designation = champDesignation.value.trim();
       const prix = nombreDepuisTexte(champPrix.value) ?? 0;
+      const fournisseur = champFournisseur.value.trim();
+      const delai = nombreDepuisTexte(champDelai.value);
       if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
       btn.disabled = true;
       if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
       try {
         if (pieceEnEdition) {
           const { data, error } = await sb.from('parts_catalog')
-            .update({ reference: reference || null, designation, unit_price: prix })
+            .update({
+              reference: reference || null, designation, unit_price: prix,
+              supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            })
             .eq('id', pieceEnEdition)
-            .select('id, reference, designation, unit_price')
+            .select(COLONNES_PIECE)
             .single();
           if (error) throw error;
           UI.partsCatalog = (UI.partsCatalog || [])
@@ -15896,8 +16128,11 @@ VIEWS.tco = {
           showToast(trad('Pièce modifiée'));
         } else {
           const { data, error } = await sb.from('parts_catalog')
-            .insert({ company_id: UI.companyId, reference: reference || null, designation, unit_price: prix })
-            .select('id, reference, designation, unit_price')
+            .insert({
+              company_id: UI.companyId, reference: reference || null, designation, unit_price: prix,
+              supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            })
+            .select(COLONNES_PIECE)
             .single();
           if (error) throw error;
           UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
@@ -15922,6 +16157,8 @@ VIEWS.tco = {
         if (champRef) champRef.value = piece.reference || '';
         if (champDesignation) champDesignation.value = piece.designation || '';
         if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
+        if (champFournisseur) champFournisseur.value = piece.supplier_name || '';
+        if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
         if (titreForm) titreForm.textContent = trad('Modifier une pièce');
         if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
         if (boutonAnnuler) boutonAnnuler.hidden = false;
@@ -23056,7 +23293,7 @@ async function boot(toastMessage) {
   if (SCHEMA.hasTco) {
     const { data: pieces } = await sb
       .from('parts_catalog')
-      .select('id, reference, designation, unit_price')
+      .select('id, reference, designation, unit_price, supplier_name, avg_lead_time_days')
       .eq('company_id', profile.company_id)
       .order('designation');
     partsCatalog = pieces || [];
