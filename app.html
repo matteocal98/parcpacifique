@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Vd5BwhgN2nti/LWm/zNMzlAVPGN16dgHk97RZBxDVO0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-yIrZmKb/4fNE7Tfc1W+9V7y/LdPh0lTn/FSoaKDVqwA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -10987,6 +10987,14 @@ function formatShortDate(iso) {
   if (!y || !m || !d) return '—';
   return `${d} ${moisCourt(m - 1)}`;
 }
+function formatShortDateAvecAnnee(iso) {
+  // Comme formatShortDate, mais avec l'année — utilisé pour le bouton du
+  // sélecteur de date (habillerChampDate) où l'année n'est pas déductible
+  // du contexte (contrairement aux échéances/rappels, toujours proches).
+  const [y, m, d] = String(iso).split('-').map(Number);
+  if (!y || !m || !d) return '—';
+  return `${d} ${moisCourt(m - 1)} ${y}`;
+}
 function formatLongDate(iso) {
   const [y, m, d] = String(iso).split('-').map(Number);
   if (!y || !m || !d) return '—';
@@ -19778,7 +19786,7 @@ function habillerChampDate(input, titre) {
   input.insertAdjacentElement('afterend', bouton);
 
   const majBouton = () => {
-    bouton.innerHTML = `<span>${esc(input.value ? formatShortDate(input.value) : trad('Choisir une date…'))}</span>${picto('agenda')}`;
+    bouton.innerHTML = `<span>${esc(input.value ? formatShortDateAvecAnnee(input.value) : trad('Choisir une date…'))}</span>${picto('agenda')}`;
     bouton.disabled = input.disabled;
   };
   majBouton();
