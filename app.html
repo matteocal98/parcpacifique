@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5b81KD+lGFTnRX8cDiwUCqLexL4FiekEhkUTBgt3KVE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rhPIVc8AUb7k40S0pOskwdY3ExHh0+W0PFM3qsuB90w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2757,6 +2757,112 @@
   .plan-field{margin-bottom:15px;}
   .plan-field .label{font-size:12px;font-weight:800;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.06em;}
   .plan-field .value{font-size:16px;margin-top:3px;line-height:1.5;}
+
+  /* ── FENÊTRE DES OFFRES (openUpgradeNotice) — reprise Stitch (maquette
+     « offres_abonnements_keeva » / « …_mobile »), avec le système de
+     variables CSS et les icônes maison de cette appli plutôt que Tailwind
+     CDN + Google Fonts + Material Symbols (CSP stricte de app.html, aucun
+     CDN externe — même choix que pour toutes les fonctionnalités
+     construites cette session, voir aussi la discussion CSS/CDN avec
+     l'utilisateur). Le contenu réel (grille tarifaire, textes, liens de
+     paiement) vient de OFFRE_GRILLE/OFFRES_PAYANTES, inchangé — seul
+     l'habillage change. Grille en auto-fit (même patron que
+     .tco-seuils-liste) : une seule mise en page pour desktop ET mobile,
+     pas de fichier séparé comme la maquette. */
+  .offres-modal .modal{max-width:1080px;}
+  .offres-entete{margin-bottom:20px;}
+  .offres-eyebrow-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .offres-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border-radius:var(--r-pill);
+    background:var(--surface-soft);color:var(--ink-2);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  }
+  .offres-eyebrow svg{width:18px;height:18px;flex:0 0 auto;}
+  .offres-eyebrow.is-restreint{background:rgba(192,57,43,.12);color:#c0392b;}
+  .offres-entete h2{font-size:26px;margin:0 0 4px;}
+  .offres-entete .sub{font-size:15px;color:var(--ink-2);max-width:640px;}
+  .offres-entete .sub strong{color:var(--ink);}
+
+  .offres-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:20px;}
+  .offre-carte{
+    display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-card);
+    box-shadow:var(--shadow-soft);overflow:hidden;position:relative;
+  }
+  .offre-carte.is-recommandee{border-color:var(--primary);box-shadow:0 8px 24px rgba(99,102,241,.18);}
+  .offre-ruban{
+    display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;background:var(--primary);color:#fff;
+    font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  }
+  .offre-ruban svg{width:14px;height:14px;}
+  .offre-carte-corps{flex:1;display:flex;flex-direction:column;gap:14px;padding:20px;}
+  .offre-carte-entete{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .offre-carte-nom{font-size:15px;font-weight:800;letter-spacing:.02em;color:var(--ink);}
+  .offre-carte-tag{
+    font-size:11px;font-weight:700;color:var(--ink-2);background:var(--surface-soft);padding:3px 9px;border-radius:var(--r-pill);
+    white-space:nowrap;display:inline-flex;align-items:center;gap:5px;
+  }
+  .offre-carte-tag.is-actuelle{background:var(--primary-tint);color:var(--primary-dark);}
+  .offre-carte-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);flex:0 0 auto;}
+  .offre-carte-prix{display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;}
+  .offre-carte-prix .nombre{font-size:36px;font-weight:700;color:var(--ink);letter-spacing:-.02em;}
+  .offre-carte-prix .devise{font-size:17px;font-weight:600;color:var(--ink);}
+  .offre-carte-prix .reste{font-size:12.5px;color:var(--ink-2);width:100%;}
+  .offre-carte.is-recommandee .offre-carte-prix .nombre,
+  .offre-carte.is-recommandee .offre-carte-prix .devise{color:var(--primary);}
+  .offre-carte-capacite{
+    display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-soft);font-size:13px;
+  }
+  .offre-carte-capacite svg{width:18px;height:18px;color:var(--ink-2);flex:0 0 auto;}
+  .offre-carte-capacite span{color:var(--ink-2);flex:1;}
+  .offre-carte-capacite strong{color:var(--ink);font-weight:800;}
+  .offre-carte-inclus .eyebrow{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin-bottom:8px;}
+  .offre-carte-inclus ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;}
+  .offre-carte-inclus li{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;color:var(--ink);}
+  .offre-carte-inclus li svg{width:16px;height:16px;color:var(--ok);flex:0 0 auto;margin-top:2px;}
+  .offre-carte-hint{font-size:11.5px;font-style:italic;color:var(--ink-3);line-height:1.5;}
+  .offre-carte-ajoute{font-size:12.5px;color:var(--ink-2);line-height:1.55;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-soft);}
+  .offre-carte-pied{padding:0 20px 20px;margin-top:auto;}
+  .offre-carte-pied .hint{margin-bottom:8px;}
+
+  .offre-bouton{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;padding:10px 14px;
+    border-radius:var(--r-chip);font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;border:1.5px solid transparent;
+    font-family:inherit;box-sizing:border-box;
+  }
+  .offre-bouton svg{width:16px;height:16px;flex:0 0 auto;}
+  .offre-bouton.is-neutre{background:var(--surface-soft);color:var(--ink-2);cursor:not-allowed;opacity:.85;}
+  .offre-bouton.is-accent{background:var(--surface-soft);color:var(--ink);border-color:var(--line);}
+  .offre-bouton.is-accent:hover{background:var(--line-2);}
+  .offre-bouton.is-primaire{background:var(--primary);color:#fff;box-shadow:0 6px 16px rgba(99,102,241,.30);}
+  .offre-bouton.is-primaire:hover{background:var(--primary-dark);}
+  .offre-bouton.is-secondaire{background:var(--surface);color:var(--ink);border-color:var(--line);}
+  .offre-bouton.is-secondaire:hover{background:var(--surface-soft);}
+
+  .offre-service{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 20px;border-radius:var(--r-lg);
+    background:var(--surface-soft);margin-bottom:14px;
+  }
+  .offre-service-icone{
+    width:44px;height:44px;border-radius:var(--r-md);background:var(--surface);display:flex;align-items:center;justify-content:center;
+    color:var(--primary);flex:0 0 auto;box-shadow:var(--shadow-soft);
+  }
+  .offre-service-icone svg{width:22px;height:22px;}
+  .offre-service-corps{flex:1;min-width:220px;}
+  .offre-service-titre-ligne{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .offre-service-titre-ligne h3{font-size:15px;margin:0;}
+  .offre-service-prix{font-weight:800;color:var(--primary);font-size:15px;}
+  .offre-service-corps p{margin:4px 0 0;font-size:13px;color:var(--ink-2);}
+  .offre-service .offre-bouton{width:auto;flex:0 0 auto;padding:10px 18px;}
+
+  .offres-pied{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding-top:6px;}
+  .offres-confiance{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .offres-confiance span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);}
+  .offres-confiance svg{width:16px;height:16px;color:var(--ok);flex:0 0 auto;}
+
+  @media (max-width:520px){
+    .offres-grille{grid-template-columns:1fr;}
+    .offre-service{flex-direction:column;align-items:flex-start;}
+    .offre-service .offre-bouton{width:100%;}
+  }
   /* Entre le titre « À faire » et le premier élément de la liste, puis entre les
      éléments eux-mêmes : deux écarts déjà employés ailleurs (10 et 8 px). */
   .plan-tasks{margin:10px 0 0;padding-left:18px;}
@@ -8949,6 +9055,23 @@ function contactEnterprise(companyId) {
     + '&body=' + encodeURIComponent(corpsContactOffre(offre, companyId));
 }
 
+// Même service, même prix (29 €), même sujet d'e-mail que le bouton de la
+// fiche machine (voir « Nous établissons votre plan d'entretien… », plus
+// bas dans ce fichier) — mais SANS machine précise en contexte ici (la
+// fenêtre des offres n'en porte aucune) : le corps invite à préciser
+// laquelle, plutôt que de fabriquer une référence.
+function contactPlanEtabli(companyId) {
+  const sujet = trad('Établissement d\'un plan d\'entretien (29 €)');
+  const corps = [
+    trad('Bonjour, je souhaite faire établir le plan d\'entretien d\'une de mes machines (29 €, réglés une fois).'),
+    '',
+    trad('Machine concernée :') + ' ',
+    '',
+    trad('Société :') + ' ' + (companyId || '—'),
+  ].join('\n');
+  return 'mailto:support@keeva.work?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps);
+}
+
 // ── Support côté client (tickets) ────────────────────────────────────────
 // Remplace le seul contact possible jusqu'ici (un lien mailto:) par un vrai
 // fil de discussion, lu et répondu depuis la console superviseur
@@ -9139,80 +9262,56 @@ async function afficherFilTicket(overlay, moi, ticketId) {
 // s'affiche dans la zone d'annonce de la fenêtre — même texte partout.
 function openUpgradeNotice(companyId, message) {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay offres-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-  // Le texte suit l'offre réellement souscrite : annoncer « plan gratuit » à un
-  // client Starter serait faux, et la grille doit rester identique d'un écran à
-  // l'autre. Le chiffre vient de la GRILLE, jamais d'une phrase recopiée.
+
+  // Cette fenêtre s'ouvre dans 3 cas bien différents — jamais annoncer un
+  // « quota atteint » qui ne serait pas vrai :
+  //  1. une restriction PRÉCISE est en cause (QR codes hors offre, machine
+  //     hors couverture après résiliation…) : `message` la décrit, affiché
+  //     en sous-titre — plus visible qu'avant (seulement dans #forfait-msg,
+  //     en bas de la fenêtre, où personne ne le voyait sans faire défiler).
+  //  2. le quota RÉEL de machines est atteint (limiteOffre(), même fonction
+  //     que handleAddMachine/refuserSiNonCouverte) : bandeau « quota atteint ».
+  //  3. simple consultation volontaire (bouton « Changer d'offre » de Mon
+  //     compte) : aucune restriction à annoncer, ton neutre.
   const offreCourante = () => offreDeLaGrille(UI.companyPlan || 'free');
   function phraseLimite() {
     const o = offreCourante();
-    if ((UI.companyPlan || 'free') === 'free') {
-      return `Ton offre Gratuit couvre ${o.machines}. Pour en suivre davantage, choisis une offre ci-dessous.`;
-    }
-    return `Ton offre ${o.offre} couvre ${o.machines}. Pour en suivre davantage, choisis une offre ci-dessous.`;
+    return tR('Ton offre {offre} couvre {machines}. Pour en suivre davantage, choisis une offre ci-dessous.',
+      { offre: `<strong>${esc(trad(o.offre))}</strong>`, machines: trad(o.machines) });
+  }
+  const quotaAtteint = limiteOffre() != null && UI.machines.length >= limiteOffre();
+  const restreint = Boolean(message) || quotaAtteint;
+  const titre = restreint ? trad('Limite de ton offre atteinte') : trad('Les offres KEEVA');
+  const eyebrowTexte = restreint ? trad('Accès limité par ton offre') : trad('Choisis ton offre');
+  const sousTitre = message ? esc(message) : (quotaAtteint ? phraseLimite() : trad('Compare les offres ci-dessous et choisis celle qui correspond à ton activité.'));
+
+  // Les TROIS enveloppes, une ligne cochée par ligne plutôt qu'une phrase
+  // fondue en une seule — chaque valeur vient de OFFRE_GRILLE, inchangée.
+  function enveloppesListe(o) {
+    return [o.analyses, o.photos, o.lectures]
+      .map((ligne) => `<li>${picto('coche')}<span>${trad(ligne)}</span></li>`).join('');
   }
 
-  // Les TROIS enveloppes, écrites dans cet ordre et jamais fondues en un seul
-  // chiffre : analyses de carnet, recherches de photo, lectures de compteur. La
-  // phrase qui tue l'ambiguïté est SOUS les chiffres, à côté d'eux.
-  function enveloppes(o) {
-    return `${trad(o.analyses)}, ${trad(o.photos)}, ${trad(o.lectures)} par mois`
-      + `<br>${trad('Les lectures de compteur ne consomment pas tes analyses.')}`;
-  }
-
-  // Une CARTE par offre, et un bouton SEULEMENT là où il mène quelque part :
-  //  • l'offre gratuite n'a pas de paiement — elle passe par la création de compte,
-  //    donc aucun lien ici ;
-  //  • l'offre déjà souscrite n'est pas proposée une seconde fois ;
-  //  • un lien absent se DIT, au lieu d'afficher un bouton qui ne mène nulle part.
-  //
-  // ⚠️ CLIENT DÉJÀ ABONNÉ : jamais de lien de paiement pour une autre offre. Il
-  // souscrirait un SECOND abonnement et paierait les deux. Le changement d'offre
-  // passe par le portail de facturation, qui l'ajuste au prorata.
-  const dejaAbonne = Boolean(UI.companyPlan && UI.companyPlan !== 'free');
-  const ligneOffre = (ligne, action) => `<div class="plan-field"><div class="value">${ligne}</div>${action}</div>`;
-  // Les mentions ci-dessous portent leur trad() : ce sont des fragments HTML
-  // dans des chaînes, que l'extraction automatique ne peut pas atteindre (elle ne
-  // voit que le texte des gabarits, pas ce qui est entre guillemets).
-  const tonOffre = `<div class="hint">${trad('Ton offre actuelle')}</div>`;
-  // Adresse de paiement retenue par offre : gardée de côté pour que le clic
-  // puisse ouvrir exactement le lien affiché, après relecture du palier.
-  const urlPaiement = {};
-  const lignes = OFFRES_PAYANTES.map((offre) => {
-    if (offre.cle === UI.companyPlan) return ligneOffre(offre.ligne, tonOffre);
-    if (dejaAbonne) {
-      return ligneOffre(offre.ligne, `
-        <div class="hint">${offre.changement}</div>
-        <div style="margin-top:8px;"><button type="button" class="primary" id="forfait-changer">${trad('Gérer mon abonnement')}</button></div>`);
-    }
-    const lien = STRIPE_LIENS[offre.cle];
-    if (!lien) return ligneOffre(offre.ligne, `<div class="hint">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@keeva.work.')}</div>`);
-    const url = lien + '?client_reference_id=' + encodeURIComponent(companyId);
-    urlPaiement[offre.cle] = url;
-    return ligneOffre(offre.ligne, `<div style="margin-top:8px;"><a id="forfait-payer-${offre.cle}" href="${url}" target="_blank" rel="noopener" class="primary" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${offre.bouton}</a></div>`);
-  }).join('');
-
-  // Ce qu'une offre AJOUTE, dit sans le cacher : le parc, les utilisateurs quand
-  // ils changent, l'enveloppe d'analyses, et la ligne d'inclus. Le cas du
-  // Starter est écrit noir sur blanc, écart d'utilisateurs compris.
+  // Ce qu'une offre AJOUTE, dit sans le cacher — texte inchangé par rapport à
+  // l'ancienne version de cette fenêtre, seul l'habillage change.
   function ajouts(o) {
     const parties = [];
     if (o.cle === 'free') {
-      parties.push(`Tu suis ${o.machines}, avec ${o.utilisateurs}.`);
-      parties.push(`Inclus : ${trad(o.inclus)}.`);
+      parties.push(tR('Tu suis {machines}, avec {utilisateurs}.', { machines: trad(o.machines), utilisateurs: trad(o.utilisateurs) }));
+      parties.push(tR('Inclus : {inclus}.', { inclus: trad(o.inclus) }));
       return parties.join(' ');
     }
     if (o.cle === 'starter') {
-      // L'écart d'utilisateurs est ÉCRIT, pas caché — et les deux phrases sont
-      // enveloppées : sans trad(), l'écran anglais montrerait du français.
+      // L'écart d'utilisateurs est ÉCRIT, pas caché.
       parties.push(trad('Ce que le Starter ajoute : 2 → 5 machines, l\'export CSV, 20 analyses au lieu de 10.'));
       parties.push(trad('Toujours un seul utilisateur, comme au Gratuit : c\'est écrit, pas caché.'));
       return parties.join(' ');
     }
     if (o.cle === 'business') {
-      parties.push(`Tu passes à ${o.machines} et à ${o.utilisateurs}.`);
+      parties.push(tR('Tu passes à {machines} et à {utilisateurs}.', { machines: trad(o.machines), utilisateurs: trad(o.utilisateurs) }));
       parties.push(trad('Inclus : multi-utilisateurs, QR codes, préparation groupée.'));
       return parties.join(' ');
     }
@@ -9221,56 +9320,138 @@ function openUpgradeNotice(companyId, message) {
     return parties.join(' ');
   }
 
+  // « Business / Flotte » → { nom:'BUSINESS', tag:'Flotte' } ; « Gratuit » →
+  // { nom:'GRATUIT', tag:null } — un découpage du VRAI nom d'offre déjà
+  // utilisé partout ailleurs (OFFRE_GRILLE.offre), jamais un sous-titre
+  // inventé pour ressembler à la maquette.
+  function decoupeNomOffre(offre) {
+    const [nom, tag] = trad(offre).split(' / ');
+    return { nom: nom.toUpperCase(), tag: tag || null };
+  }
+  // « 39 €/mois » → { nombre:'39', reste:'/mois' } — un découpage du VRAI
+  // prix. Repli sûr si le format ne matche pas (traduction future, etc.) :
+  // le prix entier s'affiche quand même, juste sans la mise en forme « gros
+  // chiffre ».
+  function decoupePrix(prix) {
+    const texte = trad(prix);
+    const m = /^(\d+)\s*€\s*(.*)$/.exec(texte);
+    return m ? { nombre: m[1], reste: m[2] } : { nombre: texte, reste: '' };
+  }
+
+  // ⚠️ CLIENT DÉJÀ ABONNÉ : jamais de lien de paiement pour une autre offre. Il
+  // souscrirait un SECOND abonnement et paierait les deux. Le changement d'offre
+  // passe par le portail de facturation, qui l'ajuste au prorata.
+  const dejaAbonne = Boolean(UI.companyPlan && UI.companyPlan !== 'free');
+  // Adresse de paiement retenue par offre : gardée de côté pour que le clic
+  // puisse ouvrir exactement le lien affiché, après relecture du palier.
+  const urlPaiement = {};
+  function offrePayanteVisantCle(cle) {
+    return OFFRES_PAYANTES.find((op) => offreDeLaGrille(op.cle).cle === cle) || null;
+  }
+
+  // Le PIED de chaque carte : UN SEUL bouton, celui qui mène quelque part —
+  // jamais un bouton qui ne fait rien. Avant ce chantier, les boutons de
+  // paiement vivaient dans une section À PART, sous les 4 cartes (dédoublé,
+  // décalé de l'offre qu'il concernait) : chaque carte porte désormais son
+  // propre bouton.
+  function piedCarte(o, estActuelle) {
+    if (estActuelle) {
+      return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`;
+    }
+    if (o.cle === 'enterprise') {
+      return `<a href="${contactEnterprise(companyId)}" class="offre-bouton is-secondaire">${trad('Nous contacter pour cette offre')}${picto('mail')}</a>`;
+    }
+    if (o.cle === 'free') return ''; // pas de « retour au gratuit » depuis cette fenêtre
+    const correspondante = offrePayanteVisantCle(o.cle);
+    if (!correspondante) return '';
+    if (dejaAbonne) {
+      return `<div class="hint">${correspondante.changement}</div>
+        <button type="button" class="offre-bouton js-forfait-changer" id="forfait-changer-${o.cle}">${trad('Gérer mon abonnement')}</button>`;
+    }
+    const lien = STRIPE_LIENS[correspondante.cle];
+    if (!lien) return `<div class="hint">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@keeva.work.')}</div>`;
+    const url = lien + '?client_reference_id=' + encodeURIComponent(companyId);
+    urlPaiement[correspondante.cle] = url;
+    const classe = o.recommandee ? 'offre-bouton is-primaire' : 'offre-bouton is-accent';
+    return `<a id="forfait-payer-${correspondante.cle}" href="${url}" target="_blank" rel="noopener" class="${classe}">${trad(correspondante.bouton)}${picto(o.recommandee ? 'eclair' : 'flecheDroite')}</a>`;
+  }
+
+  const carteCleActuelle = OFFRES_HISTORIQUES[UI.companyPlan] || UI.companyPlan;
   const cartes = OFFRE_GRILLE.map((o) => {
-    const badge = o.recommandee
-      ? `<span class="badge soon">${trad('RECOMMANDÉ')}</span>`
-      : '';
-    // L'offre souscrite est marquée : un client sur une offre historique
-    // (eco, pro, paid, unlimited) retrouve ici le nom sous lequel on la lui
-    // présente désormais — rien n'a bougé en base.
-    const marque = o.cle === (OFFRES_HISTORIQUES[UI.companyPlan] || UI.companyPlan) ? tonOffre : '';
-    // UNE PORTE DE SORTIE POUR L'OFFRE SUR MESURE. Enterprise n'a pas de lien
-    // de paiement (on ne fabrique pas d'adresse Stripe), mais une carte sans
-    // aucun bouton laisse le client devant un mur : le contact est donc
-    // PRÉ-REMPLI, comme l'offre d'établissement du plan.
-    const contact = o.cle === 'enterprise'
-      ? `<div style="margin-top:8px;"><a id="forfait-contact-enterprise" href="${contactEnterprise(companyId)}" class="primary" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${trad('Nous contacter pour cette offre')}</a></div>`
-      : '';
-    return `<div class="plan-field">
-      <div class="value">${trad(o.offre)} — ${trad(o.prix)}, ${trad(o.machines)}${badge}</div>
-      <div class="hint">${enveloppes(o)}</div>
-      <div class="hint">${ajouts(o)}</div>
-      ${contact}
-      ${marque}
-    </div>`;
+    const { nom, tag } = decoupeNomOffre(o.offre);
+    const { nombre, reste } = decoupePrix(o.prix);
+    const estActuelle = o.cle === carteCleActuelle;
+    return `
+      <div class="offre-carte${o.recommandee ? ' is-recommandee' : ''}">
+        ${o.recommandee ? `<div class="offre-ruban">${picto('etincelle')}<span>${trad('RECOMMANDÉ')}</span></div>` : ''}
+        <div class="offre-carte-corps">
+          <div class="offre-carte-entete">
+            <span class="offre-carte-nom">${nom}</span>
+            <span class="offre-carte-tag${estActuelle ? ' is-actuelle' : ''}">${estActuelle ? `<span class="dot"></span>${trad('Offre actuelle')}` : esc(tag || '')}</span>
+          </div>
+          <div class="offre-carte-prix">
+            <span class="nombre">${esc(nombre)}</span><span class="devise">€</span>${reste ? `<span class="reste">${esc(reste)}</span>` : ''}
+          </div>
+          <div class="offre-carte-capacite">${picto('parcMachine')}<span>${trad('Capacité flotte')}</span><strong>${trad(o.machines)}</strong></div>
+          <div class="offre-carte-inclus">
+            <span class="eyebrow">${trad('Inclus chaque mois')}</span>
+            <ul>${enveloppesListe(o)}</ul>
+          </div>
+          <div class="offre-carte-hint">${trad('Les lectures de compteur ne consomment pas tes analyses.')}</div>
+          <div class="offre-carte-ajoute">${ajouts(o)}</div>
+        </div>
+        <div class="offre-carte-pied">${piedCarte(o, estActuelle)}</div>
+      </div>`;
   }).join('');
-  // L'ÉTABLISSEMENT DU PLAN : 29 € l'acte, et le processus ne change pas — il
-  // passe toujours par l'e-mail pré-rempli de la fiche machine, pas par un
-  // paiement dans cette fenêtre.
-  const lignePlan = ligneOffre(trad('Établissement de ton plan d\'entretien — 29 € l\'acte'), `<div class="hint">${trad('Le processus ne change pas : tu nous écris depuis la fiche de la machine, l\'e-mail part pré-rempli.')}</div>`);
+
+  // L'ÉTABLISSEMENT DU PLAN : 29 € l'acte, toujours proposé (même service
+  // quelle que soit l'offre) — la demande part par e-mail pré-rempli, comme
+  // partout ailleurs où ce service est proposé (voir contactPlanEtabli).
+  const blocPlan = `
+    <div class="offre-service">
+      <div class="offre-service-icone">${picto('carnet')}</div>
+      <div class="offre-service-corps">
+        <div class="offre-service-titre-ligne">
+          <h3>${trad('Établissement de ton plan d\'entretien')}</h3>
+          <span class="offre-service-prix">${trad('29 € l\'acte')}</span>
+        </div>
+        <p>${trad('Le processus ne change pas : tu nous écris depuis la fiche de la machine, l\'e-mail part pré-rempli.')}</p>
+      </div>
+      <a href="${contactPlanEtabli(companyId)}" class="offre-bouton is-secondaire">${trad('Demander un plan')}${picto('flecheDroite')}</a>
+    </div>`;
 
   overlay.innerHTML = `
     <div class="modal">
-      <h2>${trad('Limite de ton offre atteinte')}</h2>
-      <p class="sub">${phraseLimite()}</p>
-      <div class="chemin-titre">${trad('Les offres')}</div>
-      ${cartes}
-      ${lignePlan}
-      ${lignes}
+      <div class="offres-entete">
+        <div class="offres-eyebrow-ligne">
+          <span class="offres-eyebrow${restreint ? ' is-restreint' : ''}">${picto('cadenas')}${eyebrowTexte}</span>
+          <button type="button" class="log-close2" id="close-upgrade-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+        </div>
+        <h2>${titre}</h2>
+        <p class="sub">${sousTitre}</p>
+      </div>
+      <div class="offres-grille">${cartes}</div>
+      ${blocPlan}
       <div class="hint" id="forfait-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
+      <div class="offres-pied">
+        <div class="offres-confiance">
+          <span>${picto('paiement')}${trad('Paiement sécurisé Stripe')}</span>
+          <span>${picto('reglages')}${trad('Résiliable à tout moment')}</span>
+        </div>
         <button type="button" class="secondary" id="close-upgrade">${trad('Fermer')}</button>
       </div>
     </div>`;
   overlay.querySelector('#close-upgrade').addEventListener('click', () => overlay.remove());
-  if (message) {
-    const annonce = document.getElementById('forfait-msg');
-    if (annonce) annonce.textContent = message;
-  }
+  overlay.querySelector('#close-upgrade-x').addEventListener('click', () => overlay.remove());
+
   // Le changement d'offre d'un client abonné passe par le portail : la fenêtre
   // reste ouverte pour pouvoir dire ce qui s'est mal passé, le cas échéant.
-  const changeur = document.getElementById('forfait-changer');
-  if (changeur) changeur.addEventListener('click', () => ouvrirPortailAbonnement('forfait-msg', 'forfait-changer'));
+  // Plusieurs boutons possibles (ex. client Enterprise : Starter ET Business
+  // affichent tous deux « Gérer mon abonnement »), chacun avec son propre id
+  // — ouvrirPortailAbonnement désactive LE bouton cliqué pendant l'appel.
+  overlay.querySelectorAll('.js-forfait-changer').forEach((bouton) => {
+    bouton.addEventListener('click', () => ouvrirPortailAbonnement('forfait-msg', bouton.id));
+  });
   // DERNIER REMPART CONTRE LE DOUBLE ABONNEMENT : un compte vu « gratuit » peut
   // être devenu payant dans l'intervalle (le webhook Stripe écrit quelques
   // secondes après le paiement). On RELIT donc le palier en base au moment du
@@ -9287,7 +9468,7 @@ function openUpgradeNotice(companyId, message) {
       if (palier && palier !== 'free') {
         overlay.remove();
         openUpgradeNotice(companyId);
-        ouvrirPortailAbonnement('forfait-msg', 'forfait-changer');
+        ouvrirPortailAbonnement('forfait-msg', 'forfait-changer-' + offreDeLaGrille(offre.cle).cle);
         return;
       }
       ouvrirLienExterne(urlPaiement[offre.cle]);
@@ -11115,6 +11296,9 @@ const PICTOS = {
   // Import CSV (catalogue de pièces) — même silhouette que `export`
   // (flèche + plateau), flèche inversée vers le haut.
   televerser: '<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/>',
+  // Fenêtre des offres (openUpgradeNotice, reprise Stitch) — bouton de
+  // l'offre recommandée.
+  eclair: '<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
