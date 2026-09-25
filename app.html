@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cpH2HZIgCF4B5ou12SQul9SD65qsxOYN91u75Y31di0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NIdbT/TaCMRqT+7hHQuwgBQBu8V1j0KYt68ivtlX+WA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -14182,10 +14182,50 @@ function planningIcsTexte() {
   lignes.push('END:VCALENDAR');
   return lignes.join('\r\n');
 }
-function telechargerPlanningIcs() {
+// Dans l'appli installée, <a download> (voir le repli tout en bas) ne
+// déclenche souvent RIEN de visible : les WebView Android n'ont pas de
+// gestionnaire de téléchargements par défaut, contrairement à un vrai
+// navigateur — constaté en test réel, bouton resté sans effet apparent.
+// Passerelle native : écrire le fichier dans le cache (Filesystem), puis
+// l'OUVRIR (FileOpener) — testé en réel : le PARTAGE (Share, ACTION_SEND
+// côté Android) n'a jamais proposé les applis calendrier, celles-ci ne
+// s'enregistrant que pour « Ouvrir avec » (ACTION_VIEW), un mécanisme
+// différent — @capacitor-community/file-opener déclenche précisément
+// celui-là, avec le bon type MIME (text/calendar), et Android y présente
+// les applis calendrier installées.
+async function telechargerPlanningIcs() {
   const { dated } = agendaEvenements();
   if (!dated.length) { showToast(trad('Aucune échéance datée à exporter.')); return; }
-  const blob = new Blob([planningIcsTexte()], { type: 'text/calendar;charset=utf-8;' });
+  const texte = planningIcsTexte();
+  const cap = window.Capacitor;
+  const filesystem = cap?.Plugins?.Filesystem;
+  const fileOpener = cap?.Plugins?.FileOpener;
+  if (cap?.isNativePlatform?.() && filesystem && fileOpener) {
+    try {
+      const { uri } = await filesystem.writeFile({
+        path: 'planning-keeva.ics',
+        data: texte,
+        directory: 'CACHE',
+        encoding: 'utf8',
+      });
+      await fileOpener.open({
+        filePath: uri,
+        contentType: 'text/calendar',
+        openWithDefault: false, // affiche toujours le choix, jamais une ouverture silencieuse avec une appli déjà choisie par défaut
+      });
+    } catch (err) {
+      // L'utilisateur qui ferme le sélecteur sans choisir n'a rien à se
+      // reprocher : ce n'est pas une erreur, jamais annoncée comme telle.
+      if (err?.message && !/cancel/i.test(err.message)) {
+        showToast(trad('Ouverture impossible :') + ' ' + err.message);
+      }
+    }
+    return;
+  }
+  // Web/bureau : le téléchargement direct fonctionne réellement (double-clic
+  // sur le fichier ouvre le calendrier par défaut) — la passerelle native
+  // ci-dessus ne sert qu'à contourner la limite propre à l'appli installée.
+  const blob = new Blob([texte], { type: 'text/calendar;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -14258,7 +14298,7 @@ VIEWS.agenda = {
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Planification & logistique')}</span>
         <div class="agenda-toolbar-actions">
-          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter le planning (.ics)')}</span></button>
+          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${trad('Intégrer à l\'agenda du téléphone')}</span></button>
           <button type="button" class="primary" id="agenda-planifier"><span class="card-ico">${picto('croix')}</span><span>${trad('Planifier un entretien')}</span></button>
         </div>
       </div>
