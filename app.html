@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2uansZS4sbIst6GEYO/pXMjclzelwFqBLqMpOW2zAYA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cMqcIWLVs3Q7MhnkYEvQ3oB2JyXRQf9KdunZpgX1Cpw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5157,6 +5157,108 @@ function optionsCategorie(liste, choisie) {
 
 function optionsCategorieListe(choisie, chargees) {
   return optionsCategorie(categoriesUtiles(chargees), choisie);
+}
+
+// ── ORGANES DÉFAILLANTS (Dépannage curatif) : même patron que les
+// catégories de machine ci-dessus — liste de départ embarquée (générique,
+// utile hors connexion) + mémoire locale (localStorage) + table
+// `intervention_components` (company_id) pour qu'un organe tapé via
+// « Autre… » se partage avec toute l'équipe, pas seulement cet appareil.
+// Rendu configurable à la demande : à l'origine une taxonomie fixe à 4
+// entrées, figée dans le code (voir openLogInterventionModal).
+const CLE_COMPOSANTS = 'keeva-composants';
+const COMPOSANT_AUTRE = 'AUTRE';
+const COMPOSANTS_DEPART = [
+  'Circuit hydraulique (Flexible, vérin, pompe)',
+  'Moteur thermique / Injection / Refroidissement',
+  'Train de roulement (Chenille, galet, barbotin)',
+  'Système électrique / Démarreur / Batterie',
+  'Transmission / Boîte de vitesses / Embrayage',
+  'Organe de coupe (Lame, chaîne, fil, disque)',
+  'Freinage (Frein, plaquettes, disques)',
+  'Pneumatiques / Roues / Essieux',
+  'Direction / Timonerie',
+  'Carrosserie / Châssis / Structure',
+];
+
+function composantsLocaux() {
+  try {
+    const brut = localStorage.getItem(CLE_COMPOSANTS);
+    const liste = brut ? JSON.parse(brut) : [];
+    return Array.isArray(liste) ? liste.map((s) => String(s).trim()).filter(Boolean) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+// Départ + vu sur cet appareil + vu en base (toute l'équipe) — dédoublonné
+// sans tenir compte de la casse, trié en français. Même rôle que
+// categoriesUtiles(), pour un référentiel différent (pas de majuscules
+// forcées ici : ce sont des libellés de description, pas des étiquettes).
+function composantsUtiles(chargees) {
+  const vues = new Map();
+  const ajouter = (nom) => {
+    const propre = String(nom || '').trim();
+    if (!propre) return;
+    const cle = propre.toLowerCase();
+    if (!vues.has(cle)) vues.set(cle, propre);
+  };
+  COMPOSANTS_DEPART.forEach(ajouter);
+  composantsLocaux().forEach(ajouter);
+  (Array.isArray(chargees) ? chargees : []).forEach((c) => ajouter(c && c.name ? c.name : c));
+  return [...vues.values()].sort((a, b) => a.localeCompare(b, 'fr'));
+}
+
+function retenirComposant(nom) {
+  const propre = String(nom || '').trim();
+  if (!propre) return false;
+  const liste = composantsUtiles(composantsLocaux());
+  if (liste.some((c) => c.toLowerCase() === propre.toLowerCase())) return false;
+  liste.push(propre);
+  try { localStorage.setItem(CLE_COMPOSANTS, JSON.stringify(liste)); } catch (err) { /* stockage plein : la liste de départ suffit */ }
+  return true;
+}
+
+function optionsComposant(liste, choisie) {
+  const valeur = String(choisie || '').trim();
+  const connue = liste.includes(valeur);
+  const options = [`<option value="" disabled${valeur ? '' : ' selected'}>${esc(trad('Choisis un organe'))}</option>`];
+  for (const nom of liste) {
+    options.push(`<option value="${esc(nom)}"${nom === valeur ? ' selected' : ''}>${esc(nom)}</option>`);
+  }
+  options.push(`<option value="${COMPOSANT_AUTRE}"${valeur && !connue ? ' selected' : ''}>${esc(trad('Autre…'))}</option>`);
+  return options.join('');
+}
+function optionsComposantListe(choisie, chargees) {
+  return optionsComposant(composantsUtiles(chargees), choisie);
+}
+
+// Câblage « Autre… » : même trick que brancherCategorie (l'option
+// sentinelle DEVIENT le texte saisi, pour que tout le reste du code
+// continue de lire `#log-organe.value` sans rien changer).
+function brancherComposant(overlay) {
+  const select = overlay.querySelector('#log-organe');
+  const autre = overlay.querySelector('#log-organe-autre');
+  if (!select || !autre) return;
+  const sentinelle = select.querySelector(`option[value="${COMPOSANT_AUTRE}"]`);
+  const maj = () => {
+    const actif = select.dataset.autre === '1';
+    autre.hidden = !actif;
+    if (!actif) { autre.value = ''; return; }
+    const texte = autre.value.trim();
+    autre.value = texte;
+    if (sentinelle) {
+      sentinelle.value = texte || COMPOSANT_AUTRE;
+      sentinelle.textContent = texte || trad('Autre…');
+    }
+  };
+  select.addEventListener('change', () => {
+    select.dataset.autre = select.value === COMPOSANT_AUTRE ? '1' : '0';
+    maj();
+    if (select.dataset.autre === '1' && typeof autre.focus === 'function') autre.focus();
+  });
+  autre.addEventListener('input', maj);
+  maj();
 }
 
 // ── Modèle « compteur » générique (heures ou kilomètres) ──────
@@ -10801,6 +10903,7 @@ const UI = {
   email: '',
   machines: [],
   categories: [],
+  components: [],
   reminders: { ...DEFAULT_REMINDERS },
   counts: { late: 0, soon: 0, ok: 0, manuals: 0, analysed: 0 },
 };
@@ -19886,16 +19989,9 @@ function openLogInterventionModal(machine, tache) {
   const compteurActuel = machineCounter(machine);
   const avecTypes = SCHEMA.hasTco;
 
-  // Organe mécanique défaillant (Dépannage) : taxonomie fixe, réelle,
-  // écrite dans interventions.component — pas une donnée par machine
-  // (aucun référentiel d'organes n'existe ailleurs dans l'app), un choix
-  // générique assumé comme tel.
-  const ORGANES = {
-    hydraulique: trad('Circuit hydraulique (Flexible, vérin, pompe)'),
-    moteur: trad('Moteur thermique / Injection / Refroidissement'),
-    chenilles: trad('Train de roulement (Chenille, galet, barbotin)'),
-    electrique: trad('Système électrique / Démarreur / Batterie'),
-  };
+  // Organe mécanique défaillant (Dépannage) : référentiel configurable —
+  // voir COMPOSANTS_DEPART/composantsUtiles/brancherComposant, écrit dans
+  // interventions.component (texte libre, pas de clé interne).
   // Nature du frais (Frais & Carburant) : chaque option pointe vers l'un
   // des 5 genres RÉELS déjà utilisés par operating_costs.kind (voir
   // blocCatalogueTcoHtml/openLogOperatingCostModal d'origine) — jamais un
@@ -20057,9 +20153,8 @@ function openLogInterventionModal(machine, tache) {
           <div class="log-panel" id="log-panel-depannage" hidden style="margin-top:10px;">
             <div>
               <label for="log-organe">${trad('Organe mécanique défaillant')}</label>
-              <select id="log-organe" required>
-                ${Object.entries(ORGANES).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}
-              </select>
+              <select id="log-organe" required>${optionsComposantListe('', UI.components)}</select>
+              <input id="log-organe-autre" placeholder="${trad('Ex. Réservoir de carburant')}" hidden>
             </div>
             <div>
               <label>${trad('Gravité sur le chantier')}</label>
@@ -20178,6 +20273,7 @@ function openLogInterventionModal(machine, tache) {
   habillerSelect(overlay.querySelector('#log-operateur'), trad('Intervenant assigné'));
   habillerChampDate(overlay.querySelector('#log-date'), trad('Date de l\'intervention'));
   habillerSelect(overlay.querySelector('#log-organe'), trad('Organe mécanique défaillant'));
+  brancherComposant(overlay);
   habillerSelect(overlay.querySelector('#log-frais-nature'), trad('Nature du frais'));
   (async () => {
     const select = overlay.querySelector('#log-operateur');
@@ -20560,6 +20656,23 @@ function openLogInterventionModal(machine, tache) {
           // n'a été choisi, c'est le seul signal fiable ici.
           .filter((l) => l.partId && l.quantity > 0)
       : [];
+
+    // Nouvel organe tapé via « Autre… » : enregistré dans le référentiel de
+    // la société AVANT l'intervention, pour qu'il réapparaisse pour toute
+    // l'équipe dès la prochaine ouverture — jamais bloquant : une erreur ici
+    // (ex. conflit d'unicité si deux personnes l'ajoutent en même temps)
+    // n'empêche pas l'enregistrement de l'intervention elle-même.
+    if (componentVal && !composantsUtiles(UI.components).some((c) => c.toLowerCase() === componentVal.toLowerCase())) {
+      try {
+        const { data: newComp } = await sb
+          .from('intervention_components')
+          .insert({ company_id: UI.companyId, name: componentVal })
+          .select('id, name')
+          .single();
+        if (newComp) UI.components.push(newComp);
+        retenirComposant(componentVal);
+      } catch (err) { /* référentiel non critique */ }
+    }
 
     try {
       const { data: intervention, error: logErr } = await sb.from('interventions').insert({
@@ -22690,6 +22803,7 @@ function afficherDepuisCache(cache) {
   UI.contactName = cache.contactName || '';
   UI.email = cache.email || '';
   UI.categories = cache.categories || [];
+  UI.components = cache.components || [];
   UI.partsCatalog = cache.partsCatalog || [];
   UI.machines = cache.machines || [];
   UI.scheduledMaintenances = cache.scheduledMaintenances || [];
@@ -22948,6 +23062,15 @@ async function boot(toastMessage) {
     partsCatalog = pieces || [];
   }
 
+  // Référentiel des organes défaillants (Dépannage curatif) : même endroit
+  // que les catégories/le catalogue pièces — chargé une fois, réutilisé
+  // partout où openLogInterventionModal est appelée (voir composantsUtiles).
+  const { data: composants } = await sb
+    .from('intervention_components')
+    .select('id, name')
+    .eq('company_id', profile.company_id)
+    .order('name');
+
   UI.companyId = profile.company_id;
   UI.companyName = company?.name || trad('Ta société');
   UI.companyPlan = company?.plan || 'free';
@@ -22986,6 +23109,7 @@ async function boot(toastMessage) {
   UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
   UI.categories = categories || [];
+  UI.components = composants || [];
   UI.partsCatalog = partsCatalog;
   UI.machines = (machines || []).map(m => ({
     ...m,
@@ -23018,6 +23142,7 @@ async function boot(toastMessage) {
     contactName: UI.contactName,
     email: UI.email,
     categories: UI.categories,
+    components: UI.components,
     partsCatalog: UI.partsCatalog,
     machines: UI.machines,
     scheduledMaintenances: UI.scheduledMaintenances,
