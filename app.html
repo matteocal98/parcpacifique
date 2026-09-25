@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Unc5VoOFDHXLOXJ9hZB0WWQdg3HE5DADTgYDpmKWImY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-LEK2/hDnAiW6Z0YhgS83n/s3a6CMaSM58Rv5D8yjrEw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4682,6 +4682,18 @@
   .tco-seuil-moyenne-tag:empty{display:none;}
   .tco-seuil-carte .tco-champ-unite{width:100%;background:#fff;border-radius:var(--r-md);border:1px solid var(--line);padding:5px;}
   .tco-seuil-carte .tco-champ-unite input{border:none;background:none;}
+
+  /* Impression d'un QR code de machine (ouvrirQrMachine/imprimerQr) : un
+     calque invisible à l'écran, seul élément visible sur la page imprimée —
+     tout le reste (appli, menus) est masqué le temps de l'impression. */
+  #qr-impression{display:none;}
+  @media print{
+    body>*:not(#qr-impression){display:none!important;}
+    #qr-impression{display:flex!important;flex-direction:column;align-items:center;gap:10px;padding:40px;}
+    #qr-impression img{width:300px;height:300px;}
+    #qr-impression .qr-impression-nom{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;}
+    #qr-impression .qr-impression-id{font-size:13px;color:#555;}
+  }
 </style>
 </head>
 <body>
@@ -4698,6 +4710,13 @@ const __isPasswordRecovery = window.location.hash.includes('type=recovery');
 // fois contre une vraie session, voir activerModeSupport() plus bas.
 const __paramsSupport = new URLSearchParams(window.location.search);
 const __isModeSupport = __paramsSupport.has('mode_support');
+// Lien profond depuis un QR code de machine (imprimé ou scanné dans l'appli) :
+// `?qr=<id machine>`. Lu ICI, avant toute authentification, car un QR peut
+// être scanné par quelqu'un pas encore connecté — la constante survit
+// jusqu'à ouvrirFicheDepuisQrSiPresent() (appelée après le rendu du parc,
+// voir boot()) puisqu'elle n'est capturée qu'une seule fois au chargement.
+const __paramsQr = new URLSearchParams(window.location.search);
+const __machineIdDepuisQr = __paramsQr.get('qr');
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const app = document.getElementById('app');
@@ -7231,6 +7250,47 @@ async function renderPdfFirstPageAsBlob(file) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
 }
 
+// ── QR CODES (génération + scan) — mêmes bibliothèques VENDUES localement,
+// chargées à la demande, même patron que loadPdfLib() ci-dessus : jamais un
+// CDN, jamais chargé tant que personne n'ouvre la section QR d'une fiche ou
+// le scanner. Deux bibliothèques distinctes et volontairement indépendantes :
+// `qrcode` (génération, vendor/qrcode.min.js) et `jsQR` (décodage de secours,
+// vendor/jsqr.min.js — utilisé seulement si `BarcodeDetector` natif est
+// absent du navigateur/WebView, voir ouvrirScannerQr()).
+const QRCODE_URL = "vendor/qrcode.min.js";
+let qrCodeLibPromise = null;
+function loadQrCodeLib() {
+  if (window.qrcode) return Promise.resolve(window.qrcode);
+  if (!qrCodeLibPromise) {
+    qrCodeLibPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = QRCODE_URL;
+      s.onload = () => (window.qrcode ? resolve(window.qrcode) : reject(new Error("qrcode.js indisponible")));
+      s.onerror = () => reject(new Error(trad('Téléchargement du générateur de QR code impossible.')));
+      document.head.appendChild(s);
+    });
+    qrCodeLibPromise.catch(() => { qrCodeLibPromise = null; });
+  }
+  return qrCodeLibPromise;
+}
+
+const JSQR_URL = "vendor/jsqr.min.js";
+let jsQrLibPromise = null;
+function loadJsQrLib() {
+  if (window.jsQR) return Promise.resolve(window.jsQR);
+  if (!jsQrLibPromise) {
+    jsQrLibPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = JSQR_URL;
+      s.onload = () => (window.jsQR ? resolve(window.jsQR) : reject(new Error("jsQR indisponible")));
+      s.onerror = () => reject(new Error(trad('Téléchargement du lecteur de QR code impossible.')));
+      document.head.appendChild(s);
+    });
+    jsQrLibPromise.catch(() => { jsQrLibPromise = null; });
+  }
+  return jsQrLibPromise;
+}
+
 // ── RECHERCHE D'IMAGE : BORNÉE, ANNONCÉE, ET REMPLAÇABLE ──────────────
 //
 // POURQUOI TOUT CECI EXISTE. Constat d'usage réel : sur un camion benne ISUZU,
@@ -8599,6 +8659,15 @@ const OFFRES_HISTORIQUES = { eco: 'starter', pro: 'business', paid: 'enterprise'
 function offreDeLaGrille(cle) {
   const visee = OFFRES_HISTORIQUES[cle] || cle;
   return OFFRE_GRILLE.find((o) => o.cle === visee) || OFFRE_GRILLE[0];
+}
+
+// Les QR codes sont annoncés dans l'offre Business (voir `inclus` de
+// OFFRE_GRILLE ci-dessus). On réutilise offreDeLaGrille() plutôt que de
+// dupliquer une liste de clés de plan à la main : elle gère déjà le
+// grandfathering (OFFRES_HISTORIQUES) et c'est la MÊME fonction qui décide
+// quel palier afficher sur l'écran des offres — aucune chance de diverger.
+function planCouvreQr() {
+  return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
 }
 
 // La ligne affichée pour une offre payante : son nom puis son parc. Le prix est
@@ -10696,6 +10765,7 @@ const PICTOS = {
   plan: '<path d="M9 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H9"/><path d="M4.5 8.5l1.6 1.6L9 7.2"/><path d="M4.5 15.5l1.6 1.6L9 14.2"/>',
   reglages: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   carnet: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v18H6.5A1.5 1.5 0 0 1 5 19.5z"/><path d="M8.5 3v18"/>',
+  qrcode: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M20 14v3h-2"/><path d="M14 20h3"/><path d="M20 20h.01"/>',
   photo: '<path d="M3.5 8.5h3.2l1.6-2.2h7.4l1.6 2.2h3.2v10.5h-17z"/><circle cx="12" cy="13.5" r="3.4"/>',
   compteur: '<path d="M4.5 18.5a8.5 8.5 0 1 1 15 0"/><path d="M12 13.8 16.6 9"/>',
   filtre: '<path d="M3.5 5.5h17l-6.6 7.6v6.4l-3.8-2.2v-4.2z"/>',
@@ -12644,6 +12714,7 @@ VIEWS.machines = {
             <span class="parc-count-pill"><span class="dot"></span>${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
           </div>
           <div class="parc-toolbar-actions">
+            <button type="button" class="parc-export-btn" id="fleet-scanner">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>
             <button type="button" class="parc-export-btn" id="fleet-export">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
             <button type="button" class="btn-primary fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
           </div>
@@ -12688,6 +12759,10 @@ VIEWS.machines = {
     // l'affichage de la liste, qui est l'essentiel de cette vue.
     root.querySelector('#fleet-add')?.addEventListener('click', handleAddMachine);
     root.querySelector('#fleet-export')?.addEventListener('click', exporterParcCsv);
+    // Pas de gating de plan ici : le scanner lui-même est gratuit (voir
+    // planCouvreQr(), qui ne borne que la GÉNÉRATION du QR) — un QR d'une
+    // société tierce scanné ici résout silencieusement à rien.
+    root.querySelector('#fleet-scanner')?.addEventListener('click', ouvrirScannerQr);
 
     const search = root.querySelector('#fleet-search');
     if (search) {
@@ -20595,6 +20670,7 @@ function openPlanView(machine, companyId, categories) {
       <div class="plan-toolbar">
         <button type="button" class="plan-toolbar-btn" id="edit-from-plan">${picto('crayon')}<span>${trad('Modifier la machine')}</span></button>
         ${machine.manual_url ? `<button type="button" class="plan-toolbar-btn" id="plan-view-manual">${picto('carnet')}<span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
+        <button type="button" class="plan-toolbar-btn" id="plan-qr-code">${picto('qrcode')}<span>${trad('QR code')}</span></button>
         <button type="button" class="plan-toolbar-btn is-primary" id="log-from-plan">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
       </div>
       <div class="plan-hero">
@@ -20696,6 +20772,13 @@ function openPlanView(machine, companyId, categories) {
   overlay.querySelector('#log-from-plan').addEventListener('click', () => {
     overlay.remove();
     openLogInterventionModal(machine);
+  });
+  overlay.querySelector('#plan-qr-code').addEventListener('click', () => {
+    if (!planCouvreQr()) {
+      openUpgradeNotice(companyId, trad('Les QR codes sont inclus à partir de l\'offre Business.'));
+      return;
+    }
+    ouvrirQrMachine(machine);
   });
   // L'ajout d'un coût d'exploitation se fait maintenant exclusivement via
   // l'onglet « Frais & Carburant » de openLogInterventionModal (bouton
@@ -20877,6 +20960,242 @@ function openPlanView(machine, companyId, categories) {
       <div class="hint">${tR('{n} entretien(s) enregistré(s).', { n: historyData.length })}</div>`);
   })();
 }
+
+// ── LIEN PROFOND QR CODE : deux chemins, UNE seule résolution ──────────
+// Un QR imprimé encode une URL complète (`.../app.html?qr=<id>`). Elle peut
+// être ouverte de deux façons, qui doivent aboutir EXACTEMENT au même
+// résultat :
+//   1. Scan par l'appareil photo natif du téléphone (hors appli) → l'URL est
+//      chargée normalement → boot() → ouvrirFicheDepuisQrSiPresent().
+//   2. Scan DEPUIS le scanner intégré (app ouverte) → ouvrirScannerQr()
+//      décode le texte, en extrait le paramètre `qr`, et appelle directement
+//      ouvrirFicheParId() — sans recharger la page.
+// Les deux chemins passent donc par ouvrirFicheParId(), jamais dupliquée.
+function ouvrirFicheParId(machineId) {
+  const m = UI.machines.find((x) => x.id === machineId);
+  if (m) { openPlanView(m, UI.companyId, UI.categories); return true; }
+  // Silencieux et sans erreur brute : un id inconnu ou d'une AUTRE société
+  // (donc absent de UI.machines, déjà filtré par société) ne doit jamais
+  // afficher une erreur technique — juste dire qu'il n'y a rien à voir ici.
+  showToast(trad('Machine introuvable ou non accessible.'));
+  return false;
+}
+
+// Appelée une fois, après le rendu du parc dans boot() (UI.machines est
+// alors chargé) — jamais avant, sinon la recherche échouerait à tort.
+function ouvrirFicheDepuisQrSiPresent() {
+  if (!__machineIdDepuisQr) return;
+  // Nettoyage IMMÉDIAT de l'URL, même discipline qu'activerModeSupport() :
+  // un id de machine qui traîne dans l'historique ne doit pas rouvrir la
+  // fiche à chaque rafraîchissement de la page.
+  history.replaceState(null, '', window.location.pathname);
+  ouvrirFicheParId(__machineIdDepuisQr);
+}
+
+// ── QR CODE D'UNE MACHINE : génération, téléchargement, impression ─────
+// Gated Business+ côté appelant (planCouvreQr(), voir le clic sur
+// #plan-qr-code dans openPlanView) — cette fonction-ci ne revérifie pas le
+// palier, elle suppose l'appelant déjà tranché, comme les autres actions de
+// la fiche (ex. peutSupprimerMachine()).
+async function ouvrirQrMachine(machine) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:420px;text-align:center;">
+      <h2>${trad('QR code')}</h2>
+      <p class="sub">${esc(machine.name)}</p>
+      <div id="qr-zone" style="display:flex;justify-content:center;align-items:center;min-height:300px;margin:16px 0;">
+        <span class="muted">${trad('Génération…')}</span>
+      </div>
+      <p class="hint">${trad('Colle ce QR code sur la machine : le scanner (menu Machines) ouvre directement cette fiche.')}</p>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="qr-imprimer" disabled>${trad('Imprimer')}</button>
+        <button type="button" class="primary" id="qr-telecharger" disabled>${picto('export')}<span>${trad('Télécharger')}</span></button>
+      </div>
+    </div>`;
+
+  try {
+    const qrcodeLib = await loadQrCodeLib();
+    // L'URL de CETTE page, jamais un domaine recopié à la main : marche donc
+    // aussi bien en production (keeva.work) qu'en test local.
+    const urlBase = window.location.origin + window.location.pathname;
+    const urlQr = `${urlBase}?qr=${encodeURIComponent(machine.id)}`;
+    // Correction d'erreur maximale ('H') : une étiquette imprimée en atelier
+    // s'use, se salit, se plie — c'est elle qui tolère le mieux ces défauts.
+    const qr = qrcodeLib(0, 'H');
+    qr.addData(urlQr);
+    qr.make();
+
+    const taille = 300;
+    const canvas = document.createElement('canvas');
+    canvas.width = taille;
+    canvas.height = taille;
+    const ctx = canvas.getContext('2d');
+    const nbModules = qr.getModuleCount();
+    const cell = taille / nbModules;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, taille, taille);
+    ctx.fillStyle = '#000000';
+    for (let r = 0; r < nbModules; r++) {
+      for (let c = 0; c < nbModules; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect(c * cell, r * cell, Math.ceil(cell) + 1, Math.ceil(cell) + 1);
+      }
+    }
+
+    const zone = overlay.querySelector('#qr-zone');
+    if (!zone) return; // la modale a été fermée pendant le chargement
+    zone.innerHTML = '';
+    canvas.style.maxWidth = '100%';
+    zone.appendChild(canvas);
+
+    const btnTelecharger = overlay.querySelector('#qr-telecharger');
+    btnTelecharger.disabled = false;
+    btnTelecharger.addEventListener('click', () => {
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `qr_${(identifiantAffiche(machine) || machine.name || machine.id).replace(/[^\w-]+/g, '_')}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    });
+
+    const btnImprimer = overlay.querySelector('#qr-imprimer');
+    btnImprimer.disabled = false;
+    btnImprimer.addEventListener('click', () => imprimerQr(canvas.toDataURL('image/png'), machine));
+  } catch (err) {
+    const zone = overlay.querySelector('#qr-zone');
+    if (zone) zone.innerHTML = `<span class="muted">${esc(trad('Génération du QR code impossible.'))}</span>`;
+  }
+}
+
+// Calque dédié imprimé seul (voir CSS #qr-impression / @media print) — créé
+// juste avant window.print(), retiré juste après : jamais laissé dans le DOM.
+function imprimerQr(dataUrl, machine) {
+  const zone = document.createElement('div');
+  zone.id = 'qr-impression';
+  zone.innerHTML = `
+    <img src="${dataUrl}" alt="QR code">
+    <div class="qr-impression-nom">${esc(machine.name)}</div>
+    ${identifiantAffiche(machine) ? `<div class="qr-impression-id">${esc(identifiantAffiche(machine))}</div>` : ''}
+  `;
+  document.body.appendChild(zone);
+  window.print();
+  zone.remove();
+}
+
+// ── SCANNER QR : caméra en direct, décodage natif si possible ──────────
+// Pas de gating de plan ici (voir le clic sur #fleet-scanner) : scanner est
+// gratuit, seule la génération (§ ouvrirQrMachine) est réservée Business+.
+// Décodage à DEUX niveaux : `BarcodeDetector` natif (zéro octet, intégré au
+// navigateur/WebView moderne) en priorité, repli sur la bibliothèque vendue
+// jsQR (loadJsQrLib) si l'API native est absente — jamais un échec silencieux
+// faute de support natif.
+async function ouvrirScannerQr() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+
+  let stream = null;
+  let arret = false;
+  // ★ LA CAMÉRA EST TOUJOURS COUPÉE À LA FERMETURE — quel que soit le chemin
+  //   (bouton, clic hors modale, décodage réussi). Une caméra qui reste
+  //   allumée en arrière-plan est le bug de ce genre de fonctionnalité.
+  const fermer = () => {
+    arret = true;
+    if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+    overlay.remove();
+  };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:420px;text-align:center;">
+      <h2>${trad('Scanner un QR code')}</h2>
+      <div id="scan-zone" style="position:relative;background:#000;border-radius:var(--r-md);overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;">
+        <span class="muted" style="color:#fff;">${trad('Démarrage de la caméra…')}</span>
+      </div>
+      <p class="hint" id="scan-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="scan-fermer">${trad('Fermer')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#scan-fermer').addEventListener('click', fermer);
+
+  const zone = overlay.querySelector('#scan-zone');
+  const message = overlay.querySelector('#scan-message');
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+  } catch (err) {
+    if (zone) zone.innerHTML = `<span class="muted" style="color:#fff;">${esc(trad('Accès à la caméra refusé. Vérifie les réglages de ton téléphone ou de ton navigateur.'))}</span>`;
+    return;
+  }
+  // La modale a pu être fermée pendant qu'on attendait la permission : on ne
+  // laisse jamais une caméra tourner pour une fenêtre déjà refermée.
+  if (arret) { stream.getTracks().forEach((t) => t.stop()); return; }
+  if (!zone) { fermer(); return; }
+
+  const video = document.createElement('video');
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.style.width = '100%';
+  video.style.height = '100%';
+  video.style.objectFit = 'cover';
+  video.srcObject = stream;
+  zone.innerHTML = '';
+  zone.appendChild(video);
+
+  let detecteurNatif = null;
+  if ('BarcodeDetector' in window) {
+    try { detecteurNatif = new window.BarcodeDetector({ formats: ['qr_code'] }); }
+    catch (e) { detecteurNatif = null; }
+  }
+  let jsQrFn = null;
+  if (!detecteurNatif) {
+    try { jsQrFn = await loadJsQrLib(); }
+    catch (e) { if (message) message.textContent = trad('Lecteur de QR code indisponible.'); }
+  }
+
+  const canvasDecode = document.createElement('canvas');
+  const ctxDecode = canvasDecode.getContext('2d', { willReadFrequently: true });
+
+  // Même résolution que le lien profond (§ ouvrirFicheParId) : un QR qui
+  // n'est pas une URL KEEVA valide, ou qui pointe vers une machine hors de
+  // portée, le dit simplement — jamais une erreur technique.
+  const traiterTexte = (texte) => {
+    let id = null;
+    try { id = new URL(texte).searchParams.get('qr'); } catch (e) { /* pas une URL : ignoré ci-dessous */ }
+    if (!id) { if (message) message.textContent = trad('Ce QR code ne correspond pas à une machine KEEVA.'); return; }
+    fermer();
+    ouvrirFicheParId(id);
+  };
+
+  async function boucleDecodage() {
+    if (arret) return;
+    if (video.readyState < 2) { requestAnimationFrame(boucleDecodage); return; }
+    try {
+      if (detecteurNatif) {
+        const codes = await detecteurNatif.detect(video);
+        if (codes.length) { traiterTexte(codes[0].rawValue); return; }
+      } else if (jsQrFn) {
+        canvasDecode.width = video.videoWidth;
+        canvasDecode.height = video.videoHeight;
+        ctxDecode.drawImage(video, 0, 0, canvasDecode.width, canvasDecode.height);
+        const image = ctxDecode.getImageData(0, 0, canvasDecode.width, canvasDecode.height);
+        const resultat = jsQrFn(image.data, image.width, image.height);
+        if (resultat && resultat.data) { traiterTexte(resultat.data); return; }
+      }
+    } catch (e) { /* une frame ratée n'interrompt jamais la boucle */ }
+    if (!arret) requestAnimationFrame(boucleDecodage);
+  }
+  requestAnimationFrame(boucleDecodage);
+}
+
 // QUI A LE DROIT D'EFFACER UNE MACHINE. Un mécanicien MODIFIE une machine, il ne
 // la supprime pas : c'est la règle du serveur (migration-roles-equipe.sql : la
 // suppression de `machines` est réservée au gérant), et elle vaut aussi pour un
@@ -22322,6 +22641,10 @@ async function boot(toastMessage) {
   //   contrôle, un lien d'invitation ouvert par une personne connectée ne
   //   produisait RIEN — le bloc n'existait que sur l'écran de connexion.
   verifierInvitationConnectee();
+
+  // ★ LIEN PROFOND QR CODE : UI.machines est chargé, on peut résoudre. Sans
+  //   effet si aucun paramètre `?qr=` n'est présent (cas normal).
+  ouvrirFicheDepuisQrSiPresent();
 
   // Reprogrammation des rappels à chaque ouverture, sans réclamer
   // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.
