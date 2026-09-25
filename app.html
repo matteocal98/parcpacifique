@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qcn+9jgpU9hUEO+uVQE23spVaox3Wl499bALmw+BHt0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hjPHP5ZFyNV16PJclOtmFsTRLBTnjcfqmV3f80sxe/w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4795,6 +4795,17 @@
   .tco-seuil-moyenne-tag:empty{display:none;}
   .tco-seuil-carte .tco-champ-unite{width:100%;background:#fff;border-radius:var(--r-md);border:1px solid var(--line);padding:5px;}
   .tco-seuil-carte .tco-champ-unite input{border:none;background:none;}
+  /* Raccourcis de pré-remplissage (= moyenne / +10 % au-dessus) — masqués
+     tant que la moyenne réelle de la catégorie n'est pas encore calculée
+     (voir mount(), même donnée que la pastille « Moy. actuelle »), jamais
+     affichés avant d'avoir un vrai chiffre derrière. */
+  .tco-seuil-raccourcis{display:flex;gap:6px;flex-wrap:wrap;}
+  .tco-seuil-raccourcis:empty{display:none;}
+  .tco-seuil-raccourci-btn{
+    font-family:inherit;font-size:11px;font-weight:600;color:var(--primary-dark);
+    background:var(--primary-tint);border:none;border-radius:var(--r-pill);padding:4px 10px;cursor:pointer;
+  }
+  .tco-seuil-raccourci-btn:hover{background:var(--primary-tint-2);}
 
   /* Impression d'un QR code de machine (ouvrirQrMachine/imprimerQr) : un
      calque invisible à l'écran, seul élément visible sur la page imprimée —
@@ -14914,6 +14925,13 @@ function blocSeuilsCategorieTcoHtml() {
           </div>
         </div>
       </div>
+      <div class="tco-tip-carte" style="margin:12px 0;">
+        <div class="tco-tip-icone">${picto('ampoule')}</div>
+        <div>
+          <div class="tco-tip-titre">${trad('Comment fixer un seuil cohérent ?')}</div>
+          <p class="tco-tip-texte">${trad('C\'est le coût horaire au-delà duquel une machine de cette catégorie est signalée comme trop chère à l\'usage (classement TCO, tableau de bord). Vise un chiffre légèrement AU-DESSUS de ta moyenne actuelle plutôt qu\'égal à elle — sinon la moitié de ta flotte serait signalée en permanence. Les boutons sous chaque catégorie proposent un point de départ calculé sur tes propres machines.')}</p>
+        </div>
+      </div>
       ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
       <div class="tco-seuils-liste">
         ${categories.map((cat, i) => {
@@ -14928,6 +14946,7 @@ function blocSeuilsCategorieTcoHtml() {
               </div>
               <span class="tco-seuil-moyenne-tag" data-seuil-moyenne-categorie="${esc(cat.id)}"></span>
             </div>
+            <div class="tco-seuil-raccourcis" data-seuil-raccourcis-categorie="${esc(cat.id)}" hidden></div>
             <div class="tco-champ-unite">
               <input type="text" inputmode="decimal" class="tco-seuil-input" value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
               <span class="tco-unite-tag">${deviseCourte()}/h</span>
@@ -15645,6 +15664,29 @@ VIEWS.tco = {
           if (!valeurs.length) return;
           const moyenne = valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
           tag.textContent = tR('Moy. actuelle {m}', { m: formatMontant(Math.round(moyenne)) });
+
+          // Raccourcis de pré-remplissage — un point de départ chiffré sur
+          // les VRAIES machines de la catégorie, pour quelqu'un qui ne sait
+          // pas quel montant taper à la main (voir la carte d'astuce
+          // ci-dessus). Réservé au gérant : si le champ est verrouillé pour
+          // ce rôle, inutile de proposer un raccourci qui ne servirait à rien.
+          const carte = tag.closest('.tco-seuil-carte');
+          const input = carte?.querySelector('.tco-seuil-input');
+          const raccourcis = carte?.querySelector('[data-seuil-raccourcis-categorie]');
+          if (!input || !raccourcis || input.disabled) return;
+          const propositions = [
+            { label: tR('= moyenne ({m})', { m: formatMontant(Math.round(moyenne)) }), valeur: moyenne },
+            { label: trad('+10 % au-dessus'), valeur: moyenne * 1.1 },
+          ];
+          raccourcis.innerHTML = propositions.map((p, i) =>
+            `<button type="button" class="tco-seuil-raccourci-btn" data-raccourci="${i}">${esc(p.label)}</button>`).join('');
+          raccourcis.hidden = false;
+          raccourcis.querySelectorAll('.tco-seuil-raccourci-btn').forEach((btn, i) => {
+            btn.addEventListener('click', () => {
+              input.value = texteAvecSeparateurs(Math.round(propositions[i].valeur));
+              input.focus();
+            });
+          });
         });
 
         // Regroupement PAR MACHINE des tableaux flotte-entière — pour le
