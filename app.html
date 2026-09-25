@@ -2197,7 +2197,16 @@
      matche plus une fois le rendu remplacé par le bouton "maison" — sans
      elle, le bouton ne rétrécissait pas et poussait la quantité/le prix/le
      bouton de retrait hors du cadre visible (constaté en test réel). */
-  .log-piece-ligne .champ-select{flex:1;min-width:0;}
+  /* Ligne très étroite (bouton + quantité + prix + retrait côte à côte sur
+     téléphone) : le libellé tronqué laisse peu ou pas de texte visible à
+     côté du chevron — centrer ce dernier plutôt que le pousser à droite
+     (justify-content:space-between, pensé pour un bouton plus large où le
+     texte ET le chevron ont leur place), et teinter légèrement le bouton et
+     les deux champs pour qu'ils se distinguent mieux comme "la ligne qu'on
+     remplit" (retour visuel demandé par l'utilisateur). */
+  .log-piece-ligne .champ-select{flex:1;min-width:0;justify-content:center;background:var(--surface-soft);}
+  .log-piece-ligne .log-piece-qte,
+  .log-piece-ligne .log-piece-prix{background:var(--surface-soft);}
   .log-piece-ligne .log-piece-qte{width:60px;flex:0 0 auto;text-align:center;padding:0 4px;}
   .log-piece-ligne .log-piece-prix{width:100px;flex:0 0 auto;text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:700;}
   .log-piece-retirer{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--dark-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
