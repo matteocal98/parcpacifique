@@ -15,7 +15,7 @@
   IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
   d'implémentation pour le détail gardé/retiré.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9BGKgD+KdsORyZxjk3CzKZ1cTsf76wx3DCB1+lY26o8=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2LJQ6sg86XXo8TfDIrbC6YLxN32Hi30962jcO7spGfI=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -216,6 +216,7 @@
                   <th class="py-3 px-4">Carnet</th>
                   <th class="py-3 px-4">Échéance</th>
                   <th class="py-3 px-4 text-right">TCO déclaré</th>
+                  <th class="py-3 px-4 text-center">Compteur</th>
                 </tr>
               </thead>
               <tbody id="parc-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
@@ -517,6 +518,32 @@
     </td>
   </tr>
 </template>
+
+<!-- ═══════════════ MODALE : correction (compteur / barème) ═══════════════
+     Outillage d'écriture du superviseur — une seule modale réutilisée pour
+     les deux corrections, motif obligatoire (journal d'audit), jamais un
+     write direct depuis le client : tout passe par l'Edge Function
+     admin-corriger-donnee (ni machines ni companies n'ont de policy RLS
+     UPDATE pour is_staff()). -->
+<div id="correction-overlay" class="hidden fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-md w-full p-space-lg flex flex-col gap-3">
+    <h3 id="correction-titre" class="font-headline-sm text-headline-sm text-on-surface"></h3>
+    <p id="correction-sous-titre" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+    <div class="flex flex-col gap-1">
+      <label id="correction-label-valeur" class="font-label-sm text-label-sm text-on-surface-variant font-semibold"></label>
+      <input id="correction-valeur" type="number" step="0.1" min="0" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-code-sm text-code-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary"/>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Motif (obligatoire, journal d'audit)</label>
+      <input id="correction-motif" type="text" placeholder="Ex. : erreur de frappe confirmée par le client" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+    </div>
+    <div id="correction-msg" class="hidden font-label-sm text-label-sm text-error"></div>
+    <div class="flex items-center justify-end gap-2 pt-2">
+      <button id="correction-annuler" type="button" class="h-11 px-4 rounded bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors">Annuler</button>
+      <button id="correction-valider" type="button" class="h-11 px-4 rounded bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors">Appliquer la correction</button>
+    </div>
+  </div>
+</div>
 
 <script>
 tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "background": "#fbf8ff", "on-primary": "#ffffff", "surface-container": "#edecff", "tertiary": "#005952", "primary": "#4236c6", "on-tertiary-fixed-variant": "#00504a", "on-error-container": "#93000a", "inverse-primary": "#c4c0ff", "on-secondary-container": "#fefcff", "surface-container-high": "#e6e6ff", "error-container": "#ffdad6", "on-background": "#141939", "on-surface-variant": "#464554", "surface-container-lowest": "#ffffff", "secondary-fixed-dim": "#aec6ff", "surface": "#fbf8ff", "on-tertiary": "#ffffff", "on-primary-fixed": "#110068", "primary-fixed-dim": "#c4c0ff", "tertiary-fixed": "#78f7e8", "inverse-surface": "#292e4f", "on-surface": "#141939", "tertiary-container": "#00746b", "error": "#ba1a1a", "surface-variant": "#dfe0ff", "on-primary-container": "#e7e4ff", "surface-tint": "#5248d6", "secondary-fixed": "#d8e2ff", "on-tertiary-fixed": "#00201d", "primary-fixed": "#e3dfff", "outline": "#777586", "on-primary-fixed-variant": "#392abd", "on-secondary-fixed": "#001a42", "tertiary-fixed-dim": "#58dacc", "on-error": "#ffffff", "outline-variant": "#c8c4d7", "secondary": "#0058be", "on-tertiary-container": "#7cfbec", "surface-container-highest": "#dfe0ff", "surface-dim": "#d4d7ff", "on-secondary-fixed-variant": "#004395", "surface-bright": "#fbf8ff", "secondary-container": "#2671e2", "primary-container": "#5b52df", "surface-container-low": "#f4f2ff", "on-secondary": "#ffffff", "inverse-on-surface": "#f0efff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-md": "1rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "margin": "1.5rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "gutter": "1.25rem" }, "fontFamily": { "body-md": [ "Hanken Grotesk" ], "code-sm": [ "Space Grotesk" ], "headline-sm": [ "Space Grotesk" ], "label-sm": [ "Hanken Grotesk" ], "telemetry-stat": [ "Space Grotesk" ], "display-mobile": [ "Space Grotesk" ], "display": [ "Space Grotesk" ], "headline-md": [ "Space Grotesk" ], "body-sm": [ "Hanken Grotesk" ], "body-lg": [ "Hanken Grotesk" ], "headline-lg-mobile": [ "Space Grotesk" ], "headline-lg": [ "Space Grotesk" ], "telemetry-stat-compact": [ "Space Grotesk" ], "label-md": [ "Hanken Grotesk" ] }, "fontSize": { "body-md": [ "0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" } ], "code-sm": [ "0.8125rem", { "lineHeight": "1rem", "fontWeight": "500" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.625rem", "fontWeight": "600" } ], "label-sm": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.02em", "fontWeight": "600" } ], "telemetry-stat": [ "1.5rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-mobile": [ "2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display": [ "3rem", { "lineHeight": "3.5rem", "letterSpacing": "-0.03em", "fontWeight": "700" } ], "headline-md": [ "1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.25rem", "fontWeight": "400" } ], "body-lg": [ "1.125rem", { "lineHeight": "1.75rem", "fontWeight": "400" } ], "headline-lg-mobile": [ "1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "headline-lg": [ "2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "telemetry-stat-compact": [ "1rem", { "lineHeight": "1.25rem", "fontWeight": "600" } ], "label-md": [ "0.875rem", { "lineHeight": "1.25rem", "fontWeight": "600" } ] } } } };
@@ -926,7 +953,18 @@ function rendreTableauParc() {
         <span class="font-label-md text-label-md font-semibold ${couleurEtat[m.etat] ? '' : ''}" style="color:${m.etat === 'retard' ? '#ba1a1a' : m.etat === 'bientot' ? '#004395' : ''}">${echapper(libelleEcheanceParc(m))}</span>
       </td>
       <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${echapper(formatMontant(m.tco_total, m.devise))}</td>
+      <td class="py-3.5 px-4 text-center">
+        <button type="button" class="btn-corriger-compteur h-9 px-3 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-colors" data-machine-id="${echapper(m.machine_id)}" title="Corriger une saisie erronée">
+          <span class="material-symbols-outlined text-[16px] align-middle">tune</span> Corriger
+        </button>
+      </td>
     </tr>`).join('');
+  el('parc-corps-tableau').querySelectorAll('.btn-corriger-compteur').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const machine = PARC.find((m) => m.machine_id === btn.dataset.machineId);
+      if (machine) ouvrirCorrectionCompteur(machine);
+    });
+  });
 }
 
 // ── Audit TCO ─────────────────────────────────────────────────────────────
@@ -1005,9 +1043,20 @@ async function chargerTco() {
         <div class="font-code-sm text-label-md text-on-surface font-bold">${echapper(formatMontant(s.depenses_mois, s.devise))}</div>
         <div class="font-code-sm text-[11px] text-outline">Pièces ${echapper(formatMontant(s.parts_mois, s.devise))} • MO ${echapper(formatMontant(s.labor_mois, s.devise))} • Expl. ${echapper(formatMontant(s.opex_mois, s.devise))}</div>
       </td>
-      <td class="py-3.5 px-4 text-right font-code-sm text-code-sm ${s.labor_hourly_rate == null ? 'text-error' : 'text-on-surface'}">${s.labor_hourly_rate == null ? 'Non configuré' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}</td>
+      <td class="py-3.5 px-4 text-right">
+        <button type="button" class="btn-corriger-bareme font-code-sm text-code-sm ${s.labor_hourly_rate == null ? 'text-error' : 'text-on-surface'} hover:underline" data-company-id="${echapper(s.company_id)}" title="Modifier le barème horaire">
+          ${s.labor_hourly_rate == null ? 'Non configuré' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}
+          <span class="material-symbols-outlined text-[14px] align-middle">edit</span>
+        </button>
+      </td>
       <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${s.nb_machines_avec_tco > 0 ? echapper(formatMontant(s.tco_total, s.devise)) : '—'}</td>
     </tr>`).join('');
+  el('tco-corps-tableau').querySelectorAll('.btn-corriger-bareme').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const societe = lignes.find((s) => s.company_id === btn.dataset.companyId);
+      if (societe) ouvrirCorrectionBareme(societe);
+    });
+  });
 
   chargerFacturationStripe();
 }
@@ -1095,6 +1144,72 @@ async function chargerOcr() {
       <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.lectures_compteur}</td>
     </tr>`).join('');
 }
+
+// ── Outillage d'écriture : correction de compteur / barème horaire ──────
+let CORRECTION_CONTEXTE = null;
+
+function ouvrirCorrectionCompteur(machine) {
+  CORRECTION_CONTEXTE = { mode: 'compteur', machine_id: machine.machine_id };
+  el('correction-titre').textContent = 'Corriger le compteur';
+  el('correction-sous-titre').textContent = `${machine.machine_name} — ${machine.company_name}`;
+  const unite = machine.counter_unit === 'km' ? 'km' : 'h';
+  el('correction-label-valeur').textContent = `Nouvelle valeur (${unite}) — actuelle : ${formatCompteurParc(machine.counter_value, machine.counter_unit)}`;
+  el('correction-valeur').value = machine.counter_value ?? '';
+  el('correction-motif').value = '';
+  el('correction-msg').classList.add('hidden');
+  el('correction-overlay').classList.remove('hidden');
+}
+
+function ouvrirCorrectionBareme(societe) {
+  CORRECTION_CONTEXTE = { mode: 'bareme', company_id: societe.company_id };
+  el('correction-titre').textContent = 'Modifier le barème horaire';
+  el('correction-sous-titre').textContent = societe.company_name;
+  el('correction-label-valeur').textContent = `Nouveau taux horaire (${societe.devise}/h) — actuel : ${societe.labor_hourly_rate == null ? 'non configuré' : societe.labor_hourly_rate}`;
+  el('correction-valeur').value = societe.labor_hourly_rate ?? '';
+  el('correction-motif').value = '';
+  el('correction-msg').classList.add('hidden');
+  el('correction-overlay').classList.remove('hidden');
+}
+
+el('correction-annuler')?.addEventListener('click', () => el('correction-overlay').classList.add('hidden'));
+
+el('correction-valider')?.addEventListener('click', async () => {
+  if (!CORRECTION_CONTEXTE) return;
+  const valeur = Number(el('correction-valeur').value);
+  const motif = el('correction-motif').value.trim();
+  const msg = el('correction-msg');
+  const annoncer = (texte) => { msg.textContent = texte; msg.classList.remove('hidden'); };
+  if (!Number.isFinite(valeur) || valeur < 0) { annoncer('Valeur invalide.'); return; }
+  if (!motif) { annoncer('Le motif est obligatoire.'); return; }
+
+  const bouton = el('correction-valider');
+  bouton.disabled = true;
+  msg.classList.add('hidden');
+  const { data: { session } } = await sb.auth.getSession();
+  const corps = CORRECTION_CONTEXTE.mode === 'compteur'
+    ? { mode: 'compteur', machine_id: CORRECTION_CONTEXTE.machine_id, nouvelle_valeur: valeur, motif }
+    : { mode: 'bareme', company_id: CORRECTION_CONTEXTE.company_id, nouveau_taux: valeur, motif };
+  let reponse, resultat;
+  try {
+    reponse = await fetch(`${SUPABASE_URL}/functions/v1/admin-corriger-donnee`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_KEY },
+      body: JSON.stringify(corps),
+    });
+    resultat = await reponse.json();
+  } catch (e) {
+    bouton.disabled = false;
+    annoncer('Échec réseau : ' + e.message);
+    return;
+  }
+  bouton.disabled = false;
+  if (!reponse.ok) { annoncer(resultat.error || 'Erreur.'); return; }
+
+  el('correction-overlay').classList.add('hidden');
+  if (CORRECTION_CONTEXTE.mode === 'compteur') chargerParc();
+  else chargerTco();
+  CORRECTION_CONTEXTE = null;
+});
 
 demarrer();
 </script>
