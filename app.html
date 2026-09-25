@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Y5oKXIQx1n2h84e4uwbahfLf3BpM0aUIpV/W5P7yST0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EU7GvHE+UqyWyCCjgRFcygTedAIasnTL89TOzfaZWbo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2898,6 +2898,15 @@
   .offre-service-corps p{margin:4px 0 0;font-size:13px;color:var(--ink-2);}
   .offre-service .offre-bouton{width:auto;flex:0 0 auto;padding:10px 18px;}
 
+  /* Message de statut (#forfait-msg) — succès/échec du portail d'abonnement
+     ou d'un paiement. Texte gris discret par défaut (.hint) : trop facile à
+     manquer en bas d'une fenêtre déjà longue, confondu avec « rien ne s'est
+     passé » (signalé par l'utilisateur). Boîte d'alerte visible dès qu'il y
+     a quelque chose à lire — même palette ambrée que .attention-box. */
+  .offres-modal #forfait-msg:not(:empty){
+    background:var(--late-bg);border:1px solid rgba(222,122,22,.35);border-radius:var(--r-chip);
+    padding:12px 14px;color:var(--late-ink);font-weight:600;font-size:13.5px;margin-bottom:14px;
+  }
   .offres-pied{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding-top:6px;}
   .offres-confiance{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
   .offres-confiance span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);}
@@ -9509,7 +9518,16 @@ function openUpgradeNotice(companyId, message) {
   // affichent tous deux « Gérer mon abonnement »), chacun avec son propre id
   // — ouvrirPortailAbonnement désactive LE bouton cliqué pendant l'appel.
   overlay.querySelectorAll('.js-forfait-changer').forEach((bouton) => {
-    bouton.addEventListener('click', () => ouvrirPortailAbonnement('forfait-msg', bouton.id));
+    bouton.addEventListener('click', async () => {
+      await ouvrirPortailAbonnement('forfait-msg', bouton.id);
+      // Signalé par l'utilisateur : un message bref en petit texte gris, en
+      // bas d'une fenêtre déjà longue, passe facilement pour « rien ne s'est
+      // passé » — surtout quand le portail réussit à s'ouvrir dans un nouvel
+      // onglet et que le message n'a de toute façon plus grand-chose à dire
+      // (mais reste utile si ça a échoué). On le fait défiler jusqu'à
+      // l'écran ; la mise en forme « alerte » ci-dessous (CSS) fait le reste.
+      document.getElementById('forfait-msg')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   });
   // DERNIER REMPART CONTRE LE DOUBLE ABONNEMENT : un compte vu « gratuit » peut
   // être devenu payant dans l'intervalle (le webhook Stripe écrit quelques
