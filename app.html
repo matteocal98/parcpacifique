@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vSlfTPUItqXIspYWmMBHwbOKm8XZ/dLcUKGuyg1PB28=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cpH2HZIgCF4B5ou12SQul9SD65qsxOYN91u75Y31di0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1920,10 +1920,12 @@
   }
   textarea{resize:vertical;min-height:64px;}
 
-  /* MENU MAISON (ouvrirChoixOperateur) : un bouton habillé comme les champs
-     ci-dessus, qui ouvre NOTRE PROPRE liste au lieu du <select> natif — voir
-     le commentaire sur #log-operateur-bouton pour pourquoi (rendu système
-     habillé par certains constructeurs Android, hors de notre contrôle). */
+  /* MENU MAISON (habillerSelect/ouvrirListeChoix) : un bouton habillé comme
+     les champs ci-dessus, qui remplace le rendu d'un <select> natif — sur
+     certains Android, la liste système d'un <select> à plusieurs <option>
+     est habillée par le constructeur/la ROM (logo en fond répété derrière
+     chaque ligne, constaté en test réel), hors de tout contrôle depuis la
+     page ou l'appli. */
   .champ-select{
     width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--r-chip);
     background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);text-align:left;
@@ -5514,6 +5516,7 @@ function wireChampTelephone(root, id) {
   const select = root.querySelector(`#${id}-pays`);
   const input = root.querySelector(`#${id}`);
   if (!select || !input) return;
+  habillerSelect(select, trad('Pays de l\'indicatif'));
 
   const courant = () => paysTel(select.value);
   const reformater = (tronquer) => {
@@ -7871,6 +7874,7 @@ function renderSocieteManquante(user, motif) {
       </form>
     </div>`;
 
+  habillerSelect(document.getElementById('societe-activite'), trad('Activité'));
   document.getElementById('societe-deconnexion').addEventListener('click', async () => {
     await sb.auth.signOut();
     renderLogin();
@@ -8404,6 +8408,7 @@ function openSignupWizard() {
       </form>
     `);
 
+    habillerSelect(overlay.querySelector('#su-activity'), trad('Activité'));
     overlay.querySelector('#su-cancel').addEventListener('click', () => overlay.remove());
     overlay.querySelector('#su-close-x').addEventListener('click', () => overlay.remove());
     overlay.querySelector('#su-goto-login').addEventListener('click', () => { overlay.remove(); renderLogin(); });
@@ -8850,6 +8855,7 @@ function afficherNouveauTicket(overlay, moi) {
       <button type="button" class="secondary" id="support-annuler">${trad('Annuler')}</button>
     </div>
   </div>`;
+  habillerSelect(overlay.querySelector('#support-machine'), trad('Machine concernée (optionnel)'));
   overlay.querySelector('#support-annuler').addEventListener('click', () => afficherListeTickets(overlay, moi));
   overlay.querySelector('#support-envoyer').addEventListener('click', async () => {
     const sujet = overlay.querySelector('#support-sujet').value.trim();
@@ -12829,6 +12835,7 @@ VIEWS.machines = {
       refreshFleetList();
     }));
 
+    habillerSelect(root.querySelector('#fleet-sort'), trad('Trier par'));
     root.querySelector('#fleet-sort')?.addEventListener('change', (e) => {
       fleetFilters().sort = e.target.value;
       fleetFilters().limit = FLEET_PAGE_SIZE;
@@ -15402,11 +15409,13 @@ VIEWS.tco = {
             rendreDynamique();
           });
         });
+        habillerSelect(section.querySelector('#tco-filtre-categorie'), trad('Catégorie'));
         section.querySelector('#tco-filtre-categorie')?.addEventListener('change', (e) => {
           categorie = e.currentTarget.value;
           limite = TCO_CLASSEMENT_PAGE_SIZE;
           rendreDynamique();
         });
+        habillerSelect(section.querySelector('#tco-filtre-tri'), trad('Trier par'));
         section.querySelector('#tco-filtre-tri')?.addEventListener('change', (e) => {
           tri = e.currentTarget.value;
           limite = TCO_CLASSEMENT_PAGE_SIZE;
@@ -15963,6 +15972,9 @@ VIEWS.account = {
   }
     root.querySelector('#acc-portail')?.addEventListener('click', () => ouvrirPortailAbonnement());
     root.querySelector('#acc-support-ouvrir')?.addEventListener('click', () => openSupportModal());
+    habillerSelect(root.querySelector('#acc-activity'), trad('Activité principale'));
+    habillerSelect(root.querySelector('#acc-membre-role'), trad('Ce qu\'il peut faire dans l\'application'));
+    habillerSelect(root.querySelector('#acc-invite-role'), trad('Rôle'));
     preparerCarteEquipe(root);
 
     // ── CE QUE CHAQUE RÔLE PEUT FAIRE, ET CE QU'ON EN DIT ────────────────────
@@ -16996,6 +17008,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       file = f;
       statusEl.textContent = tR('Fichier sélectionné : {nom}', { nom: f.name });
     });
+    habillerSelect(overlay.querySelector('#mu-machine'), trad('Machine concernée'));
     overlay.querySelector('#mu-machine').addEventListener('change', (e) => {
       machine = UI.machines.find(m => m.id === e.target.value) || null;
     });
@@ -18360,6 +18373,7 @@ function brancherCategorie(overlay, chargees, choisie) {
   const autre = overlay.querySelector('#f-category-autre');
   if (!select || !autre) return;
   select.innerHTML = optionsCategorieListe(choisie, chargees);
+  habillerSelect(select, trad('Catégorie'));
   const sentinelle = select.querySelector(`option[value="${CATEGORIE_AUTRE}"]`);
   // Une catégorie déjà enregistrée mais absente de la liste (ancienne saisie, ou
   // liste d'une autre entreprise) rouvre la saisie libre PRÉ-REMPLIE : on ne perd
@@ -19509,21 +19523,21 @@ function ligneLogPieceHtml(idx) {
 // communs. Le sélecteur de type n'apparaît que si SCHEMA.hasTco (Dépannage/
 // Frais dépendent tous les deux du chantier TCO) — sans lui, la modale se
 // comporte exactement comme avant (entretien seul).
-// MENU DE CHOIX MAISON, GÉNÉRIQUE. Remplace un <select> natif dont la liste
-// système peut être habillée par le constructeur/la ROM du téléphone (logo en
-// fond répété derrière chaque ligne, constaté en test réel sur un Android —
-// aucun contrôle possible depuis la page ni depuis l'appli sur ce rendu
-// système). `options` : liste de { id, nom_affiche }. `valeurActuelle` : id
-// déjà choisi (coche la ligne correspondante). `onChoisi(option)` : appelé à
-// la sélection, juste avant la fermeture.
-function ouvrirChoixOperateur(options, valeurActuelle, onChoisi) {
+// MENU DE CHOIX MAISON, GÉNÉRIQUE. Remplace le rendu d'un <select> natif dont
+// la liste système peut être habillée par le constructeur/la ROM du
+// téléphone (logo en fond répété derrière chaque ligne, constaté en test
+// réel sur un Android — aucun contrôle possible depuis la page ni depuis
+// l'appli sur ce rendu système). `options` : liste de { id, nom_affiche }.
+// `valeurActuelle` : id déjà choisi (coche la ligne correspondante).
+// `onChoisi(option)` : appelé à la sélection, juste avant la fermeture.
+function ouvrirListeChoix(titre, options, valeurActuelle, onChoisi) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
     <div class="modal" style="max-width:420px;">
-      <h2>${trad('Intervenant assigné')}</h2>
+      <h2>${esc(titre)}</h2>
       <div class="liste-choix">
         ${options.map((o) => `
           <button type="button" class="ligne-choix${o.id === (valeurActuelle || '') ? ' is-choisie' : ''}" data-id="${esc(o.id)}">
@@ -19539,6 +19553,56 @@ function ouvrirChoixOperateur(options, valeurActuelle, onChoisi) {
       if (choisi) onChoisi(choisi);
     });
   });
+}
+
+// HABILLAGE D'UN <select> EXISTANT. Le <select> original reste dans le DOM —
+// masqué, mais fonctionnel : son .value, ses écouteurs `change`, tout code
+// qui le lit déjà (au submit, ailleurs) continue de marcher SANS AUCUN AUTRE
+// CHANGEMENT. Un bouton visuel prend sa place, ouvre ouvrirListeChoix() avec
+// ses <option> COURANTES. Un MutationObserver garde le bouton synchronisé si
+// le select est repeuplé plus tard (ex. liste chargée après une requête
+// réseau, ou `disabled` levé après coup) — habillerSelect() se pose donc en
+// UN SEUL appel, juste après le rendu du <select>, même si son contenu
+// définitif arrive après coup. Idempotent (un select déjà habillé ne l'est
+// pas deux fois) : peut être rappelé sans risque sur toute une liste.
+function habillerSelect(select, titre) {
+  if (!select || select.dataset.habille) return;
+  select.dataset.habille = '1';
+  select.style.display = 'none';
+  select.setAttribute('aria-hidden', 'true');
+  select.tabIndex = -1;
+
+  const bouton = document.createElement('button');
+  bouton.type = 'button';
+  // Hérite des classes du select d'origine (ex. .tel-pays-etroit pour le
+  // sélecteur d'indicatif téléphonique) : certains selects vivent dans une
+  // mise en page compacte/flex précise que .champ-select seul ne connaît pas.
+  bouton.className = `champ-select ${select.className}`.trim();
+  if (select.id) bouton.id = `${select.id}-bouton`;
+  select.insertAdjacentElement('afterend', bouton);
+
+  const majBouton = () => {
+    const opt = select.options[select.selectedIndex];
+    const libelle = opt ? (opt.textContent || '').trim() : '';
+    bouton.innerHTML = `<span>${esc(libelle || trad('Choisir…'))}</span>${picto('chevronBas')}`;
+    bouton.disabled = select.disabled;
+  };
+  majBouton();
+
+  bouton.addEventListener('click', () => {
+    const optsListe = Array.from(select.options).map((o) => ({ id: o.value, nom_affiche: o.textContent }));
+    const titreReel = titre || document.querySelector(`label[for="${select.id}"]`)?.textContent?.trim() || trad('Choisir');
+    ouvrirListeChoix(titreReel, optsListe, select.value, (choisi) => {
+      select.value = choisi.id;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      majBouton();
+    });
+  });
+
+  // subtree:true est nécessaire pour le cas « catégorie personnalisée » : le
+  // texte d'une <option> déjà là est réécrit en direct (brancherCategorie),
+  // ce qui ne remonte comme mutation qu'au niveau de l'option, pas du select.
+  new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
 }
 
 function openLogInterventionModal(machine, tache) {
@@ -19674,20 +19738,10 @@ function openLogInterventionModal(machine, tache) {
               ${compteurActuel != null ? `<div class="hint">${tR('Dernière valeur relevée : {valeur}', { valeur: formatCounter(compteurActuel, unit) })}</div>` : ''}
             </div>` : ''}
             <div>
-              <label for="log-operateur-bouton">${picto('personne')}${trad('Intervenant assigné')}</label>
-              <!-- Menu MAISON (pas un <select> natif) : sur certains Android, la
-                   liste native d'un <select> à plusieurs <option> est habillée par
-                   le constructeur/la ROM (logo en fond répété derrière chaque
-                   ligne, constaté en test réel) — rien côté page ni côté appli ne
-                   peut contrôler ce rendu système. Un input caché + un bouton qui
-                   ouvre NOTRE PROPRE liste (ouvrirChoixOperateur) évite le rendu
-                   natif entièrement. #log-operateur garde son id et son .value
-                   continue de marcher partout ailleurs dans cette fonction. -->
-              <input type="hidden" id="log-operateur" value="">
-              <button type="button" class="champ-select" id="log-operateur-bouton" disabled>
-                <span id="log-operateur-libelle">${trad('Chargement de l\'équipe…')}</span>
-                ${picto('chevronBas')}
-              </button>
+              <label for="log-operateur">${picto('personne')}${trad('Intervenant assigné')}</label>
+              <select id="log-operateur" disabled>
+                <option value="">${trad('Chargement de l\'équipe…')}</option>
+              </select>
               <div class="hint">${trad('Attribution de la fiche d\'intervention')}</div>
             </div>
           </div>
@@ -19870,25 +19924,20 @@ function openLogInterventionModal(machine, tache) {
   overlay.querySelector('#cancel-log').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#cancel-log-x').addEventListener('click', () => overlay.remove());
 
+  habillerSelect(overlay.querySelector('#log-operateur'), trad('Intervenant assigné'));
+  habillerSelect(overlay.querySelector('#log-organe'), trad('Organe mécanique défaillant'));
+  habillerSelect(overlay.querySelector('#log-frais-nature'), trad('Nature du frais'));
   (async () => {
-    const hidden = overlay.querySelector('#log-operateur');
-    const bouton = overlay.querySelector('#log-operateur-bouton');
-    const libelle = overlay.querySelector('#log-operateur-libelle');
-    if (!hidden || !bouton || !libelle) return;
+    const select = overlay.querySelector('#log-operateur');
+    if (!select) return;
     try {
       const equipe = await equipePourAttribution();
       if (!overlay.isConnected) return;
-      const options = [{ id: '', nom_affiche: trad('Non précisé') }, ...equipe];
-      libelle.textContent = options[0].nom_affiche;
-      bouton.disabled = false;
-      bouton.addEventListener('click', () => {
-        ouvrirChoixOperateur(options, hidden.value, (choisi) => {
-          hidden.value = choisi.id;
-          libelle.textContent = choisi.nom_affiche;
-        });
-      });
+      select.innerHTML = `<option value="">${trad('Non précisé')}</option>`
+        + equipe.map(m => `<option value="${esc(m.id)}">${esc(m.nom_affiche)}</option>`).join('');
+      select.disabled = false;
     } catch (err) {
-      libelle.textContent = trad('Équipe indisponible');
+      select.innerHTML = `<option value="">${trad('Équipe indisponible')}</option>`;
     }
   })();
 
@@ -20071,6 +20120,7 @@ function openLogInterventionModal(machine, tache) {
       piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
       const nouvelleLigne = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
       activerSeparateurMilliers(nouvelleLigne?.querySelector('.log-piece-prix'));
+      habillerSelect(nouvelleLigne?.querySelector('.log-piece-select'), trad('Pièce du catalogue'));
     });
     piecesListe?.addEventListener('change', (e) => {
       if (e.target.classList.contains('log-piece-select')) {
@@ -20613,6 +20663,7 @@ function openChoixFrequence(machine, item, companyId, categories) {
   overlay.querySelectorAll('.choix-option').forEach(btn => {
     btn.addEventListener('click', () => appliquer(options[Number(btn.dataset.choix)], btn));
   });
+  habillerSelect(overlay.querySelector('#choix-unite'), trad('Unité'));
   overlay.querySelector('#choix-enregistrer').addEventListener('click', () => {
     const valeur = parseFloat(overlay.querySelector('#choix-valeur').value);
     const unite = overlay.querySelector('#choix-unite').value;
