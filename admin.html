@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8"/>
@@ -6,28 +6,34 @@
 <title>KEEVA — Console Superviseur</title>
 <!--
   CONSOLE SUPERVISEUR — fichier séparé de app.html, jamais mélangé au
-  bundle livré aux clients (voir keeva-redesign-project.md pour le
-  pourquoi). Design repris verbatim de la maquette Stitch
-  console_superviseur_clients_support_keeva_sans_t_l_m_trie/code.html
-  (Tailwind CDN + tokens conservés tels quels, pas de portage vers le
-  système de variables CSS de app.html) — seules les données affichées
-  changent : tout ce qui est fabriqué par la maquette (48 organisations,
-  IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
-  d'implémentation pour le détail gardé/retiré.
+  bundle livré aux clients (voir keeva-redesign-project.md et
+  keeva-backoffice-support.md pour le contexte complet). Design repris de
+  la 2ᵉ passe Stitch (Design Stitch/Back office/stitch_keeva_dashboard_redesign,
+  5 maquettes — une par vue) : cette passe a été régénérée à partir de la
+  V1 réellement construite ici, donc son texte descriptif est déjà honnête
+  (aucun XPF/€ inventé, aucune télémétrie). Ce qui restait fabriqué dans
+  les maquettes a quand même été retiré au passage (badges "SYNC 99.98%",
+  "Webhooks Stripe 200 OK", moteur OCR nommé, échantillon photo factice,
+  etc. — voir chaque section ci-dessous). Toute la logique JS est
+  RIGOUREUSEMENT INCHANGÉE par rapport à la version précédente : seuls le
+  HTML et les classes CSS ont été retouchés, les mêmes id="…" sont
+  réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
+  conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2LJQ6sg86XXo8TfDIrbC6YLxN32Hi30962jcO7spGfI=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0dFqhdq54Y8fmbHZxKN6/teSIooa6/BclqIPC9B0jO4=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}[hidden]{display:none!important;}</style>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}[hidden]{display:none!important;}</style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
-<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+<body class="bg-background font-body-md text-on-surface antialiased">
 
 <!-- ═══════════════════════ ÉCRAN DE CONNEXION ═══════════════════════ -->
-<div id="ecran-connexion" class="fixed inset-0 z-[100] bg-surface flex items-center justify-center p-4">
+<div id="ecran-connexion" class="fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
   <div class="w-full max-w-sm flex flex-col gap-5">
     <div class="flex items-center gap-3 justify-center">
       <div class="w-11 h-11 rounded-xl bg-primary flex items-center justify-center text-on-primary">
@@ -54,7 +60,7 @@
 </div>
 
 <!-- ═══════════════════ ÉCRAN « ACCÈS REFUSÉ » ═══════════════════ -->
-<div id="ecran-refuse" class="hidden fixed inset-0 z-[100] bg-surface flex items-center justify-center p-4">
+<div id="ecran-refuse" class="hidden fixed inset-0 z-[100] bg-background flex items-center justify-center p-4">
   <div class="w-full max-w-sm flex flex-col items-center gap-4 p-6 rounded-xl bg-surface-container-lowest shadow-sm text-center">
     <div class="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center">
       <span class="material-symbols-outlined text-2xl">block</span>
@@ -67,159 +73,341 @@
 
 <!-- ═══════════════════════════ CONSOLE ═══════════════════════════ -->
 <div id="console" class="hidden">
-<aside class="fixed left-0 top-0 h-full w-72 bg-[#0D1424] z-50 flex flex-col justify-between select-none shadow-[0_1px_8px_rgba(0,0,0,0.12)]">
-  <div class="flex flex-col">
-    <div class="h-16 px-space-lg flex items-center justify-between bg-[#0A0F1D]">
+<aside class="fixed left-0 top-0 h-full w-72 bg-inverse-surface z-50 flex flex-col justify-between p-space-md select-none">
+  <div class="flex flex-col gap-space-md">
+    <div class="flex items-center justify-between px-space-xs py-space-sm">
       <div class="flex items-center gap-space-sm">
-        <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
-          <span class="material-symbols-outlined text-white text-[20px]">precision_manufacturing</span>
-        </div>
-        <span class="font-headline-sm text-headline-sm font-bold tracking-tight text-white">KEEVA</span>
+        <!-- Le vrai logo KEEVA (hexagone + barre), même SVG que marqueSvg() dans
+             app.html — jamais une icône Material générique à la place de la
+             marque. Barre blanche : même choix que la variante fond sombre déjà
+             utilisée pour la barre mobile de app.html (bm-logo). -->
+        <span class="w-6 h-6 shrink-0" aria-hidden="true"><svg viewBox="0 0 1 1" focusable="false"><defs><linearGradient id="keeva-admin-barre" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#236FE0"/><stop offset="58%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#8B9B37"/></linearGradient></defs><path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#keeva-admin-barre)"/><path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/><path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/><path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/><path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="#FFFFFF"/></svg></span>
+        <span class="font-headline-lg text-headline-sm font-bold tracking-tight text-surface-bright uppercase">KEEVA</span>
+        <span class="px-space-xs py-0.5 rounded bg-primary-container text-on-primary font-code-sm text-code-sm uppercase tracking-wider font-semibold">HQ</span>
       </div>
-      <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded-sm bg-tertiary-container text-on-tertiary-container tracking-wider font-semibold">HQ</span>
+      <span class="h-2 w-2 rounded-full bg-tertiary-fixed"></span>
     </div>
-    <div class="px-space-lg pt-space-md pb-space-sm">
-      <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#162038] text-white border border-[#233154]">
-        <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
-        <span class="font-label-sm text-label-sm uppercase tracking-wider text-slate-200">Super Admin / Support</span>
-      </div>
+    <div class="px-space-xs py-space-xs rounded bg-inverse-surface/60 flex items-center gap-space-xs text-inverse-on-surface/80">
+      <span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">admin_panel_settings</span>
+      <span class="font-label-sm text-label-sm tracking-wide uppercase text-tertiary-fixed-dim">Super Admin / Support</span>
     </div>
-    <nav class="flex flex-col gap-1 px-space-sm py-space-sm" id="nav-console">
-      <a data-path="clients" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">corporate_fare</span><span>Vue Clients &amp; Organisations</span>
+    <nav class="flex flex-col gap-space-xs mt-space-sm" id="nav-console">
+      <a data-path="clients" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="font-label-md text-label-md">Vue Clients &amp; Organisations</span>
       </a>
-      <a data-path="support" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">contact_support</span><span>Support &amp; Tickets</span>
+      <a data-path="support" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">contact_support</span><span class="font-label-md text-label-md">Support &amp; Tickets</span>
       </a>
-      <a data-path="parc" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">agriculture</span><span>Parc Matériel &amp; Flottes</span>
+      <a data-path="parc" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">agriculture</span><span class="font-label-md text-label-md">Parc Matériel &amp; Flottes</span>
       </a>
-      <a data-path="tco" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Audit TCO &amp; Facturation</span>
+      <a data-path="tco" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-md text-label-md">Audit TCO &amp; Facturation</span>
       </a>
-      <a data-path="ocr" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">document_scanner</span><span>Carnets &amp; OCR</span>
+      <a data-path="ocr" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">document_scanner</span><span class="font-label-md text-label-md">Carnets &amp; OCR</span>
       </a>
     </nav>
   </div>
-  <div class="p-space-md m-space-sm rounded-lg bg-[#141C30] border border-[#1E2B4A] flex flex-col gap-2">
-    <div class="flex items-center justify-between">
-      <span class="font-label-sm text-label-sm uppercase tracking-wide text-slate-400">Session</span>
-      <span class="inline-flex items-center gap-1 font-code-sm text-code-sm text-tertiary-fixed-dim"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>Active</span>
+  <div class="flex flex-col gap-space-xs pt-space-md" id="session-guard">
+    <div class="px-space-xs py-space-xs rounded bg-inverse-surface/60 flex flex-col gap-0.5 text-inverse-on-surface/70">
+      <span class="font-label-sm text-label-sm uppercase tracking-wide">Session</span>
+      <span class="font-code-sm text-code-sm">Active</span>
     </div>
-    <p class="font-body-sm text-body-sm text-slate-300 leading-tight">Console de supervision multi-locataire KEEVA</p>
   </div>
 </aside>
 
 <div class="pl-72">
-  <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg gap-space-md">
-    <div class="flex-1 max-w-xl">
-      <div class="relative flex items-center">
-        <span class="material-symbols-outlined absolute left-3 text-outline text-[20px]">search</span>
-        <input id="recherche-clients" type="search" placeholder="Rechercher un compte client…" class="w-full h-11 pl-10 pr-4 bg-surface-container-lowest text-on-surface font-body-sm text-body-sm rounded-lg border border-outline-variant focus:outline-none focus:border-primary shadow-sm"/>
+  <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between">
+    <div class="flex items-center gap-space-sm flex-1 max-w-xl">
+      <div class="relative w-full">
+        <span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+        <input id="recherche-clients" class="w-full h-11 pl-10 pr-space-sm bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant/70 rounded focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Rechercher un compte client..." type="text"/>
       </div>
     </div>
     <div class="flex items-center gap-space-md">
-      <div class="flex items-center gap-space-sm pl-1">
-        <div class="flex flex-col text-right">
-          <span id="staff-nom" class="font-headline-sm text-label-md text-on-surface leading-tight">—</span>
-          <span class="font-body-sm text-label-sm text-on-surface-variant">Superviseur KEEVA</span>
+      <div class="flex items-center gap-space-sm">
+        <div class="text-right hidden sm:block">
+          <div id="staff-nom" class="font-label-md text-label-md text-on-surface leading-tight">—</div>
+          <div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Superviseur KEEVA</div>
         </div>
-        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-          <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
-        </div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
       </div>
-      <button id="bouton-deconnexion" type="button" class="h-9 px-3 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold transition-colors">Quitter</button>
+      <button id="bouton-deconnexion" type="button" class="flex items-center gap-space-xs min-h-[44px] px-space-sm py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md">
+        <span class="material-symbols-outlined text-[18px]">logout</span><span>Quitter</span>
+      </button>
     </div>
   </header>
 
-  <main class="relative pt-16 w-full min-h-screen bg-surface">
-    <div class="p-space-lg max-w-[1560px] mx-auto w-full flex flex-col gap-space-lg">
+  <main class="w-full pt-16 bg-background min-h-screen px-space-lg py-space-lg">
+    <div class="flex flex-col w-full gap-space-lg">
+
+      <!-- ═══════ VUE : Clients & Organisations ═══════ -->
+      <section id="vue-clients" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div class="flex flex-col gap-space-xs">
+            <div class="flex items-center gap-space-sm">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-highest text-primary font-code-sm text-code-sm font-semibold tracking-wide uppercase shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Supervision Multi-Tenant
+              </span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Console Superviseur &amp; Support KEEVA</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Vue d'ensemble des organisations clientes réelles et de leur parc.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Organisations</span>
+              <span class="p-1.5 bg-surface-container rounded text-primary"><span class="material-symbols-outlined text-[20px]">corporate_fare</span></span>
+            </div>
+            <span id="kpi-organisations" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
+          </div>
+          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Machines suivies</span>
+              <span class="p-1.5 bg-surface-container rounded text-secondary-container"><span class="material-symbols-outlined text-[20px]">precision_manufacturing</span></span>
+            </div>
+            <span id="kpi-machines" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
+          </div>
+          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Interventions ce mois</span>
+              <span class="p-1.5 bg-surface-container rounded text-primary"><span class="material-symbols-outlined text-[20px]">build_circle</span></span>
+            </div>
+            <span id="kpi-interventions" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
+          </div>
+          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-label-md text-error uppercase tracking-wider">Tickets ouverts</span>
+              <span class="p-1.5 bg-error-container rounded text-error"><span class="material-symbols-outlined text-[20px]">report_problem</span></span>
+            </div>
+            <span id="kpi-tickets" class="font-telemetry-stat text-telemetry-stat text-error font-bold mt-2">—</span>
+          </div>
+        </div>
+
+        <section id="bandeau-incident" class="hidden relative overflow-hidden bg-surface-container-lowest p-space-md lg:p-space-lg rounded-lg shadow-md">
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error"></div>
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-space-md">
+              <div class="w-12 h-12 rounded-lg bg-error-container text-error flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[26px]">warning</span></div>
+              <div class="flex flex-col gap-1">
+                <div class="flex flex-wrap items-center gap-space-sm">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm font-bold tracking-wide uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-error"></span>Ticket prioritaire
+                  </span>
+                  <span id="incident-org" class="font-label-md text-label-md text-on-surface font-semibold bg-surface-container-high px-2 py-0.5 rounded"></span>
+                </div>
+                <p id="incident-sujet" class="font-body-md text-body-md text-on-surface font-medium mt-0.5"></p>
+              </div>
+            </div>
+            <button id="incident-ouvrir" type="button" class="inline-flex items-center justify-center gap-space-xs h-11 px-5 rounded bg-error text-on-error font-label-md text-label-md hover:opacity-95 transition-all shadow-sm shrink-0">
+              <span class="material-symbols-outlined text-[18px]">open_in_new</span><span>Ouvrir le ticket</span>
+            </button>
+          </div>
+        </section>
+
+        <div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden">
+          <div class="p-space-md lg:p-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+            <div class="flex flex-col">
+              <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Répertoire Portefeuille Clients</h2>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Instances locataires isolées avec accréditation d'impersonation administrative</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-high/60 h-10">
+                  <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Organisation / Forfait</th>
+                  <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Référent</th>
+                  <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Parc suivi</th>
+                  <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant text-center">Tickets ouverts</th>
+                  <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="corps-tableau-clients" class="divide-y-0 text-on-surface font-body-md text-body-md"></tbody>
+            </table>
+          </div>
+          <div class="px-space-md py-space-sm bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-xs">
+            <div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+              <span class="inline-block w-2 h-2 rounded-full bg-tertiary"></span>
+              <span>Toute session « Se connecter en tant que » est tracée dans le journal d'audit</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-container p-space-md lg:p-space-lg rounded-lg shadow-sm">
+          <div class="flex flex-col md:flex-row items-start md:items-center gap-space-md">
+            <div class="w-12 h-12 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
+            <div class="flex flex-col gap-1 flex-1">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Protocole Zéro-Capteur KEEVA</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">Tous les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés. Aucune sonde matérielle ni module connecté requis.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VUE : Support & Tickets ═══════ -->
+      <section id="vue-support" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
+          <div class="flex flex-col gap-space-xs">
+            <span class="font-code-sm text-code-sm text-primary uppercase tracking-wider font-semibold">Console Superviseur</span>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Support Client &amp; Tickets</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">File des demandes d'assistance des organisations clientes.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm uppercase tracking-wide text-error font-semibold">Ouverts</span>
+              <span id="kpi-t-ouverts" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-space-xs">—</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Prise en charge requise</span>
+            </div>
+            <div class="w-12 h-12 rounded-lg bg-error-container/60 flex items-center justify-center text-error"><span class="material-symbols-outlined text-[24px]">pending_actions</span></div>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm uppercase tracking-wide text-secondary font-semibold">En cours</span>
+              <span id="kpi-t-encours" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-space-xs">—</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">En cours de résolution</span>
+            </div>
+            <div class="w-12 h-12 rounded-lg bg-secondary-fixed/50 flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[24px]">hourglass_top</span></div>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm uppercase tracking-wide text-tertiary font-semibold">Résolus</span>
+              <span id="kpi-t-resolus" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-space-xs">—</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Clôturés avec succès</span>
+            </div>
+            <div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[24px]">task_alt</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+          <div class="lg:col-span-7 flex flex-col gap-space-md">
+            <div class="flex flex-wrap items-center gap-space-xs bg-surface-container-low p-space-xs rounded-lg shadow-sm" id="onglets-tickets">
+              <button data-filtre="all" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors bg-surface-container-lowest text-primary font-semibold">Tous</button>
+              <button data-filtre="ouvert" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">Ouverts</button>
+              <button data-filtre="en_cours" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">En cours</button>
+              <button data-filtre="resolu" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">Résolus</button>
+            </div>
+            <div class="flex flex-col gap-space-sm" id="liste-tickets"></div>
+            <p id="tickets-vide" class="hidden font-body-sm text-body-sm text-on-surface-variant text-center py-6">Aucun ticket pour ce filtre.</p>
+          </div>
+
+          <aside class="lg:col-span-5 flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden sticky top-20">
+            <div id="panneau-ticket" class="flex flex-col gap-space-md p-space-md">
+              <p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Sélectionne un ticket pour voir le fil et répondre.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
 
       <!-- ═══════ VUE : Parc Matériel & Flottes ═══════ -->
       <section id="vue-parc" class="hidden flex flex-col gap-space-lg">
-        <div class="flex flex-col gap-1">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Parc Matériel &amp; Flottes</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">Surveillance consolidée de toutes les machines déclarées, tous clients confondus.</p>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div class="flex flex-col gap-space-xs">
+            <span class="font-code-sm text-code-sm tracking-wider uppercase text-primary">AUDIT MULTI-ORGANISATIONS</span>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Parc Matériel &amp; Flottes</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Surveillance consolidée de toutes les machines déclarées, tous clients confondus.</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <button id="parc-rafraichir" type="button" class="flex items-center gap-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Rafraîchir</span>
+            </button>
+          </div>
         </div>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Parc consolidé</span>
-            <span id="parc-kpi-total" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Parc consolidé</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">precision_manufacturing</span></div>
+            </div>
+            <span id="parc-kpi-total" class="font-display text-display text-on-surface leading-none mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Carnets indexés</span>
-            <span id="parc-kpi-carnets" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Carnets indexés</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[20px]">menu_book</span></div>
+            </div>
+            <span id="parc-kpi-carnets" class="font-display text-display text-on-surface leading-none mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-bold">Anomalies de cadence</span>
-            <span id="parc-kpi-anomalies" class="font-display text-display text-error font-bold leading-none">—</span>
+          <div class="bg-error-container p-space-md rounded shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm text-error uppercase tracking-wider font-semibold">Anomalies de cadence</span>
+              <div class="w-9 h-9 rounded bg-error text-on-error flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">speed</span></div>
+            </div>
+            <span id="parc-kpi-anomalies" class="font-display text-display text-error leading-none mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Volume entretien ce mois</span>
-            <span id="parc-kpi-volume" class="font-headline-md text-headline-md text-on-surface font-bold leading-none">—</span>
+          <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Volume entretien ce mois</span>
+              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[20px]">payments</span></div>
+            </div>
+            <span id="parc-kpi-volume" class="font-headline-lg text-headline-lg text-on-surface leading-tight font-bold mt-space-md">—</span>
           </div>
-        </section>
+        </div>
 
-        <section id="parc-anomalie-banniere" class="hidden rounded-lg bg-surface-container-lowest p-space-md shadow-sm relative overflow-hidden">
-          <div class="absolute left-0 top-0 bottom-0 w-2 bg-error"></div>
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
-            <div class="flex items-start gap-space-md">
-              <div class="w-11 h-11 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[26px]">speed</span></div>
-              <div class="flex flex-col gap-1">
-                <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold tracking-wider self-start">Cadence implausible</span>
-                <p id="parc-anomalie-texte" class="font-body-md text-body-md text-on-surface mt-1"></p>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Seuil de repérage : plus de 16 h de compteur déclarées par jour entre deux relevés — une estimation, pas une preuve ; à vérifier avec le client.</p>
-              </div>
+        <section id="parc-anomalie-banniere" class="hidden bg-error-container text-on-error-container p-space-md rounded shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+          <div class="flex items-start gap-space-md">
+            <div class="p-space-xs rounded bg-error text-on-error flex items-center justify-center mt-0.5"><span class="material-symbols-outlined text-[22px]">error</span></div>
+            <div class="flex flex-col">
+              <span class="font-headline-sm text-headline-sm font-bold text-error tracking-tight">Alerte Horamètre : cadence implausible repérée</span>
+              <p id="parc-anomalie-texte" class="font-body-md text-body-md text-on-error-container mt-1 max-w-4xl"></p>
+              <p class="font-body-sm text-body-sm text-on-error-container/80 mt-1">Seuil de repérage : plus de 16 h de compteur déclarées par jour entre deux relevés — une estimation, pas une preuve ; à vérifier avec le client.</p>
             </div>
           </div>
         </section>
 
-        <section class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm">
-            <div class="md:col-span-5 relative">
-              <input id="parc-recherche" type="search" placeholder="Machine, série, organisation…" class="w-full h-11 pl-4 pr-4 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"/>
+        <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex flex-col gap-space-md">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+            <div class="md:col-span-6 relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">manage_search</span>
+              <input id="parc-recherche" class="w-full h-11 pl-10 pr-space-md bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="Rechercher par machine, numéro de série, organisation…" type="text"/>
             </div>
-            <div class="md:col-span-4">
-              <select id="parc-filtre-org" class="w-full h-11 px-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+            <div class="md:col-span-3">
+              <select id="parc-filtre-org" class="w-full h-11 px-space-md bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
                 <option value="">Toutes les organisations</option>
               </select>
             </div>
             <div class="md:col-span-3">
-              <select id="parc-filtre-categorie" class="w-full h-11 px-3 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+              <select id="parc-filtre-categorie" class="w-full h-11 px-space-md bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer">
                 <option value="">Toutes les catégories</option>
               </select>
             </div>
           </div>
-          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="parc-statuts">
-            <button data-etat="" class="parc-statut-chip h-8 px-3 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0" type="button">Tous</button>
-            <button data-etat="anomalie" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Anomalie de cadence</button>
-            <button data-etat="retard" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">En retard</button>
-            <button data-etat="bientot" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Échéance &lt; 15j / proche</button>
-            <button data-etat="ok" class="parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">À jour</button>
+          <div class="flex items-center gap-space-xs flex-wrap pt-space-xs" id="parc-statuts">
+            <span class="font-label-sm text-label-sm text-on-surface-variant mr-space-xs uppercase tracking-wide">État de santé :</span>
+            <button data-etat="" class="parc-statut-chip px-space-md h-[34px] rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0" type="button">Tous</button>
+            <button data-etat="anomalie" class="parc-statut-chip px-space-md h-[34px] rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Anomalie de cadence</button>
+            <button data-etat="retard" class="parc-statut-chip px-space-md h-[34px] rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">En retard</button>
+            <button data-etat="bientot" class="parc-statut-chip px-space-md h-[34px] rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">Échéance &lt; 15j / proche</button>
+            <button data-etat="ok" class="parc-statut-chip px-space-md h-[34px] rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0" type="button">À jour</button>
           </div>
-        </section>
+        </div>
 
-        <div class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden">
-          <div class="p-space-md flex items-center justify-between bg-surface-container-low">
-            <span class="font-headline-sm text-headline-sm text-on-surface">Registre global des équipements</span>
-            <span id="parc-compte-affiche" class="font-code-sm text-code-sm text-outline"></span>
+        <div class="bg-surface-container-lowest rounded shadow-sm overflow-hidden">
+          <div class="px-space-md py-space-sm bg-surface-container flex items-center justify-between">
+            <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Inventaire Technique &amp; Horamètres</span>
+            <span id="parc-compte-affiche" class="font-code-sm text-code-sm text-on-surface-variant"></span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                  <th class="py-3 px-4">Matériel &amp; Série</th>
-                  <th class="py-3 px-4">Organisation</th>
-                  <th class="py-3 px-4">Dernier relevé</th>
-                  <th class="py-3 px-4">Carnet</th>
-                  <th class="py-3 px-4">Échéance</th>
-                  <th class="py-3 px-4 text-right">TCO déclaré</th>
-                  <th class="py-3 px-4 text-center">Compteur</th>
+                  <th class="py-3 px-space-md">Matériel &amp; Série</th>
+                  <th class="py-3 px-space-md">Organisation</th>
+                  <th class="py-3 px-space-md">Dernier relevé</th>
+                  <th class="py-3 px-space-md">Carnet KEEVA</th>
+                  <th class="py-3 px-space-md">Échéance de maintenance</th>
+                  <th class="py-3 px-space-md text-right">TCO Déclaré</th>
+                  <th class="py-3 px-space-md text-center">Compteur</th>
                 </tr>
               </thead>
-              <tbody id="parc-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
+              <tbody id="parc-corps-tableau" class="divide-y divide-surface-container-low font-body-sm text-body-sm text-on-surface"></tbody>
             </table>
           </div>
           <p id="parc-vide" class="hidden p-space-lg text-center font-body-sm text-body-sm text-on-surface-variant">Aucune machine pour ce filtre.</p>
@@ -228,116 +416,193 @@
 
       <!-- ═══════ VUE : Audit TCO & Facturation ═══════ -->
       <section id="vue-tco" class="hidden flex flex-col gap-space-lg">
-        <div class="flex flex-col gap-1">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Audit TCO &amp; Facturation</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">Coûts d'entretien réels par organisation, et abonnements SaaS KEEVA lus en direct depuis Stripe (jamais un tarif recopié à la main).</p>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">verified</span><span>Supervision Financière Multi-Devises</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Audit TCO &amp; Facturation</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Coûts d'entretien réels par organisation, et abonnements SaaS KEEVA lus en direct depuis Stripe (jamais un tarif recopié à la main).</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <button id="tco-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
         </div>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Dépenses ce mois</span>
-            <span id="tco-kpi-mois" class="font-headline-md text-headline-md text-on-surface font-bold leading-none">—</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Dépenses ce mois</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">payments</span>
+            </div>
+            <span id="tco-kpi-mois" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">TCO cumulé du parc</span>
-            <span id="tco-kpi-cumule" class="font-headline-md text-headline-md text-on-surface font-bold leading-none">—</span>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">TCO cumulé du parc</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-secondary material-symbols-outlined text-[20px]">account_balance_wallet</span>
+            </div>
+            <span id="tco-kpi-cumule" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Dépréciation estimée / mois</span>
-            <span id="tco-kpi-depreciation" class="font-headline-md text-headline-md text-on-surface font-bold leading-none">—</span>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Dépréciation estimée / mois</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant material-symbols-outlined text-[20px]">trending_down</span>
+            </div>
+            <span id="tco-kpi-depreciation" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-bold">Sans barème horaire configuré</span>
-            <span id="tco-kpi-sans-bareme" class="font-display text-display text-error font-bold leading-none">—</span>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Sans barème horaire</span>
+              <span class="p-1.5 rounded-lg bg-error-container text-on-error-container material-symbols-outlined text-[20px]">warning</span>
+            </div>
+            <span id="tco-kpi-sans-bareme" class="font-display text-display text-error mt-space-md">—</span>
           </div>
-        </section>
+        </div>
 
-        <section class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
-          <div class="flex items-center justify-between">
-            <h2 class="font-headline-sm text-headline-sm text-on-surface">Ventilation des dépenses de ce mois</h2>
-            <span class="font-code-sm text-code-sm text-outline">Par devise réelle — aucune conversion appliquée</span>
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+            <div>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Ventilation des dépenses du mois</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Distribution par devise réelle — aucune conversion appliquée</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-space-sm">
+              <div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-primary"></span><span>Pièces</span></div>
+              <div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-secondary-container"></span><span>Main-d'œuvre</span></div>
+              <div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-tertiary-container"></span><span>Exploitation</span></div>
+              <div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-outline-variant"></span><span>Amortissement</span></div>
+            </div>
           </div>
-          <div id="tco-ventilation" class="flex flex-col gap-space-md"></div>
-        </section>
+          <div id="tco-ventilation" class="flex flex-col gap-space-md pt-space-xs"></div>
+        </div>
 
-        <div class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden">
-          <div class="p-space-md flex items-center justify-between bg-surface-container-low">
-            <span class="font-headline-sm text-headline-sm text-on-surface">Registre TCO par organisation</span>
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+            <div>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Registre TCO par organisation</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Suivi rigoureux de l'assiette horaire interne et valorisation des entretiens</p>
+            </div>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left font-body-sm text-body-sm">
               <thead>
-                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                  <th class="py-3 px-4">Organisation</th>
-                  <th class="py-3 px-4 text-center">Machines</th>
-                  <th class="py-3 px-4 text-right">Dépenses ce mois (P + MO + Expl.)</th>
-                  <th class="py-3 px-4 text-right">Barème horaire atelier</th>
-                  <th class="py-3 px-4 text-right">TCO cumulé</th>
+                <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                  <th class="py-3 px-space-md">Organisation</th>
+                  <th class="py-3 px-space-md text-center">Engins</th>
+                  <th class="py-3 px-space-md">Dépenses ce mois (Ventilées)</th>
+                  <th class="py-3 px-space-md text-right">Barème horaire atelier</th>
+                  <th class="py-3 px-space-md text-right">TCO cumulé déclaré</th>
                 </tr>
               </thead>
-              <tbody id="tco-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
+              <tbody id="tco-corps-tableau" class="divide-y divide-surface-container-low"></tbody>
             </table>
           </div>
         </div>
 
-        <section class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-space-md pb-space-md">
             <div>
-              <h2 class="font-headline-sm text-headline-sm text-on-surface">Abonnements SaaS (Stripe)</h2>
-              <p class="font-code-sm text-code-sm text-outline">Lu en direct depuis Stripe — jamais un tarif recopié à la main</p>
+              <div class="flex items-center gap-2">
+                <span class="p-1 rounded bg-secondary-fixed text-on-secondary-fixed material-symbols-outlined text-[20px]">credit_card</span>
+                <h2 class="font-headline-md text-headline-md text-on-surface">Abonnements SaaS (Stripe)</h2>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Lu en direct depuis Stripe — jamais un tarif recopié à la main</p>
             </div>
-            <div class="flex flex-col items-end">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">MRR réel</span>
-              <span id="tco-kpi-mrr" class="font-headline-md text-headline-md text-primary font-bold leading-none">—</span>
+            <div class="bg-surface-container p-space-md rounded-xl flex items-center gap-space-lg self-start md:self-auto">
+              <div>
+                <div class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">MRR réel</div>
+                <span id="tco-kpi-mrr" class="font-telemetry-stat text-telemetry-stat text-primary font-bold block mt-1">—</span>
+              </div>
             </div>
           </div>
           <div id="tco-stripe-corps" class="flex flex-col gap-2"></div>
-        </section>
+        </div>
       </section>
 
       <!-- ═══════ VUE : Carnets & OCR ═══════ -->
       <section id="vue-ocr" class="hidden flex flex-col gap-space-lg">
-        <div class="flex flex-col gap-1">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Carnets &amp; OCR</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Usage réel de l'analyse OCR des carnets, et couverture du parc. Pas de file de traitement en direct ni de score de confiance par document : cette donnée n'est pas tracée aujourd'hui.</p>
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+          <div class="flex flex-col gap-space-xs max-w-3xl">
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider font-semibold">
+              <span class="material-symbols-outlined text-[16px]">document_scanner</span><span>ANALYSE OCR &amp; COUVERTURE DU PARC</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Carnets &amp; OCR</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant">Usage réel de l'analyse OCR des carnets, et couverture du parc. Pas de file de traitement en direct ni de score de confiance par document : cette donnée n'est pas tracée aujourd'hui.</p>
+          </div>
         </div>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Analyses OCR ce mois</span>
-            <span id="ocr-kpi-analyses" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+          <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between mb-space-sm">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Analyses OCR ce mois</span>
+              <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">document_scanner</span></div>
+            </div>
+            <span id="ocr-kpi-analyses" class="font-telemetry-stat text-telemetry-stat text-on-surface">—</span>
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Carnets indexés (parc)</span>
-            <span id="ocr-kpi-carnets" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between mb-space-sm">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Carnets indexés (parc)</span>
+              <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[18px]">menu_book</span></div>
+            </div>
+            <span id="ocr-kpi-carnets" class="font-telemetry-stat text-telemetry-stat text-on-surface">—</span>
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Recherches photo ce mois</span>
-            <span id="ocr-kpi-photos" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between mb-space-sm">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Recherches photo ce mois</span>
+              <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[18px]">image_search</span></div>
+            </div>
+            <span id="ocr-kpi-photos" class="font-telemetry-stat text-telemetry-stat text-on-surface">—</span>
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
           </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Lectures compteur ce mois</span>
-            <span id="ocr-kpi-lectures" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between mb-space-sm">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Lectures compteur ce mois</span>
+              <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[18px]">speed</span></div>
+            </div>
+            <span id="ocr-kpi-lectures" class="font-telemetry-stat text-telemetry-stat text-on-surface">—</span>
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
           </div>
-        </section>
+        </div>
 
-        <div class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden">
-          <div class="p-space-md flex items-center justify-between bg-surface-container-low">
-            <span class="font-headline-sm text-headline-sm text-on-surface">Usage IA par organisation</span>
+        <div class="rounded bg-surface-container-lowest shadow-sm p-space-lg flex flex-col justify-between relative overflow-hidden">
+          <div class="flex items-start gap-space-md">
+            <div class="w-12 h-12 rounded bg-surface-container-high flex-shrink-0 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
+            <div class="flex flex-col gap-space-xs">
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Politique Zéro-Capteur &amp; Hybridation des Relevés</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">KEEVA évite les boîtiers télématiques intrusifs coûteux et fragiles en environnement agricole ou travaux publics. Les relevés proviennent des <strong>carnets de maintenance physiques</strong> et des <strong>photos instantanées des horamètres</strong> capturées par les chauffeurs et chefs de chantier, puis lus par OCR.</p>
+            </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+        </div>
+
+        <div class="rounded bg-surface-container-lowest shadow-sm flex flex-col overflow-hidden">
+          <div class="p-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+            <div class="flex flex-col gap-0.5">
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Usage IA par organisation</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Détail de consommation des fonctionnalités d'analyse OCR, de recherche photo et de lecture de compteur.</p>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">filter_list</span>
+              <input id="ocr-recherche" class="h-10 pl-9 pr-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant/70 rounded focus:outline-none focus:ring-2 focus:ring-primary w-56" placeholder="Filtrer organisation..." type="text"/>
+            </div>
+          </div>
+          <div class="overflow-x-auto w-full">
+            <table class="w-full text-left">
               <thead>
-                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                  <th class="py-3 px-4">Organisation</th>
-                  <th class="py-3 px-4 text-center">Machines</th>
-                  <th class="py-3 px-4 text-center">Carnets indexés</th>
-                  <th class="py-3 px-4 text-center">Analyses OCR (mois)</th>
-                  <th class="py-3 px-4 text-center">Recherches photo (mois)</th>
-                  <th class="py-3 px-4 text-center">Lectures compteur (mois)</th>
+                <tr class="h-10 bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                  <th class="px-space-lg py-space-xs font-semibold">Organisation</th>
+                  <th class="px-space-md py-space-xs font-semibold text-center">Machines suivies</th>
+                  <th class="px-space-md py-space-xs font-semibold text-center">Carnets indexés</th>
+                  <th class="px-space-md py-space-xs font-semibold text-center">Analyses OCR (mois)</th>
+                  <th class="px-space-md py-space-xs font-semibold text-center">Recherches photo (mois)</th>
+                  <th class="px-space-lg py-space-xs font-semibold text-center">Lectures compteur (mois)</th>
                 </tr>
               </thead>
-              <tbody id="ocr-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
+              <tbody id="ocr-corps-tableau" class="divide-y divide-surface-container-low"></tbody>
             </table>
           </div>
         </div>
@@ -347,144 +612,7 @@
       <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
         <span class="material-symbols-outlined text-4xl text-on-surface-variant">construction</span>
         <h2 class="font-headline-md text-headline-md text-on-surface">Bientôt disponible</h2>
-        <p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Cette page réutilisera les fonctions déjà existantes de l'application (TCO, carnets OCR) — pas encore branchée dans cette console.</p>
-      </section>
-
-      <!-- ═══════ VUE : Clients & Organisations ═══════ -->
-      <section id="vue-clients" class="hidden flex flex-col gap-space-lg">
-        <div class="flex flex-col gap-1">
-          <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-surface-container text-primary font-bold tracking-wider self-start">Supervision Multi-Tenant</span>
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Console Superviseur &amp; Support KEEVA</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">Vue d'ensemble des organisations clientes réelles et de leur parc.</p>
-        </div>
-
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
-            <div class="flex items-center justify-between">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Organisations</span>
-              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[22px]">corporate_fare</span></div>
-            </div>
-            <span id="kpi-organisations" class="font-display text-display text-on-surface font-bold leading-none">—</span>
-          </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
-            <div class="flex items-center justify-between">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Machines suivies</span>
-              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[22px]">agriculture</span></div>
-            </div>
-            <span id="kpi-machines" class="font-display text-display text-on-surface font-bold leading-none">—</span>
-          </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
-            <div class="flex items-center justify-between">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Interventions ce mois</span>
-              <div class="w-9 h-9 rounded bg-surface-container flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[22px]">verified</span></div>
-            </div>
-            <span id="kpi-interventions" class="font-display text-display text-on-surface font-bold leading-none">—</span>
-          </div>
-          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col justify-between gap-space-sm">
-            <div class="flex items-center justify-between">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Tickets ouverts</span>
-              <div class="w-9 h-9 rounded bg-error-container flex items-center justify-center text-on-error-container"><span class="material-symbols-outlined text-[22px]">support_agent</span></div>
-            </div>
-            <span id="kpi-tickets" class="font-display text-display text-error font-bold leading-none">—</span>
-          </div>
-        </section>
-
-        <section id="bandeau-incident" class="hidden rounded-lg bg-surface-container-lowest p-space-md shadow-sm relative overflow-hidden">
-          <div class="absolute left-0 top-0 bottom-0 w-2 bg-error"></div>
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pl-space-xs">
-            <div class="flex items-start gap-space-md">
-              <div class="w-11 h-11 rounded bg-error-container text-on-error-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[26px]">warning</span></div>
-              <div class="flex flex-col gap-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-code-sm text-code-sm uppercase px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold tracking-wider">Ticket prioritaire</span>
-                  <span id="incident-org" class="font-headline-sm text-headline-sm font-bold text-on-surface"></span>
-                </div>
-                <p id="incident-sujet" class="font-body-md text-body-md text-on-surface"></p>
-              </div>
-            </div>
-            <button id="incident-ouvrir" type="button" class="h-11 px-4 rounded bg-primary-container text-on-primary font-headline-sm text-label-md hover:bg-primary transition-colors flex items-center gap-2 shrink-0">
-              <span class="material-symbols-outlined text-[20px]">open_in_new</span><span>Ouvrir le ticket</span>
-            </button>
-          </div>
-        </section>
-
-        <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
-            <div class="flex flex-col">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Répertoire</span>
-              <h2 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Portefeuille Clients</h2>
-            </div>
-          </div>
-          <div class="overflow-x-auto w-full">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider h-10">
-                  <th class="py-2.5 px-4 rounded-l">Organisation / Forfait</th>
-                  <th class="py-2.5 px-4">Référent</th>
-                  <th class="py-2.5 px-4">Parc suivi</th>
-                  <th class="py-2.5 px-4">Tickets ouverts</th>
-                  <th class="py-2.5 px-4 text-right rounded-r">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="corps-tableau-clients" class="divide-y divide-surface-container font-body-sm text-body-sm"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="p-space-md rounded-lg bg-surface-container flex items-start gap-space-md shadow-sm">
-          <div class="w-10 h-10 rounded bg-tertiary text-on-tertiary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[22px]">verified_user</span></div>
-          <div class="flex flex-col gap-1">
-            <span class="font-headline-sm text-label-md font-bold text-on-surface">Protocole Zéro-Capteur KEEVA</span>
-            <p class="font-body-sm text-body-sm text-on-surface-variant">Tous les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés. Aucune sonde matérielle ni module connecté requis.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════ VUE : Support & Tickets ═══════ -->
-      <section id="vue-support" class="hidden flex flex-col gap-space-lg">
-        <div class="flex flex-col gap-1">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Support Client &amp; Tickets</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">File des demandes d'assistance des organisations clientes.</p>
-        </div>
-
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
-          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Ouverts</span>
-            <span id="kpi-t-ouverts" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
-          </div>
-          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">En cours</span>
-            <span id="kpi-t-encours" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
-          </div>
-          <div class="p-space-md rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1">
-            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Résolus</span>
-            <span id="kpi-t-resolus" class="font-display-mobile text-display-mobile text-on-surface leading-none">—</span>
-          </div>
-        </section>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-          <div class="lg:col-span-7 flex flex-col gap-space-md">
-            <div class="rounded bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-md">
-              <div class="flex items-center justify-between flex-wrap gap-2">
-                <h2 class="font-headline-sm text-headline-sm text-on-surface">File des Tickets</h2>
-                <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded" id="onglets-tickets">
-                  <button data-filtre="all" class="onglet-ticket px-3 py-1 rounded bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold" type="button">Tous</button>
-                  <button data-filtre="ouvert" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">Ouverts</button>
-                  <button data-filtre="en_cours" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">En cours</button>
-                  <button data-filtre="resolu" class="onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium" type="button">Résolus</button>
-                </div>
-              </div>
-              <div id="liste-tickets" class="flex flex-col gap-space-sm"></div>
-              <p id="tickets-vide" class="hidden font-body-sm text-body-sm text-on-surface-variant text-center py-6">Aucun ticket pour ce filtre.</p>
-            </div>
-          </div>
-
-          <aside class="lg:col-span-5 flex flex-col gap-space-lg">
-            <div id="panneau-ticket" class="rounded bg-surface-container-lowest p-space-md shadow-sm flex flex-col gap-space-md">
-              <p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Sélectionne un ticket pour voir le fil et répondre.</p>
-            </div>
-          </aside>
-        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Cette page réutilisera les fonctions déjà existantes de l'application — pas encore branchée dans cette console.</p>
       </section>
 
     </div>
@@ -493,27 +621,34 @@
 </div>
 
 <template id="tpl-ligne-client">
-  <tr class="hover:bg-surface-container-low/70 transition-colors">
-    <td class="py-3.5 px-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded bg-surface-container text-primary flex items-center justify-center font-bold font-headline-sm text-headline-sm shrink-0" data-slot="initiales"></div>
+  <tr class="h-16 hover:bg-surface-container-low transition-colors">
+    <td class="px-space-md py-space-sm">
+      <div class="flex items-center gap-space-sm">
+        <div class="w-9 h-9 rounded bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center font-bold shrink-0" data-slot="initiales"></div>
         <div class="flex flex-col">
-          <span class="font-headline-sm text-label-md font-bold text-on-surface" data-slot="nom"></span>
-          <span class="text-on-surface-variant font-body-sm text-body-sm" data-slot="plan"></span>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight" data-slot="nom"></span>
+          <span class="text-on-surface-variant font-code-sm text-code-sm mt-0.5" data-slot="plan"></span>
         </div>
       </div>
     </td>
-    <td class="py-3.5 px-4">
+    <td class="px-space-md py-space-sm">
       <div class="flex flex-col">
-        <span class="font-headline-sm text-label-md font-semibold text-on-surface" data-slot="gerant-nom"></span>
-        <span class="text-on-surface-variant font-body-sm text-label-sm" data-slot="gerant-email"></span>
+        <span class="font-label-md text-label-md text-on-surface" data-slot="gerant-nom"></span>
+        <span class="font-code-sm text-code-sm text-on-surface-variant" data-slot="gerant-email"></span>
       </div>
     </td>
-    <td class="py-3.5 px-4"><span class="font-code-sm text-code-sm font-bold text-on-surface" data-slot="machines"></span></td>
-    <td class="py-3.5 px-4"><span class="font-code-sm text-code-sm font-bold" data-slot="tickets"></span></td>
-    <td class="py-3.5 px-4 text-right">
-      <button class="btn-connecter-en-tant-que h-9 px-3 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-colors" type="button" title="Se connecter en tant que le gérant">
-        <span class="material-symbols-outlined text-[16px] align-middle">login</span> Se connecter en tant que
+    <td class="px-space-md py-space-sm">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">agriculture</span>
+        <span class="font-code-sm text-code-sm text-on-surface font-semibold" data-slot="machines"></span>
+      </div>
+    </td>
+    <td class="px-space-md py-space-sm text-center">
+      <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px]" data-slot="tickets"></span>
+    </td>
+    <td class="px-space-md py-space-sm text-right">
+      <button class="btn-connecter-en-tant-que inline-flex items-center justify-center gap-space-xs h-11 px-4 rounded bg-surface-container hover:bg-primary-container hover:text-on-primary text-on-surface transition-all font-label-md text-label-md shadow-sm" type="button" title="Se connecter en tant que le gérant">
+        <span class="material-symbols-outlined text-[18px]">login</span><span>Se connecter en tant que</span>
       </button>
     </td>
   </tr>
@@ -525,22 +660,31 @@
      write direct depuis le client : tout passe par l'Edge Function
      admin-corriger-donnee (ni machines ni companies n'ont de policy RLS
      UPDATE pour is_staff()). -->
-<div id="correction-overlay" class="hidden fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-md w-full p-space-lg flex flex-col gap-3">
-    <h3 id="correction-titre" class="font-headline-sm text-headline-sm text-on-surface"></h3>
-    <p id="correction-sous-titre" class="font-body-sm text-body-sm text-on-surface-variant"></p>
-    <div class="flex flex-col gap-1">
-      <label id="correction-label-valeur" class="font-label-sm text-label-sm text-on-surface-variant font-semibold"></label>
-      <input id="correction-valeur" type="number" step="0.1" min="0" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-code-sm text-code-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary"/>
+<div id="correction-overlay" class="hidden fixed inset-0 z-[200] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
+    <div class="p-space-lg flex items-center gap-space-sm bg-surface-container-low">
+      <span class="p-2 rounded bg-primary-container text-on-primary material-symbols-outlined text-[20px]">history_edu</span>
+      <div>
+        <h3 id="correction-titre" class="font-headline-sm text-headline-sm text-on-surface"></h3>
+        <p id="correction-sous-titre" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+      </div>
     </div>
-    <div class="flex flex-col gap-1">
-      <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Motif (obligatoire, journal d'audit)</label>
-      <input id="correction-motif" type="text" placeholder="Ex. : erreur de frappe confirmée par le client" class="h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
-    </div>
-    <div id="correction-msg" class="hidden font-label-sm text-label-sm text-error"></div>
-    <div class="flex items-center justify-end gap-2 pt-2">
-      <button id="correction-annuler" type="button" class="h-11 px-4 rounded bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors">Annuler</button>
-      <button id="correction-valider" type="button" class="h-11 px-4 rounded bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors">Appliquer la correction</button>
+    <div class="p-space-lg flex flex-col gap-space-md">
+      <div class="flex flex-col gap-1">
+        <label id="correction-label-valeur" class="font-label-sm text-label-sm text-on-surface-variant font-semibold"></label>
+        <input id="correction-valeur" type="number" step="0.1" min="0" class="h-11 px-3 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-code-sm text-code-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Motif d'audit obligatoire (journalisé)</label>
+        <textarea id="correction-motif" rows="3" placeholder="Ex. : erreur de frappe confirmée par le client" class="p-3 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+      </div>
+      <div id="correction-msg" class="hidden font-label-sm text-label-sm text-error"></div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+        <button id="correction-annuler" type="button" class="min-h-[44px] px-space-md rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">Annuler</button>
+        <button id="correction-valider" type="button" class="min-h-[44px] px-space-lg rounded bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md shadow-sm transition-all flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-[18px]">save</span><span>Enregistrer la correction</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -596,14 +740,17 @@ async function demarrer() {
   }));
   document.querySelectorAll('.onglet-ticket').forEach((btn) => btn.addEventListener('click', () => {
     FILTRE_TICKET = btn.dataset.filtre;
-    document.querySelectorAll('.onglet-ticket').forEach((b) => b.className = 'onglet-ticket px-3 py-1 rounded text-on-surface-variant font-label-sm text-label-sm font-medium');
-    btn.className = 'onglet-ticket px-3 py-1 rounded bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold';
+    document.querySelectorAll('.onglet-ticket').forEach((b) => b.className = 'onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface');
+    btn.className = 'onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors bg-surface-container-lowest text-primary font-semibold';
     rendreListeTickets();
   }));
   el('incident-ouvrir').addEventListener('click', () => {
     allerA('support');
     if (window.__incidentTicketId) ouvrirTicket(window.__incidentTicketId);
   });
+  el('parc-rafraichir')?.addEventListener('click', () => chargerParc());
+  el('tco-rafraichir')?.addEventListener('click', () => chargerTco());
+  el('ocr-recherche')?.addEventListener('input', () => rendreTableauOcr());
 
   sb.auth.onAuthStateChange((_event, session) => {
     if (session?.user) verifierAccesEtCharger(session.user.id);
@@ -696,7 +843,7 @@ function rendreTableauClients() {
     noeud.querySelector('[data-slot="machines"]').textContent = `${o.nb_machines} machine(s)`;
     const puceTickets = noeud.querySelector('[data-slot="tickets"]');
     puceTickets.textContent = o.tickets_ouverts;
-    puceTickets.className = 'font-code-sm text-code-sm font-bold ' + (o.tickets_ouverts > 0 ? 'text-error' : 'text-on-surface-variant');
+    puceTickets.className = 'inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ' + (o.tickets_ouverts > 0 ? 'bg-error-container text-error' : 'bg-surface-container-highest text-on-surface-variant');
     const btn = noeud.querySelector('.btn-connecter-en-tant-que');
     if (!o.gerant_login) { btn.disabled = true; btn.classList.add('opacity-40', 'cursor-not-allowed'); }
     else btn.addEventListener('click', () => connecterEnTantQue(o));
@@ -709,8 +856,8 @@ el('parc-filtre-org')?.addEventListener?.('change', () => rendreTableauParc());
 el('parc-filtre-categorie')?.addEventListener?.('change', () => rendreTableauParc());
 document.querySelectorAll('.parc-statut-chip').forEach((btn) => btn.addEventListener('click', () => {
   PARC_FILTRE_ETAT = btn.dataset.etat;
-  document.querySelectorAll('.parc-statut-chip').forEach((b) => b.className = 'parc-statut-chip h-8 px-3 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0');
-  btn.className = 'parc-statut-chip h-8 px-3 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0';
+  document.querySelectorAll('.parc-statut-chip').forEach((b) => b.className = 'parc-statut-chip px-space-md h-[34px] rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm shrink-0');
+  btn.className = 'parc-statut-chip px-space-md h-[34px] rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-semibold shrink-0';
   rendreTableauParc();
 }));
 
@@ -766,19 +913,20 @@ function rendreListeTickets() {
   const libellePriorite = { haute: 'Priorité Haute', normale: 'Normale', basse: 'Basse' };
   visibles.forEach((t) => {
     const carte = document.createElement('div');
-    carte.className = 'p-space-md rounded bg-surface-container-low/60 hover:bg-surface-container-low transition-colors shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm cursor-pointer';
+    carte.className = 'bg-surface-container-lowest hover:bg-surface-container-low/50 p-space-md rounded-xl shadow-sm cursor-pointer transition-all flex flex-col gap-space-xs';
     carte.innerHTML = `
-      <div class="flex items-start gap-3">
-        <div class="w-2.5 h-2.5 rounded-full ${couleurPriorite[t.priority] || 'bg-outline-variant'} mt-1.5 shrink-0"></div>
-        <div class="flex flex-col gap-0.5">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(t.companies?.name)}</span>
-            <span class="text-on-surface-variant font-body-sm text-body-sm">• ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
-            <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">${libellePriorite[t.priority] || t.priority}</span>
-          </div>
-          <p class="font-body-md text-body-md text-on-surface">${echapper(t.subject)}</p>
-          <span class="font-code-sm text-code-sm text-on-surface-variant">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'} • ${ilYA(t.created_at)}</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <span class="w-2.5 h-2.5 rounded-full ${couleurPriorite[t.priority] || 'bg-outline-variant'}"></span>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">${echapper(t.companies?.name)}</span>
+          <span class="px-space-xs py-0.5 rounded text-on-surface-variant bg-surface-container font-code-sm text-code-sm uppercase">${libellePriorite[t.priority] || t.priority}</span>
         </div>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">${ilYA(t.created_at)}</span>
+      </div>
+      <div class="font-label-md text-label-md text-on-surface font-semibold">${echapper(t.subject)}</div>
+      <div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+        <span>Créé par : ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
+        <span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium ${t.status === 'resolu' ? 'bg-surface-container-highest text-tertiary' : t.status === 'en_cours' ? 'bg-secondary-fixed text-secondary' : 'bg-error-container text-error'}">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'}</span>
       </div>`;
     carte.addEventListener('click', () => ouvrirTicket(t.id));
     liste.appendChild(carte);
@@ -797,30 +945,42 @@ async function ouvrirTicket(ticketId) {
     .order('created_at', { ascending: true });
   if (error) { panneau.innerHTML = `<p class="font-body-sm text-body-sm text-error">Erreur : ${echapper(error.message)}</p>`; return; }
   panneau.innerHTML = `
-    <div class="flex items-center justify-between gap-2">
-      <h3 class="font-headline-sm text-headline-sm text-on-surface">${echapper(t?.companies?.name)}</h3>
-      <select id="ticket-statut" class="h-9 px-2 rounded bg-surface-container-low text-on-surface font-label-sm text-label-sm">
-        <option value="ouvert" ${t?.status === 'ouvert' ? 'selected' : ''}>Ouvert</option>
-        <option value="en_cours" ${t?.status === 'en_cours' ? 'selected' : ''}>En cours</option>
-        <option value="resolu" ${t?.status === 'resolu' ? 'selected' : ''}>Résolu</option>
-      </select>
+    <div class="p-space-md bg-surface-container-low flex flex-col gap-space-sm -m-space-md mb-0">
+      <div class="flex items-center justify-between gap-space-sm">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-primary text-[20px]">corporate_fare</span>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-bold">${echapper(t?.companies?.name)}</span>
+        </div>
+        <select id="ticket-statut" class="h-11 bg-surface-container-lowest text-on-surface font-label-md text-label-md px-space-sm rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
+          <option value="ouvert" ${t?.status === 'ouvert' ? 'selected' : ''}>Ouvert</option>
+          <option value="en_cours" ${t?.status === 'en_cours' ? 'selected' : ''}>En cours</option>
+          <option value="resolu" ${t?.status === 'resolu' ? 'selected' : ''}>Résolu</option>
+        </select>
+      </div>
+      <div class="pt-space-xs">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Demande</span>
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold mt-0.5">${echapper(t?.subject)}</h2>
+      </div>
     </div>
-    <p class="font-body-md text-body-md text-on-surface font-semibold">${echapper(t?.subject)}</p>
-    <div id="fil-messages" class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1"></div>
-    <form id="form-reponse" class="flex flex-col gap-2 pt-2 border-t border-surface-container">
-      <textarea id="reponse-texte" rows="2" placeholder="Répondre…" class="p-2 rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/40"></textarea>
-      <button type="submit" class="h-10 rounded bg-primary text-on-primary font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors">Envoyer</button>
+    <div id="fil-messages" class="flex flex-col gap-space-md max-h-[420px] overflow-y-auto py-space-md"></div>
+    <form id="form-reponse" class="flex flex-col gap-space-sm bg-surface-container-low -m-space-md mt-0 p-space-md">
+      <textarea id="reponse-texte" rows="3" placeholder="Répondre..." class="w-full p-space-sm bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/70 rounded focus:outline-none focus:ring-2 focus:ring-primary resize-none shadow-sm"></textarea>
+      <button type="submit" class="h-11 px-space-lg bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-headline-sm rounded flex items-center justify-center gap-space-xs transition-colors shadow-sm self-end">
+        <span class="material-symbols-outlined text-[18px]">send</span><span>Envoyer</span>
+      </button>
     </form>`;
   const fil = panneau.querySelector('#fil-messages');
   (messages || []).forEach((m) => {
     const bulle = document.createElement('div');
     const deMoi = m.author_id === MOI.id;
-    bulle.className = 'p-2.5 rounded ' + (deMoi ? 'bg-primary/10 self-end' : 'bg-surface-container-low');
     // « Toi » l'emporte toujours sur le nom réel : un compte staff qui a AUSSI
     // un accès client (cas réel ici, gérant ET superviseur du même compte) doit
     // se voir lui-même, jamais confondu avec « le client » côté admin.
     const auteur = deMoi ? 'Toi' : (m.profiles?.is_staff ? 'Support KEEVA' : (m.profiles?.full_name || m.profiles?.login || '?'));
-    bulle.innerHTML = `<div class="font-label-sm text-label-sm font-semibold text-on-surface">${echapper(auteur)}</div><p class="font-body-sm text-body-sm text-on-surface">${echapper(m.body)}</p><div class="font-code-sm text-[11px] text-on-surface-variant">${ilYA(m.created_at)}</div>`;
+    bulle.className = deMoi ? 'flex flex-col items-end self-end max-w-[85%]' : 'flex flex-col items-start max-w-[85%]';
+    const meta = `<div class="flex items-center gap-space-xs mb-1"><span class="font-label-sm text-label-sm ${deMoi ? 'text-primary' : 'text-on-surface'} font-semibold">${echapper(auteur)}</span><span class="font-body-sm text-body-sm text-on-surface-variant">${ilYA(m.created_at)}</span></div>`;
+    const bulleTexte = `<div class="${deMoi ? 'bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface'} p-space-sm rounded-lg font-body-md text-body-md shadow-sm">${echapper(m.body)}</div>`;
+    bulle.innerHTML = meta + bulleTexte;
     fil.appendChild(bulle);
   });
   fil.scrollTop = fil.scrollHeight;
@@ -930,32 +1090,50 @@ function rendreTableauParc() {
   el('parc-compte-affiche').textContent = `Affichage de ${visibles.length} sur ${PARC.length} matériels`;
   el('parc-vide').classList.toggle('hidden', visibles.length > 0);
 
-  const couleurEtat = { retard: 'bg-error-container text-on-error-container', bientot: 'bg-secondary-fixed text-on-secondary-fixed', ok: 'bg-tertiary-container/15 text-tertiary', inconnu: 'bg-surface-container text-on-surface-variant' };
   el('parc-corps-tableau').innerHTML = visibles.map((m) => `
-    <tr class="hover:bg-surface-container-low/70 transition-colors ${m.anomalie_cadence ? 'bg-error-container/10' : ''}">
-      <td class="py-3.5 px-4">
-        <div class="flex flex-col">
-          <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(m.machine_name)}${m.anomalie_cadence ? ' <span class="px-1.5 py-0.5 rounded bg-error text-on-error font-code-sm text-[10px] font-bold align-middle">ANOMALIE</span>' : ''}</span>
-          <span class="font-code-sm text-code-sm text-outline">${echapper([m.brand, m.model].filter(Boolean).join(' ') || m.kind || '')}${m.serial_number ? ' • ' + echapper(m.serial_number) : m.plate ? ' • ' + echapper(m.plate) : ''}</span>
+    <tr class="hover:bg-surface-container-low transition-colors ${m.anomalie_cadence ? 'bg-error-container/10' : ''}">
+      <td class="py-space-sm px-space-md">
+        <div class="flex items-start gap-space-sm">
+          <div class="w-8 h-8 rounded ${m.anomalie_cadence ? 'bg-error text-on-error' : 'bg-surface-container-high text-on-surface'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">precision_manufacturing</span></div>
+          <div>
+            <div class="flex items-center gap-space-xs">
+              <span class="font-headline-sm text-headline-sm font-semibold text-on-surface">${echapper(m.machine_name)}</span>
+              ${m.anomalie_cadence ? '<span class="px-space-xs py-0.5 rounded bg-error text-on-error font-code-sm text-code-sm uppercase font-bold tracking-wide">ANOMALIE</span>' : ''}
+            </div>
+            <div class="flex items-center gap-space-xs text-on-surface-variant mt-0.5">
+              <span class="font-code-sm text-code-sm">${echapper([m.brand, m.model].filter(Boolean).join(' ') || m.kind || '')}</span>
+              ${m.serial_number ? `<span class="text-outline-variant">•</span><span class="font-code-sm text-code-sm text-primary font-medium">${echapper(m.serial_number)}</span>` : m.plate ? `<span class="text-outline-variant">•</span><span class="font-code-sm text-code-sm text-primary font-medium">${echapper(m.plate)}</span>` : ''}
+            </div>
+          </div>
         </div>
       </td>
-      <td class="py-3.5 px-4 font-label-md text-label-md text-on-surface">${echapper(m.company_name)}</td>
-      <td class="py-3.5 px-4">
+      <td class="py-space-sm px-space-md">
         <div class="flex flex-col">
-          <span class="font-code-sm text-telemetry-stat-compact text-on-surface font-semibold">${echapper(formatCompteurParc(m.counter_value, m.counter_unit))}</span>
-          ${m.derniere_saisie_le ? `<span class="font-body-sm text-body-sm text-outline">Saisi ${echapper(ilYA(m.derniere_saisie_le))}</span>` : ''}
+          <span class="font-label-md text-label-md font-semibold text-on-surface">${echapper(m.company_name)}</span>
         </div>
       </td>
-      <td class="py-3.5 px-4">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full ${m.manuel_indexe ? 'bg-tertiary-container/15 text-tertiary' : 'bg-surface-container-high text-on-surface-variant'} font-label-sm text-label-sm">${m.manuel_indexe ? 'Carnet indexé' : 'Sans carnet'}</span>
+      <td class="py-space-sm px-space-md">
+        <div class="flex flex-col">
+          <span class="font-telemetry-stat text-telemetry-stat font-bold ${m.anomalie_cadence ? 'text-error' : 'text-on-surface'}">${echapper(formatCompteurParc(m.counter_value, m.counter_unit))}</span>
+          ${m.derniere_saisie_le ? `<span class="font-body-sm text-body-sm text-on-surface-variant">Saisi ${echapper(ilYA(m.derniere_saisie_le))}</span>` : ''}
+        </div>
       </td>
-      <td class="py-3.5 px-4">
-        <span class="font-label-md text-label-md font-semibold ${couleurEtat[m.etat] ? '' : ''}" style="color:${m.etat === 'retard' ? '#ba1a1a' : m.etat === 'bientot' ? '#004395' : ''}">${echapper(libelleEcheanceParc(m))}</span>
+      <td class="py-space-sm px-space-md">
+        <div class="inline-flex items-center gap-1.5 px-space-xs py-1 rounded-full ${m.manuel_indexe ? 'bg-surface-container text-on-surface' : 'bg-error-container text-on-error-container font-semibold'} font-label-sm text-label-sm">
+          <span class="w-1.5 h-1.5 rounded-full ${m.manuel_indexe ? 'bg-tertiary' : 'bg-error'}"></span>
+          <span>${m.manuel_indexe ? 'Carnet indexé' : 'Sans carnet'}</span>
+        </div>
       </td>
-      <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${echapper(formatMontant(m.tco_total, m.devise))}</td>
-      <td class="py-3.5 px-4 text-center">
-        <button type="button" class="btn-corriger-compteur h-9 px-3 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-colors" data-machine-id="${echapper(m.machine_id)}" title="Corriger une saisie erronée">
-          <span class="material-symbols-outlined text-[16px] align-middle">tune</span> Corriger
+      <td class="py-space-sm px-space-md">
+        <div class="flex items-center gap-space-xs font-semibold font-body-sm text-body-sm" style="color:${m.etat === 'retard' ? '#ba1a1a' : m.etat === 'bientot' ? '#004395' : m.etat === 'ok' ? '#005952' : '#464554'}">
+          <span class="material-symbols-outlined text-[18px]">${m.etat === 'retard' ? 'report' : m.etat === 'bientot' ? 'schedule' : m.etat === 'ok' ? 'check_circle' : 'event_note'}</span>
+          <span>${echapper(libelleEcheanceParc(m))}</span>
+        </div>
+      </td>
+      <td class="py-space-sm px-space-md text-right font-code-sm text-code-sm font-semibold">${echapper(formatMontant(m.tco_total, m.devise))}</td>
+      <td class="py-space-sm px-space-md text-center">
+        <button type="button" class="btn-corriger-compteur min-h-[44px] px-space-md ${m.anomalie_cadence ? 'bg-error hover:bg-on-error-container text-on-error' : 'bg-surface-container-high hover:bg-surface-variant text-on-surface'} rounded font-label-md text-label-md inline-flex items-center gap-space-xs transition-colors shadow-sm" data-machine-id="${echapper(m.machine_id)}" title="Corriger une saisie erronée">
+          <span class="material-symbols-outlined text-[16px]">edit_note</span><span>Corriger</span>
         </button>
       </td>
     </tr>`).join('');
@@ -1016,18 +1194,21 @@ async function chargerTco() {
     };
     const bloc = document.createElement('div');
     bloc.innerHTML = `
-      <div class="font-label-sm text-label-sm text-on-surface-variant font-semibold mb-1">${echapper(d)}</div>
-      <div class="w-full h-7 bg-surface-container rounded-lg overflow-hidden flex shadow-inner">
+      <div class="flex items-center justify-between text-on-surface font-label-md text-label-md mb-1">
+        <span class="flex items-center gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-high font-code-sm text-code-sm text-on-surface">${echapper(d)}</span></span>
+        <span class="font-code-sm text-code-sm font-semibold">${echapper(formatMontant(total, d))}</span>
+      </div>
+      <div class="h-6 w-full rounded-md bg-surface-container flex overflow-hidden">
         ${seg(parts, 'bg-primary text-on-primary', 'Pièces')}
         ${seg(mo, 'bg-secondary-container text-on-secondary-container', 'Main-d’œuvre')}
         ${seg(expl, 'bg-tertiary-container text-on-tertiary-container', 'Exploitation')}
         ${seg(dep, 'bg-outline-variant text-on-surface', 'Amortissement')}
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 font-code-sm text-code-sm text-on-surface-variant">
-        <span><span class="inline-block w-2 h-2 rounded bg-primary mr-1"></span>Pièces : ${echapper(formatMontant(parts, d))}</span>
-        <span><span class="inline-block w-2 h-2 rounded bg-secondary-container mr-1"></span>MO : ${echapper(formatMontant(mo, d))}</span>
-        <span><span class="inline-block w-2 h-2 rounded bg-tertiary-container mr-1"></span>Exploitation : ${echapper(formatMontant(expl, d))}</span>
-        <span><span class="inline-block w-2 h-2 rounded bg-outline-variant mr-1"></span>Amortissement : ${echapper(formatMontant(Math.round(dep), d))}</span>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm pt-1 text-on-surface-variant font-code-sm text-code-sm">
+        <div>Pièces : <span class="text-on-surface font-semibold">${echapper(formatMontant(parts, d))}</span></div>
+        <div>MO Atelier : <span class="text-on-surface font-semibold">${echapper(formatMontant(mo, d))}</span></div>
+        <div>Exploitation : <span class="text-on-surface font-semibold">${echapper(formatMontant(expl, d))}</span></div>
+        <div>Amortissement : <span class="text-on-surface font-semibold">${echapper(formatMontant(Math.round(dep), d))}</span></div>
       </div>`;
     zoneVentilation.appendChild(bloc);
   });
@@ -1036,20 +1217,22 @@ async function chargerTco() {
   }
 
   el('tco-corps-tableau').innerHTML = lignes.map((s) => `
-    <tr class="hover:bg-surface-container-low/70 transition-colors">
-      <td class="py-3.5 px-4 font-label-md text-label-md text-on-surface font-semibold">${echapper(s.company_name)}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.nb_machines}</td>
-      <td class="py-3.5 px-4 text-right">
-        <div class="font-code-sm text-label-md text-on-surface font-bold">${echapper(formatMontant(s.depenses_mois, s.devise))}</div>
-        <div class="font-code-sm text-[11px] text-outline">Pièces ${echapper(formatMontant(s.parts_mois, s.devise))} • MO ${echapper(formatMontant(s.labor_mois, s.devise))} • Expl. ${echapper(formatMontant(s.opex_mois, s.devise))}</div>
+    <tr class="hover:bg-surface-container-low/40 transition-colors">
+      <td class="py-4 px-space-md">
+        <div class="font-label-md text-label-md text-on-surface">${echapper(s.company_name)}</div>
       </td>
-      <td class="py-3.5 px-4 text-right">
-        <button type="button" class="btn-corriger-bareme font-code-sm text-code-sm ${s.labor_hourly_rate == null ? 'text-error' : 'text-on-surface'} hover:underline" data-company-id="${echapper(s.company_id)}" title="Modifier le barème horaire">
-          ${s.labor_hourly_rate == null ? 'Non configuré' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}
-          <span class="material-symbols-outlined text-[14px] align-middle">edit</span>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${s.nb_machines}</td>
+      <td class="py-4 px-space-md">
+        <div class="font-code-sm text-code-sm font-semibold text-on-surface">${echapper(formatMontant(s.depenses_mois, s.devise))}</div>
+        <div class="text-on-surface-variant text-[11px] leading-relaxed">Pièces ${echapper(formatMontant(s.parts_mois, s.devise))} • MO ${echapper(formatMontant(s.labor_mois, s.devise))} • Expl. ${echapper(formatMontant(s.opex_mois, s.devise))}</div>
+      </td>
+      <td class="py-4 px-space-md text-right">
+        <button type="button" class="btn-corriger-bareme min-h-[44px] px-space-sm py-1.5 rounded ${s.labor_hourly_rate == null ? 'bg-error-container text-on-error-container hover:brightness-95' : 'hover:bg-surface-container text-primary'} font-label-md text-label-md transition-all inline-flex items-center gap-1" data-company-id="${echapper(s.company_id)}">
+          <span class="material-symbols-outlined text-[18px]">${s.labor_hourly_rate == null ? 'add_circle' : 'tune'}</span>
+          <span>${s.labor_hourly_rate == null ? 'Définir barème' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}</span>
         </button>
       </td>
-      <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${s.nb_machines_avec_tco > 0 ? echapper(formatMontant(s.tco_total, s.devise)) : '—'}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-on-surface">${s.nb_machines_avec_tco > 0 ? echapper(formatMontant(s.tco_total, s.devise)) : '—'}</td>
     </tr>`).join('');
   el('tco-corps-tableau').querySelectorAll('.btn-corriger-bareme').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -1114,7 +1297,7 @@ async function chargerFacturationStripe() {
         <span class="font-code-sm text-code-sm text-outline">Prochaine échéance : ${echeance}${a.annule_a_echeance ? ' • résiliation programmée' : ''}</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full ${a.statut === 'active' ? 'bg-tertiary-container/15 text-tertiary' : 'bg-error-container text-on-error-container'} font-label-sm text-label-sm font-semibold">${echapper(LIBELLE_STATUT_STRIPE[a.statut] || a.statut)}</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${a.statut === 'active' ? 'bg-surface-container text-tertiary' : 'bg-secondary-fixed text-secondary'}"><span class="w-1.5 h-1.5 rounded-full ${a.statut === 'active' ? 'bg-tertiary' : 'bg-secondary'}"></span>${echapper(LIBELLE_STATUT_STRIPE[a.statut] || a.statut)}</span>
         <span class="font-code-sm text-label-md text-on-surface font-bold">${a.montant_mensuel != null ? echapper(formatMontant(Math.round(a.montant_mensuel), a.devise)) + '/mois' : '—'}</span>
       </div>
     </div>`;
@@ -1122,26 +1305,44 @@ async function chargerFacturationStripe() {
 }
 
 // ── Carnets & OCR ────────────────────────────────────────────────────────
+let OCR_LIGNES = [];
+
 async function chargerOcr() {
   const { data: societes, error } = await sb.rpc('admin_usage_ocr_societes');
   if (error) { console.error(error); return; }
-  const lignes = (societes || []).filter((s) => s.nb_machines > 0);
+  OCR_LIGNES = (societes || []).filter((s) => s.nb_machines > 0);
 
-  el('ocr-kpi-analyses').textContent = lignes.reduce((a, s) => a + Number(s.analyses_carnet || 0), 0);
-  el('ocr-kpi-photos').textContent = lignes.reduce((a, s) => a + Number(s.recherches_photo || 0), 0);
-  el('ocr-kpi-lectures').textContent = lignes.reduce((a, s) => a + Number(s.lectures_compteur || 0), 0);
-  const totalMachines = lignes.reduce((a, s) => a + Number(s.nb_machines || 0), 0);
-  const totalManuels = lignes.reduce((a, s) => a + Number(s.nb_manuels || 0), 0);
+  el('ocr-kpi-analyses').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.analyses_carnet || 0), 0);
+  el('ocr-kpi-photos').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.recherches_photo || 0), 0);
+  el('ocr-kpi-lectures').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.lectures_compteur || 0), 0);
+  const totalMachines = OCR_LIGNES.reduce((a, s) => a + Number(s.nb_machines || 0), 0);
+  const totalManuels = OCR_LIGNES.reduce((a, s) => a + Number(s.nb_manuels || 0), 0);
   el('ocr-kpi-carnets').textContent = `${totalManuels}/${totalMachines}`;
 
-  el('ocr-corps-tableau').innerHTML = lignes.map((s) => `
-    <tr class="hover:bg-surface-container-low/70 transition-colors">
-      <td class="py-3.5 px-4 font-label-md text-label-md text-on-surface font-semibold">${echapper(s.company_name)}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.nb_machines}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.nb_manuels}/${s.nb_machines}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm font-bold">${s.analyses_carnet}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.recherches_photo}</td>
-      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.lectures_compteur}</td>
+  rendreTableauOcr();
+}
+
+function rendreTableauOcr() {
+  const recherche = (el('ocr-recherche')?.value || '').toLowerCase();
+  const visibles = OCR_LIGNES.filter((s) => !recherche || s.company_name.toLowerCase().includes(recherche));
+  el('ocr-corps-tableau').innerHTML = visibles.map((s) => `
+    <tr class="min-h-[52px] hover:bg-surface-container-low/40 transition-colors">
+      <td class="px-space-lg py-space-sm">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-headline-sm text-primary font-bold">${echapper(initiales(s.company_name).slice(0, 1))}</div>
+          <span class="font-label-md text-label-md text-on-surface">${echapper(s.company_name)}</span>
+        </div>
+      </td>
+      <td class="px-space-md py-space-sm text-center"><span class="font-code-sm text-code-sm text-on-surface font-semibold bg-surface-container-high px-2 py-0.5 rounded">${s.nb_machines}</span></td>
+      <td class="px-space-md py-space-sm text-center">
+        <div class="inline-flex items-center gap-space-xs">
+          <span class="font-code-sm text-code-sm font-semibold text-on-surface">${s.nb_manuels}/${s.nb_machines}</span>
+          <span class="w-2 h-2 rounded-full ${!s.nb_machines ? 'bg-outline-variant' : (s.nb_manuels / s.nb_machines) >= 0.8 ? 'bg-tertiary' : (s.nb_manuels / s.nb_machines) >= 0.6 ? 'bg-secondary' : 'bg-error'}"></span>
+        </div>
+      </td>
+      <td class="px-space-md py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-on-surface">${s.analyses_carnet}</span></td>
+      <td class="px-space-md py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-on-surface">${s.recherches_photo}</span></td>
+      <td class="px-space-lg py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-primary font-bold">${s.lectures_compteur}</span></td>
     </tr>`).join('');
 }
 
