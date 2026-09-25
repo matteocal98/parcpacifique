@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hjPHP5ZFyNV16PJclOtmFsTRLBTnjcfqmV3f80sxe/w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5b81KD+lGFTnRX8cDiwUCqLexL4FiekEhkUTBgt3KVE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9787,6 +9787,7 @@ let verrouPropose = false;  // l'invite automatique est déjà partie pour ce ve
 let verrouEnCours = false;  // une vérification est en cours (pas de doublon)
 let verrouMasque = 0;       // instant du passage en arrière-plan
 let verrouEcoute = false;   // les écouteurs d'arrière-plan sont posés
+let boutonRetourEcoute = false; // idem pour ecouterBoutonRetour() — un seul écouteur
 let verrouGeneration = 0;   // numéro du verrou courant (périme les résultats tardifs)
 
 // Le réglage « Verrouiller l'application », mémorisé sur l'appareil seulement.
@@ -9987,6 +9988,41 @@ function verrouEcouterArrierePlan() {
   });
   window.addEventListener('focus', revenir);
   window.addEventListener('blur', masqueFenetre);
+}
+
+// ── BOUTON/GESTE « RETOUR » ANDROID : ferme la modale ouverte plutôt que
+// de quitter l'appli ────────────────────────────────────────────────────
+// Signalé par l'utilisateur : le geste natif (balayage depuis le bord) ou
+// le bouton retour matériel ne fermaient aucune modale — il fallait
+// toujours chercher le bouton Annuler/Fermer, parfois hors écran après un
+// long formulaire. Le geste ET le bouton matériel émettent le MÊME
+// évènement système Android (« retour »), intercepté ici via @capacitor/app
+// (déjà utilisé pour verrouEcouterArrierePlan, même patron
+// pluginApplication()/dansApplication() — aucun nouveau greffon).
+// Toutes les modales de l'appli partagent la même structure (.overlay
+// ajoutée à document.body, fermée par overlay.remove() — voir le clic hors
+// modale déjà présent sur chacune) : fermer le DERNIER .overlay du DOM
+// ferme donc la modale visuellement au-dessus (même si une seconde modale
+// — sélecteur de date, liste de choix… — a été ouverte PAR-DESSUS une
+// première), sans toucher au code de chaque modale une par une. Le verrou
+// biométrique (renderVerrouillage) n'utilise PAS .overlay — jamais
+// contournable par ce geste, intentionnellement.
+function ecouterBoutonRetour() {
+  if (boutonRetourEcoute || !dansApplication()) return;
+  const application = pluginApplication();
+  if (!application) return;
+  boutonRetourEcoute = true;
+  try {
+    application.addListener('backButton', ({ canGoBack } = {}) => {
+      const overlays = document.querySelectorAll('.overlay');
+      if (overlays.length) { overlays[overlays.length - 1].remove(); return; }
+      // Aucune modale ouverte : comportement standard Android (retour dans
+      // l'historique web s'il y en a un, sinon on quitte l'appli — jamais
+      // un écran bloqué qui ne répond plus au bouton retour).
+      if (canGoBack) window.history.back();
+      else if (typeof application.exitApp === 'function') application.exitApp();
+    });
+  } catch (err) { /* greffon muet : le bouton retour garde son comportement système par défaut */ }
 }
 
 // La connexion sans mot de passe de l'ÉCRAN DE CONNEXION prouve déjà l'identité :
@@ -23146,6 +23182,7 @@ async function boot(toastMessage) {
     return;
   }
   verrouEcouterArrierePlan();
+  ecouterBoutonRetour();
 
   // La copie locale est lue AVANT tout appel réseau : si le réseau manque, on
   // veut pouvoir l'afficher sans attendre l'expiration des délais.
