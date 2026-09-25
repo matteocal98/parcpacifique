@@ -1939,6 +1939,12 @@
   .champ-select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-tint);}
   .champ-select:disabled{opacity:.6;cursor:default;}
   .champ-select svg{width:16px;height:16px;flex:0 0 auto;color:var(--ink-2);}
+  /* Un <select> natif TRONQUE un libellé trop long — un <span> dans un
+     bouton flex, lui, PASSE À LA LIGNE par défaut : dans un contexte étroit
+     (ligne de pièce sur téléphone), le texte s'enroulait verticalement sur
+     des dizaines de lignes au lieu de se couper proprement (constaté en
+     test réel). Même comportement que le natif, retrouvé ici à la main. */
+  .champ-select span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
   .liste-choix{display:flex;flex-direction:column;margin-top:12px;max-height:60vh;overflow-y:auto;}
   .ligne-choix{
     display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;
