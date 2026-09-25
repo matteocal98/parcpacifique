@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XuDTpc+qKXFC25G3fl7OYHbw4zbyHzv7q1JmaR+SXuI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kPa1mBew0KrqjoV0akIWK9MtvQhM2vjtcGvKmXr5RjU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2917,6 +2917,98 @@
     .offre-service{flex-direction:column;align-items:flex-start;}
     .offre-service .offre-bouton{width:100%;}
   }
+
+  /* ── MODALE D'IMPORT CSV DU CATALOGUE (ouvrirImportCatalogue) — reprise
+     Stitch (maquette « import_csv_catalogue »), même choix que la fenêtre
+     des offres : système de variables CSS et polices déjà vendues en
+     local (Space Grotesk/Hanken Grotesk) plutôt que Tailwind CDN. */
+  .import-csv-modal{padding:0;overflow:hidden;max-width:520px;}
+  .import-csv-barre{height:6px;background:linear-gradient(90deg,var(--primary-dark),var(--ok),var(--late));}
+  .import-csv-corps{padding:24px;display:flex;flex-direction:column;gap:18px;}
+  .import-csv-entete{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .import-csv-entete-gauche{display:flex;align-items:flex-start;gap:12px;}
+  .import-csv-icone{
+    width:44px;height:44px;border-radius:var(--r-md);background:var(--primary-tint);color:var(--primary-dark);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .import-csv-icone svg{width:22px;height:22px;}
+  .import-csv-entete h2{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;margin:0;line-height:1.3;}
+  .import-csv-sous-titre{font-size:12.5px;color:var(--ink-2);margin:3px 0 0;}
+
+  .import-csv-section{display:flex;flex-direction:column;gap:8px;}
+  .import-csv-libelle{font-size:13.5px;font-weight:600;color:var(--ink);margin:0;}
+  .import-csv-badge{
+    color:var(--primary-dark);background:var(--primary-tint);font-size:10.5px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.05em;padding:2px 7px;border-radius:var(--r-chip);
+  }
+  .import-csv-terminal{border-radius:var(--r-md);background:var(--dark);color:#cbd5e1;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
+  .import-csv-terminal-tete{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;
+    background:rgba(0,0,0,.22);font-size:11px;color:#94a3b8;
+  }
+  .import-csv-terminal-tete>span{display:inline-flex;align-items:center;gap:6px;}
+  .import-csv-terminal-tete .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
+  #import-copier{
+    display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:var(--r-chip);border:none;
+    background:rgba(255,255,255,.08);color:#cbd5e1;font-family:inherit;font-size:11px;cursor:pointer;
+  }
+  #import-copier svg{width:13px;height:13px;flex:0 0 auto;}
+  #import-copier:hover{background:rgba(255,255,255,.16);}
+  #import-copier.is-copie{background:var(--ok);color:#fff;}
+  .import-csv-terminal-code{
+    padding:12px;font-family:'Space Grotesk',monospace;font-size:12px;color:var(--ok);white-space:nowrap;overflow-x:auto;
+  }
+
+  .import-csv-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);}
+  .import-csv-regles{display:flex;flex-direction:column;gap:7px;}
+  .import-csv-regle{
+    display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--r-md);
+    background:var(--surface-soft);font-size:12.5px;color:var(--ink);line-height:1.5;
+  }
+  .import-csv-regle.is-accent{background:var(--primary-tint);}
+  .import-csv-regle strong{color:var(--ink);font-weight:700;}
+  .import-csv-souligne{text-decoration:underline;text-decoration-color:var(--primary-dark);text-underline-offset:2px;font-weight:700;}
+  .import-csv-regle-icone{
+    width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px;
+  }
+  .import-csv-regle-icone svg{width:13px;height:13px;}
+  .import-csv-regle-icone.is-bleu{background:rgba(35,111,224,.14);color:var(--bleu-roi);}
+  .import-csv-regle-icone.is-vert{background:var(--ok-bg);color:var(--ok);}
+  .import-csv-regle-icone.is-ambre{background:var(--late-bg);color:var(--late);}
+  .import-csv-regle-icone.is-primaire{background:var(--primary-dark);color:#fff;}
+
+  .import-csv-bouton-modele{
+    width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    border-radius:var(--r-chip);border:1.5px solid var(--primary-tint-2);background:var(--surface);color:var(--primary-dark);
+    font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:10px;
+  }
+  .import-csv-bouton-modele:hover{background:var(--primary-tint);border-color:var(--primary-dark);}
+  .import-csv-bouton-modele svg{width:17px;height:17px;flex:0 0 auto;}
+  .import-csv-zone{
+    min-height:58px;padding:10px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    border-radius:var(--r-md);border:2px dashed var(--line-3);background:var(--surface-soft);cursor:pointer;transition:border-color .15s ease,background .15s ease;
+  }
+  .import-csv-zone:hover,.import-csv-zone.is-survol{border-color:var(--primary-dark);background:var(--primary-tint);}
+  .import-csv-zone.is-rempli{border-color:var(--ok);background:var(--ok-bg);}
+  .import-csv-zone-icone{
+    width:30px;height:30px;border-radius:var(--r-chip);background:var(--surface);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex:0 0 auto;
+  }
+  .import-csv-zone-icone svg{width:15px;height:15px;}
+  .import-csv-zone-nom{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .import-csv-zone-aide{font-size:11.5px;color:var(--ink-3);}
+
+  #import-msg:not(:empty){
+    background:var(--late-bg);border:1px solid rgba(222,122,22,.35);border-radius:var(--r-chip);
+    padding:10px 12px;color:var(--late-ink);font-size:12.5px;
+  }
+  .import-csv-pied{
+    display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 24px;
+    background:var(--surface-soft);border-top:1px solid var(--line-2);
+  }
+  .import-csv-pied button{width:auto;flex:0 0 auto;}
+  .import-csv-pied .primary{display:inline-flex;align-items:center;gap:8px;}
+  .import-csv-pied .primary svg{width:15px;height:15px;flex:0 0 auto;}
   /* Entre le titre « À faire » et le premier élément de la liste, puis entre les
      éléments eux-mêmes : deux écarts déjà employés ailleurs (10 et 8 px). */
   .plan-tasks{margin:10px 0 0;padding-left:18px;}
@@ -4587,11 +4679,6 @@
      « Télécharger » (modale QR, ouvrirQrMachine). */
   .qr-modal .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .qr-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
-  /* Même piège, même correctif — deux boutons cette fois HORS .modal-actions
-     (« Télécharger un modèle », « Choisir un fichier » de la modale d'import
-     CSV du catalogue de pièces, ouvrirImportCatalogue). */
-  .import-btn-icone{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-  .import-btn-icone svg{width:18px;height:18px;flex:0 0 auto;}
   /* Les blocs de la page (bandeau, tuiles KPI, classement flotte, grille
      Paramètres/Catalogue) sont des enfants directs de .vue-couts-tco sans
      .dash-grid autour : sans gap ici, ils se touchaient (contrairement aux
@@ -11381,6 +11468,9 @@ const PICTOS = {
   // Fenêtre des offres (openUpgradeNotice, reprise Stitch) — bouton de
   // l'offre recommandée.
   eclair: '<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
+  // Modale d'import CSV du catalogue (reprise Stitch) — « mise à jour
+  // intelligente » (upsert par référence).
+  rafraichir: '<path d="M20 12a8 8 0 1 1-3-6.3"/><path d="M20 3v5h-5"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -15786,48 +15876,124 @@ function ouvrirImportCatalogue() {
   overlay.className = 'overlay import-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const REGLES = [
+    { icone: 'info', teinte: 'is-bleu', titre: trad('Référence et Fournisseur :'), texte: trad('facultatifs, peuvent rester vides.') },
+    { icone: 'devise', teinte: 'is-vert', titre: trad('Prix unitaire :'), texte: trad('nombre (virgule ou point décimal accepté).') },
+    { icone: 'bientot', teinte: 'is-ambre', titre: trad('Délai moyen (jours) :'), texte: trad('nombre entier, facultatif.') },
+  ];
+
   overlay.innerHTML = `
-    <div class="modal" style="max-width:480px;">
-      <h2>${trad('Importer le catalogue depuis un CSV')}</h2>
-      <p class="muted-text">${trad('Fichier CSV avec un en-tête EXACTEMENT dans cet ordre :')}</p>
-      <p style="font-family:monospace;font-size:12.5px;background:var(--surface-soft);padding:10px;border-radius:var(--r-md);word-break:break-all;">${esc(ENTETE_CSV_PIECES.join(','))}</p>
-      <ul class="hint" style="margin:0 0 12px 18px;padding:0;">
-        <li>${trad('Référence et Fournisseur : facultatifs, peuvent rester vides.')}</li>
-        <li>${trad('Prix unitaire : nombre (virgule ou point décimal accepté).')}</li>
-        <li>${trad('Délai moyen (jours) : nombre entier, facultatif.')}</li>
-        <li>${trad('Une pièce dont la Référence existe déjà dans ton catalogue est mise à jour, pas dupliquée.')}</li>
-      </ul>
-      <button type="button" class="secondary import-btn-icone" id="import-modele" style="width:100%;margin-bottom:12px;">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
-      <input id="import-fichier" type="file" accept=".csv,text/csv" hidden>
-      <button type="button" class="secondary import-btn-icone" id="import-choisir" style="width:100%;">${picto('televerser')}<span id="import-choisir-label">${trad('Choisir un fichier…')}</span></button>
-      <div id="import-msg" role="status" aria-live="polite" style="margin-top:10px;font-size:13px;"></div>
-      <div class="modal-actions">
+    <div class="modal import-csv-modal">
+      <div class="import-csv-barre"></div>
+      <div class="import-csv-corps">
+        <div class="import-csv-entete">
+          <div class="import-csv-entete-gauche">
+            <div class="import-csv-icone">${picto('boite')}</div>
+            <div>
+              <h2>${trad('Importer le catalogue depuis un CSV')}</h2>
+              <p class="import-csv-sous-titre">${trad('Mets à jour tes pièces et tarifs en un clic')}</p>
+            </div>
+          </div>
+          <button type="button" class="log-close2" id="import-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+        </div>
+
+        <div class="import-csv-section">
+          <p class="import-csv-libelle">${trad('Fichier CSV avec un en-tête')} <strong class="import-csv-badge">${trad('EXACTEMENT')}</strong> ${trad('dans cet ordre :')}</p>
+          <div class="import-csv-terminal">
+            <div class="import-csv-terminal-tete">
+              <span><span class="dot"></span>${trad('En-tête requis (colonnes 1 à 5)')}</span>
+              <button type="button" id="import-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
+            </div>
+            <div class="import-csv-terminal-code">${esc(ENTETE_CSV_PIECES.join(','))}</div>
+          </div>
+        </div>
+
+        <div class="import-csv-section">
+          <span class="import-csv-eyebrow">${trad('Règles & conditions de traitement')}</span>
+          <div class="import-csv-regles">
+            ${REGLES.map((r) => `
+              <div class="import-csv-regle">
+                <div class="import-csv-regle-icone ${r.teinte}">${picto(r.icone)}</div>
+                <div><strong>${esc(r.titre)}</strong> ${esc(r.texte)}</div>
+              </div>`).join('')}
+            <div class="import-csv-regle is-accent">
+              <div class="import-csv-regle-icone is-primaire">${picto('rafraichir')}</div>
+              <div><strong>${trad('Mise à jour intelligente :')}</strong> ${trad('une pièce dont la Référence existe déjà dans ton catalogue est')} <span class="import-csv-souligne">${trad('mise à jour')}</span>${trad(', pas dupliquée.')}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="import-csv-section">
+          <button type="button" class="import-csv-bouton-modele" id="import-modele">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
+          <input id="import-fichier" type="file" accept=".csv,text/csv" hidden>
+          <div class="import-csv-zone" id="import-zone">
+            <div class="import-csv-zone-icone">${picto('televerser')}</div>
+            <span class="import-csv-zone-nom" id="import-choisir-label">${trad('Choisir un fichier…')}</span>
+            <span class="import-csv-zone-aide">${trad('(ou glisser le .csv ici)')}</span>
+          </div>
+        </div>
+
+        <div id="import-msg" role="status" aria-live="polite"></div>
+      </div>
+      <div class="import-csv-pied">
         <button type="button" class="secondary" id="import-fermer">${trad('Fermer')}</button>
-        <button type="button" class="primary" id="import-go" disabled>${trad('Importer')}</button>
+        <button type="button" class="primary" id="import-go" disabled>${picto('coche')}<span>${trad('Importer')}</span></button>
       </div>
     </div>`;
 
   overlay.querySelector('#import-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#import-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#import-modele').addEventListener('click', telechargerModeleCsvCatalogue);
 
+  // Copier l'en-tête : un confort, jamais bloquant si le presse-papiers est
+  // indisponible (permission refusée, contexte non sécurisé) — le bouton
+  // reste alors simplement sans effet visible, rien ne casse.
+  const boutonCopier = overlay.querySelector('#import-copier');
+  boutonCopier?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(ENTETE_CSV_PIECES.join(','));
+      const texteBtn = boutonCopier.querySelector('span');
+      const avant = texteBtn.textContent;
+      boutonCopier.classList.add('is-copie');
+      texteBtn.textContent = trad('Copié !');
+      setTimeout(() => { boutonCopier.classList.remove('is-copie'); texteBtn.textContent = avant; }, 2000);
+    } catch (err) { /* presse-papiers indisponible : sans conséquence */ }
+  });
+
   const inputFichier = overlay.querySelector('#import-fichier');
+  const zone = overlay.querySelector('#import-zone');
   const labelChoisir = overlay.querySelector('#import-choisir-label');
   const boutonGo = overlay.querySelector('#import-go');
   const msg = overlay.querySelector('#import-msg');
   let fichierChoisi = null;
 
-  overlay.querySelector('#import-choisir').addEventListener('click', () => inputFichier.click());
-  inputFichier.addEventListener('change', () => {
-    fichierChoisi = inputFichier.files?.[0] || null;
+  const definirFichier = (fichier) => {
+    fichierChoisi = fichier || null;
     labelChoisir.textContent = fichierChoisi ? fichierChoisi.name : trad('Choisir un fichier…');
+    zone.classList.toggle('is-rempli', !!fichierChoisi);
     boutonGo.disabled = !fichierChoisi;
     msg.textContent = '';
+  };
+
+  zone.addEventListener('click', () => inputFichier.click());
+  inputFichier.addEventListener('change', () => definirFichier(inputFichier.files?.[0] || null));
+  // Glisser-déposer réel (pas juste le texte d'invite) : le fichier déposé
+  // passe par le MÊME chemin que la sélection au clic.
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('is-survol'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('is-survol'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('is-survol');
+    const depose = e.dataTransfer?.files?.[0];
+    if (depose) definirFichier(depose);
   });
 
+  const labelGo = boutonGo.querySelector('span');
   boutonGo.addEventListener('click', async () => {
     if (!fichierChoisi) return;
     boutonGo.disabled = true;
-    boutonGo.textContent = trad('Import en cours…');
+    labelGo.textContent = trad('Import en cours…');
     msg.textContent = '';
     try {
       const texte = await lireTexteFichier(fichierChoisi);
@@ -15836,7 +16002,7 @@ function ouvrirImportCatalogue() {
         msg.style.color = 'var(--danger, #c0392b)';
         msg.textContent = erreurs.length ? erreurs.join(' ') : trad('Aucune ligne valide trouvée dans ce fichier.');
         boutonGo.disabled = false;
-        boutonGo.textContent = trad('Importer');
+        labelGo.textContent = trad('Importer');
         return;
       }
       const { data, error } = await sb.from('parts_catalog')
@@ -15861,7 +16027,7 @@ function ouvrirImportCatalogue() {
           + `<div style="margin-top:6px;color:var(--danger, #c0392b);">${esc(tR('{m} ligne(s) ignorée(s) :', { m: erreurs.length }))}</div>`
           + `<ul style="margin:4px 0 0 18px;padding:0;">${erreurs.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
         boutonGo.disabled = false;
-        boutonGo.textContent = trad('Importer');
+        labelGo.textContent = trad('Importer');
       } else {
         showToast(succes);
         overlay.remove();
@@ -15870,7 +16036,7 @@ function ouvrirImportCatalogue() {
       msg.style.color = 'var(--danger, #c0392b)';
       msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
       boutonGo.disabled = false;
-      boutonGo.textContent = trad('Importer');
+      labelGo.textContent = trad('Importer');
     }
   });
 }
