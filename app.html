@@ -2007,8 +2007,14 @@
      « Min. 6 car. ») : toujours une règle RÉELLE du champ, jamais une
      décoration — le contact prend la casse forcée, le mot de passe a
      bien minlength=6. */
-  .label-avec-note{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
-  .label-annotation{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);}
+  .label-avec-note{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  /* Sans min-width:0, le libellé (span flex par défaut) refuse de rétrécir
+     sous sa largeur de contenu et pousse l'annotation "FACULTATIF" hors du
+     cadre — même gotcha que .mstrip-jauge-part/la grille d'agenda, cette
+     fois sur un libellé long ("Durée d'amortissement (années)") dans une
+     colonne étroite (5 colonnes de field-row). */
+  .label-avec-note>span:first-child{min-width:0;}
+  .label-annotation{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);flex:0 0 auto;}
   .signup-login-line{margin:16px 0 0;text-align:center;font-size:13.5px;color:var(--ink-2);}
   /* L'astérisque rouge est un repère universel de champ obligatoire — la
      seule utilité où le nuancier fermé de la charte s'efface devant une
