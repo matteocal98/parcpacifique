@@ -15,7 +15,7 @@
   IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
   d'implémentation pour le détail gardé/retiré.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dfJxPZHV8y4EOZL/4XrhD9Un/NNfa8w5S4Ku+sFklAM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9cPsFM3IB/g6xJt+V1cTk9NEJ2voEWrHrg+OgQE7gfI=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -97,8 +97,8 @@
       <a data-path="tco" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
         <span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Audit TCO</span>
       </a>
-      <a data-path="bientot" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">document_scanner</span><span>Carnets &amp; OCR IA</span>
+      <a data-path="ocr" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">document_scanner</span><span>Carnets &amp; OCR</span>
       </a>
     </nav>
   </div>
@@ -275,6 +275,54 @@
                 </tr>
               </thead>
               <tbody id="tco-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VUE : Carnets & OCR ═══════ -->
+      <section id="vue-ocr" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col gap-1">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Carnets &amp; OCR</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Usage réel de l'analyse OCR des carnets, et couverture du parc. Pas de file de traitement en direct ni de score de confiance par document : cette donnée n'est pas tracée aujourd'hui.</p>
+        </div>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Analyses OCR ce mois</span>
+            <span id="ocr-kpi-analyses" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Carnets indexés (parc)</span>
+            <span id="ocr-kpi-carnets" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Recherches photo ce mois</span>
+            <span id="ocr-kpi-photos" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+          <div class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Lectures compteur ce mois</span>
+            <span id="ocr-kpi-lectures" class="font-display text-display text-on-surface font-bold leading-none">—</span>
+          </div>
+        </section>
+
+        <div class="rounded-lg bg-surface-container-lowest shadow-sm overflow-hidden">
+          <div class="p-space-md flex items-center justify-between bg-surface-container-low">
+            <span class="font-headline-sm text-headline-sm text-on-surface">Usage IA par organisation</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+                  <th class="py-3 px-4">Organisation</th>
+                  <th class="py-3 px-4 text-center">Machines</th>
+                  <th class="py-3 px-4 text-center">Carnets indexés</th>
+                  <th class="py-3 px-4 text-center">Analyses OCR (mois)</th>
+                  <th class="py-3 px-4 text-center">Recherches photo (mois)</th>
+                  <th class="py-3 px-4 text-center">Lectures compteur (mois)</th>
+                </tr>
+              </thead>
+              <tbody id="ocr-corps-tableau" class="divide-y divide-surface-container-high font-body-md text-body-md"></tbody>
             </table>
           </div>
         </div>
@@ -569,10 +617,11 @@ async function verifierAccesEtCharger(userId) {
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
+  if (chemin === 'ocr') chargerOcr();
 }
 
 // ── Clients & Organisations ─────────────────────────────────────────────
@@ -944,6 +993,30 @@ async function chargerTco() {
       </td>
       <td class="py-3.5 px-4 text-right font-code-sm text-code-sm ${s.labor_hourly_rate == null ? 'text-error' : 'text-on-surface'}">${s.labor_hourly_rate == null ? 'Non configuré' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}</td>
       <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${s.nb_machines_avec_tco > 0 ? echapper(formatMontant(s.tco_total, s.devise)) : '—'}</td>
+    </tr>`).join('');
+}
+
+// ── Carnets & OCR ────────────────────────────────────────────────────────
+async function chargerOcr() {
+  const { data: societes, error } = await sb.rpc('admin_usage_ocr_societes');
+  if (error) { console.error(error); return; }
+  const lignes = (societes || []).filter((s) => s.nb_machines > 0);
+
+  el('ocr-kpi-analyses').textContent = lignes.reduce((a, s) => a + Number(s.analyses_carnet || 0), 0);
+  el('ocr-kpi-photos').textContent = lignes.reduce((a, s) => a + Number(s.recherches_photo || 0), 0);
+  el('ocr-kpi-lectures').textContent = lignes.reduce((a, s) => a + Number(s.lectures_compteur || 0), 0);
+  const totalMachines = lignes.reduce((a, s) => a + Number(s.nb_machines || 0), 0);
+  const totalManuels = lignes.reduce((a, s) => a + Number(s.nb_manuels || 0), 0);
+  el('ocr-kpi-carnets').textContent = `${totalManuels}/${totalMachines}`;
+
+  el('ocr-corps-tableau').innerHTML = lignes.map((s) => `
+    <tr class="hover:bg-surface-container-low/70 transition-colors">
+      <td class="py-3.5 px-4 font-label-md text-label-md text-on-surface font-semibold">${echapper(s.company_name)}</td>
+      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.nb_machines}</td>
+      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.nb_manuels}/${s.nb_machines}</td>
+      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm font-bold">${s.analyses_carnet}</td>
+      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.recherches_photo}</td>
+      <td class="py-3.5 px-4 text-center font-code-sm text-code-sm">${s.lectures_compteur}</td>
     </tr>`).join('');
 }
 
