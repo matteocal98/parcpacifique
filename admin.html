@@ -15,7 +15,7 @@
   IoT/MQTT, "2FA validé", badges eIDAS/ISO) a été retiré. Voir §2 du plan
   d'implémentation pour le détail gardé/retiré.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9cPsFM3IB/g6xJt+V1cTk9NEJ2voEWrHrg+OgQE7gfI=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9BGKgD+KdsORyZxjk3CzKZ1cTsf76wx3DCB1+lY26o8=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
@@ -95,7 +95,7 @@
         <span class="material-symbols-outlined text-[20px]">agriculture</span><span>Parc Matériel &amp; Flottes</span>
       </a>
       <a data-path="tco" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
-        <span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Audit TCO</span>
+        <span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Audit TCO &amp; Facturation</span>
       </a>
       <a data-path="ocr" href="#" class="nav-lien flex items-center gap-space-sm h-11 px-3 rounded-lg text-slate-300 font-label-md text-label-md hover:bg-[#162038] hover:text-white transition-colors">
         <span class="material-symbols-outlined text-[20px]">document_scanner</span><span>Carnets &amp; OCR</span>
@@ -225,11 +225,11 @@
         </div>
       </section>
 
-      <!-- ═══════ VUE : Audit TCO ═══════ -->
+      <!-- ═══════ VUE : Audit TCO & Facturation ═══════ -->
       <section id="vue-tco" class="hidden flex flex-col gap-space-lg">
         <div class="flex flex-col gap-1">
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Audit TCO</h1>
-          <p class="font-body-md text-body-md text-on-surface-variant">Coûts d'entretien réels, consolidés par organisation. La facturation des abonnements KEEVA n'est pas encore reliée ici.</p>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Audit TCO &amp; Facturation</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant">Coûts d'entretien réels par organisation, et abonnements SaaS KEEVA lus en direct depuis Stripe (jamais un tarif recopié à la main).</p>
         </div>
 
         <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
@@ -278,6 +278,20 @@
             </table>
           </div>
         </div>
+
+        <section class="p-space-md rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+            <div>
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Abonnements SaaS (Stripe)</h2>
+              <p class="font-code-sm text-code-sm text-outline">Lu en direct depuis Stripe — jamais un tarif recopié à la main</p>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">MRR réel</span>
+              <span id="tco-kpi-mrr" class="font-headline-md text-headline-md text-primary font-bold leading-none">—</span>
+            </div>
+          </div>
+          <div id="tco-stripe-corps" class="flex flex-col gap-2"></div>
+        </section>
       </section>
 
       <!-- ═══════ VUE : Carnets & OCR ═══════ -->
@@ -994,6 +1008,68 @@ async function chargerTco() {
       <td class="py-3.5 px-4 text-right font-code-sm text-code-sm ${s.labor_hourly_rate == null ? 'text-error' : 'text-on-surface'}">${s.labor_hourly_rate == null ? 'Non configuré' : echapper(formatMontant(s.labor_hourly_rate, s.devise)) + '/h'}</td>
       <td class="py-3.5 px-4 text-right font-code-sm text-label-md text-on-surface font-bold">${s.nb_machines_avec_tco > 0 ? echapper(formatMontant(s.tco_total, s.devise)) : '—'}</td>
     </tr>`).join('');
+
+  chargerFacturationStripe();
+}
+
+// « & Facturation » — lu en direct depuis Stripe via l'Edge Function
+// admin-facturation-stripe (jamais un tarif recopié à la main, voir son
+// commentaire d'en-tête). Chargé séparément de chargerTco() ci-dessus,
+// après le rendu du registre TCO, pour ne jamais bloquer le reste de la
+// page si Stripe répond lentement ou pas du tout.
+async function chargerFacturationStripe() {
+  const zone = el('tco-stripe-corps');
+  zone.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant">Interrogation de Stripe…</p>';
+  const { data: { session } } = await sb.auth.getSession();
+  let corps;
+  try {
+    const reponse = await fetch(`${SUPABASE_URL}/functions/v1/admin-facturation-stripe`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_KEY },
+    });
+    corps = await reponse.json();
+    if (!reponse.ok) throw new Error(corps.error || String(reponse.status));
+  } catch (e) {
+    zone.innerHTML = `<p class="font-body-sm text-body-sm text-error">Impossible d'interroger Stripe : ${echapper(e.message)}</p>`;
+    return;
+  }
+  const abonnements = corps.abonnements || [];
+  const LIBELLE_STATUT_STRIPE = {
+    active: 'Actif', trialing: 'Essai', past_due: 'Paiement en retard', canceled: 'Résilié',
+    incomplete: 'Incomplet', incomplete_expired: 'Incomplet expiré', unpaid: 'Impayé', paused: 'En pause',
+  };
+  const parDevise = {};
+  abonnements.forEach((a) => {
+    if (a.erreur || a.montant_mensuel == null) return;
+    parDevise[a.devise] = (parDevise[a.devise] || 0) + a.montant_mensuel;
+  });
+  const devisesMrr = Object.keys(parDevise);
+  el('tco-kpi-mrr').innerHTML = devisesMrr.length
+    ? devisesMrr.map((d) => echapper(formatMontant(Math.round(parDevise[d]), d))).join('<br>') : '0';
+
+  if (!abonnements.length) {
+    zone.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant">Aucune société avec un abonnement Stripe pour l\'instant.</p>';
+    return;
+  }
+  zone.innerHTML = abonnements.map((a) => {
+    if (a.erreur) {
+      return `<div class="p-3 rounded bg-error-container/30 flex items-center justify-between gap-3">
+        <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(a.company_name)}</span>
+        <span class="font-code-sm text-code-sm text-error">Erreur Stripe : ${echapper(a.erreur)}</span>
+      </div>`;
+    }
+    const echeance = a.prochaine_echeance ? new Date(a.prochaine_echeance).toLocaleDateString('fr-FR') : '—';
+    return `<div class="p-3 rounded bg-surface-container-low flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-col">
+        <span class="font-label-md text-label-md text-on-surface font-semibold">${echapper(a.company_name)}</span>
+        <span class="font-code-sm text-code-sm text-outline">Prochaine échéance : ${echeance}${a.annule_a_echeance ? ' • résiliation programmée' : ''}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full ${a.statut === 'active' ? 'bg-tertiary-container/15 text-tertiary' : 'bg-error-container text-on-error-container'} font-label-sm text-label-sm font-semibold">${echapper(LIBELLE_STATUT_STRIPE[a.statut] || a.statut)}</span>
+        <span class="font-code-sm text-label-md text-on-surface font-bold">${a.montant_mensuel != null ? echapper(formatMontant(Math.round(a.montant_mensuel), a.devise)) + '/mois' : '—'}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── Carnets & OCR ────────────────────────────────────────────────────────
