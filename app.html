@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUI884DyTQKL1Al/vNFPYB58bKIWK3pV9xoqzh92CwE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qcn+9jgpU9hUEO+uVQE23spVaox3Wl499bALmw+BHt0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4422,6 +4422,11 @@
      « Télécharger » (modale QR, ouvrirQrMachine). */
   .qr-modal .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .qr-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
+  /* Même piège, même correctif — deux boutons cette fois HORS .modal-actions
+     (« Télécharger un modèle », « Choisir un fichier » de la modale d'import
+     CSV du catalogue de pièces, ouvrirImportCatalogue). */
+  .import-btn-icone{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .import-btn-icone svg{width:18px;height:18px;flex:0 0 auto;}
   /* Les blocs de la page (bandeau, tuiles KPI, classement flotte, grille
      Paramètres/Catalogue) sont des enfants directs de .vue-couts-tco sans
      .dash-grid autour : sans gap ici, ils se touchaient (contrairement aux
@@ -15457,7 +15462,7 @@ function telechargerModeleCsvCatalogue() {
 // voulu, pas de clé naturelle fiable sans référence).
 function ouvrirImportCatalogue() {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay import-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
@@ -15471,9 +15476,9 @@ function ouvrirImportCatalogue() {
         <li>${trad('Délai moyen (jours) : nombre entier, facultatif.')}</li>
         <li>${trad('Une pièce dont la Référence existe déjà dans ton catalogue est mise à jour, pas dupliquée.')}</li>
       </ul>
-      <button type="button" class="secondary" id="import-modele" style="width:100%;justify-content:center;margin-bottom:12px;">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
+      <button type="button" class="secondary import-btn-icone" id="import-modele" style="width:100%;margin-bottom:12px;">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
       <input id="import-fichier" type="file" accept=".csv,text/csv" hidden>
-      <button type="button" class="secondary" id="import-choisir" style="width:100%;justify-content:center;">${picto('televerser')}<span id="import-choisir-label">${trad('Choisir un fichier…')}</span></button>
+      <button type="button" class="secondary import-btn-icone" id="import-choisir" style="width:100%;">${picto('televerser')}<span id="import-choisir-label">${trad('Choisir un fichier…')}</span></button>
       <div id="import-msg" role="status" aria-live="polite" style="margin-top:10px;font-size:13px;"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="import-fermer">${trad('Fermer')}</button>
