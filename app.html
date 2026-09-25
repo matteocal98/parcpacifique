@@ -4455,6 +4455,11 @@
   .compte-formule-tete{display:flex;align-items:center;gap:10px;flex:1;min-width:180px;}
   .compte-formule-tete .card-ico{color:#f5c451;}
   .compte-formule-nom{font-weight:800;font-size:15px;}
+  /* Le .pill.ok générique (texte quasi noir sur fond teinté très translucide,
+     pensé pour un fond clair) devenait illisible ici : cette carte est TOUJOURS
+     sombre (background:var(--dark)) — signalé par l'utilisateur, capture à
+     l'appui. Vert vif dédié, contraste fort sur fond sombre. */
+  .compte-formule-tete .pill.ok{background:#22c55e;color:#052e16;}
   .compte-formule-lien{color:#fff;text-decoration:underline;text-underline-offset:2px;}
   .compte-formule-lien:hover{color:#fff;}
 
