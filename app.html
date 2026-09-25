@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-u0qOGHGEV7zmuoJm42wKB1zpWRr5lsa3zwCSzD3+aso=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Y5oKXIQx1n2h84e4uwbahfLf3BpM0aUIpV/W5P7yST0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9406,7 +9406,14 @@ function openUpgradeNotice(companyId, message) {
   // propre bouton.
   function piedCarte(o, estActuelle) {
     if (estActuelle) {
-      return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`;
+      // Sur SA PROPRE carte : un vrai accès au portail plutôt qu'un bouton
+      // désactivé — plus intuitif que d'aller le chercher sur une autre
+      // carte (le portail Stripe est générique, pas propre à une offre).
+      // Le plan Gratuit n'a rien à gérer (aucun abonnement réel).
+      if (!dejaAbonne) {
+        return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`;
+      }
+      return `<button type="button" class="offre-bouton is-secondaire js-forfait-changer" id="forfait-changer-${o.cle}">${trad('Gérer mon abonnement')}</button>`;
     }
     if (o.cle === 'enterprise') {
       return `<a href="${contactEnterprise(companyId)}" class="offre-bouton is-secondaire">${trad('Nous contacter pour cette offre')}${picto('mail')}</a>`;
@@ -9415,8 +9422,10 @@ function openUpgradeNotice(companyId, message) {
     const correspondante = offrePayanteVisantCle(o.cle);
     if (!correspondante) return '';
     if (dejaAbonne) {
-      return `<div class="hint">${correspondante.changement}</div>
-        <button type="button" class="offre-bouton js-forfait-changer" id="forfait-changer-${o.cle}">${trad('Gérer mon abonnement')}</button>`;
+      // Pas de bouton ici : ce serait le MÊME portail générique que celui
+      // déjà proposé sur la carte « Offre actuelle » — juste le texte
+      // explicatif, pour ne pas le répéter deux fois.
+      return `<div class="hint">${correspondante.changement}</div>`;
     }
     const lien = STRIPE_LIENS[correspondante.cle];
     if (!lien) return `<div class="hint">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@keeva.work.')}</div>`;
