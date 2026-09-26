@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IY8PS53oFimKyI6BNoR1cUEs3BQAvuHnNTm7RK2Qw0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1xdZ7g7UgAOX9TDQsk1UYnGdd05OB2dbbtleaq9UZgI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4714,6 +4714,50 @@
   .support-compositeur-hint{font-weight:500;font-size:11px;color:var(--ink-3);}
   .support-compositeur textarea{width:100%;resize:none;}
   .support-compositeur-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;}
+
+  /* « Nouveau ticket » : le champ Machine ouvre un vrai sélecteur (2e
+     modale empilée, .support-picker-*) plutôt qu'un <select> natif — reprise
+     Stitch, 2 modales manquées la première fois (« Vue Principale : Formulaire
+     de demande » + « Composant Déployé : Sélecteur Machine »). */
+  .support-champ-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .support-badge-interactif,.support-badge-optionnel{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .support-badge-interactif{color:var(--primary-dark);background:var(--primary-tint);}
+  .support-badge-optionnel{color:var(--ink-3);background:var(--surface-soft);font-weight:600;}
+  .support-machine-trigger{
+    width:100%;height:46px;padding:0 14px;border-radius:12px;border:2px solid var(--primary-line);
+    background:var(--surface);display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);text-align:left;
+  }
+  .support-machine-trigger:hover{background:var(--primary-tint);}
+  .support-machine-trigger .dot{width:8px;height:8px;border-radius:50%;background:var(--primary-dark);flex:0 0 auto;}
+  .support-machine-trigger-gauche{display:flex;align-items:center;gap:9px;min-width:0;}
+  .support-machine-trigger-gauche span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .support-machine-trigger .card-ico{color:var(--primary-dark);flex:0 0 auto;}
+
+  .support-picker-recherche{position:relative;margin-bottom:12px;}
+  .support-picker-recherche .card-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none;}
+  .support-picker-recherche .card-ico svg{width:16px;height:16px;display:block;}
+  .support-picker-recherche input{width:100%;height:40px;padding:0 14px 0 38px;font-size:13px;background:var(--surface-soft);}
+  .support-picker-liste{display:flex;flex-direction:column;gap:4px;max-height:340px;overflow-y:auto;padding-right:2px;}
+  .support-picker-ligne{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:10px;
+    border-radius:12px;border:1px solid transparent;background:none;cursor:pointer;text-align:left;font-family:inherit;
+    transition:background .12s,border-color .12s;
+  }
+  .support-picker-ligne:hover{background:var(--surface-soft);}
+  .support-picker-ligne.is-choisie{border-color:var(--primary-line);background:var(--primary-tint);}
+  .support-picker-ligne-gauche{display:flex;align-items:center;gap:11px;min-width:0;}
+  .support-picker-ico{width:34px;height:34px;border-radius:10px;background:var(--surface-soft);color:var(--ink-2);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .support-picker-ico svg{width:17px;height:17px;display:block;}
+  .support-picker-ligne.is-choisie .support-picker-ico{background:var(--primary-tint-2);color:var(--primary-dark);}
+  .support-picker-nom{display:block;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .support-picker-sub{display:block;font-size:11px;color:var(--ink-3);margin-top:1px;}
+  .support-picker-radio{width:19px;height:19px;border-radius:50%;border:2px solid var(--line-3);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .support-picker-ligne.is-choisie .support-picker-radio{border-color:var(--primary-dark);}
+  .support-picker-radio .point{width:9px;height:9px;border-radius:50%;background:var(--primary-dark);display:none;}
+  .support-picker-ligne.is-choisie .support-picker-radio .point{display:block;}
+  .support-picker-pied{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);flex-wrap:wrap;}
+  .support-picker-pied-droite{display:flex;align-items:center;gap:8px;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
@@ -9441,7 +9485,97 @@ async function afficherListeTickets(overlay, moi) {
   });
 }
 
+// Sous-titre réel d'une machine dans le sélecteur (jamais une donnée
+// inventée comme la « Prioritaire »/zone de la maquette) : sa catégorie si
+// elle en a une, sinon marque+modèle (si différent du nom déjà affiché en
+// titre), sinon sa référence.
+function sousTitreMachinePicker(m) {
+  if (m.category?.name) return m.category.name;
+  const bm = [m.brand, m.model].filter(Boolean).join(' ');
+  if (bm && bm !== libelleMachineCourt(m)) return bm;
+  return m.plate || (m.serial_number ? tR('Réf : {ref}', { ref: m.serial_number }) : '');
+}
+
+// Sélecteur de machine (reprise Stitch, 2e modale « Composant Déployé »),
+// déployé PAR-DESSUS la modale « Nouveau ticket » (un second .overlay
+// empilé) plutôt qu'en remplacement — ainsi le sujet/message déjà saisis
+// ne sont jamais perdus en ouvrant/fermant le sélecteur. `actuelId` : la
+// sélection en cours ; `onConfirm(id)` : appelé seulement sur « Confirmer
+// la sélection », jamais sur un simple clic dans la liste.
+function ouvrirSelecteurMachine(actuelId, onConfirm) {
+  const overlay2 = document.createElement('div');
+  overlay2.className = 'overlay support-modal';
+  document.body.appendChild(overlay2);
+  let choisieId = actuelId || null;
+
+  const rendreListe = (filtre) => {
+    const f = (filtre || '').trim().toLowerCase();
+    const correspond = (m) => !f || [libelleMachineCourt(m), m.brand, m.model, m.serial_number, m.plate].filter(Boolean).some((v) => String(v).toLowerCase().includes(f));
+    const machinesFiltrees = UI.machines.filter(correspond);
+    const zone = overlay2.querySelector('#support-picker-liste');
+    const lignes = [`<button type="button" class="support-picker-ligne${!choisieId ? ' is-choisie' : ''}" data-id="">
+        <span class="support-picker-ligne-gauche">
+          <span class="support-picker-ico">${picto('aideCercle')}</span>
+          <span><span class="support-picker-nom">${trad('Aucune en particulier')}</span><span class="support-picker-sub">${trad('Demande générale ou administrative')}</span></span>
+        </span>
+        <span class="support-picker-radio"><span class="point"></span></span>
+      </button>`];
+    // L'option « aucune » reste toujours visible, filtre ou pas — seules
+    // les vraies machines sont filtrées par la recherche.
+    machinesFiltrees.forEach((m) => {
+      lignes.push(`<button type="button" class="support-picker-ligne${choisieId === m.id ? ' is-choisie' : ''}" data-id="${esc(m.id)}">
+        <span class="support-picker-ligne-gauche">
+          <span class="support-picker-ico">${picto('vehicule')}</span>
+          <span><span class="support-picker-nom">${esc(libelleMachineCourt(m) || m.id)}</span>${sousTitreMachinePicker(m) ? `<span class="support-picker-sub">${esc(sousTitreMachinePicker(m))}</span>` : ''}</span>
+        </span>
+        <span class="support-picker-radio"><span class="point"></span></span>
+      </button>`);
+    });
+    zone.innerHTML = lignes.join('');
+    zone.querySelectorAll('.support-picker-ligne').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        choisieId = btn.dataset.id || null;
+        zone.querySelectorAll('.support-picker-ligne').forEach((l) => l.classList.toggle('is-choisie', l === btn));
+      });
+    });
+    const compteur = overlay2.querySelector('#support-picker-compte');
+    if (compteur) compteur.textContent = tR('{n} matériel(s) disponible(s)', { n: machinesFiltrees.length });
+  };
+
+  overlay2.innerHTML = `<div class="modal">
+    <div class="support-tete">
+      <div><h2>${trad('Machine concernée')} <span class="support-badge-optionnel">${trad('optionnel')}</span></h2><p class="sub">${trad('Sélectionne un matériel pour assigner la fiche atelier immédiatement.')}</p></div>
+      <button type="button" class="mform-close" id="support-picker-fermer-x" aria-label="${esc(trad('Fermer la liste'))}">${picto('fermer')}</button>
+    </div>
+    <div class="support-picker-recherche">
+      <span class="card-ico">${picto('recherche')}</span>
+      <input type="text" id="support-picker-recherche" placeholder="${esc(trad('Rechercher par nom, modèle ou immatriculation…'))}">
+    </div>
+    <div class="support-picker-liste" id="support-picker-liste"></div>
+    <div class="support-picker-pied">
+      <span class="hint" id="support-picker-compte" style="margin:0;"></span>
+      <div class="support-picker-pied-droite">
+        <button type="button" class="secondary" id="support-picker-effacer">${trad('Effacer')}</button>
+        <button type="button" class="primary" id="support-picker-confirmer">${trad('Confirmer la sélection')}</button>
+      </div>
+    </div>
+  </div>`;
+  overlay2.addEventListener('click', (e) => { if (e.target === overlay2) overlay2.remove(); });
+  overlay2.querySelector('#support-picker-fermer-x').addEventListener('click', () => overlay2.remove());
+  overlay2.querySelector('#support-picker-recherche').addEventListener('input', (e) => rendreListe(e.target.value));
+  overlay2.querySelector('#support-picker-effacer').addEventListener('click', () => {
+    choisieId = null;
+    rendreListe(overlay2.querySelector('#support-picker-recherche').value);
+  });
+  overlay2.querySelector('#support-picker-confirmer').addEventListener('click', () => {
+    onConfirm(choisieId);
+    overlay2.remove();
+  });
+  rendreListe('');
+}
+
 function afficherNouveauTicket(overlay, moi) {
+  let machineChoisieId = null;
   overlay.innerHTML = `<div class="modal">
     <div class="support-tete">
       <div><h2>${trad('Nouveau ticket')}</h2><p class="sub">${trad('Décris ta demande : nous te répondons ici.')}</p></div>
@@ -9452,11 +9586,14 @@ function afficherNouveauTicket(overlay, moi) {
       <input id="support-sujet" required maxlength="140">
     </div>
     ${UI.machines.length ? `<div class="plan-field">
-      <label for="support-machine">${trad('Machine concernée (optionnel)')}</label>
-      <select id="support-machine">
-        <option value="">${trad('Aucune en particulier')}</option>
-        ${UI.machines.map((m) => `<option value="${esc(m.id)}">${esc(libelleMachineCourt(m) || m.id)}</option>`).join('')}
-      </select>
+      <div class="support-champ-tete">
+        <label for="support-machine-trigger">${trad('Machine concernée')} <span class="muted-text">(${trad('optionnel')})</span></label>
+        <span class="support-badge-interactif">${trad('Menu interactif')}</span>
+      </div>
+      <button type="button" class="support-machine-trigger" id="support-machine-trigger">
+        <span class="support-machine-trigger-gauche"><span class="dot"></span><span id="support-machine-trigger-label">${trad('Aucune en particulier')}</span></span>
+        <span class="card-ico">${picto('chevronBas')}</span>
+      </button>
     </div>` : ''}
     <div class="plan-field">
       <label for="support-message">${trad('Message')}</label>
@@ -9468,13 +9605,19 @@ function afficherNouveauTicket(overlay, moi) {
       <button type="button" class="secondary" id="support-annuler">${trad('Annuler')}</button>
     </div>
   </div>`;
-  habillerSelect(overlay.querySelector('#support-machine'), trad('Machine concernée (optionnel)'));
   overlay.querySelector('#support-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#support-annuler').addEventListener('click', () => afficherListeTickets(overlay, moi));
+  overlay.querySelector('#support-machine-trigger')?.addEventListener('click', () => {
+    ouvrirSelecteurMachine(machineChoisieId, (id) => {
+      machineChoisieId = id;
+      const m = id ? UI.machines.find((x) => x.id === id) : null;
+      overlay.querySelector('#support-machine-trigger-label').textContent = m ? (libelleMachineCourt(m) || m.id) : trad('Aucune en particulier');
+    });
+  });
   overlay.querySelector('#support-envoyer').addEventListener('click', async () => {
     const sujet = overlay.querySelector('#support-sujet').value.trim();
     const message = overlay.querySelector('#support-message').value.trim();
-    const machineId = overlay.querySelector('#support-machine')?.value || null;
+    const machineId = machineChoisieId || null;
     const annonce = overlay.querySelector('#support-nouveau-msg');
     if (!sujet || !message) {
       annonce.textContent = trad('Le sujet et le message sont nécessaires.');
