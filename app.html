@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eTePp0hR3a4ugFcPQ1H4vB4nFxU7Mqd7wWCZOyxU0Y4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PCvPocrG4m5lOHy8+zI/ArbfEopjahJ6SUG9BSO0G0o=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1793,6 +1793,11 @@
     flex:1 1 260px;min-width:240px;background:var(--dark);border-radius:var(--r-card);
     padding:16px;display:flex;flex-direction:column;gap:12px;justify-content:center;
   }
+  /* Regroupe relevé/seuil + jauge détaillée : BUREAU UNIQUEMENT (.desktop-only,
+     voir plus bas). Sur téléphone, la carte compteur fusionnée de compteurHtml
+     (branche mobile, ★ CARTE COMPTEUR FUSIONNÉE) montre déjà cette même
+     information (relevé, échéance, état) — la dupliquer ici ferait doublon. */
+  .phc-desktop{flex-direction:column;gap:12px;width:100%;}
   /* Tête : relevé actuel (grand, à gauche) et seuil d'alerte (petit, à
      droite) — les deux vraies valeurs déjà connues du plan et du compteur,
      simplement mises en avant comme la maquette. */
@@ -3119,12 +3124,14 @@
 
   /* Aides d'affichage responsive */
   .mobile-only{display:flex;}
+  .desktop-only{display:none;}
   @media (min-width:900px){
     #view-root{gap:24px;}
     /* LA PROPORTION DE DESIGN.md §3 : φ pour la mise en page. Les deux colonnes du
      tableau de bord, `1.618fr / 1fr` — la colonne latérale occupe 38,2 %. */
   .dash-grid{display:grid;grid-template-columns:1.618fr 1fr;gap:24px;align-items:start;}
     .mobile-only{display:none;}
+    .desktop-only{display:flex;}
   }
 
   /* ★ LOT 5 — L'AIR ET LA DENSITÉ DU TABLEAU DE BORD.
@@ -4790,28 +4797,91 @@
      précédente (le geste d'appui-glissé y déclenchait la sélection de
      texte native d'Android, et n'était de toute façon pas pratique à
      l'usage — retour explicite de l'utilisateur). Nouveau modèle : le
-     compteur affiche juste l'INFORMATION (.compteur-apparent, lecture
-     seule au clavier) ; un TAP ouvre .compteur-rouleaux-overlay (plein
-     écran, palette claire normale — pas la carte sombre), où chaque
-     rouleau se fait glisser INDÉPENDAMMENT à la verticale, positionné par
-     défaut sur le chiffre réel du compteur ; « Valider le relevé » ferme
-     et enregistre (enregistrerCompteur, même fonction que les 2 autres
+     compteur affiche juste l'INFORMATION (.compteur-carte, lecture seule
+     au clavier) ; un TAP ouvre .compteur-rouleaux-overlay (plein écran,
+     palette claire normale — pas la carte sombre), où chaque rouleau se
+     fait glisser INDÉPENDAMMENT à la verticale, positionné par défaut sur
+     le chiffre réel du compteur ; « Valider le relevé » ferme et
+     enregistre (enregistrerCompteur, même fonction que les 2 autres
      variantes), en rouvrant la fiche pour que l'échéance/la jauge
      au-dessus restent cohérentes. Heures : 3 rouleaux de 00 à 99 (partie
      ENTIÈRE seulement — la décimale réelle du compteur, si elle existe,
      est préservée telle quelle, jamais éditée ni perdue). Km : 2
      rouleaux de 000 à 999 (le km n'a pas de décimale). La photo/OCR du
      compteur a été retirée entièrement (fiabilité insuffisante en usage
-     réel, demande explicite) — plus aucune mention nulle part. */
-  .compteur-apparent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;text-align:center;cursor:pointer;}
-  .compteur-apparent-mot{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--cyan);}
-  .compteur-apparent-ligne{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:2px;}
-  .compteur-apparent-valeur{
-    font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;color:#fff;
-  }
-  .compteur-apparent-unite{font-size:15px;font-weight:800;color:rgba(255,255,255,.6);}
-  .compteur-apparent-aide{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:10.5px;font-weight:600;color:rgba(255,255,255,.45);}
-  .compteur-apparent-aide svg{width:12px;height:12px;}
+     réel, demande explicite) — plus aucune mention nulle part.
+
+     ★ CARTE COMPTEUR FUSIONNÉE (6e passe, reprise Stitch « stitch_refonte_
+     zone_change_ticketing (2) ») — remplace .compteur-apparent (texte
+     blanc translucide, pensé pour la carte SOMBRE de la fiche machine,
+     devenu illisible une fois posé sur le fond CLAIR de la carte du Parc :
+     signalé par l'utilisateur, capture à l'appui). Fusionne aussi dans la
+     même carte ce que .mstrip-jauge / la jauge détaillée de la fiche
+     affichaient À CÔTÉ (échéance, delta, état) — un seul bloc, comme la
+     maquette, au lieu de deux qui répètent la même information. Skin CLAIR
+     par défaut (carte du Parc, fond clair) ; surchargé juste après pour le
+     contexte carte sombre de la fiche machine (.plan-hero-compteur). Les
+     couleurs d'état reprennent la palette TRI-ÉTAT déjà déclarée
+     (--late/--soon/--ok) — PAS le rouge/vert de la maquette, qui ne
+     correspond à aucun état réel de ce produit (3 états, jamais 2).
+     ⚠️ .compteur-carte se pose DANS deux conteneurs qui neutralisent déjà
+     le `.compteur` générique (fond/marge/cadre à 0) via un sélecteur à 2
+     classes — .mstrip-compteur-bloc .compteur (ligne ~1041) et
+     .plan-hero-compteur .compteur (ligne ~1814) — donc à SPÉCIFICITÉ ÉGALE
+     à la mienne (.compteur-carte, 1 seule classe, perdrait sinon LA
+     TOTALITÉ du fond/padding malgré son ordre plus tardif dans la
+     feuille). D'où les deux surcharges complètes et explicites plus bas
+     (.mstrip-compteur-bloc .compteur-carte / .plan-hero-compteur
+     .compteur-carte), à la même spécificité à 2 classes, qui l'emportent
+     par l'ordre.
+     ⚠️ AUCUN `display` ici, volontairement : .compteur-mobile bascule déjà
+     flex/none selon le seuil des 900 px (ligne ~1470/1504), à la MÊME
+     spécificité qu'un .compteur-carte qui en poserait un — et le mien,
+     plus tardif dans la feuille, l'aurait emporté à toutes les largeurs et
+     cassé le masquage sur ordinateur. flex-direction/gap seuls n'ont pas
+     ce problème : display:flex vient déjà de la règle .compteur générique
+     (ligne ~1420), fidèlement gouvernée par .compteur-mobile. */
+  .compteur-carte{flex-direction:column;gap:8px;background:#fff;box-shadow:var(--shadow-soft);border-radius:12px;padding:12px;}
+  .compteur-carte-tap{border:none;background:none;padding:0;margin:0;text-align:left;color:inherit;display:flex;flex-direction:column;gap:6px;width:100%;box-sizing:border-box;cursor:pointer;min-height:44px;}
+  .compteur-carte-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .compteur-carte-mot{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);}
+  .compteur-carte-mot svg{width:13px;height:13px;}
+  .compteur-carte-ajuster{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:#fff;color:var(--primary-dark);font-size:12px;font-weight:700;box-shadow:var(--shadow-soft);}
+  .compteur-carte-ajuster svg{width:13px;height:13px;}
+  .compteur-carte-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .compteur-carte-valeur-bloc{display:flex;align-items:baseline;gap:5px;}
+  .compteur-carte-valeur{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-.01em;}
+  .compteur-carte-unite{font-size:14px;font-weight:800;color:var(--ink-3);}
+  .compteur-carte-badge{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;}
+  .compteur-carte-badge.is-late{background:var(--late-bg);color:var(--late);}
+  .compteur-carte-badge.is-soon{background:var(--soon-bg);color:var(--soon);}
+  .compteur-carte-badge.is-ok{background:var(--ok-bg);color:var(--ok);}
+  .compteur-carte-piste{display:block;width:100%;height:6px;border-radius:999px;background:var(--line-2);overflow:hidden;}
+  .compteur-carte-part{display:block;height:100%;border-radius:999px;}
+  .compteur-carte-part.is-late{background:var(--late);}
+  .compteur-carte-part.is-soon{background:var(--soon);}
+  .compteur-carte-part.is-ok{background:var(--ok);}
+  .compteur-carte-echeance{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:700;color:var(--ink-3);flex-wrap:wrap;}
+  .compteur-carte-delta{font-weight:800;}
+  .compteur-carte-delta.is-late{color:var(--late);}
+  .compteur-carte-delta.is-soon{color:var(--soon);}
+  .compteur-carte-delta.is-ok{color:var(--ok);}
+  /* Surcharge à spécificité égale (2 classes), voir l'avertissement plus
+     haut : rétablit fond/padding/rayon annulés par .mstrip-compteur-bloc
+     .compteur (ligne ~1041) — carte BLANCHE, distincte du fond gris clair
+     de .mstrip-compteur-bloc, comme la maquette. */
+  .mstrip-compteur-bloc .compteur-carte{background:#fff;box-shadow:var(--shadow-soft);padding:12px;margin-top:0;border:none;border-radius:12px;}
+  /* Contexte carte sombre (fiche machine, .plan-hero-compteur) : mêmes
+     classes, palette inversée — jamais de nouvelle classe ni de doublon.
+     Surcharge à spécificité égale (2 classes) elle aussi, complète pour la
+     même raison (annule fond/marge/padding/cadre de la ligne ~1814). */
+  .plan-hero-compteur .compteur-carte{background:rgba(255,255,255,.08);box-shadow:none;margin:0;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;}
+  .plan-hero-compteur .compteur-carte-mot{color:rgba(255,255,255,.65);}
+  .plan-hero-compteur .compteur-carte-ajuster{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;}
+  .plan-hero-compteur .compteur-carte-valeur{color:#fff;}
+  .plan-hero-compteur .compteur-carte-unite{color:rgba(255,255,255,.6);}
+  .plan-hero-compteur .compteur-carte-piste{background:rgba(255,255,255,.16);}
+  .plan-hero-compteur .compteur-carte-echeance{color:rgba(255,255,255,.6);}
   .plan-hero-compteur .compteur-lecture{color:rgba(255,255,255,.85);}
 
   /* Le module de rouleaux : overlay plein écran, palette claire normale
@@ -6771,8 +6841,8 @@ function forcerMajuscules(input) {
 }
 
 const COUNTER_UNITS = {
-  hours: { word: trad('heures'), short: trad('h'), field: trad('Heures compteur actuelles'), placeholder: trad('Ex. 245'), step: '0.1' },
-  km: { word: trad('kilomètres'), short: trad('km'), field: trad('Kilométrage actuel'), placeholder: trad('Ex. 19 240'), step: '1' },
+  hours: { word: trad('heures'), short: trad('h'), label: trad('Compteur horamètre'), field: trad('Heures compteur actuelles'), placeholder: trad('Ex. 245'), step: '0.1' },
+  km: { word: trad('kilomètres'), short: trad('km'), label: trad('Compteur kilométrique'), field: trad('Kilométrage actuel'), placeholder: trad('Ex. 19 240'), step: '1' },
 };
 
 function counterUnitFromMode(mode) { return mode === 'km' ? trad('km') : 'hours'; }
@@ -6785,9 +6855,12 @@ function counterUnitOf(machine) {
   return 'hours';
 }
 function counterShort(unit) { return COUNTER_UNITS[unit] ? COUNTER_UNITS[unit].short : trad('h'); }
-function formatCounter(value, unit) {
-  // Attention : Number(null) vaut 0. Un compteur non renseigné doit afficher
-  // « — » et non « 0 h ».
+// Juste le NOMBRE, sans l'unité — factorisé hors de formatCounter : la carte
+// compteur fusionnée (compteurHtml, branche téléphone) affiche le nombre et
+// l'unité dans deux <span> distincts (typographie différente, comme la
+// maquette), jamais un second calcul de l'arrondi/séparateur qui pourrait
+// diverger de formatCounter.
+function formatCounterNombre(value, unit) {
   if (value == null || value === '') return '—';
   const n = Number(value);
   if (!isFinite(n)) return '—';
@@ -6798,9 +6871,16 @@ function formatCounter(value, unit) {
   //   non — c'était une incohérence d'affichage, pas un choix. Le séparateur
   //   décimal suit la langue active (virgule en français).
   const nombre = u === 'km' ? Math.round(n) : n;
-  const text = nombre.toLocaleString(localeActive(),
+  return nombre.toLocaleString(localeActive(),
     Number.isInteger(nombre) ? {} : { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  return `${text} ${COUNTER_UNITS[u].short}`;
+}
+function formatCounter(value, unit) {
+  // Attention : Number(null) vaut 0. Un compteur non renseigné doit afficher
+  // « — » et non « 0 h ». Même garde côté « pas un nombre » : « — h » serait
+  // trompeur, on veut le même « — » nu que formatCounterNombre.
+  if (value == null || value === '' || !isFinite(Number(value))) return '—';
+  const u = COUNTER_UNITS[unit] ? unit : 'hours';
+  return `${formatCounterNombre(value, unit)} ${COUNTER_UNITS[u].short}`;
 }
 function machineCounter(machine) {
   if (!machine) return null;
@@ -13669,26 +13749,50 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
       </div>`;
   }
   // MOBILE (fiche machine) ET STRIP SUR TÉLÉPHONE (bandeau du Parc) :
-  // compteur COMPACT, en lecture seule au clavier — reprise Stitch, 5e
-  // passe (voir le bloc CSS ★ RELEVÉ DE COMPTEUR pour ce qui n'a
-  // délibérément pas été repris). Un tap ouvre les rouleaux
-  // (initCompteurRouleaux, câblée après le rendu), qui enregistrent
-  // directement au clic sur « Valider le relevé ». Aucun <input> ici —
-  // volontairement : la version précédente (roue tactile sur un vrai
-  // <input>) avait un défaut résiduel de sélection de texte native malgré
-  // toutes les protections CSS/JS ; un <span> n'a tout simplement rien à
-  // sélectionner ni à focaliser, donc rien à supprimer non plus.
+  // ★ CARTE COMPTEUR FUSIONNÉE — reprise Stitch « stitch_refonte_zone_
+  // change_ticketing (2) », 6e passe. Remplace l'ancien .compteur-apparent
+  // (texte blanc translucide — lisible sur la carte SOMBRE de la fiche
+  // machine, mais devenu illisible une fois le même widget posé sur le fond
+  // CLAIR de la carte du Parc, signalé par l'utilisateur avec capture à
+  // l'appui) ET fusionne dans la MÊME carte ce que .mstrip-jauge / la jauge
+  // détaillée de la fiche affichaient juste à côté (échéance, delta, état) —
+  // un seul bloc, comme la maquette, plutôt que deux qui répètent la même
+  // information (voir .desktop-only sur .mstrip-jauge / .phc-desktop : ces
+  // éléments restent affichés tels quels sur ordinateur, où le compteur
+  // garde sa simple saisie clavier sans badge ni jauge). AUCUNE DONNÉE
+  // NOUVELLE : mêmes fonctions déjà utilisées ailleurs (infoMachine,
+  // pourcentageIntervalle, deltaTexteDe, echeanceTexteDe, etatNoteTexte).
+  // Un tap ouvre les rouleaux (ouvrirRouleauxCompteur, câblée au document),
+  // qui enregistrent directement au clic sur « Valider le relevé ». Aucun
+  // <input> ici — volontairement : la version précédente (roue tactile sur
+  // un vrai <input>) avait un défaut résiduel de sélection de texte native
+  // malgré toutes les protections CSS/JS ; un <span>/<button> n'a tout
+  // simplement rien à sélectionner ni à focaliser, donc rien à supprimer.
   if (emplacement === 'mobile' || (emplacement === 'strip' && environnementTelephone())) {
-    const classeCompacte = emplacement === 'strip' ? ' is-strip' : '';
+    const info = infoMachine(m);
+    const etat = info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok');
+    const part = pourcentageIntervalle(info, m);
+    const delta = deltaTexteDe(info);
+    const note = etatNoteTexte(info.state);
+    const carteEtat = part != null ? `
+      <span class="compteur-carte-piste" aria-hidden="true"><span class="compteur-carte-part is-${etat}" style="width:${part}%"></span></span>
+      <div class="compteur-carte-echeance">
+        <span>${tR('Échéance requise : {valeur}', { valeur: esc(echeanceTexteDe(info, m)) })}</span>
+        ${delta ? `<span class="compteur-carte-delta is-${etat}">${esc(delta)}${info.state === 'late' ? ' ' + trad('de retard') : ''}</span>` : ''}
+      </div>` : (info.short ? `<span class="compteur-carte-echeance"><span>${esc(info.short)}</span></span>` : '');
     return `
-    <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
-      <button type="button" id="${champId}" class="compteur-apparent${classeCompacte}" data-tactile-cible data-valeur="${montre == null ? '' : esc(montre)}" aria-label="${esc(tR('Relevé du compteur de {machine} — toucher pour ajuster', { machine: m.name }))}">
-        <span class="compteur-apparent-mot">${esc(u.word)}</span>
-        <div class="compteur-apparent-ligne">
-          <span class="compteur-apparent-valeur" data-tactile-valeur>${montre == null ? '—' : esc(formatCounter(montre, unite))}</span>
-        </div>
-        <span class="compteur-apparent-aide">${picto('rafraichir')}${trad('Toucher pour ajuster')}</span>
+    <div class="compteur compteur-${emplacement} compteur-carte" data-compteur="${id}" data-unite="${esc(u.short)}">
+      <button type="button" id="${champId}" class="compteur-carte-tap" data-tactile-cible data-valeur="${montre == null ? '' : esc(montre)}" aria-label="${esc(tR('Relevé du compteur de {machine} — toucher pour ajuster', { machine: m.name }))}">
+        <span class="compteur-carte-tete">
+          <span class="compteur-carte-mot">${picto('compteur')}${esc(u.label)}</span>
+          <span class="compteur-carte-ajuster">${picto('crayon')}${trad('Ajuster')}</span>
+        </span>
+        <span class="compteur-carte-ligne">
+          <span class="compteur-carte-valeur-bloc"><span class="compteur-carte-valeur" data-tactile-valeur>${esc(formatCounterNombre(montre, unite))}</span><span class="compteur-carte-unite">${esc(u.short)}</span></span>
+          ${note ? `<span class="compteur-carte-badge is-${etat}">${esc(note)}</span>` : ''}
+        </span>
       </button>
+      ${carteEtat}
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
   }
@@ -14331,6 +14435,24 @@ function pourcentageIntervalle(info, m) {
   const fait = intervalle - reste;
   return Math.max(0, Math.min(100, Math.round((fait / intervalle) * 100)));
 }
+// Delta signé réel (« -3 h »/« +100 h », « -3 j »/« +12 j ») et texte d'état,
+// factorisés hors de machineCardHtml : la carte compteur fusionnée
+// (compteurHtml, branche téléphone) affiche EXACTEMENT les mêmes valeurs,
+// jamais un second calcul qui pourrait diverger.
+function deltaTexteDe(info) {
+  if (!(info.unit && Number.isFinite(info.sortKey) && Math.abs(info.sortKey) !== Infinity)) return null;
+  return `${info.sortKey < 0 ? '-' : '+'}${info.unit === 'days' ? tR('{n} j', { n: Math.round(Math.abs(info.sortKey)) }) : formatCounter(Math.abs(info.sortKey), info.unit)}`;
+}
+function echeanceTexteDe(info, m) {
+  if (info.state === 'unknown' || !m.plan) return info.short;
+  return info.unit === 'days' ? formatShortDate(m.plan.next_due_at) : formatCounter(planNextDueCounter(m.plan), info.unit);
+}
+function etatNoteTexte(state) {
+  if (state === 'late') return trad('Dépassement critique');
+  if (state === 'soon') return trad('Intervention imminente');
+  if (state === 'ok') return trad('Conforme au plan préventif');
+  return '';
+}
 function jaugeIntervalleHtml(info, m, detaille) {
   if (!m || !m.plan) return '';
   const enCompteur = planIsCounter(m.plan);
@@ -14400,11 +14522,10 @@ function machineCardHtml(m) {
 
   // Delta réel signé (voir dueInfo) : « -3 h »/« +100 h » pour un suivi au
   // compteur, « -3 j »/« +12 j » pour un suivi calendaire — jamais un taux,
-  // toujours la même unité que la grandeur suivie.
-  const deltaTexte = (info.unit && Number.isFinite(info.sortKey) && Math.abs(info.sortKey) !== Infinity)
-    ? `${info.sortKey < 0 ? '-' : '+'}${info.unit === 'days' ? tR('{n} j', { n: Math.round(Math.abs(info.sortKey)) }) : formatCounter(Math.abs(info.sortKey), info.unit)}`
-    : null;
-  const NOTE_ETAT = { late: trad('Dépassement critique'), soon: trad('Intervention imminente'), ok: trad('Conforme au plan préventif'), unknown: '' };
+  // toujours la même unité que la grandeur suivie. Factorisé (deltaTexteDe/
+  // etatNoteTexte) : la carte compteur fusionnée de compteurHtml affiche
+  // exactement les mêmes valeurs sur téléphone, jamais un second calcul.
+  const deltaTexte = deltaTexteDe(info);
   const part = pourcentageIntervalle(info, m);
 
   return `
@@ -14437,14 +14558,14 @@ function machineCardHtml(m) {
         </div>
 
         ${m.plan && part != null ? `
-        <div class="mstrip-jauge">
+        <div class="mstrip-jauge desktop-only">
           <div class="mstrip-jauge-tete">
-            <span>${tR('Échéance {valeur}', { valeur: esc(info.state === 'unknown' ? info.short : (info.unit === 'days' ? formatShortDate(m.plan.next_due_at) : formatCounter(planNextDueCounter(m.plan), info.unit))) })}</span>
+            <span>${tR('Échéance {valeur}', { valeur: esc(echeanceTexteDe(info, m)) })}</span>
             ${deltaTexte ? `<span class="mstrip-jauge-delta is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">${deltaTexte}</span>` : ''}
           </div>
           <span class="mstrip-jauge-piste"><span class="mstrip-jauge-part is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}" style="width:${part}%"></span></span>
-          ${NOTE_ETAT[info.state] ? `<span class="mstrip-jauge-note is-${info.state}">${info.state === 'late' ? picto('alerte') : ''}${NOTE_ETAT[info.state]}</span>` : ''}
-        </div>` : `<div class="mstrip-jauge"><span class="mstrip-jauge-note">${esc(info.short)}</span></div>`}
+          ${etatNoteTexte(info.state) ? `<span class="mstrip-jauge-note is-${info.state}">${info.state === 'late' ? picto('alerte') : ''}${etatNoteTexte(info.state)}</span>` : ''}
+        </div>` : `<div class="mstrip-jauge desktop-only"><span class="mstrip-jauge-note">${esc(info.short)}</span></div>`}
 
         <div class="mstrip-actions">
           <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
@@ -23141,17 +23262,19 @@ function openPlanView(machine, companyId, categories) {
           </div>` : ''}
         </div>
         ${machine.plan ? `<div class="plan-hero-compteur">
-          ${isCounterMode ? `
-          <div class="phc-tete">
-            <span class="phc-mot">${trad('Relevé horamètre actuel')}</span>
-            <span class="phc-mot phc-mot-seuil">${trad('Seuil d\'alerte')}</span>
+          <div class="phc-desktop desktop-only">
+            ${isCounterMode ? `
+            <div class="phc-tete">
+              <span class="phc-mot">${trad('Relevé horamètre actuel')}</span>
+              <span class="phc-mot phc-mot-seuil">${trad('Seuil d\'alerte')}</span>
+            </div>
+            <div class="phc-valeurs">
+              <span class="phc-valeur">${releveCompteur}</span>
+              <span class="phc-valeur phc-valeur-seuil">${seuilCompteur}</span>
+            </div>
+            ` : ''}
+            ${jaugeIntervalleHtml(dueInfo(machine.plan, machine), machine, true)}
           </div>
-          <div class="phc-valeurs">
-            <span class="phc-valeur">${releveCompteur}</span>
-            <span class="phc-valeur phc-valeur-seuil">${seuilCompteur}</span>
-          </div>
-          ` : ''}
-          ${jaugeIntervalleHtml(dueInfo(machine.plan, machine), machine, true)}
           ${(() => { const v2 = vueCompteurSecondaire(machine); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue, true) : ''; })()}
           ${compteurHtml(machine, 'bureau', 'Mettre à jour', 'Valider')}${compteurHtml(machine, 'mobile', 'Mettre à jour', 'Valider')}
           ${compteur2Html(machine, 'bureau')}${compteur2Html(machine, 'mobile')}
