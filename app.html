@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1xdZ7g7UgAOX9TDQsk1UYnGdd05OB2dbbtleaq9UZgI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-8wa978a+ClVmP4j+HzwcM9cxWBEsXD79MqnSJP/g42I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4782,6 +4782,78 @@
   .support-picker-pied-droite{display:flex;align-items:center;gap:8px;}
 
   /* ══════════════════════════════════════════════════════════════════════════
+     ★ SÉLECTEUR D'INDICATIF PAYS — reprise Stitch « stitch_refonte_zone_
+     change_ticketing » (modale « Pays de l'indicatif »), remplace
+     ouvrirListeChoix() pour tous les champs téléphone (inscription, Mon
+     compte). Mêmes substitutions que les reprises précédentes : couleurs
+     mappées sur --ink/--primary-dark/--cyan déjà déclarés (identiques au
+     pixel près à la charte de la maquette), aucune police d'icônes
+     (PICTOS), drapeaux en emoji Unicode réels (drapeauDe(), déjà existant)
+     plutôt que des images. Compteur et liste sur la vraie PAYS_TEL (61
+     pays), jamais le « 242 indicatifs mondiaux » fictif de la maquette. */
+  .indicatif-modal .modal{max-width:520px;}
+  .indicatif-tete-gauche{display:flex;align-items:flex-start;gap:12px;min-width:0;}
+  .indicatif-tete-ico{width:40px;height:40px;border-radius:14px;background:var(--primary-tint);color:var(--primary-dark);flex:0 0 auto;}
+  .indicatif-tete-ico svg{width:20px;height:20px;}
+  .indicatif-recherche{position:relative;margin-top:14px;}
+  .indicatif-recherche .card-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none;}
+  .indicatif-recherche .card-ico svg{width:18px;height:18px;display:block;}
+  .indicatif-recherche input{width:100%;height:42px;padding:0 38px;font-size:13.5px;background:var(--surface-soft);}
+  .indicatif-effacer-recherche{
+    display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;border-radius:50%;border:none;background:none;color:var(--ink-3);
+    align-items:center;justify-content:center;cursor:pointer;
+  }
+  .indicatif-effacer-recherche.is-visible{display:flex;}
+  .indicatif-effacer-recherche:hover{background:var(--surface-soft);color:var(--ink);}
+  .indicatif-effacer-recherche svg{width:13px;height:13px;}
+  .indicatif-onglets{display:flex;align-items:center;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+  .indicatif-onglet{
+    flex:0 0 auto;padding:5px 12px;border-radius:999px;border:none;background:var(--surface-soft);
+    color:var(--ink-2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .indicatif-onglet.is-actif{background:var(--primary-dark);color:#fff;}
+  .indicatif-raccourcis{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--primary-tint);border:1px solid var(--primary-tint-2);}
+  .indicatif-raccourcis-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:8px;}
+  .indicatif-raccourcis-defaut{color:var(--primary-dark);text-transform:none;letter-spacing:0;font-weight:700;cursor:pointer;}
+  .indicatif-raccourcis-defaut:hover{text-decoration:underline;}
+  .indicatif-raccourcis-liste{display:flex;flex-wrap:wrap;gap:7px;}
+  .indicatif-chip{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface);font-family:inherit;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  }
+  .indicatif-chip:hover{border-color:var(--primary-line);background:var(--primary-tint);}
+  .indicatif-chip-num{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);}
+  .indicatif-liste{display:flex;flex-direction:column;gap:3px;max-height:300px;overflow-y:auto;margin-top:12px;padding-right:2px;}
+  .indicatif-ligne{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:10px;
+    border-radius:12px;border:1px solid transparent;background:none;cursor:pointer;text-align:left;font-family:inherit;
+    transition:background .12s,border-color .12s;
+  }
+  .indicatif-ligne:hover{background:var(--surface-soft);}
+  .indicatif-ligne.is-choisie{border-color:var(--primary-line);background:var(--primary-tint);}
+  .indicatif-ligne-gauche{display:flex;align-items:center;gap:11px;min-width:0;}
+  .indicatif-drapeau{font-size:22px;line-height:1;flex:0 0 auto;}
+  .indicatif-ligne-tete{display:flex;align-items:center;gap:8px;}
+  .indicatif-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
+  .indicatif-badge{font-size:10.5px;font-weight:700;color:var(--primary-dark);background:var(--surface);padding:2px 8px;border-radius:6px;border:1px solid var(--primary-tint-2);}
+  .indicatif-nom{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-top:1px;}
+  .indicatif-radio{width:19px;height:19px;border-radius:50%;border:2px solid var(--line-3);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .indicatif-ligne.is-choisie .indicatif-radio{border-color:var(--primary-dark);}
+  .indicatif-radio .point{width:9px;height:9px;border-radius:50%;background:var(--primary-dark);display:none;}
+  .indicatif-ligne.is-choisie .indicatif-radio .point{display:block;}
+  .indicatif-vide{padding:36px 20px;text-align:center;}
+  .indicatif-vide .card-ico{width:44px;height:44px;border-radius:50%;background:var(--surface-soft);color:var(--ink-3);margin:0 auto 10px;}
+  .indicatif-vide .card-ico svg{width:20px;height:20px;}
+  .indicatif-vide p{margin:0;font-size:13px;font-weight:700;color:var(--ink);}
+  .indicatif-vide p.muted-text{font-weight:500;font-size:12px;margin-top:4px;max-width:280px;margin-left:auto;margin-right:auto;}
+  .indicatif-pied{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);flex-wrap:wrap;}
+  .indicatif-pied-compte{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3);font-weight:600;}
+  .indicatif-pied-compte .card-ico{color:var(--cyan);}
+  .indicatif-pied-compte .card-ico svg{width:15px;height:15px;}
+  .indicatif-pied-actions{display:flex;align-items:center;gap:8px;}
+
+  /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
      « Appli web/WEB TCO/code.html » (labellés, couleurs, tailles, police,
      pictogrammes — voir keeva-tco-feature). Deux substitutions, forcées par
@@ -5993,6 +6065,24 @@ const PAYS_TEL = [
 
 const PAYS_TEL_DEFAUT = PAYS_TEL[0];
 
+// Sélecteur d'indicatif pays (reprise Stitch « stitch_refonte_zone_change_
+// ticketing », modale « Pays de l'indicatif ») — les 5 raccourcis de la
+// maquette sont déjà les 5 premiers pays réels de PAYS_TEL (Pacifique +
+// France), repris tels quels. La zone (Pacifique/Europe/Autres) n'est PAS
+// une donnée téléphonique : un simple classement d'affichage pour les
+// onglets de la maquette, sur la vraie liste PAYS_TEL (61 pays) — jamais le
+// « 242 indicatifs mondiaux » fictif de la maquette.
+const INDICATIFS_FREQUENTS = ['NC', 'PF', 'FR', 'WF', 'BE'];
+const ZONE_PAYS_TEL = {
+  NC: 'pacifique', PF: 'pacifique', WF: 'pacifique', VU: 'pacifique', FJ: 'pacifique', WS: 'pacifique',
+  TO: 'pacifique', PG: 'pacifique', SB: 'pacifique', KI: 'pacifique', NR: 'pacifique', TV: 'pacifique',
+  CK: 'pacifique', AU: 'pacifique', NZ: 'pacifique',
+  FR: 'europe', BE: 'europe', CH: 'europe', LU: 'europe', MC: 'europe', IE: 'europe', DE: 'europe',
+  ES: 'europe', IT: 'europe', PT: 'europe', NL: 'europe', AT: 'europe', GR: 'europe', PL: 'europe',
+  SE: 'europe', NO: 'europe', DK: 'europe', FI: 'europe', GB: 'europe',
+};
+function zonePaysTel(code) { return ZONE_PAYS_TEL[code] || 'autres'; }
+
 function paysTel(code) {
   return PAYS_TEL.find((p) => p.code === code) || PAYS_TEL_DEFAUT;
 }
@@ -6109,12 +6199,192 @@ function champTelephoneHtml(id, valeur, opts = {}) {
     ${opts.aide ? `<div class="hint">${esc(opts.aide)}</div>` : ''}`;
 }
 
+// Modale « Pays de l'indicatif » (reprise Stitch, remplace ouvrirListeChoix()
+// pour CE select précis, partout où un champ téléphone existe — inscription,
+// Mon compte) : recherche en direct, onglets de zone, raccourcis atelier,
+// liste avec drapeau + pastille radio. `valeurActuelle` : le code ISO en
+// cours (ex. 'NC') ; `onChoisi(pays)` : appelé UNIQUEMENT sur « Confirmer
+// l'indicatif », jamais sur un simple clic dans la liste (même discipline
+// que ouvrirSelecteurMachine, support client).
+function ouvrirChoixIndicatifPays(valeurActuelle, onChoisi) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay indicatif-modal';
+  document.body.appendChild(overlay);
+  let choisiCode = valeurActuelle || PAYS_TEL_DEFAUT.code;
+  let filtreZone = 'all';
+
+  const correspond = (p, texte) => {
+    const t = texte.trim().toLowerCase();
+    if (!t) return true;
+    return p.nom.toLowerCase().includes(t) || p.indicatif.includes(t.replace(/^\+/, ''));
+  };
+  const correspondZone = (p) => {
+    if (filtreZone === 'all') return true;
+    if (filtreZone === 'frequents') return INDICATIFS_FREQUENTS.includes(p.code);
+    return zonePaysTel(p.code) === filtreZone;
+  };
+
+  const rendreListe = () => {
+    const texte = overlay.querySelector('#indicatif-recherche').value;
+    overlay.querySelector('#indicatif-effacer-recherche').classList.toggle('is-visible', texte.length > 0);
+    const liste = PAYS_TEL.filter((p) => correspond(p, texte) && correspondZone(p));
+    const zone = overlay.querySelector('#indicatif-liste');
+    if (!liste.length) {
+      zone.innerHTML = `<div class="indicatif-vide">
+        <span class="card-ico">${picto('recherche')}</span>
+        <p>${trad('Aucun pays trouvé')}</p>
+        <p class="muted-text">${trad('Vérifie l\'orthographe du pays ou renseigne directement l\'indicatif sans symbole.')}</p>
+      </div>`;
+    } else {
+      zone.innerHTML = liste.map((p) => `
+        <button type="button" class="indicatif-ligne${p.code === choisiCode ? ' is-choisie' : ''}" data-code="${esc(p.code)}">
+          <span class="indicatif-ligne-gauche">
+            <span class="indicatif-drapeau">${drapeauDe(p.code)}</span>
+            <span>
+              <span class="indicatif-ligne-tete">
+                <span class="indicatif-num">+${esc(p.indicatif)}</span>
+                ${p.code === PAYS_TEL_DEFAUT.code ? `<span class="indicatif-badge">${trad('Par défaut')}</span>` : ''}
+              </span>
+              <span class="indicatif-nom">${esc(p.nom)}</span>
+            </span>
+          </span>
+          <span class="indicatif-radio"><span class="point"></span></span>
+        </button>`).join('');
+      zone.querySelectorAll('.indicatif-ligne').forEach((ligne) => {
+        ligne.addEventListener('click', () => {
+          choisiCode = ligne.dataset.code;
+          zone.querySelectorAll('.indicatif-ligne').forEach((l) => l.classList.toggle('is-choisie', l === ligne));
+        });
+      });
+    }
+    const compte = overlay.querySelector('#indicatif-compte');
+    compte.textContent = (texte || filtreZone !== 'all')
+      ? tR('{n} pays affiché(s)', { n: liste.length })
+      : tR('{n} indicatifs disponibles', { n: PAYS_TEL.length });
+  };
+
+  const selectionRapide = (code) => {
+    choisiCode = code;
+    rendreListe();
+    const p = paysTel(code);
+    showToast(tR('Indicatif sélectionné : +{indicatif} ({nom})', { indicatif: p.indicatif, nom: p.nom }));
+  };
+
+  overlay.innerHTML = `<div class="modal">
+    <div class="support-tete">
+      <div class="indicatif-tete-gauche">
+        <span class="card-ico card-ico-plein indicatif-tete-ico">${picto('monde')}</span>
+        <div><h2>${trad('Pays de l\'indicatif')}</h2><p class="sub">${trad('Sélectionne l\'indicatif international pour tes alertes et notifications.')}</p></div>
+      </div>
+      <button type="button" class="mform-close" id="indicatif-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+    </div>
+    <div class="indicatif-recherche">
+      <span class="card-ico">${picto('recherche')}</span>
+      <input type="text" id="indicatif-recherche" placeholder="${esc(trad('Rechercher par pays ou indicatif (+687, Calédonie, +33…)'))}">
+      <button type="button" class="indicatif-effacer-recherche" id="indicatif-effacer-recherche" aria-label="${esc(trad('Effacer la recherche'))}">${picto('fermer')}</button>
+    </div>
+    <div class="indicatif-onglets" id="indicatif-onglets">
+      <button type="button" class="indicatif-onglet is-actif" data-zone="all">${trad('Tous les pays')}</button>
+      <button type="button" class="indicatif-onglet" data-zone="pacifique">${trad('DOM-TOM & Pacifique')}</button>
+      <button type="button" class="indicatif-onglet" data-zone="europe">${trad('Europe')}</button>
+      <button type="button" class="indicatif-onglet" data-zone="autres">${trad('Autres')}</button>
+      <button type="button" class="indicatif-onglet" data-zone="frequents">${trad('Fréquents')}</button>
+    </div>
+    <div class="indicatif-raccourcis">
+      <div class="indicatif-raccourcis-tete">
+        <span>${trad('Sélections rapides atelier')}</span>
+        <span class="indicatif-raccourcis-defaut" id="indicatif-defaut">${tR('Par défaut (+{indicatif})', { indicatif: PAYS_TEL_DEFAUT.indicatif })}</span>
+      </div>
+      <div class="indicatif-raccourcis-liste">
+        ${INDICATIFS_FREQUENTS.map((code) => { const p = paysTel(code); return `
+          <button type="button" class="indicatif-chip" data-code="${esc(code)}">
+            <span>${drapeauDe(code)}</span><span class="indicatif-chip-num">+${esc(p.indicatif)}</span><span class="indicatif-chip-nom">${esc(p.nom)}</span>
+          </button>`; }).join('')}
+      </div>
+    </div>
+    <div class="indicatif-liste" id="indicatif-liste"></div>
+    <div class="indicatif-pied">
+      <span class="indicatif-pied-compte"><span class="card-ico">${picto('bouclier')}</span><span id="indicatif-compte"></span></span>
+      <div class="indicatif-pied-actions">
+        <button type="button" class="secondary" id="indicatif-annuler">${trad('Annuler')}</button>
+        <button type="button" class="primary" id="indicatif-confirmer"><span>${trad('Confirmer l\'indicatif')}</span><span class="card-ico">${picto('coche')}</span></button>
+      </div>
+    </div>
+  </div>`;
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#indicatif-fermer-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#indicatif-annuler').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#indicatif-recherche').addEventListener('input', rendreListe);
+  overlay.querySelector('#indicatif-effacer-recherche').addEventListener('click', () => {
+    const champ = overlay.querySelector('#indicatif-recherche');
+    champ.value = '';
+    champ.focus();
+    rendreListe();
+  });
+  overlay.querySelector('#indicatif-defaut').addEventListener('click', () => selectionRapide(PAYS_TEL_DEFAUT.code));
+  overlay.querySelectorAll('.indicatif-chip').forEach((chip) => {
+    chip.addEventListener('click', () => selectionRapide(chip.dataset.code));
+  });
+  overlay.querySelectorAll('.indicatif-onglet').forEach((onglet) => {
+    onglet.addEventListener('click', () => {
+      filtreZone = onglet.dataset.zone;
+      overlay.querySelectorAll('.indicatif-onglet').forEach((o) => o.classList.toggle('is-actif', o === onglet));
+      rendreListe();
+    });
+  });
+  overlay.querySelector('#indicatif-confirmer').addEventListener('click', () => {
+    const p = paysTel(choisiCode);
+    overlay.remove();
+    showToast(tR('Indicatif confirmé : +{indicatif}', { indicatif: p.indicatif }));
+    onChoisi(p);
+  });
+
+  rendreListe();
+}
+
+// Habillage dédié au select d'indicatif pays (même mécanique que
+// habillerSelect : select natif masqué mais fonctionnel, un bouton visuel
+// prend sa place) — ouvre ouvrirChoixIndicatifPays() au lieu du choix
+// générique ouvrirListeChoix(), pour ce select précis seulement.
+function habillerSelectIndicatif(select) {
+  if (!select || select.dataset.habille) return;
+  select.dataset.habille = '1';
+  select.style.display = 'none';
+  select.setAttribute('aria-hidden', 'true');
+  select.tabIndex = -1;
+
+  const bouton = document.createElement('button');
+  bouton.type = 'button';
+  bouton.className = `champ-select ${select.className}`.trim();
+  if (select.id) bouton.id = `${select.id}-bouton`;
+  select.insertAdjacentElement('afterend', bouton);
+
+  const majBouton = () => {
+    const pays = paysTel(select.value);
+    const etroit = select.classList.contains('tel-pays-etroit');
+    bouton.innerHTML = `<span>${etroit ? `+${esc(pays.indicatif)}` : `${drapeauDe(pays.code)} +${esc(pays.indicatif)} — ${esc(pays.nom)}`}</span>${picto('chevronBas')}`;
+    bouton.disabled = select.disabled;
+  };
+  majBouton();
+
+  bouton.addEventListener('click', () => {
+    ouvrirChoixIndicatifPays(select.value, (pays) => {
+      select.value = pays.code;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      majBouton();
+    });
+  });
+
+  new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+}
+
 // Applique le masque à la frappe et tient le sélecteur et le champ cohérents.
 function wireChampTelephone(root, id) {
   const select = root.querySelector(`#${id}-pays`);
   const input = root.querySelector(`#${id}`);
   if (!select || !input) return;
-  habillerSelect(select, trad('Pays de l\'indicatif'));
+  habillerSelectIndicatif(select);
 
   const courant = () => paysTel(select.value);
   const reformater = (tronquer) => {
@@ -11827,6 +12097,8 @@ const PICTOS = {
   rafraichir: '<path d="M20 12a8 8 0 1 1-3-6.3"/><path d="M20 3v5h-5"/>',
   // Support client (échange de ticket, reprise Stitch) — bouton Envoyer.
   envoyer: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  // Sélecteur d'indicatif pays (reprise Stitch) — en-tête de la modale.
+  monde: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
