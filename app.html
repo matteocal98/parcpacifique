@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d4IjK5Umr/iGggvEuZmi9XNKK9GcLbfvavGXn+HPX+I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-LcRoyLmWTm2SH/Mq7YtanSbawxzvizrUx0HFaQmLH20=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4930,6 +4930,80 @@
   .compteur-tactile-reinitialiser{flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0 4px;}
   .compteur-tactile-reinitialiser:hover{color:var(--gold);}
   .plan-hero-compteur .compteur-lecture{color:rgba(255,255,255,.85);}
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ PIÈCE DU CATALOGUE (recherche intégrée) — reprise Stitch « stitch_
+     refonte_zone_change_ticketing », remplace le <select> habillé générique
+     (ouvrirListeChoix) de « Enregistrer un entretien » → pièce catalogue.
+     Couleurs mappées sur --ink/--primary-dark/--cyan/--gold déjà déclarés
+     (identiques au pixel près à la charte de la maquette). Volontairement
+     PAS repris : toute notion de STOCK (« En stock (28 dispo) », « Stock
+     faible », « En réappro (J+3) », « Sur commande (J+5) ») — parts_catalog
+     n'a aucune colonne de quantité en stock, seulement avg_lead_time_days
+     (délai moyen de disponibilité) ; remplacé par une seule pastille
+     neutre « Délai moyen : N j » quand ce délai est renseigné, sinon rien.
+     La « Réf OEM » séparée de la maquette n'existe pas non plus (une seule
+     colonne reference) — retirée. Le double prix €/F CFP de la maquette
+     n'a pas de sens ici : une société KEEVA a UNE devise (deviseCourte()),
+     jamais les deux en simultané — un seul prix, dans sa vraie devise. Le
+     raccourci clavier ⌘K de la maquette n'a pas de sens sur une appli
+     d'abord mobile (pas de clavier physique) — retiré avec son badge. */
+  .piece-modal .modal{max-width:640px;}
+  .piece-tete-gauche{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .piece-badge-compte{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--primary-dark);background:var(--primary-tint);padding:3px 10px;border-radius:999px;}
+  .piece-badge-compte .dot{width:6px;height:6px;border-radius:50%;background:var(--primary-dark);animation:tco-pulse 1.8s ease-in-out infinite;}
+  .piece-outils{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .piece-recherche{position:relative;flex:1 1 220px;min-width:0;}
+  .piece-recherche .card-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none;}
+  .piece-recherche .card-ico svg{width:16px;height:16px;display:block;}
+  .piece-recherche input{width:100%;height:40px;padding:0 14px 0 38px;font-size:13.5px;background:var(--surface-soft);}
+  .piece-tri{flex:0 0 auto;}
+  .piece-tri select{height:40px;font-size:12.5px;background:var(--surface-soft);}
+  .piece-fournisseurs{display:flex;align-items:center;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+  .piece-fournisseur-chip{
+    flex:0 0 auto;padding:5px 12px;border-radius:8px;border:none;background:var(--surface-soft);
+    color:var(--ink-2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .piece-fournisseur-chip.is-actif{background:var(--ink);color:#fff;}
+  .piece-liste{margin-top:14px;display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;padding-right:2px;}
+  .piece-ligne-catalogue{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px;
+    border-radius:12px;border:1px solid var(--line);background:var(--surface);text-align:left;cursor:pointer;
+    transition:background .12s,border-color .12s;
+  }
+  .piece-ligne-catalogue:hover{border-color:var(--line-3);}
+  .piece-ligne-catalogue.is-choisie{border-color:var(--primary-line);background:var(--primary-tint);}
+  .piece-ligne-gauche{display:flex;align-items:flex-start;gap:11px;min-width:0;}
+  .piece-ligne-icone{width:38px;height:38px;border-radius:10px;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;}
+  .piece-ligne-icone svg{width:17px;height:17px;}
+  .piece-ligne-titre{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .piece-ligne-nom{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .piece-ligne-delai{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--primary-dark);background:var(--surface);border:1px solid var(--primary-tint-2);padding:2px 8px;border-radius:6px;white-space:nowrap;flex:0 0 auto;}
+  .piece-ligne-delai svg{width:11px;height:11px;flex:0 0 auto;}
+  .piece-ligne-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px;}
+  .piece-ligne-meta strong{color:var(--ink-2);font-weight:600;}
+  .piece-ligne-droite{display:flex;align-items:center;gap:12px;flex:0 0 auto;}
+  .piece-ligne-prix{text-align:right;}
+  .piece-ligne-prix .montant{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:700;color:var(--ink);}
+  .piece-ligne-prix .devise{font-size:11px;color:var(--ink-3);margin-left:3px;}
+  .piece-radio{width:19px;height:19px;border-radius:50%;border:2px solid var(--line-3);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .piece-ligne-catalogue.is-choisie .piece-radio{border-color:var(--primary-dark);}
+  .piece-radio .point{width:9px;height:9px;border-radius:50%;background:var(--primary-dark);display:none;}
+  .piece-ligne-catalogue.is-choisie .piece-radio .point{display:block;}
+  .piece-vide{padding:32px 16px;text-align:center;}
+  .piece-vide .card-ico{width:40px;height:40px;border-radius:50%;background:var(--surface-soft);color:var(--ink-3);margin:0 auto 10px;}
+  .piece-vide .card-ico svg{width:18px;height:18px;}
+  .piece-vide p{margin:0;font-size:13px;font-weight:700;color:var(--ink);}
+  .piece-vide p.muted-text{font-weight:500;font-size:12px;margin-top:4px;}
+  .piece-resume{margin-top:14px;padding:11px 13px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .piece-resume-gauche{display:flex;align-items:center;gap:10px;min-width:0;}
+  .piece-resume-icone{width:30px;height:30px;border-radius:9px;background:var(--ink);color:var(--cyan);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .piece-resume-icone svg{width:14px;height:14px;}
+  .piece-resume-titre{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);}
+  .piece-resume-nom{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .piece-resume-droite{text-align:right;flex:0 0 auto;}
+  .piece-resume-mot{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);}
+  .piece-resume-prix{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
@@ -21350,6 +21424,201 @@ async function equipePourAttribution() {
   if (error) throw error;
   return Array.isArray(data) ? data : [];
 }
+// Trois lettres dérivées du nom réel du fournisseur (jamais un code
+// inventé) : sert juste de pastille visuelle dans le sélecteur de pièce.
+function abrevFournisseur(nom) {
+  const lettres = String(nom || '').replace(/[^A-Za-zÀ-ÿ]/g, '');
+  return lettres ? lettres.slice(0, 3).toUpperCase() : '';
+}
+
+// Sélecteur de pièce du catalogue (reprise Stitch « stitch_refonte_zone_
+// change_ticketing », modale « Pièce du catalogue ») — remplace le <select>
+// habillé générique (ouvrirListeChoix) pour CE select précis, dans
+// « Enregistrer un entretien ». `valeurActuelle` : l'id de pièce déjà
+// choisi (ou '') ; `onChoisi(piece|null)` appelé UNIQUEMENT sur
+// « Valider », jamais sur un simple clic dans la liste — piece est `null`
+// pour l'option « Aucune pièce spécifique ».
+function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay piece-modal';
+  document.body.appendChild(overlay);
+  const pieces = UI.partsCatalog || [];
+  let choisiId = valeurActuelle || '';
+  let filtreFournisseur = 'all';
+  let tri = 'pertinence';
+
+  const fournisseurs = [...new Set(pieces.map((p) => p.supplier_name).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+  const piecesTriees = () => {
+    const f = overlay.querySelector('#piece-recherche')?.value.trim().toLowerCase() || '';
+    let liste = pieces.filter((p) => {
+      const matchFournisseur = filtreFournisseur === 'all' || p.supplier_name === filtreFournisseur;
+      const matchTexte = !f || [p.designation, p.reference, p.supplier_name].filter(Boolean).some((v) => String(v).toLowerCase().includes(f));
+      return matchFournisseur && matchTexte;
+    });
+    if (tri === 'prix-asc') liste = liste.slice().sort((a, b) => (Number(a.unit_price) || 0) - (Number(b.unit_price) || 0));
+    if (tri === 'prix-desc') liste = liste.slice().sort((a, b) => (Number(b.unit_price) || 0) - (Number(a.unit_price) || 0));
+    return liste;
+  };
+
+  const rendreResume = (piece) => {
+    const resume = overlay.querySelector('#piece-resume');
+    if (!piece) {
+      resume.innerHTML = `<div class="piece-resume-gauche">
+          <span class="piece-resume-icone">${picto('coche')}</span>
+          <div><div class="piece-resume-titre">${trad('Sélection')}</div><div class="piece-resume-nom">${trad('Aucune pièce spécifique')}</div></div>
+        </div>
+        <div class="piece-resume-droite"><span class="piece-resume-mot">${trad('Prix')}</span><div class="piece-resume-prix">—</div></div>`;
+      return;
+    }
+    resume.innerHTML = `<div class="piece-resume-gauche">
+        <span class="piece-resume-icone">${picto('coche')}</span>
+        <div><div class="piece-resume-titre">${trad('Pièce sélectionnée')}</div><div class="piece-resume-nom">${esc(piece.designation)}</div></div>
+      </div>
+      <div class="piece-resume-droite"><span class="piece-resume-mot">${trad('Prix')}</span><div class="piece-resume-prix">${texteAvecSeparateurs(piece.unit_price)} <span style="font-size:11px;color:var(--ink-3);">${esc(deviseCourte())}</span></div></div>`;
+  };
+
+  const rendreListe = () => {
+    const liste = piecesTriees();
+    const zone = overlay.querySelector('#piece-liste');
+    const boutonValider = overlay.querySelector('#piece-valider');
+    const ligneAucune = `<button type="button" class="piece-ligne-catalogue${!choisiId ? ' is-choisie' : ''}" data-id="">
+        <span class="piece-ligne-gauche">
+          <span class="piece-ligne-icone">${picto('fermer')}</span>
+          <span><span class="piece-ligne-titre"><span class="piece-ligne-nom">${trad('— Choisir une pièce du catalogue —')}</span></span>
+          <div class="piece-ligne-meta">${trad('Hors catalogue, ou main-d\'œuvre seule')}</div></span>
+        </span>
+        <span class="piece-radio"><span class="point"></span></span>
+      </button>`;
+    if (!liste.length) {
+      zone.innerHTML = ligneAucune + `<div class="piece-vide">
+        <span class="card-ico">${picto('recherche')}</span>
+        <p>${trad('Aucune pièce ne correspond')}</p>
+        <p class="muted-text">${trad('Vérifie l\'orthographe, ou choisis un autre fournisseur.')}</p>
+      </div>`;
+    } else {
+      zone.innerHTML = ligneAucune + liste.map((p) => {
+        const meta = [p.supplier_name ? tR('Fournisseur : {nom}', { nom: p.supplier_name }) : '', p.reference ? tR('Réf : {ref}', { ref: p.reference }) : ''].filter(Boolean).join(' · ');
+        const delai = p.avg_lead_time_days != null ? `<span class="piece-ligne-delai">${picto('sablier')}${tR('Délai moyen : {n} j', { n: p.avg_lead_time_days })}</span>` : '';
+        return `<button type="button" class="piece-ligne-catalogue${choisiId === String(p.id) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
+          <span class="piece-ligne-gauche">
+            <span class="piece-ligne-icone">${abrevFournisseur(p.supplier_name) || picto('boite')}</span>
+            <span>
+              <span class="piece-ligne-titre"><span class="piece-ligne-nom">${esc(p.designation)}</span>${delai}</span>
+              ${meta ? `<div class="piece-ligne-meta">${esc(meta)}</div>` : ''}
+            </span>
+          </span>
+          <span class="piece-ligne-droite">
+            <span class="piece-ligne-prix"><span class="montant">${texteAvecSeparateurs(p.unit_price)}</span><span class="devise">${esc(deviseCourte())}</span></span>
+            <span class="piece-radio"><span class="point"></span></span>
+          </span>
+        </button>`;
+      }).join('');
+    }
+    zone.querySelectorAll('.piece-ligne-catalogue').forEach((ligne) => {
+      ligne.addEventListener('click', () => {
+        choisiId = ligne.dataset.id || '';
+        zone.querySelectorAll('.piece-ligne-catalogue').forEach((l) => l.classList.toggle('is-choisie', l === ligne));
+        const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
+        rendreResume(piece);
+        if (boutonValider) boutonValider.querySelector('span').textContent = piece
+          ? tR('Valider la pièce sélectionnée ({prix} {devise})', { prix: texteAvecSeparateurs(piece.unit_price), devise: deviseCourte() })
+          : trad('Continuer sans pièce catalogue');
+      });
+    });
+  };
+
+  overlay.innerHTML = `<div class="modal">
+    <div class="support-tete">
+      <div class="piece-tete-gauche">
+        <div><h2>${trad('Pièce du catalogue')}</h2><p class="sub">${trad('Sélectionne une pièce pour cette intervention.')}</p></div>
+      </div>
+      <button type="button" class="mform-close" id="piece-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+    </div>
+    <span class="piece-badge-compte"><span class="dot"></span>${tR('Catalogue atelier · {n} référence(s)', { n: pieces.length })}</span>
+    <div class="piece-outils">
+      <div class="piece-recherche">
+        <span class="card-ico">${picto('recherche')}</span>
+        <input type="text" id="piece-recherche" placeholder="${esc(trad('Rechercher par référence, désignation, fournisseur…'))}">
+      </div>
+      <div class="piece-tri">
+        <select id="piece-tri-select">
+          <option value="pertinence">${trad('Trier : Pertinence')}</option>
+          <option value="prix-asc">${trad('Prix croissant')}</option>
+          <option value="prix-desc">${trad('Prix décroissant')}</option>
+        </select>
+      </div>
+    </div>
+    ${fournisseurs.length ? `<div class="piece-fournisseurs" id="piece-fournisseurs">
+      <button type="button" class="piece-fournisseur-chip is-actif" data-fournisseur="all">${tR('Tous les fournisseurs ({n})', { n: pieces.length })}</button>
+      ${fournisseurs.map((f) => `<button type="button" class="piece-fournisseur-chip" data-fournisseur="${esc(f)}">${esc(f)}</button>`).join('')}
+    </div>` : ''}
+    <div class="piece-liste" id="piece-liste"></div>
+    <div class="piece-resume" id="piece-resume"></div>
+    <div class="modal-actions">
+      <button type="button" class="primary" id="piece-valider"><span>${trad('Valider la pièce sélectionnée')}</span></button>
+      <button type="button" class="secondary" id="piece-annuler">${trad('Annuler')}</button>
+    </div>
+  </div>`;
+
+  habillerSelect(overlay.querySelector('#piece-tri-select'), trad('Trier'));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#piece-fermer-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#piece-annuler').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#piece-recherche').addEventListener('input', rendreListe);
+  overlay.querySelector('#piece-tri-select').addEventListener('change', (e) => { tri = e.target.value; rendreListe(); });
+  overlay.querySelectorAll('.piece-fournisseur-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      filtreFournisseur = chip.dataset.fournisseur;
+      overlay.querySelectorAll('.piece-fournisseur-chip').forEach((c) => c.classList.toggle('is-actif', c === chip));
+      rendreListe();
+    });
+  });
+  overlay.querySelector('#piece-valider').addEventListener('click', () => {
+    const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
+    overlay.remove();
+    onChoisi(piece);
+  });
+
+  rendreListe();
+  rendreResume(valeurActuelle ? pieces.find((p) => String(p.id) === String(valeurActuelle)) : null);
+}
+
+// Habillage dédié au select de pièce catalogue (même mécanique que
+// habillerSelectIndicatif) — ouvre ouvrirChoixPieceCatalogue() au lieu du
+// choix générique ouvrirListeChoix(), pour ce select précis seulement.
+function habillerSelectPieceCatalogue(select) {
+  if (!select || select.dataset.habille) return;
+  select.dataset.habille = '1';
+  select.style.display = 'none';
+  select.setAttribute('aria-hidden', 'true');
+  select.tabIndex = -1;
+
+  const bouton = document.createElement('button');
+  bouton.type = 'button';
+  bouton.className = `champ-select ${select.className}`.trim();
+  if (select.id) bouton.id = `${select.id}-bouton`;
+  select.insertAdjacentElement('afterend', bouton);
+
+  const majBouton = () => {
+    const opt = select.options[select.selectedIndex];
+    const libelle = (opt ? opt.textContent : '') || trad('— Choisir une pièce du catalogue —');
+    bouton.innerHTML = `<span>${esc(libelle)}</span>${picto('chevronBas')}`;
+    bouton.disabled = select.disabled;
+  };
+  majBouton();
+
+  bouton.addEventListener('click', () => {
+    ouvrirChoixPieceCatalogue(select.value, (piece) => {
+      select.value = piece ? String(piece.id) : '';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      majBouton();
+    });
+  });
+
+  new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+}
+
 // Une ligne de pièce dans « Enregistrer un entretien » : sélection dans le
 // catalogue (le prix se propose, reste modifiable — une remise ponctuelle ou
 // une pièce hors catalogue ne doit pas être bloquée), quantité, sous-total.
@@ -22107,7 +22376,7 @@ function openLogInterventionModal(machine, tache) {
       piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
       const nouvelleLigne = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
       activerSeparateurMilliers(nouvelleLigne?.querySelector('.log-piece-prix'));
-      habillerSelect(nouvelleLigne?.querySelector('.log-piece-select'), trad('Pièce du catalogue'));
+      habillerSelectPieceCatalogue(nouvelleLigne?.querySelector('.log-piece-select'));
     });
     piecesListe?.addEventListener('change', (e) => {
       if (e.target.classList.contains('log-piece-select')) {
