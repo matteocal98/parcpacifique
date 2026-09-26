@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5yhXUZKSX/GQEhczzm54GxLAFQ3xLRBNO7DLiElrKpU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MOLOsr7sPoCYFtJg7W6pPL91+yEEw4USDEgSdqpZRH8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -12863,7 +12863,18 @@ function enhanceModal(overlay) {
     const active = document.activeElement;
     if (active && overlay.contains(active)) return;      // le focus est déjà dedans
     const target = overlay.querySelector('[autofocus]') || focusableIn(overlay)[0];
-    if (target) target.focus();
+    // ★ `preventScroll` — sans lui, ce focus (posé sur le premier élément
+    // focusable, en haut de la modale, pour l'accessibilité) fait remonter
+    // TOUTE modale scrollable jusqu'en haut, même quand elle vient d'être
+    // rouverte à une position précise (voir openPlanView/options.scrollTop) :
+    // ce focus arrive PLUS TARD (via requestAnimationFrame, sur la frame
+    // suivante) que l'affectation de overlay.scrollTop faite à l'ouverture,
+    // et l'écrase. Signalé par l'utilisateur sur un vrai téléphone — pas
+    // reproduit dans les tests navigateur (le scroll-into-view natif au
+    // focus() est plus agressif sur WebView mobile que sur un onglet de
+    // test sans focus OS réel, d'où le décalage). Sans effet secondaire sur
+    // une ouverture FRAÎCHE : son scrollTop est déjà à 0 par défaut.
+    if (target) target.focus({ preventScroll: true });
   });
 }
 
