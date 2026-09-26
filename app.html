@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-8wa978a+ClVmP4j+HzwcM9cxWBEsXD79MqnSJP/g42I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-d4IjK5Umr/iGggvEuZmi9XNKK9GcLbfvavGXn+HPX+I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4852,6 +4852,84 @@
   .indicatif-pied-compte .card-ico{color:var(--cyan);}
   .indicatif-pied-compte .card-ico svg{width:15px;height:15px;}
   .indicatif-pied-actions{display:flex;align-items:center;gap:8px;}
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ RELEVÉ DE COMPTEUR — MODULE INCRÉMENTAL TACTILE (reprise Stitch
+     « stitch_refonte_zone_change_ticketing », SMARTPHONE UNIQUEMENT — vit
+     dans .compteur-mobile, la carte de bureau .compteur-bureau garde
+     l'ancienne saisie simple, aucun changement là). Toutes les teintes sont
+     blanches/translucides, PAS les jetons --ink habituels : ce module vit
+     sur .plan-hero-compteur, une carte au fond sombre (var(--dark)) — même
+     contrainte déjà gérée pour .compteur-champ/.compteur-enregistrer juste
+     au-dessus dans ce fichier. Volontairement PAS repris de la maquette :
+     le sélecteur Heures/Km (fabriqué — une machine réelle a une unité
+     fixe, jamais un choix à la volée), le comparatif « Hier : Xh »/
+     « Écart calculé depuis hier » (aucun historique de relevés horodatés
+     n'existe), le bloc « Contrôle télématique IA / Cohérent avec le GPS
+     traceur KEEVA » (aucune télémétrie/IoT dans ce produit — même
+     discipline que le reste de cette session), le lien « Historique des
+     relevés » (aucune vue de ce type n'existe). Câblé sur le MÊME contrat
+     data-compteur-*/.compteur-champ que le reste du système de compteur
+     (document.addEventListener, plus bas dans ce fichier) : ce module ne
+     fait qu'ajuster la valeur du VRAI champ, l'enregistrement et la photo
+     OCR déjà en place ne changent pas d'une ligne. */
+  .compteur-tactile{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;}
+  .compteur-tactile-entete{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.55);margin-bottom:10px;}
+  .compteur-tactile-cadran-ligne{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+  .compteur-tactile-zone{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;background:none;border:none;padding:6px;cursor:pointer;font-family:inherit;}
+  .compteur-tactile-zone.is-gauche{align-items:flex-start;}
+  .compteur-tactile-zone.is-droite{align-items:flex-end;}
+  .compteur-tactile-zone svg{width:18px;height:18px;color:rgba(255,255,255,.65);}
+  .compteur-tactile-zone-texte{display:flex;flex-direction:column;line-height:1.25;}
+  .compteur-tactile-zone.is-droite .compteur-tactile-zone-texte{align-items:flex-end;}
+  .compteur-tactile-zone-texte>span:first-child{font-size:9.5px;font-weight:800;text-transform:uppercase;color:rgba(255,255,255,.85);}
+  .compteur-tactile-zone-texte>span.muted-text{font-size:8.5px;color:rgba(255,255,255,.45);margin:0;}
+  .compteur-tactile-zone:active{transform:scale(.94);}
+  .compteur-tactile-cadran{position:relative;width:150px;height:150px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .compteur-tactile-svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .compteur-tactile-anneau{transition:stroke-dashoffset .25s cubic-bezier(.4,0,.2,1);}
+  .compteur-tactile-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;pointer-events:none;}
+  .compteur-tactile-centre input{pointer-events:auto;}
+  .compteur-tactile-valeur.compteur-champ{
+    border:none;background:none;width:100%;padding:0;text-align:center;
+    font-family:'Space Grotesk',sans-serif;font-size:27px;font-weight:700;color:#fff;transition:transform .12s;
+  }
+  .compteur-tactile-valeur.compteur-champ::-webkit-outer-spin-button,
+  .compteur-tactile-valeur.compteur-champ::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .compteur-tactile-valeur.is-ajuste{transform:scale(1.1);color:var(--cyan);}
+  .compteur-tactile-valeur.compteur-champ:focus{outline:none;background:rgba(255,255,255,.1);border-radius:8px;}
+  .compteur-tactile-unite{font-size:10px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:.03em;margin-top:1px;}
+
+  .compteur-tactile-glissiere{margin-top:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;}
+  .compteur-tactile-glissiere-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9.5px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:6px;}
+  .compteur-tactile-badge{padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.1);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:9.5px;color:rgba(255,255,255,.75);}
+  .compteur-tactile-badge.is-plus{background:rgba(36,181,168,.25);color:#7fe3d6;}
+  .compteur-tactile-badge.is-moins{background:rgba(222,122,22,.25);color:#ffbd7a;}
+  .compteur-tactile-piste{position:relative;height:44px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;touch-action:none;cursor:grab;}
+  .compteur-tactile-etiquette{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);padding:2px 4px;border-radius:6px;transition:all .1s;pointer-events:none;}
+  .compteur-tactile-etiquette.is-zero{font-size:8.5px;text-transform:uppercase;}
+  .compteur-tactile-etiquette.is-visee{background:var(--primary-dark);color:#fff;transform:scale(1.15);}
+  .compteur-tactile-curseur{position:absolute;left:50%;top:50%;width:32px;height:32px;border-radius:9px;background:linear-gradient(90deg,var(--primary-dark),var(--cyan));color:#fff;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);box-shadow:0 4px 10px rgba(91,82,223,.4);pointer-events:none;}
+  .compteur-tactile-curseur svg{width:15px;height:15px;transform:rotate(90deg);}
+  .compteur-tactile-curseur.is-glisse{transition:none;}
+  .compteur-tactile-curseur:not(.is-glisse){transition:transform .22s cubic-bezier(.175,.885,.32,1.275);}
+
+  .compteur-tactile-pas{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px;}
+  .compteur-tactile-pas button{padding:7px 0;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;color:rgba(255,255,255,.8);cursor:pointer;}
+  .compteur-tactile-pas button.is-plus{background:rgba(36,181,168,.16);border-color:rgba(36,181,168,.4);color:#7fe3d6;}
+  .compteur-tactile-pas button:active{transform:scale(.93);}
+
+  .compteur-tactile-photo{
+    width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px dashed rgba(36,181,168,.55);background:rgba(36,181,168,.1);
+    color:#7fe3d6;font-family:inherit;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  }
+  .compteur-tactile-photo svg{width:16px;height:16px;}
+
+  .compteur-tactile-pied{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .compteur-tactile-pied .compteur-enregistrer{flex:1;width:100%;padding:11px 16px;border-radius:12px;font-size:14px;}
+  .compteur-tactile-reinitialiser{flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0 4px;}
+  .compteur-tactile-reinitialiser:hover{color:var(--gold);}
+  .plan-hero-compteur .compteur-lecture{color:rgba(255,255,255,.85);}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
@@ -13507,6 +13585,92 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
   }
+  // MOBILE : module incrémental tactile (reprise Stitch, voir le bloc CSS
+  // ★ RELEVÉ DE COMPTEUR plus haut pour ce qui n'a délibérément pas été
+  // repris). Le seul câblage propre à ce module (anneau, zones tap,
+  // glissière, pas rapides) est posé par initCompteurTactile() après le
+  // rendu — le reste (Enregistrer/Photo/OCR) tourne déjà sur le câblage
+  // délégué global plus bas, grâce au même contrat data-compteur-*/
+  // .compteur-champ que les deux autres variantes.
+  if (emplacement === 'mobile') {
+    // Anneau : progression RÉELLE dans le cycle d'entretien (même calcul
+    // que la jauge déjà affichée juste au-dessus, pourcentageIntervalle) —
+    // jamais un « max » arbitraire comme la maquette (gaugeMaxRange=500).
+    // Repli neutre (mi-anneau) si aucun plan au compteur n'est défini.
+    const circonference = 389.55;
+    const part = pourcentageIntervalle(dueInfo(m.plan, m), m);
+    const ratio = part == null ? 0.5 : Math.max(0.08, Math.min(0.94, part / 100));
+    const offsetAnneau = (circonference * (1 - ratio)).toFixed(2);
+    return `
+    <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
+      <div class="compteur-tactile" data-purpose="interactive-flick-drag-wheel">
+        <div class="compteur-tactile-entete">${trad('Module incrémental tactile')}</div>
+        <div class="compteur-tactile-cadran-ligne">
+          <button type="button" class="compteur-tactile-zone is-gauche" data-tactile-tap="-1" aria-label="${esc(trad('Réduire'))}">
+            ${picto('flecheGauche')}
+            <span class="compteur-tactile-zone-texte"><span>${trad('Glisser gauche')}</span><span class="muted-text">(${trad('réduire')})</span></span>
+          </button>
+          <div class="compteur-tactile-cadran">
+            <svg viewBox="0 0 160 160" class="compteur-tactile-svg" aria-hidden="true">
+              <defs><lineargradient id="jaugeTactileGradient-${id}" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#24B5A8"></stop>
+                <stop offset="60%" stop-color="#5B52DF"></stop>
+                <stop offset="100%" stop-color="#DE7A16"></stop>
+              </lineargradient></defs>
+              <circle cx="80" cy="80" r="62" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"></circle>
+              <circle cx="80" cy="80" r="62" fill="none" stroke="url(#jaugeTactileGradient-${id})" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="${circonference}" stroke-dashoffset="${offsetAnneau}" class="compteur-tactile-anneau"></circle>
+            </svg>
+            <div class="compteur-tactile-centre">
+              <input id="${champId}" class="compteur-champ compteur-tactile-valeur" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
+                value="${montre == null ? '' : esc(montre)}" placeholder="—" data-tactile-valeur
+                aria-label="${esc(tR('Relevé du compteur de {machine}', { machine: m.name }))}">
+              <span class="compteur-tactile-unite">${esc(u.word)}</span>
+            </div>
+          </div>
+          <button type="button" class="compteur-tactile-zone is-droite" data-tactile-tap="1" aria-label="${esc(trad('Augmenter'))}">
+            <span class="compteur-tactile-zone-texte"><span>${trad('Glisser droite')}</span><span class="muted-text">(${trad('augmenter')})</span></span>
+            ${picto('flecheDroite')}
+          </button>
+        </div>
+        <div class="compteur-tactile-glissiere" data-tactile-slider>
+          <div class="compteur-tactile-glissiere-tete">
+            <span>${trad('Zone de glissement dynamique')}</span>
+            <span class="compteur-tactile-badge" data-tactile-badge>${trad('Relâcher pour appliquer : 0')}</span>
+          </div>
+          <div class="compteur-tactile-piste" data-tactile-piste>
+            <span class="compteur-tactile-etiquette" data-pas="-50">-50</span>
+            <span class="compteur-tactile-etiquette" data-pas="-10">-10</span>
+            <span class="compteur-tactile-etiquette" data-pas="-1">-1</span>
+            <span class="compteur-tactile-etiquette is-zero" data-pas="0">0</span>
+            <span class="compteur-tactile-etiquette" data-pas="1">+1</span>
+            <span class="compteur-tactile-etiquette" data-pas="10">+10</span>
+            <span class="compteur-tactile-etiquette" data-pas="50">+50</span>
+            <div class="compteur-tactile-curseur" data-tactile-curseur>${picto('chevronBas')}</div>
+          </div>
+        </div>
+        <div class="compteur-tactile-pas">
+          <button type="button" data-tactile-pas="-50">-50</button>
+          <button type="button" data-tactile-pas="-10">-10</button>
+          <button type="button" data-tactile-pas="-1">-1</button>
+          <button type="button" class="is-plus" data-tactile-pas="1">+1</button>
+          <button type="button" class="is-plus" data-tactile-pas="10">+10</button>
+          <button type="button" class="is-plus" data-tactile-pas="50">+50</button>
+        </div>
+      </div>
+      <button type="button" class="compteur-tactile-photo" data-compteur-photo="${id}" data-compteur-photo-source="${appareil ? 'appareil' : 'galerie'}">
+        ${picto('photo')}<span>${trad('Joindre une photo du cadran (OCR)')}</span>
+      </button>
+      ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
+      ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
+      <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
+      <div class="compteur-tactile-pied">
+        <button type="button" class="compteur-enregistrer" data-compteur-enregistrer="${id}">${trad(libelleBouton || 'Enregistrer')}</button>
+        <button type="button" class="compteur-tactile-reinitialiser" data-tactile-reset data-valeur-initiale="${montre == null ? '' : esc(montre)}">${trad('Réinitialiser')}</button>
+      </div>
+    </div>`;
+  }
   return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
       <label class="compteur-titre" for="${champId}">${picto('compteur')}${trad(libelle || 'Compteur')}</label>
@@ -13546,6 +13710,98 @@ function compteur2Html(m, emplacement) {
       <span class="compteur-jour-valeur">${esc(valeur2 == null ? '—' : formatCounter(valeur2, unite2))}</span>
       <span class="compteur-note">${trad('Mis à jour via « Enregistrer un entretien ».')}</span>
     </div>`;
+}
+
+// Câblage du module incrémental tactile (variante 'mobile' de compteurHtml,
+// voir le bloc CSS ★ RELEVÉ DE COMPTEUR) : zones tap gauche/droite,
+// glissière tactile (pointer events, souris ET doigt), pas rapides,
+// réinitialiser. N'écrit QUE dans le champ .compteur-champ réel — le
+// bouton Enregistrer, la photo et l'OCR restent gérés par le câblage
+// délégué global (document.addEventListener) juste en dessous, sans
+// aucun changement. Idempotent : un module déjà câblé ne l'est pas deux
+// fois (openPlanView peut se ré-ouvrir sur la même machine).
+function initCompteurTactile(root, champId, unite) {
+  const champ = root.querySelector(`#${champId}`);
+  const module = champ ? champ.closest('.compteur-tactile') : null;
+  if (!champ || !module || module.dataset.tactileInit) return;
+  module.dataset.tactileInit = '1';
+
+  const pasTap = unite === 'km' ? 10 : 1;
+  const badge = module.querySelector('[data-tactile-badge]');
+  const piste = module.querySelector('[data-tactile-piste]');
+  const curseur = module.querySelector('[data-tactile-curseur]');
+  const etiquettes = Array.from(module.querySelectorAll('.compteur-tactile-etiquette'));
+
+  const valeurActuelle = () => { const n = parseFloat(champ.value); return Number.isFinite(n) ? n : 0; };
+  const appliquer = (delta) => {
+    const n = Math.max(0, valeurActuelle() + delta);
+    champ.value = unite === 'km' ? String(Math.round(n)) : n.toFixed(1);
+    champ.dispatchEvent(new Event('input', { bubbles: true }));
+    champ.classList.add('is-ajuste');
+    setTimeout(() => champ.classList.remove('is-ajuste'), 150);
+    if (navigator.vibrate) { try { navigator.vibrate(20); } catch (err) { /* vibration indisponible, sans conséquence */ } }
+  };
+
+  module.querySelectorAll('[data-tactile-tap]').forEach((zone) => {
+    zone.addEventListener('click', (e) => { e.stopPropagation(); appliquer(Number(zone.dataset.tactileTap) * pasTap); });
+  });
+  module.querySelectorAll('[data-tactile-pas]').forEach((bouton) => {
+    bouton.addEventListener('click', () => appliquer(Number(bouton.dataset.tactilePas)));
+  });
+  etiquettes.forEach((lbl) => {
+    if (lbl.dataset.pas === '0') return;
+    lbl.addEventListener('click', () => appliquer(Number(lbl.dataset.pas)));
+  });
+
+  if (piste && curseur && badge) {
+    let enCours = false, xDepart = 0, enAttente = 0;
+    const zonePas = (px) => {
+      const a = Math.abs(px);
+      if (a < 20) return { valeur: 0, pas: '0' };
+      if (a < 65) return px > 0 ? { valeur: 1, pas: '1' } : { valeur: -1, pas: '-1' };
+      if (a < 115) return px > 0 ? { valeur: 10, pas: '10' } : { valeur: -10, pas: '-10' };
+      return px > 0 ? { valeur: 50, pas: '50' } : { valeur: -50, pas: '-50' };
+    };
+    const rafraichir = (px) => {
+      const bornee = Math.max(-90, Math.min(90, px));
+      curseur.style.transform = `translate(calc(-50% + ${bornee}px), -50%)`;
+      const z = zonePas(px);
+      enAttente = z.valeur;
+      etiquettes.forEach((lbl) => lbl.classList.toggle('is-visee', lbl.dataset.pas === z.pas && z.pas !== '0'));
+      badge.textContent = z.valeur === 0
+        ? trad('Relâcher pour appliquer : 0')
+        : tR('Relâcher : {signe}{valeur}', { signe: z.valeur > 0 ? '+' : '', valeur: z.valeur });
+      badge.classList.toggle('is-plus', z.valeur > 0);
+      badge.classList.toggle('is-moins', z.valeur < 0);
+    };
+    const fin = () => {
+      if (!enCours) return;
+      enCours = false;
+      curseur.classList.remove('is-glisse');
+      curseur.style.transform = '';
+      etiquettes.forEach((lbl) => lbl.classList.remove('is-visee'));
+      badge.textContent = trad('Relâcher pour appliquer : 0');
+      badge.classList.remove('is-plus', 'is-moins');
+      if (enAttente) appliquer(enAttente);
+      enAttente = 0;
+    };
+    piste.addEventListener('pointerdown', (e) => {
+      enCours = true; xDepart = e.clientX;
+      curseur.classList.add('is-glisse');
+      try { piste.setPointerCapture(e.pointerId); } catch (err) { /* capture indisponible, sans conséquence */ }
+    });
+    piste.addEventListener('pointermove', (e) => { if (enCours) rafraichir(e.clientX - xDepart); });
+    piste.addEventListener('pointerup', fin);
+    piste.addEventListener('pointercancel', fin);
+  }
+
+  const reset = module.parentElement.querySelector('[data-tactile-reset]');
+  if (reset) {
+    reset.addEventListener('click', () => {
+      champ.value = reset.dataset.valeurInitiale || '';
+      champ.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
 }
 
 // Au retour du réseau, ce qui attend part tout seul.
@@ -22654,6 +22910,11 @@ function openPlanView(machine, companyId, categories) {
 
   overlay.querySelector('#close-plan').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#plan-fil-retour').addEventListener('click', () => overlay.remove());
+  // Module incrémental tactile (version smartphone du compteur) — no-op
+  // silencieux si la machine n'a pas de compteur numérique (calendaire,
+  // ou non couverte par l'offre) : initCompteurTactile n'y trouve pas son
+  // champ et ressort aussitôt.
+  if (machine.plan) initCompteurTactile(overlay, `compteur-mobile-${machine.id}`, counterUnitOf(machine));
   overlay.querySelector('#edit-from-plan').addEventListener('click', () => {
     overlay.remove();
     openMachineModal(companyId, categories, machine);
