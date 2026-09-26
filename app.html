@@ -2533,6 +2533,28 @@
     transition:border-color .15s ease,background .15s ease;
   }
   button.secondary:hover{border-color:var(--ink-2);background:var(--surface-soft);}
+  /* Bouton .primary/.secondary avec icône ET texte (.card-ico + <span>) :
+     un bouton texte SEUL se centre par le rendu par défaut du bouton, mais
+     dès qu'une icône est posée à côté (motif utilisé partout : Envoyer,
+     Exporter, Planifier…), deux problèmes se cumulaient — (1) ni display:flex
+     ni gap ici, donc `text-align:center` centrait le BLOC icône+texte, ce
+     qui décale le texte visible hors du centre du bouton dès que l'icône
+     prend de la place ; (2) .card-ico applique sa propre couleur (--ink-2,
+     pensée pour un fond clair) qui l'emporte sur le blanc hérité d'un
+     bouton .primary — icône quasi invisible sur fond nuit, mais occupant
+     quand même sa place, d'où le décalage constaté sur « Nouveau ticket »
+     et une dizaine d'autres boutons dans toute l'appli (agenda, mon
+     compte, bon de commande…). Deux correctifs ponctuels existaient déjà
+     (.vue-couts-tco/.qr-modal .modal-actions button) sans jamais toucher
+     la règle générale ; généralisé ici avec :has() (déjà utilisé ailleurs
+     dans ce fichier, ex. .log-item-carte:has(...)) puisque le même bug
+     touchait bien plus de boutons que prévu — ne s'applique qu'aux
+     boutons qui contiennent réellement une icône, aucun changement pour
+     les boutons texte seul. */
+  button.primary:has(.card-ico),button.secondary:has(.card-ico){
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  }
+  button.primary .card-ico,button.secondary .card-ico{color:inherit;}
   button:disabled{opacity:.45;cursor:not-allowed;}
   .delete-link{
     display:block;margin-top:16px;text-align:center;background:none;border:none;
