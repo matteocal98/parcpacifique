@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hHikDefY2eNLIa+4QGpVbpt1JUozTFjZZa4Pi8Vcl4w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUlpiJYl/0uLwxEsDnWzgeVim7DokkFw95jBvpeBEvY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4993,6 +4993,117 @@
   .piece-resume-droite{text-align:right;flex:0 0 auto;}
   .piece-resume-mot{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);}
   .piece-resume-prix{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ PIÈCE DU CATALOGUE — VERSION SMARTPHONE (reprise Stitch « stitch_
+     refonte_zone_change_ticketing », 5e passe : « Tactile Fleet
+     Operations ») — la modale centrée .piece-modal ci-dessus restait
+     illisible sur téléphone (lignes trop compactes) ; cette variante
+     plein écran la remplace UNIQUEMENT sous 900px (même seuil que
+     .compteur-mobile/.compteur-bureau), habillerSelectPieceCatalogue()
+     choisit l'une ou l'autre selon window.innerWidth. Couleurs de la
+     maquette (primary #4236C6 généré par sa palette M3) mappées sur les
+     VRAIES couleurs de marque déjà déclarées ici (--primary-dark
+     #5B52DF, --ink #0E1333, --cyan #24B5A8, --gold #DE7A16 — son propre
+     DESIGN.md les cite explicitement comme « Signature Indigo »/
+     « Deep Midnight Navy »/etc., donc aucune nouvelle teinte). Icônes
+     Material Symbols → PICTOS existants. Volontairement pas repris :
+     l'avatar de profil et la barre de logo (aucune photo de profil dans
+     ce produit), le bouton « Scanner code-barres » (aucune lecture de
+     code-barres dans ce produit), TOUTE notion de stock (« 8 dispo
+     magasin », « 28 dispo », « Stock faible », « Réappro J+3 ») —
+     parts_catalog n'a aucune colonne de quantité, seulement
+     avg_lead_time_days, déjà substitué en pastille neutre côté bureau ;
+     « Compatibilité »/« Garantie »/« Affectation » (aucune de ces
+     colonnes n'existe, seules reference/supplier_name sont réelles) ; le
+     double prix €/F CFP (une société a UNE devise, deviseCourte()). */
+  .piece-mobile-overlay{
+    /* Même z-index:20 que .overlay (pas une valeur plus haute) : le
+       sélecteur de tri (ouvrirListeChoix, .overlay standard) doit pouvoir
+       s'empiler PAR-DESSUS, comme partout ailleurs cette session — ordre
+       d'apparition dans le DOM, pas une course de z-index. */
+    position:fixed;inset:0;z-index:20;background:var(--surface);display:flex;flex-direction:column;
+    padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);
+  }
+  .piece-mobile-tete{
+    flex:0 0 auto;height:56px;padding:0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:var(--surface);border-bottom:1px solid var(--line-2);box-shadow:0 1px 8px rgba(14,19,51,.04);
+  }
+  .piece-mobile-fermer{
+    width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    border-radius:10px;border:none;background:none;color:var(--ink);cursor:pointer;
+  }
+  .piece-mobile-fermer:active{background:var(--surface-soft);}
+  .piece-mobile-titre-bloc{flex:1;min-width:0;text-align:center;}
+  .piece-mobile-titre-bloc h2{margin:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .piece-mobile-titre-bloc p{margin:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .piece-mobile-corps{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .piece-mobile-souscontexte{padding:10px 16px 8px;display:flex;flex-direction:column;gap:8px;}
+  .piece-mobile-compte-ligne{display:flex;align-items:center;gap:8px;}
+  .piece-mobile-compte-ligne .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:tco-pulse 1.8s ease-in-out infinite;flex:0 0 auto;}
+  .piece-mobile-compte-ligne h3{margin:0;font-size:17px;flex:1;min-width:0;}
+  .piece-mobile-compte-badge{font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:800;background:var(--surface-soft);color:var(--ink-2);padding:2px 7px;border-radius:6px;flex:0 0 auto;}
+  .piece-mobile-recherche{position:relative;}
+  .piece-mobile-recherche .card-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none;}
+  .piece-mobile-recherche .card-ico svg{width:19px;height:19px;display:block;}
+  .piece-mobile-recherche input{width:100%;height:48px;padding:0 52px 0 40px;border-radius:12px;font-size:15px;background:var(--surface);box-shadow:var(--shadow-soft);border:1px solid var(--line);}
+  .piece-mobile-recherche-actions{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;}
+  .piece-mobile-recherche-actions button{
+    width:34px;height:34px;border-radius:8px;border:none;background:var(--surface-soft);color:var(--ink-2);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .piece-mobile-recherche-actions button svg{width:16px;height:16px;}
+  .piece-mobile-fournisseurs{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:0 16px 10px;}
+  .piece-mobile-fournisseurs .piece-fournisseur-chip{height:36px;border-radius:999px;box-shadow:var(--shadow-soft);}
+  .piece-mobile-liste{padding:0 16px 24px;display:flex;flex-direction:column;gap:10px;}
+  .piece-mobile-carte{
+    display:block;width:100%;text-align:left;border-radius:16px;background:var(--surface);
+    border:1px solid var(--line);box-shadow:var(--shadow-soft);padding:14px;cursor:pointer;font-family:inherit;
+    transition:border-color .12s,box-shadow .12s;
+  }
+  .piece-mobile-carte.is-choisie{border:2px solid var(--primary-dark);padding:13px;box-shadow:0 4px 14px -2px rgba(91,82,223,.15);}
+  .piece-mobile-carte-ligne{display:flex;align-items:flex-start;gap:10px;}
+  .piece-mobile-radio{width:24px;height:24px;border-radius:50%;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .piece-mobile-carte.is-choisie .piece-mobile-radio{background:var(--primary-dark);}
+  .piece-mobile-radio .point{width:10px;height:10px;border-radius:50%;background:var(--surface);opacity:0;transition:opacity .12s;}
+  .piece-mobile-carte.is-choisie .piece-mobile-radio .point{opacity:1;}
+  .piece-mobile-carte-corps{flex:1;min-width:0;}
+  .piece-mobile-carte-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+  .piece-mobile-carte-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .piece-mobile-abrev{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:800;background:var(--surface-soft);color:var(--ink-2);padding:2px 8px;border-radius:6px;}
+  .piece-mobile-delai{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;background:var(--voile-cyan);color:#0c5f57;padding:2px 8px;border-radius:6px;}
+  .piece-mobile-delai svg{width:12px;height:12px;}
+  .piece-mobile-prix{text-align:right;flex:0 0 auto;}
+  .piece-mobile-prix .montant{display:block;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .piece-mobile-carte.is-choisie .piece-mobile-prix .montant{color:var(--primary-dark);}
+  .piece-mobile-prix .devise{font-size:11px;font-weight:600;color:var(--ink-3);}
+  .piece-mobile-carte-nom{font-size:16px;font-weight:600;color:var(--ink);}
+  .piece-mobile-carte-meta{margin-top:8px;padding-top:8px;background:var(--surface-soft);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;}
+  .piece-mobile-carte-meta-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;}
+  .piece-mobile-carte-meta-ligne .mot{color:var(--ink-3);font-weight:600;}
+  .piece-mobile-carte-meta-ligne .val{color:var(--ink);font-weight:600;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;}
+  .piece-mobile-vide{padding:40px 20px;text-align:center;}
+  .piece-mobile-vide .card-ico{width:44px;height:44px;border-radius:50%;background:var(--surface-soft);color:var(--ink-3);margin:0 auto 12px;}
+  .piece-mobile-vide .card-ico svg{width:20px;height:20px;}
+  .piece-mobile-vide p{margin:0;font-size:14px;font-weight:700;color:var(--ink);}
+  .piece-mobile-vide p.muted-text{font-weight:500;font-size:12.5px;margin-top:4px;}
+  .piece-mobile-pied{
+    flex:0 0 auto;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);box-shadow:0 -6px 20px rgba(14,19,51,.08);
+    padding:8px 16px calc(10px + var(--safe-bottom));border-top:1px solid var(--line-2);
+  }
+  .piece-mobile-resume{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;}
+  .piece-mobile-resume-gauche{min-width:0;flex:1;}
+  .piece-mobile-resume-titre-ligne{display:flex;align-items:center;gap:6px;}
+  .piece-mobile-resume-titre-ligne .dot{width:8px;height:8px;border-radius:50%;background:var(--primary-dark);flex:0 0 auto;}
+  .piece-mobile-resume-nom{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .piece-mobile-resume-droite{text-align:right;flex:0 0 auto;}
+  .piece-mobile-resume-prix{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;color:var(--ink);}
+  .piece-mobile-actions{display:flex;align-items:center;gap:8px;padding-bottom:8px;}
+  .piece-mobile-annuler{
+    flex:0 0 auto;height:48px;padding:0 18px;border-radius:12px;border:none;background:var(--surface-soft);
+    color:var(--ink);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .piece-mobile-valider{flex:1;height:48px;border-radius:12px;font-size:14.5px;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
@@ -21583,7 +21694,11 @@ function habillerSelectPieceCatalogue(select) {
   majBouton();
 
   bouton.addEventListener('click', () => {
-    ouvrirChoixPieceCatalogue(select.value, (piece) => {
+    // Même seuil que .compteur-mobile/.compteur-bureau : la modale centrée
+    // (.piece-modal) reste illisible sur téléphone (lignes trop
+    // compactes) — reprise Stitch dédiée, plein écran, au-dessous.
+    const ouvrir = window.innerWidth < 900 ? ouvrirChoixPieceCatalogueMobile : ouvrirChoixPieceCatalogue;
+    ouvrir(select.value, (piece) => {
       select.value = piece ? String(piece.id) : '';
       select.dispatchEvent(new Event('change', { bubbles: true }));
       majBouton();
@@ -21591,6 +21706,160 @@ function habillerSelectPieceCatalogue(select) {
   });
 
   new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+}
+
+// Version SMARTPHONE du sélecteur de pièce (reprise Stitch « stitch_
+// refonte_zone_change_ticketing », 5e passe) — plein écran plutôt qu'une
+// modale centrée, voir le bloc CSS ★ PIÈCE DU CATALOGUE — VERSION
+// SMARTPHONE pour ce qui n'a délibérément pas été repris. Même contrat
+// `onChoisi(piece|null)` que la version bureau (ouvrirChoixPieceCatalogue).
+function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
+  const overlay = document.createElement('div');
+  overlay.className = 'piece-mobile-overlay';
+  document.body.appendChild(overlay);
+  const pieces = UI.partsCatalog || [];
+  let choisiId = valeurActuelle || '';
+  let filtreFournisseur = 'all';
+  let tri = 'pertinence';
+
+  const fournisseurs = [...new Set(pieces.map((p) => p.supplier_name).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+  const piecesTriees = () => {
+    const f = overlay.querySelector('#piece-m-recherche')?.value.trim().toLowerCase() || '';
+    let liste = pieces.filter((p) => {
+      const matchFournisseur = filtreFournisseur === 'all' || p.supplier_name === filtreFournisseur;
+      const matchTexte = !f || [p.designation, p.reference, p.supplier_name].filter(Boolean).some((v) => String(v).toLowerCase().includes(f));
+      return matchFournisseur && matchTexte;
+    });
+    if (tri === 'prix-asc') liste = liste.slice().sort((a, b) => (Number(a.unit_price) || 0) - (Number(b.unit_price) || 0));
+    if (tri === 'prix-desc') liste = liste.slice().sort((a, b) => (Number(b.unit_price) || 0) - (Number(a.unit_price) || 0));
+    return liste;
+  };
+
+  const rendreResume = (piece) => {
+    const resume = overlay.querySelector('#piece-m-resume');
+    const bouton = overlay.querySelector('#piece-m-valider');
+    if (!piece) {
+      resume.innerHTML = `<div class="piece-mobile-resume-titre-ligne"><span class="dot"></span><span class="piece-mobile-resume-nom">${trad('Aucune pièce spécifique')}</span></div>`;
+      bouton.querySelector('span:last-child').textContent = trad('Continuer sans pièce catalogue');
+      return;
+    }
+    resume.innerHTML = `<div class="piece-mobile-resume-titre-ligne"><span class="dot"></span><span class="piece-mobile-resume-nom">${esc(piece.designation)}</span></div>`;
+    bouton.querySelector('span:last-child').textContent = tR('Valider la pièce ({prix} {devise})', { prix: texteAvecSeparateurs(piece.unit_price), devise: deviseCourte() });
+  };
+
+  const rendreListe = () => {
+    const liste = piecesTriees();
+    const zone = overlay.querySelector('#piece-m-liste');
+    const carteAucune = `<label class="piece-mobile-carte${!choisiId ? ' is-choisie' : ''}" data-id="">
+        <div class="piece-mobile-carte-ligne">
+          <span class="piece-mobile-radio"><span class="point"></span></span>
+          <div class="piece-mobile-carte-corps">
+            <span class="piece-mobile-abrev">${trad('Direct')}</span>
+            <div class="piece-mobile-carte-nom" style="margin-top:4px;">${trad('Intervention main-d\'œuvre seule')}</div>
+            <p class="muted-text" style="margin:2px 0 0;font-size:12.5px;">${trad('Aucune pièce du catalogue rattachée.')}</p>
+          </div>
+        </div>
+      </label>`;
+    if (!liste.length) {
+      zone.innerHTML = carteAucune + `<div class="piece-mobile-vide">
+        <span class="card-ico">${picto('recherche')}</span>
+        <p>${trad('Aucune pièce ne correspond')}</p>
+        <p class="muted-text">${trad('Vérifie l\'orthographe, ou choisis un autre fournisseur.')}</p>
+      </div>`;
+    } else {
+      zone.innerHTML = carteAucune + liste.map((p) => {
+        const delai = p.avg_lead_time_days != null ? `<span class="piece-mobile-delai">${picto('sablier')}${tR('{n} j', { n: p.avg_lead_time_days })}</span>` : '';
+        return `<label class="piece-mobile-carte${choisiId === String(p.id) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
+          <div class="piece-mobile-carte-ligne">
+            <span class="piece-mobile-radio"><span class="point"></span></span>
+            <div class="piece-mobile-carte-corps">
+              <div class="piece-mobile-carte-tete">
+                <span class="piece-mobile-carte-badges">
+                  <span class="piece-mobile-abrev">${esc(abrevFournisseur(p.supplier_name)) || trad('—')}</span>
+                  ${delai}
+                </span>
+                <span class="piece-mobile-prix"><span class="montant">${texteAvecSeparateurs(p.unit_price)}</span><span class="devise">${esc(deviseCourte())} HT</span></span>
+              </div>
+              <div class="piece-mobile-carte-nom">${esc(p.designation)}</div>
+              ${(p.reference || p.supplier_name) ? `<div class="piece-mobile-carte-meta">
+                ${p.reference ? `<div class="piece-mobile-carte-meta-ligne"><span class="mot">${trad('Référence :')}</span><span class="val">${esc(p.reference)}</span></div>` : ''}
+                ${p.supplier_name ? `<div class="piece-mobile-carte-meta-ligne"><span class="mot">${trad('Fournisseur :')}</span><span class="val">${esc(p.supplier_name)}</span></div>` : ''}
+              </div>` : ''}
+            </div>
+          </div>
+        </label>`;
+      }).join('');
+    }
+    zone.querySelectorAll('.piece-mobile-carte').forEach((carte) => {
+      carte.addEventListener('click', () => {
+        choisiId = carte.dataset.id || '';
+        zone.querySelectorAll('.piece-mobile-carte').forEach((c) => c.classList.toggle('is-choisie', c === carte));
+        rendreResume(choisiId ? pieces.find((p) => String(p.id) === choisiId) : null);
+        if (navigator.vibrate) { try { navigator.vibrate(15); } catch (err) { /* vibration indisponible, sans conséquence */ } }
+      });
+    });
+  };
+
+  overlay.innerHTML = `
+    <div class="piece-mobile-tete">
+      <button type="button" class="piece-mobile-fermer" id="piece-m-fermer" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      <div class="piece-mobile-titre-bloc"><h2>${trad('Pièce du catalogue')}</h2><p>${trad('Atelier & chantier')}</p></div>
+      <span style="width:44px;flex:0 0 auto;" aria-hidden="true"></span>
+    </div>
+    <div class="piece-mobile-corps">
+      <div class="piece-mobile-souscontexte">
+        <div class="piece-mobile-compte-ligne">
+          <span class="dot"></span><h3>${trad('Catalogue pièces')}</h3>
+          <span class="piece-mobile-compte-badge">${tR('{n} RÉF(S)', { n: pieces.length })}</span>
+        </div>
+        <div class="piece-mobile-recherche">
+          <span class="card-ico">${picto('recherche')}</span>
+          <input type="text" id="piece-m-recherche" placeholder="${esc(trad('Référence, désignation, fournisseur…'))}">
+          <div class="piece-mobile-recherche-actions">
+            <button type="button" id="piece-m-tri" aria-label="${esc(trad('Trier'))}">${picto('filtre')}</button>
+          </div>
+        </div>
+      </div>
+      ${fournisseurs.length ? `<div class="piece-mobile-fournisseurs" id="piece-m-fournisseurs">
+        <button type="button" class="piece-fournisseur-chip is-actif" data-fournisseur="all">${tR('Tous {n}', { n: pieces.length })}</button>
+        ${fournisseurs.map((f) => `<button type="button" class="piece-fournisseur-chip" data-fournisseur="${esc(f)}">${esc(f)}</button>`).join('')}
+      </div>` : ''}
+      <div class="piece-mobile-liste" id="piece-m-liste"></div>
+    </div>
+    <div class="piece-mobile-pied">
+      <div class="piece-mobile-resume" id="piece-m-resume"></div>
+      <div class="piece-mobile-actions">
+        <button type="button" class="piece-mobile-annuler" id="piece-m-annuler">${trad('Annuler')}</button>
+        <button type="button" class="primary piece-mobile-valider" id="piece-m-valider"><span class="card-ico">${picto('coche')}</span><span>${trad('Valider la pièce sélectionnée')}</span></button>
+      </div>
+    </div>`;
+
+  overlay.querySelector('#piece-m-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#piece-m-annuler').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#piece-m-recherche').addEventListener('input', rendreListe);
+  overlay.querySelector('#piece-m-tri').addEventListener('click', () => {
+    ouvrirListeChoix(trad('Trier'), [
+      { id: 'pertinence', nom_affiche: trad('Pertinence') },
+      { id: 'prix-asc', nom_affiche: trad('Prix croissant') },
+      { id: 'prix-desc', nom_affiche: trad('Prix décroissant') },
+    ], tri, (choisi) => { tri = choisi.id; rendreListe(); });
+  });
+  overlay.querySelectorAll('.piece-fournisseur-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      filtreFournisseur = chip.dataset.fournisseur;
+      overlay.querySelectorAll('.piece-fournisseur-chip').forEach((c) => c.classList.toggle('is-actif', c === chip));
+      rendreListe();
+    });
+  });
+  overlay.querySelector('#piece-m-valider').addEventListener('click', () => {
+    const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
+    overlay.remove();
+    onChoisi(piece);
+  });
+
+  rendreListe();
+  rendreResume(valeurActuelle ? pieces.find((p) => String(p.id) === String(valeurActuelle)) : null);
 }
 
 // Une ligne de pièce dans « Enregistrer un entretien » : sélection dans le
