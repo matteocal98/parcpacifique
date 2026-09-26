@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bUlpiJYl/0uLwxEsDnWzgeVim7DokkFw95jBvpeBEvY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-wZFatrhL8UcO/DVl8TWRn5XgSsSSYE+sPakzEYFmksM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4880,6 +4880,12 @@
   .compteur-apparent-valeur.compteur-champ{
     border:none;background:none;width:auto;max-width:60%;padding:0;text-align:right;touch-action:none;cursor:grab;
     font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;color:#fff;
+    /* Empêche la sélection de texte native (menu « Rédaction IA/Traduire/
+       Couper » + clavier constatés en vrai sur téléphone) : un appui qui
+       bouge légèrement était interprété comme un geste de sélection par
+       Android, en plus/à la place de la rotation de la roue.
+       touch-action seul ne suffisait pas — confirmé en testant. */
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
   }
   .compteur-apparent-valeur.compteur-champ::-webkit-outer-spin-button,
   .compteur-apparent-valeur.compteur-champ::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
@@ -13961,6 +13967,11 @@ function initCompteurTactile(ficheOverlay, champId, unite, machine, companyId, c
   champ.addEventListener('pointermove', bouge);
   champ.addEventListener('pointerup', fin);
   champ.addEventListener('pointercancel', fin);
+  // Le menu contextuel natif (sélection/copier/traduire) est déclenché par
+  // un évènement À PART, pas seulement par pointerdown/pointermove — sans
+  // ce blocage, un appui qui glisse légèrement l'ouvrait quand même,
+  // clavier compris (constaté en vrai sur téléphone).
+  champ.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 // Au retour du réseau, ce qui attend part tout seul.
