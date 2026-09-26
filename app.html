@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-kPa1mBew0KrqjoV0akIWK9MtvQhM2vjtcGvKmXr5RjU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-IY8PS53oFimKyI6BNoR1cUEs3BQAvuHnNTm7RK2Qw0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4621,6 +4621,101 @@
   .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
 
   /* ══════════════════════════════════════════════════════════════════════════
+     ★ SUPPORT CLIENT (TICKETING) — reprise Stitch « stitch_refonte_zone_
+     change_ticketing » : même substitution que les reprises précédentes,
+     aucune police d'icônes (PICTOS), Figtree/Space Grotesk déjà embarquées,
+     couleurs mappées 1:1 sur --ink (bleu nuit #0E1333), --primary-dark
+     (violet #5B52DF), --cyan (vert d'eau #24B5A8), --gold (ambre #DE7A16) —
+     ce sont déjà, au pixel près, les couleurs de la maquette. Éléments
+     fictifs de la maquette volontairement non repris : le badge « Équipe en
+     ligne · ~15 min » et « KEEVA Care 24/7 » (aucun suivi de présence ni
+     SLA réel), les accusés de lecture « ✓✓ » (aucune colonne is_read), les
+     boutons « Joindre un fichier »/« Capture d'écran » (aucune colonne de
+     pièce jointe sur support_ticket_messages, même constat que côté
+     admin.html). */
+  .support-lance-btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+    background:var(--ink);color:#fff;border:2px solid rgba(91,82,223,.35);
+    padding:13px 18px;border-radius:var(--r-card);font-weight:800;font-size:14.5px;
+    cursor:pointer;box-shadow:0 10px 20px rgba(14,19,51,.20);transition:background .15s,border-color .15s;
+  }
+  .support-lance-btn:hover{background:#161D4C;border-color:var(--primary-dark);}
+  .support-lance-btn .card-ico{color:var(--cyan);}
+  .support-lance-pied{
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);
+    display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-3);
+  }
+  .support-lance-pied .card-ico{width:15px;height:15px;}
+  .support-lance-pied .card-ico svg{width:15px;height:15px;}
+
+  /* Modales 2 & 3 (liste des demandes, échange sur un ticket) — .support-modal
+     porte les mêmes réglages que .offres-modal/.log-modal : rien de neuf, la
+     police par défaut de app.html (Figtree/Space Grotesk) est déjà celle de
+     la maquette (Plus Jakarta Sans + Space Grotesk). */
+  .support-modal .modal{max-width:460px;}
+  .support-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;}
+  .support-tete h2{margin:0;}
+  .support-tete .sub{margin:2px 0 0;}
+  .support-liste{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;}
+  .support-liste-ligne{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+    padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);
+    text-align:left;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;
+  }
+  .support-liste-ligne:hover{border-color:var(--primary-line);background:var(--primary-tint);box-shadow:var(--shadow-soft);}
+  .support-liste-ligne.is-active{border-color:var(--primary-line);background:var(--primary-tint);}
+  .support-liste-corps{min-width:0;flex:1 1 auto;}
+  .support-liste-titre-ligne{display:flex;align-items:center;gap:8px;min-width:0;}
+  .support-liste-sujet{font-weight:800;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .support-liste-ligne.is-active .support-liste-sujet{color:var(--primary-dark);}
+  .support-liste-ref{font-size:10.5px;color:var(--ink-3);font-family:'Space Grotesk',sans-serif;flex:0 0 auto;}
+  .support-liste-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .support-statut{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);font-size:11.5px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
+  .support-statut .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
+  .support-statut.is-ouvert{background:var(--voile-ambre);color:#8a4a0e;}
+  .support-statut.is-ouvert .dot{background:var(--gold);}
+  .support-statut.is-en_cours{background:var(--primary-tint);color:var(--primary-dark);}
+  .support-statut.is-en_cours .dot{background:var(--primary-dark);animation:tco-pulse 1.8s ease-in-out infinite;}
+  .support-statut.is-resolu{background:var(--voile-cyan);color:#0c5f57;}
+  .support-statut.is-resolu svg{width:12px;height:12px;}
+
+  /* Échange sur un ticket (modale 3) */
+  .support-echange-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line-2);margin-bottom:14px;}
+  .support-echange-tete-gauche{display:flex;align-items:flex-start;gap:8px;min-width:0;}
+  .support-retour-fil{
+    flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+    margin-top:2px;border-radius:50%;border:none;background:none;color:var(--ink-3);cursor:pointer;
+  }
+  .support-retour-fil:hover{background:var(--surface-soft);color:var(--ink);}
+  .support-retour-fil svg{width:19px;height:19px;}
+  .support-echange-titre{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .support-echange-titre h2{margin:0;font-size:18px;}
+  .support-echange-ref{font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;padding:2px 8px;border-radius:6px;background:var(--surface-soft);color:var(--ink-2);}
+  .support-echange-sub{font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:2px;}
+  .support-fil{
+    display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;padding-right:4px;margin-bottom:14px;
+  }
+  .support-fil::-webkit-scrollbar{width:5px;}
+  .support-fil::-webkit-scrollbar-track{background:transparent;}
+  .support-fil::-webkit-scrollbar-thumb{background:var(--line-3);border-radius:4px;}
+  .support-bulle-ligne{display:flex;flex-direction:column;}
+  .support-bulle-ligne.is-moi{align-items:flex-end;}
+  .support-bulle-ligne.is-autre{align-items:flex-start;}
+  .support-bulle-auteur{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;color:var(--ink-3);font-weight:600;}
+  .support-bulle-auteur .avatar{width:16px;height:16px;border-radius:50%;background:var(--ink);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .support-bulle-auteur .nom{font-weight:800;color:var(--ink);}
+  .support-bulle{
+    max-width:86%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.45;font-weight:500;
+  }
+  .support-bulle-ligne.is-moi .support-bulle{background:var(--primary-dark);color:#fff;border-radius:16px 16px 4px 16px;}
+  .support-bulle-ligne.is-autre .support-bulle{background:var(--surface-soft);color:var(--ink);border:1px solid var(--line-2);border-radius:16px 16px 16px 4px;}
+  .support-compositeur{margin-top:4px;padding-top:12px;border-top:1px solid var(--line-2);}
+  .support-compositeur-label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-weight:800;font-size:12.5px;color:var(--ink);margin-bottom:6px;}
+  .support-compositeur-hint{font-weight:500;font-size:11px;color:var(--ink-3);}
+  .support-compositeur textarea{width:100%;resize:none;}
+  .support-compositeur-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;}
+
+  /* ══════════════════════════════════════════════════════════════════════════
      ★ COÛTS & TCO — reprise à l'identique de la maquette Stitch
      « Appli web/WEB TCO/code.html » (labellés, couleurs, tailles, police,
      pictogrammes — voir keeva-tco-feature). Deux substitutions, forcées par
@@ -9227,7 +9322,8 @@ function contactPlanEtabli(companyId) {
 // Remplace le seul contact possible jusqu'ici (un lien mailto:) par un vrai
 // fil de discussion, lu et répondu depuis la console superviseur
 // (admin.html) — voir support_tickets/support_ticket_messages,
-// keeva-redesign-project.md.
+// keeva-redesign-project.md. Redesign : reprise Stitch « stitch_refonte_
+// zone_change_ticketing » (voir bloc CSS .support-* / ★ SUPPORT CLIENT).
 function ilYaSupport(iso) {
   const diffMin = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (diffMin < 1) return trad('à l\'instant');
@@ -9236,15 +9332,46 @@ function ilYaSupport(iso) {
   if (h < 24) return tR('il y a {n} h', { n: h });
   return tR('il y a {n} j', { n: Math.round(h / 24) });
 }
+// Même formule que refTicket() côté admin.html — une référence courte et
+// lisible à l'oral, jamais l'UUID complet.
+function refTicket(id) {
+  return '#TK-' + String(id || '').replace(/-/g, '').slice(0, 6).toUpperCase();
+}
 const LIBELLE_STATUT_TICKET = {
   ouvert: () => trad('Ouvert'),
   en_cours: () => trad('En cours'),
   resolu: () => trad('Résolu'),
 };
+// Icônes/couleurs de la maquette : violet qui pulse (en_cours), ambre uni
+// (ouvert — équivalent de son « En attente »), vert d'eau + coche (résolu).
+function statutSupportHtml(status) {
+  const libelle = LIBELLE_STATUT_TICKET[status]?.() || status;
+  if (status === 'resolu') {
+    return `<span class="support-statut is-resolu">${picto('coche')}${esc(libelle)}</span>`;
+  }
+  return `<span class="support-statut is-${esc(status)}"><span class="dot"></span>${esc(libelle)}</span>`;
+}
+// Le libellé machine d'un ticket, résolu CÔTÉ CLIENT depuis UI.machines
+// (déjà chargé, scopé à la société) — aucune jointure supplémentaire.
+function machineDuTicket(machineId) {
+  return machineId ? UI.machines.find((m) => m.id === machineId) : null;
+}
+function libelleMachineCourt(m) {
+  if (!m) return '';
+  return m.name || [m.brand, m.model].filter(Boolean).join(' ') || '';
+}
+// Deux initiales à partir d'un nom/identifiant, pour l'avatar d'un message
+// d'un·e collègue (pas soi-même, pas le support KEEVA) — même esprit que
+// initiales() côté admin.html.
+function initialesSupport(nom) {
+  const mots = String(nom || '').trim().split(/\s+/).filter(Boolean);
+  if (!mots.length) return '?';
+  return (mots[0][0] + (mots[1]?.[0] || '')).toUpperCase();
+}
 
 async function openSupportModal() {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay support-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const { data: sessionCourante } = await sb.auth.getUser();
@@ -9254,20 +9381,23 @@ async function openSupportModal() {
 
 async function afficherListeTickets(overlay, moi) {
   overlay.innerHTML = `<div class="modal">
-    <h2>${trad('Support')}</h2>
-    <p class="sub">${trad('Tes demandes précédentes, et une nouvelle si besoin.')}</p>
-    <div id="support-liste">${trad('Chargement…')}</div>
+    <div class="support-tete">
+      <div><h2>${trad('Support')}</h2><p class="sub">${trad('Tes demandes précédentes, et une nouvelle si besoin.')}</p></div>
+      <button type="button" class="mform-close" id="support-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+    </div>
+    <div class="support-liste" id="support-liste">${trad('Chargement…')}</div>
     <div class="modal-actions">
-      <button type="button" class="primary" id="support-nouveau">${trad('Nouveau ticket')}</button>
+      <button type="button" class="primary" id="support-nouveau"><span class="card-ico">${picto('croix')}</span><span>${trad('Nouveau ticket')}</span></button>
       <button type="button" class="secondary" id="support-fermer">${trad('Fermer')}</button>
     </div>
   </div>`;
   overlay.querySelector('#support-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#support-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#support-nouveau').addEventListener('click', () => afficherNouveauTicket(overlay, moi));
 
   const { data: tickets, error } = await sb
     .from('support_tickets')
-    .select('id, subject, status, created_at')
+    .select('id, subject, status, machine_id, created_at')
     .eq('company_id', UI.companyId)
     .order('created_at', { ascending: false });
   const zone = overlay.querySelector('#support-liste');
@@ -9280,19 +9410,43 @@ async function afficherListeTickets(overlay, moi) {
     zone.innerHTML = `<div class="hint">${trad('Aucune demande pour l\'instant.')}</div>`;
     return;
   }
-  zone.innerHTML = tickets.map((t) => `
-    <button type="button" class="support-ticket-ligne" data-id="${esc(t.id)}" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft);text-align:left;cursor:pointer;">
-      <span style="min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.subject)}</span>
-      <span class="pill ${t.status === 'resolu' ? 'ok' : 'neutral'}" style="flex:0 0 auto;">${LIBELLE_STATUT_TICKET[t.status]?.() || t.status}</span>
-    </button>`).join('');
-  zone.querySelectorAll('.support-ticket-ligne').forEach((btn) => {
+  // Dernier message par ticket, en un seul aller-retour (jamais une requête
+  // par ticket) — sert de sous-titre réel (« Dernier message il y a… »),
+  // avec repli sur la date d'ouverture si le ticket n'a encore aucune
+  // réponse (juste créé, un seul message initial pas encore chargé ici).
+  const { data: dernierMessages } = await sb
+    .from('support_ticket_messages')
+    .select('ticket_id, created_at')
+    .in('ticket_id', tickets.map((t) => t.id))
+    .order('created_at', { ascending: false });
+  const dernierParTicket = {};
+  (dernierMessages || []).forEach((m) => { if (!dernierParTicket[m.ticket_id]) dernierParTicket[m.ticket_id] = m.created_at; });
+
+  zone.innerHTML = tickets.map((t) => {
+    const m = machineDuTicket(t.machine_id);
+    const sousTitre = [libelleMachineCourt(m), tR('Dernier message {quand}', { quand: ilYaSupport(dernierParTicket[t.id] || t.created_at) })].filter(Boolean).join(' · ');
+    return `<button type="button" class="support-liste-ligne" data-id="${esc(t.id)}">
+      <span class="support-liste-corps">
+        <span class="support-liste-titre-ligne">
+          <span class="support-liste-sujet">${esc(t.subject)}</span>
+          <span class="support-liste-ref">${refTicket(t.id)}</span>
+        </span>
+        <span class="support-liste-sub">${esc(sousTitre)}</span>
+      </span>
+      ${statutSupportHtml(t.status)}
+    </button>`;
+  }).join('');
+  zone.querySelectorAll('.support-liste-ligne').forEach((btn) => {
     btn.addEventListener('click', () => afficherFilTicket(overlay, moi, btn.dataset.id));
   });
 }
 
 function afficherNouveauTicket(overlay, moi) {
   overlay.innerHTML = `<div class="modal">
-    <h2>${trad('Nouveau ticket')}</h2>
+    <div class="support-tete">
+      <div><h2>${trad('Nouveau ticket')}</h2><p class="sub">${trad('Décris ta demande : nous te répondons ici.')}</p></div>
+      <button type="button" class="mform-close" id="support-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+    </div>
     <div class="plan-field">
       <label for="support-sujet">${trad('Sujet')}</label>
       <input id="support-sujet" required maxlength="140">
@@ -9301,7 +9455,7 @@ function afficherNouveauTicket(overlay, moi) {
       <label for="support-machine">${trad('Machine concernée (optionnel)')}</label>
       <select id="support-machine">
         <option value="">${trad('Aucune en particulier')}</option>
-        ${UI.machines.map((m) => `<option value="${esc(m.id)}">${esc(m.name || m.brand || '')}</option>`).join('')}
+        ${UI.machines.map((m) => `<option value="${esc(m.id)}">${esc(libelleMachineCourt(m) || m.id)}</option>`).join('')}
       </select>
     </div>` : ''}
     <div class="plan-field">
@@ -9310,11 +9464,12 @@ function afficherNouveauTicket(overlay, moi) {
     </div>
     <div class="hint" id="support-nouveau-msg" role="status" aria-live="polite"></div>
     <div class="modal-actions">
-      <button type="button" class="primary" id="support-envoyer">${trad('Envoyer')}</button>
+      <button type="button" class="primary" id="support-envoyer"><span class="card-ico">${picto('envoyer')}</span><span>${trad('Envoyer')}</span></button>
       <button type="button" class="secondary" id="support-annuler">${trad('Annuler')}</button>
     </div>
   </div>`;
   habillerSelect(overlay.querySelector('#support-machine'), trad('Machine concernée (optionnel)'));
+  overlay.querySelector('#support-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#support-annuler').addEventListener('click', () => afficherListeTickets(overlay, moi));
   overlay.querySelector('#support-envoyer').addEventListener('click', async () => {
     const sujet = overlay.querySelector('#support-sujet').value.trim();
@@ -9352,20 +9507,43 @@ function afficherNouveauTicket(overlay, moi) {
 }
 
 async function afficherFilTicket(overlay, moi, ticketId) {
+  const { data: ticket } = await sb
+    .from('support_tickets')
+    .select('id, subject, status, machine_id, created_at')
+    .eq('id', ticketId).single();
+  const m = machineDuTicket(ticket?.machine_id);
+  const sousTitre = [ticket?.subject, libelleMachineCourt(m)].filter(Boolean).join(' · ');
+
   overlay.innerHTML = `<div class="modal">
-    <h2>${trad('Ticket')}</h2>
-    <div id="support-fil" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;margin-bottom:10px;">${trad('Chargement…')}</div>
-    <div class="plan-field">
-      <label for="support-reponse">${trad('Répondre')}</label>
+    <div class="support-echange-tete">
+      <div class="support-echange-tete-gauche">
+        <button type="button" class="support-retour-fil" id="support-retour" title="${esc(trad('Retour aux tickets'))}">${picto('flecheGauche')}</button>
+        <div>
+          <div class="support-echange-titre">
+            <h2>${trad('Ticket')}</h2>
+            <span class="support-echange-ref">${refTicket(ticketId)}</span>
+          </div>
+          ${sousTitre ? `<div class="support-echange-sub">${esc(sousTitre)}</div>` : ''}
+        </div>
+      </div>
+      ${ticket ? statutSupportHtml(ticket.status) : ''}
+    </div>
+    <div class="support-fil" id="support-fil">${trad('Chargement…')}</div>
+    <form class="support-compositeur" id="support-form">
+      <div class="support-compositeur-label">
+        <label for="support-reponse">${trad('Répondre')}</label>
+        <span class="support-compositeur-hint">${trad('Entrée pour envoyer, Maj+Entrée pour un saut de ligne')}</span>
+      </div>
       <textarea id="support-reponse" rows="2"></textarea>
-    </div>
-    <div class="hint" id="support-fil-msg" role="status" aria-live="polite"></div>
-    <div class="modal-actions">
-      <button type="button" class="primary" id="support-repondre">${trad('Envoyer')}</button>
-      <button type="button" class="secondary" id="support-retour">${trad('Retour')}</button>
-    </div>
+      <div class="hint" id="support-fil-msg" role="status" aria-live="polite"></div>
+      <div class="support-compositeur-actions">
+        <button type="button" class="secondary" id="support-retour-bas">${trad('Retour')}</button>
+        <button type="submit" class="primary" id="support-repondre"><span>${trad('Envoyer')}</span><span class="card-ico">${picto('envoyer')}</span></button>
+      </div>
+    </form>
   </div>`;
   overlay.querySelector('#support-retour').addEventListener('click', () => afficherListeTickets(overlay, moi));
+  overlay.querySelector('#support-retour-bas').addEventListener('click', () => afficherListeTickets(overlay, moi));
 
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
@@ -9376,21 +9554,25 @@ async function afficherFilTicket(overlay, moi, ticketId) {
   if (error || !fil) {
     if (fil) fil.innerHTML = `<div class="hint is-late">${trad('Impossible de charger ce ticket.')}</div>`;
   } else {
-    fil.innerHTML = (messages || []).map((m) => {
-      const deMoi = m.author_id === moi;
+    fil.innerHTML = (messages || []).map((m2) => {
+      const deMoi = m2.author_id === moi;
       // « Toi » l'emporte TOUJOURS sur « Support KEEVA » : un compte staff qui
       // écrit depuis SON PROPRE espace client (cas réel sur ce compte, gérant
       // ET superviseur à la fois) doit se voir lui-même, pas son autre rôle.
-      const auteur = deMoi ? trad('Toi') : (m.profiles?.is_staff ? trad('Support KEEVA') : (m.profiles?.full_name || m.profiles?.login || '?'));
-      return `<div style="align-self:${deMoi ? 'flex-end' : 'flex-start'};max-width:85%;padding:8px 10px;border-radius:10px;background:${deMoi ? 'var(--primary-tint)' : 'var(--surface-soft)'};">
-        <div style="font-weight:700;font-size:12.5px;">${esc(auteur)}</div>
-        <div>${esc(m.body)}</div>
-        <div style="font-size:11px;color:var(--ink-2);margin-top:2px;">${ilYaSupport(m.created_at)}</div>
+      const estStaff = !!m2.profiles?.is_staff;
+      const auteur = deMoi ? trad('Toi') : (estStaff ? trad('Support KEEVA') : (m2.profiles?.full_name || m2.profiles?.login || '?'));
+      const avatar = deMoi ? '' : `<span class="avatar">${estStaff ? 'KV' : esc(initialesSupport(auteur))}</span>`;
+      return `<div class="support-bulle-ligne ${deMoi ? 'is-moi' : 'is-autre'}">
+        <span class="support-bulle-auteur">${avatar}<span class="nom">${esc(auteur)}</span><span>· ${ilYaSupport(m2.created_at)}</span></span>
+        <div class="support-bulle">${esc(m2.body)}</div>
       </div>`;
     }).join('') || `<div class="hint">${trad('Aucun message.')}</div>`;
+    fil.scrollTop = fil.scrollHeight;
   }
-  overlay.querySelector('#support-repondre').addEventListener('click', async () => {
-    const texte = overlay.querySelector('#support-reponse').value.trim();
+
+  const envoyerReponseClient = async () => {
+    const champ = overlay.querySelector('#support-reponse');
+    const texte = champ.value.trim();
     const annonce = overlay.querySelector('#support-fil-msg');
     if (!texte) return;
     const bouton = overlay.querySelector('#support-repondre');
@@ -9405,6 +9587,13 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       return;
     }
     afficherFilTicket(overlay, moi, ticketId);
+  };
+  overlay.querySelector('#support-form').addEventListener('submit', (ev) => { ev.preventDefault(); envoyerReponseClient(); });
+  // Entrée envoie, Maj+Entrée passe à la ligne — annoncé sous le champ, donc
+  // le comportement réel doit correspondre exactement à ce qui est écrit
+  // (même geste que côté admin.html, ouvrirTicket()).
+  overlay.querySelector('#support-reponse').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); envoyerReponseClient(); }
   });
 }
 
@@ -11471,6 +11660,8 @@ const PICTOS = {
   // Modale d'import CSV du catalogue (reprise Stitch) — « mise à jour
   // intelligente » (upsert par référence).
   rafraichir: '<path d="M20 12a8 8 0 1 1-3-6.3"/><path d="M20 3v5h-5"/>',
+  // Support client (échange de ticket, reprise Stitch) — bouton Envoyer.
+  envoyer: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
 };
 function picto(nom) {
   const trace = PICTOS[nom];
@@ -16902,9 +17093,12 @@ VIEWS.account = {
 
       <section class="card">
         <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('aideCercle')}</span><span>${trad('Support')}</span></h2></div>
-        <p class="muted-text">${trad('Une question, une difficulté ? Écris-nous : on te répond directement ici.')}</p>
-        <div class="modal-actions">
-          <button type="button" class="primary" id="acc-support-ouvrir"><span class="card-ico">${picto('message')}</span><span>${trad('Contacter le support')}</span></button>
+        <p class="muted-text">${trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.')}</p>
+        <button type="button" class="support-lance-btn" id="acc-support-ouvrir">
+          <span class="card-ico">${picto('message')}</span><span>${trad('Contacter le support')}</span>
+        </button>
+        <div class="support-lance-pied">
+          <span class="card-ico">${picto('cadenas')}</span><span>${trad('Données atelier sécurisées')}</span>
         </div>
       </section>
 
