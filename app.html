@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-PCvPocrG4m5lOHy8+zI/ArbfEopjahJ6SUG9BSO0G0o=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5yhXUZKSX/GQEhczzm54GxLAFQ3xLRBNO7DLiElrKpU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -14094,7 +14094,7 @@ if (typeof document !== 'undefined' && document.addEventListener) {
     if (!machine) return;
     const ficheOverlay = cible.closest('.plan-modal');
     const refraichir = ficheOverlay
-      ? () => { ficheOverlay.remove(); openPlanView(machine, UI.companyId, UI.categories); }
+      ? () => { const scrollTop = ficheOverlay.scrollTop; ficheOverlay.remove(); openPlanView(machine, UI.companyId, UI.categories, { scrollTop }); }
       : () => renderApp();
     ouvrirRouleauxCompteur(cible, counterUnitOf(machine), machine, refraichir);
   });
@@ -22926,7 +22926,7 @@ function grouperParMachine(lignes) {
 //   • une valeur LIBRE est un vrai intervalle dans son unité : la tâche reçoit sa
 //     propre échéance, même si cette unité n'est pas celle du plan (elle ne
 //     compte alors pas dans l'échéance globale, et l'écran le dit).
-function openChoixFrequence(machine, item, companyId, categories) {
+function openChoixFrequence(machine, item, companyId, categories, planScrollTop) {
   if (refuserSiNonCouverte(machine)) return;
   const plan = machine.plan || {};
   const options = optionsTache(item, plan, machine);
@@ -23036,7 +23036,7 @@ function openChoixFrequence(machine, item, companyId, categories) {
     // doit pas rouvrir une DEUXIÈME fiche par-dessus.
     if (!overlay.isConnected) return;
     overlay.remove();
-    openPlanView(machine, companyId, categories);
+    openPlanView(machine, companyId, categories, { scrollTop: planScrollTop });
   };
   overlay.querySelector('#choix-close-x')?.addEventListener('click', fermerEtRouvrir);
   overlay.querySelector('#choix-annuler').addEventListener('click', fermerEtRouvrir);
@@ -23071,7 +23071,7 @@ function openChoixFrequence(machine, item, companyId, categories) {
       // du plan est recalculée, et le choix reste modifiable.
       Object.assign(plan, maj);
       overlay.remove();
-      openPlanView(machine, companyId, categories);
+      openPlanView(machine, companyId, categories, { scrollTop: planScrollTop });
     } catch (err) {
       erreur.textContent = trad('Erreur :') + ' ' + err.message;
       boutonsActionnables().forEach((b) => { b.disabled = false; });
@@ -23147,7 +23147,7 @@ function notesUtiles(notes, compteur) {
   return resultat.length >= 40 ? resultat : texte;
 }
 
-function openPlanView(machine, companyId, categories) {
+function openPlanView(machine, companyId, categories, options = {}) {
   // L'état GLOBAL (voir infoMachine), pour rester cohérent avec la carte :
   // les deux jauges plus bas détaillent ensuite CHAQUE suivi séparément.
   const info = infoMachine(machine);
@@ -23365,8 +23365,12 @@ function openPlanView(machine, companyId, categories) {
     btn.addEventListener('click', () => {
       const item = items.find(it => it.label === btn.dataset.tache);
       if (!item) return;
+      // Capturée AVANT de retirer cette fiche : openChoixFrequence la
+      // rendra à openPlanView quand elle se referme, pour rouvrir la fiche
+      // là où on l'avait laissée plutôt que tout en haut.
+      const planScrollTop = overlay.scrollTop;
       overlay.remove();
-      openChoixFrequence(machine, item, companyId, categories);
+      openChoixFrequence(machine, item, companyId, categories, planScrollTop);
     });
   });
   if (machine.manual_url) {
@@ -23481,6 +23485,14 @@ function openPlanView(machine, companyId, categories) {
     const body = encodeURIComponent(`tR('Historique des entretiens pour {machine}', { machine: machine.name }) :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si tu veux le joindre en pièce jointe.)')}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   });
+
+  // Restaure la position de défilement d'AVANT la fermeture — signalé par
+  // l'utilisateur : valider le compteur (rouleaux) ou un choix de fréquence
+  // de tâche ferme cette même fiche puis la rouvre pour refléter ce qui
+  // vient d'être enregistré, et elle se rouvrait toujours tout en haut,
+  // perdant l'endroit où on était. `options.scrollTop` est capturé par
+  // l'appelant sur l'ANCIEN overlay, juste avant de le retirer.
+  if (options.scrollTop) overlay.scrollTop = options.scrollTop;
 
   (async () => {
     const section = overlay.querySelector('#history-section');
