@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-wZFatrhL8UcO/DVl8TWRn5XgSsSSYE+sPakzEYFmksM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eTePp0hR3a4ugFcPQ1H4vB4nFxU7Mqd7wWCZOyxU0Y4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1459,50 +1459,6 @@
      (3,04:1) n'y portent pas de texte. L'encre, si. */
   .compteur-note.is-ok{color:var(--ok-ink);}
   .compteur-note.is-late{color:var(--late-ink);}
-  /* ── LIRE LE COMPTEUR SUR UNE PHOTO ─────────────────────────────────────
-     Le bouton est À CÔTÉ de la saisie, pas à sa place : la saisie manuelle
-     reste la base. La zone de lecture porte la proposition et ses deux gestes
-     (Confirmer / Corriger), ou la raison honnête d'un échec. */
-  .compteur-lire{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px;}
-  /* Les champs fichier ne sont jamais visibles : c'est le bouton qui les ouvre.
-     Il y en a DEUX — un pour l'appareil photo, un pour la galerie — et la règle
-     est écrite ici, avec leurs classes, pour que la feuille déclare bien tout ce
-     que le code emploie. */
-  input.compteur-photo-champ,
-  input.compteur-photo-champ-appareil,
-  input.compteur-photo-champ-galerie{display:none;}
-  .compteur-photo{
-    font-size:13.5px;font-weight:800;padding:7px 14px;border-radius:10px;cursor:pointer;font-family:inherit;
-    background:var(--surface);color:var(--ink);border:1.5px solid var(--line-3);
-  }
-  .compteur-photo:hover{border-color:var(--ink-2);background:var(--surface-soft);}
-  /* DEUX GESTES, DEUX POIDS. Devant la machine, prendre la photo est le geste
-     normal : bouton plein, comme « Enregistrer ». La galerie reste offerte, mais
-     discrète — un lien souligné, pas un second bouton de même poids. Sur un
-     ordinateur il n'y a pas d'appareil photo : le choix d'un fichier est alors le
-     SEUL bouton, et il prend le poids du geste principal. */
-  .compteur-photo.is-principal{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
-  .compteur-photo.is-principal:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
-  .compteur-photo.is-secondaire{
-    background:none;border-color:transparent;color:var(--primary-dark);
-    text-decoration:underline;padding:7px 4px;
-  }
-  .compteur-photo.is-secondaire:hover{background:none;border-color:transparent;color:var(--primary-dark);}
-  .compteur-lecture{
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-    font-size:13px;font-weight:700;color:var(--ink-2);
-  }
-  .compteur-lecture:empty{display:none;}
-  .compteur-lecture-texte{font-size:14px;font-weight:800;color:var(--ink);}
-  .compteur-confirmer{
-    font-size:13px;font-weight:800;padding:6px 12px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;
-    /* L'aplat cyan ne porte pas de blanc (2,55:1) : l'encre y donne 7,11:1. */
-    background:var(--ok);color:var(--ok-ink);
-  }
-  .compteur-corriger{
-    font-size:13px;font-weight:800;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;
-    background:var(--surface);color:var(--ink);border:1.5px solid var(--line-3);
-  }
   .compteur-jour-valeur{font-size:22px;font-weight:800;color:var(--ink);}
   /* Machine NON COUVERTE par l'offre : la valeur s'affiche, la saisie n'existe
      pas. Un champ qui aurait l'air modifiable sans rien enregistrer est le piège
@@ -1868,24 +1824,6 @@
      l'emportait sinon par ordre de source. */
   .plan-hero-compteur .compteur-bureau .compteur-enregistrer,
   .plan-hero-compteur .compteur-mobile .compteur-enregistrer{background:var(--ok);color:#000;}
-  /* Spécificité forcée à 3 classes partout ici : à ≥900px, les règles
-     .compteur-bureau .compteur-photo(...)  du Parc (même poids que 2
-     classes) l'emportaient sinon par ordre de source, et repassaient ces
-     boutons en lien bleu plat sur fond transparent — invisible sur la
-     carte sombre. */
-  .plan-hero-compteur .compteur-bureau .compteur-photo,
-  .plan-hero-compteur .compteur-mobile .compteur-photo{
-    background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.24);
-    padding:10px 20px;color:#fff;font-weight:800;text-decoration:none;
-  }
-  .plan-hero-compteur .compteur-bureau .compteur-photo.is-principal,
-  .plan-hero-compteur .compteur-mobile .compteur-photo.is-principal{
-    background:var(--ok);border-color:var(--ok);color:var(--ok-ink);padding:10px 20px;
-  }
-  .plan-hero-compteur .compteur-bureau .compteur-photo.is-secondaire,
-  .plan-hero-compteur .compteur-mobile .compteur-photo.is-secondaire{color:#fff;padding:10px 20px;}
-  .plan-hero-compteur .compteur-bureau .compteur-photo:hover,
-  .plan-hero-compteur .compteur-mobile .compteur-photo:hover{background:rgba(255,255,255,.16);text-decoration:none;}
   .plan-hero-compteur .compteur-note{color:rgba(255,255,255,.7);}
   .plan-hero-compteur .compteur-note.is-late{color:#fbbf6b;}
   /* Un petit picto devant un libellé de section (Points d'attention, Historique). */
@@ -3942,13 +3880,9 @@
   .chip:not(.is-active){background:var(--surface);border-color:var(--line-3);}
   .chip:not(.is-active):hover{border-color:var(--primary-line);}
 
-  /* Compteur : saisie, unité et « Enregistrer » sur une ligne ; photo en teinte Signature FR */
+  /* Compteur : saisie, unité et « Enregistrer » sur une ligne */
   .compteur-enregistrer{background:var(--ink);}
   .compteur-enregistrer:hover{background:var(--dark);}
-  .compteur-photo.is-principal{
-    background:rgba(36,181,168,.14);color:var(--ink);border-color:rgba(36,181,168,.55);
-  }
-  .compteur-photo.is-principal:hover{background:rgba(36,181,168,.22);border-color:rgba(36,181,168,.75);}
 
   /* Boutons de la carte : « Enregistrer un entretien » en indigo pour un retard,
      en encre sinon ; les trois autres en voile lavande, sans cadre */
@@ -4124,13 +4058,6 @@
     .compteur-bureau .compteur-champ{width:7em;text-align:right;border-radius:8px 0 0 8px;}
     .compteur-bureau .compteur-unite{border-radius:0 8px 8px 0;margin-right:12px;}
     .compteur-bureau .compteur-enregistrer{background:var(--ink);border-radius:8px;}
-    .compteur-bureau .compteur-lire{margin:0 0 0 auto;}
-    .compteur-bureau .compteur-photo,
-    .compteur-bureau .compteur-photo.is-principal,
-    .compteur-bureau .compteur-photo.is-secondaire{
-      background:none;border:none;padding:0;color:#236FE0;font-weight:700;text-decoration:none;
-    }
-    .compteur-bureau .compteur-photo:hover{text-decoration:underline;background:none;}
 
     /* Colonne de droite */
     .m-side{
@@ -4854,77 +4781,94 @@
   .indicatif-pied-actions{display:flex;align-items:center;gap:8px;}
 
   /* ══════════════════════════════════════════════════════════════════════════
-     ★ RELEVÉ DE COMPTEUR — ROUE TACTILE (reprise Stitch « stitch_refonte_
-     zone_change_ticketing », 4e passe, SMARTPHONE UNIQUEMENT — vit dans
-     .compteur-mobile, .compteur-bureau garde l'ancienne saisie simple).
-     Remplace le module toujours déployé de la passe précédente : l'écran
-     n'affiche plus qu'un compteur COMPACT (.compteur-apparent, mêmes
-     teintes blanches/translucides que .compteur-champ dans cette carte
-     sombre), et poser le doigt dessus fait apparaître une roue tactile
-     PAR-DESSUS TOUT L'ÉCRAN (.roue-tactile-overlay, ajoutée/retirée en JS,
-     donc sur la palette claire normale de l'appli — elle ne vit pas dans
-     la carte sombre). Tourner ajuste la valeur par crans ; relâcher le
-     doigt referme la roue ET enregistre directement (pas de bouton
-     Valider — demande explicite de l'utilisateur), en rouvrant la fiche
-     pour que l'échéance/la jauge au-dessus restent cohérentes avec la
-     nouvelle valeur. Toujours volontairement absents : le comparatif
-     « vs hier » (aucun historique de relevés horodatés), le bloc
-     « Contrôle télématique IA / GPS traceur KEEVA » (aucune télémétrie
-     dans ce produit), le bouton Réinitialiser (n'a plus de sens sans
-     étape de validation séparée). Câblé sur le MÊME contrat data-
-     compteur-*/.compteur-champ que le reste du système (photo/OCR,
-     confirmer/corriger) — rien de tout ça ne change. */
-  .compteur-apparent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;text-align:center;}
+     ★ RELEVÉ DE COMPTEUR — ROULEAUX (reprise Stitch « stitch_refonte_zone_
+     change_ticketing », 5e passe, dossier compteur_pur_3_roulettes_bleu_
+     orange_keeva_mobile [heures] + compteur_odom_tre_kilom_trique_2_
+     roulettes_000_999_keeva_mobile [km] — SMARTPHONE UNIQUEMENT :
+     .compteur-mobile ET .compteur-strip (sous 900px), .compteur-bureau
+     garde l'ancienne saisie clavier). Remplace la roue de la passe
+     précédente (le geste d'appui-glissé y déclenchait la sélection de
+     texte native d'Android, et n'était de toute façon pas pratique à
+     l'usage — retour explicite de l'utilisateur). Nouveau modèle : le
+     compteur affiche juste l'INFORMATION (.compteur-apparent, lecture
+     seule au clavier) ; un TAP ouvre .compteur-rouleaux-overlay (plein
+     écran, palette claire normale — pas la carte sombre), où chaque
+     rouleau se fait glisser INDÉPENDAMMENT à la verticale, positionné par
+     défaut sur le chiffre réel du compteur ; « Valider le relevé » ferme
+     et enregistre (enregistrerCompteur, même fonction que les 2 autres
+     variantes), en rouvrant la fiche pour que l'échéance/la jauge
+     au-dessus restent cohérentes. Heures : 3 rouleaux de 00 à 99 (partie
+     ENTIÈRE seulement — la décimale réelle du compteur, si elle existe,
+     est préservée telle quelle, jamais éditée ni perdue). Km : 2
+     rouleaux de 000 à 999 (le km n'a pas de décimale). La photo/OCR du
+     compteur a été retirée entièrement (fiabilité insuffisante en usage
+     réel, demande explicite) — plus aucune mention nulle part. */
+  .compteur-apparent{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;text-align:center;cursor:pointer;}
   .compteur-apparent-mot{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--cyan);}
   .compteur-apparent-ligne{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:2px;}
-  .compteur-apparent-valeur.compteur-champ{
-    border:none;background:none;width:auto;max-width:60%;padding:0;text-align:right;touch-action:none;cursor:grab;
+  .compteur-apparent-valeur{
     font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;color:#fff;
-    /* Empêche la sélection de texte native (menu « Rédaction IA/Traduire/
-       Couper » + clavier constatés en vrai sur téléphone) : un appui qui
-       bouge légèrement était interprété comme un geste de sélection par
-       Android, en plus/à la place de la rotation de la roue.
-       touch-action seul ne suffisait pas — confirmé en testant. */
-    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
   }
-  .compteur-apparent-valeur.compteur-champ::-webkit-outer-spin-button,
-  .compteur-apparent-valeur.compteur-champ::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-  .compteur-apparent-valeur.compteur-champ:focus{outline:none;background:rgba(255,255,255,.1);border-radius:8px;}
   .compteur-apparent-unite{font-size:15px;font-weight:800;color:rgba(255,255,255,.6);}
   .compteur-apparent-aide{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:10.5px;font-weight:600;color:rgba(255,255,255,.45);}
   .compteur-apparent-aide svg{width:12px;height:12px;}
-
-  .compteur-tactile-photo{
-    width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px dashed rgba(36,181,168,.55);background:rgba(36,181,168,.1);
-    color:#7fe3d6;font-family:inherit;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
-  }
-  .compteur-tactile-photo svg{width:16px;height:16px;}
   .plan-hero-compteur .compteur-lecture{color:rgba(255,255,255,.85);}
 
-  /* La roue elle-même : overlay plein écran, palette claire normale (elle
-     n'est PAS posée dans la carte sombre — ajoutée à document.body). */
-  .roue-tactile-overlay{
-    position:fixed;inset:0;z-index:60;background:rgba(13,20,36,.6);backdrop-filter:blur(2px);
-    display:flex;align-items:center;justify-content:center;touch-action:none;pointer-events:none;
+  /* Le module de rouleaux : overlay plein écran, palette claire normale
+     (ajouté à document.body, pas dans la carte sombre). */
+  .compteur-rouleaux-overlay{
+    position:fixed;inset:0;z-index:60;background:var(--surface);display:flex;flex-direction:column;
+    padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);
   }
-  .roue-tactile-disque{
-    position:relative;width:272px;height:272px;border-radius:50%;
-    background:radial-gradient(circle at 32% 28%,#ffffff,#F5F3FF 55%,#E9F7F5 100%);
-    border:4px solid #fff;box-shadow:0 25px 50px -12px rgba(91,82,223,.35),0 0 0 0 rgba(36,181,168,0);
-    display:flex;align-items:center;justify-content:center;
-    transform:scale(.85);opacity:0;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s ease,box-shadow .22s ease;
+  .compteur-rouleaux-tete{
+    flex:0 0 auto;height:56px;padding:0 8px;display:flex;align-items:center;gap:8px;
+    background:var(--surface);border-bottom:1px solid var(--line-2);
   }
-  .roue-tactile-disque.is-active{transform:scale(1);opacity:1;box-shadow:0 25px 50px -12px rgba(91,82,223,.4),0 0 0 10px rgba(36,181,168,.14);}
-  .roue-tactile-svg{position:absolute;inset:0;width:100%;height:100%;padding:8px;pointer-events:none;}
-  .roue-tactile-graduation{stroke:#868ea8;stroke-width:1.5;stroke-linecap:round;}
-  .roue-tactile-graduation.is-majeure{stroke:var(--primary-dark);stroke-width:2.5;}
-  .roue-tactile-anneau{will-change:transform;transform-origin:center center;}
-  .roue-tactile-centre{position:relative;width:172px;height:172px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px;}
-  .roue-tactile-mot{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--cyan);}
-  .roue-tactile-valeur-ligne{display:flex;align-items:baseline;gap:4px;margin-top:2px;}
-  .roue-tactile-valeur{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:800;color:var(--ink);line-height:1;}
-  .roue-tactile-unite{font-size:12px;font-weight:700;color:var(--ink-3);}
-  .roue-tactile-pas{font-size:9.5px;color:var(--ink-3);font-weight:600;margin-top:6px;}
+  .compteur-rouleaux-fermer{
+    width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    border-radius:10px;border:none;background:none;color:var(--ink);cursor:pointer;
+  }
+  .compteur-rouleaux-fermer:active{background:var(--surface-soft);}
+  .compteur-rouleaux-titre-bloc{flex:1;min-width:0;text-align:center;}
+  .compteur-rouleaux-titre-bloc h2{margin:0;font-size:16px;}
+  .compteur-rouleaux-titre-bloc p{margin:0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);}
+  .compteur-rouleaux-corps{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:16px;gap:16px;}
+  .compteur-rouleaux-index{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:4px;}
+  .compteur-rouleaux-index-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--primary-tint);color:var(--primary-dark);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .compteur-rouleaux-index-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:tco-pulse 1.8s ease-in-out infinite;}
+  .compteur-rouleaux-index-valeur{display:flex;align-items:baseline;gap:6px;}
+  .compteur-rouleaux-index-valeur span:first-child{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:800;color:var(--ink);letter-spacing:.02em;}
+  .compteur-rouleaux-index-valeur span:last-child{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--gold);}
+  .compteur-rouleaux-index-sous{font-size:11.5px;color:var(--ink-3);font-weight:600;}
+  .compteur-rouleaux-module{position:relative;width:100%;max-width:420px;background:var(--surface);border-radius:24px;padding:16px;box-shadow:0 20px 40px -12px rgba(14,19,51,.15);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;}
+  .compteur-rouleaux-tambours{position:relative;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:none;}
+  .compteur-rouleaux-bande{position:absolute;inset-inline:0;top:50%;transform:translateY(-50%);height:44px;background:var(--primary-tint);border-radius:14px;border-top:1px solid var(--primary-line);border-bottom:1px solid var(--primary-line);pointer-events:none;z-index:1;}
+  .compteur-rouleau{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+  .compteur-rouleau-vue{
+    position:relative;width:100%;height:220px;overflow:hidden;border-radius:16px;background:var(--surface-soft);
+    border:1px solid var(--line);box-shadow:inset 0 2px 6px rgba(14,19,51,.06);cursor:grab;
+    touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  }
+  .compteur-rouleau-vue:active{cursor:grabbing;}
+  .compteur-rouleau-ombre-haut,.compteur-rouleau-ombre-bas{position:absolute;inset-inline:0;height:64px;pointer-events:none;z-index:2;}
+  .compteur-rouleau-ombre-haut{top:0;background:linear-gradient(to bottom,var(--surface-soft),transparent);}
+  .compteur-rouleau-ombre-bas{bottom:0;background:linear-gradient(to top,var(--surface-soft),transparent);}
+  .compteur-rouleau-bande{display:flex;flex-direction:column;align-items:center;will-change:transform;}
+  .compteur-rouleau-chiffre{height:44px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:var(--ink-3);opacity:.55;}
+  .compteur-rouleau-chiffre.is-central{color:var(--primary-dark);opacity:1;font-size:27px;}
+  .compteur-rouleau-etiquette{margin-top:9px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);}
+  .compteur-rouleaux-loupe{
+    position:absolute;z-index:5;width:88px;height:88px;border-radius:50%;pointer-events:none;
+    top:50%;transform:translate(-50%,-50%);box-shadow:0 10px 24px rgba(91,82,223,.25);
+    background:var(--surface);border:2px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transition:left .18s ease;
+  }
+  .compteur-rouleaux-loupe-valeur{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--primary-dark);}
+  .compteur-rouleaux-loupe-mot{font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-top:1px;}
+  .compteur-rouleaux-astuce{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:11.5px;color:var(--ink-3);font-weight:600;}
+  .compteur-rouleaux-astuce svg{width:15px;height:15px;color:var(--primary-dark);flex:0 0 auto;}
+  .compteur-rouleaux-pied{flex:0 0 auto;padding:12px 16px calc(14px + var(--safe-bottom));border-top:1px solid var(--line-2);background:var(--surface);}
+  .compteur-rouleaux-valider{width:100%;height:52px;border-radius:16px;font-size:15px;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ PIÈCE DU CATALOGUE (recherche intégrée) — reprise Stitch « stitch_
@@ -13668,18 +13612,16 @@ function annoncerCompteur(machineId, texte, ton) {
   });
 }
 
-// ── Y A-T-IL UN APPAREIL PHOTO ? ──────────────────────────────────────
-// Le relevé se fait DEVANT la machine : prendre la photo est le geste normal, et
-// la galerie n'est qu'un second chemin (un technicien peut avoir photographié le
-// compteur plus tôt). Mais un ORDINATEUR n'a pas d'appareil photo : y proposer
-// « Prendre la photo » ouvrirait en réalité un sélecteur de fichiers — un bouton
-// qui ment sur ce qu'il fait. On regarde donc ce que l'appareil est :
-//   · l'application Android (Capacitor natif) en a toujours un, quelle que soit
-//     la largeur — une tablette en paysage aussi ;
-//   · dans un navigateur, on se fie à la largeur : sous 900 px, c'est la MÊME
-//     frontière que celle qui fait apparaître la barre d'onglets (styles.css),
-//     donc « téléphone » ici veut dire la même chose que partout ailleurs.
-function appareilPhotoDisponible() {
+// ── SUR SMARTPHONE ? ───────────────────────────────────────────────────
+// Utilisé pour décider quelle variante du compteur compact afficher sur le
+// bandeau du Parc (emplacement 'strip', qui n'a pas de séparation CSS
+// bureau/mobile comme la fiche machine). Même détection que celle qui
+// servait autrefois à choisir « appareil photo » vs « galerie » :
+//   · l'application Android (Capacitor natif) est toujours « téléphone » ;
+//   · dans un navigateur, sous 900 px — la MÊME frontière que celle qui
+//     fait apparaître la barre d'onglets (styles.css) et que
+//     .compteur-mobile/.compteur-bureau sur la fiche machine.
+function environnementTelephone() {
   try {
     const cap = typeof window !== 'undefined' ? window.Capacitor : null;
     if (cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform()) return true;
@@ -13692,11 +13634,10 @@ function appareilPhotoDisponible() {
   }
 }
 
-// Un bloc de compteur. `emplacement` vaut 'bureau' (sous les boutons) ou
-// 'mobile' (sous la photo) : la feuille de style n'en montre qu'un.
+// Un bloc de compteur. `emplacement` vaut 'bureau' (fiche machine, large
+// écran), 'mobile' (fiche machine, téléphone) ou 'strip' (bandeau du Parc).
 function compteurHtml(m, emplacement, libelle, libelleBouton) {
   const id = esc(m.id);
-  const appareil = appareilPhotoDisponible();
   const enCompteur = planIsCounter(m.plan);
   if (!enCompteur) {
     // CALENDAIRE : c'est une information, pas une saisie. On affiche la date du
@@ -13727,24 +13668,32 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         <span class="compteur-note">${trad('Non couverte par ton offre : le relevé n\'est pas enregistré.')}</span>
       </div>`;
   }
-  // Reprise Stitch « Machines (Parc) » (voir keeva-redesign-project) : sur
-  // le bandeau compact, le compteur tient sur UNE ligne — saisie + 2
-  // boutons icône (valider / photo), plutôt que les 2 boutons texte
-  // empilés de la version fiche (qui débordaient sur plusieurs lignes
-  // dans ce contexte étroit). Même contrat data-compteur-* que la version
-  // fiche — le câblage global (document.addEventListener, plus bas) ne
-  // change pas d'une ligne.
-  // Un seul bouton visible (pas de place pour 2 dans une ligne compacte) :
-  // il ouvre l'APPAREIL PHOTO quand appareilPhotoDisponible() le permet —
-  // PAS la galerie. Correction du 2026-09-25 : l'hypothèse précédente
-  // (« sur mobile, le sélecteur natif propose quand même appareil ET
-  // galerie sans capture= dédiée ») s'est révélée FAUSSE dans ce WebView
-  // Capacitor précis, constaté sur un vrai téléphone — un <input
-  // type=file> sans capture= n'y ouvrait QUE la galerie, jamais l'appareil.
-  // Même logique conditionnelle que la version fiche juste en dessous
-  // (bouton « Prendre la photo » avec capture="environment"), pas une
-  // nouvelle règle. L'accès galerie reste possible depuis la fiche machine
-  // complète (2 boutons), jamais supprimé, juste plus la voie rapide ici.
+  // MOBILE (fiche machine) ET STRIP SUR TÉLÉPHONE (bandeau du Parc) :
+  // compteur COMPACT, en lecture seule au clavier — reprise Stitch, 5e
+  // passe (voir le bloc CSS ★ RELEVÉ DE COMPTEUR pour ce qui n'a
+  // délibérément pas été repris). Un tap ouvre les rouleaux
+  // (initCompteurRouleaux, câblée après le rendu), qui enregistrent
+  // directement au clic sur « Valider le relevé ». Aucun <input> ici —
+  // volontairement : la version précédente (roue tactile sur un vrai
+  // <input>) avait un défaut résiduel de sélection de texte native malgré
+  // toutes les protections CSS/JS ; un <span> n'a tout simplement rien à
+  // sélectionner ni à focaliser, donc rien à supprimer non plus.
+  if (emplacement === 'mobile' || (emplacement === 'strip' && environnementTelephone())) {
+    const classeCompacte = emplacement === 'strip' ? ' is-strip' : '';
+    return `
+    <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
+      <button type="button" id="${champId}" class="compteur-apparent${classeCompacte}" data-tactile-cible data-valeur="${montre == null ? '' : esc(montre)}" aria-label="${esc(tR('Relevé du compteur de {machine} — toucher pour ajuster', { machine: m.name }))}">
+        <span class="compteur-apparent-mot">${esc(u.word)}</span>
+        <div class="compteur-apparent-ligne">
+          <span class="compteur-apparent-valeur" data-tactile-valeur>${montre == null ? '—' : esc(formatCounter(montre, unite))}</span>
+        </div>
+        <span class="compteur-apparent-aide">${picto('rafraichir')}${trad('Toucher pour ajuster')}</span>
+      </button>
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
+    </div>`;
+  }
+  // BUREAU (fiche machine ET bandeau du Parc sur grand écran) : saisie
+  // manuelle classique, inchangée à part le retrait de la photo/OCR.
   if (emplacement === 'strip') {
     return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
@@ -13757,41 +13706,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
           <span class="compteur-strip-unite" aria-hidden="true">${esc(u.short)}</span>
         </div>
         <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}</button>
-        <button type="button" class="compteur-strip-icone is-photo" data-compteur-photo="${id}" data-compteur-photo-source="${appareil ? 'appareil' : 'galerie'}" title="${esc(trad(appareil ? 'Prendre la photo' : 'Photo du compteur'))}" aria-label="${esc(trad(appareil ? 'Prendre la photo' : 'Photo du compteur'))}">${picto('photo')}</button>
-        ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
-        ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
       </div>
-      <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
-      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
-    </div>`;
-  }
-  // MOBILE : compteur COMPACT + roue tactile (reprise Stitch, 4e passe —
-  // voir le bloc CSS ★ RELEVÉ DE COMPTEUR plus haut pour ce qui n'a
-  // délibérément pas été repris). Maintenir le doigt sur la valeur fait
-  // apparaître la roue (initCompteurTactile, câblée après le rendu) ;
-  // relâcher enregistre directement, sans bouton Valider (demande
-  // explicite). Photo/OCR tourne déjà sur le câblage délégué global plus
-  // bas, grâce au même contrat data-compteur-*/.compteur-champ que les
-  // deux autres variantes.
-  if (emplacement === 'mobile') {
-    return `
-    <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
-      <div class="compteur-apparent">
-        <span class="compteur-apparent-mot">${esc(u.word)}</span>
-        <div class="compteur-apparent-ligne">
-          <input id="${champId}" class="compteur-champ compteur-apparent-valeur" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
-            value="${montre == null ? '' : esc(montre)}" placeholder="—"
-            aria-label="${esc(tR('Relevé du compteur de {machine}', { machine: m.name }))}">
-          <span class="compteur-apparent-unite">${esc(u.short)}</span>
-        </div>
-        <span class="compteur-apparent-aide">${picto('rafraichir')}${trad('Maintenir pour ajuster')}</span>
-      </div>
-      <button type="button" class="compteur-tactile-photo" data-compteur-photo="${id}" data-compteur-photo-source="${appareil ? 'appareil' : 'galerie'}">
-        ${picto('photo')}<span>${trad('Joindre une photo du cadran (OCR)')}</span>
-      </button>
-      ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
-      ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
-      <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
   }
@@ -13805,13 +13720,6 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         <span class="compteur-unite" aria-hidden="true">${esc(u.short)}</span>
         <button type="button" class="compteur-enregistrer" data-compteur-enregistrer="${id}">${trad(libelleBouton || 'Enregistrer')}</button>
       </div>
-      <div class="compteur-lire">
-        ${appareil ? `<button type="button" class="compteur-photo is-principal" data-compteur-photo="${id}" data-compteur-photo-source="appareil">${picto('photo')}<span>${trad('Prendre la photo')}</span></button>
-        ` : ''}<button type="button" class="compteur-photo${appareil ? ' is-secondaire' : ' is-principal'}" data-compteur-photo="${id}" data-compteur-photo-source="galerie">${picto('photo')}<span>${appareil ? trad('Choisir dans la galerie') : trad('Choisir une photo')}</span></button>
-        ${appareil ? `<input type="file" class="compteur-photo-champ compteur-photo-champ-appareil" accept="image/*" capture="environment" hidden data-compteur-photo-champ="${id}">
-        ` : ''}<input type="file" class="compteur-photo-champ compteur-photo-champ-galerie" accept="image/*" hidden data-compteur-photo-champ="${id}">
-      </div>
-      <span class="compteur-lecture" data-compteur-lecture="${id}" role="status"></span>
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
 }
@@ -13836,142 +13744,191 @@ function compteur2Html(m, emplacement) {
     </div>`;
 }
 
-// 60 graduations circulaires (5 majeures sur 5) — même géométrie que la
-// maquette Stitch, retracée en SVG pur (pas de dépendance Tailwind).
-function graduationsRoueTactileHtml() {
-  const total = 60, cx = 140, cy = 140, rExt = 132, lMin = 8, lMaj = 14;
+// Configuration des rouleaux par unité — reprise Stitch : compteur_pur_3_
+// roulettes_bleu_orange_keeva_mobile (heures, 3 rouleaux 00-99) +
+// compteur_odom_tre_kilom_trique_2_roulettes_000_999_keeva_mobile (km, 2
+// rouleaux 000-999). Les rouleaux n'éditent QUE la partie ENTIÈRE : le km
+// n'a pas de décimale (COUNTER_UNITS.km.step=1), et pour les heures
+// (step=0,1) la décimale réelle du relevé est préservée telle quelle par
+// initCompteurRouleaux, jamais éditée ni perdue — ni la maquette « heures »
+// ni la maquette « km » ne montrent de virgule.
+function configRouleauxCompteur(unite) {
+  return unite === 'km'
+    ? { nbRouleaux: 2, chiffres: 3, max: 999 }
+    : { nbRouleaux: 3, chiffres: 2, max: 99 };
+}
+// Éclate un entier positif en indices de rouleaux (le plus significatif en
+// premier), plafonné à ce que le nombre de rouleaux peut représenter
+// (999999 dans les deux configs — largement au-delà de tout relevé réel).
+function entierVersRouleaux(entier, config) {
+  const base = config.max + 1;
+  const maxTotal = Math.pow(base, config.nbRouleaux) - 1;
+  let v = Math.max(0, Math.min(maxTotal, Math.round(entier)));
+  const indices = new Array(config.nbRouleaux).fill(0);
+  for (let i = config.nbRouleaux - 1; i >= 0; i--) {
+    indices[i] = v % base;
+    v = Math.floor(v / base);
+  }
+  return indices;
+}
+function rouleauxVersEntier(indices, config) {
+  const base = config.max + 1;
+  return indices.reduce((acc, v) => acc * base + v, 0);
+}
+// Les `max+1` lignes d'un rouleau (00 à 99, ou 000 à 999).
+function rouleauChiffresHtml(config) {
   let s = '';
-  for (let i = 0; i < total; i++) {
-    const angleDeg = (i * 360) / total;
-    const rad = (angleDeg * Math.PI) / 180;
-    const majeure = i % 5 === 0;
-    const len = majeure ? lMaj : lMin;
-    const x1 = cx + rExt * Math.sin(rad), y1 = cy - rExt * Math.cos(rad);
-    const x2 = cx + (rExt - len) * Math.sin(rad), y2 = cy - (rExt - len) * Math.cos(rad);
-    s += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" class="roue-tactile-graduation${majeure ? ' is-majeure' : ''}"/>`;
+  for (let i = 0; i <= config.max; i++) {
+    s += `<div class="compteur-rouleau-chiffre" data-valeur="${i}">${String(i).padStart(config.chiffres, '0')}</div>`;
   }
   return s;
 }
 
-// Câblage de la roue tactile (compteur compact + roue plein écran,
-// reprise Stitch 4e passe, voir le bloc CSS ★ RELEVÉ DE COMPTEUR).
-// Poser le doigt sur la valeur compacte fait apparaître la roue
-// (overlay ajouté à document.body, PAS dans la carte sombre) ; tourner
-// ajuste par crans réels (u.step) ; relâcher referme la roue ET
-// enregistre directement (enregistrerCompteur, la même fonction que le
-// bouton Enregistrer des deux autres variantes) — pas d'étape de
-// validation séparée, demande explicite de l'utilisateur. La fiche est
-// rouverte après l'enregistrement pour que l'échéance/la jauge au-dessus
-// restent cohérentes avec la nouvelle valeur (elles ne se recalculent
-// pas toutes seules). La photo/OCR et le contrat data-compteur-* restent
-// gérés par le câblage délégué global (document.addEventListener),
-// inchangé. Idempotent : un champ déjà câblé ne l'est pas deux fois.
-function initCompteurTactile(ficheOverlay, champId, unite, machine, companyId, categories) {
-  const champ = ficheOverlay.querySelector(`#${champId}`);
-  if (!champ || champ.dataset.tactileInit) return;
-  champ.dataset.tactileInit = '1';
-
+// Ouvre les rouleaux plein écran pour AJUSTER le relevé d'une machine
+// (reprise Stitch, 5e passe, voir le bloc CSS ★ RELEVÉ DE COMPTEUR).
+// Appelée par le câblage délégué au document (voir plus bas, [data-
+// tactile-cible]) — jamais directement sur un <input> : le compteur
+// compact est un <button>, rien à focaliser ni à sélectionner, donc rien
+// du défaut de sélection de texte natif de la roue de la passe
+// précédente. Positionnée par défaut sur le VRAI relevé actuel ; chaque
+// rouleau se glisse INDÉPENDAMMENT à la verticale (pointer events +
+// capture PAR rouleau — glisser l'un ne touche jamais les autres, demande
+// explicite de l'utilisateur) ; « Valider le relevé » enregistre
+// directement (enregistrerCompteur, la même fonction que le bouton
+// Enregistrer de la version bureau, mêmes garde-fous) puis appelle
+// `refraichir()`, fourni par l'appelant — la fiche machine et le bandeau
+// du Parc n'ont pas le même geste de rafraîchissement.
+function ouvrirRouleauxCompteur(cible, unite, machine, refraichir) {
   const u = COUNTER_UNITS[unite] || COUNTER_UNITS.hours;
-  const pas = parseFloat(u.step) || 0.1;
-  const anglePasDeg = 6;
+  const config = configRouleauxCompteur(unite);
+  const ITEM_HEIGHT = 44;
+  const VISIBLE_OFFSET = 2; // 5 lignes visibles par rouleau, la 3e est centrale
 
-  let overlayRoue = null, disque = null, svgAnneau = null, valeurEl = null;
-  let rotation = 0, angleDepart = 0, valeurDepart = 0, valeurCourante = 0, dernierCranVibre = 0;
+  const vibrer = () => { if (navigator.vibrate) { try { navigator.vibrate(10); } catch (err) { /* sans conséquence */ } } };
 
-  const vibrer = () => { if (navigator.vibrate) { try { navigator.vibrate(8); } catch (err) { /* vibration indisponible, sans conséquence */ } } };
-  const formater = (n) => (unite === 'km' ? String(Math.round(n)) : n.toFixed(1));
+  {
+    const valeurBrute = parseFloat(cible.dataset.valeur) || 0;
+    const partieEntiere = Math.floor(valeurBrute);
+    const decimale = unite === 'km' ? 0 : Math.round((valeurBrute - partieEntiere) * 10) / 10;
+    const indices = entierVersRouleaux(partieEntiere, config);
+    let rouleauActif = config.nbRouleaux - 1; // dernier rouleau par défaut, comme les 2 maquettes
 
-  const angleDepuisPointeur = (clientX, clientY) => {
-    const rect = disque.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-    let a = Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI) + 90;
-    if (a < 0) a += 360;
-    return a;
-  };
+    const formaterAffichage = () => {
+      const entierAffiche = rouleauxVersEntier(indices, config);
+      const val = unite === 'km' ? entierAffiche : Math.round((entierAffiche + decimale) * 10) / 10;
+      return formatCounter(val, unite);
+    };
 
-  const debut = (e) => {
-    e.preventDefault();
-    valeurDepart = parseFloat(champ.value) || 0;
-    valeurCourante = valeurDepart;
-    rotation = 0;
-    dernierCranVibre = Math.round(valeurCourante / pas);
+    const overlay = document.createElement('div');
+    overlay.className = 'compteur-rouleaux-overlay';
+    const etiquettes = unite === 'km' ? [trad('Milliers'), trad('Unités')] : [trad('Centaines'), trad('Dizaines'), trad('Unités')];
 
-    overlayRoue = document.createElement('div');
-    overlayRoue.className = 'roue-tactile-overlay';
-    overlayRoue.innerHTML = `<div class="roue-tactile-disque">
-      <svg viewBox="0 0 280 280" class="roue-tactile-svg" aria-hidden="true">
-        <circle cx="140" cy="140" r="126" fill="none" stroke="#ECE9F8" stroke-width="3"></circle>
-        <circle cx="140" cy="140" r="102" fill="none" stroke="#F1F0F9" stroke-dasharray="2 3" stroke-width="1.5"></circle>
-        <g class="roue-tactile-anneau">${graduationsRoueTactileHtml()}</g>
-      </svg>
-      <div class="roue-tactile-centre">
-        <span class="roue-tactile-mot">${esc(u.word)}</span>
-        <div class="roue-tactile-valeur-ligne"><span class="roue-tactile-valeur">${esc(formater(valeurCourante))}</span><span class="roue-tactile-unite">${esc(u.short)}</span></div>
-        <span class="roue-tactile-pas">${tR('Pas de {pas} {unite} par cran', { pas: formater(pas), unite: u.short })}</span>
+    overlay.innerHTML = `<div class="compteur-rouleaux-tete">
+        <button type="button" class="compteur-rouleaux-fermer" id="rouleaux-fermer" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+        <div class="compteur-rouleaux-titre-bloc"><h2>${trad('Relevé de compteur')}</h2><p>${esc(machine.name || '')}</p></div>
+        <span style="width:44px;flex:0 0 auto;" aria-hidden="true"></span>
       </div>
-    </div>`;
-    document.body.appendChild(overlayRoue);
-    disque = overlayRoue.querySelector('.roue-tactile-disque');
-    svgAnneau = overlayRoue.querySelector('.roue-tactile-anneau');
-    valeurEl = overlayRoue.querySelector('.roue-tactile-valeur');
-    requestAnimationFrame(() => disque.classList.add('is-active'));
+      <div class="compteur-rouleaux-corps">
+        <div class="compteur-rouleaux-index">
+          <span class="compteur-rouleaux-index-badge"><span class="dot"></span>${trad('Index actuel')}</span>
+          <div class="compteur-rouleaux-index-valeur"><span id="rouleaux-affichage">${esc(formaterAffichage())}</span></div>
+          <span class="compteur-rouleaux-index-sous">${unite === 'km' ? trad('Kilométrage total') : trad('Heures de fonctionnement moteur')}</span>
+        </div>
+        <div class="compteur-rouleaux-module">
+          <div class="compteur-rouleaux-tambours" id="rouleaux-tambours">
+            <div class="compteur-rouleaux-bande"></div>
+            ${indices.map((v, i) => `
+              <div class="compteur-rouleau">
+                <div class="compteur-rouleau-vue" data-rouleau="${i}">
+                  <div class="compteur-rouleau-ombre-haut"></div>
+                  <div class="compteur-rouleau-bande" id="rouleaux-bande-${i}">${rouleauChiffresHtml(config)}</div>
+                  <div class="compteur-rouleau-ombre-bas"></div>
+                </div>
+                <span class="compteur-rouleau-etiquette">${esc(etiquettes[i])}</span>
+              </div>`).join('')}
+            <div class="compteur-rouleaux-loupe" id="rouleaux-loupe">
+              <span class="compteur-rouleaux-loupe-valeur" id="rouleaux-loupe-valeur">${String(indices[rouleauActif]).padStart(config.chiffres, '0')}</span>
+              <span class="compteur-rouleaux-loupe-mot">${trad('Sélection')}</span>
+            </div>
+          </div>
+          <div class="compteur-rouleaux-astuce">${picto('rafraichir')}<span>${tR('Faites glisser les rouleaux de {min} à {max}', { min: '0'.padStart(config.chiffres, '0'), max: String(config.max) })}</span></div>
+        </div>
+      </div>
+      <div class="compteur-rouleaux-pied">
+        <button type="button" class="primary compteur-rouleaux-valider" id="rouleaux-valider"><span>${trad('Valider le relevé')}</span></button>
+      </div>`;
+    document.body.appendChild(overlay);
 
-    angleDepart = angleDepuisPointeur(e.clientX, e.clientY);
-    try { champ.setPointerCapture(e.pointerId); } catch (err) { /* capture indisponible, sans conséquence */ }
-    vibrer();
-  };
+    const affichage = overlay.querySelector('#rouleaux-affichage');
+    const loupe = overlay.querySelector('#rouleaux-loupe');
+    const loupeValeur = overlay.querySelector('#rouleaux-loupe-valeur');
+    const positionsLoupe = config.nbRouleaux === 2 ? ['26%', '74%'] : ['18%', '50%', '82%'];
 
-  const bouge = (e) => {
-    if (!overlayRoue) return;
-    e.preventDefault();
-    const angleCourant = angleDepuisPointeur(e.clientX, e.clientY);
-    let delta = angleCourant - angleDepart;
-    if (delta > 180) delta -= 360;
-    if (delta < -180) delta += 360;
-    const diffRotation = delta - rotation;
-    const cransDelta = diffRotation / anglePasDeg;
-    if (Math.abs(cransDelta) >= 1) {
-      const cransAppliques = Math.trunc(cransDelta);
-      const prochaine = valeurCourante + cransAppliques * pas;
-      if (prochaine >= 0) {
-        valeurCourante = Math.round(prochaine / pas) * pas;
-        rotation += cransAppliques * anglePasDeg;
-        const idxCran = Math.round(valeurCourante / pas);
-        if (idxCran !== dernierCranVibre) { vibrer(); dernierCranVibre = idxCran; }
-        svgAnneau.style.transform = `rotate(${rotation}deg)`;
-        valeurEl.textContent = formater(valeurCourante);
-        champ.value = formater(valeurCourante);
-      }
-    }
-  };
+    const majLoupe = (idx) => {
+      rouleauActif = idx;
+      loupe.style.left = positionsLoupe[idx];
+      loupeValeur.textContent = String(indices[idx]).padStart(config.chiffres, '0');
+    };
+    const majBande = (idx, animer) => {
+      const bande = overlay.querySelector(`#rouleaux-bande-${idx}`);
+      bande.style.transition = animer ? 'transform .18s cubic-bezier(.2,.9,.3,1)' : 'none';
+      bande.style.transform = `translateY(${(VISIBLE_OFFSET - indices[idx]) * ITEM_HEIGHT}px)`;
+      bande.querySelectorAll('.compteur-rouleau-chiffre').forEach((el, i) => el.classList.toggle('is-central', i === indices[idx]));
+    };
+    const fixerIndex = (idx, valeur, animer) => {
+      indices[idx] = Math.max(0, Math.min(config.max, valeur));
+      majBande(idx, animer);
+      majLoupe(idx);
+      affichage.textContent = formaterAffichage();
+    };
+    indices.forEach((_, i) => majBande(i, false));
+    majLoupe(rouleauActif);
 
-  const fin = (e) => {
-    if (!overlayRoue) return;
-    try { champ.releasePointerCapture(e.pointerId); } catch (err) { /* déjà relâché, sans conséquence */ }
-    overlayRoue.remove();
-    overlayRoue = null;
-    if (valeurCourante !== valeurDepart) {
-      champ.dispatchEvent(new Event('input', { bubbles: true }));
-      enregistrerCompteur(machine, champ.value).then(() => {
-        // Rouvre la fiche : l'échéance/la jauge au-dessus du compteur ne
-        // se recalculent pas toutes seules, mais openPlanView le fait en
-        // se relançant sur la même machine (déjà mutée par
-        // enregistrerCompteur, voir sa propre définition).
-        ficheOverlay.remove();
-        openPlanView(machine, companyId, categories);
+    // Chaque rouleau capture SON PROPRE pointeur.
+    overlay.querySelectorAll('.compteur-rouleau-vue').forEach((vue) => {
+      const idx = Number(vue.dataset.rouleau);
+      let enCours = false, yDepart = 0, indexDepart = 0, dernierVibre = 0;
+      vue.addEventListener('pointerdown', (e) => {
+        enCours = true; yDepart = e.clientY; indexDepart = indices[idx]; dernierVibre = indexDepart;
+        majLoupe(idx);
+        try { vue.setPointerCapture(e.pointerId); } catch (err) { /* sans conséquence */ }
+        vibrer();
       });
-    }
-  };
+      vue.addEventListener('pointermove', (e) => {
+        if (!enCours) return;
+        e.preventDefault();
+        const cibleIdx = Math.max(0, Math.min(config.max, indexDepart - Math.round((e.clientY - yDepart) / ITEM_HEIGHT)));
+        if (cibleIdx !== indices[idx]) {
+          fixerIndex(idx, cibleIdx, false);
+          if (cibleIdx !== dernierVibre) { vibrer(); dernierVibre = cibleIdx; }
+        }
+      });
+      const relacher = (e) => {
+        if (!enCours) return;
+        enCours = false;
+        try { vue.releasePointerCapture(e.pointerId); } catch (err) { /* sans conséquence */ }
+        majBande(idx, true);
+      };
+      vue.addEventListener('pointerup', relacher);
+      vue.addEventListener('pointercancel', relacher);
+      vue.addEventListener('contextmenu', (e) => e.preventDefault());
+      // Tap en haut/bas du rouleau (hors glissement) : ±1 cran.
+      vue.addEventListener('click', (e) => {
+        const rect = vue.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        if (y < rect.height / 2 - 24) { fixerIndex(idx, indices[idx] - 1, true); vibrer(); }
+        else if (y > rect.height / 2 + 24) { fixerIndex(idx, indices[idx] + 1, true); vibrer(); }
+      });
+    });
 
-  champ.addEventListener('pointerdown', debut);
-  champ.addEventListener('pointermove', bouge);
-  champ.addEventListener('pointerup', fin);
-  champ.addEventListener('pointercancel', fin);
-  // Le menu contextuel natif (sélection/copier/traduire) est déclenché par
-  // un évènement À PART, pas seulement par pointerdown/pointermove — sans
-  // ce blocage, un appui qui glisse légèrement l'ouvrait quand même,
-  // clavier compris (constaté en vrai sur téléphone).
-  champ.addEventListener('contextmenu', (e) => e.preventDefault());
+    overlay.querySelector('#rouleaux-fermer').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#rouleaux-valider').addEventListener('click', () => {
+      const entierFinal = rouleauxVersEntier(indices, config);
+      const valeurFinale = unite === 'km' ? entierFinal : Math.round((entierFinal + decimale) * 10) / 10;
+      overlay.remove();
+      enregistrerCompteur(machine, String(valeurFinale)).then(() => refraichir());
+    });
+  }
 }
 
 // Au retour du réseau, ce qui attend part tout seul.
@@ -13997,167 +13954,6 @@ function compteurMachineVisee(noeud, genre) {
   return ref ? (UI.machines.find((m) => m.id === ref) || null) : null;
 }
 
-// ── LIRE LE COMPTEUR SUR UNE PHOTO ────────────────────────────────────
-//
-// POURQUOI : le relevé se fait sur le chantier, souvent les mains sales, et le
-// client recopie un nombre à six chiffres lu de travers. Photographier le
-// compteur est le geste qui sert tous les jours — donc, sur un téléphone, le
-// bouton « Prendre la photo » (appareil arrière) vient EN PREMIER, et la galerie
-// reste offerte en second pour une photo prise plus tôt.
-//
-// LA RÈGLE QUI GOUVERNE TOUT CE BLOC : ON PROPOSE, L'UTILISATEUR VALIDE. Rien
-// n'est enregistré sans son geste — comme pour les fréquences ambiguës du carnet.
-// Et jamais de valeur inventée : si la lecture n'est pas sûre, on le DIT et on
-// renvoie vers la saisie manuelle, qui reste intacte. Un compteur faux décale
-// TOUTES les échéances de la machine : c'est plus grave que pas de compteur.
-//
-// LA VALEUR CONFIRMÉE PASSE PAR LE CHEMIN EXISTANT (`enregistrerCompteur`) : un
-// seul chemin d'écriture, donc les mêmes garanties — état local, copie hors
-// connexion, file d'attente, rafraîchissement de l'échéance et du bandeau.
-const CLE_QUOTA_LECTURES = 'keeva-lectures-compteur-restantes';
-// Mêmes chiffres que la base (migration-plafonds-usages.sql), offre par offre.
-// Ils ne servent qu'à AFFICHER avant le premier appel ; ensuite, c'est le décompte
-// du serveur qui fait foi.
-//   · la LECTURE DE COMPTEUR a son PROPRE compteur (30 / 200 / 500 / 2 000) :
-//     elle ne consomme PAS les analyses de carnet — son coût est une fraction de
-//     centime, quand une analyse de carnet en coûte mille fois plus ;
-//   · eco / pro / paid restent à 500 : offres vendues avant, grandfathering.
-const QUOTAS_LECTURES = {
-  free: 30, starter: 200, business: 500, enterprise: 2000,
-  eco: 500, pro: 500, paid: 500, unlimited: 2000,
-};
-
-function etatQuotaLectures() {
-  const plan = (typeof UI !== 'undefined' && UI.companyPlan) || 'free';
-  const plafond = QUOTAS_LECTURES[plan] || QUOTAS_LECTURES.free;
-  let restant = null;
-  try {
-    const brut = JSON.parse(localStorage.getItem(CLE_QUOTA_LECTURES) || 'null');
-    if (brut && brut.plan === plan && Number.isFinite(Number(brut.restant))) {
-      restant = Math.max(0, Math.min(plafond, Number(brut.restant)));
-    }
-  } catch (err) { restant = null; }
-  return { plan, plafond, restant, offre: OFFRES_LIBELLES[plan] || OFFRES_LIBELLES.free };
-}
-
-// Ce que la lecture a coûté, tel que le SERVEUR le renvoie.
-function retenirQuotaLectures(reponse) {
-  try {
-    const etat = etatQuotaLectures();
-    const plafond = Number(reponse && reponse.quota_plafond) || etat.plafond;
-    if (!Number.isFinite(Number(reponse && reponse.quota_restant))) return;
-    localStorage.setItem(CLE_QUOTA_LECTURES, JSON.stringify({
-      plan: etat.plan, plafond, restant: Math.max(0, Number(reponse.quota_restant)), maj: Date.now(),
-    }));
-  } catch (err) { /* stockage indisponible : on n'affiche pas le décompte */ }
-}
-
-function phraseQuotaLectures() {
-  const q = etatQuotaLectures();
-  return q.restant == null
-    ? tR('Votre offre {offre} comprend {plafond} lectures de compteur par mois.', { offre: q.offre, plafond: q.plafond })
-    : tR('Votre offre {offre} comprend {plafond} lectures de compteur par mois. Il vous en reste {restant}.', { offre: q.offre, plafond: q.plafond, restant: q.restant });
-}
-
-// La zone où l'on parle à l'utilisateur : celle de l'emplacement D'OÙ VIENT le
-// geste (les deux emplacements existent dans le DOM, un seul est visible).
-function zoneLectureDe(machineId, noeud) {
-  const bloc = noeud && noeud.closest ? noeud.closest('.compteur') : null;
-  if (bloc) {
-    const zone = bloc.querySelector('[data-compteur-lecture]');
-    if (zone) return zone;
-  }
-  const blocs = document.querySelectorAll('.compteur') || [];
-  for (const b of blocs) {
-    if (String(b.dataset.compteur) !== String(machineId)) continue;
-    const zone = b.querySelector('[data-compteur-lecture]');
-    if (zone) return zone;
-  }
-  return null;
-}
-
-// La confirmation : la valeur lue d'un côté, deux gestes de l'autre. « Confirmer »
-// passe par le chemin d'enregistrement EXISTANT ; « Corriger » rend la main au
-// champ de saisie, qui n'a jamais cessé de fonctionner.
-function afficherConfirmationLecture(machine, valeur, uniteAffichee, zone) {
-  if (!zone) return;
-  zone.innerHTML =
-    `<span class="compteur-lecture-texte">${tR('J\'ai lu {valeur} — c\'est juste ?', { valeur: formatCounter(valeur, uniteAffichee) })}</span>`
-    + `<button type="button" class="compteur-confirmer" data-compteur-confirmer="${esc(machine.id)}" data-valeur="${esc(valeur)}">${trad('Confirmer')}</button>`
-    + `<button type="button" class="compteur-corriger" data-compteur-corriger="${esc(machine.id)}">${trad('Corriger')}</button>`;
-}
-
-async function lireCompteurSurPhoto(machineId, fichier, noeud) {
-  const machine = (UI.machines || []).find((m) => String(m.id) === String(machineId));
-  const zone = zoneLectureDe(machineId, noeud);
-  const dire = (texte) => { if (zone) zone.textContent = texte || ''; };
-  if (!machine) return;
-
-  // HORS CONNEXION : la lecture ne peut pas se faire. On le DIT, et on ne touche
-  // à rien d'autre : la saisie manuelle reste exactement là où elle était.
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    dire(trad('La lecture d\'une photo nécessite une connexion — saisis la valeur à la main.'));
-    return;
-  }
-
-  dire(trad('Lecture de la photo…'));
-  let base64 = '';
-  try {
-    // MÊME RÉDUCTION QUE LES PHOTOS DE CARNET (1600 px, JPEG) : une photo de
-    // téléphone de 8 Mo n'a aucune raison d'être envoyée telle quelle.
-    const reduite = await reduirePhotoCarnet(fichier);
-    const dataUrl = await blobVersDataUrl(reduite.blob);
-    base64 = String(dataUrl).split(',')[1] || '';
-  } catch (err) {
-    dire(tR('Photo illisible ({erreur}) — saisis la valeur à la main.', { erreur: (err && err.message) || err }));
-    return;
-  }
-  if (!base64) {
-    dire(trad('Photo illisible — saisis la valeur à la main.'));
-    return;
-  }
-
-  const unite = counterUnitOf(machine);
-  let reponse = null;
-  try {
-    const { data, error } = await sb.functions.invoke('lire-compteur', {
-      body: { imageBase64: base64, mimeType: 'image/jpeg', unite },
-    });
-    if (error) throw new Error(await functionErrorMessage(error, trad('lecture impossible')));
-    reponse = data;
-  } catch (err) {
-    dire(tR('Lecture impossible ({erreur}) — saisis la valeur à la main.', { erreur: (err && err.message) || err }));
-    return;
-  }
-
-  // Le décompte du serveur est retenu AVANT de juger : même un échec dit où en
-  // est le quota (le crédit est rendu par la fonction quand rien n'est lu).
-  retenirQuotaLectures(reponse);
-
-  if (!reponse || reponse.lisible === false || reponse.valeur == null) {
-    dire(tR('Je n\'ai pas réussi à lire le compteur — saisis-le à la main. {quota}', { quota: phraseQuotaLectures() }));
-    return;
-  }
-
-  const uniteLue = reponse.unite_lue === 'km' ? trad('km') : (reponse.unite_lue === 'hours' ? 'hours' : null);
-  // ★ L'UNITÉ DOIT CORRESPONDRE AU MODE DE LA MACHINE. Un nombre en kilomètres
-  //   écrit dans un compteur horaire fausserait tout : on le DIT, et on ne
-  //   propose pas de l'enregistrer.
-  if (uniteLue && uniteLue !== unite) {
-    dire(tR('J\'ai lu {valeur}, mais « {machine} » est suivie en {attendu} : vérifie la photo, ou saisis la valeur à la main.', {
-      valeur: formatCounter(reponse.valeur, uniteLue), machine: machine.name, attendu: COUNTER_UNITS[unite].word,
-    }));
-    return;
-  }
-
-  // La valeur lue est PROPOSÉE dans le champ (l'utilisateur peut la corriger à la
-  // main), et la confirmation attend son geste.
-  const bloc = zone && zone.closest ? zone.closest('.compteur') : null;
-  const champ = bloc ? bloc.querySelector('.compteur-champ') : null;
-  if (champ) champ.value = String(reponse.valeur);
-  afficherConfirmationLecture(machine, reponse.valeur, uniteLue || unite, zone);
-}
-
 if (typeof document !== 'undefined' && document.addEventListener) {
   // Le bouton « Enregistrer » de chaque carte.
   document.addEventListener('click', (e) => {
@@ -14179,43 +13975,24 @@ if (typeof document !== 'undefined' && document.addEventListener) {
     e.preventDefault();
     enregistrerCompteur(machine, champ.value);
   });
-  // LES DEUX BOUTONS DE PHOTO, ET LEUR PROPRE CHAMP. Chaque bouton ouvre LE SIEN :
-  // « Prendre la photo » (capture="environment") ne doit pas ouvrir le sélecteur
-  // de fichiers, et « Choisir dans la galerie » ne doit pas ouvrir l'appareil —
-  // c'est toute la raison d'avoir deux champs distincts plutôt qu'un seul.
+  // Le compteur COMPACT (fiche machine sur téléphone, bandeau du Parc sur
+  // téléphone) : un tap ouvre les rouleaux. Délégué comme le reste de ce
+  // bloc — la liste du Parc se réaffiche à chaque filtre/tri/recherche, un
+  // câblage posé à l'ouverture de la vue serait perdu au premier re-rendu.
+  // Deux gestes de rafraîchissement différents selon d'où vient le tap :
+  // dans la fiche machine (.plan-modal), on referme et rouvre la fiche
+  // pour que l'échéance/la jauge au-dessus restent cohérentes ; dans le
+  // bandeau du Parc, un renderApp() simple suffit (pas de fiche ouverte).
   document.addEventListener('click', (e) => {
-    const bouton = e.target && e.target.closest ? e.target.closest('[data-compteur-photo]') : null;
-    if (!bouton) return;
-    const bloc = bouton.closest('.compteur');
-    const source = bouton.dataset && bouton.dataset.compteurPhotoSource === 'appareil' ? 'appareil' : 'galerie';
-    const champ = bloc
-      ? bloc.querySelector(source === 'appareil' ? '.compteur-photo-champ-appareil' : '.compteur-photo-champ-galerie')
-      : null;
-    if (champ && champ.click) champ.click();
-  });
-  // La photo choisie.
-  document.addEventListener('change', (e) => {
-    const champ = e.target && e.target.closest ? e.target.closest('[data-compteur-photo-champ]') : null;
-    if (!champ) return;
-    const fichier = (champ.files || [])[0] || null;
-    try { champ.value = ''; } catch (err) { /* certains moteurs refusent l'effacement */ }
-    if (fichier) lireCompteurSurPhoto(champ.dataset.compteurPhotoChamp, fichier, champ);
-  });
-  // « Confirmer » et « Corriger » : les deux gestes de la proposition.
-  document.addEventListener('click', (e) => {
-    const confirmer = e.target && e.target.closest ? e.target.closest('[data-compteur-confirmer]') : null;
-    if (confirmer) {
-      const machine = (UI.machines || []).find((m) => String(m.id) === String(confirmer.dataset.compteurConfirmer));
-      if (machine) enregistrerCompteur(machine, confirmer.dataset.valeur || '');
-      return;
-    }
-    const corriger = e.target && e.target.closest ? e.target.closest('[data-compteur-corriger]') : null;
-    if (!corriger) return;
-    const bloc = corriger.closest('.compteur');
-    const zone = bloc ? bloc.querySelector('[data-compteur-lecture]') : null;
-    if (zone) zone.textContent = trad('Corrige la valeur si besoin, puis « Enregistrer ».');
-    const champ = bloc ? bloc.querySelector('.compteur-champ') : null;
-    if (champ && champ.focus) champ.focus();
+    const cible = e.target && e.target.closest ? e.target.closest('[data-tactile-cible]') : null;
+    if (!cible) return;
+    const machine = compteurMachineVisee(cible, 'champ');
+    if (!machine) return;
+    const ficheOverlay = cible.closest('.plan-modal');
+    const refraichir = ficheOverlay
+      ? () => { ficheOverlay.remove(); openPlanView(machine, UI.companyId, UI.categories); }
+      : () => renderApp();
+    ouvrirRouleauxCompteur(cible, counterUnitOf(machine), machine, refraichir);
   });
 }
 
@@ -22682,9 +22459,10 @@ function openLogInterventionModal(machine, tache) {
       if (heuresChamp) heuresChamp.value = '';
     });
 
-    // Lecture d'une facture par photo : même famille que la lecture de
-    // compteur par photo (lireCompteurSurPhoto) — propose un montant, ne
-    // l'enregistre jamais sans que l'utilisateur ait vu et pu corriger.
+    // Lecture d'une facture par photo : propose un montant, ne l'enregistre
+    // jamais sans que l'utilisateur ait vu et pu corriger (la lecture de
+    // compteur par photo suivait la même règle, avant d'être retirée —
+    // fiabilité insuffisante en usage réel, demande explicite).
     // ⚠️ Dépendance : suppose une Edge Function `lire-facture` déployée
     // séparément (voir keeva-tco-feature) ; message d'erreur clair et saisie
     // manuelle disponible tant qu'elle ne l'est pas.
@@ -23435,9 +23213,10 @@ function openPlanView(machine, companyId, categories) {
   overlay.querySelector('#plan-fil-retour').addEventListener('click', () => overlay.remove());
   // Module incrémental tactile (version smartphone du compteur) — no-op
   // silencieux si la machine n'a pas de compteur numérique (calendaire,
-  // ou non couverte par l'offre) : initCompteurTactile n'y trouve pas son
-  // champ et ressort aussitôt.
-  if (machine.plan) initCompteurTactile(overlay, `compteur-mobile-${machine.id}`, counterUnitOf(machine), machine, companyId, categories);
+  // ou non couverte par l'offre) : initCompteurRouleaux n'y trouve pas sa
+  // cible et ressort aussitôt.
+  // Le compteur compact (tap → rouleaux) est câblé par délégation au
+  // document (voir ouvrirRouleauxCompteur, plus bas) — rien à faire ici.
   overlay.querySelector('#edit-from-plan').addEventListener('click', () => {
     overlay.remove();
     openMachineModal(companyId, categories, machine);
