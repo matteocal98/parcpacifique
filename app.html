@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MOLOsr7sPoCYFtJg7W6pPL91+yEEw4USDEgSdqpZRH8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AQVX1IeLLBKO38dUQZMgtmieGELrp5BsPjsf73wpRnY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1026,20 +1026,29 @@
 
   /* Cadre élargi (était trop étriqué, notamment pour la date en mode
      calendaire) + coins arrondis (voir --r-lg plus haut, manquante). */
-  /* Valeurs REPRISES À L'OCTET du fichier fourni (bg-surface-container-low
-     px-3 py-2 rounded-lg) plutôt qu'approchées avec les jetons --r-chip/
-     --r-md existants — l'utilisateur a explicitement demandé le compteur
-     EXACT, pas une approximation. rounded-lg de CE fichier = 8px (voir
-     son DESIGN.md : rounded.lg = 0.5rem), pas --r-card (16px). */
-  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border-radius:8px;padding:8px 12px;width:100%;min-width:0;}
-  @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:196px;}}
+  /* ★ Reprise Stitch « stitch_refonte_zone_change_ticketing (4) » (liste
+     Machines, vue BUREAU) : le fond passe du gris neutre (--surface-soft)
+     au liseré indigo pâle du fichier fourni (bg-[#F8F9FF] border-indigo-
+     50/60) — mappé sur --primary-tint/--primary-line déjà déclarés (même
+     rôle : un encart indigo léger), jamais une nouvelle teinte à part.
+     Coins à 12px (rounded-xl du fichier), pas 8px. Effet de bord sur
+     TÉLÉPHONE (la carte fusionnée blanche de compteurHtml y est posée
+     DANS ce bloc) : le cadre passe du gris au liseré indigo là aussi —
+     voulu, ça uniformise avec la vue machine du site (même demande que ce
+     chantier), pas un oubli. */
+  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--primary-tint);border:1px solid var(--primary-line);border-radius:12px;padding:8px 12px;width:100%;min-width:0;}
+  @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:220px;}}
   /* .compteur (fiche machine) porte un cadre 2px solid var(--ink) + marge
      + fond propres, pensés pour le grand hero de la fiche — jamais
      annulés ici jusqu'à présent, d'où le cadre noir épais et disproportionné
      signalé sur cette carte compacte. .mstrip-compteur-bloc porte déjà
      SON PROPRE fond/rayon ; .compteur, à l'intérieur, doit être nu. */
   .mstrip-compteur-bloc .compteur{background:transparent;box-shadow:none;padding:0;margin-top:0;border:none;border-radius:0;}
-  .mstrip-compteur-bloc .compteur-titre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--dark-ink);display:block;margin-bottom:2px;}
+  /* display:inline-flex (pas block) : la vue BUREAU pose maintenant une
+     icône devant le libellé (picto('compteur'), comme la maquette), qui a
+     besoin de s'aligner À CÔTÉ du texte, pas au-dessus. */
+  .mstrip-compteur-bloc .compteur-titre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--dark-ink);display:inline-flex;align-items:center;gap:5px;margin-bottom:2px;}
+  .mstrip-compteur-bloc .compteur-titre svg{width:13px;height:13px;}
   /* Suivi calendaire : la date reprend .compteur-jour-valeur (22px) taillée
      pour le hero de la fiche machine — trop grande pour ce bandeau étroit,
      réduite ici spécifiquement. */
@@ -1073,25 +1082,46 @@
   .mstrip-compteur-bloc .compteur-note{font-size:10.5px;margin-top:3px;}
 
   .mstrip-jauge{flex:0 0 auto;width:100%;display:flex;flex-direction:column;gap:4px;}
-  @media (min-width:1180px){.mstrip-jauge{width:170px;}}
+  @media (min-width:1180px){.mstrip-jauge{width:190px;}}
   .mstrip-jauge-tete{display:flex;align-items:baseline;justify-content:space-between;font-size:12px;color:var(--ink-2);gap:8px;}
-  .mstrip-jauge-delta{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;}
-  .mstrip-jauge-delta.is-late{color:var(--late);}
-  .mstrip-jauge-delta.is-soon{color:var(--primary-dark);}
-  .mstrip-jauge-delta.is-ok{color:var(--ok-ink);}
-  .mstrip-jauge-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
+  /* ★ Reprise Stitch (vue bureau) : le delta devient une PASTILLE (fond +
+     bordure teintés), pas juste du texte gras coloré — mêmes tokens
+     --late/--soon/--ok(-bg) déjà utilisés partout pour ces 3 états. */
+  .mstrip-jauge-delta{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;white-space:nowrap;padding:2px 8px;border-radius:6px;}
+  .mstrip-jauge-delta.is-late{color:var(--late);background:var(--late-bg);}
+  .mstrip-jauge-delta.is-soon{color:var(--primary-dark);background:var(--primary-tint);}
+  .mstrip-jauge-delta.is-ok{color:var(--ok-ink);background:var(--ok-bg);}
+  .mstrip-jauge-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;display:flex;}
   /* min-width:4px : à une part très basse (5%) ou nulle (0%, un cycle qui
      vient de repartir à zéro — vérifié réel sur plusieurs machines de
      test, pas un bug de calcul), le remplissage devenait visuellement
      indiscernable d'une barre vide sur un écran/zoom réduit. Un repère
-     minimal, jamais un pourcentage inventé. */
-  .mstrip-jauge-part{display:block;height:100%;min-width:4px;border-radius:var(--r-pill);}
+     minimal, jamais un pourcentage inventé. Pas de rayon sur le segment
+     lui-même : .mstrip-jauge-piste (le rail) porte déjà le rayon et
+     découpe (overflow:hidden) — 2 segments accolés avec chacun leur propre
+     rayon laisseraient un interstice carré entre eux. */
+  .mstrip-jauge-part{display:block;height:100%;min-width:4px;}
   .mstrip-jauge-part.is-late{background:var(--late);}
   .mstrip-jauge-part.is-soon{background:var(--primary);}
   .mstrip-jauge-part.is-ok{background:var(--ok);}
+  /* Segment de DÉPASSEMENT (voir segmentsJaugeDepassement) : hachures
+     ambre, comme la maquette (striped-alert) — jamais de pourcentage
+     inventé écrit dessus, juste le repère visuel. */
+  .mstrip-jauge-part.is-depassement{background-image:repeating-linear-gradient(-45deg,rgba(222,122,22,.55) 0 6px,rgba(222,122,22,.85) 6px 12px);}
   .mstrip-jauge-note{font-size:10.5px;color:var(--ink-2);display:flex;align-items:center;gap:4px;}
   .mstrip-jauge-note svg{width:13px;height:13px;flex:0 0 auto;}
   .mstrip-jauge-note.is-late{color:var(--late);}
+  /* « Plan à définir » (pas de plan du tout, donc rien à jauger) — reprise
+     Stitch : encart neutre à bordure pointillée, plutôt que la simple
+     phrase de secours utilisée quand un plan EXISTE mais n'a pas encore de
+     pourcentage calculable (compteur non renseigné, etc. — cas différent,
+     qui garde .mstrip-jauge-note tel quel). */
+  .mstrip-jauge-vide{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface-soft);border:1px dashed var(--line);border-radius:10px;height:100%;}
+  .mstrip-jauge-vide .card-ico{flex:0 0 auto;color:var(--ink-3);}
+  .mstrip-jauge-vide svg{width:18px;height:18px;}
+  .mstrip-jauge-vide p{margin:0;}
+  .mstrip-jauge-vide p:first-child{font-size:12px;font-weight:700;color:var(--ink-2);}
+  .mstrip-jauge-vide p:last-child{font-size:10.5px;color:var(--ink-3);}
 
   .mstrip-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:100%;}
   @media (min-width:1180px){.mstrip-actions{width:auto;}}
@@ -1115,6 +1145,12 @@
   @media (max-width:520px){.mstrip-btn-icone.view-manual{width:40px;}}
   .mstrip-btn-icone:hover{background:var(--line);}
   .mstrip-btn-icone svg{width:19px;height:19px;}
+  /* ★ Reprise Stitch (vue bureau) : le bouton carnet se distingue du
+     bouton réglages par une teinte indigo (même rôle que .compteur-carte-
+     ajuster/.mstrip-jauge-delta.is-soon) — les deux étaient identiques
+     (gris neutre) avant cette passe. */
+  .mstrip-btn-icone.view-manual{background:var(--primary-tint);border:1px solid var(--primary-line);color:var(--primary-dark);}
+  .mstrip-btn-icone.view-manual:hover{background:var(--primary-line);}
 
   .mstrip-badge{display:inline-flex;align-items:center;gap:5px;}
   .mstrip-badge .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
@@ -13812,7 +13848,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
   if (emplacement === 'strip') {
     return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
-      <span class="compteur-titre">${trad(libelle || 'Compteur')}</span>
+      <span class="compteur-titre">${picto('compteur')}${esc(u.label)}</span>
       <div class="compteur-strip-ligne">
         <div class="compteur-strip-saisie">
           <input id="${champId}" class="compteur-champ" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
@@ -14464,6 +14500,24 @@ function etatNoteTexte(state) {
   if (state === 'ok') return trad('Conforme au plan préventif');
   return '';
 }
+// Répartition de la jauge en 2 segments quand l'échéance est dépassée —
+// reprise Stitch (liste Machines, vue bureau) : au lieu de plafonner le
+// remplissage à 100% en perdant le dépassement (pourcentageIntervalle),
+// la barre répartit le total RÉELLEMENT consommé (intervalle + dépassement)
+// entre les deux segments. Vérifié cohérent avec les proportions de la
+// maquette (255/(255+65)=80 % ≈ ses 78 % affichés) — un vrai calcul, pas
+// une approximation visuelle. `null` si pas d'état en retard : un seul
+// segment (déjà donné par pourcentageIntervalle) suffit alors.
+function segmentsJaugeDepassement(info, m) {
+  if (info.state !== 'late') return null;
+  const enCompteur = planIsCounter(m.plan);
+  const intervalle = enCompteur ? planIntervalCounter(m.plan) : (m.plan.interval_days ?? null);
+  const depassement = -info.sortKey;
+  if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(depassement) || depassement <= 0) return null;
+  const total = intervalle + depassement;
+  const normal = Math.max(0, Math.min(100, Math.round((intervalle / total) * 100)));
+  return { normal, depassement: 100 - normal };
+}
 function jaugeIntervalleHtml(info, m, detaille) {
   if (!m || !m.plan) return '';
   const enCompteur = planIsCounter(m.plan);
@@ -14538,10 +14592,14 @@ function machineCardHtml(m) {
   // exactement les mêmes valeurs sur téléphone, jamais un second calcul.
   const deltaTexte = deltaTexteDe(info);
   const part = pourcentageIntervalle(info, m);
+  const etat = info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok');
+  // Répartition à 2 segments de la jauge (dépassement visible au-delà de
+  // 100 %, voir segmentsJaugeDepassement) — reprise Stitch, vue bureau.
+  const segments = segmentsJaugeDepassement(info, m);
 
   return `
     <article class="mstrip" data-machine-id="${esc(m.id)}">
-      <span class="mstrip-accent is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}" aria-hidden="true"></span>
+      <span class="mstrip-accent is-${etat}" aria-hidden="true"></span>
       <div class="mstrip-corps">
         <div class="mstrip-identite">
           <div class="mstrip-photo">
@@ -14572,11 +14630,14 @@ function machineCardHtml(m) {
         <div class="mstrip-jauge desktop-only">
           <div class="mstrip-jauge-tete">
             <span>${tR('Échéance {valeur}', { valeur: esc(echeanceTexteDe(info, m)) })}</span>
-            ${deltaTexte ? `<span class="mstrip-jauge-delta is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">${deltaTexte}</span>` : ''}
+            ${deltaTexte ? `<span class="mstrip-jauge-delta is-${etat}">${deltaTexte}</span>` : ''}
           </div>
-          <span class="mstrip-jauge-piste"><span class="mstrip-jauge-part is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}" style="width:${part}%"></span></span>
+          <span class="mstrip-jauge-piste">
+            <span class="mstrip-jauge-part is-${etat}" style="width:${segments ? segments.normal : part}%"></span>
+            ${segments ? `<span class="mstrip-jauge-part is-depassement" style="width:${segments.depassement}%"></span>` : ''}
+          </span>
           ${etatNoteTexte(info.state) ? `<span class="mstrip-jauge-note is-${info.state}">${info.state === 'late' ? picto('alerte') : ''}${etatNoteTexte(info.state)}</span>` : ''}
-        </div>` : `<div class="mstrip-jauge desktop-only"><span class="mstrip-jauge-note">${esc(info.short)}</span></div>`}
+        </div>` : `<div class="mstrip-jauge desktop-only">${m.plan ? `<span class="mstrip-jauge-note">${esc(info.short)}</span>` : `<div class="mstrip-jauge-vide"><span class="card-ico">${picto('plan')}</span><div><p>${trad('Plan d\'entretien à définir')}</p><p>${trad('Configure une périodicité pour activer la jauge.')}</p></div></div>`}</div>`}
 
         <div class="mstrip-actions">
           <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
