@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ve4wrRJc/3T9azatAgnkOh1LPHnWp3CLTiWE02WcoFU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rnq48jqdPAxv5VdCTnxls2Gm6bMCC4U7QWeIGIGY4OA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -6340,6 +6340,19 @@ function brancherComposant(overlay) {
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
 const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
+
+// Fragment `.select()` du catalogue de pièces (parts_catalog), UN SEUL
+// endroit pour les 3 lectures existantes (boot, catalogue TCO, import CSV)
+// — un ajout de colonne migré séparément (default_reorder_point sous
+// SCHEMA.hasStock, packaging sous SCHEMA.hasStockPackaging, chacun sa
+// propre sonde) ne doit jamais dépendre de ce que CHAQUE appelant se
+// souvient d'ajouter. Toujours appelé APRÈS que les sondes SCHEMA aient
+// tourné (boot()) — jamais au chargement du script.
+function colonnesCatalogueePiece() {
+  return 'id, reference, designation, unit_price, supplier_name, avg_lead_time_days'
+    + (SCHEMA.hasStock ? ', default_reorder_point' : '')
+    + (SCHEMA.hasStockPackaging ? ', packaging' : '');
+}
 
 // SECOND COMPTEUR, optionnel : machines.counter_value_2 + counter_unit_2, et
 // sur le plan interval_counter_2 / next_due_counter_2 /
@@ -18556,9 +18569,10 @@ function ligneCatalogueTcoHtml(piece) {
       <div class="tco-part-gauche">
         <div class="tco-part-icone">${picto('boite')}</div>
         <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece.designation)}</span></span>
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece.designation)}</span>${piece.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}</span>
           <span class="tco-part-ref">${piece.reference ? esc(piece.reference) : trad('Sans référence')}</span>
           ${piece.supplier_name || piece.avg_lead_time_days != null ? `<span class="tco-part-ref">${esc([piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' · '))}</span>` : ''}
+          ${piece.default_reorder_point != null ? `<span class="tco-part-ref">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
         </div>
       </div>
       <div class="tco-part-droite">
@@ -18634,6 +18648,19 @@ function blocCatalogueTcoHtml() {
               </div>
             </div>
           </div>
+          ${SCHEMA.hasStockPackaging || SCHEMA.hasStock ? `
+          <div class="field-row">
+            ${SCHEMA.hasStockPackaging ? `
+            <div>
+              <label class="sr-only" for="tco-piece-conditionnement">${trad('Conditionnement')}</label>
+              <input id="tco-piece-conditionnement" placeholder="${trad('Conditionnement (ex: Boîte de 12)')}">
+            </div>` : ''}
+            ${SCHEMA.hasStock ? `
+            <div>
+              <label class="sr-only" for="tco-piece-seuil">${trad('Seuil de réapprovisionnement')}</label>
+              <input id="tco-piece-seuil" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
+            </div>` : ''}
+          </div>` : ''}
           <div class="modal-actions">
             <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
             <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
@@ -18647,8 +18674,19 @@ function blocCatalogueTcoHtml() {
 // Format FIGÉ, documenté dans la modale et le modèle téléchargeable : en-tête
 // EXACT, dans cet ordre précis (demande explicite de l'utilisateur — pas un
 // mappage par nom de colonne, un ordre positionnel strict, plus simple et
-// plus prévisible à documenter qu'un mapping flexible).
-const ENTETE_CSV_PIECES = ['Référence', 'Désignation', 'Prix unitaire', 'Fournisseur', 'Délai moyen (jours)'];
+// plus prévisible à documenter qu'un mapping flexible). Les 2 dernières
+// colonnes sont AJOUTÉES À LA FIN seulement si leur migration est visible
+// (SCHEMA.hasStockPackaging/hasStock) — jamais un en-tête qui réclame une
+// colonne absente de la base au moment de l'import. Une seule base partagée
+// (multi-tenant par company_id) : une fois la migration passée, elle est
+// vue par TOUTES les sociétés en quelques secondes, jamais une variation
+// durable d'une société à l'autre.
+function enteteCsvPieces() {
+  const entete = ['Référence', 'Désignation', 'Prix unitaire', 'Fournisseur', 'Délai moyen (jours)'];
+  if (SCHEMA.hasStockPackaging) entete.push('Conditionnement');
+  if (SCHEMA.hasStock) entete.push('Seuil de réapprovisionnement');
+  return entete;
+}
 
 // Un seul champ par appel : gère les champs entre guillemets (avec `""`
 // pour un guillemet littéral, RFC4180), mais PAS un retour à la ligne à
@@ -18685,13 +18723,14 @@ function analyserCsvCatalogue(texte) {
   const lignesBrutes = String(texte || '').split(/\r\n|\r|\n/).filter((l) => l.trim() !== '');
   if (!lignesBrutes.length) return { lignes: [], erreurs: [trad('Fichier vide.')] };
   const entete = analyserLigneCsv(lignesBrutes[0]).map((c) => c.trim());
-  const enteteOk = entete.length === ENTETE_CSV_PIECES.length
-    && entete.every((c, i) => c.toLowerCase() === ENTETE_CSV_PIECES[i].toLowerCase());
+  const enteteAttendu = enteteCsvPieces();
+  const enteteOk = entete.length === enteteAttendu.length
+    && entete.every((c, i) => c.toLowerCase() === enteteAttendu[i].toLowerCase());
   if (!enteteOk) {
     return {
       lignes: [],
       erreurs: [tR('En-tête invalide. Attendu : {attendu} — reçu : {recu}', {
-        attendu: ENTETE_CSV_PIECES.join(','), recu: entete.join(',') || trad('(vide)'),
+        attendu: enteteAttendu.join(','), recu: entete.join(',') || trad('(vide)'),
       })],
     };
   }
@@ -18700,18 +18739,33 @@ function analyserCsvCatalogue(texte) {
   for (let i = 1; i < lignesBrutes.length; i++) {
     const champs = analyserLigneCsv(lignesBrutes[i]).map((c) => (c || '').trim());
     const numero = i + 1; // numéro de ligne humain (1 = en-tête)
-    const [reference, designation, prixTexte, fournisseur, delaiTexte] = champs;
+    // Les 2 dernières colonnes sont positionnelles, DANS L'ORDRE de
+    // enteteCsvPieces() (Conditionnement avant Seuil si les deux sont
+    // présentes) — jamais lues si leur migration n'est pas visible, comme
+    // pour l'en-tête lui-même.
+    const [reference, designation, prixTexte, fournisseur, delaiTexte, ...reste] = champs;
     if (!designation) { erreurs.push(tR('Ligne {n} : désignation manquante, ignorée.', { n: numero })); continue; }
     const prix = nombreDepuisTexte(prixTexte);
     if (prix == null) { erreurs.push(tR('Ligne {n} : prix unitaire invalide, ignorée.', { n: numero })); continue; }
     const delai = delaiTexte ? nombreDepuisTexte(delaiTexte) : null;
-    lignes.push({
+    const ligne = {
       reference: reference || null,
       designation,
       unit_price: prix,
       supplier_name: fournisseur || null,
       avg_lead_time_days: delai != null ? Math.round(delai) : null,
-    });
+    };
+    let idxReste = 0;
+    if (SCHEMA.hasStockPackaging) {
+      const conditionnement = reste[idxReste++];
+      ligne.packaging = conditionnement ? conditionnement : null;
+    }
+    if (SCHEMA.hasStock) {
+      const seuilTexte = reste[idxReste++];
+      const seuil = seuilTexte ? nombreDepuisTexte(seuilTexte) : null;
+      ligne.default_reorder_point = seuil != null ? seuil : null;
+    }
+    lignes.push(ligne);
   }
   return { lignes, erreurs };
 }
@@ -18731,8 +18785,10 @@ async function lireTexteFichier(file) {
 
 function modeleCsvCatalogue() {
   const exemple = ['FLT-0142', 'Filtre à huile moteur', '24.90', 'Motoculture Pacifique', '5'];
+  if (SCHEMA.hasStockPackaging) exemple.push('Boîte de 12');
+  if (SCHEMA.hasStock) exemple.push('3');
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  return [ENTETE_CSV_PIECES, exemple].map((r) => r.map(escape).join(',')).join('\r\n');
+  return [enteteCsvPieces(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
 function telechargerModeleCsvCatalogue() {
   const blob = new Blob([csvToUtf16Buffer(modeleCsvCatalogue())], { type: 'text/csv;charset=utf-16le;' });
@@ -18761,6 +18817,8 @@ function ouvrirImportCatalogue() {
     { icone: 'info', teinte: 'is-bleu', titre: trad('Référence et Fournisseur :'), texte: trad('facultatifs, peuvent rester vides.') },
     { icone: 'devise', teinte: 'is-vert', titre: trad('Prix unitaire :'), texte: trad('nombre (virgule ou point décimal accepté).') },
     { icone: 'bientot', teinte: 'is-ambre', titre: trad('Délai moyen (jours) :'), texte: trad('nombre entier, facultatif.') },
+    ...(SCHEMA.hasStockPackaging ? [{ icone: 'boite', teinte: 'is-bleu', titre: trad('Conditionnement :'), texte: trad('texte libre (ex : « Boîte de 12 »), facultatif.') }] : []),
+    ...(SCHEMA.hasStock ? [{ icone: 'alerte', teinte: 'is-ambre', titre: trad('Seuil de réapprovisionnement :'), texte: trad('quantité en dessous de laquelle une alerte se déclenche, facultatif.') }] : []),
   ];
 
   overlay.innerHTML = `
@@ -18782,10 +18840,10 @@ function ouvrirImportCatalogue() {
           <p class="import-csv-libelle">${trad('Fichier CSV avec un en-tête')} <strong class="import-csv-badge">${trad('EXACTEMENT')}</strong> ${trad('dans cet ordre :')}</p>
           <div class="import-csv-terminal">
             <div class="import-csv-terminal-tete">
-              <span><span class="dot"></span>${trad('En-tête requis (colonnes 1 à 5)')}</span>
+              <span><span class="dot"></span>${tR('En-tête requis (colonnes 1 à {n})', { n: enteteCsvPieces().length })}</span>
               <button type="button" id="import-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
             </div>
-            <div class="import-csv-terminal-code">${esc(ENTETE_CSV_PIECES.join(','))}</div>
+            <div class="import-csv-terminal-code">${esc(enteteCsvPieces().join(','))}</div>
           </div>
         </div>
 
@@ -18832,7 +18890,7 @@ function ouvrirImportCatalogue() {
   const boutonCopier = overlay.querySelector('#import-copier');
   boutonCopier?.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(ENTETE_CSV_PIECES.join(','));
+      await navigator.clipboard.writeText(enteteCsvPieces().join(','));
       const texteBtn = boutonCopier.querySelector('span');
       const avant = texteBtn.textContent;
       boutonCopier.classList.add('is-copie');
@@ -18890,7 +18948,7 @@ function ouvrirImportCatalogue() {
           lignes.map((l) => ({ ...l, company_id: UI.companyId })),
           { onConflict: 'company_id,reference' },
         )
-        .select('id, reference, designation, unit_price, supplier_name, avg_lead_time_days');
+        .select(colonnesCatalogueePiece());
       if (error) throw error;
       // Fusion dans UI.partsCatalog par id (remplace les pièces déjà connues,
       // ajoute les nouvelles) — même esprit que le reste de la vue TCO.
@@ -19499,11 +19557,13 @@ VIEWS.tco = {
     const champPrix = root.querySelector('#tco-piece-prix');
     const champFournisseur = root.querySelector('#tco-piece-fournisseur');
     const champDelai = root.querySelector('#tco-piece-delai');
+    const champConditionnement = root.querySelector('#tco-piece-conditionnement');
+    const champSeuil = root.querySelector('#tco-piece-seuil');
     const titreForm = root.querySelector('#tco-piece-form-titre');
     const boutonAjouter = root.querySelector('#tco-piece-ajouter');
     const boutonAjouterLabel = boutonAjouter?.querySelector('span');
     const boutonAnnuler = root.querySelector('#tco-piece-annuler');
-    const COLONNES_PIECE = 'id, reference, designation, unit_price, supplier_name, avg_lead_time_days';
+    const COLONNES_PIECE = colonnesCatalogueePiece();
     const sortirDuModeEdition = () => {
       pieceEnEdition = null;
       if (champRef) champRef.value = '';
@@ -19511,6 +19571,8 @@ VIEWS.tco = {
       if (champPrix) champPrix.value = '';
       if (champFournisseur) champFournisseur.value = '';
       if (champDelai) champDelai.value = '';
+      if (champConditionnement) champConditionnement.value = '';
+      if (champSeuil) champSeuil.value = '';
       if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
       if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
       if (boutonAnnuler) boutonAnnuler.hidden = true;
@@ -19526,15 +19588,22 @@ VIEWS.tco = {
       const prix = nombreDepuisTexte(champPrix.value) ?? 0;
       const fournisseur = champFournisseur.value.trim();
       const delai = nombreDepuisTexte(champDelai.value);
+      const conditionnement = champConditionnement ? champConditionnement.value.trim() : '';
+      const seuil = champSeuil ? nombreDepuisTexte(champSeuil.value) : null;
       if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
       btn.disabled = true;
       if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
+      const champsOptionnels = {
+        ...(SCHEMA.hasStockPackaging ? { packaging: conditionnement || null } : {}),
+        ...(SCHEMA.hasStock ? { default_reorder_point: seuil } : {}),
+      };
       try {
         if (pieceEnEdition) {
           const { data, error } = await sb.from('parts_catalog')
             .update({
               reference: reference || null, designation, unit_price: prix,
               supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+              ...champsOptionnels,
             })
             .eq('id', pieceEnEdition)
             .select(COLONNES_PIECE)
@@ -19549,6 +19618,7 @@ VIEWS.tco = {
             .insert({
               company_id: UI.companyId, reference: reference || null, designation, unit_price: prix,
               supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+              ...champsOptionnels,
             })
             .select(COLONNES_PIECE)
             .single();
@@ -19577,6 +19647,8 @@ VIEWS.tco = {
         if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
         if (champFournisseur) champFournisseur.value = piece.supplier_name || '';
         if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
+        if (champConditionnement) champConditionnement.value = piece.packaging || '';
+        if (champSeuil) champSeuil.value = piece.default_reorder_point != null ? texteAvecSeparateurs(piece.default_reorder_point) : '';
         if (titreForm) titreForm.textContent = trad('Modifier une pièce');
         if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
         if (boutonAnnuler) boutonAnnuler.hidden = false;
@@ -19821,7 +19893,7 @@ function ligneInventaireStockHtml(it) {
       <div class="tco-part-gauche">
         <div class="tco-part-icone">${picto('boite')}</div>
         <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${enAlerte ? `<span class="badge alert">${trad('Seuil bas')}</span>` : ''}</span>
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${piece?.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="badge alert">${trad('Seuil bas')}</span>` : ''}</span>
           <span class="tco-part-ref">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</span>
         </div>
       </div>
@@ -19866,7 +19938,7 @@ function blocInventaireStockHtml() {
 // mouvement » réservé à peutGererMouvementsStock() (gérant+mécanicien).
 function ligneMouvementStockHtml(m) {
   const badge = badgeTypeMouvement(m.type);
-  const piece = designationPiece(m.part_id);
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(m.part_id));
   const lieu = m.type === 'transfert'
     ? `${nomMagasin(m.warehouse_id)} → ${nomMagasin(m.destination_warehouse_id)}`
     : nomMagasin(m.warehouse_id);
@@ -19876,7 +19948,7 @@ function ligneMouvementStockHtml(m) {
       <div class="tco-part-gauche">
         <div class="tco-part-icone"><span class="badge ${badge.classe}">${badge.texte}</span></div>
         <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece)}</span></span>
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(m.part_id))}</span>${piece?.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}</span>
           <span class="tco-part-ref">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</span>
         </div>
       </div>
@@ -19943,7 +20015,7 @@ function ouvrirNouveauMouvementModal() {
   const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
   const gerant = peutGererParametresStock();
   const optionsMagasins = magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
-  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`).join('');
+  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.packaging ? ` (${esc(p.packaging)})` : ''}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`).join('');
 
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mvt-titre">
@@ -27699,6 +27771,12 @@ async function boot(toastMessage) {
   // migration continue de VOIR ses données, seul le palier décide si le
   // module reste ACCESSIBLE (voir navItemsVisibles()).
   SCHEMA.hasStock = await sonderColonne('warehouses', 'id');
+  // Conditionnement du catalogue de pièces (« Boîte de 12 », « Bidon de
+  // 5L »…) : migration ajoutée APRÈS coup, séparément du reste du module
+  // Stock (demande de l'utilisateur une fois la Phase 1 déjà en place) —
+  // sonde dédiée, ne pas supposer sa présence sous SCHEMA.hasStock qui a
+  // pu être migré avant elle.
+  SCHEMA.hasStockPackaging = await sonderColonne('parts_catalog', 'packaging');
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -27859,7 +27937,7 @@ async function boot(toastMessage) {
   if (SCHEMA.hasTco) {
     const { data: pieces } = await sb
       .from('parts_catalog')
-      .select('id, reference, designation, unit_price, supplier_name, avg_lead_time_days')
+      .select(colonnesCatalogueePiece())
       .eq('company_id', profile.company_id)
       .order('designation');
     partsCatalog = pieces || [];
