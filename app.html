@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-fmr/SlPijhy2gCEvjpwRptCBzUmu9DpP6CWvuFG+9PU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-8Il/b+x+FBovCtv/ci307FuMN+Q95XsfVDXuRGNK4Tk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4379,44 +4379,43 @@
   .agenda-semaine-noms span{text-align:center;font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;}
   .agenda-grille{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;}
   .agenda-jour{
-    min-width:0;min-height:112px;padding:8px;border-radius:var(--r-md);background:var(--surface-soft);
-    display:flex;flex-direction:column;gap:5px;border:1px solid transparent;
+    min-width:0;min-height:64px;padding:8px;border-radius:var(--r-md);background:var(--surface-soft);
+    display:flex;flex-direction:column;gap:5px;border:1px solid transparent;position:relative;
   }
   .agenda-jour.is-hors-mois{opacity:.35;}
   .agenda-jour.is-weekend{background:rgba(14,19,51,.02);}
-  /* Toute la case est cliquable pour programmer un entretien sur ce jour
-     (pas seulement une icône) — fonctionne au doigt, pas seulement au hover. */
+  /* Toute la case est cliquable — vers la fenêtre récapitulative du jour
+     (ouvrirJourAgenda) s'il y a au moins une échéance, vers « Planifier un
+     entretien » sinon — ça fonctionne au doigt, pas seulement au hover : le
+     nom/la tâche/le badge de chaque échéance ne tiennent plus DANS la case
+     (débordement et illisibilité constatés sur téléphone en usage réel),
+     seule une pastille de couleur par échéance y reste ; le détail complet
+     (même carte que la Liste chronologique) s'ouvre au clic. */
   .agenda-jour.is-cliquable{cursor:pointer;}
   .agenda-jour.is-cliquable:hover{background:rgba(99,102,241,.06);}
   .agenda-jour-tete{display:flex;align-items:center;justify-content:space-between;}
   .agenda-jour-num{font-weight:700;font-size:13.5px;font-family:'Space Grotesk',sans-serif;}
   .agenda-jour.is-aujourdhui .agenda-jour-num{color:var(--primary-dark);}
-  .agenda-jour-ajout{width:14px;height:14px;color:var(--ink-3);opacity:0;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease;}
+  /* Toujours visible (pas seulement au survol : un doigt ne « survole »
+     jamais) — plus discret par défaut, net au survol/focus pour les
+     pointeurs qui le permettent. */
+  .agenda-jour-ajout{
+    width:20px;height:20px;border:none;background:none;padding:0;border-radius:6px;color:var(--ink-3);
+    opacity:.55;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease,background .12s ease;cursor:pointer;
+  }
   .agenda-jour-ajout svg{width:12px;height:12px;}
-  .agenda-jour.is-cliquable:hover .agenda-jour-ajout{opacity:1;}
+  .agenda-jour-ajout:hover,.agenda-jour-ajout:focus-visible{opacity:1;background:rgba(99,102,241,.12);}
   .agenda-jour.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.3);}
   .agenda-jour.is-soon{background:var(--soon-bg);border-color:rgba(99,102,241,.25);}
   .agenda-jour.is-ok{background:var(--ok-bg);border-color:rgba(36,181,168,.25);}
-  .agenda-evt{
-    display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:5px 6px;
-    border-radius:8px;background:var(--surface);border:1px solid var(--line);cursor:pointer;text-align:left;font-family:inherit;
-  }
-  /* Entretien programmé À LA MAIN (scheduled_maintenances) plutôt qu'échéance
-     du plan : un simple liseret pour le distinguer, jamais une couleur d'état
-     différente — l'état affiché reste toujours celui, réel, de la machine. */
-  .agenda-evt.is-programme{border-left:3px solid var(--primary-dark);}
-  /* width:100% nécessaire (même piège que les grilles CSS 1fr sans minimum
-     plus haut dans ce fichier : sans largeur explicite, un enfant
-     align-items:flex-start se contente de son contenu). 2 lignes plutôt
-     qu'une seule tronquée : à la largeur réelle d'une case (~45-70px sur un
-     écran de bureau standard), une ellipse 1 ligne ne laissait quasiment
-     rien du nom — vérifié à 1024px de large, pas juste supposé. */
-  .agenda-evt-nom{
-    font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.25;width:100%;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  }
-  .agenda-evt-tache{font-size:10.5px;color:var(--ink-2);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-  .agenda-evt-badge{font-size:9.5px;padding:2px 6px;}
+  /* Pastilles : une par échéance (4 max, puis « +N ») — remplace les
+     anciennes mini-cartes nom/tâche/badge, devenues illisibles dans une case
+     de calendrier sur petit écran. */
+  .agenda-jour-dots{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
+  .agenda-jour-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;background:var(--ink-3);}
+  .agenda-jour-dot.is-late{background:var(--late);}
+  .agenda-jour-dot.is-soon{background:var(--soon);}
+  .agenda-jour-dot.is-ok{background:var(--ok);}
   .agenda-jour-plus{font-size:10.5px;font-weight:700;color:var(--ink-3);}
 
   .agenda-legende{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2);}
@@ -4424,9 +4423,13 @@
   .agenda-legende-item .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
   .agenda-pills .dot{width:8px;height:8px;border-radius:50%;}
 
+  /* Fenêtre récapitulative d'un jour (ouvrirJourAgenda) : mêmes cartes que la
+     Liste chronologique (.chrono-carte), même reset de marge sur la 1ʳᵉ. */
+  .agenda-jour-modal-liste{max-height:60vh;overflow-y:auto;margin-top:4px;}
+  .agenda-jour-modal-liste .chrono-carte:first-of-type{margin-top:0;}
+
   @media (max-width:640px){
-    .agenda-jour{min-height:76px;padding:6px;}
-    .agenda-evt-tache{display:none;}
+    .agenda-jour{min-height:52px;padding:6px;}
     .agenda-nav-label{min-width:auto;font-size:13px;}
   }
 
@@ -15604,16 +15607,23 @@ function wirePreparation(root) {
 // AUCUNE ACTION NOUVELLE : les trois boutons ouvrent les MÊMES fenêtres que le
 // Parc (Enregistrer un entretien, Prochain entretien, Voir le plan) — seul le
 // choix DE LAQUELLE proposer en avant suit l'état, comme sur la carte machine.
-function chronologieCarteHtml(m, info) {
-  const tache = nextTaskLabel(m);
+// `programme` (une ligne de scheduled_maintenances) quand cette carte vient
+// d'une programmation manuelle plutôt que de l'échéance du plan — reprise de
+// la distinction déjà faite par l'ancien agendaEvenementMiniHtml() : la tâche
+// affichée devient celle programmée, mais l'état/la couleur restent TOUJOURS
+// ceux, réels et actuels, de la machine (`info`), jamais figés à la date de
+// programmation.
+function chronologieCarteHtml(m, info, programme) {
+  const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
   const meta = [machineBrandModel(m), identifiantAffiche(m)].filter(Boolean).join(' · ');
+  const echeance = programme ? tR('Programmé le {date}', { date: formatShortDate(programme.scheduled_date) }) : info.label;
   const cta = info.state === 'late'
     ? { texte: trad('Enregistrer l\'entretien'), action: 'log', picto: 'entretien' }
     : info.state === 'soon'
       ? { texte: trad('Planifier'), action: 'next', picto: 'prochain' }
       : { texte: trad('Voir'), action: 'plan', picto: 'plan' };
   return `
-    <article class="chrono-carte is-${info.state}" data-machine="${esc(m.id)}">
+    <article class="chrono-carte is-${info.state}${programme ? ' is-programme' : ''}" data-machine="${esc(m.id)}"${programme ? ` data-programme-id="${esc(programme.id)}"` : ''}>
       <span class="chrono-bar" aria-hidden="true"></span>
       <div class="chrono-corps">
         <div class="chrono-tete">
@@ -15622,7 +15632,7 @@ function chronologieCarteHtml(m, info) {
         </div>
         ${meta ? `<div class="chrono-meta">${esc(meta)}</div>` : ''}
         ${tache ? `<div class="chrono-tache">${esc(tache)}</div>` : ''}
-        <div class="chrono-echeance">${esc(info.label)}</div>
+        <div class="chrono-echeance">${esc(echeance)}</div>
       </div>
       <button type="button" class="btn-row-action chrono-cta" data-chrono="${cta.action}" data-machine-id="${esc(m.id)}">${picto(cta.picto)}<span>${cta.texte}</span></button>
     </article>`;
@@ -15710,29 +15720,20 @@ function agendaParJour(datedFiltres) {
   return map;
 }
 
-const AGENDA_JOUR_MAX = 2;
-// `programme` (une ligne de scheduled_maintenances) quand cette carte vient
-// d'une programmation manuelle plutôt que de l'échéance du plan — sa couleur
-// reste TOUJOURS l'état RÉEL ACTUEL de la machine (info vient d'infoMachine,
-// jamais figé au moment de la programmation), comme demandé.
-function agendaEvenementMiniHtml(m, info, programme) {
-  const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
-  const titre = programme
-    ? tR('{machine} — programmé le {date}', { machine: m.name, date: formatShortDate(programme.scheduled_date) })
-    : info.label;
-  return `
-    <button type="button" class="agenda-evt is-${info.state}${programme ? ' is-programme' : ''}"
-      data-machine-id="${esc(m.id)}"${programme ? ` data-programme-id="${esc(programme.id)}"` : ''} title="${esc(titre)}">
-      <span class="agenda-evt-nom">${esc(m.name)}</span>
-      ${tache ? `<span class="agenda-evt-tache">${esc(tache)}</span>` : ''}
-      <span class="badge ${badgeClass(info.state)} agenda-evt-badge">${badgeLabel(info.state)}</span>
-    </button>`;
-}
-// La case entière (pas juste une icône) est cliquable pour programmer un
-// entretien sur ce jour — plus simple à découvrir, et fonctionne au doigt
-// (un hover n'existe pas sur tablette/téléphone). `data-jour` seulement sur
-// les jours du mois affiché : cliquer un jour grisé (mois voisin) ne fait
-// rien de surprenant.
+// Nom/tâche/badge de chaque échéance ne tenaient plus dans une case de
+// calendrier sur téléphone (débordement, illisible — constaté en usage
+// réel) : la case ne montre plus qu'une pastille de couleur par échéance ;
+// le détail (même carte que la Liste chronologique) s'ouvre au clic sur la
+// case, dans ouvrirJourAgenda(). AGENDA_JOUR_DOTS_MAX limite le nombre de
+// pastilles avant de résumer le reste en « +N ».
+const AGENDA_JOUR_DOTS_MAX = 4;
+// La case entière (pas juste une icône) est cliquable : vers le récapitulatif
+// du jour s'il y a au moins une échéance, vers « Planifier un entretien »
+// sinon (wireAgenda) — ça fonctionne au doigt, pas seulement au hover.
+// `data-jour` seulement sur les jours du mois affiché : cliquer un jour
+// grisé (mois voisin) ne fait rien de surprenant. Le bouton « + » reste une
+// action séparée (toujours visible, pas seulement au survol) pour programmer
+// un entretien même sur un jour qui a déjà des échéances.
 function agendaJourHtml(jour, evenements) {
   const jourNum = jour.iso.slice(8, 10);
   const classes = ['agenda-jour'];
@@ -15743,16 +15744,20 @@ function agendaJourHtml(jour, evenements) {
   }
   if (jour.iso === todayIso()) classes.push('is-aujourdhui');
   if (evenements.length) classes.push(`is-${evenements[0].info.state}`);
-  const visibles = evenements.slice(0, AGENDA_JOUR_MAX);
+  const visibles = evenements.slice(0, AGENDA_JOUR_DOTS_MAX);
   const reste = evenements.length - visibles.length;
+  const dotsHtml = evenements.length ? `
+      <div class="agenda-jour-dots">
+        ${visibles.map(({ info }) => `<span class="agenda-jour-dot is-${info.state}"></span>`).join('')}
+        ${reste > 0 ? `<span class="agenda-jour-plus">+${reste}</span>` : ''}
+      </div>` : '';
   return `
     <div class="${classes.join(' ')}"${jour.dansLeMois ? ` data-jour="${esc(jour.iso)}"` : ''}>
       <div class="agenda-jour-tete">
         <span class="agenda-jour-num">${jourNum}</span>
-        ${jour.dansLeMois ? `<span class="agenda-jour-ajout" aria-hidden="true">${picto('croix')}</span>` : ''}
+        ${jour.dansLeMois ? `<button type="button" class="agenda-jour-ajout" data-jour-ajout="${esc(jour.iso)}" aria-label="${esc(trad('Planifier un entretien ce jour'))}">${picto('croix')}</button>` : ''}
       </div>
-      ${visibles.map(({ m, info, programme }) => agendaEvenementMiniHtml(m, info, programme)).join('')}
-      ${reste > 0 ? `<span class="agenda-jour-plus">${esc(tR('+ {n} autre(s)', { n: reste }))}</span>` : ''}
+      ${dotsHtml}
     </div>`;
 }
 function agendaGrilleHtml(jours, parJour) {
@@ -15873,6 +15878,69 @@ function agendaContenuHtml() {
   const parJour = new Map();
   jours.forEach((j) => parJour.set(j.iso, [...(parJourEcheances.get(j.iso) || []), ...(parJourProgrammes.get(j.iso) || [])]));
   return agendaGrilleHtml(jours, parJour) + agendaLegendeHtml();
+}
+
+// Même filtre/fusion que agendaContenuHtml() (échéances datées + entretiens
+// programmés, filtrés par le statut actif) mais pour UN SEUL jour — le rendu
+// de la grille ne garde pas les événements de chaque case après coup, donc
+// ouvrirJourAgenda() (déclenché au clic, pas au rendu) les recalcule ici.
+function agendaEvenementsDuJour(iso) {
+  const statut = agendaStatutActif();
+  const { dated } = agendaEvenements();
+  const passe = (info) => statut === 'tous' || info.state === statut;
+  const datedFiltres = dated.filter(({ info }) => passe(info));
+  const echeances = agendaParJour(datedFiltres).get(iso) || [];
+  const programmes = agendaProgrammesParJour(statut).get(iso) || [];
+  return [...echeances, ...programmes];
+}
+// Clic sur une case du calendrier qui a au moins une échéance : liste chaque
+// machine concernée avec la MÊME carte que la Liste chronologique
+// (chronologieCarteHtml) plutôt que de réinventer un second format — jamais
+// entassée dans la case elle-même (voir agendaJourHtml). Câblage dédié (pas
+// wireChronologie telle quelle) : une carte « programmée » doit rouvrir
+// ouvrirProgrammeActions (voir/annuler CETTE programmation), comme le faisait
+// l'ancien clic sur .agenda-evt — wireChronologie ne connaît pas ce cas,
+// puisqu'aucun de ses autres appelants (Liste chronologique, Tableau de
+// bord) n'affiche de carte programmée.
+function ouvrirJourAgenda(iso) {
+  const evenements = agendaEvenementsDuJour(iso);
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const cartesHtml = evenements.map(({ m, info, programme }) => chronologieCarteHtml(m, info, programme)).join('');
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>${esc(formatLongDate(iso))}</h2>
+      <div class="agenda-jour-modal-liste">${cartesHtml || `<p class="muted-text">${trad('Aucune échéance ce jour.')}</p>`}</div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="agenda-jour-planifier">${trad('Planifier un entretien')}</button>
+        <button type="button" class="secondary" id="agenda-jour-fermer">${trad('Fermer')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#agenda-jour-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#agenda-jour-planifier').addEventListener('click', () => { overlay.remove(); ouvrirProgrammerEntretien(iso); });
+  overlay.querySelectorAll('.chrono-carte').forEach((carte) => carte.addEventListener('click', (e) => {
+    if (e.target.closest('[data-chrono]')) return;
+    const m = UI.machines.find((x) => x.id === carte.dataset.machine);
+    if (!m) return;
+    if (carte.dataset.programmeId) {
+      const programme = (UI.scheduledMaintenances || []).find((p) => p.id === carte.dataset.programmeId);
+      if (programme) { overlay.remove(); ouvrirProgrammeActions(programme, m); return; }
+    }
+    overlay.remove();
+    openPlanView(m, UI.companyId, UI.categories);
+  }));
+  overlay.querySelectorAll('[data-chrono]').forEach((btn) => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
+    if (!m) return;
+    overlay.remove();
+    const action = btn.dataset.chrono;
+    if (action === 'log') openLogInterventionModal(m, nextTaskLabel(m));
+    else if (action === 'next') openNextMaintenanceView(m);
+    else openPlanView(m, UI.companyId, UI.categories);
+  }));
 }
 
 // Carte « Surveillance au compteur » : les échéances SANS date (heures/km),
@@ -16118,19 +16186,21 @@ function wireAgenda(root) {
     UI.agendaRefIso = todayIso();
     renderApp();
   });
-  root.querySelectorAll('.agenda-evt').forEach((btn) => btn.addEventListener('click', (e) => {
+  // Le bouton « + » reste une action séparée (toujours visible désormais,
+  // plus seulement au survol) : programmer un entretien MÊME sur un jour qui
+  // a déjà des échéances, sans passer par le récapitulatif.
+  root.querySelectorAll('[data-jour-ajout]').forEach((btn) => btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
-    if (!m) return;
-    if (btn.dataset.programmeId) {
-      const programme = (UI.scheduledMaintenances || []).find((p) => p.id === btn.dataset.programmeId);
-      if (programme) { ouvrirProgrammeActions(programme, m); return; }
-    }
-    openPlanView(m, UI.companyId, UI.categories);
+    ouvrirProgrammerEntretien(btn.dataset.jourAjout);
   }));
+  // Le reste de la case : récapitulatif du jour s'il y a au moins une
+  // échéance (ouvrirJourAgenda), sinon directement « Planifier un
+  // entretien » comme avant — un jour vide n'a rien d'autre à montrer.
   root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => cell.addEventListener('click', (e) => {
-    if (e.target.closest('.agenda-evt')) return;
-    ouvrirProgrammerEntretien(cell.dataset.jour);
+    if (e.target.closest('[data-jour-ajout]')) return;
+    const iso = cell.dataset.jour;
+    if (agendaEvenementsDuJour(iso).length) ouvrirJourAgenda(iso);
+    else ouvrirProgrammerEntretien(iso);
   }));
   root.querySelector('#agenda-planifier')?.addEventListener('click', () => ouvrirProgrammerEntretien());
   root.querySelector('#agenda-export-ics')?.addEventListener('click', telechargerPlanningIcs);
