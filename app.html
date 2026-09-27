@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uG2HxzfMmJkoQDI3mlNOfcC2seVUEJzNqXPWOAZCjNM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-UHlvG0oHnv77JNBDMSR1kqSx0MpBQls/KpzOlofM6rY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5452,6 +5452,11 @@
      « Télécharger » (modale QR, ouvrirQrMachine). */
   .qr-modal .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .qr-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
+  /* Même piège, même correctif : la modale du rapport TCO (ouvrirRapportTcoModal)
+     est ajoutée à document.body, hors de .vue-couts-tco — la règle ci-dessus
+     ne s'applique donc pas, il en faut une dédiée. */
+  .rapport-tco-modal .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .rapport-tco-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
   /* Les blocs de la page (bandeau, tuiles KPI, classement flotte, grille
      Paramètres/Catalogue) sont des enfants directs de .vue-couts-tco sans
      .dash-grid autour : sans gap ici, ils se touchaient (contrairement aux
@@ -7561,6 +7566,300 @@ function repartitionFlotteTco(interventionsToutes, coutsToutes) {
   return { pieces, mainOeuvre, fixes, heures, total, pctPieces: (pieces / total) * 100, pctMainOeuvre: (mainOeuvre / total) * 100, pctFixes: (fixes / total) * 100 };
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// ★ RAPPORT TCO (PDF) — calculs purs, aucun accès réseau. Tout part de
+// `flotte`/`interventionsFlotte`/`coutsFlotte` déjà chargés par
+// VIEWS.tco.mount() — jamais un second fetch flotte-entière pour le rapport.
+
+// CAPEX de la fenêtre affichée. Deux régimes, JAMAIS mélangés :
+//  · nbAnnees != null (12 derniers mois / année en cours) : la dépréciation
+//    comptable annuelle au prorata — Σ depreciationAnnuelle(m) × nbAnnees.
+//    Les machines sans amortization_years sont EXCLUES et COMPTÉES
+//    (depreciationAnnuelle renvoie null) — jamais une durée supposée.
+//  · nbAnnees == null (« Depuis mise en service ») : le capital RÉELLEMENT
+//    consommé, Σ (parAcquisition − revente) — exactement la part achat déjà
+//    incluse dans tco.total. Une dépréciation « annuelle » n'aurait aucun
+//    sens sur une fenêtre sans durée propre.
+function capexFlotteSurPeriode(flotte, nbAnnees) {
+  let total = 0;
+  let nbRetenues = 0;
+  let nbSansDuree = 0;
+  (flotte?.lignes || []).forEach(({ machine, tco }) => {
+    if (nbAnnees != null) {
+      const dep = depreciationAnnuelle(machine);
+      if (dep == null) { nbSansDuree++; return; }
+      total += dep * nbAnnees;
+      nbRetenues++;
+    } else {
+      total += Math.max((tco.parAcquisition || 0) - (tco.revente || 0), 0);
+      nbRetenues++;
+    }
+  });
+  return { total, base: nbAnnees != null ? 'depreciation' : 'cumul', nbRetenues, nbSansDuree };
+}
+// TCO global de la période = CAPEX (ci-dessus) + OPEX (repartitionFlotteTco,
+// déjà calculé par rendreDynamique() sur la MÊME fenêtre — jamais recalculé
+// ici). `null` si les deux composantes sont nulles : rien à dire, la carte
+// disparaît plutôt que d'afficher un zéro.
+function tcoGlobalPeriode(capex, repartition) {
+  const opex = repartition?.total || 0;
+  const total = (capex?.total || 0) + opex;
+  if (!total) return null;
+  return {
+    total, capex: capex.total, opex,
+    pctCapex: (capex.total / total) * 100, pctOpex: (opex / total) * 100,
+    base: capex.base, nbSansDuree: capex.nbSansDuree,
+  };
+}
+// Coût réel moyen par unité d'usage vs cible pondérée — GROUPÉ PAR UNITÉ DE
+// COMPTEUR (heures/km, counterUnitOf) : additionner des heures et des
+// kilomètres dans un même quotient produirait un nombre qui ne veut rien
+// dire. Moyenne PONDÉRÉE PAR L'USAGE (Σcoûts/Σusage), pas une moyenne de
+// moyennes — une machine à 40 h ne doit pas peser autant qu'une à 4 000 h.
+// Cible pondérée = Σ(seuil_i × usage_i) / Σusage_i, sur le SOUS-ENSEMBLE des
+// machines dont la catégorie a un seuil — `cible: null` si aucune n'en a,
+// jamais un seuil inventé.
+function coutUsageMoyenVsCible(flotte) {
+  const parUnite = new Map();
+  (flotte?.lignes || []).forEach(({ machine, tco }) => {
+    if (tco.coutParUnite == null) return;
+    const usage = machineCounter(machine);
+    if (!usage) return;
+    const unit = counterUnitOf(machine);
+    if (!parUnite.has(unit)) {
+      parUnite.set(unit, { unite: unit, uniteCourte: counterShort(unit), usageCumule: 0, coutCumule: 0, seuilCumule: 0, usageAvecSeuil: 0, nbRetenues: 0, nbSansSeuil: 0 });
+    }
+    const bucket = parUnite.get(unit);
+    bucket.usageCumule += usage;
+    bucket.coutCumule += tco.coutParUnite * usage;
+    bucket.nbRetenues++;
+    const seuil = machine.category?.target_hourly_cost;
+    if (seuil != null) {
+      bucket.seuilCumule += Number(seuil) * usage;
+      bucket.usageAvecSeuil += usage;
+    } else {
+      bucket.nbSansSeuil++;
+    }
+  });
+  let uniteDominante = null;
+  let usageMax = -1;
+  const resultat = new Map();
+  parUnite.forEach((b, unit) => {
+    const reel = b.usageCumule ? b.coutCumule / b.usageCumule : null;
+    const cible = b.usageAvecSeuil ? b.seuilCumule / b.usageAvecSeuil : null;
+    resultat.set(unit, {
+      unite: b.unite, uniteCourte: b.uniteCourte, reel, cible,
+      ecart: (reel != null && cible != null) ? reel - cible : null,
+      ecartPct: (reel != null && cible) ? ((reel - cible) / cible) * 100 : null,
+      nbRetenues: b.nbRetenues, nbSansSeuil: b.nbSansSeuil, usageCumule: b.usageCumule,
+    });
+    if (b.usageCumule > usageMax) { usageMax = b.usageCumule; uniteDominante = unit; }
+  });
+  return { parUnite: resultat, uniteDominante };
+}
+// Construite SUR machinesAuDessusSeuilCategorie() (jamais un second filtre),
+// avec l'écart chiffré (unitaire et cumulé sur l'usage total de la machine).
+// ⚠ Périmètre LIFETIME (tco.coutParUnite inclut l'achat depuis toujours, pas
+// depuis le début de la période affichée à l'écran) — à étiqueter
+// explicitement « depuis la mise en service » partout où ces chiffres sont
+// montrés, jamais sous l'en-tête de la période choisie.
+function depassementsSeuilAvecEcart(flotte) {
+  const au = machinesAuDessusSeuilCategorie(flotte);
+  let ecartCumuleTotal = 0;
+  let nbEcartIncalculable = 0;
+  const liste = au.map(({ machine, tco, decision }) => {
+    const seuil = Number(machine.category.target_hourly_cost);
+    const coutReel = tco.coutParUnite;
+    const usage = machineCounter(machine);
+    const uniteCourte = counterShort(counterUnitOf(machine));
+    const ecartUnitaire = coutReel - seuil;
+    const ecartPct = seuil ? (ecartUnitaire / seuil) * 100 : null;
+    const ecartCumule = usage ? ecartUnitaire * usage : null;
+    if (ecartCumule != null) ecartCumuleTotal += ecartCumule; else nbEcartIncalculable++;
+    return {
+      machine, tco, decision, seuil, coutReel, uniteCourte, ecartUnitaire, ecartPct, usage, ecartCumule,
+      severite: severiteEcartSeuil(ecartPct != null ? ecartPct / 100 : null),
+    };
+  }).sort((a, b) => (b.ecartCumule ?? -Infinity) - (a.ecartCumule ?? -Infinity));
+  return { liste, nb: liste.length, ecartCumuleTotal, nbEcartIncalculable };
+}
+// Seuils de PRÉSENTATION, nouveaux et assumés comme tels — etatTco() mesure
+// entretien/dépréciation, une autre grandeur, pas réutilisable ici. Le
+// pourcentage RÉEL reste toujours imprimé à côté du mot, même discipline que
+// ligneClassementTcoHtml : le lecteur ne dépend jamais de l'étiquette seule.
+// `ecartFraction` : 0,5 = 50 % au-dessus du seuil.
+function severiteEcartSeuil(ecartFraction) {
+  if (ecartFraction == null) return null;
+  if (ecartFraction >= 0.5) return 'critique';
+  if (ecartFraction >= 0.25) return 'eleve';
+  if (ecartFraction > 0) return 'modere';
+  return null;
+}
+// UNE phrase factuelle par machine hors cible. RÈGLE ABSOLUE : chaque
+// branche ne cite que (a) des nombres calculés de CETTE machine, (b) le
+// seuil que la société a elle-même saisi, (c) une notion qui existe déjà
+// dans l'application. Aucune cause de panne, aucune pièce, aucune date
+// future, aucun fournisseur, aucun pourcentage vs N-1 — voir keeva-tco-feature
+// (le paragraphe « Analyse de la Direction » du rapport de référence n'est
+// PAS repris pour cette raison : aucune donnée ne le porte honnêtement).
+function recommandationSeuilTco(ligne, ventilationPeriode) {
+  const { decision, machine } = ligne;
+  if (decision && decision.base === 'amortissement') {
+    const pct = Math.round(decision.ratio * 100);
+    if (decision.ratio >= 1) {
+      return tR('Entretien annualisé à {n} % de la dépréciation annuelle : le remplacement se justifie chiffres en main.', { n: pct });
+    }
+    if (decision.ratio >= 0.5) {
+      return tR('Entretien annualisé à {n} % de la dépréciation annuelle — point d\'inflexion approché, à revoir au prochain entretien.', { n: pct });
+    }
+    // Sous 50 % : ce ratio-là n'est pas le signal le plus parlant ici — on
+    // regarde plutôt la composition de l'entretien de la période, ci-dessous.
+  } else {
+    // ratioAmortissement (tcoMachine) exige DEUX champs à la fois
+    // (amortization_years ET purchase_date, via anneesDepuisAchat) — nommer
+    // celui qui manque réellement, jamais toujours le même mot par défaut.
+    if (machine.amortization_years == null) {
+      return trad('Durée d\'amortissement non renseignée : dépassement mesuré, arbitrage garder/remplacer impossible à chiffrer précisément.');
+    }
+    if (!machine.purchase_date) {
+      return trad('Date d\'achat non renseignée : dépassement mesuré, arbitrage garder/remplacer impossible à chiffrer précisément.');
+    }
+    return trad('Dépassement mesuré, arbitrage garder/remplacer impossible à chiffrer précisément avec les données disponibles.');
+  }
+  const v = ventilationPeriode;
+  if (v && (v.pieces || v.mainOeuvre)) {
+    const totalV = v.pieces + v.mainOeuvre;
+    if (v.pieces >= v.mainOeuvre) {
+      return tR('Dépassement porté surtout par les pièces ({n} % de l\'entretien de la période).', { n: Math.round((v.pieces / totalV) * 100) });
+    }
+    return tR('Dépassement porté surtout par la main d\'œuvre ({n} % de l\'entretien de la période).', { n: Math.round((v.mainOeuvre / totalV) * 100) });
+  }
+  return trad('Aucun entretien enregistré sur la période : le dépassement vient des coûts d\'exploitation et de l\'achat.');
+}
+// Les N derniers trimestres CIVILS, du plus ancien au plus récent, le
+// dernier étant celui EN COURS (partiel — à le dire dans la légende, un
+// trimestre incomplet à côté de pleins se lirait sinon comme une baisse).
+function trimestresRecents(n = 4, ref) {
+  const base = ref ? new Date(ref) : new Date();
+  const trimCourant = Math.floor(base.getMonth() / 3);
+  const resultat = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const offset = trimCourant - i;
+    const annee = base.getFullYear() + Math.floor(offset / 4);
+    const trim = ((offset % 4) + 4) % 4;
+    const moisDebut = trim * 3;
+    const debut = new Date(annee, moisDebut, 1);
+    const fin = new Date(annee, moisDebut + 3, 1);
+    resultat.push({
+      cle: `${annee}-T${trim + 1}`,
+      label: tR('T{n} {annee}', { n: trim + 1, annee }),
+      debutIso: debut.toISOString().slice(0, 10),
+      finIso: fin.toISOString().slice(0, 10),
+      enCours: i === 0,
+    });
+  }
+  return resultat;
+}
+// Bucketing par comparaison de CHAÎNES ISO ('YYYY-MM-DD'), exactement
+// l'idiome déjà utilisé par le filtre de période (it.performed_at >= borne,
+// voir VIEWS.tco.mount()) — aucun parsing de Date, aucun décalage de fuseau
+// possible. Lignes sans date : ignorées et COMPTÉES (`ignorees`), jamais
+// silencieusement versées dans le premier trimestre. Lignes datées mais hors
+// des n derniers trimestres : simplement hors fenêtre, pas une anomalie.
+// Regroupement à 3 séries — choix de présentation assumé : Carburant
+// (kind==='fuel'), Pièces (parts_cost des interventions), et « Main d'œuvre
+// & frais fixes » qui fusionne labor_cost + tout coût d'exploitation dont le
+// genre n'est PAS 'fuel' (donc other + tax + insurance + storage, les 5
+// genres réels de operating_costs.kind moins le carburant déjà à part) — la
+// légende doit nommer ce contenu réel, ne jamais reprendre un libellé du
+// rapport de référence qui ne nommerait qu'un seul des quatre genres fusionnés.
+function evolutionOpexParTrimestre(interventionsFlotte, coutsFlotte, n = 4) {
+  const trimestres = trimestresRecents(n);
+  const carburant = new Array(n).fill(0);
+  const pieces = new Array(n).fill(0);
+  const mainOeuvreEtFrais = new Array(n).fill(0);
+  let ignorees = 0;
+  const trouverIndex = (iso) => trimestres.findIndex((t) => iso >= t.debutIso && iso < t.finIso);
+  (interventionsFlotte || []).forEach((it) => {
+    if (!it.performed_at) { ignorees++; return; }
+    const idx = trouverIndex(it.performed_at);
+    if (idx === -1) return;
+    pieces[idx] += Number(it.parts_cost) || 0;
+    mainOeuvreEtFrais[idx] += Number(it.labor_cost) || 0;
+  });
+  (coutsFlotte || []).forEach((c) => {
+    if (!c.incurred_at) { ignorees++; return; }
+    const idx = trouverIndex(c.incurred_at);
+    if (idx === -1) return;
+    const montant = Number(c.amount) || 0;
+    if (c.kind === 'fuel') carburant[idx] += montant; else mainOeuvreEtFrais[idx] += montant;
+  });
+  const totaux = trimestres.map((_, i) => carburant[i] + pieces[i] + mainOeuvreEtFrais[i]);
+  const max = Math.max(0, ...totaux);
+  return { trimestres, series: { carburant, pieces, mainOeuvreEtFrais }, totaux, max, ignorees, vide: max === 0 };
+}
+// Assemble tout ce qui précède pour le rapport TCO — une seule fonction
+// pure, testable sans jsPDF. `periode` est l'une des clés déjà utilisées par
+// le filtre de l'écran ('total'|'12m'|'annee'), `borne`/`annees` ses bornes
+// déjà calculées par borneDepuis()/anneesFenetre() (VIEWS.tco.mount()) —
+// jamais un second calcul de fenêtre temporelle.
+function assemblerDonneesRapportTco({ flotte, interventionsFlotte, coutsFlotte, periode, borne, annees, topN = 8 }) {
+  const interventionsFlat = borne ? interventionsFlotte.filter((it) => it.performed_at >= borne) : interventionsFlotte;
+  const coutsFlat = borne ? coutsFlotte.filter((c) => c.incurred_at >= borne) : coutsFlotte;
+  const repartition = repartitionFlotteTco(interventionsFlat, coutsFlat);
+  const capex = capexFlotteSurPeriode(flotte, annees);
+  const global = tcoGlobalPeriode(capex, repartition);
+  const coutUsage = coutUsageMoyenVsCible(flotte);
+  const depassementsToutes = depassementsSeuilAvecEcart(flotte);
+  // Recommandation par ligne : composition de l'entretien de LA MACHINE sur
+  // LA MÊME fenêtre que le reste du rapport (jamais lifetime pour cette part).
+  const interventionsParMachine = grouperParMachine(interventionsFlat);
+  const depassements = {
+    ...depassementsToutes,
+    liste: depassementsToutes.liste.slice(0, topN).map((ligne) => ({
+      ...ligne,
+      recommandation: recommandationSeuilTco(ligne, ventilationCoutsInterventions(interventionsParMachine.get(ligne.machine.id) || [])),
+    })),
+    resteNonListe: Math.max(0, depassementsToutes.liste.length - topN),
+  };
+  const trimestres = evolutionOpexParTrimestre(interventionsFlotte, coutsFlotte, 4);
+  const PERIODE_LABEL = { total: trad('Depuis mise en service'), '12m': trad('12 derniers mois'), annee: trad('Année en cours') };
+  // Extrait par machine (page 3) : ventilation pièces/main d'œuvre/frais
+  // fixes/carburant LIFETIME (mêmes lignes que tco.total, jamais bornées à la
+  // période affichée — l'extrait décrit la machine, pas la fenêtre choisie),
+  // même découpage par `kind` que le graphique trimestriel (carburant à
+  // part, le reste des genres fusionné en « frais fixes »).
+  const interventionsParMachineTout = grouperParMachine(interventionsFlotte);
+  const coutsParMachineTout = grouperParMachine(coutsFlotte);
+  const extrait = flotte.lignes.map(({ machine, tco }) => {
+    const vent = ventilationCoutsInterventions(interventionsParMachineTout.get(machine.id) || []);
+    const coutsMachine = coutsParMachineTout.get(machine.id) || [];
+    const carburant = coutsMachine.filter((c) => c.kind === 'fuel').reduce((s, c) => s + (Number(c.amount) || 0), 0);
+    const fraisFixes = coutsMachine.filter((c) => c.kind !== 'fuel').reduce((s, c) => s + (Number(c.amount) || 0), 0);
+    return { machine, tco, pieces: vent.pieces, mainOeuvre: vent.mainOeuvre, fraisFixes, carburant };
+  });
+  // Catégories réellement présentes dans la flotte, sans seuil défini — un
+  // comptage honnête, jamais fabriqué.
+  const categoriesSansSeuil = new Set();
+  flotte.lignes.forEach(({ machine }) => {
+    if (machine.category && machine.category.target_hourly_cost == null) categoriesSansSeuil.add(machine.category.id);
+  });
+  return {
+    societe: UI.companyName || trad('Ta société'),
+    devise: UI.company?.currency || 'EUR',
+    dateIso: todayIso(),
+    periodeLabel: PERIODE_LABEL[periode] || PERIODE_LABEL.total,
+    periode, borne, annees, topN,
+    flotte, global, coutUsage, depassements, repartition, trimestres, extrait,
+    exclusions: {
+      sansPrixAchat: flotte.exclues.length,
+      sansDuree: capex.nbSansDuree,
+      sansSeuil: categoriesSansSeuil.size,
+      ignorees: trimestres.ignorees,
+    },
+  };
+}
+
 // SECOND SUIVI (optionnel) — mêmes principes que le principal, mais SANS
 // repli historique : la fonctionnalité n'existe qu'après la migration
 // dédiée, donc rien à lire ni à écrire tant que SCHEMA.hasCounter2 est faux
@@ -8771,6 +9070,629 @@ function loadJsQrLib() {
     jsQrLibPromise.catch(() => { jsQrLibPromise = null; });
   }
   return jsQrLibPromise;
+}
+
+// Générateur du rapport TCO (PDF) — vendorisé localement, chargé à la
+// demande, même politique que pdf.js/jsQR ci-dessus : jamais au démarrage,
+// seulement au clic sur « Rapport TCO (PDF) »/« Télécharger »/« Envoyer ».
+const JSPDF_URL = "vendor/jspdf.umd.min.js";
+let jsPdfLibPromise = null;
+function loadJsPdfLib() {
+  if (window.jspdf?.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if (!jsPdfLibPromise) {
+    jsPdfLibPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = JSPDF_URL;
+      s.onload = () => (window.jspdf?.jsPDF ? resolve(window.jspdf.jsPDF) : reject(new Error("jsPDF indisponible")));
+      s.onerror = () => reject(new Error(trad('Téléchargement du générateur de PDF impossible.')));
+      document.head.appendChild(s);
+    });
+    jsPdfLibPromise.catch(() => { jsPdfLibPromise = null; });
+  }
+  return jsPdfLibPromise;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ★ RAPPORT TCO — rendu PDF. Consomme uniquement `assemblerDonneesRapportTco`
+// (calculs purs, voir plus haut) : aucun chiffre n'est recalculé ici.
+
+// Les polices intégrées de jsPDF sont en WinAnsiEncoding. formatMontant()
+// produit U+202F (espace fine insécable, séparateur de milliers en fr-FR),
+// absente de cette table — sans cette normalisation, TOUS les montants du
+// rapport sortent avec un caractère cassé. Un seul point de passage, pour
+// qu'aucun appel à doc.text() ne puisse l'oublier.
+function pdfTexteSain(v) {
+  return String(v ?? '')
+    .replace(/[    ]/g, ' ')
+    .replace(/[‑‒–—−]/g, '-');
+}
+
+// Donut du parc → PNG, pour l'embarquer dans le PDF. Réutilise
+// donutTcoSvgHtml() TELLE QUELLE (zéro divergence visuelle avec l'écran) :
+// insérée hors-écran dans le DOM RÉEL (pas un document isolé) pour que les
+// var(--bleu-roi)/var(--ok)/var(--late) se résolvent via getComputedStyle —
+// un SVG sérialisé isolément n'hérite rien du :root de la page, les arcs
+// seraient sinon invisibles.
+async function donutTcoPngDataUri(repartition, taillePx = 400) {
+  if (!repartition) return null;
+  const hote = document.createElement('div');
+  hote.style.cssText = 'position:fixed;left:-99999px;top:0;';
+  hote.setAttribute('aria-hidden', 'true');
+  hote.innerHTML = donutTcoSvgHtml(repartition, taillePx);
+  document.body.appendChild(hote);
+  try {
+    const svg = hote.querySelector('svg');
+    if (!svg) return null;
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('width', String(taillePx));
+    svg.setAttribute('height', String(taillePx));
+    const racine = getComputedStyle(document.documentElement);
+    svg.querySelectorAll('[stroke]').forEach((el) => {
+      const val = el.getAttribute('stroke');
+      const m = val && /^var\((--[a-z0-9-]+)\)$/i.exec(val.trim());
+      if (m) {
+        const resolu = racine.getPropertyValue(m[1]).trim();
+        if (resolu) el.setAttribute('stroke', resolu);
+      }
+    });
+    const source = new XMLSerializer().serializeToString(svg);
+    // jamais btoa (limite Latin-1) : un data URI SVG encodé en URI, pas en base64.
+    const uriSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Rendu du donut impossible.'));
+      img.src = uriSvg;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = taillePx;
+    canvas.height = taillePx;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, taillePx, taillePx);
+    ctx.drawImage(image, 0, 0, taillePx, taillePx);
+    return canvas.toDataURL('image/png');
+  } finally {
+    hote.remove();
+  }
+}
+
+// Graphique à barres groupées — dessiné nativement (rect/line), aucun SVG.
+// `series` : { carburant:[], pieces:[], mainOeuvreEtFrais:[] }, une valeur
+// par trimestre. Mêmes 3 couleurs que le donut (bleu roi/sarcelle/ambre).
+const PDF_COULEUR_PIECES = [35, 111, 224];
+const PDF_COULEUR_MAIN_OEUVRE = [36, 181, 168];
+const PDF_COULEUR_FIXES = [222, 122, 22];
+function pdfBarresGroupees(doc, { x, y, largeur, hauteur, trimestres, series, T }) {
+  const n = trimestres.length;
+  const cles = ['carburant', 'pieces', 'mainOeuvreEtFrais'];
+  const couleurs = [PDF_COULEUR_FIXES, PDF_COULEUR_PIECES, PDF_COULEUR_MAIN_OEUVRE];
+  const max = Math.max(1, ...cles.flatMap((c) => series[c]));
+  const largeurGroupe = largeur / n;
+  const gap = largeurGroupe * 0.12;
+  const largeurBarre = (largeurGroupe - gap * 2) / 3;
+
+  doc.setDrawColor(225, 225, 230);
+  doc.setFontSize(7);
+  doc.setTextColor(120, 120, 130);
+  for (let g = 0; g <= 2; g++) {
+    const valeur = (max / 2) * g;
+    const gy = y + hauteur - (valeur / max) * hauteur;
+    doc.line(x, gy, x + largeur, gy);
+    T(doc, montantAbrege(valeur), x - 2, gy + 1, { align: 'right' });
+  }
+
+  trimestres.forEach((t, i) => {
+    const gx = x + i * largeurGroupe + gap;
+    cles.forEach((cle, ci) => {
+      const valeur = series[cle][i] || 0;
+      const h = (valeur / max) * hauteur;
+      doc.setFillColor(...couleurs[ci]);
+      if (h > 0) doc.rect(gx + ci * largeurBarre, y + hauteur - h, Math.max(largeurBarre - 0.6, 0.1), h, 'F');
+    });
+    doc.setFontSize(7.5);
+    doc.setTextColor(60, 60, 70);
+    T(doc, t.label + (t.enCours ? ` (${trad('en cours')})` : ''), x + i * largeurGroupe + largeurGroupe / 2, y + hauteur + 5, { align: 'center' });
+  });
+
+  doc.setDrawColor(180, 180, 190);
+  doc.line(x, y + hauteur, x + largeur, y + hauteur);
+
+  const legendes = [
+    [trad('Carburant'), PDF_COULEUR_FIXES],
+    [trad('Pièces'), PDF_COULEUR_PIECES],
+    [trad('Main d\'œuvre & frais fixes'), PDF_COULEUR_MAIN_OEUVRE],
+  ];
+  let lx = x;
+  const ly = y + hauteur + 12;
+  doc.setFontSize(7.5);
+  legendes.forEach(([libelle, couleur]) => {
+    doc.setFillColor(...couleur);
+    doc.rect(lx, ly - 2.5, 3, 3, 'F');
+    doc.setTextColor(60, 60, 70);
+    T(doc, libelle, lx + 4.5, ly);
+    lx += 4.5 + doc.getTextWidth(pdfTexteSain(libelle)) + 8;
+  });
+}
+
+// Tableau dessiné à la main — pas de plugin jspdf-autotable (dépendance
+// évitée pour des tableaux de quelques lignes). Pagination automatique :
+// `onNouvellePage(doc)` est appelé juste après doc.addPage(), pour que
+// l'appelant réimprime l'en-tête DE PAGE (pdfEnTete) avant que le tableau ne
+// réimprime son propre en-tête de colonnes.
+function pdfTableau(doc, { x, y, largeurs, entetes, lignes, alignements = [], hauteurLigne = 6, zebra = true, sousLignes = null, margeBasse = 278, onNouvellePage, T }) {
+  const largeurTotale = largeurs.reduce((a, b) => a + b, 0);
+  let py = y;
+  const dessinerEntete = () => {
+    doc.setFillColor(240, 240, 245);
+    doc.rect(x, py, largeurTotale, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(20, 19, 51);
+    let cx = x;
+    entetes.forEach((h, i) => {
+      const align = alignements[i] || 'left';
+      const tx = align === 'right' ? cx + largeurs[i] - 1.5 : cx + 1.5;
+      T(doc, h, tx, py + 4.8, { align });
+      cx += largeurs[i];
+    });
+    py += 7;
+  };
+  dessinerEntete();
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  lignes.forEach((ligne, i) => {
+    const sousLigne = sousLignes ? sousLignes[i] : null;
+    const hLigne = hauteurLigne + (sousLigne ? 4 : 0);
+    if (py + hLigne > margeBasse) {
+      doc.addPage();
+      py = 28;
+      if (onNouvellePage) onNouvellePage(doc);
+      dessinerEntete();
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+    }
+    if (zebra && i % 2 === 1) {
+      doc.setFillColor(248, 248, 251);
+      doc.rect(x, py, largeurTotale, hLigne, 'F');
+    }
+    let cx = x;
+    doc.setTextColor(14, 19, 51);
+    ligne.forEach((valeur, ci) => {
+      const align = alignements[ci] || 'left';
+      const tx = align === 'right' ? cx + largeurs[ci] - 1.5 : cx + 1.5;
+      T(doc, String(valeur), tx, py + 4.2, { align });
+      cx += largeurs[ci];
+    });
+    if (sousLigne) {
+      doc.setFontSize(7);
+      doc.setTextColor(...(sousLigne.couleur || [100, 100, 100]));
+      const texte = doc.splitTextToSize(pdfTexteSain(sousLigne.texte), largeurTotale - 3);
+      doc.text(texte[0] || '', x + 1.5, py + hauteurLigne + 2.2);
+      doc.setFontSize(8);
+      doc.setTextColor(14, 19, 51);
+    }
+    doc.setDrawColor(230, 230, 235);
+    doc.line(x, py + hLigne, x + largeurTotale, py + hLigne);
+    py += hLigne;
+  });
+  return py;
+}
+
+function pdfEnTete(doc, donnees, T) {
+  doc.setFillColor(14, 19, 51);
+  doc.rect(0, 0, 210, 18, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  T(doc, donnees.societe, 15, 11.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  T(doc, tR('Rapport TCO — {periode} — {devise}', { periode: donnees.periodeLabel, devise: donnees.devise }), 195, 11.5, { align: 'right' });
+  doc.setTextColor(14, 19, 51);
+}
+function pdfPiedDePage(doc, donnees, n, total, T) {
+  doc.setFontSize(7);
+  doc.setTextColor(140, 140, 150);
+  doc.setFont('helvetica', 'normal');
+  T(doc, tR('Page {n}/{total}', { n, total }), 15, 292);
+  T(doc, tR('Généré par KEEVA le {date} — chiffres calculés sur les données enregistrées par {societe}.', { date: formatShortDateAvecAnnee(donnees.dateIso), societe: donnees.societe }), 195, 292, { align: 'right' });
+}
+function pdfCarteKpi(doc, x, y, l, h, { eyebrow, valeur, sub1, sub2 }, T) {
+  doc.setDrawColor(226, 232, 240);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(x, y, l, h, 2, 2, 'FD');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 105, 120);
+  doc.setFont('helvetica', 'bold');
+  T(doc, String(eyebrow).toUpperCase(), x + 4, y + 6);
+  doc.setFontSize(14);
+  doc.setTextColor(14, 19, 51);
+  doc.setFont('helvetica', 'bold');
+  T(doc, valeur, x + 4, y + 15);
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(90, 95, 110);
+  if (sub1) T(doc, sub1, x + 4, y + 21);
+  if (sub2) T(doc, sub2, x + 4, y + 25.5);
+}
+
+// Le générateur — 3 pages A4 portrait. `donnees` = retour de
+// assemblerDonneesRapportTco(). Explicitement ABSENT du rapport (aucune
+// donnée ne le porte honnêtement) : le paragraphe « Analyse de la
+// Direction », toute comparaison N-1, les causes de panne par machine, les
+// recommandations pour un trimestre futur ou un montant d'économie chiffré,
+// une courbe de tendance/prévision — voir keeva-tco-feature.
+async function genererRapportTcoPdf(donnees) {
+  const jsPDF = await loadJsPdfLib();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const T = (d, s, x, y, o) => d.text(pdfTexteSain(s), x, y, o);
+  const MX = 15;
+  const LARGEUR = 180;
+
+  // ── PAGE 1 — SYNTHÈSE ──────────────────────────────────────────────
+  pdfEnTete(doc, donnees, T);
+  let y = 30;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Synthèse exécutive du parc'), MX, y);
+  y += 10;
+
+  const largeurCarte = (LARGEUR - 10) / 3;
+  const g = donnees.global;
+  if (g) {
+    const baseTexte = g.base === 'depreciation'
+      ? trad('CAPEX = dépréciation annuelle au prorata')
+      : trad('CAPEX = capital consommé depuis l\'achat');
+    pdfCarteKpi(doc, MX, y, largeurCarte, 30, {
+      eyebrow: tR('TCO global — {periode}', { periode: donnees.periodeLabel }),
+      valeur: formatMontant(g.total, donnees.devise),
+      sub1: tR('CAPEX {c} % · OPEX {o} %', { c: Math.round(g.pctCapex), o: Math.round(g.pctOpex) }),
+      sub2: baseTexte,
+    }, T);
+  } else {
+    pdfCarteKpi(doc, MX, y, largeurCarte, 30, { eyebrow: trad('TCO global'), valeur: '—', sub1: trad('Aucune dépense enregistrée sur la période.') }, T);
+  }
+
+  const cu = donnees.coutUsage.parUnite.get(donnees.coutUsage.uniteDominante);
+  if (cu && cu.reel != null) {
+    pdfCarteKpi(doc, MX + largeurCarte + 5, y, largeurCarte, 30, {
+      eyebrow: trad('Coût réel moyen / usage'),
+      valeur: `${formatMontant(cu.reel, donnees.devise)} /${cu.uniteCourte}`,
+      sub1: cu.cible != null
+        ? tR('Cible pondérée {c} — écart {s}{e} %', { c: formatMontant(cu.cible, donnees.devise), s: cu.ecart >= 0 ? '+' : '', e: Math.round(cu.ecartPct) })
+        : trad('Aucun seuil cible défini sur les catégories concernées'),
+    }, T);
+  } else {
+    pdfCarteKpi(doc, MX + largeurCarte + 5, y, largeurCarte, 30, { eyebrow: trad('Coût réel moyen / usage'), valeur: '—', sub1: trad('Aucun relevé de compteur disponible.') }, T);
+  }
+
+  const dep = donnees.depassements;
+  pdfCarteKpi(doc, MX + (largeurCarte + 5) * 2, y, largeurCarte, 30, {
+    eyebrow: trad('Machines hors cible'),
+    valeur: String(dep.nb),
+    sub1: dep.nb ? tR('Écart cumulé : {m}', { m: formatMontant(dep.ecartCumuleTotal, donnees.devise) }) : trad('Aucune machine au-dessus du seuil de sa catégorie.'),
+    sub2: dep.nb ? trad('Coût mesuré depuis la mise en service') : '',
+  }, T);
+
+  y += 38;
+
+  if (donnees.repartition) {
+    const pngUri = await donutTcoPngDataUri(donnees.repartition, 400);
+    if (pngUri) doc.addImage(pngUri, 'PNG', MX, y, 50, 50);
+    const r = donnees.repartition;
+    let ly = y + 6;
+    const lx = MX + 58;
+    const legendeLigne = (libelle, valeur, pct, couleur) => {
+      doc.setFillColor(...couleur);
+      doc.rect(lx, ly - 3, 3, 3, 'F');
+      doc.setFontSize(8.5);
+      doc.setTextColor(14, 19, 51);
+      doc.setFont('helvetica', 'normal');
+      T(doc, `${libelle} — ${formatMontant(valeur, donnees.devise)} (${Math.round(pct)} %)`, lx + 5, ly);
+      ly += 7;
+    };
+    legendeLigne(trad('Pièces'), r.pieces, r.pctPieces, PDF_COULEUR_PIECES);
+    legendeLigne(trad('Main d\'œuvre'), r.mainOeuvre, r.pctMainOeuvre, PDF_COULEUR_MAIN_OEUVRE);
+    legendeLigne(trad('Frais fixes & carburant'), r.fixes, r.pctFixes, PDF_COULEUR_FIXES);
+    doc.setFontSize(7.5);
+    doc.setTextColor(120, 120, 130);
+    T(doc, tR('Dépenses d\'exploitation (OPEX) — {periode}', { periode: donnees.periodeLabel }), lx, ly + 2);
+    y += 56;
+  } else {
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 130);
+    T(doc, trad('Aucune dépense d\'exploitation enregistrée sur la période : pas de répartition à afficher.'), MX, y + 6);
+    y += 16;
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Synthèse'), MX, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 30, 40);
+  const phrases = [];
+  if (g) {
+    phrases.push(tR('Sur {periode}, le coût total de possession du parc suivi s\'élève à {total}, dont {capex} de dépréciation/capital et {opex} de dépenses d\'exploitation.', { periode: donnees.periodeLabel.toLowerCase(), total: formatMontant(g.total, donnees.devise), capex: formatMontant(g.capex, donnees.devise), opex: formatMontant(g.opex, donnees.devise) }));
+  }
+  phrases.push(tR('{n} machine(s) sont suivies avec un prix d\'achat renseigné.', { n: donnees.extrait.length }));
+  if (donnees.repartition) {
+    const r = donnees.repartition;
+    phrases.push(tR('Les dépenses d\'exploitation se répartissent en {p} % de pièces, {m} % de main d\'œuvre et {f} % de frais fixes, pour {h} h de main d\'œuvre déclarées.', { p: Math.round(r.pctPieces), m: Math.round(r.pctMainOeuvre), f: Math.round(r.pctFixes), h: Math.round(r.heures) }));
+  }
+  phrases.push(tR('{n} machine(s) dépassent le seuil de coût horaire fixé pour leur catégorie.', { n: dep.nb }));
+  if (donnees.flotte) {
+    phrases.push(tR('Ratio moyen entretien/dépréciation du parc : {label}.', { label: tendanceRatioMoyenFlotte(donnees.flotte).label }));
+  }
+  phrases.forEach((p) => {
+    const lignes = doc.splitTextToSize(pdfTexteSain(p), LARGEUR - 4);
+    lignes.forEach((l) => { doc.text(l, MX + 2, y); y += 4.5; });
+    y += 1.5;
+  });
+
+  // ── PAGE 2 — ÉVOLUTION + MACHINES HORS CIBLE ────────────────────────
+  doc.addPage();
+  pdfEnTete(doc, donnees, T);
+  y = 28;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Évolution trimestrielle des dépenses d\'exploitation'), MX, y);
+  y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 130);
+  T(doc, trad('Le dernier trimestre est en cours (partiel).'), MX, y);
+  y += 6;
+
+  if (donnees.trimestres.vide) {
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 130);
+    T(doc, trad('Aucune dépense datée sur les 4 derniers trimestres.'), MX, y + 10);
+    y += 20;
+  } else {
+    pdfBarresGroupees(doc, { x: MX, y, largeur: LARGEUR, hauteur: 55, trimestres: donnees.trimestres.trimestres, series: donnees.trimestres.series, T });
+    y += 80;
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(14, 19, 51);
+  T(doc, tR('{n} machine(s) au-dessus du seuil cible de leur catégorie', { n: dep.nb }), MX, y);
+  y += 4;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 130);
+  T(doc, trad('Coût horaire mesuré depuis la mise en service.'), MX, y);
+  y += 6;
+
+  if (dep.nb) {
+    const largeursDep = [42, 26, 26, 24, 22, 30];
+    const entetesDep = [trad('Machine'), trad('Catégorie'), trad('Coût réel'), trad('Seuil'), trad('Écart %'), trad('Écart cumulé')];
+    const alignementsDep = ['left', 'left', 'right', 'right', 'right', 'right'];
+    const lignesDep = dep.liste.map((l) => [
+      l.machine.name,
+      l.machine.category?.name || '—',
+      `${formatMontant(l.coutReel, donnees.devise)}/${l.uniteCourte}`,
+      `${formatMontant(l.seuil, donnees.devise)}/${l.uniteCourte}`,
+      l.ecartPct != null ? `+${Math.round(l.ecartPct)} %` : '—',
+      l.ecartCumule != null ? formatMontant(l.ecartCumule, donnees.devise) : '—',
+    ]);
+    const sousLignesDep = dep.liste.map((l) => ({
+      texte: l.recommandation,
+      couleur: l.severite === 'critique' ? [186, 26, 26] : l.severite === 'eleve' ? [222, 122, 22] : [36, 181, 168],
+    }));
+    y = pdfTableau(doc, { x: MX, y, largeurs: largeursDep, entetes: entetesDep, lignes: lignesDep, alignements: alignementsDep, sousLignes: sousLignesDep, onNouvellePage: (d) => pdfEnTete(d, donnees, T), T });
+    if (dep.resteNonListe > 0) {
+      y += 4;
+      doc.setFontSize(7.5);
+      doc.setTextColor(120, 120, 130);
+      T(doc, tR('{n} autre(s) machine(s) au-dessus du seuil, non listée(s) ici.', { n: dep.resteNonListe }), MX, y);
+    }
+  }
+
+  // ── PAGE 3 — EXTRAIT PAR MACHINE + MÉTHODOLOGIE ─────────────────────
+  doc.addPage();
+  pdfEnTete(doc, donnees, T);
+  y = 28;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Extrait de données par machine'), MX, y);
+  y += 7;
+
+  const largeursE = [34, 22, 16, 20, 18, 18, 18, 18, 20];
+  const entetesE = [trad('Machine'), trad('Achat'), trad('Amort.'), trad('Seuil'), trad('Pièces'), trad('MO'), trad('Frais fixes'), trad('Carburant'), trad('TCO/unité')];
+  const alignementsE = ['left', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right'];
+  const lignesE = donnees.extrait.map(({ machine, tco, pieces, mainOeuvre, fraisFixes, carburant }) => {
+    const uc = counterShort(counterUnitOf(machine));
+    return [
+      machine.name,
+      machine.purchase_price != null ? formatMontant(machine.purchase_price, donnees.devise) : '—',
+      machine.amortization_years != null ? tR('{n} ans', { n: machine.amortization_years }) : '—',
+      machine.category?.target_hourly_cost != null ? `${formatMontant(machine.category.target_hourly_cost, donnees.devise)}/${uc}` : '—',
+      formatMontant(pieces, donnees.devise),
+      formatMontant(mainOeuvre, donnees.devise),
+      formatMontant(fraisFixes, donnees.devise),
+      formatMontant(carburant, donnees.devise),
+      tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite, donnees.devise)}/${uc}` : '—',
+    ];
+  });
+  y = pdfTableau(doc, { x: MX, y, largeurs: largeursE, entetes: entetesE, lignes: lignesE, alignements: alignementsE, onNouvellePage: (d) => pdfEnTete(d, donnees, T), T });
+  y += 8;
+
+  if (y > 250) { doc.addPage(); pdfEnTete(doc, donnees, T); y = 28; }
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Méthodologie de calcul'), MX, y);
+  y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(60, 60, 70);
+  const methodo = [
+    trad('TCO total (machine) = prix d\'achat + entretien cumulé (pièces + main d\'œuvre) + coûts d\'exploitation − revente estimée.'),
+    trad('Coût par unité d\'usage = TCO total / relevé du compteur (heures ou km).'),
+    trad('Dépréciation annuelle = (prix d\'achat − revente estimée) / durée d\'amortissement.'),
+    trad('Ratio garder/remplacer = entretien annualisé / dépréciation annuelle ; repli sur entretien cumulé / prix d\'achat quand la durée d\'amortissement n\'est pas renseignée (la base retenue est alors indiquée).'),
+    trad('Seuils d\'alerte = 50 % puis 100 % de la dépréciation annuelle ; 30 % puis 50 % du prix d\'achat en mode repli.'),
+    trad('Dépassement de seuil = coût par unité d\'usage supérieur au seuil cible de la catégorie de la machine.'),
+    tR('CAPEX de la période = dépréciation annuelle × durée de la fenêtre ; capital consommé (achat − revente) pour « {label} ».', { label: trad('Depuis mise en service') }),
+    tR('Devise = {devise}, parité fixe 1 EUR = {parite} XPF.', { devise: donnees.devise, parite: PARITE_EUR_XPF.toLocaleString(localeActive()) }),
+  ];
+  methodo.forEach((m) => {
+    if (y > 278) { doc.addPage(); pdfEnTete(doc, donnees, T); y = 28; }
+    const lignesM = doc.splitTextToSize(pdfTexteSain(m), LARGEUR - 4);
+    lignesM.forEach((l) => { doc.text(l, MX + 2, y); y += 3.6; });
+    y += 1;
+  });
+
+  y += 3;
+  if (y > 270) { doc.addPage(); pdfEnTete(doc, donnees, T); y = 28; }
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(14, 19, 51);
+  T(doc, trad('Exclusions'), MX, y);
+  y += 4.5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(90, 95, 110);
+  const ex = donnees.exclusions;
+  const exValeurs = [ex.sansPrixAchat, ex.sansDuree, ex.sansSeuil, ex.ignorees];
+  const exPhrases = [
+    tR('{n} machine(s) sans prix d\'achat renseigné, exclue(s) du rapport.', { n: ex.sansPrixAchat }),
+    tR('{n} machine(s) sans durée d\'amortissement renseignée, exclue(s) du calcul du CAPEX de la période.', { n: ex.sansDuree }),
+    tR('{n} catégorie(s) sans seuil de coût horaire cible.', { n: ex.sansSeuil }),
+    tR('{n} ligne(s) de coût sans date, exclue(s) du graphique trimestriel.', { n: ex.ignorees }),
+  ].filter((_, i) => exValeurs[i] > 0);
+  if (!exPhrases.length) exPhrases.push(trad('Aucune exclusion : toutes les machines et lignes de coût ont pu être exploitées.'));
+  exPhrases.forEach((p) => {
+    if (y > 278) { doc.addPage(); pdfEnTete(doc, donnees, T); y = 28; }
+    const l = doc.splitTextToSize(pdfTexteSain(p), LARGEUR - 4);
+    l.forEach((ligne) => { doc.text(ligne, MX + 2, y); y += 3.6; });
+  });
+
+  // Pied de page, posé en dernier sur CHAQUE page une fois le nombre total
+  // de pages connu (peut dépasser 3 avec un grand parc — jamais un total
+  // figé à 3).
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    pdfPiedDePage(doc, donnees, p, totalPages, T);
+  }
+
+  const blob = doc.output('blob');
+  const arrayBuffer = doc.output('arraybuffer');
+  const nomFichier = `rapport_tco_${todayIso()}.pdf`;
+  return { blob, arrayBuffer, nomFichier };
+}
+
+// Envoi du rapport TCO par e-mail — même patron que envoyerGrosManuel() :
+// corps BINAIRE (le PDF), jamais sb.functions.invoke (qui encapsule en JSON)
+// — Edge Function côté serveur : envoyer-rapport-tco (non commitée dans ce
+// dépôt, convention déjà établie pour toutes les Edge Functions du projet).
+async function envoyerRapportTcoParEmail(arrayBuffer, destinataire, nomFichier, periodeLabel) {
+  const { data: sessionData } = await sb.auth.getSession();
+  const jeton = sessionData && sessionData.session ? sessionData.session.access_token : '';
+  if (!jeton) throw new Error(trad('Session expirée : reconnecte-toi pour envoyer ce rapport.'));
+  const reponse = await fetch(`${SUPABASE_URL}/functions/v1/envoyer-rapport-tco`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/pdf',
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${jeton}`,
+      // En-têtes HTTP = Latin-1 : on encode, comme envoyerGrosManuel() le
+      // fait déjà pour son contexte JSON.
+      'x-keeva-destinataire': encodeURIComponent(destinataire),
+      'x-keeva-fichier': encodeURIComponent(nomFichier),
+      'x-keeva-periode': encodeURIComponent(periodeLabel || ''),
+    },
+    body: arrayBuffer,
+  });
+  const texte = await reponse.text();
+  let donnees = {};
+  try { donnees = texte ? JSON.parse(texte) : {}; } catch { donnees = {}; }
+  if (!reponse.ok || donnees.error) throw new Error(donnees.error || `envoi refusé (${reponse.status})`);
+  return donnees;
+}
+
+// Modale « Rapport TCO (PDF) » — idiome maison exact (.overlay/.modal, voir
+// openForgotPasswordModal) + accessibilité (role="dialog" aria-modal="true",
+// voir afficherFenetreConfirmation). `contexte.donnees` est déjà assemblé
+// (assemblerDonneesRapportTco) au moment de l'ouverture — le PDF n'est
+// généré qu'au clic sur une des deux actions, jamais avant (pas de travail
+// inutile si l'utilisateur ferme sans rien choisir).
+function ouvrirRapportTcoModal(contexte) {
+  const donnees = contexte.donnees;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay rapport-tco-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const emailDefaut = UI.company?.notification_email || '';
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rapport-tco-titre">
+      <h2 id="rapport-tco-titre">${trad('Rapport TCO (PDF)')}</h2>
+      <p class="sub">${tR('Synthèse financière du parc sur la période affichée à l\'écran : {periode}.', { periode: esc(donnees.periodeLabel) })}</p>
+      <label for="rapport-tco-email">${trad('Envoyer par e-mail à')}</label>
+      <input id="rapport-tco-email" type="email" inputmode="email" autocomplete="email" placeholder="${esc(trad('adresse@exemple.com'))}" value="${esc(emailDefaut)}">
+      <div class="hint" id="rapport-tco-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="rapport-tco-fermer">${trad('Fermer')}</button>
+        <button type="button" class="secondary" id="rapport-tco-telecharger">${picto('export')}<span>${trad('Télécharger le rapport')}</span></button>
+        <button type="button" class="primary" id="rapport-tco-envoyer">${picto('mail')}<span>${trad('Envoyer par e-mail')}</span></button>
+      </div>
+    </div>`;
+  const msg = overlay.querySelector('#rapport-tco-msg');
+  const btnFermer = overlay.querySelector('#rapport-tco-fermer');
+  const btnTelecharger = overlay.querySelector('#rapport-tco-telecharger');
+  const btnEnvoyer = overlay.querySelector('#rapport-tco-envoyer');
+  const champEmail = overlay.querySelector('#rapport-tco-email');
+  const dire = (texte, erreur) => {
+    msg.textContent = texte;
+    msg.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+  };
+  const geler = (gele) => { btnTelecharger.disabled = gele; btnEnvoyer.disabled = gele; champEmail.disabled = gele; };
+
+  btnFermer.addEventListener('click', () => overlay.remove());
+
+  btnTelecharger.addEventListener('click', async () => {
+    geler(true);
+    dire(trad('Génération du rapport…'), false);
+    try {
+      const { blob, nomFichier } = await genererRapportTcoPdf(donnees);
+      await telechargerFichierBinaire(blob, nomFichier, 'application/pdf');
+      dire(trad('Téléchargement lancé.'), false);
+    } catch (err) {
+      dire(trad('Génération impossible : ') + (err?.message || err), true);
+    } finally {
+      geler(false);
+    }
+  });
+
+  btnEnvoyer.addEventListener('click', async () => {
+    const destinataire = champEmail.value.trim();
+    if (!destinataire || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destinataire)) {
+      dire(trad('Adresse e-mail invalide.'), true);
+      champEmail.focus();
+      return;
+    }
+    geler(true);
+    dire(trad('Génération du rapport…'), false);
+    try {
+      const { arrayBuffer, nomFichier } = await genererRapportTcoPdf(donnees);
+      dire(trad('Envoi en cours…'), false);
+      await envoyerRapportTcoParEmail(arrayBuffer, destinataire, nomFichier, donnees.periodeLabel);
+      dire(tR('Rapport envoyé à {email}.', { email: destinataire }), false);
+    } catch (err) {
+      dire(trad('Envoi impossible : ') + (err?.message || err), true);
+    } finally {
+      geler(false);
+    }
+  });
 }
 
 // ── RECHERCHE D'IMAGE : BORNÉE, ANNONCÉE, ET REMPLAÇABLE ──────────────
@@ -16480,6 +17402,48 @@ function planningIcsTexte() {
   lignes.push('END:VCALENDAR');
   return lignes.join('\r\n');
 }
+// Généralise la passerelle native éprouvée par l'export ICS ci-dessous (voir
+// son commentaire) pour un fichier BINAIRE (le rapport TCO en PDF, entre
+// autres) : dans l'appli installée, <a download> ne déclenche souvent RIEN
+// de visible (les WebView Android n'ont pas de gestionnaire de
+// téléchargements par défaut) — écrire dans le cache (Filesystem) puis
+// OUVRIR (FileOpener, ACTION_VIEW) reste le seul chemin qui fonctionne
+// réellement, constaté sur appareil. ⚠ BINAIRE : `encoding` n'est PAS posé
+// (contrairement à l'ICS, qui est du texte et passe `encoding:'utf8'') —
+// sans `encoding`, @capacitor/filesystem écrit l'octet brut et interprète
+// `data` comme du base64 ; avec `encoding:'utf8'` un PDF serait corrompu.
+async function telechargerFichierBinaire(blob, nomFichier, typeMime) {
+  const cap = window.Capacitor;
+  const filesystem = cap?.Plugins?.Filesystem;
+  const fileOpener = cap?.Plugins?.FileOpener;
+  if (cap?.isNativePlatform?.() && filesystem && fileOpener) {
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const lecteur = new FileReader();
+        lecteur.onloadend = () => resolve(String(lecteur.result).split(',')[1] || '');
+        lecteur.onerror = () => reject(new Error(trad('Lecture du fichier impossible.')));
+        lecteur.readAsDataURL(blob);
+      });
+      const { uri } = await filesystem.writeFile({ path: nomFichier, data: base64, directory: 'CACHE' });
+      await fileOpener.open({ filePath: uri, contentType: typeMime, openWithDefault: false });
+    } catch (err) {
+      // L'utilisateur qui ferme le sélecteur sans choisir n'a rien à se
+      // reprocher : ce n'est pas une erreur, jamais annoncée comme telle.
+      if (err?.message && !/cancel/i.test(err.message)) {
+        showToast(trad('Ouverture impossible :') + ' ' + err.message);
+      }
+    }
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomFichier;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 // Dans l'appli installée, <a download> (voir le repli tout en bas) ne
 // déclenche souvent RIEN de visible : les WebView Android n'ont pas de
 // gestionnaire de téléchargements par défaut, contrairement à un vrai
@@ -17005,9 +17969,11 @@ VIEWS.reminders = {
 // SCHEMA.hasTco (voir navItemsVisibles) — même garde-fou que le reste de la
 // fonctionnalité (voir keeva-tco-feature).
 // Bandeau eyebrow + actions, au-dessus du h1 (déjà rendu par pageHeadHtml).
-// « Journal d'audit » retiré (aucun journal n'existe) ; « Rapport TCO (PDF) »
-// reste visible mais désactivé — même motif que le canal WhatsApp « à venir
-// prochainement » (bouton annoncé, jamais promis) plutôt que masqué.
+// « Journal d'audit » retiré (aucun journal n'existe). « Rapport TCO (PDF) »
+// est maintenant réel : le bouton reste désactivé au premier rendu (données
+// flotte pas encore chargées) et n'est activé qu'une fois VIEWS.tco.mount()
+// a réellement calculé `flotte` — jamais cliquable sur des données absentes,
+// voir le câblage dans mount().
 function tcoEyebrowToolbarHtml() {
   return `
     <div class="tco-eyebrow-row">
@@ -17017,7 +17983,7 @@ function tcoEyebrowToolbarHtml() {
         <span class="tco-eyebrow-texte">${trad('Gestion de flotte & Exploitation')}</span>
       </div>
       <div class="tco-toolbar-actions">
-        <button type="button" class="tco-btn-outil" disabled title="${esc(trad('Bientôt disponible'))}">${picto('export')}<span>${trad('Rapport TCO (PDF)')}</span></button>
+        <button type="button" class="tco-btn-outil" id="tco-rapport-pdf" disabled title="${esc(trad('Chargement des données du parc…'))}">${picto('export')}<span>${trad('Rapport TCO (PDF)')}</span></button>
       </div>
     </div>`;
 }
@@ -18235,6 +19201,29 @@ VIEWS.tco = {
         section.querySelector('#tco-export-classement')?.addEventListener('click', () => exporterClassementTcoCsv(flotte));
 
         rendreDynamique();
+
+        // Rapport TCO (PDF) : `flotte`/`interventionsFlotte`/`coutsFlotte`
+        // sont déjà en mémoire dans cette même fermeture — jamais un second
+        // fetch flotte-entière. Le bouton reste désactivé si ce point n'est
+        // jamais atteint (échec de fetch ou !flotte, les deux `return` plus
+        // haut) : il n'est activé qu'ICI, une fois les données réellement
+        // disponibles.
+        const boutonRapport = root.querySelector('#tco-rapport-pdf');
+        if (boutonRapport) {
+          boutonRapport.disabled = false;
+          boutonRapport.title = '';
+          boutonRapport.addEventListener('click', () => {
+            // `periode` relue AU CLIC (variable mutable de cette fermeture) :
+            // le rapport suit le filtre affiché à cet instant, jamais celui
+            // qui était actif au premier chargement de la page.
+            const borneRapport = borneDepuis(periode);
+            const anneesRapport = anneesFenetre(periode);
+            const donneesRapport = assemblerDonneesRapportTco({
+              flotte, interventionsFlotte, coutsFlotte, periode, borne: borneRapport, annees: anneesRapport,
+            });
+            ouvrirRapportTcoModal({ donnees: donneesRapport });
+          });
+        }
       })();
     }
 
@@ -23877,8 +24866,12 @@ async function fetchTousCoutsExploitationFlotte(machineIds) {
   const pageSize = 1000;
   const all = [];
   for (let from = 0; ; from += pageSize) {
+    // `kind` est nécessaire pour ventiler le carburant dans le rapport TCO
+    // (evolutionOpexParTrimestre) — sans lui, la série « Carburant » du
+    // graphique trimestriel serait à zéro partout, un chiffre faux plutôt
+    // qu'une absence de données.
     const { data, error } = await sb.from('operating_costs')
-      .select('machine_id, amount, incurred_at')
+      .select('machine_id, amount, incurred_at, kind')
       .in('machine_id', machineIds)
       .range(from, from + pageSize - 1);
     if (error) throw error;
