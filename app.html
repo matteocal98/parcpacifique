@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Y/Vy4mqJFOIj0TVCRtsVDluePx8MYoVLtW3wUoXbVHc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-scbzu8aRlZDenhA/BxFkLUrAdKLKD0DvMf1Gx2O+36E=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5466,6 +5466,148 @@
   .vue-couts-tco{display:flex;flex-direction:column;gap:20px;}
   @media (min-width:900px){ .vue-couts-tco{gap:24px;} }
   .vue-stock{display:flex;flex-direction:column;gap:20px;}
+  /* ── Reprise Stitch « Stocks & SAV » (2026-09-28) — reprise à l'octet
+     près du HTML fourni par l'utilisateur. Mêmes règles que toutes les
+     reprises précédentes (voir keeva-tco-feature) : aucune police
+     d'icônes (chaque icône du mockup a un équivalent déjà tracé dans
+     PICTOS — boite/batiment/vehicule/crayon/corbeille/plusCercle/
+     recherche/export/televerser/alerte/calendrier/devise/info — zéro
+     icône neuve nécessaire), et un mappage 1:1 des couleurs Tailwind du
+     mockup vers la palette officielle DÉJÀ déclarée en :root, jamais une
+     teinte inventée : keeva.dark(#0E1333)→--ink, keeva.blue(#236FE0)→
+     --bleu-roi, keeva.teal(#24B5A8)→--ok, keeva.indigo(#5B52DF)→
+     --primary-dark, keeva.amber(#DE7A16)→--late, keeva.border(#E8E6F0)→
+     --line, keeva.muted(#686B82)→--ink-2 (ces 5 premières correspondances
+     sont des égalités hexadécimales EXACTES, pas des approximations —
+     confirmé en comparant aux constantes RGB déjà utilisées pour le PDF
+     TCO). "rose"/"emerald" (hors palette officielle, jamais utilisées par
+     ce mockup pour autre chose qu'une variante de badge) → repliées sur
+     --late et --ok respectivement, même principe que les reprises
+     précédentes. L'en-tête/pied de page génériques du fichier Stitch
+     (logo, fil d'Ariane, pastille « Serveur télématique ») ne sont PAS
+     repris : c'est le gabarit de démonstration de l'outil, pas une partie
+     de l'écran — la coquille réelle (sidebar, pageHeadHtml) existe déjà,
+     et une télémétrie inventée est explicitement exclue de ce produit
+     depuis le début du chantier (voir keeva-redesign-project). */
+  .stock-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px;}
+  .stock-eyebrow-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:rgba(91,82,223,.08);border:1px solid rgba(91,82,223,.14);color:var(--primary-dark);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .stock-eyebrow-pill svg{width:13px;height:13px;flex:0 0 auto;}
+  .stock-btn-outline{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13px;font-weight:700;box-shadow:0 1px 2px rgba(14,19,51,.04);transition:border-color .15s,color .15s;}
+  .stock-btn-outline:hover{border-color:rgba(91,82,223,.4);color:var(--primary-dark);}
+  .stock-btn-outline svg{width:16px;height:16px;flex:0 0 auto;color:var(--primary-dark);}
+
+  .stock-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:900px){.stock-kpi-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:600px){.stock-kpi-grid{grid-template-columns:1fr;}}
+  .stock-kpi-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;box-shadow:0 4px 20px -2px rgba(14,19,51,.04),0 2px 6px -1px rgba(14,19,51,.02);display:flex;flex-direction:column;justify-content:space-between;transition:box-shadow .15s;}
+  .stock-kpi-card:hover{box-shadow:0 10px 25px -4px rgba(14,19,51,.08),0 4px 10px -2px rgba(14,19,51,.03);}
+  .stock-kpi-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--ink-2);letter-spacing:.06em;text-transform:uppercase;}
+  .stock-kpi-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .stock-kpi-icon svg{width:16px;height:16px;}
+  .stock-kpi-icon.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);}
+  .stock-kpi-icon.is-amber{background:rgba(222,122,22,.08);color:var(--late);}
+  .stock-kpi-icon.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);}
+  .stock-kpi-value-row{margin-top:6px;}
+  .stock-kpi-value{font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:1.15;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .stock-kpi-value .unite{font-size:15px;font-weight:500;color:var(--ink-4);}
+  .stock-kpi-sub{font-size:11.5px;color:var(--ink-2);margin-top:4px;display:flex;align-items:center;gap:6px;font-weight:500;}
+  .stock-kpi-sub .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--bleu-roi);}
+  .stock-kpi-sub.is-ok{color:var(--ok);font-weight:600;}
+  .stock-kpi-sub.is-ok .dot{background:var(--ok);}
+  .stock-kpi-sub.is-late .dot{background:var(--late);}
+  .stock-kpi-sub.is-indigo .dot{background:var(--primary-dark);}
+
+  .stock-section{background:var(--surface);border-radius:var(--r-card);border:1px solid var(--line);box-shadow:0 4px 20px -2px rgba(14,19,51,.04),0 2px 6px -1px rgba(14,19,51,.02);overflow:hidden;}
+  .stock-section-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;}
+  .stock-section-head-gauche{display:flex;align-items:center;gap:13px;}
+  .stock-section-icon{width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .stock-section-icon svg{width:20px;height:20px;}
+  .stock-section-icon.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);}
+  .stock-section-icon.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);}
+  .stock-section-icon.is-ok{background:rgba(36,181,168,.1);color:var(--ok);}
+  .stock-section-titre-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .stock-section-titre{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
+  .stock-section-badge{padding:2px 10px;border-radius:var(--r-pill);font-size:11.5px;font-weight:700;border:1px solid transparent;}
+  .stock-section-badge.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);border-color:rgba(35,111,224,.15);}
+  .stock-section-badge.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);border-color:rgba(91,82,223,.15);}
+  .stock-section-badge.is-ok{background:rgba(36,181,168,.1);color:var(--ok);border-color:rgba(36,181,168,.18);}
+  .stock-section-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
+  .stock-section-body{padding:24px;}
+  .stock-section-body.is-tight{padding-top:8px;}
+
+  .stock-grid-2{display:grid;grid-template-columns:1fr;gap:24px;}
+  @media (min-width:960px){.stock-grid-2{grid-template-columns:1fr 1fr;}}
+  @media (min-width:960px){.stock-grid-2.is-magasins{grid-template-columns:1fr 1fr;}}
+  @media (min-width:960px){.stock-grid-2.is-catalogue{grid-template-columns:7fr 5fr;}}
+
+  .stock-liste{display:flex;flex-direction:column;gap:10px;}
+  .stock-liste.is-scroll{max-height:360px;overflow-y:auto;padding-right:4px;}
+  .stock-row{padding:13px 14px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .15s,background .15s;}
+  .stock-row:hover{border-color:rgba(91,82,223,.3);background:rgba(91,82,223,.02);}
+  .stock-row-gauche{display:flex;align-items:center;gap:13px;min-width:0;}
+  .stock-row-icone{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(222,122,22,.08);color:var(--late);}
+  .stock-row-icone svg{width:18px;height:18px;}
+  .stock-row-corps{min-width:0;}
+  .stock-row-titre-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .stock-row-titre{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--ink);}
+  .stock-row-sub{font-size:12px;color:var(--ink-2);margin-top:1px;}
+  .stock-row-droite{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+  .stock-row-valeur{text-align:right;flex:0 0 auto;}
+  .stock-row-valeur .montant{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
+  .stock-row-valeur .unite{font-size:11.5px;color:var(--ink-4);margin-left:3px;font-weight:500;}
+  .stock-row-actions{display:flex;align-items:center;gap:2px;}
+  .stock-row-actions button{padding:7px;border:none;background:transparent;color:var(--ink-4);border-radius:8px;cursor:pointer;transition:color .15s,background .15s;}
+  .stock-row-actions button:hover{background:var(--surface-soft);color:var(--primary-dark);}
+  .stock-row-actions button.is-danger:hover{color:var(--late);}
+  .stock-row-actions button svg{width:15px;height:15px;display:block;}
+
+  .stock-tag{display:inline-flex;padding:1px 8px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-2);font-size:10.5px;font-weight:700;}
+  .stock-tag.is-alert{background:rgba(222,122,22,.1);color:var(--late);}
+
+  .stock-form-panel{background:rgba(14,19,51,.015);border:1px solid var(--line);border-radius:var(--r-card);padding:18px;display:flex;flex-direction:column;gap:12px;}
+  .stock-form-tete{display:flex;align-items:center;gap:8px;}
+  .stock-form-tete svg{width:15px;height:15px;color:var(--primary-dark);}
+  .stock-form-tete span{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink);}
+  .stock-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stock-form-panel input, .stock-form-panel select{width:100%;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;color:var(--ink);transition:border-color .15s,box-shadow .15s;}
+  .stock-form-panel input::placeholder{color:var(--ink-4);}
+  .stock-form-panel input:focus, .stock-form-panel select:focus{outline:none;border-color:var(--primary-dark);box-shadow:0 0 0 3px rgba(91,82,223,.12);}
+  .stock-champ-unite{position:relative;}
+  .stock-champ-unite input{padding-right:34px;}
+  .stock-champ-unite .suffixe{position:absolute;top:0;bottom:0;right:12px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--ink-4);pointer-events:none;}
+  .stock-select-wrap{position:relative;}
+  .stock-select-wrap select{appearance:none;padding-right:32px;font-weight:600;}
+  .stock-select-wrap svg{position:absolute;top:0;bottom:0;right:11px;margin:auto;width:14px;height:14px;color:var(--ink-4);pointer-events:none;}
+
+  .stock-cta{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--r-md);background:var(--ink);color:#fff;font-size:13.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 14px 0 rgba(14,19,51,.25);transition:background .15s,transform .1s;}
+  .stock-cta:hover{background:var(--primary-dark);}
+  .stock-cta:active{transform:scale(.99);}
+  .stock-cta svg{width:16px;height:16px;flex:0 0 auto;}
+  .stock-cta[disabled]{opacity:.6;cursor:default;}
+  .stock-cta-annuler{width:100%;text-align:center;padding:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);background:none;border:none;cursor:pointer;}
+  .stock-cta-annuler:hover{color:var(--primary-dark);}
+
+  .stock-search{position:relative;}
+  .stock-search svg{position:absolute;top:0;bottom:0;left:13px;margin:auto;width:16px;height:16px;color:var(--ink-4);pointer-events:none;}
+  .stock-search input{width:100%;font-size:13.5px;padding:10px 14px 10px 38px;background:rgba(14,19,51,.015);border:1px solid var(--line);border-radius:var(--r-md);color:var(--ink);}
+  .stock-search input::placeholder{color:var(--ink-4);}
+  .stock-search input:focus{outline:none;border-color:var(--primary-dark);background:var(--surface);}
+
+  .stock-badge-mouvement{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto;border:1px solid transparent;}
+  .stock-badge-mouvement.is-ok{background:rgba(36,181,168,.1);color:var(--ok);border-color:rgba(36,181,168,.2);}
+  .stock-badge-mouvement.is-alert{background:rgba(222,122,22,.1);color:var(--late);border-color:rgba(222,122,22,.2);}
+  .stock-badge-mouvement.is-soon{background:rgba(35,111,224,.08);color:var(--bleu-roi);border-color:rgba(35,111,224,.16);}
+  .stock-badge-mouvement.is-neutral{background:rgba(91,82,223,.08);color:var(--primary-dark);border-color:rgba(91,82,223,.16);}
+  .stock-mouvement-valeur{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;}
+  .stock-mouvement-valeur.is-ok{color:var(--ok);}
+  .stock-mouvement-valeur.is-alert{color:var(--late);}
+  .stock-mouvement-valeur.is-soon{color:var(--bleu-roi);}
+  .stock-mouvement-valeur.is-neutral{color:var(--primary-dark);}
+  @media (max-width:640px){
+    .stock-row{flex-wrap:wrap;}
+    .stock-section-head{padding:18px;}
+    .stock-section-body{padding:18px;}
+  }
   @media (min-width:900px){ .vue-stock{gap:24px;} }
   /* La section « Classement TCO du parc » est pleine largeur, hors de
      .dash-grid : elle n'hérite donc pas du filet doux que .dash-grid .card
@@ -18564,22 +18706,25 @@ async function chargerCarteTcoDashboard(root) {
 // contrairement au mockup qui varie l'icône par type de produit, aucune
 // donnée réelle ne permet de deviner « huile »/« filtre »/« bougie » ici).
 function ligneCatalogueTcoHtml(piece) {
+  const refEtDelai = [
+    piece.reference || trad('Sans référence'),
+    [piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' - '),
+  ].filter(Boolean).join(' · ');
   return `
-    <div class="tco-part-ligne" data-piece-id="${esc(piece.id)}">
-      <div class="tco-part-gauche">
-        <div class="tco-part-icone">${picto('boite')}</div>
-        <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece.designation)}</span>${piece.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}</span>
-          <span class="tco-part-ref">${piece.reference ? esc(piece.reference) : trad('Sans référence')}</span>
-          ${piece.supplier_name || piece.avg_lead_time_days != null ? `<span class="tco-part-ref">${esc([piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' · '))}</span>` : ''}
-          ${piece.default_reorder_point != null ? `<span class="tco-part-ref">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
+    <div class="stock-row" data-piece-id="${esc(piece.id)}">
+      <div class="stock-row-gauche">
+        <div class="stock-row-icone">${picto('boite')}</div>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece.designation)}</span>${piece.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}</div>
+          <div class="stock-row-sub">${esc(refEtDelai)}</div>
+          ${piece.default_reorder_point != null ? `<div class="stock-row-sub">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</div>` : ''}
         </div>
       </div>
-      <div class="tco-part-droite">
-        <div class="tco-part-prix"><span class="montant">${texteAvecSeparateurs(piece.unit_price)}</span><span class="devise">${esc(deviseCourte())}</span></div>
-        <div class="tco-part-actions">
-          <button type="button" class="tco-part-btn" data-piece-modifier="${esc(piece.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
-          <button type="button" class="tco-part-btn is-danger" data-piece-retirer="${esc(piece.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
+      <div class="stock-row-droite">
+        <div class="stock-row-valeur"><span class="montant">${texteAvecSeparateurs(piece.unit_price)}</span><span class="unite">${esc(deviseCourte())}</span></div>
+        <div class="stock-row-actions">
+          <button type="button" data-piece-modifier="${esc(piece.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+          <button type="button" class="is-danger" data-piece-retirer="${esc(piece.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
         </div>
       </div>
     </div>`;
@@ -18595,75 +18740,73 @@ function ligneCatalogueTcoHtml(piece) {
 function blocCatalogueTcoHtml() {
   const pieces = UI.partsCatalog || [];
   return `
-    <section class="card" id="tco-catalogue-section">
-      <div class="tco-card-tete" style="margin-bottom:2px;">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-indigo">${picto('boite')}</div>
+    <section class="stock-section" id="tco-catalogue-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-indigo">${picto('boite')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Catalogue de pièces')}</h2>
-            <span class="tag" id="tco-catalogue-badge" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>
+            <div class="stock-section-titre-row">
+              <h2 class="stock-section-titre">${trad('Catalogue de pièces')}</h2>
+              <span class="stock-section-badge is-indigo" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>
+            </div>
+            <p class="stock-section-sub">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
           </div>
         </div>
-        <button type="button" class="parc-export-btn" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
+        <button type="button" class="stock-btn-outline" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
       </div>
-      <p class="muted-text">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
-      <div class="tco-catalogue-grid">
-        <div class="tco-catalogue-colonne">
-          <div class="tco-recherche">
-            ${picto('recherche')}
-            <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
-          </div>
-          <div class="tco-parts-liste" id="tco-catalogue-liste">
-            ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
-          </div>
-          <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
-        </div>
-        <div class="tco-quick-add">
-          <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
-          <div class="field-row">
-            <div>
-              <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
-              <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+      <div class="stock-section-body">
+        <div class="stock-grid-2 is-catalogue">
+          <div>
+            <div class="stock-search" style="margin-bottom:14px;">
+              ${picto('recherche')}
+              <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
             </div>
-            <div>
-              <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
-              <div class="tco-champ-unite">
+            <div class="stock-liste is-scroll" id="tco-catalogue-liste">
+              ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
+            </div>
+            <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
+          </div>
+          <div class="stock-form-panel">
+            <div class="stock-form-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
+            <div class="stock-field-row">
+              <div>
+                <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
+                <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+              </div>
+              <div class="stock-champ-unite">
+                <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
                 <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
-                <span class="tco-unite-tag" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+                <span class="suffixe" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
               </div>
             </div>
-          </div>
-          <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
-          <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
-          <div class="field-row">
-            <div>
-              <label class="sr-only" for="tco-piece-fournisseur">${trad('Fournisseur')}</label>
-              <input id="tco-piece-fournisseur" placeholder="${trad('Fournisseur (optionnel)')}">
-            </div>
-            <div>
-              <label class="sr-only" for="tco-piece-delai">${trad('Délai moyen de disponibilité')}</label>
-              <div class="tco-champ-unite">
-                <input id="tco-piece-delai" type="text" inputmode="numeric" placeholder="${trad('Délai moyen')}">
-                <span class="tco-unite-tag">${trad('jours')}</span>
+            <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
+            <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
+            <div class="stock-field-row">
+              <div>
+                <label class="sr-only" for="tco-piece-fournisseur">${trad('Fournisseur')}</label>
+                <input id="tco-piece-fournisseur" placeholder="${trad('Fournisseur (optionnel)')}">
+              </div>
+              <div class="stock-champ-unite">
+                <label class="sr-only" for="tco-piece-delai">${trad('Délai moyen de disponibilité')}</label>
+                <input id="tco-piece-delai" type="text" inputmode="numeric" placeholder="${trad('Délai moye')}">
+                <span class="suffixe">${trad('jours')}</span>
               </div>
             </div>
-          </div>
-          ${SCHEMA.hasStockPackaging || SCHEMA.hasStock ? `
-          <div class="field-row">
-            ${SCHEMA.hasStockPackaging ? `
-            <div>
-              <label class="sr-only" for="tco-piece-conditionnement">${trad('Conditionnement')}</label>
-              <input id="tco-piece-conditionnement" placeholder="${trad('Conditionnement (ex: Boîte de 12)')}">
+            ${SCHEMA.hasStockPackaging || SCHEMA.hasStock ? `
+            <div class="stock-field-row">
+              ${SCHEMA.hasStockPackaging ? `
+              <div>
+                <label class="sr-only" for="tco-piece-conditionnement">${trad('Conditionnement')}</label>
+                <input id="tco-piece-conditionnement" placeholder="${trad('Conditionnement (optionnel)')}">
+              </div>` : ''}
+              ${SCHEMA.hasStock ? `
+              <div>
+                <label class="sr-only" for="tco-piece-seuil">${trad('Seuil de réapprovisionnement')}</label>
+                <input id="tco-piece-seuil" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
+              </div>` : ''}
             </div>` : ''}
-            ${SCHEMA.hasStock ? `
-            <div>
-              <label class="sr-only" for="tco-piece-seuil">${trad('Seuil de réapprovisionnement')}</label>
-              <input id="tco-piece-seuil" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
-            </div>` : ''}
-          </div>` : ''}
-          <div class="modal-actions">
-            <button type="button" class="secondary" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
-            <button type="button" class="primary" id="tco-piece-ajouter" style="width:100%;justify-content:center;">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
+            <button type="button" class="stock-cta" id="tco-piece-ajouter">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
+            <button type="button" class="stock-cta-annuler" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
           </div>
         </div>
       </div>
@@ -19789,6 +19932,43 @@ function formatDateHeureMouvement(iso) {
   return `${d.getDate()} ${moisCourt(d.getMonth())} ${d.getFullYear()} · ${heure}`;
 }
 
+// Bandeau eyebrow + bouton d'aide — reprise Stitch, même patron que
+// tcoEyebrowToolbarHtml(). Le bouton « Principe de valorisation PUMP »
+// ouvre une explication RÉELLE de la méthode déjà implémentée par la RPC
+// enregistrer_mouvement_stock (voir le plan de session), jamais un lien
+// mort — seul le paragraphe « Analyse » d'un mockup fabriquerait un texte
+// sans réalité derrière ; une explication de méthodologie déjà en place
+// n'en est pas une.
+function stockEyebrowToolbarHtml() {
+  return `
+    <div class="stock-eyebrow-row">
+      <span class="stock-eyebrow-pill">${picto('boite')}${trad('Gestion des pièces & logistique flotte')}</span>
+      <div>
+        <button type="button" class="stock-btn-outline" id="stock-pump-info">${picto('info')}<span>${trad('Principe de valorisation PUMP')}</span></button>
+      </div>
+    </div>`;
+}
+function ouvrirExplicationPump() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pump-titre">
+      <h2 id="pump-titre">${trad('Principe de valorisation PUMP')}</h2>
+      <p class="sub">${trad('Prix Unitaire Moyen Pondéré — la méthode utilisée par ce module pour donner une valeur réelle à ton stock.')}</p>
+      <div class="hint" style="margin-top:10px;line-height:1.6;">
+        <p>${trad('À chaque entrée de stock, le coût moyen d\'une référence est recalculé en pondérant l\'ancien stock par son ancien coût, et la quantité entrante par son coût d\'achat réel :')}</p>
+        <p style="margin-top:8px;font-family:monospace;background:var(--surface-soft);padding:10px 12px;border-radius:var(--r-md);">${trad('nouveau coût = (stock × ancien coût + entrée × prix d\'achat) / (stock + entrée)')}</p>
+        <p style="margin-top:8px;">${trad('Une sortie ou un transfert ne modifie jamais ce coût moyen — seule une nouvelle entrée le fait évoluer. C\'est ce coût qui sert à calculer la valeur totale du stock (quantité × coût moyen) affichée en haut de cette page.')}</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="primary" id="pump-fermer">${trad('Compris')}</button>
+      </div>
+    </div>`;
+  overlay.querySelector('#pump-fermer').addEventListener('click', () => overlay.remove());
+}
+
 // KPI : valeur totale (gérant seulement — même trust model que
 // interventions.parts_cost, jamais de privilège de colonne côté RLS, voir
 // le plan §2), alertes de seuil bas (UI.stockCounts, calculé au boot ET
@@ -19802,32 +19982,38 @@ function stockKpiGridHtml() {
   const nbAlertes = UI.stockCounts?.seuilBas || 0;
   const nbMagasins = (UI.warehouses || []).filter((w) => w.active !== false).length;
   return `
-    <div class="tco-kpi-grid">
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Valeur totale du stock')}</div>
-          <div class="tco-kpi-valeur-ligne">${gerant
-            ? `<span class="tco-kpi-valeur">${texteAvecSeparateurs(valeurTotale)}</span><span class="tco-kpi-unite">${esc(deviseCourte())}</span>`
-            : `<span class="tco-kpi-valeur">—</span>`}</div>
-          <div class="tco-kpi-sub">${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</div>
+    <div class="stock-kpi-grid">
+      <div class="stock-kpi-card">
+        <div class="stock-kpi-head">
+          <span>${trad('Valeur totale du stock')}</span>
+          <div class="stock-kpi-icon is-blue">${picto('devise')}</div>
         </div>
-        <div class="tco-kpi-icone is-roi">${picto('devise')}</div>
+        <div class="stock-kpi-value-row">
+          <div class="stock-kpi-value">${gerant
+            ? `${texteAvecSeparateurs(valeurTotale)} <span class="unite">${esc(deviseCourte())}</span>`
+            : '—'}</div>
+          <div class="stock-kpi-sub is-indigo"><span class="dot"></span>${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</div>
+        </div>
       </div>
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Références en alerte')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${nbAlertes}</span></div>
-          <div class="tco-kpi-sub${nbAlertes ? ' is-late' : ' is-ok'}">${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</div>
+      <div class="stock-kpi-card">
+        <div class="stock-kpi-head">
+          <span>${trad('Références en alerte')}</span>
+          <div class="stock-kpi-icon is-amber">${picto('alerte')}</div>
         </div>
-        <div class="tco-kpi-icone is-amber">${picto('alerte')}</div>
+        <div class="stock-kpi-value-row">
+          <div class="stock-kpi-value">${nbAlertes}</div>
+          <div class="stock-kpi-sub${nbAlertes ? ' is-late' : ' is-ok'}"><span class="dot"></span>${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</div>
+        </div>
       </div>
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Mouvements ce mois-ci')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur" id="stock-kpi-mouvements">…</span></div>
-          <div class="tco-kpi-sub">${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</div>
+      <div class="stock-kpi-card">
+        <div class="stock-kpi-head">
+          <span>${trad('Mouvements ce mois-ci')}</span>
+          <div class="stock-kpi-icon is-indigo">${picto('calendrier')}</div>
         </div>
-        <div class="tco-kpi-icone is-indigo">${picto('calendrier')}</div>
+        <div class="stock-kpi-value-row">
+          <div class="stock-kpi-value" id="stock-kpi-mouvements">…</div>
+          <div class="stock-kpi-sub"><span class="dot"></span>${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</div>
+        </div>
       </div>
     </div>`;
 }
@@ -19841,20 +20027,18 @@ function stockKpiGridHtml() {
 function ligneMagasinHtml(w) {
   const gerant = peutGererParametresStock();
   return `
-    <div class="tco-part-ligne" data-magasin-id="${esc(w.id)}">
-      <div class="tco-part-gauche">
-        <div class="tco-part-icone">${picto(w.kind === 'mobile' ? 'vehicule' : 'batiment')}</div>
-        <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(w.name)}</span>${w.active === false ? `<span class="badge neutral">${trad('Inactif')}</span>` : ''}</span>
-          <span class="tco-part-ref">${w.kind === 'mobile' ? trad('Magasin mobile') : trad('Magasin central')}${w.note ? ' · ' + esc(w.note) : ''}</span>
+    <div class="stock-row" data-magasin-id="${esc(w.id)}">
+      <div class="stock-row-gauche">
+        <div class="stock-row-icone" style="background:rgba(222,122,22,.08);color:var(--late);">${picto(w.kind === 'mobile' ? 'vehicule' : 'batiment')}</div>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(w.name)}</span>${w.active === false ? `<span class="stock-tag">${trad('Inactif')}</span>` : ''}</div>
+          <div class="stock-row-sub">${w.kind === 'mobile' ? trad('Magasin mobile') : trad('Magasin central')}${w.note ? ' · ' + esc(w.note) : ''}</div>
         </div>
       </div>
       ${gerant ? `
-      <div class="tco-part-droite">
-        <div class="tco-part-actions">
-          <button type="button" class="tco-part-btn" data-magasin-modifier="${esc(w.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
-          <button type="button" class="tco-part-btn is-danger" data-magasin-retirer="${esc(w.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
-        </div>
+      <div class="stock-row-actions">
+        <button type="button" data-magasin-modifier="${esc(w.id)}" title="${esc(trad('Modifier'))}" aria-label="${esc(tR('Modifier {nom}', { nom: w.name }))}">${picto('crayon')}</button>
+        <button type="button" class="is-danger" data-magasin-retirer="${esc(w.id)}" title="${esc(trad('Supprimer'))}" aria-label="${esc(tR('Supprimer {nom}', { nom: w.name }))}">${picto('corbeille')}</button>
       </div>` : ''}
     </div>`;
 }
@@ -19863,48 +20047,51 @@ function blocMagasinsStockHtml() {
   const gerant = peutGererParametresStock();
   const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="hint">${trad('Aucun magasin pour l\'instant — crée le magasin central pour commencer.')}</div>`;
   return `
-    <section class="card" id="stock-magasins-section">
-      <div class="tco-card-tete" style="margin-bottom:2px;">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-roi">${picto('batiment')}</div>
+    <section class="stock-section" id="stock-magasins-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-blue">${picto('batiment')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Magasins')}</h2>
-            <span class="tag" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${tR('{n} magasin(s)', { n: magasins.length })}</span>
+            <div class="stock-section-titre-row">
+              <h2 class="stock-section-titre">${trad('Magasins')}</h2>
+              <span class="stock-section-badge is-blue">${tR('{n} magasin(s)', { n: magasins.length })}</span>
+            </div>
+            <p class="stock-section-sub">${trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.')}</p>
           </div>
         </div>
       </div>
-      <p class="muted-text">${trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.')}</p>
+      <div class="stock-section-body">
       ${gerant ? `
-      <div class="tco-catalogue-grid">
-        <div class="tco-catalogue-colonne">
-          <div class="tco-parts-liste" id="stock-magasins-liste">${liste}</div>
-          <div class="hint" id="stock-magasin-msg" role="status" aria-live="polite"></div>
-        </div>
-        <div class="tco-quick-add">
-          <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
+      <div class="stock-grid-2 is-magasins">
+        <div class="stock-liste" id="stock-magasins-liste">${liste}</div>
+        <div class="stock-form-panel">
+          <div class="stock-form-tete">${picto('plusCercle')}<span id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
           <label class="sr-only" for="stock-magasin-nom">${trad('Nom')}</label>
           <input id="stock-magasin-nom" required placeholder="${trad('Nom (ex : Magasin central, Fourgon Paul…)')}">
-          <div class="field-row">
+          <div class="stock-field-row">
             <div>
-              <label class="tco-champ-label" for="stock-magasin-kind"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Type')}</span></label>
-              <select id="stock-magasin-kind">
-                <option value="central">${trad('Magasin central')}</option>
-                <option value="mobile">${trad('Magasin mobile (fourgon)')}</option>
-              </select>
+              <label class="sr-only" for="stock-magasin-kind">${trad('Type')}</label>
+              <div class="stock-select-wrap">
+                <select id="stock-magasin-kind">
+                  <option value="central">${trad('Magasin central')}</option>
+                  <option value="mobile">${trad('Magasin mobile (fourgon)')}</option>
+                </select>
+                ${picto('chevronBas')}
+              </div>
             </div>
             <div>
               <label class="sr-only" for="stock-magasin-note">${trad('Note')}</label>
               <input id="stock-magasin-note" placeholder="${trad('Note (optionnel)')}">
             </div>
           </div>
-          <div class="modal-actions" style="margin-top:8px;">
-            <button type="button" class="secondary" id="stock-magasin-annuler" hidden>${trad('Annuler la modification')}</button>
-            <button type="button" class="primary" id="stock-magasin-ajouter"><span>${trad('Ajouter le magasin')}</span></button>
-          </div>
+          <button type="button" class="stock-cta" id="stock-magasin-ajouter">${picto('plusCercle')}<span>${trad('Ajouter le magasin')}</span></button>
+          <button type="button" class="stock-cta-annuler" id="stock-magasin-annuler" hidden>${trad('Annuler la modification')}</button>
+          <div class="hint" id="stock-magasin-msg" role="status" aria-live="polite"></div>
         </div>
       </div>` : `
       <div class="hint">${trad('Réservé au gérant.')}</div>
-      <div class="tco-parts-liste">${liste}</div>`}
+      <div class="stock-liste" style="margin-top:10px;">${liste}</div>`}
+      </div>
     </section>`;
 }
 
@@ -19918,46 +20105,54 @@ function ligneInventaireStockHtml(it) {
   const seuil = it.reorder_point ?? piece?.default_reorder_point ?? null;
   const enAlerte = seuil != null && Number(it.quantity) <= Number(seuil);
   return `
-    <div class="tco-part-ligne">
-      <div class="tco-part-gauche">
-        <div class="tco-part-icone">${picto('boite')}</div>
-        <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${piece?.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="badge alert">${trad('Seuil bas')}</span>` : ''}</span>
-          <span class="tco-part-ref">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</span>
+    <div class="stock-row">
+      <div class="stock-row-gauche">
+        <div class="stock-row-icone">${picto('boite')}</div>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${piece?.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="stock-tag is-alert">${trad('Seuil bas')}</span>` : ''}</div>
+          <div class="stock-row-sub">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</div>
         </div>
       </div>
-      <div class="tco-part-droite">
-        <div class="tco-part-prix"><span class="montant">${texteAvecSeparateurs(it.quantity)}</span></div>
-        ${gerant ? `<span class="tco-part-ref">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
+      <div class="stock-row-valeur">
+        <span class="montant">${texteAvecSeparateurs(it.quantity)}</span>
+        ${gerant ? `<span class="unite">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
       </div>
     </div>`;
 }
 function blocInventaireStockHtml() {
   const magasins = UI.warehouses || [];
   return `
-    <section class="card" id="stock-inventaire-section">
-      <div class="tco-card-tete" style="margin-bottom:2px;">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-olive">${picto('boite')}</div>
+    <section class="stock-section" id="stock-inventaire-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-ok">${picto('boite')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Inventaire')}</h2>
-            <span class="tag" id="stock-inventaire-badge" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;"></span>
+            <div class="stock-section-titre-row">
+              <h2 class="stock-section-titre">${trad('Inventaire')}</h2>
+              <span class="stock-section-badge is-ok" id="stock-inventaire-badge"></span>
+            </div>
+            <p class="stock-section-sub">${trad('Quantités physiques en stock par référence et valorisation unitaire')}</p>
           </div>
         </div>
-        <button type="button" class="parc-export-btn" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+        <button type="button" class="stock-btn-outline" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
       </div>
-      <div class="field-row" style="grid-template-columns:2fr 1fr;">
-        <div class="tco-recherche">
-          ${picto('recherche')}
-          <input id="stock-inventaire-filtre" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
+      <div class="stock-section-body">
+        <div class="stock-field-row" style="grid-template-columns:2fr 1fr;margin-bottom:16px;">
+          <div class="stock-search">
+            ${picto('recherche')}
+            <input id="stock-inventaire-filtre" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
+          </div>
+          <div class="stock-select-wrap">
+            <select id="stock-inventaire-magasin">
+              <option value="">${trad('Tous les magasins')}</option>
+              ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
+            </select>
+            ${picto('chevronBas')}
+          </div>
         </div>
-        <select id="stock-inventaire-magasin">
-          <option value="">${trad('Tous les magasins')}</option>
-          ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
-        </select>
+        <div class="stock-liste" id="stock-inventaire-liste"></div>
+        <div class="hint" id="stock-inventaire-vide"></div>
       </div>
-      <div class="tco-parts-liste" id="stock-inventaire-liste"></div>
-      <div class="hint" id="stock-inventaire-vide"></div>
     </section>`;
 }
 
@@ -19973,35 +20168,35 @@ function ligneMouvementStockHtml(m) {
     : nomMagasin(m.warehouse_id);
   const negatif = m.type === 'sortie' || (m.type === 'ajustement' && Number(m.quantity) < 0);
   return `
-    <div class="tco-part-ligne">
-      <div class="tco-part-gauche">
-        <div class="tco-part-icone"><span class="badge ${badge.classe}">${badge.texte}</span></div>
-        <div class="tco-part-corps">
-          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(m.part_id))}</span>${piece?.packaging ? `<span class="tag">${esc(piece.packaging)}</span>` : ''}</span>
-          <span class="tco-part-ref">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</span>
+    <div class="stock-row">
+      <div class="stock-row-gauche">
+        <span class="stock-badge-mouvement is-${badge.classe}">${badge.texte}</span>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece ? piece.designation : designationPiece(m.part_id))}</span>${piece?.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}</div>
+          <div class="stock-row-sub">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</div>
         </div>
       </div>
-      <div class="tco-part-droite">
-        <div class="tco-part-prix"><span class="montant">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</span></div>
-      </div>
+      <div class="stock-mouvement-valeur is-${badge.classe}">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</div>
     </div>`;
 }
 function blocMouvementsStockHtml() {
   const peut = peutGererMouvementsStock();
   return `
-    <section class="card" id="stock-mouvements-section">
-      <div class="tco-card-tete" style="margin-bottom:2px;">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-indigo">${picto('calendrier')}</div>
+    <section class="stock-section" id="stock-mouvements-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-indigo">${picto('calendrier')}</div>
           <div>
-            <h2 class="tco-card-titre">${trad('Mouvements')}</h2>
-            <span class="tag" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${trad('Entrées, sorties, transferts et ajustements')}</span>
+            <h2 class="stock-section-titre">${trad('Mouvements')}</h2>
+            <p class="stock-section-sub" style="color:var(--primary-dark);font-weight:600;">${trad('Entrées, sorties, transferts et ajustements')}</p>
           </div>
         </div>
-        ${peut ? `<button type="button" class="tco-btn-outil" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : ''}
+        ${peut ? `<button type="button" class="stock-btn-outline" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : ''}
       </div>
-      <div class="tco-parts-liste" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
-      <button type="button" class="secondary" id="stock-mouvements-plus" hidden style="margin-top:10px;">${trad('Voir plus')}</button>
+      <div class="stock-section-body">
+        <div class="stock-liste" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
+        <button type="button" class="stock-btn-outline" id="stock-mouvements-plus" hidden style="margin-top:14px;width:100%;justify-content:center;">${trad('Voir plus')}</button>
+      </div>
     </section>`;
 }
 
@@ -20198,6 +20393,7 @@ VIEWS.stock = {
   render() {
     return `
       <div class="vue-stock">
+        ${stockEyebrowToolbarHtml()}
         ${stockKpiGridHtml()}
         ${blocMagasinsStockHtml()}
         ${blocCatalogueTcoHtml()}
@@ -20213,6 +20409,8 @@ VIEWS.stock = {
       el.textContent = texte;
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
+
+    root.querySelector('#stock-pump-info')?.addEventListener('click', ouvrirExplicationPump);
 
     // Catalogue de pièces : déplacé ici depuis Coûts & TCO pour les
     // sociétés Enterprise (demande explicite de l'utilisateur — sa place
