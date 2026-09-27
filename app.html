@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-8Il/b+x+FBovCtv/ci307FuMN+Q95XsfVDXuRGNK4Tk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/oBBPYH5b2Wqb53mOHc0BOw749b3Fg9EQtRwhY9uLfw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4396,15 +4396,6 @@
   .agenda-jour-tete{display:flex;align-items:center;justify-content:space-between;}
   .agenda-jour-num{font-weight:700;font-size:13.5px;font-family:'Space Grotesk',sans-serif;}
   .agenda-jour.is-aujourdhui .agenda-jour-num{color:var(--primary-dark);}
-  /* Toujours visible (pas seulement au survol : un doigt ne « survole »
-     jamais) — plus discret par défaut, net au survol/focus pour les
-     pointeurs qui le permettent. */
-  .agenda-jour-ajout{
-    width:20px;height:20px;border:none;background:none;padding:0;border-radius:6px;color:var(--ink-3);
-    opacity:.55;display:inline-flex;align-items:center;justify-content:center;transition:opacity .12s ease,background .12s ease;cursor:pointer;
-  }
-  .agenda-jour-ajout svg{width:12px;height:12px;}
-  .agenda-jour-ajout:hover,.agenda-jour-ajout:focus-visible{opacity:1;background:rgba(99,102,241,.12);}
   .agenda-jour.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.3);}
   .agenda-jour.is-soon{background:var(--soon-bg);border-color:rgba(99,102,241,.25);}
   .agenda-jour.is-ok{background:var(--ok-bg);border-color:rgba(36,181,168,.25);}
@@ -4422,11 +4413,6 @@
   .agenda-legende-item{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink-2);}
   .agenda-legende-item .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
   .agenda-pills .dot{width:8px;height:8px;border-radius:50%;}
-
-  /* Fenêtre récapitulative d'un jour (ouvrirJourAgenda) : mêmes cartes que la
-     Liste chronologique (.chrono-carte), même reset de marge sur la 1ʳᵉ. */
-  .agenda-jour-modal-liste{max-height:60vh;overflow-y:auto;margin-top:4px;}
-  .agenda-jour-modal-liste .chrono-carte:first-of-type{margin-top:0;}
 
   @media (max-width:640px){
     .agenda-jour{min-height:52px;padding:6px;}
@@ -4458,13 +4444,137 @@
   .agenda-pieces-detail-toggle[aria-expanded="true"] .prep-groupes-chevron svg{transform:rotate(180deg);}
   .agenda-pieces-detail{display:flex;flex-direction:column;gap:16px;margin-top:12px;}
 
-  .agenda-choix-liste{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;margin-top:10px;}
-  .agenda-choix-machine{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;
-    border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);cursor:pointer;
-    font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);text-align:left;min-height:44px;
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ Reprise Stitch « modale_agenda_planifier_un_entretien_keeva » — même
+     système que precision_field_matrix (couleurs déjà en variables CSS ici,
+     voir --late/--soon/--ok plus haut). Recherche + filtres + sélection en
+     deux temps (on choisit une machine, puis on confirme) plutôt que la
+     validation immédiate au clic de l'ancienne version — évite qu'un tapotis
+     malencontreux programme un entretien sur la mauvaise machine. */
+  .pe-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .pe-tete-icone{
+    flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-chip);background:var(--surface-soft);
+    display:flex;align-items:center;justify-content:center;color:var(--primary-dark);
   }
-  .agenda-choix-machine:hover{background:var(--surface-soft);}
+  .pe-tete-icone svg{width:18px;height:18px;}
+  .pe-date-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:6px;}
+  .pe-date-bloc{margin-bottom:12px;}
+  .pe-date-bloc .champ-select{width:100%;height:48px;background:var(--surface-soft);border:1px solid transparent;font-size:14px;}
+  .pe-recherche{position:relative;margin-bottom:10px;}
+  .pe-recherche svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);}
+  .pe-recherche input{
+    width:100%;height:44px;padding:0 14px 0 36px;border-radius:var(--r-md);border:1px solid var(--line);
+    background:var(--surface-soft);font-family:inherit;font-size:14px;color:var(--ink);box-sizing:border-box;
+  }
+  .pe-recherche input:focus{outline:none;border-color:var(--primary);background:var(--surface);}
+  .pe-pills{display:flex;align-items:center;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+  .pe-pill{
+    flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:var(--r-pill);
+    border:none;background:var(--surface-soft);color:var(--ink-2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .pe-pill .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
+  .pe-pill.is-active{background:var(--primary-dark);color:#fff;}
+  .pe-liste{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow-y:auto;}
+  .pe-machine{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;
+    border-radius:var(--r-md);border:1px solid transparent;background:var(--surface-soft);cursor:pointer;
+    font-family:inherit;text-align:left;min-height:52px;transition:background .12s ease;
+  }
+  .pe-machine:hover{background:var(--line-2);}
+  .pe-machine.is-choisie{background:var(--primary-tint);border-color:var(--primary-line);}
+  .pe-machine-gauche{display:flex;align-items:center;gap:10px;min-width:0;}
+  .pe-machine-icone{
+    flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);background:var(--surface);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-2);box-shadow:0 1px 2px rgba(14,19,51,.06);
+  }
+  .pe-machine-icone svg{width:18px;height:18px;}
+  .pe-machine-corps{min-width:0;display:flex;flex-direction:column;}
+  .pe-machine-nom{font-size:13.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pe-machine-meta{font-size:12px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pe-machine-droite{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .pe-machine-check{
+    width:20px;height:20px;border-radius:50%;background:var(--primary-dark);color:#fff;
+    display:flex;align-items:center;justify-content:center;opacity:0;flex:0 0 auto;
+  }
+  .pe-machine-check svg{width:12px;height:12px;}
+  .pe-machine.is-choisie .pe-machine-check{opacity:1;}
+  .pe-vide{display:flex;flex-direction:column;align-items:center;text-align:center;padding:28px 10px;color:var(--ink-3);}
+  .pe-vide svg{width:24px;height:24px;margin-bottom:8px;}
+  .pe-bandeau{
+    display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;border-radius:var(--r-md);
+    background:var(--primary-tint);color:var(--primary-dark);font-size:13px;font-weight:700;
+  }
+  .pe-bandeau svg{width:16px;height:16px;flex:0 0 auto;}
+  .pe-pied{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+  .pe-confirmer{
+    width:100%;min-height:48px;border-radius:var(--r-md);border:none;background:var(--line-2);color:var(--ink-3);
+    font-family:inherit;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;cursor:not-allowed;
+  }
+  .pe-confirmer:not(:disabled){background:var(--primary-dark);color:#fff;cursor:pointer;}
+  .pe-confirmer svg{width:18px;height:18px;}
+  .pe-fermer{
+    width:100%;min-height:44px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);
+    font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ Reprise Stitch « modale_agenda_v_nements_du_jour_keeva » — la fenêtre
+     qui s'ouvre au clic sur une case du calendrier (ouvrirJourAgenda). Une
+     carte par échéance, même contenu que chronologieCarteHtml mais présenté
+     dans ce format-ci : bandeau latéral coloré, bloc « tâche » séparé, bloc
+     télémétrie SEULEMENT quand une vraie lecture de compteur existe pour
+     cette machine — jamais un seuil ou un « max » inventé pour coller à la
+     maquette (son 140h/145h est un exemple fictif, pas une donnée réelle). */
+  .jm-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .jm-badge-ligne{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+  .jm-icone{
+    flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--primary-dark);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .jm-icone svg{width:12px;height:12px;}
+  .jm-eyebrow{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-dark);}
+  .jm-compte{font-size:11px;font-weight:800;padding:2px 8px;border-radius:var(--r-pill);background:var(--line-2);color:var(--ink-2);}
+  .jm-tete h2{font-size:19px;margin:0 0 2px;}
+  .jm-fermer{
+    flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);
+    color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .jm-fermer svg{width:16px;height:16px;}
+  .jm-liste{display:flex;flex-direction:column;gap:12px;max-height:52vh;overflow-y:auto;margin-bottom:4px;}
+  .jm-carte{display:flex;gap:0;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line-2);overflow:hidden;}
+  .jm-carte-bar{flex:0 0 5px;align-self:stretch;background:var(--ink-3);}
+  .jm-carte.is-late .jm-carte-bar{background:var(--late);}
+  .jm-carte.is-soon .jm-carte-bar{background:var(--soon);}
+  .jm-carte.is-ok .jm-carte-bar{background:var(--ok);}
+  .jm-carte-corps{flex:1;min-width:0;padding:13px;display:flex;flex-direction:column;gap:10px;}
+  .jm-carte-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .jm-carte-nom{font-size:14.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.01em;}
+  .jm-carte-meta{font-size:11.5px;color:var(--ink-3);margin-top:1px;}
+  .jm-carte-tache-bloc{background:var(--surface-soft);border-radius:var(--r-chip);padding:9px 10px;}
+  .jm-carte-tache-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;}
+  .jm-carte.is-late .jm-carte-echeance{color:var(--late);}
+  .jm-carte-tache{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:3px;}
+  .jm-carte-telemetrie{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r-chip);background:var(--surface-soft);}
+  .jm-carte-telemetrie-gauche{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink-2);}
+  .jm-carte-telemetrie-gauche svg{width:15px;height:15px;color:var(--ink-3);}
+  .jm-carte-telemetrie-valeur{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);}
+  .jm-carte-cta{
+    width:100%;min-height:44px;border-radius:var(--r-md);border:none;font-family:inherit;font-size:13.5px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--surface-soft);color:var(--ink);
+  }
+  .jm-carte.is-late .jm-carte-cta{background:var(--primary-dark);color:#fff;}
+  .jm-carte-cta svg{width:16px;height:16px;}
+  .jm-vide{padding:24px 10px;text-align:center;color:var(--ink-3);font-size:13.5px;}
+  .jm-pied{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+  .jm-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);}
+  .jm-nav-btn{
+    display:inline-flex;align-items:center;gap:5px;background:none;border:none;padding:6px 8px;border-radius:var(--r-chip);
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer;
+  }
+  .jm-nav-btn:hover{background:var(--surface-soft);}
+  .jm-nav-btn svg{width:14px;height:14px;}
+  .jm-nav-legende{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ink-3);white-space:nowrap;}
+  .jm-nav-legende .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ RAPPELS (maquette Stitch « WEB rappel » / « mobile rappel »)
@@ -15727,13 +15837,18 @@ function agendaParJour(datedFiltres) {
 // case, dans ouvrirJourAgenda(). AGENDA_JOUR_DOTS_MAX limite le nombre de
 // pastilles avant de résumer le reste en « +N ».
 const AGENDA_JOUR_DOTS_MAX = 4;
-// La case entière (pas juste une icône) est cliquable : vers le récapitulatif
-// du jour s'il y a au moins une échéance, vers « Planifier un entretien »
-// sinon (wireAgenda) — ça fonctionne au doigt, pas seulement au hover.
-// `data-jour` seulement sur les jours du mois affiché : cliquer un jour
-// grisé (mois voisin) ne fait rien de surprenant. Le bouton « + » reste une
-// action séparée (toujours visible, pas seulement au survol) pour programmer
-// un entretien même sur un jour qui a déjà des échéances.
+// La case ENTIÈRE est le seul et unique élément cliquable — UN SEUL
+// comportement au clic, toujours ouvrirJourAgenda() (wireAgenda), qui
+// contient elle-même « Planifier un entretien ». Il y avait auparavant un
+// second bouton « + » dans le coin de la case pour programmer un entretien
+// séparément : sur une case de ~48px sur téléphone, ce bouton (même agrandi)
+// restait un second petit repère à viser tout près du numéro du jour, et
+// captait au clic une partie des tapotis destinés à la case elle-même
+// (stopPropagation) — l'utilisateur a remonté une ouverture peu fiable
+// « 1 fois sur 2 » selon l'endroit exact du doigt. Un seul grand repère,
+// toute la case, ne laisse plus cette ambiguïté. `data-jour` seulement sur
+// les jours du mois affiché : cliquer un jour grisé (mois voisin) ne fait
+// rien de surprenant.
 function agendaJourHtml(jour, evenements) {
   const jourNum = jour.iso.slice(8, 10);
   const classes = ['agenda-jour'];
@@ -15755,7 +15870,6 @@ function agendaJourHtml(jour, evenements) {
     <div class="${classes.join(' ')}"${jour.dansLeMois ? ` data-jour="${esc(jour.iso)}"` : ''}>
       <div class="agenda-jour-tete">
         <span class="agenda-jour-num">${jourNum}</span>
-        ${jour.dansLeMois ? `<button type="button" class="agenda-jour-ajout" data-jour-ajout="${esc(jour.iso)}" aria-label="${esc(trad('Planifier un entretien ce jour'))}">${picto('croix')}</button>` : ''}
       </div>
       ${dotsHtml}
     </div>`;
@@ -15893,34 +16007,112 @@ function agendaEvenementsDuJour(iso) {
   const programmes = agendaProgrammesParJour(statut).get(iso) || [];
   return [...echeances, ...programmes];
 }
-// Clic sur une case du calendrier qui a au moins une échéance : liste chaque
-// machine concernée avec la MÊME carte que la Liste chronologique
-// (chronologieCarteHtml) plutôt que de réinventer un second format — jamais
-// entassée dans la case elle-même (voir agendaJourHtml). Câblage dédié (pas
-// wireChronologie telle quelle) : une carte « programmée » doit rouvrir
-// ouvrirProgrammeActions (voir/annuler CETTE programmation), comme le faisait
-// l'ancien clic sur .agenda-evt — wireChronologie ne connaît pas ce cas,
-// puisqu'aucun de ses autres appelants (Liste chronologique, Tableau de
-// bord) n'affiche de carte programmée.
+// Reprise Stitch « modale_agenda_v_nements_du_jour_keeva » — même contenu
+// que chronologieCarteHtml (nom, état, tâche, échéance) mais dans ce format
+// à bandeau latéral + bloc tâche + bloc télémétrie. La télémétrie ne
+// s'affiche QUE si cette machine a un second suivi au compteur
+// (vueCompteurSecondaire) avec une vraie lecture — jamais un « max » inventé
+// comme le 140h/145h fictif de la maquette (aucune donnée réelle derrière).
+function agendaJourCarteHtml(m, info, programme) {
+  const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
+  const meta = [machineBrandModel(m), identifiantAffiche(m)].filter(Boolean).join(' · ');
+  const labelTache = programme ? trad('Contrôle programmé') : info.state === 'late' ? trad('Opération requise') : trad('Prochaine intervention');
+  const echeanceCourte = programme
+    ? tR('Prévu le {date}', { date: formatShortDate(programme.scheduled_date) })
+    : tR('Échéance {date}', { date: formatShortDate(m.plan.next_due_at) });
+  const suffixe = (!programme && info.state === 'late' && info.short) ? ` (${info.short})` : '';
+  const cta = info.state === 'late'
+    ? { texte: trad('Enregistrer l\'entretien'), action: 'log', picto: 'entretien' }
+    : info.state === 'soon'
+      ? { texte: trad('Planifier'), action: 'next', picto: 'prochain' }
+      : { texte: trad('Voir'), action: 'plan', picto: 'plan' };
+  const v2 = vueCompteurSecondaire(m);
+  const compteurValeur = (v2 && v2.machineVue.counter_unit !== 'days') ? machineCounter(v2.machineVue) : null;
+  const telemetrieHtml = compteurValeur != null ? `
+    <div class="jm-carte-telemetrie">
+      <span class="jm-carte-telemetrie-gauche">${picto('compteur')}<span>${esc(tR('Relevé {unite}', { unite: v2.machineVue.counter_unit === 'km' ? trad('kilométrique') : trad('horaire') }))}</span></span>
+      <span class="jm-carte-telemetrie-valeur">${esc(formatCounter(compteurValeur, v2.machineVue.counter_unit))}</span>
+    </div>` : '';
+  return `
+    <article class="jm-carte is-${info.state}${programme ? ' is-programme' : ''}" data-machine="${esc(m.id)}"${programme ? ` data-programme-id="${esc(programme.id)}"` : ''}>
+      <span class="jm-carte-bar" aria-hidden="true"></span>
+      <div class="jm-carte-corps">
+        <div class="jm-carte-tete">
+          <div>
+            <div class="jm-carte-nom">${esc(m.name)}</div>
+            ${meta ? `<div class="jm-carte-meta">${esc(meta)}</div>` : ''}
+          </div>
+          <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}${esc(suffixe)}</span>
+        </div>
+        <div class="jm-carte-tache-bloc">
+          <div class="jm-carte-tache-tete">
+            <span>${esc(labelTache)}</span>
+            <span class="jm-carte-echeance">${esc(echeanceCourte)}</span>
+          </div>
+          ${tache ? `<div class="jm-carte-tache">${esc(tache)}</div>` : ''}
+        </div>
+        ${telemetrieHtml}
+        <button type="button" class="jm-carte-cta" data-chrono="${cta.action}" data-machine-id="${esc(m.id)}">${picto(cta.picto)}<span>${cta.texte}</span></button>
+      </div>
+    </article>`;
+}
+// Clic sur une case du calendrier : liste chaque machine concernée (ou
+// « aucune échéance » sur un jour vide — dans les deux cas la même fenêtre,
+// avec toujours un bouton « Planifier un entretien » : un seul comportement
+// au clic sur la case, quel que soit son contenu, plutôt qu'un second petit
+// bouton « + » à viser séparément dans un coin de case déjà minuscule au
+// doigt (ouverture peu fiable, remontée par l'utilisateur — voir
+// agendaJourHtml). Câblage dédié (pas wireChronologie telle quelle) : une
+// carte « programmée » doit rouvrir ouvrirProgrammeActions (voir/annuler
+// CETTE programmation), comme le faisait l'ancien clic sur .agenda-evt.
 function ouvrirJourAgenda(iso) {
   const evenements = agendaEvenementsDuJour(iso);
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-  const cartesHtml = evenements.map(({ m, info, programme }) => chronologieCarteHtml(m, info, programme)).join('');
+  const cartesHtml = evenements.map(({ m, info, programme }) => agendaJourCarteHtml(m, info, programme)).join('');
+  const parEtat = { late: 0, soon: 0, ok: 0 };
+  evenements.forEach(({ info }) => { if (parEtat[info.state] != null) parEtat[info.state]++; });
+  const legendeHtml = ['late', 'soon', 'ok']
+    .filter((s) => parEtat[s])
+    .map((s) => `<span class="dot" style="background:var(--${s});"></span><span>${tR('{n} {label}', { n: parEtat[s], label: badgeLabel(s).toLowerCase() })}</span>`)
+    .join('<span>·</span>');
+  const veille = addDaysIso(iso, -1);
+  const lendemain = addDaysIso(iso, 1);
   overlay.innerHTML = `
     <div class="modal">
-      <h2>${esc(formatLongDate(iso))}</h2>
-      <div class="agenda-jour-modal-liste">${cartesHtml || `<p class="muted-text">${trad('Aucune échéance ce jour.')}</p>`}</div>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="agenda-jour-planifier">${trad('Planifier un entretien')}</button>
-        <button type="button" class="secondary" id="agenda-jour-fermer">${trad('Fermer')}</button>
+      <div class="jm-tete">
+        <div>
+          <div class="jm-badge-ligne">
+            <span class="jm-icone">${picto('calendrier')}</span>
+            <span class="jm-eyebrow">${trad('Agenda atelier')}</span>
+            <span class="jm-compte">${tR('{n} acte(s)', { n: evenements.length })}</span>
+          </div>
+          <h2>${esc(formatLongDate(iso))}</h2>
+          <p class="sub" style="margin-bottom:0;">${evenements.length ? tR('{n} intervention(s) d\'entretien planifiée(s)', { n: evenements.length }) : trad('Aucune échéance ce jour.')}</p>
+        </div>
+        <button type="button" class="jm-fermer" id="agenda-jour-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <div class="jm-liste">${cartesHtml || `<p class="jm-vide">${trad('Aucune échéance ce jour — planifie un entretien ci-dessous si besoin.')}</p>`}</div>
+      <div class="jm-pied">
+        <button type="button" class="pe-confirmer" id="agenda-jour-planifier" style="cursor:pointer;background:var(--primary-dark);color:#fff;">${picto('croix')}<span>${trad('Planifier un entretien')}</span></button>
+        <button type="button" class="pe-fermer" id="agenda-jour-fermer">${trad('Fermer')}</button>
+      </div>
+      <div class="jm-nav">
+        <button type="button" class="jm-nav-btn" data-jour-nav="${esc(veille)}">${picto('flecheGauche')}<span>${esc(formatShortDate(veille))} (${agendaEvenementsDuJour(veille).length})</span></button>
+        ${legendeHtml ? `<span class="jm-nav-legende">${legendeHtml}</span>` : ''}
+        <button type="button" class="jm-nav-btn" data-jour-nav="${esc(lendemain)}"><span>${esc(formatShortDate(lendemain))} (${agendaEvenementsDuJour(lendemain).length})</span>${picto('flecheDroite')}</button>
       </div>
     </div>`;
   overlay.querySelector('#agenda-jour-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#agenda-jour-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#agenda-jour-planifier').addEventListener('click', () => { overlay.remove(); ouvrirProgrammerEntretien(iso); });
-  overlay.querySelectorAll('.chrono-carte').forEach((carte) => carte.addEventListener('click', (e) => {
+  overlay.querySelectorAll('[data-jour-nav]').forEach((btn) => btn.addEventListener('click', () => {
+    overlay.remove();
+    ouvrirJourAgenda(btn.dataset.jourNav);
+  }));
+  overlay.querySelectorAll('.jm-carte').forEach((carte) => carte.addEventListener('click', (e) => {
     if (e.target.closest('[data-chrono]')) return;
     const m = UI.machines.find((x) => x.id === carte.dataset.machine);
     if (!m) return;
@@ -16001,6 +16193,13 @@ function agendaPiecesDetailToggleHtml() {
 // enregistré) : ceci est une programmation manuelle, annulable indépendamment,
 // affichée dans la case du jour choisi avec la couleur d'état RÉELLE et
 // ACTUELLE de la machine (jamais figée à la programmation).
+// Reprise Stitch « modale_agenda_planifier_un_entretien_keeva » — recherche +
+// filtre par statut + sélection en deux temps (choisir puis confirmer,
+// jamais un clic unique qui programme immédiatement — un tapotis
+// malencontreux ne doit pas créer une programmation sur la mauvaise
+// machine). La date reste un vrai <input type="date"> habillé
+// (habillerChampDate, déjà établi) : jamais une liste de dates fictives à
+// faire défiler comme la maquette, qui n'a pas de vrai calendrier derrière.
 function ouvrirProgrammerEntretien(dateInitiale) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -16008,45 +16207,127 @@ function ouvrirProgrammerEntretien(dateInitiale) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const machines = [...UI.machines].sort((a, b) => a.name.localeCompare(b.name));
   const dateDefaut = dateInitiale || todayIso();
-  const ligneHtml = (m) => {
-    const info = infoMachine(m);
-    return `<button type="button" class="agenda-choix-machine" data-machine-id="${esc(m.id)}">
-      <span class="agenda-choix-nom">${esc(m.name)}</span>
-      <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+  const machinesInfo = machines.map((m) => ({ m, info: infoMachine(m) }));
+  const compteStatut = (statut) => statut === 'tous'
+    ? machinesInfo.length
+    : machinesInfo.filter((x) => x.info.state === statut).length;
+
+  const ligneHtml = ({ m, info }) => `
+    <button type="button" class="pe-machine" data-machine-id="${esc(m.id)}" data-statut="${esc(info.state)}" data-nom="${esc(m.name.toLowerCase())}">
+      <span class="pe-machine-gauche">
+        <span class="pe-machine-icone">${picto(iconeCategorieMachine(m.name))}</span>
+        <span class="pe-machine-corps">
+          <span class="pe-machine-nom">${esc(m.name)}</span>
+          <span class="pe-machine-meta">${esc([machineBrandModel(m), identifiantAffiche(m)].filter(Boolean).join(' · '))}</span>
+        </span>
+      </span>
+      <span class="pe-machine-droite">
+        <span class="badge ${badgeClass(info.state)}">${badgeLabel(info.state)}</span>
+        <span class="pe-machine-check">${picto('coche')}</span>
+      </span>
     </button>`;
-  };
+  const pillHtml = (statut, label, teinte) => `
+    <button type="button" class="pe-pill${statut === 'tous' ? ' is-active' : ''}" data-pe-statut="${statut}">
+      ${teinte ? `<span class="dot" style="background:var(--${teinte});"></span>` : ''}
+      <span>${esc(label)}</span><span>${compteStatut(statut)}</span>
+    </button>`;
+
   overlay.innerHTML = `
     <div class="modal">
-      <h2>${trad('Planifier un entretien')}</h2>
-      <p class="sub">${trad('Choisis la date puis la machine : la programmation apparaît dans le calendrier, colorée selon l\'état réel de la machine.')}</p>
-      <label for="prog-date">${trad('Date')}</label>
-      <input id="prog-date" type="date" value="${esc(dateDefaut)}">
-      <div class="agenda-choix-liste">${machines.length ? machines.map(ligneHtml).join('') : `<p class="muted-text">${trad('Aucune machine enregistrée.')}</p>`}</div>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="agenda-choix-fermer">${trad('Fermer')}</button>
+      <div class="pe-tete">
+        <div>
+          <h2>${trad('Planifier un entretien')}</h2>
+          <p class="sub" style="margin-bottom:0;">${trad('Choisis la date puis la machine : la programmation apparaît dans le calendrier, colorée selon l\'état réel de la machine.')}</p>
+        </div>
+        <span class="pe-tete-icone">${picto('calendrier')}</span>
+      </div>
+      <div class="pe-date-bloc">
+        <span class="pe-date-label">${trad('Date sélectionnée')}</span>
+        <input id="prog-date" type="date" value="${esc(dateDefaut)}">
+      </div>
+      <div class="pe-recherche">
+        ${picto('recherche')}
+        <input type="search" id="pe-recherche" autocomplete="off" placeholder="${esc(trad('Rechercher une machine…'))}">
+      </div>
+      <div class="pe-pills">
+        ${pillHtml('tous', trad('Tous'), null)}
+        ${pillHtml('late', trad('En retard'), 'late')}
+        ${pillHtml('soon', trad('Bientôt'), 'soon')}
+        ${pillHtml('ok', trad('À jour'), 'ok')}
+      </div>
+      <div class="pe-liste" id="pe-liste">
+        ${machinesInfo.length ? machinesInfo.map(ligneHtml).join('') : ''}
+        <div class="pe-vide" id="pe-vide" style="display:none;">${picto('recherche')}<p>${trad('Aucune machine trouvée.')}</p></div>
+      </div>
+      <div class="pe-bandeau" id="pe-bandeau" style="display:none;">${picto('coche')}<span id="pe-bandeau-nom"></span></div>
+      <div class="pe-pied">
+        <button type="button" class="pe-confirmer" id="pe-confirmer" disabled>${picto('calendrier')}<span>${trad('Programmer à cette date')}</span></button>
+        <button type="button" class="pe-fermer" id="agenda-choix-fermer">${trad('Fermer')}</button>
       </div>
     </div>`;
+  if (!machinesInfo.length) overlay.querySelector('#pe-liste').insertAdjacentHTML('afterbegin', `<p class="muted-text">${trad('Aucune machine enregistrée.')}</p>`);
   habillerChampDate(overlay.querySelector('#prog-date'), trad('Date'));
   overlay.querySelector('#agenda-choix-fermer').addEventListener('click', () => overlay.remove());
-  overlay.querySelectorAll('[data-machine-id]').forEach((btn) => btn.addEventListener('click', async () => {
-    const m = UI.machines.find((x) => x.id === btn.dataset.machineId);
+
+  let statutActif = 'tous';
+  let choisiId = null;
+  const recherche = overlay.querySelector('#pe-recherche');
+  const vide = overlay.querySelector('#pe-vide');
+  const confirmer = overlay.querySelector('#pe-confirmer');
+  const bandeau = overlay.querySelector('#pe-bandeau');
+  const bandeauNom = overlay.querySelector('#pe-bandeau-nom');
+
+  const appliquerFiltres = () => {
+    const q = recherche.value.trim().toLowerCase();
+    let visibles = 0;
+    overlay.querySelectorAll('.pe-machine').forEach((ligne) => {
+      const correspond = (statutActif === 'tous' || ligne.dataset.statut === statutActif) && ligne.dataset.nom.includes(q);
+      ligne.style.display = correspond ? '' : 'none';
+      if (correspond) visibles++;
+    });
+    vide.style.display = visibles ? 'none' : 'flex';
+  };
+  recherche.addEventListener('input', appliquerFiltres);
+  overlay.querySelectorAll('[data-pe-statut]').forEach((pill) => pill.addEventListener('click', () => {
+    statutActif = pill.dataset.peStatut;
+    overlay.querySelectorAll('[data-pe-statut]').forEach((p) => p.classList.toggle('is-active', p === pill));
+    appliquerFiltres();
+  }));
+
+  overlay.querySelectorAll('.pe-machine').forEach((ligne) => ligne.addEventListener('click', () => {
+    const id = ligne.dataset.machineId;
+    choisiId = choisiId === id ? null : id;
+    overlay.querySelectorAll('.pe-machine').forEach((l) => l.classList.toggle('is-choisie', l.dataset.machineId === choisiId));
+    if (choisiId) {
+      bandeau.style.display = 'flex';
+      bandeauNom.textContent = ligne.querySelector('.pe-machine-nom').textContent;
+      confirmer.disabled = false;
+    } else {
+      bandeau.style.display = 'none';
+      confirmer.disabled = true;
+    }
+  }));
+
+  confirmer.addEventListener('click', async () => {
+    if (!choisiId) return;
+    const m = UI.machines.find((x) => x.id === choisiId);
     if (!m) return;
     const dateChoisie = overlay.querySelector('#prog-date').value || dateDefaut;
-    overlay.querySelectorAll('[data-machine-id]').forEach((b) => { b.disabled = true; });
+    confirmer.disabled = true;
     const { data, error } = await sb.from('scheduled_maintenances')
       .insert({ machine_id: m.id, scheduled_date: dateChoisie })
       .select('id, machine_id, scheduled_date, label, status, created_at')
       .single();
     if (error) {
       showToast(trad('Programmation impossible : ') + error.message);
-      overlay.querySelectorAll('[data-machine-id]').forEach((b) => { b.disabled = false; });
+      confirmer.disabled = false;
       return;
     }
     UI.scheduledMaintenances = [...(UI.scheduledMaintenances || []), data];
     overlay.remove();
     renderApp();
     showToast(trad('Entretien programmé'));
-  }));
+  });
 }
 // Clic sur une carte « programmée » dans une case du calendrier : voir la
 // fiche ou annuler CETTE programmation (jamais l'échéance du plan lui-même,
@@ -16186,21 +16467,12 @@ function wireAgenda(root) {
     UI.agendaRefIso = todayIso();
     renderApp();
   });
-  // Le bouton « + » reste une action séparée (toujours visible désormais,
-  // plus seulement au survol) : programmer un entretien MÊME sur un jour qui
-  // a déjà des échéances, sans passer par le récapitulatif.
-  root.querySelectorAll('[data-jour-ajout]').forEach((btn) => btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    ouvrirProgrammerEntretien(btn.dataset.jourAjout);
-  }));
-  // Le reste de la case : récapitulatif du jour s'il y a au moins une
-  // échéance (ouvrirJourAgenda), sinon directement « Planifier un
-  // entretien » comme avant — un jour vide n'a rien d'autre à montrer.
-  root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => cell.addEventListener('click', (e) => {
-    if (e.target.closest('[data-jour-ajout]')) return;
-    const iso = cell.dataset.jour;
-    if (agendaEvenementsDuJour(iso).length) ouvrirJourAgenda(iso);
-    else ouvrirProgrammerEntretien(iso);
+  // Toute la case ouvre la même fenêtre (ouvrirJourAgenda), qu'il y ait ou
+  // non une échéance — elle contient déjà « Planifier un entretien ». Un
+  // seul repère par case, pas un second petit bouton à viser séparément
+  // (voir le commentaire d'agendaJourHtml).
+  root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => cell.addEventListener('click', () => {
+    ouvrirJourAgenda(cell.dataset.jour);
   }));
   root.querySelector('#agenda-planifier')?.addEventListener('click', () => ouvrirProgrammerEntretien());
   root.querySelector('#agenda-export-ics')?.addEventListener('click', telechargerPlanningIcs);
