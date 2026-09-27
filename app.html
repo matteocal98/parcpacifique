@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AQVX1IeLLBKO38dUQZMgtmieGELrp5BsPjsf73wpRnY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g7k0ap+dy8rQRF3pCFYPqaVKmWGhTcckz72aPg8GD2I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4506,20 +4506,14 @@
   .rappel-file-titre{font-size:13px;font-weight:700;color:var(--ink);}
   .rappel-file-corps{font-size:12px;color:var(--ink-2);}
 
-  /* Aperçu WhatsApp : une bulle de message sombre, clairement annoncée comme
-     un exemple — jamais présentée comme un message réellement reçu. */
-  .whatsapp-apercu{
-    margin-top:14px;padding:14px;border-radius:12px;
-    background:rgba(139,155,55,.07);border:1px dashed rgba(139,155,55,.4);
-  }
-  .whatsapp-apercu-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;}
-  .whatsapp-bulle{
-    margin-top:10px;padding:12px 14px;border-radius:14px 14px 14px 3px;
-    background:var(--dark);color:#fff;max-width:340px;
-  }
-  .whatsapp-bulle-tete{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--ok-accent);margin-bottom:6px;}
-  .whatsapp-bulle-tete .card-ico{color:var(--ok-accent);}
-  .whatsapp-bulle-texte{margin:0;font-size:13px;line-height:1.5;color:#fff;}
+  /* Ciblage des rappels push par rôle (blocCiblagePushHtml) : une ligne par
+     rôle, case à cocher + 2 seuils numériques (jours / compteur), activés
+     seulement si le rôle est coché. */
+  .push-roles-grille{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
+  .push-role-ligne{padding:10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-soft);}
+  .push-role-seuils{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .push-role-champ{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink-2);flex:1 1 160px;}
+  .push-role-champ input{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13px;color:var(--ink);}
 
   .fonctionnement-grille{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:6px;
@@ -5634,6 +5628,12 @@ const __isModeSupport = __paramsSupport.has('mode_support');
 // voir boot()) puisqu'elle n'est capturée qu'une seule fois au chargement.
 const __paramsQr = new URLSearchParams(window.location.search);
 const __machineIdDepuisQr = __paramsQr.get('qr');
+// Même besoin que le lien profond QR, pour une raison différente : le tap
+// sur une notification push peut arriver AVANT que UI.machines soit chargé
+// (lancement à froid de l'appli). Posée par wirePushEcouteurs(), résolue par
+// ouvrirFicheDepuisPushSiPresent() dans boot() — jamais une deuxième logique
+// de navigation, seulement une deuxième façon d'arriver à ouvrirFicheParId().
+let __machineIdDepuisPushEnAttente = null;
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const app = document.getElementById('app');
@@ -6092,6 +6092,11 @@ SCHEMA.hasCounter2 = false;
 // trouvées : l'écran des rappels le dit alors, au lieu de laisser croire qu'un
 // réglage a été enregistré.
 SCHEMA.hasReminders = false;
+
+// Ciblage des rappels push par rôle (reminders_push, reminders_push_roles),
+// ajoutées par migration-push-notifications.sql. Même discipline : faux tant
+// que la sonde ne les a pas trouvées.
+SCHEMA.hasPushRoles = false;
 
 // TCO (coût total de possession) : machines.purchase_price/purchase_date/
 // estimated_resale_value/expected_lifespan_counter, interventions.parts_cost/
@@ -9553,7 +9558,7 @@ function openSignupWizard() {
             ${champTelephoneHtml('su-phone', state.phone, { labelHtml: `${esc(trad('Numéro de téléphone'))} <span class="requis">*</span>`, required: true, indicatifSeul: true })}
           </div>
         </div>
-        <div class="hint">${trad('Le téléphone sert aux rappels d\'échéance par WhatsApp et par e-mail.')}</div>
+        <div class="hint">${trad('Coordonnée de contact de la société.')}</div>
 
         <div class="field-row">
           <div>
@@ -12209,9 +12214,101 @@ function blocRappelsHtml() {
     <div id="acc-rappels-file" role="status" aria-live="polite"></div>
 
     <div class="modal-actions">
-      <button type="button" class="secondary" id="acc-rappels-test"><span class="card-ico">${picto('cloche')}</span><span>${trad('Tester la notification push maintenant')}</span></button>
+      <button type="button" class="secondary" id="acc-rappels-test"><span class="card-ico">${picto('cloche')}</span><span>${trad('Tester le rappel local maintenant')}</span></button>
     </div>
     <div class="hint" id="acc-rappels-msg" role="status" aria-live="polite"></div>`;
+}
+
+// ── RAPPELS PUSH (FCM), CIBLÉS PAR RÔLE ─────────────────────────────────────
+// Contrairement aux rappels locaux ci-dessus (Alarm Manager, autonomes sur
+// l'appareil), le push est ENVOYÉ PAR LE SERVEUR (send-maintenance-reminders
+// côté Supabase) : l'appli n'a qu'à s'inscrire (jeton FCM) et réagir à la
+// réception/au tap. L'inscription est un choix PERSONNEL (interrupteur
+// individuel, voir blocPushHtml) ; le ciblage par rôle et son délai
+// d'anticipation sont un choix de société (gérant seulement, voir
+// blocCiblagePushHtml) — jamais l'un à la place de l'autre : être dans un
+// rôle ciblé ne suffit pas si on n'a pas soi-même activé le push.
+function pluginPush() {
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) || null;
+}
+function pushDisponible() { return !!pluginPush(); }
+
+const PUSH_TOKEN_KEY = 'parcpacific.push.token.v1';
+function monTokenPushConnu() {
+  try { return localStorage.getItem(PUSH_TOKEN_KEY) || null; } catch (err) { return null; }
+}
+function memoriserTokenPush(token) {
+  try {
+    if (token) localStorage.setItem(PUSH_TOKEN_KEY, token);
+    else localStorage.removeItem(PUSH_TOKEN_KEY);
+  } catch (err) { /* sans conséquence */ }
+}
+
+// Active : demande la permission Android, enregistre le greffon, ATTEND le
+// jeton (événement asynchrone 'registration', voir wirePushEcouteurs) puis
+// l'envoie au serveur. Comme programmerRappels(), la permission n'est
+// réclamée qu'à l'activation explicite de l'interrupteur, jamais au démarrage.
+async function activerPush() {
+  const plugin = pluginPush();
+  if (!plugin) return { natif: false };
+  try {
+    let etat = await plugin.checkPermissions();
+    if (!etat || etat.receive !== 'granted') {
+      etat = await plugin.requestPermissions();
+    }
+    if (!etat || etat.receive !== 'granted') return { refuse: true };
+    await plugin.register();
+    return { demande: true };
+  } catch (err) {
+    return { erreur: (err && err.message) || trad('erreur inconnue') };
+  }
+}
+
+async function desactiverPush() {
+  const plugin = pluginPush();
+  const token = monTokenPushConnu();
+  if (token) {
+    try { await sb.rpc('retirer_mon_token_push', { p_token: token }); } catch (err) { /* réessaiera à la prochaine ouverture */ }
+  }
+  memoriserTokenPush(null);
+  try { await plugin?.removeAllDeliveredNotifications(); } catch (err) { /* sans conséquence */ }
+}
+
+// Câblés UNE FOIS, au niveau racine du script (voir l'appel tout en bas,
+// à côté de changerLangue) — ce sont des écouteurs du greffon natif, pas des
+// éléments du DOM, ils doivent survivre aux changements de vue.
+function wirePushEcouteurs() {
+  const plugin = pluginPush();
+  if (!plugin) return;
+  plugin.addListener('registration', async (jeton) => {
+    const token = jeton && jeton.value;
+    if (!token) return;
+    memoriserTokenPush(token);
+    try { await sb.rpc('enregistrer_mon_token_push', { p_token: token }); } catch (err) { console.warn('Inscription du jeton push :', err && err.message); }
+  });
+  plugin.addListener('registrationError', (err) => {
+    console.warn('Enregistrement push refusé par le greffon :', err && err.error);
+  });
+  // Premier plan : l'appli est déjà ouverte quand la notification arrive —
+  // on ne laisse pas Android l'afficher une deuxième fois, on montre notre
+  // propre bannière (showToast, déjà utilisé ailleurs pour ce genre de cas).
+  plugin.addListener('pushNotificationReceived', (notification) => {
+    const titre = notification && notification.title;
+    if (titre) showToast(titre);
+  });
+  // Tap sur la notification (appli en arrière-plan OU fermée) : réutilise
+  // EXACTEMENT ouvrirFicheParId(), comme le lien profond QR code — jamais
+  // une deuxième logique de navigation pour le même résultat. Si UI.machines
+  // n'est pas encore chargé (lancement à froid), voir
+  // ouvrirFicheDepuisPushSiPresent() plus bas, qui reprend le patron déjà
+  // établi pour le lien profond QR.
+  plugin.addListener('pushNotificationActionPerformed', (action) => {
+    const donnees = action && action.notification && action.notification.data;
+    const machineId = donnees && donnees.machine_id;
+    if (!machineId) return;
+    if (Array.isArray(UI.machines)) ouvrirFicheParId(machineId);
+    else __machineIdDepuisPushEnAttente = machineId;
+  });
 }
 
 const REMINDERS_KEY = 'parcpacific.reminders.v1';
@@ -13071,11 +13168,14 @@ function attachDropzone(el, onFile) {
 
 // ── Rappels : ce que l'application annonce, et ce qu'elle fait ───────────────
 //
-// Deux canaux existent VRAIMENT : les notifications du téléphone, programmées
-// par l'application Android (sans réseau, sans service tiers), et l'e-mail,
+// Trois canaux existent VRAIMENT : les notifications du téléphone, programmées
+// par l'application Android (sans réseau, sans service tiers) ; l'e-mail,
 // envoyé par le serveur une fois par jour — il part donc même application
-// fermée. WhatsApp n'est pas branché : le compte WhatsApp Business n'est pas
-// vérifié.
+// fermée ; et le push (FCM), envoyé par le serveur, ciblé par rôle avec un
+// délai d'anticipation propre à chaque rôle (voir blocCiblagePushHtml). Le
+// canal WhatsApp envisagé un temps a été explicitement abandonné (coût par
+// message, jamais gratuit contrairement au push) — plus aucune trace dans
+// l'interface.
 //
 // D'où la disparition des interrupteurs `data-reminder` : un bouton qui
 // s'allume sans rien changer côté serveur fait croire que le message partira.
@@ -13112,6 +13212,7 @@ function remindersCardHtml() {
   // un navigateur, le greffon est absent et la carte ne doit pas laisser croire
   // qu'un rappel de téléphone est déjà programmé.
   const surTelephone = rappelsDisponibles();
+  const parPush = !!monTokenPushConnu();
   // Un mini-bloc par canal : icône, titre, sous-titre, état. Le titre et le
   // sous-titre ont chacun UNE taille pour les trois canaux.
   return `
@@ -13138,12 +13239,12 @@ function remindersCardHtml() {
         <span class="badge ${parEmail ? 'ok' : 'neutral'}">${parEmail ? trad('Actif') : trad('Inactif')}</span>
       </div>
       <div class="canal canal-msg">
-        <span class="canal-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M21 12a8 8 0 01-11.7 7L3 21l2-6A8 8 0 1121 12z"/></svg></span>
+        <span class="canal-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></span>
         <span class="canal-texte">
-          <span class="canal-titre">${trad('WhatsApp')}</span>
-          <span class="canal-sous">${trad('Alerte J-7')}</span>
+          <span class="canal-titre">${trad('Notification push')}</span>
+          <span class="canal-sous">${trad('Ciblage par rôle')}</span>
         </span>
-        <span class="badge neutral">${trad('à venir')}</span>
+        <span class="badge ${parPush ? 'ok' : 'neutral'}">${parPush ? trad('Actif') : trad('Inactif')}</span>
       </div>
       <p class="hint">${parEmail ? trad('E-mail actif : le serveur envoie le rappel avant chaque échéance, même application fermée.') : trad('Aucun e-mail ne partira tant que l\'adresse et la case ne sont pas réglées dans Rappels.')}</p>
     </section>`;
@@ -15925,42 +16026,139 @@ function blocReglagesRappelsHtml() {
     </section>`;
 }
 
-// Un exemple, clairement annoncé comme tel — jamais un message qui laisse
-// croire qu'il a vraiment été reçu. Le texte est générique (aucune machine
-// précise) : personne ne doit y lire une alerte réelle sur SON parc.
-function apercuWhatsappHtml() {
+// Interrupteur PERSONNEL de réception des rappels push — même gabarit que
+// blocRappelsHtml (dégradation propre si le greffon est absent, permission
+// jamais réclamée avant le clic explicite).
+function blocPushHtml() {
+  if (!pushDisponible()) {
+    return `<p class="muted-text">${trad('Les notifications push nécessitent l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
+  }
+  const actif = !!monTokenPushConnu();
   return `
-    <div class="whatsapp-apercu">
-      <div class="whatsapp-apercu-tete">
-        <span>${trad('Aperçu du format d\'alerte')}</span>
-        <span class="pill neutral">${trad('exemple')}</span>
-      </div>
-      <p class="muted-text">${trad('Aucun message n\'est envoyé tant que ce canal n\'est pas actif : voici seulement à quoi ressemblera une alerte, une fois la ligne WhatsApp Business vérifiée.')}</p>
-      <div class="whatsapp-bulle">
-        <span class="whatsapp-bulle-tete"><span class="card-ico">${picto('message')}</span><span>${trad('KEEVA Dispatch')}</span></span>
-        <p class="whatsapp-bulle-texte">${trad('⚠️ Rappel : une machine de votre parc arrive à échéance d\'entretien.')}</p>
-      </div>
-    </div>`;
+    <div class="switch-row rappel-switch-row">
+      <span class="switch-label">
+        <span class="rappel-switch-titre">${trad('Recevoir les rappels d\'échéance par notification push')}</span>
+        <span class="rappel-switch-sous">${trad('Envoyée par le serveur, même application fermée — nécessite ton autorisation Android')}</span>
+      </span>
+      <button type="button" class="switch${actif ? ' on' : ''}" id="acc-push" role="switch" aria-checked="${actif ? 'true' : 'false'}" aria-label="${trad('Recevoir les rappels d\'échéance par notification push')}"><span></span></button>
+    </div>
+    <div class="hint" id="acc-push-msg" role="status" aria-live="polite"></div>`;
 }
 
-// WhatsApp : le canal est ANNONCÉ, jamais promis. La ligne existe pour que
-// l'utilisateur sache que le sujet est connu, et elle dit POURQUOI rien n'est
-// réglable ici — le compte WhatsApp Business n'est pas encore vérifié.
-function blocWhatsappRappelsHtml() {
+// Ciblage par rôle, réservé au gérant — même idiome que blocParametresTcoHtml
+// (UI.role === 'gerant') : visible à tous pour que chacun sache que le
+// réglage existe, contrôles désactivés pour un non-gérant (la vraie barrière
+// est côté serveur, dans update_reminder_roles, comme peutGererEquipe()
+// ailleurs). Un délai d'anticipation par rôle, EN PLUS de celui déjà réglé
+// sur chaque plan de maintenance — jamais à la place.
+function blocCiblagePushHtml() {
+  const c = UI.company || {};
+  const dispo = SCHEMA.hasPushRoles !== false;
+  const gerant = UI.role === 'gerant';
+  const bloque = (gerant && dispo) ? '' : ' disabled';
+  const roles = (c.reminders_push_roles && typeof c.reminders_push_roles === 'object') ? c.reminders_push_roles : {};
+  const actif = !!c.reminders_push;
+  const ROLES_CIBLE = [
+    { id: 'gerant', label: trad('Gérant') },
+    { id: 'mecanicien', label: trad('Mécanicien') },
+    { id: 'chauffeur', label: trad('Chauffeur') },
+  ];
+  const ligneRole = (r) => {
+    const reglage = roles[r.id] || null;
+    const coche = !!reglage;
+    return `
+      <div class="push-role-ligne">
+        <label class="check-row" for="push-role-${r.id}"><input type="checkbox" id="push-role-${r.id}" data-role="${r.id}"${coche ? ' checked' : ''}${bloque}> ${esc(r.label)}</label>
+        <div class="push-role-seuils">
+          <label class="push-role-champ">
+            <span>${trad('Jours avant (machines datées)')}</span>
+            <input type="number" min="0" inputmode="numeric" id="push-role-${r.id}-jours" value="${reglage && reglage.jours != null ? esc(reglage.jours) : ''}" placeholder="${FALLBACK_REMINDER_DAYS}"${bloque}>
+          </label>
+          <label class="push-role-champ">
+            <span>${trad('Avant l\'échéance du compteur (h ou km)')}</span>
+            <input type="number" min="0" inputmode="numeric" id="push-role-${r.id}-compteur" value="${reglage && reglage.compteur != null ? esc(reglage.compteur) : ''}" placeholder="${FALLBACK_REMINDER_HOURS}"${bloque}>
+          </label>
+        </div>
+      </div>`;
+  };
   return `
     <section class="card">
       <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('message')}</span><span>${trad('WhatsApp Pro')}</span></h2>
+        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('cloche')}</span><span>${trad('Notifications push — qui est prévenu')}</span></h2>
         <span class="spacer"></span>
-        <span class="pill neutral">${trad('à venir prochainement')}</span>
+        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
       </div>
-      <p class="muted-text">${trad('La vérification de la ligne officielle WhatsApp Business KEEVA est en cours d\'approbation auprès de Meta. Dès activation, les alertes d\'intervention pourront être poussées directement dans le canal de messagerie de vos mécaniciens.')}</p>
-      <div class="switch-row is-a-venir">
-        <span class="switch-label">${trad('Rappel WhatsApp')}</span>
-        <button type="button" class="switch" role="switch" aria-checked="false" aria-disabled="true" disabled aria-label="${trad('Rappel WhatsApp — à venir prochainement')}"><span></span></button>
+      <p class="muted-text">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai s\'ajoute à celui déjà réglé sur chaque plan de maintenance, il ne le remplace pas. Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
+      <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
+      <div class="push-roles-grille">
+        ${ROLES_CIBLE.map(ligneRole).join('')}
       </div>
-      ${apercuWhatsappHtml()}
+      ${!dispo ? `<div class="hint">${trad('Mise à jour indisponible : exécute')} <strong>migration-push-notifications.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>` : (!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : '')}
+      <div class="hint" id="push-cible-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="primary" id="push-cible-save"${bloque}><span class="card-ico">${picto('case')}</span><span>${trad('Enregistrer le ciblage')}</span></button>
+      </div>
     </section>`;
+}
+
+function wirePush(root) {
+  if (!root) return;
+  const bouton = root.querySelector('#acc-push');
+  const msg = root.querySelector('#acc-push-msg');
+  bouton?.addEventListener('click', async () => {
+    const actif = !bouton.classList.contains('on');
+    bouton.disabled = true;
+    if (msg) msg.textContent = actif ? trad('Activation…') : trad('Désactivation…');
+    if (actif) {
+      const resultat = await activerPush();
+      if (resultat.refuse) {
+        if (msg) msg.textContent = trad('Autorisation refusée : Android n\'affichera aucune notification. Tu peux l\'accorder dans les réglages de l\'application.');
+      } else if (resultat.erreur) {
+        if (msg) msg.textContent = tR('Activation impossible : {erreur}', { erreur: resultat.erreur });
+      } else {
+        bouton.classList.add('on');
+        bouton.setAttribute('aria-checked', 'true');
+        if (msg) msg.textContent = trad('Notifications activées.');
+      }
+    } else {
+      await desactiverPush();
+      bouton.classList.remove('on');
+      bouton.setAttribute('aria-checked', 'false');
+      if (msg) msg.textContent = trad('Notifications désactivées sur cet appareil.');
+    }
+    bouton.disabled = false;
+  });
+}
+
+function wireCiblagePush(root) {
+  if (!root) return;
+  root.querySelector('#push-cible-save')?.addEventListener('click', async () => {
+    const bouton = root.querySelector('#push-cible-save');
+    const msg = root.querySelector('#push-cible-msg');
+    const actif = !!root.querySelector('#push-cible-actif')?.checked;
+    const roles = {};
+    ['gerant', 'mecanicien', 'chauffeur'].forEach((id) => {
+      const coche = root.querySelector(`#push-role-${id}`)?.checked;
+      if (!coche) return;
+      const joursVal = root.querySelector(`#push-role-${id}-jours`)?.value;
+      const compteurVal = root.querySelector(`#push-role-${id}-compteur`)?.value;
+      const jours = joursVal !== '' && joursVal != null ? parseInt(joursVal, 10) : null;
+      const compteur = compteurVal !== '' && compteurVal != null ? parseInt(compteurVal, 10) : null;
+      if (jours == null && compteur == null) return; // coché mais sans seuil : ne cible rien de réel, on n'enregistre pas ce rôle
+      roles[id] = { jours, compteur };
+    });
+    bouton.disabled = true;
+    try {
+      const { error } = await sb.rpc('update_reminder_roles', { p_actif: actif, p_roles: roles });
+      if (error) throw error;
+      UI.company.reminders_push = actif;
+      UI.company.reminders_push_roles = roles;
+      if (msg) { msg.style.color = 'var(--ok)'; msg.textContent = trad('Ciblage enregistré.'); }
+    } catch (err) {
+      if (msg) { msg.style.color = 'var(--late)'; msg.textContent = trad('Enregistrement impossible.') + ' ' + ((err && err.message) || ''); }
+    }
+    bouton.disabled = false;
+  });
 }
 
 // La carte des rappels locaux : c'était le contenu de « Mon compte », déménagé
@@ -15987,7 +16185,7 @@ function blocFonctionnementRappelsHtml() {
   const tuiles = [
     { icone: 'filtre', accent: 'ambre', titre: trad('Anticipation mesurée'), texte: trad('KEEVA envoie un e-mail avant chaque échéance, puis rien de plus le même jour : un rappel qui arrive au bon moment se lit, une série de messages finit par être ignorée.') },
     { icone: 'reglages', accent: 'indigo', titre: trad('Délai réglable par machine'), texte: trad('Le délai se règle sur le plan de maintenance de chaque machine : 7 jours avant l\'échéance par défaut quand elle est datée, et la fenêtre de rappel du compteur pour un engin suivi en heures ou en kilomètres — ces machines-là n\'ont pas de date à annoncer.') },
-    { icone: 'wifi', accent: 'ok', titre: trad('Indépendance réseau'), texte: trad('L\'envoi est fait par le serveur : le rappel part même si l\'application n\'est pas ouverte. Sur le téléphone, l\'application Android programme en plus ses propres notifications, sans réseau ni compte tiers. WhatsApp viendra plus tard, quand le compte WhatsApp Business sera vérifié.') },
+    { icone: 'wifi', accent: 'ok', titre: trad('Indépendance réseau'), texte: trad('L\'envoi est fait par le serveur : le rappel part même si l\'application n\'est pas ouverte. Sur le téléphone, l\'application Android programme en plus ses propres notifications, sans réseau ni compte tiers. Les notifications push suivent le même principe, avec en plus un délai d\'anticipation réglable par rôle.') },
   ];
   return `
     <section class="card">
@@ -16013,6 +16211,7 @@ function blocFonctionnementRappelsHtml() {
 function apercuRappelsHtml() {
   const parEmail = rappelsEmailActifs();
   const surTelephone = rappelsDisponibles();
+  const parPush = !!monTokenPushConnu();
   const tuile = (icone, accent, label, valeur, texte, idValeur) => `
     <div class="rappel-tuile rappel-tuile-${accent}">
       <span class="card-ico">${picto(icone)}</span>
@@ -16024,6 +16223,7 @@ function apercuRappelsHtml() {
     <div class="rappels-apercu">
       ${tuile('mail', 'ambre', trad('Canal d\'alerte e-mail'), parEmail ? trad('Actif') : trad('Inactif'), trad('Avant chaque échéance datée'))}
       ${tuile('telephone', 'indigo', trad('App mobile Android'), surTelephone ? trad('Actif') : trad('À installer'), trad('Service d\'arrière-plan · indépendant du réseau'), surTelephone ? 'rappel-tuile-file' : null)}
+      ${tuile('cloche', 'indigo', trad('Notifications push'), parPush ? trad('Actif sur ce téléphone') : trad('Inactif sur ce téléphone'), trad('Ciblage et délai réglables par rôle'))}
       ${tuile('reglages', 'ok', trad('Anticipation d\'atelier'), tR('{n} jours', { n: FALLBACK_REMINDER_DAYS }), trad('Réglable individuellement sur chaque machine'))}
     </div>`;
 }
@@ -16104,7 +16304,13 @@ VIEWS.reminders = {
           ${blocFonctionnementRappelsHtml()}
         </div>
         <div class="dash-side">
-          ${blocWhatsappRappelsHtml()}
+          <section class="card">
+            <div class="card-head">
+              <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Notifications push (application mobile)')}</span></h2>
+            </div>
+            ${blocPushHtml()}
+          </section>
+          ${blocCiblagePushHtml()}
         </div>
       </div>`;
   },
@@ -16164,6 +16370,8 @@ VIEWS.reminders = {
     wireReminderSwitches(document.getElementById('view-root'));
 
     wireReglagesRappelsEmail(document.getElementById('view-root'));
+    wirePush(document.getElementById('view-root'));
+    wireCiblagePush(document.getElementById('view-root'));
   },
 };
 
@@ -17746,6 +17954,22 @@ function sousBlocEmailRappelsHtml() {
     </div>`;
 }
 
+// Même patron que sousBlocEmailRappelsHtml juste au-dessus : reprend
+// blocPushHtml (interrupteur personnel) tel quel dans « Mon compte », mêmes
+// id, donc wirePush() suffit aux deux points de montage.
+function sousBlocPushHtml() {
+  const actif = !!monTokenPushConnu();
+  return `
+    <div class="compte-sous-bloc">
+      <div class="compte-sous-bloc-tete">
+        <span class="card-ico">${picto('cloche')}</span>
+        <div class="label">${trad('Notification push sur ce téléphone')}</div>
+        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
+      </div>
+      ${blocPushHtml()}
+    </div>`;
+}
+
 // ── Vue : Mon compte ──────────────────────────────────────────
 VIEWS.account = {
   title: trad('Mon compte'),
@@ -17867,7 +18091,7 @@ VIEWS.account = {
 
       <section class="card">
         <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Contact & Alertes')}</span></h2></div>
-        <p class="muted-text">${trad('Rappels automatiques de maintenance : ces coordonnées reçoivent les alertes WhatsApp et e-mail.')}</p>
+        <p class="muted-text">${trad('Coordonnées de contact de la société ; l\'adresse e-mail ci-dessous reçoit les rappels automatiques de maintenance.')}</p>
         <div class="field-row">
           <div>
             <label for="acc-first">${trad('Prénom')}</label>
@@ -17881,10 +18105,11 @@ VIEWS.account = {
         ${champTelephoneHtml('acc-phone', c.phone || '', {
           label: trad('Téléphone'),
           disabled: !modifiable,
-          aide: trad('Ce numéro servira aux rappels d\'échéance par WhatsApp.'),
+          aide: trad('Coordonnée de contact de la société.'),
           compact: true,
         })}
         ${sousBlocEmailRappelsHtml()}
+        ${sousBlocPushHtml()}
         <div class="hint" id="acc-contact-msg" role="status" aria-live="polite"></div>
         <div class="modal-actions">
           <button type="button" class="primary" id="acc-save-contact"${bloque}>${trad('Enregistrer les coordonnées')}</button>
@@ -17956,6 +18181,7 @@ VIEWS.account = {
 
     root.querySelector('#account-upgrade')?.addEventListener('click', () => openUpgradeNotice(UI.companyId));
     wireReglagesRappelsEmail(root);
+    wirePush(root);
   const basculeCopie = document.getElementById('acc-hors-ligne');
   if (basculeCopie) {
     basculeCopie.addEventListener('change', () => {
@@ -23651,6 +23877,16 @@ function ouvrirFicheDepuisQrSiPresent() {
   ouvrirFicheParId(__machineIdDepuisQr);
 }
 
+// Même rôle que ci-dessus, pour un tap sur une notification push arrivé
+// avant que UI.machines soit chargé (voir wirePushEcouteurs) — appelée au
+// même endroit dans boot(), juste après ouvrirFicheDepuisQrSiPresent().
+function ouvrirFicheDepuisPushSiPresent() {
+  if (!__machineIdDepuisPushEnAttente) return;
+  const machineId = __machineIdDepuisPushEnAttente;
+  __machineIdDepuisPushEnAttente = null;
+  ouvrirFicheParId(machineId);
+}
+
 // ── QR CODE D'UNE MACHINE : génération, téléchargement, impression ─────
 // Gated Business+ côté appelant (planCouvreQr(), voir le clic sur
 // #plan-qr-code dans openPlanView) — cette fonction-ci ne revérifie pas le
@@ -25052,6 +25288,11 @@ async function boot(toastMessage) {
   // reste le filet : une base plus ancienne continue de fonctionner.
   SCHEMA.hasReminders = await sonderColonne('companies', 'notification_email');
 
+  // Ciblage des rappels PUSH par rôle : présent seulement après
+  // migration-push-notifications.sql. Même discipline de sonde que les
+  // autres colonnes optionnelles.
+  SCHEMA.hasPushRoles = await sonderColonne('companies', 'reminders_push');
+
   // TCO : une seule sonde, côté société (labor_hourly_rate), suffit à savoir si
   // TOUTE la migration TCO est en place — colonnes machines/interventions et
   // tables parts_catalog/intervention_parts/operating_costs ont été ajoutées
@@ -25069,7 +25310,14 @@ async function boot(toastMessage) {
     ? ['notification_email', 'reminders_email', 'reminders_whatsapp'] : [];
   const colonnesTco = SCHEMA.hasTco
     ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly', 'currency'] : [];
+  // Colonnes de ciblage du push par rôle — ajoutées seulement à la tentative
+  // la plus riche : c'est la plus récente des migrations optionnelles, donc
+  // la plus probable d'être absente sur un environnement pas encore à jour ;
+  // toute la cascade existante en dessous reste inchangée en repli.
+  const colonnesPush = SCHEMA.hasPushRoles
+    ? ['reminders_push', 'reminders_push_roles'] : [];
   const tentatives = [
+    [...colonnesEtendues, ...colonnesContact, ...colonnesRappels, ...colonnesTco, ...colonnesPush],
     [...colonnesEtendues, ...colonnesContact, ...colonnesRappels, ...colonnesTco],
     [...colonnesEtendues, ...colonnesContact, ...colonnesRappels],
     [...colonnesEtendues, ...colonnesContact],
@@ -25249,6 +25497,10 @@ async function boot(toastMessage) {
     notification_email: company?.notification_email || '',
     reminders_email: company?.reminders_email !== false,
     reminders_whatsapp: company?.reminders_whatsapp === true,
+    // Ciblage des rappels push par rôle : { role: { jours, compteur } }.
+    // Absent/vide tant que le gérant n'a rien réglé — jamais supposé actif.
+    reminders_push: company?.reminders_push === true,
+    reminders_push_roles: (company?.reminders_push_roles && typeof company.reminders_push_roles === 'object') ? company.reminders_push_roles : {},
     // TCO : taux horaire main d'œuvre + barèmes suggérés (jamais imposés —
     // voir keeva-tco-feature). Nuls tant qu'aucun réglage n'a été enregistré.
     labor_hourly_rate: company?.labor_hourly_rate ?? null,
@@ -25320,6 +25572,10 @@ async function boot(toastMessage) {
   //   effet si aucun paramètre `?qr=` n'est présent (cas normal).
   ouvrirFicheDepuisQrSiPresent();
 
+  // ★ TAP SUR UNE NOTIFICATION PUSH arrivé avant que UI.machines soit chargé
+  //   (lancement à froid) : résolu ici, même emplacement que le lien QR.
+  ouvrirFicheDepuisPushSiPresent();
+
   // Reprogrammation des rappels à chaque ouverture, sans réclamer
   // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.
   // Hors connexion, l'appel échoue sans conséquence — les rappels déjà
@@ -25330,6 +25586,13 @@ async function boot(toastMessage) {
 // La langue est arrêtée AVANT tout rendu : le premier écran affiché doit déjà
 // être dans la bonne langue, sans clignotement.
 changerLangue(langueInitiale(), { silencieux: true });
+
+// ★ ÉCOUTEURS PUSH : posés UNE FOIS, au niveau racine du script — jamais dans
+// boot() — pour capter un lancement à froid de l'appli par tap sur une
+// notification le plus tôt possible, même avant que la connexion aboutisse
+// (hors connexion, l'inscription du jeton échoue simplement sans
+// conséquence, comme programmerRappels ci-dessus).
+wirePushEcouteurs();
 
 if (sb) {
   if (__isPasswordRecovery) {
