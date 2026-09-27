@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rcrRouA2wguhpa0ZsnmsWhN5N8OZNAYFk8HxbF1fTn0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uG2HxzfMmJkoQDI3mlNOfcC2seVUEJzNqXPWOAZCjNM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3170,19 +3170,80 @@
   }
   .loading{color:var(--ink-2);font-size:15px;padding:70px 0;text-align:center;}
 
-  /* Feuille « Plus » (mobile) */
-  .sheet{
+  /* ══════════════════════════════════════════════════════════════════════════
+     ★ Feuille « Plus » (mobile) — reprise Stitch « Navigation Plus » à
+     l'identique. Remplace l'ancienne .sheet minimale (titre + liste plate) :
+     mêmes 5 destinations + Mon compte + Déconnexion, mais avec icône teintée,
+     sous-titre et repère de droite (badge/pastille/chevron) par ligne, comme
+     la maquette. Couleurs reprises des variables déjà en place dans ce
+     fichier (même système « Precision Field Matrix » que l'Agenda/le TCO) :
+     --primary-dark (indigo), --ok (signature/sarcelle), --late (ambre),
+     --bleu-roi (royal) — jamais une couleur à part inventée pour l'occasion. */
+  .plus-sheet{
     background:var(--surface);border-radius:var(--r-card) var(--r-card) 0 0;width:100%;max-width:520px;
-    padding:20px 20px calc(20px + var(--safe-bottom));
-    display:flex;flex-direction:column;gap:8px;margin-top:auto;
+    max-height:88vh;display:flex;flex-direction:column;margin-top:auto;overflow:hidden;
   }
-  .sheet-item{
-    display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-    background:none;border:none;padding:14px 12px;border-radius:12px;cursor:pointer;
-    font-size:15.5px;font-weight:600;color:var(--ink);font-family:inherit;
+  .plus-sheet-poignee{display:flex;justify-content:center;padding:10px 0 4px;flex:0 0 auto;}
+  .plus-sheet-poignee span{width:40px;height:4px;border-radius:99px;background:var(--line-2);}
+  .plus-sheet-entete{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:6px 20px 16px;border-bottom:1px solid var(--line-2);flex:0 0 auto;
   }
-  .sheet-item:hover{background:var(--surface-soft);}
-  .sheet .sheet-title{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 12px 4px;}
+  .plus-sheet-identite{display:flex;align-items:center;gap:12px;min-width:0;}
+  .plus-sheet-avatar{
+    position:relative;flex:0 0 auto;width:44px;height:44px;border-radius:16px;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;
+  }
+  .plus-sheet-avatar-pastille{
+    position:absolute;bottom:-2px;right:-2px;width:13px;height:13px;border-radius:50%;
+    background:var(--ok);border:2px solid #fff;
+  }
+  .plus-sheet-nom-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .plus-sheet-nom{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
+  .plus-sheet-sous-titre{font-size:12px;font-weight:600;color:var(--ink-3);margin:2px 0 0;}
+  .plus-sheet-fermer{
+    flex:0 0 auto;width:32px;height:32px;border-radius:50%;border:none;background:var(--surface-soft);
+    color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .plus-sheet-fermer svg{width:16px;height:16px;}
+  .plus-sheet-corps{overflow-y:auto;padding:12px 12px calc(12px + var(--safe-bottom));display:flex;flex-direction:column;gap:4px;}
+  .plus-sheet-section{display:flex;flex-direction:column;gap:2px;}
+  .plus-sheet-section-tete{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 6px;}
+  .plus-sheet-section-titre{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .plus-sheet-section-accessoire{font-size:11px;font-weight:700;color:var(--bleu-roi);}
+  .plus-sheet-separateur{height:1px;background:var(--line-2);margin:10px 4px;}
+  .plus-sheet-item{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;
+    background:none;border:none;padding:9px 10px;border-radius:16px;cursor:pointer;font-family:inherit;
+  }
+  .plus-sheet-item:hover{background:var(--surface-soft);}
+  .plus-sheet-item-gauche{display:flex;align-items:center;gap:13px;min-width:0;}
+  .plus-sheet-item-icone{
+    flex:0 0 auto;width:44px;height:44px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  }
+  .plus-sheet-item-icone svg{width:22px;height:22px;}
+  .plus-sheet-item-icone.is-indigo{background:rgba(91,82,223,.12);color:var(--primary-dark);}
+  .plus-sheet-item-icone.is-signature{background:rgba(36,181,168,.12);color:var(--ok);}
+  .plus-sheet-item-icone.is-amber{background:rgba(222,122,22,.12);color:var(--late);}
+  .plus-sheet-item-icone.is-royal{background:rgba(35,111,224,.12);color:var(--bleu-roi);}
+  .plus-sheet-item-icone.is-neutre{background:var(--surface-soft);color:var(--ink-2);}
+  .plus-sheet-item-texte{min-width:0;display:flex;flex-direction:column;}
+  .plus-sheet-item-titre{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;color:var(--ink);}
+  .plus-sheet-item-sous{font-size:11.5px;font-weight:500;color:var(--ink-3);line-height:1.3;}
+  .plus-sheet-item-droite{flex:0 0 auto;display:flex;align-items:center;gap:6px;}
+  .plus-sheet-item-droite svg{width:16px;height:16px;color:var(--line-3);}
+  .plus-sheet-item-compte{
+    font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(91,82,223,.1);color:var(--primary-dark);
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .plus-sheet-item-pastille{position:relative;width:8px;height:8px;flex:0 0 auto;}
+  .plus-sheet-item-pastille span{position:absolute;inset:0;border-radius:50%;background:var(--late);}
+  .plus-sheet-item-pastille span:first-child{animation:plusSheetPing 1.6s cubic-bezier(0,0,.2,1) infinite;opacity:.7;}
+  @keyframes plusSheetPing{75%,100%{transform:scale(2.2);opacity:0;}}
+  .plus-sheet-item-version{font-size:11px;font-weight:700;color:var(--ink-3);padding-right:2px;}
+  .plus-sheet-item.is-deconnexion:hover{background:var(--late-bg);}
+  .plus-sheet-item.is-deconnexion:hover .plus-sheet-item-titre{color:var(--late);}
+  .plus-sheet-item.is-deconnexion:hover .plus-sheet-item-icone.is-neutre{background:var(--late-bg);color:var(--late);}
 
   /* Grille du tableau de bord */
   #view-root{display:flex;flex-direction:column;gap:20px;}
@@ -5820,6 +5881,10 @@ let __machineIdDepuisPushEnAttente = null;
 let __appPretePourPush = false;
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
+// Numéro de version affiché à l'utilisateur (feuille « Plus ») — à tenir à
+// jour avec le champ "version" de version.json (distinct de son champ
+// "empreinte", qui sert lui au contrôle de fraîcheur, voir empreintePage()).
+const APP_VERSION = "1.0.0";
 const app = document.getElementById('app');
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -19696,28 +19761,95 @@ async function ouvrirSuppressionCompte(messageEcran) {
 }
 
 // ── Feuille « Plus » (mobile) ─────────────────────────────────
+// Étiquette d'offre courte, pour le badge de la feuille « Plus » — même
+// repli que limiteOffre() (une offre absente de LIMITES_OFFRES = illimitée =
+// Pro), jamais un libellé à part inventé pour ce badge.
+function badgeOffreCourt() {
+  const offre = String(UI.companyPlan || 'free').toLowerCase();
+  if (offre === 'free') return { texte: trad('Gratuit'), classe: 'neutral' };
+  if (offre === 'eco') return { texte: trad('Éco'), classe: 'soon' };
+  return { texte: trad('Pro'), classe: 'ok' };
+}
+// Reprise Stitch « Navigation Plus » — feuille ouverte par le bouton central
+// de la barre mobile (barreMobileHtml, id="open-plus") ET par le raccourci
+// « Plus » de la barre d'onglets (tabbarHtml). Mêmes destinations que
+// l'ancienne .sheet minimale, présentées comme la maquette : icône teintée +
+// sous-titre par ligne, badge/pastille/chevron à droite. Données réelles
+// uniquement — pas de « v2.4.1 » de la maquette (fictif) : la vraie version
+// publiée (version.json), pas de compte de documents inventé : UI.counts,
+// déjà calculé par machineCounts() à chaque rendu.
 function openPlusSheet() {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   overlay.style.alignItems = 'flex-end';
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const nom = UI.contactName || UI.companyName || trad('Mon compte');
+  const offre = badgeOffreCourt();
+  const nbMachines = (UI.machines || []).filter((m) => !m.archived).length;
+  const nbDocs = UI.counts?.manuals || 0;
+  const alerteRappels = (UI.counts?.late || 0) > 0;
+  const itemHtml = (nav, icone, teinte, titre, sousTitre, droiteHtml) => `
+    <button type="button" class="plus-sheet-item" data-nav="${nav}">
+      <span class="plus-sheet-item-gauche">
+        <span class="plus-sheet-item-icone ${teinte}">${navIcone(icone)}</span>
+        <span class="plus-sheet-item-texte">
+          <span class="plus-sheet-item-titre">${esc(titre)}</span>
+          <span class="plus-sheet-item-sous">${esc(sousTitre)}</span>
+        </span>
+      </span>
+      <span class="plus-sheet-item-droite">${droiteHtml || ''}${picto('flecheDroite')}</span>
+    </button>`;
   overlay.innerHTML = `
-    <div class="sheet">
-      <div class="sheet-title">${trad('Navigation')}</div>
-      <button type="button" class="sheet-item" data-nav="manuals"><span aria-hidden="true">✦&nbsp;</span>${trad('Manuels & carnets')}</button>
-      <button type="button" class="sheet-item" data-nav="agenda"><span aria-hidden="true">◔&nbsp;</span>${trad('Agenda')}</button>
-      <button type="button" class="sheet-item" data-nav="reminders"><span aria-hidden="true">☰&nbsp;</span>${trad('Rappels')}</button>
-      ${SCHEMA.hasTco ? `<button type="button" class="sheet-item" data-nav="tco"><span aria-hidden="true">◈&nbsp;</span>${trad('Coûts & TCO')}</button>` : ''}
-      <div class="sheet-title" style="padding-top:10px;">${trad('Compte')}</div>
-      <button type="button" class="sheet-item" data-nav="account"><span aria-hidden="true">◉&nbsp;</span>${trad('Mon compte')}</button>
-      <button type="button" class="sheet-item" id="sheet-logout">${trad('Se déconnecter')}</button>
+    <div class="plus-sheet">
+      <div class="plus-sheet-poignee"><span></span></div>
+      <div class="plus-sheet-entete">
+        <div class="plus-sheet-identite">
+          <div class="plus-sheet-avatar">${initialsFrom(nom)}<span class="plus-sheet-avatar-pastille"></span></div>
+          <div>
+            <div class="plus-sheet-nom-ligne">
+              <span class="plus-sheet-nom">${esc(nom)}</span>
+              <span class="badge ${offre.classe}">${offre.texte}</span>
+            </div>
+            <p class="plus-sheet-sous-titre">${esc(tR('{societe} • {n} machine(s) suivie(s)', { societe: UI.companyName || trad('Ta société'), n: nbMachines }))}</p>
+          </div>
+        </div>
+        <button type="button" class="plus-sheet-fermer" id="plus-sheet-fermer-x" aria-label="${esc(trad('Fermer le menu'))}">${picto('fermer')}</button>
+      </div>
+      <div class="plus-sheet-corps">
+        <div class="plus-sheet-section">
+          <div class="plus-sheet-section-tete">
+            <span class="plus-sheet-section-titre">${trad('Navigation parc')}</span>
+            <span class="plus-sheet-section-accessoire">${trad('Accès rapide')}</span>
+          </div>
+          ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Manuels & Carnets'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
+          ${itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '')}
+          ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
+          ${SCHEMA.hasTco ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
+        </div>
+        <div class="plus-sheet-separateur"></div>
+        <div class="plus-sheet-section">
+          <div class="plus-sheet-section-tete"><span class="plus-sheet-section-titre">${trad('Compte & organisation')}</span></div>
+          ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), '')}
+          <button type="button" class="plus-sheet-item is-deconnexion" id="plus-sheet-logout">
+            <span class="plus-sheet-item-gauche">
+              <span class="plus-sheet-item-icone is-neutre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
+              <span class="plus-sheet-item-texte">
+                <span class="plus-sheet-item-titre">${trad('Se déconnecter')}</span>
+                <span class="plus-sheet-item-sous">${trad('Terminer la session actuelle')}</span>
+              </span>
+            </span>
+            <span class="plus-sheet-item-version">v${esc(APP_VERSION)}</span>
+          </button>
+        </div>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
+  overlay.querySelector('#plus-sheet-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => {
     overlay.remove();
     goTo(btn.dataset.nav);
   }));
-  overlay.querySelector('#sheet-logout').addEventListener('click', () => { overlay.remove(); doLogout(); });
+  overlay.querySelector('#plus-sheet-logout').addEventListener('click', () => { overlay.remove(); doLogout(); });
 }
 
 // ── Dépôt d'un manuel → analyse → validation du plan ──────────
