@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-UHlvG0oHnv77JNBDMSR1kqSx0MpBQls/KpzOlofM6rY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ve4wrRJc/3T9azatAgnkOh1LPHnWp3CLTiWE02WcoFU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3226,6 +3226,7 @@
   .plus-sheet-item-icone.is-signature{background:rgba(36,181,168,.12);color:var(--ok);}
   .plus-sheet-item-icone.is-amber{background:rgba(222,122,22,.12);color:var(--late);}
   .plus-sheet-item-icone.is-royal{background:rgba(35,111,224,.12);color:var(--bleu-roi);}
+  .plus-sheet-item-icone.is-olive{background:rgba(139,155,55,.12);color:var(--olive);}
   .plus-sheet-item-icone.is-neutre{background:var(--surface-soft);color:var(--ink-2);}
   .plus-sheet-item-texte{min-width:0;display:flex;flex-direction:column;}
   .plus-sheet-item-titre{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;color:var(--ink);}
@@ -5464,6 +5465,8 @@
      que #view-root/.dash-grid ([app.html:2401](app.html)), mobile puis bureau. */
   .vue-couts-tco{display:flex;flex-direction:column;gap:20px;}
   @media (min-width:900px){ .vue-couts-tco{gap:24px;} }
+  .vue-stock{display:flex;flex-direction:column;gap:20px;}
+  @media (min-width:900px){ .vue-stock{gap:24px;} }
   /* La section « Classement TCO du parc » est pleine largeur, hors de
      .dash-grid : elle n'hérite donc pas du filet doux que .dash-grid .card
      applique aux autres cartes de cette page et du tableau de bord
@@ -5475,6 +5478,10 @@
      pleine largeur hors .dash-grid (voir plus haut) — oublié à ce
      moment-là, corrigé ici avec la même règle exacte. */
   #tco-catalogue-section{border:1.5px solid var(--line);}
+  /* Même gotcha, mêmes sections pleine largeur hors .dash-grid, pour le
+     module Stock & SAV (Phase 1) — même règle exacte, appliquée dès
+     l'écriture cette fois plutôt qu'oubliée puis corrigée après coup. */
+  #stock-magasins-section, #stock-inventaire-section, #stock-mouvements-section{border:1.5px solid var(--line);}
 
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
@@ -5487,6 +5494,7 @@
   .tco-kpi-sub{font-size:12px;color:var(--dark-ink);margin-top:3px;display:flex;align-items:center;gap:3px;}
   .tco-kpi-sub svg{width:14px;height:14px;}
   .tco-kpi-sub.is-ok{color:var(--ok);}
+  .tco-kpi-sub.is-late{color:var(--late);}
   .tco-kpi-icone{flex:0 0 auto;width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;}
   .tco-kpi-icone svg{width:26px;height:26px;}
   .tco-kpi-icone.is-fr{background:var(--ok-bg);color:var(--ok);}
@@ -5499,6 +5507,7 @@
   .tco-card-icone-carre svg{width:22px;height:22px;}
   .tco-card-icone-carre.is-roi{background:var(--bleu-roi);}
   .tco-card-icone-carre.is-indigo{background:var(--primary);}
+  .tco-card-icone-carre.is-olive{background:var(--olive);}
   .tco-card-titre{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:28px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);margin:0;}
   .tco-card-soustitre{font-size:12px;color:var(--ink-2);margin-top:1px;}
   .tco-btn-aide{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
@@ -11081,6 +11090,31 @@ function planCouvreQr() {
   return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
 }
 
+// Stock & SAV : réservé au palier Enterprise UNIQUEMENT (demande explicite
+// de l'utilisateur — contrairement aux QR codes ci-dessus, pas de palier
+// intermédiaire). `offreDeLaGrille()` gère déjà le grandfathering
+// (`paid`/`unlimited` → 'enterprise', voir OFFRES_HISTORIQUES) — même
+// fonction que celle qui décide de l'écran des offres, aucune chance de
+// diverger.
+function planCouvreStock() {
+  return offreDeLaGrille(UI.companyPlan || 'free').cle === 'enterprise';
+}
+
+// Rôles autorisés sur le module Stock (décidé avec l'utilisateur) : les
+// mouvements du quotidien (entrée/sortie/transfert) sont ouverts au
+// mécanicien — cohérent avec `peut_ecrire()` côté serveur (RLS/RPC), qui
+// vaut exactement gérant+mécanicien. Les magasins, l'ajustement d'inventaire
+// et la valorisation financière (PUMP, valeur du stock) restent réservés au
+// gérant — ces fonctions ne sont qu'un REFLET côté client : la vraie
+// barrière est côté serveur (RPC enregistrer_mouvement_stock + RLS), comme
+// peutSupprimerMachine()/peutGererEquipe() ailleurs dans ce fichier.
+function peutGererMouvementsStock() {
+  return UI.role === 'gerant' || UI.role === 'mecanicien';
+}
+function peutGererParametresStock() {
+  return UI.role === 'gerant';
+}
+
 // La ligne affichée pour une offre payante : son nom puis son parc. Le prix est
 // lu dans la grille ci-dessus, jamais réécrit ici.
 function ligneOffrePayante(cle) {
@@ -13527,15 +13561,21 @@ const NAV_ITEMS = [
   { id: 'agenda', label: trad('Agenda et préparation'), short: trad('Agenda'), icon: 'agenda' },
   { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
   { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
+  { id: 'stock', label: trad('Stocks & SAV'), short: trad('Stocks'), icon: 'stock' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
 // NAV_ITEMS est une constante évaluée une seule fois, AVANT que SCHEMA.hasTco
 // ne soit connu (la sonde tourne au boot, bien après) : on ne peut donc pas
 // filtrer ici. `navItemsVisibles()` refait le filtre à CHAQUE rendu — même
 // garde-fou que le reste de la fonctionnalité (rien tant que la migration
-// n'est pas visible), mais recalculé au bon moment.
+// n'est pas visible), mais recalculé au bon moment. Stock combine DEUX
+// conditions (migration visible ET palier Enterprise) — voir planCouvreStock().
 function navItemsVisibles() {
-  return NAV_ITEMS.filter((item) => item.id !== 'tco' || SCHEMA.hasTco);
+  return NAV_ITEMS.filter((item) => {
+    if (item.id === 'tco') return SCHEMA.hasTco;
+    if (item.id === 'stock') return SCHEMA.hasStock && planCouvreStock();
+    return true;
+  });
 }
 
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
@@ -13571,6 +13611,9 @@ const NAV_ICONES = {
   // « argent » sans glyphe de police — même grille 24×24 / trait 2px que le
   // reste de NAV_ICONES.
   couts: '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5a7 3 0 0 0 14 0V7"/><path d="M5 12v5a7 3 0 0 0 14 0v-5"/>',
+  // Stock & SAV : une caisse ouverte (silhouette de carton) — lecture
+  // immédiate « stockage/entrepôt », même grille 24×24 / trait 2px.
+  stock: '<path d="M3 8 12 4l9 4-9 4-9-4Z"/><path d="M3 8v9l9 4 9-4V8"/><path d="M12 12v9"/>',
   compte: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
 // ★ LOT 9 — LES PICTOs DE LA CARTE MACHINE, DESSINÉS COMME CEUX DE LA NAVIGATION.
@@ -13812,6 +13855,22 @@ function machineCounts(machines) {
     if (normalizeItems(m.plan?.items).length) c.analysed++;
   });
   return c;
+}
+
+// Stock & SAV — décompte pur (même famille que machineCounts ci-dessus) :
+// une ligne stock_items est « en alerte » quand sa quantité passe sous le
+// seuil EFFECTIF (son propre reorder_point s'il existe, sinon le seuil par
+// défaut de la pièce) — jamais comptée si aucun des deux seuils n'est
+// renseigné (silence honnête, pas une alerte à 0 fabriquée). Utilisée par
+// la pastille du menu Plus et la carte KPI de la page Stock.
+function calculerStockCounts(stockItems, partsCatalog) {
+  const seuilParPiece = new Map((partsCatalog || []).map((p) => [String(p.id), p.default_reorder_point]));
+  let seuilBas = 0;
+  (stockItems || []).forEach((it) => {
+    const seuil = it.reorder_point ?? seuilParPiece.get(String(it.part_id));
+    if (seuil != null && Number(it.quantity) <= Number(seuil)) seuilBas++;
+  });
+  return { seuilBas };
 }
 
 // Échéances à traiter, les plus urgentes d'abord.
@@ -19582,6 +19641,653 @@ function sousBlocPushHtml() {
     </div>`;
 }
 
+// ════════════════════════════════════════════════════════════════════════
+// STOCK & SAV — Phase 1 « Fondations » (cahier des charges fourni par
+// l'utilisateur : voir le plan de session pour le détail des décisions —
+// palier Enterprise strict, gérant+mécanicien pour les mouvements du
+// quotidien, gérant seul pour les magasins/l'ajustement/la valorisation).
+// Aucun mockup Stitch fourni pour ce module : réutilise largement le
+// langage visuel déjà posé pour Coûts & TCO (.tco-kpi-grid, .card/
+// .tco-card-tete, .tco-parts-liste/.tco-part-ligne, .tco-quick-add,
+// .tco-recherche, .tco-btn-outil) plutôt que d'inventer un design.
+// Toute écriture réelle (mouvement) passe PAR LA RPC
+// enregistrer_mouvement_stock — jamais un insert/update direct sur
+// stock_items/stock_movements côté client, RLS le refuserait de toute
+// façon (voir la migration : aucune policy insert/update/delete pour
+// authenticated sur ces deux tables).
+// ════════════════════════════════════════════════════════════════════════
+
+function nomMagasin(id) {
+  const w = (UI.warehouses || []).find((x) => String(x.id) === String(id));
+  return w ? w.name : trad('Magasin supprimé');
+}
+function designationPiece(id) {
+  const p = (UI.partsCatalog || []).find((x) => String(x.id) === String(id));
+  return p ? p.designation : trad('Référence supprimée');
+}
+function badgeTypeMouvement(type) {
+  const map = {
+    entree: { texte: trad('Entrée'), classe: 'ok' },
+    sortie: { texte: trad('Sortie'), classe: 'alert' },
+    transfert: { texte: trad('Transfert'), classe: 'soon' },
+    ajustement: { texte: trad('Ajustement'), classe: 'neutral' },
+  };
+  return map[type] || { texte: type, classe: 'neutral' };
+}
+// stock_movements.performed_at est un timestamptz (contrairement à
+// interventions.performed_at, une simple date) — un journal de mouvements a
+// besoin de l'heure, pas seulement du jour, pour distinguer deux mouvements
+// le même jour. formatShortDate*/formatLongDate (qui découpent une chaîne
+// "AAAA-MM-JJ") ne conviennent donc pas ici ; réutilise moisCourt() pour
+// rester cohérent avec l'i18n existante plutôt que toLocaleString (qui
+// suivrait la locale du NAVIGATEUR, pas la langue choisie dans l'app).
+function formatDateHeureMouvement(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  const heure = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  return `${d.getDate()} ${moisCourt(d.getMonth())} ${d.getFullYear()} · ${heure}`;
+}
+
+// KPI : valeur totale (gérant seulement — même trust model que
+// interventions.parts_cost, jamais de privilège de colonne côté RLS, voir
+// le plan §2), alertes de seuil bas (UI.stockCounts, calculé au boot ET
+// après chaque mouvement), mouvements du mois (rempli en asynchrone par
+// VIEWS.stock.mount(), pas au boot — voir le commentaire sur la section
+// Mouvements plus bas).
+function stockKpiGridHtml() {
+  const gerant = peutGererParametresStock();
+  const items = UI.stockItems || [];
+  const valeurTotale = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.pump_unit_cost) || 0), 0);
+  const nbAlertes = UI.stockCounts?.seuilBas || 0;
+  const nbMagasins = (UI.warehouses || []).filter((w) => w.active !== false).length;
+  return `
+    <div class="tco-kpi-grid">
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Valeur totale du stock')}</div>
+          <div class="tco-kpi-valeur-ligne">${gerant
+            ? `<span class="tco-kpi-valeur">${texteAvecSeparateurs(valeurTotale)}</span><span class="tco-kpi-unite">${esc(deviseCourte())}</span>`
+            : `<span class="tco-kpi-valeur">—</span>`}</div>
+          <div class="tco-kpi-sub">${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</div>
+        </div>
+        <div class="tco-kpi-icone is-roi">${picto('devise')}</div>
+      </div>
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Références en alerte')}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${nbAlertes}</span></div>
+          <div class="tco-kpi-sub${nbAlertes ? ' is-late' : ' is-ok'}">${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</div>
+        </div>
+        <div class="tco-kpi-icone is-amber">${picto('alerte')}</div>
+      </div>
+      <div class="tco-kpi-tile">
+        <div>
+          <div class="tco-kpi-eyebrow">${trad('Mouvements ce mois-ci')}</div>
+          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur" id="stock-kpi-mouvements">…</span></div>
+          <div class="tco-kpi-sub">${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</div>
+        </div>
+        <div class="tco-kpi-icone is-indigo">${picto('calendrier')}</div>
+      </div>
+    </div>`;
+}
+
+// ── Magasins ── CRUD réservé au gérant (peutGererParametresStock), même
+// patron que le catalogue de pièces TCO (même formulaire pour ajout ET
+// édition, ligne SERVEUR fusionnée dans le cache local, jamais la valeur
+// locale tapée — voir blocCatalogueTcoHtml/ses handlers). Le mécanicien
+// voit la liste (il en a besoin pour choisir un magasin dans un mouvement)
+// mais sans les actions de gestion.
+function ligneMagasinHtml(w) {
+  const gerant = peutGererParametresStock();
+  return `
+    <div class="tco-part-ligne" data-magasin-id="${esc(w.id)}">
+      <div class="tco-part-gauche">
+        <div class="tco-part-icone">${picto(w.kind === 'mobile' ? 'vehicule' : 'batiment')}</div>
+        <div class="tco-part-corps">
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(w.name)}</span>${w.active === false ? `<span class="badge neutral">${trad('Inactif')}</span>` : ''}</span>
+          <span class="tco-part-ref">${w.kind === 'mobile' ? trad('Magasin mobile') : trad('Magasin central')}${w.note ? ' · ' + esc(w.note) : ''}</span>
+        </div>
+      </div>
+      ${gerant ? `
+      <div class="tco-part-droite">
+        <div class="tco-part-actions">
+          <button type="button" class="tco-part-btn" data-magasin-modifier="${esc(w.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+          <button type="button" class="tco-part-btn is-danger" data-magasin-retirer="${esc(w.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+function blocMagasinsStockHtml() {
+  const magasins = UI.warehouses || [];
+  const gerant = peutGererParametresStock();
+  const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="hint">${trad('Aucun magasin pour l\'instant — crée le magasin central pour commencer.')}</div>`;
+  return `
+    <section class="card" id="stock-magasins-section">
+      <div class="tco-card-tete" style="margin-bottom:2px;">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-roi">${picto('batiment')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Magasins')}</h2>
+            <span class="tag" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${tR('{n} magasin(s)', { n: magasins.length })}</span>
+          </div>
+        </div>
+      </div>
+      <p class="muted-text">${trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.')}</p>
+      ${gerant ? `
+      <div class="tco-catalogue-grid">
+        <div class="tco-catalogue-colonne">
+          <div class="tco-parts-liste" id="stock-magasins-liste">${liste}</div>
+          <div class="hint" id="stock-magasin-msg" role="status" aria-live="polite"></div>
+        </div>
+        <div class="tco-quick-add">
+          <div class="tco-quick-add-tete">${picto('plusCercle')}<span id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
+          <label class="sr-only" for="stock-magasin-nom">${trad('Nom')}</label>
+          <input id="stock-magasin-nom" required placeholder="${trad('Nom (ex : Magasin central, Fourgon Paul…)')}">
+          <div class="field-row">
+            <div>
+              <label class="tco-champ-label" for="stock-magasin-kind"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Type')}</span></label>
+              <select id="stock-magasin-kind">
+                <option value="central">${trad('Magasin central')}</option>
+                <option value="mobile">${trad('Magasin mobile (fourgon)')}</option>
+              </select>
+            </div>
+            <div>
+              <label class="sr-only" for="stock-magasin-note">${trad('Note')}</label>
+              <input id="stock-magasin-note" placeholder="${trad('Note (optionnel)')}">
+            </div>
+          </div>
+          <div class="modal-actions" style="margin-top:8px;">
+            <button type="button" class="secondary" id="stock-magasin-annuler" hidden>${trad('Annuler la modification')}</button>
+            <button type="button" class="primary" id="stock-magasin-ajouter"><span>${trad('Ajouter le magasin')}</span></button>
+          </div>
+        </div>
+      </div>` : `
+      <div class="hint">${trad('Réservé au gérant.')}</div>
+      <div class="tco-parts-liste">${liste}</div>`}
+    </section>`;
+}
+
+// ── Inventaire ── lecture pure de UI.stockItems (déjà chargé au boot,
+// jamais un second fetch flotte-entière ici) — filtre magasin + recherche
+// en mémoire, comme le classement TCO (rendreDynamique). Quantité visible
+// à tous ; coût PUMP/valeur réservés au gérant (peutGererParametresStock).
+function ligneInventaireStockHtml(it) {
+  const gerant = peutGererParametresStock();
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
+  const seuil = it.reorder_point ?? piece?.default_reorder_point ?? null;
+  const enAlerte = seuil != null && Number(it.quantity) <= Number(seuil);
+  return `
+    <div class="tco-part-ligne">
+      <div class="tco-part-gauche">
+        <div class="tco-part-icone">${picto('boite')}</div>
+        <div class="tco-part-corps">
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${enAlerte ? `<span class="badge alert">${trad('Seuil bas')}</span>` : ''}</span>
+          <span class="tco-part-ref">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</span>
+        </div>
+      </div>
+      <div class="tco-part-droite">
+        <div class="tco-part-prix"><span class="montant">${texteAvecSeparateurs(it.quantity)}</span></div>
+        ${gerant ? `<span class="tco-part-ref">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
+      </div>
+    </div>`;
+}
+function blocInventaireStockHtml() {
+  const magasins = UI.warehouses || [];
+  return `
+    <section class="card" id="stock-inventaire-section">
+      <div class="tco-card-tete" style="margin-bottom:2px;">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-olive">${picto('boite')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Inventaire')}</h2>
+            <span class="tag" id="stock-inventaire-badge" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;"></span>
+          </div>
+        </div>
+        <button type="button" class="parc-export-btn" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+      </div>
+      <div class="field-row" style="grid-template-columns:2fr 1fr;">
+        <div class="tco-recherche">
+          ${picto('recherche')}
+          <input id="stock-inventaire-filtre" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
+        </div>
+        <select id="stock-inventaire-magasin">
+          <option value="">${trad('Tous les magasins')}</option>
+          ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="tco-parts-liste" id="stock-inventaire-liste"></div>
+      <div class="hint" id="stock-inventaire-vide"></div>
+    </section>`;
+}
+
+// ── Mouvements ── journal append-only, jamais chargé au boot (un
+// historique peut grossir sans borne — voir VIEWS.stock.mount()) : chargé
+// en asynchrone au montage, comme le classement TCO. Bouton « Nouveau
+// mouvement » réservé à peutGererMouvementsStock() (gérant+mécanicien).
+function ligneMouvementStockHtml(m) {
+  const badge = badgeTypeMouvement(m.type);
+  const piece = designationPiece(m.part_id);
+  const lieu = m.type === 'transfert'
+    ? `${nomMagasin(m.warehouse_id)} → ${nomMagasin(m.destination_warehouse_id)}`
+    : nomMagasin(m.warehouse_id);
+  const negatif = m.type === 'sortie' || (m.type === 'ajustement' && Number(m.quantity) < 0);
+  return `
+    <div class="tco-part-ligne">
+      <div class="tco-part-gauche">
+        <div class="tco-part-icone"><span class="badge ${badge.classe}">${badge.texte}</span></div>
+        <div class="tco-part-corps">
+          <span class="tco-part-nom-ligne"><span class="tco-part-nom">${esc(piece)}</span></span>
+          <span class="tco-part-ref">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</span>
+        </div>
+      </div>
+      <div class="tco-part-droite">
+        <div class="tco-part-prix"><span class="montant">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</span></div>
+      </div>
+    </div>`;
+}
+function blocMouvementsStockHtml() {
+  const peut = peutGererMouvementsStock();
+  return `
+    <section class="card" id="stock-mouvements-section">
+      <div class="tco-card-tete" style="margin-bottom:2px;">
+        <div class="tco-card-tete-gauche">
+          <div class="tco-card-icone-carre is-indigo">${picto('calendrier')}</div>
+          <div>
+            <h2 class="tco-card-titre">${trad('Mouvements')}</h2>
+            <span class="tag" style="color:var(--primary);background:var(--primary-tint);padding:2px 8px;border-radius:var(--r-pill);display:inline-block;margin-top:2px;">${trad('Entrées, sorties, transferts et ajustements')}</span>
+          </div>
+        </div>
+        ${peut ? `<button type="button" class="tco-btn-outil" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : ''}
+      </div>
+      <div class="tco-parts-liste" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
+      <button type="button" class="secondary" id="stock-mouvements-plus" hidden style="margin-top:10px;">${trad('Voir plus')}</button>
+    </section>`;
+}
+
+function exporterInventaireStockCsv() {
+  const gerant = peutGererParametresStock();
+  const header = gerant
+    ? [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité'), trad('Coût PUMP'), trad('Valeur')]
+    : [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité')];
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const items = (UI.stockItems || []).slice().sort((a, b) => designationPiece(a.part_id).localeCompare(designationPiece(b.part_id)));
+  const rows = items.map((it) => {
+    const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
+    const base = [piece?.reference || '', piece?.designation || designationPiece(it.part_id), nomMagasin(it.warehouse_id), it.quantity];
+    return gerant ? [...base, it.pump_unit_cost, Number(it.quantity) * Number(it.pump_unit_cost)] : base;
+  });
+  const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
+  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `stock_${todayIso()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ── Modale « Nouveau mouvement » ── idiome .overlay/.modal habituel
+// (geler()/dire(), fermeture désactivée pendant l'écriture — voir le bug
+// de course déjà rencontré et corrigé ailleurs dans ce fichier :
+// keeva-redesign-project, « choix de fréquence parfois jamais enregistré »).
+// TOUTE la logique PUMP/verrouillage vit dans la RPC enregistrer_mouvement_stock
+// — ce code ne fait que collecter les champs et interpréter l'erreur.
+function ouvrirNouveauMouvementModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
+  const gerant = peutGererParametresStock();
+  const optionsMagasins = magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
+  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`).join('');
+
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mvt-titre">
+      <h2 id="mvt-titre">${trad('Nouveau mouvement de stock')}</h2>
+      <div class="field-row" style="grid-template-columns:repeat(${gerant ? 4 : 3},1fr);gap:8px;margin-bottom:4px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="entree" checked style="width:16px;height:16px;">${trad('Entrée')}</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="sortie" style="width:16px;height:16px;">${trad('Sortie')}</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="transfert" style="width:16px;height:16px;">${trad('Transfert')}</label>
+        ${gerant ? `<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="ajustement" style="width:16px;height:16px;">${trad('Ajustement')}</label>` : ''}
+      </div>
+      <label class="sr-only" for="mvt-piece">${trad('Pièce')}</label>
+      <select id="mvt-piece">${optionsPieces}</select>
+      <div class="field-row" style="margin-top:8px;">
+        <div>
+          <label id="mvt-magasin-label" for="mvt-magasin">${trad('Magasin')}</label>
+          <select id="mvt-magasin">${optionsMagasins}</select>
+        </div>
+        <div id="mvt-destination-bloc" hidden>
+          <label for="mvt-destination">${trad('Magasin de destination')}</label>
+          <select id="mvt-destination">${optionsMagasins}</select>
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <div>
+          <label for="mvt-quantite">${trad('Quantité')}</label>
+          <input id="mvt-quantite" type="text" inputmode="decimal" placeholder="0">
+        </div>
+        <div id="mvt-cout-bloc">
+          <label for="mvt-cout">${trad('Coût unitaire')}</label>
+          <div class="tco-champ-unite">
+            <input id="mvt-cout" type="text" inputmode="decimal" placeholder="0">
+            <span class="tco-unite-tag">${esc(deviseCourte())}</span>
+          </div>
+        </div>
+      </div>
+      <div id="mvt-intervention-bloc" hidden style="margin-top:8px;">
+        <label for="mvt-machine">${trad('Machine (optionnel)')}</label>
+        <select id="mvt-machine">
+          <option value="">${trad('— Aucune —')}</option>
+          ${(UI.machines || []).filter((m) => !m.archived).map((m) => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('')}
+        </select>
+        <label for="mvt-intervention" style="margin-top:6px;display:block;">${trad('Intervention liée (optionnel)')}</label>
+        <select id="mvt-intervention" disabled>
+          <option value="">${trad('Choisir une machine d\'abord')}</option>
+        </select>
+        <p class="hint">${trad('Si cette sortie a déjà été saisie via « Enregistrer une intervention », ne la lie pas ici aussi — le coût serait compté deux fois.')}</p>
+      </div>
+      <label for="mvt-motif" style="margin-top:8px;display:block;">${trad('Motif / note (optionnel)')}</label>
+      <input id="mvt-motif" placeholder="${trad('Ex : bon de livraison, casse, inventaire…')}">
+      <div class="hint" id="mvt-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="mvt-fermer">${trad('Fermer')}</button>
+        <button type="button" class="primary" id="mvt-valider"><span>${trad('Enregistrer le mouvement')}</span></button>
+      </div>
+    </div>`;
+
+  activerSeparateurMilliers(overlay.querySelector('#mvt-quantite'));
+  activerSeparateurMilliers(overlay.querySelector('#mvt-cout'));
+
+  const dire = (texte, erreur) => {
+    const el = overlay.querySelector('#mvt-msg');
+    if (!el) return;
+    el.textContent = texte;
+    el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+  };
+  const geler = (g) => { overlay.querySelectorAll('button,input,select').forEach((el) => { el.disabled = g; }); };
+
+  const majSelonType = () => {
+    const type = overlay.querySelector('input[name="mvt-type"]:checked')?.value || 'entree';
+    overlay.querySelector('#mvt-destination-bloc').hidden = type !== 'transfert';
+    overlay.querySelector('#mvt-cout-bloc').style.display = type === 'entree' ? '' : 'none';
+    overlay.querySelector('#mvt-intervention-bloc').hidden = type !== 'sortie';
+    overlay.querySelector('#mvt-magasin-label').textContent = type === 'transfert' ? trad('Magasin source') : trad('Magasin');
+  };
+  overlay.querySelectorAll('input[name="mvt-type"]').forEach((r) => r.addEventListener('change', majSelonType));
+  majSelonType();
+
+  overlay.querySelector('#mvt-fermer').addEventListener('click', () => overlay.remove());
+
+  // Interventions de la machine choisie — chargées À LA DEMANDE, jamais au
+  // montage de la modale (la plupart des sorties n'utiliseront jamais ce
+  // champ optionnel, pas de fetch gratuit pour ça).
+  overlay.querySelector('#mvt-machine')?.addEventListener('change', async (e) => {
+    const selInter = overlay.querySelector('#mvt-intervention');
+    const machineId = e.target.value;
+    if (!machineId) { selInter.innerHTML = `<option value="">${trad('— Aucune —')}</option>`; selInter.disabled = true; return; }
+    selInter.disabled = true;
+    selInter.innerHTML = `<option value="">${trad('Chargement…')}</option>`;
+    try {
+      const interventions = await fetchAllInterventions(machineId);
+      selInter.innerHTML = `<option value="">${trad('— Aucune —')}</option>` +
+        interventions.slice(0, 30).map((it) => `<option value="${esc(it.id)}">${esc(formatShortDateAvecAnnee(it.performed_at))}${it.description ? ' — ' + esc(String(it.description).slice(0, 40)) : ''}</option>`).join('');
+      selInter.disabled = false;
+    } catch (err) {
+      selInter.innerHTML = `<option value="">${trad('Erreur de chargement')}</option>`;
+    }
+  });
+
+  overlay.querySelector('#mvt-valider').addEventListener('click', async () => {
+    const type = overlay.querySelector('input[name="mvt-type"]:checked')?.value || 'entree';
+    const partId = overlay.querySelector('#mvt-piece').value;
+    const warehouseId = overlay.querySelector('#mvt-magasin').value;
+    const destId = type === 'transfert' ? overlay.querySelector('#mvt-destination').value : null;
+    const qty = nombreDepuisTexte(overlay.querySelector('#mvt-quantite').value);
+    const coutBrut = overlay.querySelector('#mvt-cout').value;
+    const cout = type === 'entree' ? nombreDepuisTexte(coutBrut) : (coutBrut ? nombreDepuisTexte(coutBrut) : null);
+    const interventionId = (type === 'sortie' && overlay.querySelector('#mvt-intervention')?.value) || null;
+    const motif = overlay.querySelector('#mvt-motif').value.trim() || null;
+
+    if (!partId) { dire(trad('Choisis une pièce.'), true); return; }
+    if (!warehouseId) { dire(trad('Choisis un magasin.'), true); return; }
+    if (type === 'transfert' && (!destId || destId === warehouseId)) { dire(trad('Choisis un magasin de destination différent du magasin source.'), true); return; }
+    if (!qty || qty <= 0) { dire(trad('Quantité invalide.'), true); return; }
+    if (type === 'entree' && (cout == null || cout < 0)) { dire(trad('Coût unitaire requis pour une entrée.'), true); return; }
+
+    geler(true);
+    dire(trad('Enregistrement…'), false);
+    try {
+      const { error } = await sb.rpc('enregistrer_mouvement_stock', {
+        p_type: type,
+        p_part_id: partId,
+        p_warehouse_id: warehouseId,
+        p_destination_warehouse_id: destId,
+        p_quantity: qty,
+        p_unit_cost: cout,
+        p_intervention_id: interventionId,
+        p_reason: motif,
+      });
+      if (error) throw error;
+      // Le solde réel fait foi côté serveur (calcul PUMP/verrouillage dans
+      // la RPC) — on le relit plutôt que de reconstruire le calcul en JS,
+      // jamais deux implémentations du même calcul qui pourraient diverger.
+      const { data: soldes } = await sb.from('stock_items')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at')
+        .eq('company_id', UI.companyId);
+      UI.stockItems = soldes || [];
+      UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+      showToast(trad('Mouvement enregistré'));
+      overlay.remove();
+      renderApp();
+    } catch (err) {
+      dire(trad('Erreur :') + ' ' + (err.message || err), true);
+      geler(false);
+    }
+  });
+}
+
+VIEWS.stock = {
+  title: trad('Stocks & SAV'),
+  subtitle: () => trad('Magasins, mouvements et valorisation du stock'),
+  render() {
+    return `
+      <div class="vue-stock">
+        ${stockKpiGridHtml()}
+        ${blocMagasinsStockHtml()}
+        ${blocInventaireStockHtml()}
+        ${blocMouvementsStockHtml()}
+      </div>`;
+  },
+  mount() {
+    const root = document.getElementById('view-root');
+    if (!root) return;
+    const message = (el, texte, erreur) => {
+      if (!el) return;
+      el.textContent = texte;
+      el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+    };
+
+    // ── Inventaire : filtre magasin + recherche, entièrement en mémoire
+    // (UI.stockItems déjà chargé au boot — jamais un second fetch ici). ──
+    const rafraichirInventaire = () => {
+      const liste = root.querySelector('#stock-inventaire-liste');
+      const badge = root.querySelector('#stock-inventaire-badge');
+      const vide = root.querySelector('#stock-inventaire-vide');
+      if (!liste) return;
+      const terme = (root.querySelector('#stock-inventaire-filtre')?.value || '').trim().toLowerCase();
+      const magasinId = root.querySelector('#stock-inventaire-magasin')?.value || '';
+      let items = UI.stockItems || [];
+      if (magasinId) items = items.filter((it) => String(it.warehouse_id) === String(magasinId));
+      if (terme) {
+        items = items.filter((it) => {
+          const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
+          const texte = [piece?.designation, piece?.reference, nomMagasin(it.warehouse_id)].filter(Boolean).join(' ').toLowerCase();
+          return texte.includes(terme);
+        });
+      }
+      items = items.slice().sort((a, b) => designationPiece(a.part_id).localeCompare(designationPiece(b.part_id)));
+      liste.innerHTML = items.map(ligneInventaireStockHtml).join('');
+      if (badge) badge.textContent = tR('{n} ligne(s)', { n: items.length });
+      if (vide) vide.textContent = items.length ? '' : trad('Aucune ligne de stock pour ce filtre.');
+    };
+    rafraichirInventaire();
+    root.querySelector('#stock-inventaire-filtre')?.addEventListener('input', rafraichirInventaire);
+    root.querySelector('#stock-inventaire-magasin')?.addEventListener('change', rafraichirInventaire);
+    root.querySelector('#stock-inventaire-export')?.addEventListener('click', () => exporterInventaireStockCsv());
+
+    // ── Magasins : CRUD réservé au gérant, même patron que le catalogue
+    // de pièces TCO (formulaire unique ajout/édition). ──
+    if (peutGererParametresStock()) {
+      let magasinEnEdition = null;
+      const formTitre = root.querySelector('#stock-magasin-form-titre');
+      const btnAjouter = root.querySelector('#stock-magasin-ajouter');
+      const btnAnnuler = root.querySelector('#stock-magasin-annuler');
+      const msg = root.querySelector('#stock-magasin-msg');
+      const sortirEdition = () => {
+        magasinEnEdition = null;
+        const champNom = root.querySelector('#stock-magasin-nom');
+        const champKind = root.querySelector('#stock-magasin-kind');
+        const champNote = root.querySelector('#stock-magasin-note');
+        if (champNom) champNom.value = '';
+        if (champKind) champKind.value = 'central';
+        if (champNote) champNote.value = '';
+        if (formTitre) formTitre.textContent = trad('Ajouter un magasin');
+        if (btnAjouter) btnAjouter.querySelector('span').textContent = trad('Ajouter le magasin');
+        if (btnAnnuler) btnAnnuler.hidden = true;
+      };
+      root.querySelector('#stock-magasins-liste')?.addEventListener('click', (e) => {
+        const modifier = e.target.closest('[data-magasin-modifier]');
+        const retirer = e.target.closest('[data-magasin-retirer]');
+        if (modifier) {
+          const w = (UI.warehouses || []).find((x) => String(x.id) === modifier.getAttribute('data-magasin-modifier'));
+          if (!w) return;
+          magasinEnEdition = w.id;
+          root.querySelector('#stock-magasin-nom').value = w.name || '';
+          root.querySelector('#stock-magasin-kind').value = w.kind || 'central';
+          root.querySelector('#stock-magasin-note').value = w.note || '';
+          if (formTitre) formTitre.textContent = trad('Modifier le magasin');
+          if (btnAjouter) btnAjouter.querySelector('span').textContent = trad('Enregistrer les modifications');
+          if (btnAnnuler) btnAnnuler.hidden = false;
+        } else if (retirer) {
+          const id = retirer.getAttribute('data-magasin-retirer');
+          if (!window.confirm(trad('Supprimer ce magasin ?'))) return;
+          (async () => {
+            const { error } = await sb.from('warehouses').delete().eq('id', id);
+            if (error) {
+              // ON DELETE RESTRICT côté stock_movements : un magasin avec un
+              // historique de mouvements ne peut pas être supprimé — on
+              // propose de le désactiver plutôt qu'une erreur technique brute.
+              if (String(error.code) === '23503' || /foreign key/i.test(error.message || '')) {
+                if (window.confirm(trad('Ce magasin a un historique de mouvements et ne peut pas être supprimé. Le désactiver à la place (il n\'apparaîtra plus dans les nouveaux mouvements) ?'))) {
+                  const { error: err2 } = await sb.from('warehouses').update({ active: false }).eq('id', id);
+                  if (!err2) {
+                    UI.warehouses = (UI.warehouses || []).map((w) => (String(w.id) === String(id) ? { ...w, active: false } : w));
+                    showToast(trad('Magasin désactivé'));
+                    renderApp();
+                  }
+                }
+                return;
+              }
+              message(msg, trad('Erreur :') + ' ' + error.message, true);
+              return;
+            }
+            UI.warehouses = (UI.warehouses || []).filter((w) => String(w.id) !== String(id));
+            showToast(trad('Magasin supprimé'));
+            renderApp();
+          })();
+        }
+      });
+      btnAnnuler?.addEventListener('click', sortirEdition);
+      btnAjouter?.addEventListener('click', async () => {
+        const nom = root.querySelector('#stock-magasin-nom').value.trim();
+        const kind = root.querySelector('#stock-magasin-kind').value;
+        const note = root.querySelector('#stock-magasin-note').value.trim();
+        if (!nom) { message(msg, trad('Le nom est obligatoire.'), true); return; }
+        btnAjouter.disabled = true;
+        try {
+          if (magasinEnEdition) {
+            const { data, error } = await sb.from('warehouses')
+              .update({ name: nom, kind, note: note || null })
+              .eq('id', magasinEnEdition)
+              .select('id, name, kind, assigned_to, note, active')
+              .single();
+            if (error) throw error;
+            UI.warehouses = (UI.warehouses || []).map((w) => (String(w.id) === String(magasinEnEdition) ? data : w));
+            showToast(trad('Magasin modifié'));
+          } else {
+            const { data, error } = await sb.from('warehouses')
+              .insert({ company_id: UI.companyId, name: nom, kind, note: note || null })
+              .select('id, name, kind, assigned_to, note, active')
+              .single();
+            if (error) throw error;
+            UI.warehouses = [...(UI.warehouses || []), data];
+            showToast(trad('Magasin ajouté'));
+          }
+          sortirEdition();
+          renderApp();
+        } catch (err) {
+          message(msg, trad('Erreur :') + ' ' + err.message, true);
+          btnAjouter.disabled = false;
+        }
+      });
+    }
+
+    // ── Mouvements : journal chargé en asynchrone (jamais au boot — un
+    // historique peut grossir sans borne), pagination « voir plus » comme
+    // le reste de l'app. Alimente aussi la tuile KPI « Mouvements ce
+    // mois-ci » une fois chargé — jamais un second calcul séparé. ──
+    const MOUVEMENTS_PAGE_SIZE = 20;
+    let limiteMouvements = MOUVEMENTS_PAGE_SIZE;
+    let mouvementsCharges = [];
+    const rafraichirMouvements = () => {
+      const liste = root.querySelector('#stock-mouvements-liste');
+      if (!liste) return;
+      const visibles = mouvementsCharges.slice(0, limiteMouvements);
+      liste.innerHTML = visibles.length
+        ? visibles.map(ligneMouvementStockHtml).join('')
+        : `<div class="hint">${trad('Aucun mouvement enregistré pour l\'instant.')}</div>`;
+      const plus = root.querySelector('#stock-mouvements-plus');
+      if (plus) plus.hidden = limiteMouvements >= mouvementsCharges.length;
+    };
+    (async () => {
+      const section = root.querySelector('#stock-mouvements-section');
+      if (!section) return;
+      try {
+        const { data, error } = await sb.from('stock_movements')
+          .select('id, part_id, warehouse_id, destination_warehouse_id, type, quantity, unit_cost, resulting_pump_cost, intervention_id, reason, performed_by, performed_at')
+          .eq('company_id', UI.companyId)
+          .order('performed_at', { ascending: false })
+          .limit(500);
+        if (error) throw error;
+        mouvementsCharges = data || [];
+        if (!root.isConnected || !section.isConnected) return;
+        rafraichirMouvements();
+        const kpi = root.querySelector('#stock-kpi-mouvements');
+        if (kpi) {
+          const debutMois = new Date();
+          debutMois.setDate(1);
+          debutMois.setHours(0, 0, 0, 0);
+          const n = mouvementsCharges.filter((m) => new Date(m.performed_at) >= debutMois).length;
+          kpi.textContent = String(n);
+        }
+      } catch (err) {
+        const liste = root.querySelector('#stock-mouvements-liste');
+        if (liste) liste.innerHTML = `<div class="hint">${trad('Erreur de chargement :')} ${esc(err.message)}</div>`;
+      }
+    })();
+    root.querySelector('#stock-mouvements-plus')?.addEventListener('click', () => {
+      limiteMouvements += MOUVEMENTS_PAGE_SIZE;
+      rafraichirMouvements();
+    });
+    root.querySelector('#stock-mouvements-nouveau')?.addEventListener('click', () => ouvrirNouveauMouvementModal());
+  },
+};
+
 // ── Vue : Mon compte ──────────────────────────────────────────
 VIEWS.account = {
   title: trad('Mon compte'),
@@ -20814,6 +21520,7 @@ function openPlusSheet() {
           ${itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '')}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           ${SCHEMA.hasTco ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
+          ${(SCHEMA.hasStock && planCouvreStock()) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
         </div>
         <div class="plus-sheet-separateur"></div>
         <div class="plus-sheet-section">
@@ -26877,6 +27584,9 @@ function afficherDepuisCache(cache) {
   UI.categories = cache.categories || [];
   UI.components = cache.components || [];
   UI.partsCatalog = cache.partsCatalog || [];
+  UI.warehouses = cache.warehouses || [];
+  UI.stockItems = cache.stockItems || [];
+  UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
   UI.machines = cache.machines || [];
   UI.scheduledMaintenances = cache.scheduledMaintenances || [];
   UI.reminders = loadReminders();
@@ -26981,6 +27691,14 @@ async function boot(toastMessage) {
   // tables parts_catalog/intervention_parts/operating_costs ont été ajoutées
   // ensemble, jamais séparément (voir keeva-tco-feature).
   SCHEMA.hasTco = await sonderColonne('companies', 'labor_hourly_rate');
+
+  // Stock & SAV (Phase 1) : une seule sonde, table warehouses — schéma et
+  // RPC (enregistrer_mouvement_stock) toujours ajoutés ensemble, même
+  // discipline qu'hasTco ci-dessus. Indépendant du palier d'offre
+  // (planCouvreStock()) : une société qui rétrograde après avoir eu la
+  // migration continue de VOIR ses données, seul le palier décide si le
+  // module reste ACCESSIBLE (voir navItemsVisibles()).
+  SCHEMA.hasStock = await sonderColonne('warehouses', 'id');
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -27147,6 +27865,28 @@ async function boot(toastMessage) {
     partsCatalog = pieces || [];
   }
 
+  // Stock & SAV (Phase 1) : magasins + solde vivant par (pièce, magasin),
+  // chargés une fois ici comme le catalogue de pièces — jamais un fetch
+  // flotte-entière séparé par écran. Absent tant que la migration n'est pas
+  // visible. `stock_items` n'est jamais écrit directement par le client
+  // (voir enregistrer_mouvement_stock) : ce chargement est un simple
+  // reflet, toujours réconciliable en relisant la table.
+  let warehouses = [];
+  let stockItems = [];
+  if (SCHEMA.hasStock) {
+    const [{ data: mags }, { data: soldes }] = await Promise.all([
+      sb.from('warehouses')
+        .select('id, name, kind, assigned_to, note, active')
+        .eq('company_id', profile.company_id)
+        .order('name'),
+      sb.from('stock_items')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at')
+        .eq('company_id', profile.company_id),
+    ]);
+    warehouses = mags || [];
+    stockItems = soldes || [];
+  }
+
   // Référentiel des organes défaillants (Dépannage curatif) : même endroit
   // que les catégories/le catalogue pièces — chargé une fois, réutilisé
   // partout où openLogInterventionModal est appelée (voir composantsUtiles).
@@ -27200,6 +27940,9 @@ async function boot(toastMessage) {
   UI.categories = categories || [];
   UI.components = composants || [];
   UI.partsCatalog = partsCatalog;
+  UI.warehouses = warehouses;
+  UI.stockItems = stockItems;
+  UI.stockCounts = calculerStockCounts(stockItems, partsCatalog);
   UI.machines = (machines || []).map(m => ({
     ...m,
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
@@ -27236,6 +27979,8 @@ async function boot(toastMessage) {
     categories: UI.categories,
     components: UI.components,
     partsCatalog: UI.partsCatalog,
+    warehouses: UI.warehouses,
+    stockItems: UI.stockItems,
     machines: UI.machines,
     scheduledMaintenances: UI.scheduledMaintenances,
   });
