@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/18TIJKGDJ0t3brwvXzHuIG3fNk7EuKA9vkLHaOTypE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l/Qdrlnxrkjd6cuDT/56PhzNK5yOrG1JPj5kXv4YMLo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4508,12 +4508,21 @@
 
   /* Ciblage des rappels push par rôle (blocCiblagePushHtml) : une ligne par
      rôle, case à cocher + 2 seuils numériques (jours / compteur), activés
-     seulement si le rôle est coché. */
+     seulement si le rôle est coché.
+     ★ Grille à 2 colonnes FIXES (pas flex-wrap) : signalé par l'utilisateur,
+     les 2 champs basculaient entre 1 et 2 colonnes selon la carte — un
+     flex-basis à la limite du seuil de retour à la ligne peut faire
+     osciller flex-wrap d'un pixel à l'autre. Une grille à colonnes
+     explicites n'a pas cette ambiguïté : toujours 2 colonnes alignées au
+     même endroit sur chaque carte de rôle, sur ordinateur comme sur
+     tablette ; une seule colonne seulement en dessous de 480px (téléphone
+     étroit, où 2 colonnes deviendraient trop serrées). */
   .push-roles-grille{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
   .push-role-ligne{padding:10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-soft);}
-  .push-role-seuils{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
-  .push-role-champ{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink-2);flex:1 1 160px;}
-  .push-role-champ input{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13px;color:var(--ink);}
+  .push-role-seuils{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+  @media (max-width:480px){.push-role-seuils{grid-template-columns:1fr;}}
+  .push-role-champ{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink-2);min-width:0;}
+  .push-role-champ input{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13px;color:var(--ink);width:100%;box-sizing:border-box;}
 
   .fonctionnement-grille{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:6px;
@@ -12361,7 +12370,7 @@ const NAV_ITEMS = [
   { id: 'machines', label: trad('Machines'), short: trad('Parc'), icon: 'parc' },
   { id: 'manuals', label: trad('Manuels & carnets'), short: trad('Manuels'), icon: 'manuels' },
   { id: 'agenda', label: trad('Agenda'), short: trad('Agenda'), icon: 'agenda' },
-  { id: 'reminders', label: trad('Rappels'), short: trad('Rappels'), icon: 'rappels' },
+  { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
   { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
