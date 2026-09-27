@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l/Qdrlnxrkjd6cuDT/56PhzNK5yOrG1JPj5kXv4YMLo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ym9Kwy4CQU1KtABYacLPEARvyRK4ZdOh8Jo93hXe07s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -15332,7 +15332,7 @@ function bonCommandeHtml() {
 // établie (PICTO_CATEGORIE) plutôt qu'un nom/icône inventés pour coller au
 // mockup à l'identique.
 const TEINTES_FAMILLE = ['is-roi', 'is-amber', 'is-ok', 'is-indigo'];
-function preparationResumeHtml() {
+function preparationResumeHtml(options = {}) {
   const jours = UI.preparationJours || 90;
   const liste = listePreparation(UI.machines, jours);
   const nombre = liste.produits.length;
@@ -15389,7 +15389,7 @@ function preparationResumeHtml() {
       <div class="prep-pied">
         <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
         <div class="prep-pied-actions">
-          <button type="button" class="link-inline" data-nav="agenda">${tR('Voir la liste complète ({n}) →', { n: nombre })}</button>
+          ${options.masquerLienAgenda ? '' : `<button type="button" class="link-inline" data-nav="agenda">${tR('Voir la liste complète ({n}) →', { n: nombre })}</button>`}
           <button type="button" class="prep-copier-btn" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button>
         </div>
       </div>
@@ -15975,7 +15975,7 @@ VIEWS.agenda = {
       return `<div class="empty">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div>`;
     }
     const { counters } = agendaEvenements();
-    const piecesHtml = preparationResumeHtml();
+    const piecesHtml = preparationResumeHtml({ masquerLienAgenda: true });
     return `
       <div class="vue-agenda">
       <div class="agenda-toolbar">
@@ -15989,11 +15989,10 @@ VIEWS.agenda = {
       <div class="dash-grid agenda-grid">
         <div class="dash-main">
           <section class="card agenda-calendrier">${agendaContenuHtml()}</section>
+          ${piecesHtml ? `<div class="agenda-pieces-bloc">${piecesHtml}${agendaPiecesDetailToggleHtml()}</div>` : ''}
         </div>
         <div class="dash-side">
-          ${piecesHtml ? `<div class="agenda-pieces-bloc">${piecesHtml}${agendaPiecesDetailToggleHtml()}</div>` : ''}
           ${agendaSurveillanceHtml(counters)}
-          ${remindersCardHtml()}
         </div>
       </div>
       </div>`;
