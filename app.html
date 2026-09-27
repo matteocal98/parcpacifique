@@ -4279,7 +4279,14 @@
   .prep-produit-corps{flex:1;min-width:0;}
   .prep-case{flex:0 0 auto;margin-top:1px;color:var(--ink);}
   .prep-groupes-plus{display:none;}
-  .prep-groupes-plus.is-ouvert{display:block;}
+  /* flex (pas block) : ce conteneur enveloppe plusieurs cartes concaténées
+     (familles ou produits) sans marge entre elles — en display:block, elles
+     se touchaient une fois dépliées (remonté par l'utilisateur, capture à
+     l'appui). Même espacement que les cartes visibles au-dessus, qui elles
+     héritent du gap du conteneur PARENT (.prep-detail-groupe-corps /
+     .prep-groupes-liste) — un gap direct était nécessaire ICI aussi, puisque
+     ce repli est lui-même un seul enfant flex de ce parent. */
+  .prep-groupes-plus.is-ouvert{display:flex;flex-direction:column;gap:8px;}
   .prep-groupes-toggle{
     display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:700;
   }
