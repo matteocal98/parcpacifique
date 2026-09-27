@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rnq48jqdPAxv5VdCTnxls2Gm6bMCC4U7QWeIGIGY4OA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Y/Vy4mqJFOIj0TVCRtsVDluePx8MYoVLtW3wUoXbVHc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -18992,6 +18992,160 @@ function tcoTipCarteHtml() {
       </div>
     </div>`;
 }
+// Câblage du bloc « Catalogue de pièces » (recherche, ajout/édition/
+// suppression, import CSV) — extrait pour être appelé aussi bien depuis
+// VIEWS.tco.mount() (sociétés non-Enterprise : le catalogue reste dans
+// Coûts & TCO, seul palier qu'elles voient) que depuis VIEWS.stock.mount()
+// (sociétés Enterprise : déplacé dans Stocks & SAV, sa place naturelle
+// maintenant que ce module existe — demande explicite de l'utilisateur).
+// LE MÊME bloc HTML (blocCatalogueTcoHtml) n'est rendu qu'À UN SEUL des
+// deux endroits selon planCouvreStock() (voir chaque render()), jamais
+// dupliqué pour une même société — cette fonction ne fait que câbler
+// l'endroit où il se trouve réellement dans le DOM à cet instant.
+function cablerCatalogueTco(root) {
+  const message = (el, texte, erreur) => {
+    if (!el) return;
+    el.textContent = texte;
+    el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+  };
+  activerSeparateurMilliers(root.querySelector('#tco-piece-prix'));
+  activerSeparateurMilliers(root.querySelector('#tco-piece-seuil'));
+
+  // Recherche du catalogue : filtre client, comme le mockup — sur la
+  // référence ET la désignation.
+  root.querySelector('#tco-piece-filtre')?.addEventListener('input', (e) => {
+    const terme = e.target.value.trim().toLowerCase();
+    root.querySelectorAll('#tco-catalogue-liste .tco-part-ligne').forEach((ligne) => {
+      ligne.style.display = ligne.textContent.toLowerCase().includes(terme) ? '' : 'none';
+    });
+  });
+
+  // Ajout ET modification d'une pièce partagent le même petit formulaire
+  // (pas de deuxième formulaire, pas de modale à part) : `pieceEnEdition`
+  // porte l'id de la pièce en cours de modification, ou `null` en mode
+  // ajout — c'est lui qui décide si le bouton fait un insert ou un update.
+  let pieceEnEdition = null;
+  const champRef = root.querySelector('#tco-piece-reference');
+  const champDesignation = root.querySelector('#tco-piece-designation');
+  const champPrix = root.querySelector('#tco-piece-prix');
+  const champFournisseur = root.querySelector('#tco-piece-fournisseur');
+  const champDelai = root.querySelector('#tco-piece-delai');
+  const champConditionnement = root.querySelector('#tco-piece-conditionnement');
+  const champSeuil = root.querySelector('#tco-piece-seuil');
+  const titreForm = root.querySelector('#tco-piece-form-titre');
+  const boutonAjouter = root.querySelector('#tco-piece-ajouter');
+  const boutonAjouterLabel = boutonAjouter?.querySelector('span');
+  const boutonAnnuler = root.querySelector('#tco-piece-annuler');
+  const COLONNES_PIECE = colonnesCatalogueePiece();
+  const sortirDuModeEdition = () => {
+    pieceEnEdition = null;
+    if (champRef) champRef.value = '';
+    if (champDesignation) champDesignation.value = '';
+    if (champPrix) champPrix.value = '';
+    if (champFournisseur) champFournisseur.value = '';
+    if (champDelai) champDelai.value = '';
+    if (champConditionnement) champConditionnement.value = '';
+    if (champSeuil) champSeuil.value = '';
+    if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
+    if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
+    if (boutonAnnuler) boutonAnnuler.hidden = true;
+  };
+  boutonAnnuler?.addEventListener('click', sortirDuModeEdition);
+  root.querySelector('#tco-catalogue-importer')?.addEventListener('click', ouvrirImportCatalogue);
+
+  boutonAjouter?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const msg = root.querySelector('#tco-catalogue-msg');
+    const reference = champRef.value.trim();
+    const designation = champDesignation.value.trim();
+    const prix = nombreDepuisTexte(champPrix.value) ?? 0;
+    const fournisseur = champFournisseur.value.trim();
+    const delai = nombreDepuisTexte(champDelai.value);
+    const conditionnement = champConditionnement ? champConditionnement.value.trim() : '';
+    const seuil = champSeuil ? nombreDepuisTexte(champSeuil.value) : null;
+    if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
+    btn.disabled = true;
+    if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
+    const champsOptionnels = {
+      ...(SCHEMA.hasStockPackaging ? { packaging: conditionnement || null } : {}),
+      ...(SCHEMA.hasStock ? { default_reorder_point: seuil } : {}),
+    };
+    try {
+      if (pieceEnEdition) {
+        const { data, error } = await sb.from('parts_catalog')
+          .update({
+            reference: reference || null, designation, unit_price: prix,
+            supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            ...champsOptionnels,
+          })
+          .eq('id', pieceEnEdition)
+          .select(COLONNES_PIECE)
+          .single();
+        if (error) throw error;
+        UI.partsCatalog = (UI.partsCatalog || [])
+          .map((p) => (String(p.id) === String(pieceEnEdition) ? data : p))
+          .sort((a, b) => a.designation.localeCompare(b.designation));
+        showToast(trad('Pièce modifiée'));
+      } else {
+        const { data, error } = await sb.from('parts_catalog')
+          .insert({
+            company_id: UI.companyId, reference: reference || null, designation, unit_price: prix,
+            supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            ...champsOptionnels,
+          })
+          .select(COLONNES_PIECE)
+          .single();
+        if (error) throw error;
+        UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
+        showToast(trad('Pièce ajoutée au catalogue'));
+      }
+      sortirDuModeEdition();
+      renderApp();
+    } catch (err) {
+      message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+      btn.disabled = false;
+      if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrer les modifications') : trad('Ajouter au catalogue');
+    }
+  });
+
+  root.querySelector('#tco-catalogue-liste')?.addEventListener('click', async (e) => {
+    const modifier = e.target.closest('[data-piece-modifier]');
+    if (modifier) {
+      const id = modifier.getAttribute('data-piece-modifier');
+      const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(id));
+      if (!piece) return;
+      pieceEnEdition = id;
+      if (champRef) champRef.value = piece.reference || '';
+      if (champDesignation) champDesignation.value = piece.designation || '';
+      if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
+      if (champFournisseur) champFournisseur.value = piece.supplier_name || '';
+      if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
+      if (champConditionnement) champConditionnement.value = piece.packaging || '';
+      if (champSeuil) champSeuil.value = piece.default_reorder_point != null ? texteAvecSeparateurs(piece.default_reorder_point) : '';
+      if (titreForm) titreForm.textContent = trad('Modifier une pièce');
+      if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
+      if (boutonAnnuler) boutonAnnuler.hidden = false;
+      champDesignation?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    const bouton = e.target.closest('[data-piece-retirer]');
+    if (!bouton) return;
+    const id = bouton.getAttribute('data-piece-retirer');
+    if (!window.confirm(trad('Retirer cette pièce du catalogue ?'))) return;
+    bouton.disabled = true;
+    try {
+      const { error } = await sb.from('parts_catalog').delete().eq('id', id);
+      if (error) throw error;
+      UI.partsCatalog = (UI.partsCatalog || []).filter((p) => String(p.id) !== String(id));
+      if (pieceEnEdition === id) sortirDuModeEdition();
+      renderApp();
+    } catch (err) {
+      message(root.querySelector('#tco-catalogue-msg'), trad('Erreur :') + ' ' + (err.message || err), true);
+      bouton.disabled = false;
+    }
+  });
+}
+
 VIEWS.tco = {
   title: trad('Paramètres TCO & Coûts d\'exploitation'),
   subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
@@ -19010,7 +19164,7 @@ VIEWS.tco = {
             ${tcoTipCarteHtml()}
           </div>
         </div>
-        ${blocCatalogueTcoHtml()}
+        ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
       </div>`;
   },
   mount() {
@@ -19413,19 +19567,18 @@ VIEWS.tco = {
 
     // Séparateurs de milliers : ces champs sont passés en type="text" (un
     // type="number" refuse tout espace) — voir activerSeparateurMilliers.
-    ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage', '#tco-piece-prix'].forEach((sel) => {
+    // #tco-piece-prix/#tco-piece-seuil ne sont PAS ici : câblés par
+    // cablerCatalogueTco() ci-dessous, seulement quand le catalogue est
+    // effectivement rendu sur CETTE page (sociétés non-Enterprise).
+    ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage'].forEach((sel) => {
       activerSeparateurMilliers(root.querySelector(sel));
     });
     root.querySelectorAll('.tco-seuil-input').forEach((input) => activerSeparateurMilliers(input));
 
-    // Recherche du catalogue : filtre client, comme le mockup — sur la
-    // référence ET la désignation.
-    root.querySelector('#tco-piece-filtre')?.addEventListener('input', (e) => {
-      const terme = e.target.value.trim().toLowerCase();
-      root.querySelectorAll('#tco-catalogue-liste .tco-part-ligne').forEach((ligne) => {
-        ligne.style.display = ligne.textContent.toLowerCase().includes(terme) ? '' : 'none';
-      });
-    });
+    // Catalogue de pièces : déplacé dans Stocks & SAV pour une société
+    // Enterprise (voir render() ci-dessus) — reste ici, câblé normalement,
+    // pour toutes les autres. Jamais les deux à la fois.
+    if (!(SCHEMA.hasStock && planCouvreStock())) cablerCatalogueTco(root);
 
     // Deux chemins DISTINCTS, jamais mélangés — c'est le bug remonté par
     // l'utilisateur qui a fait abandonner une 1ʳᵉ version qui tentait de
@@ -19547,130 +19700,6 @@ VIEWS.tco = {
       }
     });
 
-    // Ajout ET modification d'une pièce partagent le même petit formulaire
-    // (pas de deuxième formulaire, pas de modale à part) : `pieceEnEdition`
-    // porte l'id de la pièce en cours de modification, ou `null` en mode
-    // ajout — c'est lui qui décide si le bouton fait un insert ou un update.
-    let pieceEnEdition = null;
-    const champRef = root.querySelector('#tco-piece-reference');
-    const champDesignation = root.querySelector('#tco-piece-designation');
-    const champPrix = root.querySelector('#tco-piece-prix');
-    const champFournisseur = root.querySelector('#tco-piece-fournisseur');
-    const champDelai = root.querySelector('#tco-piece-delai');
-    const champConditionnement = root.querySelector('#tco-piece-conditionnement');
-    const champSeuil = root.querySelector('#tco-piece-seuil');
-    const titreForm = root.querySelector('#tco-piece-form-titre');
-    const boutonAjouter = root.querySelector('#tco-piece-ajouter');
-    const boutonAjouterLabel = boutonAjouter?.querySelector('span');
-    const boutonAnnuler = root.querySelector('#tco-piece-annuler');
-    const COLONNES_PIECE = colonnesCatalogueePiece();
-    const sortirDuModeEdition = () => {
-      pieceEnEdition = null;
-      if (champRef) champRef.value = '';
-      if (champDesignation) champDesignation.value = '';
-      if (champPrix) champPrix.value = '';
-      if (champFournisseur) champFournisseur.value = '';
-      if (champDelai) champDelai.value = '';
-      if (champConditionnement) champConditionnement.value = '';
-      if (champSeuil) champSeuil.value = '';
-      if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
-      if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
-      if (boutonAnnuler) boutonAnnuler.hidden = true;
-    };
-    boutonAnnuler?.addEventListener('click', sortirDuModeEdition);
-    root.querySelector('#tco-catalogue-importer')?.addEventListener('click', ouvrirImportCatalogue);
-
-    boutonAjouter?.addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      const msg = root.querySelector('#tco-catalogue-msg');
-      const reference = champRef.value.trim();
-      const designation = champDesignation.value.trim();
-      const prix = nombreDepuisTexte(champPrix.value) ?? 0;
-      const fournisseur = champFournisseur.value.trim();
-      const delai = nombreDepuisTexte(champDelai.value);
-      const conditionnement = champConditionnement ? champConditionnement.value.trim() : '';
-      const seuil = champSeuil ? nombreDepuisTexte(champSeuil.value) : null;
-      if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
-      btn.disabled = true;
-      if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
-      const champsOptionnels = {
-        ...(SCHEMA.hasStockPackaging ? { packaging: conditionnement || null } : {}),
-        ...(SCHEMA.hasStock ? { default_reorder_point: seuil } : {}),
-      };
-      try {
-        if (pieceEnEdition) {
-          const { data, error } = await sb.from('parts_catalog')
-            .update({
-              reference: reference || null, designation, unit_price: prix,
-              supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
-              ...champsOptionnels,
-            })
-            .eq('id', pieceEnEdition)
-            .select(COLONNES_PIECE)
-            .single();
-          if (error) throw error;
-          UI.partsCatalog = (UI.partsCatalog || [])
-            .map((p) => (String(p.id) === String(pieceEnEdition) ? data : p))
-            .sort((a, b) => a.designation.localeCompare(b.designation));
-          showToast(trad('Pièce modifiée'));
-        } else {
-          const { data, error } = await sb.from('parts_catalog')
-            .insert({
-              company_id: UI.companyId, reference: reference || null, designation, unit_price: prix,
-              supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
-              ...champsOptionnels,
-            })
-            .select(COLONNES_PIECE)
-            .single();
-          if (error) throw error;
-          UI.partsCatalog = [...(UI.partsCatalog || []), data].sort((a, b) => a.designation.localeCompare(b.designation));
-          showToast(trad('Pièce ajoutée au catalogue'));
-        }
-        sortirDuModeEdition();
-        renderApp();
-      } catch (err) {
-        message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
-        btn.disabled = false;
-        if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrer les modifications') : trad('Ajouter au catalogue');
-      }
-    });
-
-    root.querySelector('#tco-catalogue-liste')?.addEventListener('click', async (e) => {
-      const modifier = e.target.closest('[data-piece-modifier]');
-      if (modifier) {
-        const id = modifier.getAttribute('data-piece-modifier');
-        const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(id));
-        if (!piece) return;
-        pieceEnEdition = id;
-        if (champRef) champRef.value = piece.reference || '';
-        if (champDesignation) champDesignation.value = piece.designation || '';
-        if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
-        if (champFournisseur) champFournisseur.value = piece.supplier_name || '';
-        if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
-        if (champConditionnement) champConditionnement.value = piece.packaging || '';
-        if (champSeuil) champSeuil.value = piece.default_reorder_point != null ? texteAvecSeparateurs(piece.default_reorder_point) : '';
-        if (titreForm) titreForm.textContent = trad('Modifier une pièce');
-        if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
-        if (boutonAnnuler) boutonAnnuler.hidden = false;
-        champDesignation?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-      const bouton = e.target.closest('[data-piece-retirer]');
-      if (!bouton) return;
-      const id = bouton.getAttribute('data-piece-retirer');
-      if (!window.confirm(trad('Retirer cette pièce du catalogue ?'))) return;
-      bouton.disabled = true;
-      try {
-        const { error } = await sb.from('parts_catalog').delete().eq('id', id);
-        if (error) throw error;
-        UI.partsCatalog = (UI.partsCatalog || []).filter((p) => String(p.id) !== String(id));
-        if (pieceEnEdition === id) sortirDuModeEdition();
-        renderApp();
-      } catch (err) {
-        message(root.querySelector('#tco-catalogue-msg'), trad('Erreur :') + ' ' + (err.message || err), true);
-        bouton.disabled = false;
-      }
-    });
   },
 };
 
@@ -20171,6 +20200,7 @@ VIEWS.stock = {
       <div class="vue-stock">
         ${stockKpiGridHtml()}
         ${blocMagasinsStockHtml()}
+        ${blocCatalogueTcoHtml()}
         ${blocInventaireStockHtml()}
         ${blocMouvementsStockHtml()}
       </div>`;
@@ -20183,6 +20213,13 @@ VIEWS.stock = {
       el.textContent = texte;
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
+
+    // Catalogue de pièces : déplacé ici depuis Coûts & TCO pour les
+    // sociétés Enterprise (demande explicite de l'utilisateur — sa place
+    // naturelle maintenant que le module Stock existe). Même fonction de
+    // câblage que sur la page TCO pour les autres paliers — voir
+    // cablerCatalogueTco() et VIEWS.tco.mount().
+    cablerCatalogueTco(root);
 
     // ── Inventaire : filtre magasin + recherche, entièrement en mémoire
     // (UI.stockItems déjà chargé au boot — jamais un second fetch ici). ──
