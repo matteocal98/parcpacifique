@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1XYZpUIO/RmcG9brvvEe+LG6NYh0nm7GX0Xqh7mimXs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-fmr/SlPijhy2gCEvjpwRptCBzUmu9DpP6CWvuFG+9PU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -914,8 +914,12 @@
   .prep-detail-groupe-nom{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--ink);}
   .prep-detail-groupe-corps{display:flex;flex-direction:column;gap:8px;}
   .prep-detail-produit{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:var(--r-md);background:var(--surface);box-shadow:0 1px 2px rgba(14,19,51,.06);}
-  .prep-detail-produit .prep-case{flex:0 0 auto;color:var(--primary-dark);margin-top:1px;}
-  .prep-detail-produit .prep-case svg{width:18px;height:18px;}
+  /* Case cochée : fond plein bleu roi KEEVA (--bleu-roi = #236FE0), coche
+     blanche épaisse, carré 22×22 à coins adoucis — un vrai pictogramme
+     « inclus dans cette liste », jamais un <input> qui ne changerait rien au
+     clic (voir le commentaire de produitHtml() dans preparationHtml()). */
+  .prep-detail-produit .prep-case{flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:var(--bleu-roi);border:1px solid rgba(14,19,51,.18);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .prep-detail-produit .prep-case svg{width:14px;height:14px;color:#fff;stroke-width:3;}
   .prep-detail-produit-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
   .prep-detail-produit-tete{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .prep-detail-produit-nom{font-size:14px;font-weight:700;color:var(--ink);}
@@ -12396,7 +12400,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil' },
   { id: 'machines', label: trad('Machines'), short: trad('Parc'), icon: 'parc' },
   { id: 'manuals', label: trad('Manuels & carnets'), short: trad('Manuels'), icon: 'manuels' },
-  { id: 'agenda', label: trad('Agenda'), short: trad('Agenda'), icon: 'agenda' },
+  { id: 'agenda', label: trad('Agenda et préparation'), short: trad('Agenda'), icon: 'agenda' },
   { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
   { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
@@ -15453,7 +15457,7 @@ function preparationCompleteAgendaHtml() {
     const total = produit.total ? formatteTotal(produit.total) : '';
     return `
       <div class="prep-detail-produit">
-        <span class="card-ico prep-case">${picto('case')}</span>
+        <span class="card-ico prep-case">${picto('coche')}</span>
         <div class="prep-detail-produit-corps">
           <div class="prep-detail-produit-tete">
             <span class="prep-detail-produit-nom">${esc(produit.label)}</span>
@@ -15465,6 +15469,13 @@ function preparationCompleteAgendaHtml() {
       </div>`;
   };
 
+  // Une famille peut lister beaucoup de produits : seules les 3 premières
+  // lignes restent visibles par défaut, le reste est déplié PAR FAMILLE (état
+  // gardé dans UI.prepFamillesOuvertes, indexé par groupe.cle — dépliée
+  // indépendamment des autres, jamais un seul interrupteur global pour toute
+  // la carte). Même patron que le repli des familles de preparationHtml()
+  // (PREP_GROUPES_VISIBLES/UI.prepGroupesTous), appliqué ici aux produits.
+  const PREP_PRODUITS_VISIBLES = 3;
   const groupeHtml = (groupe, i) => {
     const teinte = TEINTES_FAMILLE[i % TEINTES_FAMILLE.length];
     const nbBesoins = groupe.produits.reduce((total, p) => total + p.besoins.length, 0);
@@ -15475,6 +15486,15 @@ function preparationCompleteAgendaHtml() {
       chipClasse = besoinProche ? etatBesoin(besoinProche).classe : 'neutral';
       chipTexte = tR('Premier besoin : dès le {date}', { date: formatShortDate(groupe.premiereDate) });
     }
+    const ouvert = !!(UI.prepFamillesOuvertes && UI.prepFamillesOuvertes[groupe.cle]);
+    const visibles = groupe.produits.slice(0, PREP_PRODUITS_VISIBLES).map(produitHtml).join('');
+    const reste = groupe.produits.slice(PREP_PRODUITS_VISIBLES);
+    const repli = reste.length ? `
+        <div class="prep-groupes-plus${ouvert ? ' is-ouvert' : ''}">${reste.map(produitHtml).join('')}</div>
+        <button type="button" class="link-inline prep-detail-famille-toggle" data-famille="${esc(groupe.cle)}" aria-expanded="${ouvert ? 'true' : 'false'}">
+          <span class="card-ico prep-groupes-chevron">${picto('chevron')}</span>
+          <span>${ouvert ? trad('Réduire') : tR('Voir {n} produit(s) de plus', { n: reste.length })}</span>
+        </button>` : '';
     return `
       <div class="prep-detail-groupe">
         <div class="prep-detail-groupe-tete">
@@ -15485,7 +15505,7 @@ function preparationCompleteAgendaHtml() {
           </div>
           <span class="badge ${chipClasse}">${esc(chipTexte)}</span>
         </div>
-        <div class="prep-detail-groupe-corps">${groupe.produits.map(produitHtml).join('')}</div>
+        <div class="prep-detail-groupe-corps">${visibles}${repli}</div>
       </div>`;
   };
 
@@ -15504,7 +15524,7 @@ function preparationCompleteAgendaHtml() {
       </div>
       <div class="prep-detail-groupe-corps">${liste.sansItems.map((entree) => `
         <div class="prep-detail-produit">
-          <span class="card-ico prep-case">${picto('case')}</span>
+          <span class="card-ico prep-case">${picto('coche')}</span>
           <div class="prep-detail-produit-corps">
             <div class="prep-detail-produit-tete">
               <span class="prep-detail-produit-nom">${esc(entree.machine.name)}</span>
@@ -15569,6 +15589,14 @@ function wirePreparation(root) {
   root.querySelector('#prep-groupes-toggle')?.addEventListener('click', () => {
     UI.prepGroupesTous = !UI.prepGroupesTous;
     renderApp();
+  });
+  root.querySelectorAll('.prep-detail-famille-toggle').forEach((bouton) => {
+    bouton.addEventListener('click', () => {
+      const cle = bouton.dataset.famille;
+      UI.prepFamillesOuvertes = UI.prepFamillesOuvertes || {};
+      UI.prepFamillesOuvertes[cle] = !UI.prepFamillesOuvertes[cle];
+      renderApp();
+    });
   });
 }
 
