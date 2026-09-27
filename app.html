@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g7k0ap+dy8rQRF3pCFYPqaVKmWGhTcckz72aPg8GD2I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/18TIJKGDJ0t3brwvXzHuIG3fNk7EuKA9vkLHaOTypE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5634,6 +5634,13 @@ const __machineIdDepuisQr = __paramsQr.get('qr');
 // ouvrirFicheDepuisPushSiPresent() dans boot() — jamais une deuxième logique
 // de navigation, seulement une deuxième façon d'arriver à ouvrirFicheParId().
 let __machineIdDepuisPushEnAttente = null;
+// ⚠️ NE PAS remplacer par `Array.isArray(UI.machines)` : UI.machines vaut
+// `[]` dès la déclaration de UI (bien avant tout chargement réel), donc ce
+// test serait TOUJOURS vrai — un tap au lancement à froid résolvait alors
+// contre un tableau encore vide et affichait « Machine introuvable » (bug
+// réel, vu sur un vrai téléphone). Ce drapeau ne passe à vrai qu'une fois
+// UI.machines rempli avec les VRAIES données, dans boot().
+let __appPretePourPush = false;
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
 const app = document.getElementById('app');
@@ -12306,7 +12313,7 @@ function wirePushEcouteurs() {
     const donnees = action && action.notification && action.notification.data;
     const machineId = donnees && donnees.machine_id;
     if (!machineId) return;
-    if (Array.isArray(UI.machines)) ouvrirFicheParId(machineId);
+    if (__appPretePourPush) ouvrirFicheParId(machineId);
     else __machineIdDepuisPushEnAttente = machineId;
   });
 }
@@ -25522,6 +25529,9 @@ async function boot(toastMessage) {
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
     category: Array.isArray(m.category) ? m.category[0] : m.category,
   }));
+  // À partir d'ici, UI.machines reflète les VRAIES données de la société
+  // connectée — voir __appPretePourPush, lu par wirePushEcouteurs().
+  __appPretePourPush = true;
 
   // Entretiens programmés (calendrier Agenda) : un jeu de données léger par
   // société, chargé une fois ici comme le catalogue de pièces — jamais
