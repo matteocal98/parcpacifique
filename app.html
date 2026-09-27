@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ym9Kwy4CQU1KtABYacLPEARvyRK4ZdOh8Jo93hXe07s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-owznl55ocJ0cHi5lj7/pm86aJfja5E7sxBSrWMK3QrA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -15981,7 +15981,7 @@ VIEWS.agenda = {
       <div class="agenda-toolbar">
         <span class="agenda-eyebrow">${trad('Planification & logistique')}</span>
         <div class="agenda-toolbar-actions">
-          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${trad('Intégrer à l\'agenda du téléphone')}</span></button>
+          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${dansApplication() ? trad('Intégrer à l\'agenda du téléphone') : trad('Intégrer à l\'agenda de cet ordinateur')}</span></button>
           <button type="button" class="primary" id="agenda-planifier"><span class="card-ico">${picto('croix')}</span><span>${trad('Planifier un entretien')}</span></button>
         </div>
       </div>
