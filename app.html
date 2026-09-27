@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-owznl55ocJ0cHi5lj7/pm86aJfja5E7sxBSrWMK3QrA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1XYZpUIO/RmcG9brvvEe+LG6NYh0nm7GX0Xqh7mimXs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -900,6 +900,33 @@
   .prep-pied-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
   .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;}
   .prep-copier-btn svg{width:16px;height:16px;}
+
+  /* Reprise Stitch « Precision Field Matrix » — bloc Agenda « Préparation des
+     pièces et consommables » en liste COMPLÈTE (toutes les familles, tous les
+     produits) plutôt que le résumé à 3 familles du Tableau de bord : mêmes
+     données (listePreparation/grouperProduits/etatBesoin), même classement
+     par catégorie, même badge .prep-famille-icone/.prep-famille-badge —
+     seule la présentation par produit change, pour ce contexte précis. */
+  .prep-detail-groupe{border-radius:var(--r-lg);background:var(--surface-soft);padding:14px 14px 10px;margin-top:14px;}
+  .prep-detail-groupe:first-child{margin-top:0;}
+  .prep-detail-groupe-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .prep-detail-groupe-gauche{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .prep-detail-groupe-nom{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--ink);}
+  .prep-detail-groupe-corps{display:flex;flex-direction:column;gap:8px;}
+  .prep-detail-produit{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:var(--r-md);background:var(--surface);box-shadow:0 1px 2px rgba(14,19,51,.06);}
+  .prep-detail-produit .prep-case{flex:0 0 auto;color:var(--primary-dark);margin-top:1px;}
+  .prep-detail-produit .prep-case svg{width:18px;height:18px;}
+  .prep-detail-produit-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+  .prep-detail-produit-tete{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .prep-detail-produit-nom{font-size:14px;font-weight:700;color:var(--ink);}
+  .prep-detail-produit-spec{font-size:11.5px;font-weight:600;color:var(--ink-3);background:var(--surface-soft);padding:2px 7px;border-radius:6px;}
+  .prep-detail-produit-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .prep-detail-tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--surface-soft);padding:2px 8px;border-radius:6px;}
+  .prep-detail-produit-total{flex:0 0 auto;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;padding-top:1px;}
+  @media (max-width:480px){
+    .prep-detail-produit{flex-wrap:wrap;}
+    .prep-detail-produit-total{margin-left:28px;}
+  }
 
   /* ★ LOT 4 — LA LIGNE COMPACTE DU BLOC « PIÈCES & CONSOMMABLES ». */
   .pieces-legende{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);}
@@ -15332,7 +15359,7 @@ function bonCommandeHtml() {
 // établie (PICTO_CATEGORIE) plutôt qu'un nom/icône inventés pour coller au
 // mockup à l'identique.
 const TEINTES_FAMILLE = ['is-roi', 'is-amber', 'is-ok', 'is-indigo'];
-function preparationResumeHtml(options = {}) {
+function preparationResumeHtml() {
   const jours = UI.preparationJours || 90;
   const liste = listePreparation(UI.machines, jours);
   const nombre = liste.produits.length;
@@ -15389,7 +15416,127 @@ function preparationResumeHtml(options = {}) {
       <div class="prep-pied">
         <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
         <div class="prep-pied-actions">
-          ${options.masquerLienAgenda ? '' : `<button type="button" class="link-inline" data-nav="agenda">${tR('Voir la liste complète ({n}) →', { n: nombre })}</button>`}
+          <button type="button" class="link-inline" data-nav="agenda">${tR('Voir la liste complète ({n}) →', { n: nombre })}</button>
+          <button type="button" class="prep-copier-btn" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button>
+        </div>
+      </div>
+    </section>`;
+}
+
+// Reprise Stitch « Precision Field Matrix » (bloc Agenda « Préparation des
+// pièces et consommables ») — remplace, POUR L'AGENDA UNIQUEMENT, le résumé à
+// 3 familles / 1 produit de preparationResumeHtml() par la liste COMPLÈTE :
+// chaque famille, chaque produit, chaque machine concernée. Mêmes données que
+// partout ailleurs sur cet écran — listePreparation()/grouperProduits() pour
+// le classement par famille (CATEGORIES_PRODUIT), etatBesoin() pour l'état de
+// chaque besoin (aucun état recalculé) — seule la présentation change. Les
+// « chips » de la maquette (« Premier besoin », « Stock tampon recommandé »…)
+// étaient du texte fixe par famille dans le jeu de données fictif du mockup :
+// ici, un seul chip réel par famille, dérivé de sa date la plus proche
+// (premiereDate, déjà calculée) — jamais un statut inventé pour coller au
+// mockup à l'identique.
+function preparationCompleteAgendaHtml() {
+  const jours = UI.preparationJours || 90;
+  const liste = listePreparation(UI.machines, jours);
+  const nombre = liste.produits.length;
+  if (!nombre && !liste.sansItems.length) return '';
+
+  const produitHtml = (produit) => {
+    const machinesVues = new Set();
+    const tags = produit.besoins.filter((b) => {
+      if (machinesVues.has(b.machine.id)) return false;
+      machinesVues.add(b.machine.id);
+      return true;
+    }).map((b) => `<span class="prep-detail-tag">${esc(b.machine.name)}</span>`).join('');
+    const besoinPrincipal = produit.besoins.find((b) => b.date === produit.premiereDate) || produit.besoins[0];
+    const etat = etatBesoin(besoinPrincipal);
+    const total = produit.total ? formatteTotal(produit.total) : '';
+    return `
+      <div class="prep-detail-produit">
+        <span class="card-ico prep-case">${picto('case')}</span>
+        <div class="prep-detail-produit-corps">
+          <div class="prep-detail-produit-tete">
+            <span class="prep-detail-produit-nom">${esc(produit.label)}</span>
+            ${produit.spec ? `<span class="prep-detail-produit-spec">${esc(produit.spec)}</span>` : ''}
+          </div>
+          <div class="prep-detail-produit-tags">${tags}<span class="badge ${etat.classe}">${esc(etat.mot)}</span></div>
+        </div>
+        ${total ? `<span class="prep-detail-produit-total">${esc(total)}</span>` : ''}
+      </div>`;
+  };
+
+  const groupeHtml = (groupe, i) => {
+    const teinte = TEINTES_FAMILLE[i % TEINTES_FAMILLE.length];
+    const nbBesoins = groupe.produits.reduce((total, p) => total + p.besoins.length, 0);
+    let chipClasse = 'neutral';
+    let chipTexte = trad('Suivi au compteur');
+    if (groupe.premiereDate) {
+      const besoinProche = groupe.produits.flatMap((p) => p.besoins).find((b) => b.date === groupe.premiereDate);
+      chipClasse = besoinProche ? etatBesoin(besoinProche).classe : 'neutral';
+      chipTexte = tR('Premier besoin : dès le {date}', { date: formatShortDate(groupe.premiereDate) });
+    }
+    return `
+      <div class="prep-detail-groupe">
+        <div class="prep-detail-groupe-tete">
+          <div class="prep-detail-groupe-gauche">
+            <span class="prep-famille-icone ${teinte}">${picto(PICTO_CATEGORIE[groupe.cle] || 'boite')}</span>
+            <span class="prep-detail-groupe-nom">${esc(groupe.nom.toUpperCase())}</span>
+            <span class="prep-famille-badge">${tR('{n} référence(s) · {m} pièce(s)', { n: groupe.produits.length, m: nbBesoins })}</span>
+          </div>
+          <span class="badge ${chipClasse}">${esc(chipTexte)}</span>
+        </div>
+        <div class="prep-detail-groupe-corps">${groupe.produits.map(produitHtml).join('')}</div>
+      </div>`;
+  };
+
+  const groupesHtml = (liste.groupes || []).map(groupeHtml).join('');
+  // Les plans sans carnet analysé (aucun item) n'ont pas de famille — perdus
+  // par le résumé condensé du Tableau de bord, mais pas ici : même principe
+  // que preparationHtml(), qui les liste déjà à part.
+  const sansItemsHtml = liste.sansItems.length ? `
+    <div class="prep-detail-groupe">
+      <div class="prep-detail-groupe-tete">
+        <div class="prep-detail-groupe-gauche">
+          <span class="prep-famille-icone is-amber">${picto('carnet')}</span>
+          <span class="prep-detail-groupe-nom">${esc(trad('Entretiens sans liste de pièces').toUpperCase())}</span>
+          <span class="prep-famille-badge">${tR('{n} machine(s)', { n: liste.sansItems.length })}</span>
+        </div>
+      </div>
+      <div class="prep-detail-groupe-corps">${liste.sansItems.map((entree) => `
+        <div class="prep-detail-produit">
+          <span class="card-ico prep-case">${picto('case')}</span>
+          <div class="prep-detail-produit-corps">
+            <div class="prep-detail-produit-tete">
+              <span class="prep-detail-produit-nom">${esc(entree.machine.name)}</span>
+              ${entree.date ? `<span class="prep-detail-produit-spec">${esc(formatShortDate(entree.date))}</span>` : ''}
+            </div>
+            <div class="prep-detail-produit-tags"><span class="prep-detail-tag">${entree.taches ? esc(entree.taches) : esc(trad('Tâches non renseignées'))}</span></div>
+          </div>
+        </div>`).join('')}</div>
+    </div>` : '';
+  const resume = nombre
+    ? tR('{n} produit(s) à prévoir pour les {jours} prochains jours ({horizon}).', { n: nombre, jours, horizon: trad('consolidation automatique') })
+    : tR('Rien à commander pour l\'instant, mais {n} plan(s) sans liste de produits.', { n: liste.sansItems.length });
+
+  return `
+    <section class="card dash-preparation prep-detail-carte">
+      <div class="card-head">
+        <div class="pieces-tete">
+          <span class="card-ico" aria-hidden="true">${picto('boite')}</span>
+          <div>
+            <h2 class="card-title">${trad('Préparation des pièces et consommables')}</h2>
+            <p class="muted-text" style="margin:1px 0 0;">${esc(resume)}</p>
+          </div>
+        </div>
+        <span class="spacer"></span>
+        <div class="seg-horizon" role="group" aria-label="${trad('Période')}">
+          ${PREPARATION_HORIZON.map((j) => `<button type="button" class="seg-btn${j === jours ? ' is-active' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${esc(tR('{n} j', { n: j }))}${j === jours ? ` (${trad('Actif')})` : ''}</button>`).join('')}
+        </div>
+      </div>
+      ${groupesHtml}${sansItemsHtml}
+      <div class="prep-pied">
+        <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
+        <div class="prep-pied-actions">
           <button type="button" class="prep-copier-btn" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button>
         </div>
       </div>
@@ -15733,19 +15880,21 @@ function agendaSurveillanceHtml(counters) {
       <button type="button" class="primary agenda-surv-cta" data-nav="machines"><span class="card-ico">${picto('croix')}</span><span>${trad('Saisir un relevé compteur')}</span></button>
     </section>`;
 }
-// Le détail complet (préparation par produit, export CSV, bon de commande)
-// reste entièrement accessible, replié par défaut sous la carte compacte —
-// aucune fonctionnalité perdue en adoptant la carte condensée du mockup.
+// Export CSV et bon de commande, repliés par défaut sous la carte de
+// préparation — celle-ci montre déjà chaque famille et chaque produit
+// (preparationCompleteAgendaHtml), donc plus besoin de reproduire la liste
+// ici : seules les deux actions qui n'ont pas leur place dans la carte
+// elle-même restent derrière ce bouton.
 function agendaPiecesDetailToggleHtml() {
   const ouvert = !!UI.agendaPiecesDetail;
   return `
     <button type="button" class="link-inline agenda-pieces-detail-toggle" id="agenda-pieces-detail-toggle" aria-expanded="${ouvert}">
       <span class="card-ico prep-groupes-chevron">${picto('chevron')}</span>
-      <span>${ouvert ? trad('Réduire le détail') : trad('Détail complet, export et bon de commande')}</span>
+      <span>${ouvert ? trad('Réduire') : trad('Export et bon de commande')}</span>
     </button>
     ${ouvert ? `<div class="agenda-pieces-detail">
       <button type="button" class="secondary" id="prep-export"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter la liste (CSV)')}</span></button>
-      ${preparationHtml()}${bonCommandeHtml()}
+      ${bonCommandeHtml()}
     </div>` : ''}`;
 }
 
@@ -15975,7 +16124,7 @@ VIEWS.agenda = {
       return `<div class="empty">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div>`;
     }
     const { counters } = agendaEvenements();
-    const piecesHtml = preparationResumeHtml({ masquerLienAgenda: true });
+    const piecesHtml = preparationCompleteAgendaHtml();
     return `
       <div class="vue-agenda">
       <div class="agenda-toolbar">
