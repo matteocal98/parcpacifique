@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/oBBPYH5b2Wqb53mOHc0BOw749b3Fg9EQtRwhY9uLfw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rcrRouA2wguhpa0ZsnmsWhN5N8OZNAYFk8HxbF1fTn0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1468,7 +1468,7 @@
   .machine-jauge-pied{font-size:11px;font-weight:700;color:var(--ink-4);}
   .badge{
     display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;
+    letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;white-space:nowrap;
   }
   .badge.ok{color:var(--ok-ink);background:var(--ok-bg);}
   .badge.soon{color:var(--soon-ink);background:var(--soon-bg);}
@@ -4540,7 +4540,13 @@
     color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
   .jm-fermer svg{width:16px;height:16px;}
-  .jm-liste{display:flex;flex-direction:column;gap:12px;max-height:52vh;overflow-y:auto;margin-bottom:4px;}
+  /* Pas de max-height/overflow-y ici : .overlay défile déjà tout le contenu
+     (voir sa règle plus haut) — un second cadre défilant IMBRIQUÉ, calculé en
+     vh, se recalculait mal sur certains WebView Android et coupait la
+     dernière carte visible à mi-hauteur (bouton tronché, remonté par
+     l'utilisateur). Un seul niveau de défilement, comme la maquette (toute
+     la page défile, aucune sous-boîte à hauteur fixe). */
+  .jm-liste{display:flex;flex-direction:column;gap:18px;margin-bottom:4px;}
   .jm-carte{display:flex;gap:0;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line-2);overflow:hidden;}
   .jm-carte-bar{flex:0 0 5px;align-self:stretch;background:var(--ink-3);}
   .jm-carte.is-late .jm-carte-bar{background:var(--late);}
@@ -4548,8 +4554,10 @@
   .jm-carte.is-ok .jm-carte-bar{background:var(--ok);}
   .jm-carte-corps{flex:1;min-width:0;padding:13px;display:flex;flex-direction:column;gap:10px;}
   .jm-carte-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-  .jm-carte-nom{font-size:14.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.01em;}
-  .jm-carte-meta{font-size:11.5px;color:var(--ink-3);margin-top:1px;}
+  .jm-carte-tete-nom{min-width:0;flex:1;}
+  .jm-carte-tete .badge{flex:0 0 auto;}
+  .jm-carte-nom{font-size:14.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere;}
+  .jm-carte-meta{font-size:11.5px;color:var(--ink-3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .jm-carte-tache-bloc{background:var(--surface-soft);border-radius:var(--r-chip);padding:9px 10px;}
   .jm-carte-tache-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;}
   .jm-carte.is-late .jm-carte-echeance{color:var(--late);}
@@ -16038,7 +16046,7 @@ function agendaJourCarteHtml(m, info, programme) {
       <span class="jm-carte-bar" aria-hidden="true"></span>
       <div class="jm-carte-corps">
         <div class="jm-carte-tete">
-          <div>
+          <div class="jm-carte-tete-nom">
             <div class="jm-carte-nom">${esc(m.name)}</div>
             ${meta ? `<div class="jm-carte-meta">${esc(meta)}</div>` : ''}
           </div>
