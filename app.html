@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9Zd4NjF9+1MoVS2bK2l5IovX46Sgf5534rh5mlO55Sg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-r2mcWP/iepNgeL26DDm5L/JEbUli5bArmqa+UzQkljQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4549,14 +4549,19 @@
   .manuel-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
   .manuel-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .manuel-nom{font-size:16px;font-weight:800;letter-spacing:-.01em;}
-  .manuel-meta{font-size:12.5px;color:var(--ink-2);}
+  /* Référence machine et boutons sur la même ligne, signalé par l'utilisateur
+     (ex. « STIHL FS250 · MOTOCULTURE » à côté de « Voir le plan »/« Déposer ») —
+     .manuel-actions pousse à droite via margin-left:auto, .manuel-meta prend
+     le reste de la place ; wrap sur mobile plutôt que de comprimer. */
+  .manuel-ligne{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;}
+  .manuel-meta{flex:1 1 auto;min-width:0;font-size:12.5px;color:var(--ink-2);}
   .manuel-fichier{
     display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;
     background:var(--surface-soft);font-size:12.5px;color:var(--ink-2);
   }
   .manuel-fichier svg{flex:0 0 auto;width:16px;height:16px;color:var(--primary-dark);}
   .manuel-fichier.is-vide{color:var(--ink-3);font-style:italic;}
-  .manuel-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px;}
+  .manuel-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto;}
   /* Contour noir (border:2px solid var(--ink)) retiré, signalé par
      l'utilisateur : même langage que .mstrip-btn-icone (Parc Machines),
      un fond teinté sans bordure épaisse plutôt qu'un cadre encre. */
@@ -16598,13 +16603,15 @@ function manuelCarteHtml(m) {
           <span class="manuel-nom">${esc(m.name)}</span>
           <span class="badge ${pastille}">${pictoEtat(etat === 'analyse' ? 'ok' : (etat === 'valider' ? 'soon' : 'neutral'))}<span>${label}</span></span>
         </div>
-        ${meta ? `<div class="manuel-meta">${esc(meta)}</div>` : ''}
-        <div class="manuel-fichier${hasManual ? '' : ' is-vide'}">${hasManual ? picto('carnet') : ''}<span class="manuel-fichier-sub">${esc(sub)}</span></div>
-        <div class="manuel-actions">
-          ${items.length ? `<button type="button" class="btn-row-action btn-principal" data-plan="${esc(m.id)}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
-          ${hasManual ? `<button type="button" class="btn-row-action view-manual" data-path="${esc(m.manual_url)}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
-          <button type="button" class="btn-row-action" data-manual="${esc(m.id)}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
+        <div class="manuel-ligne">
+          ${meta ? `<div class="manuel-meta">${esc(meta)}</div>` : '<span></span>'}
+          <div class="manuel-actions">
+            ${items.length ? `<button type="button" class="btn-row-action btn-principal" data-plan="${esc(m.id)}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
+            ${hasManual ? `<button type="button" class="btn-row-action view-manual" data-path="${esc(m.manual_url)}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
+            <button type="button" class="btn-row-action" data-manual="${esc(m.id)}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
+          </div>
         </div>
+        <div class="manuel-fichier${hasManual ? '' : ' is-vide'}">${hasManual ? picto('carnet') : ''}<span class="manuel-fichier-sub">${esc(sub)}</span></div>
       </div>
     </article>`;
 }
