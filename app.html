@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ss3kmRBqSvvt8ZZPTDrM1q+j5wLk1v+3AmNXF9wyc0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XHpSE1JVpWt9Of1NnkKOxWRTeUg9yKrRA5HIUcqSk0o=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1638,48 +1638,55 @@
   /* LE REPÉRAGE DES PAGES UTILES : une liste courte, cochée d'avance, avec
      l'aperçu qui justifie chaque page, et le coût annoncé avant l'envoi. */
   .pages-utiles:empty{display:none;}
+  /* Reprise Stitch de l'écran 2 (« pages repérées ») — mêmes classes
+     structurelles qu'avant (remplirVignettes/checkboxes ciblent
+     .vignette-bouton/.page-lignes[data-page] telles quelles, jamais
+     renommées), seule l'habillage change. `.page-empilement` (nouveau) met
+     le numéro de page AU-DESSUS de son contenu, comme la carte Stitch,
+     au lieu d'à côté (la grille 3 colonnes d'avant). Le crédit réel
+     (quota/plafond, pas de facture surprise) et l'ajout manuel de page
+     restent EXACTEMENT ceux d'avant — aucune fonctionnalité perdue. */
   .pages-utiles{
-    margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-chip);
-    background:var(--surface-soft);
+    margin-top:16px;padding:16px;border:1px solid rgba(14,19,51,.1);border-radius:16px;
+    background:rgba(250,248,255,.4);
   }
-  .pages-utiles .reperage-titre{font-weight:700;font-size:14px;color:var(--ink);}
-  /* CHAQUE LIGNE : case à cocher, numéro de page, aperçu — DANS le cadre.
-     La première version utilisait flex sans `min-width: 0` : l'aperçu, long,
-     refusait de se réduire, poussait tout vers la droite HORS du panneau, et il
-     ne restait que la case à cocher à gauche — l'utilisateur croyait alors que
-     rien n'avait été trouvé. Une grille avec `minmax(0, 1fr)` garantit que
-     l'aperçu se replie À L'INTÉRIEUR de sa colonne, sur ordinateur comme sur
-     téléphone. */
+  .pages-utiles .reperage-titre{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;color:var(--ink);
+    text-transform:uppercase;letter-spacing:.03em;
+  }
   .pages-utiles .page-utile{
-    display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:start;
-    gap:8px;margin-top:10px;font-size:13.5px;color:var(--ink-2);max-width:100%;
+    display:flex;align-items:flex-start;gap:10px;margin-top:12px;max-width:100%;
+    padding:14px;border:1px solid rgba(14,19,51,.15);border-radius:16px;background:var(--surface);
+    box-shadow:0 1px 2px rgba(14,19,51,.04);transition:border-color .15s;
   }
-  .pages-utiles .page-utile input{margin:3px 0 0;flex:0 0 auto;}
-  .pages-utiles .page-num{font-weight:600;color:var(--ink);white-space:nowrap;}
-  .pages-utiles .page-contenu{min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .pages-utiles .page-utile:hover{border-color:rgba(35,111,224,.5);}
+  .pages-utiles .page-utile input{margin:3px 0 0;flex:0 0 auto;width:16px;height:16px;accent-color:var(--bleu-roi);cursor:pointer;}
+  .pages-utiles .page-empilement{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+  .pages-utiles .page-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;}
+  .pages-utiles .page-contenu{min-width:0;display:flex;flex-direction:column;gap:8px;}
   .pages-utiles .page-apercu{
     line-height:1.4;min-width:0;overflow-wrap:anywhere;word-break:break-word;white-space:normal;
-    font-size:12.5px;color:var(--ink-2);
+    font-size:11.5px;color:var(--ink-4);background:var(--surface-soft);border-radius:10px;padding:8px 10px;
   }
   /* LA VIGNETTE : la page elle-même, rendue EN LOCAL. Elle grandit SUR PLACE au
      clic — pas de fenêtre lourde, et elle reste dans le cadre. */
   .pages-utiles .vignette-bouton{
-    padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);
+    padding:0;border:1px solid rgba(14,19,51,.1);border-radius:12px;background:var(--surface-soft);
     cursor:zoom-in;max-width:100%;line-height:0;overflow:hidden;
   }
   .pages-utiles .vignette-bouton img{
-    display:block;width:180px;max-width:100%;height:auto;border-radius:7px;
+    display:block;width:180px;max-width:100%;height:auto;border-radius:11px;
   }
   .pages-utiles .vignette-bouton.agrandie{cursor:zoom-out;width:100%;}
   .pages-utiles .vignette-bouton.agrandie img{width:100%;max-width:560px;}
   /* LES LIGNES D'ENTRETIEN REPÉRÉES : ce qu'on lit pour valider d'un coup d'œil,
      sans zoom. Un couple par ligne, court et net. */
-  .pages-utiles .page-lignes{display:block;font-size:12.5px;color:var(--ink-2);}
+  .pages-utiles .page-lignes{display:block;font-size:11.5px;color:var(--ink-4);background:var(--surface-soft);border-radius:10px;padding:8px 10px;}
   .pages-utiles .page-lignes:empty{display:none;}
-  .pages-utiles .page-lignes-titre{font-weight:600;color:var(--ink);}
+  .pages-utiles .page-lignes-titre{font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
   .pages-utiles .page-lignes ul{margin:4px 0 0;padding-left:18px;}
   .pages-utiles .page-lignes li{line-height:1.45;}
-  .pages-utiles .page-lignes-vide{color:var(--late-ink);}
+  .pages-utiles .page-lignes-vide{color:var(--late);}
   /* LE LECTEUR : plein écran, défilable DANS LES DEUX SENS, ouvert à un zoom
      LISIBLE. `.lecteur-vue` garde le défilement natif à un doigt (touch-action
      pan-x pan-y) ; le pincement à deux doigts est traité par le code du lecteur,
@@ -1716,28 +1723,29 @@
   }
   .lecteur-page .lecteur-attente{color:var(--surface);font-size:13.5px;padding:24px 12px;display:block;}
   .pages-utiles .vignette-bouton.echec{
-    font-size:12px;color:var(--ink-2);padding:6px 8px;cursor:default;line-height:1.3;
+    font-size:12px;color:var(--ink-4);padding:6px 8px;cursor:default;line-height:1.3;
   }
-  .pages-utiles .vignette-attente{font-size:12px;color:var(--ink-2);padding:6px 8px;display:inline-block;line-height:1.3;}
+  .pages-utiles .vignette-attente{font-size:12px;color:var(--ink-4);padding:6px 8px;display:inline-block;line-height:1.3;}
   /* LE CRÉDIT, EN CLAIR : ce qui est compris, le plafond de l'offre, où l'on en
      est, et l'absence de paiement depuis cet écran. */
   .pages-utiles .credit-clair{
-    margin-top:12px;padding:10px 12px;border-left:3px solid var(--primary);
-    border-radius:8px;background:var(--primary-tint);
+    margin-top:16px;padding:14px 16px;border-radius:16px;background:var(--surface);
+    border:1px solid rgba(35,111,224,.25);box-shadow:0 1px 2px rgba(14,19,51,.04);
   }
-  .pages-utiles .credit-clair.epuise{border-left-color:var(--late);background:var(--late-bg);}
-  .pages-utiles .credit-titre{font-weight:700;font-size:13.5px;color:var(--ink);}
-  .pages-utiles .credit-detail{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.45;}
-  .pages-utiles .credit-rassurance{font-size:12.5px;color:var(--ink-2);margin-top:4px;}
-  .pages-utiles .credit-plafond{font-size:12px;color:var(--ink-2);margin-top:4px;}
-  /* Sur téléphone, la colonne d'aperçu serait trop étroite à côté du numéro :
-     l'aperçu passe SOUS le numéro, toujours dans le cadre. */
+  .pages-utiles .credit-clair.epuise{border-color:rgba(222,122,22,.35);background:rgba(222,122,22,.06);}
+  .pages-utiles .credit-titre{font-weight:700;font-size:13px;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
+  .pages-utiles .credit-detail{font-size:12px;color:var(--ink-4);margin-top:4px;line-height:1.5;}
+  .pages-utiles .credit-rassurance{font-size:11.5px;color:var(--ok);margin-top:6px;font-weight:600;}
+  .pages-utiles .credit-plafond{font-size:11px;color:var(--ink-4);margin-top:4px;}
+  /* Sur téléphone, la carte garde une seule colonne (flex-wrap) plutôt que la
+     grille 3 colonnes d'avant — plus rien à répartir en colonnes fixes. */
   @media (max-width:719px){
-    .pages-utiles .page-utile{grid-template-columns:auto minmax(0,1fr);}
-    .pages-utiles .page-apercu{grid-column:2;}
+    .pages-utiles .page-utile{flex-wrap:wrap;}
   }
-  .pages-utiles .ajout-page{display:flex;align-items:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap;}
-  .pages-utiles .ajout-page input{max-width:120px;}
+  .pages-utiles .ajout-page{display:flex;align-items:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap;}
+  .pages-utiles .ajout-page label{font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;font-family:'Space Grotesk',sans-serif;}
+  .pages-utiles .ajout-page input{max-width:120px;background:var(--surface);border:1px solid rgba(14,19,51,.15);border-radius:10px;padding:8px 10px;font-size:12.5px;color:var(--ink);}
+  .pages-utiles .ajout-page input:focus{border-color:var(--bleu-roi);outline:none;}
   #photo-preview .machine-photo{margin-bottom:12px;}
   .machine-photo{
     display:block;width:100%;max-width:220px;aspect-ratio:16/9;object-fit:contain;
@@ -2369,12 +2377,13 @@
      aucun pourcentage réel n'existe à afficher — un segment qui défile en
      boucle, jamais un chiffre inventé. */
   .analyse-progress{
-    margin-top:8px;height:6px;border-radius:var(--r-pill);overflow:hidden;
-    background:var(--surface-soft);
+    margin-top:12px;height:14px;border-radius:var(--r-pill);overflow:hidden;
+    background:var(--surface-soft);padding:2px;border:1px solid rgba(14,19,51,.05);
   }
   .analyse-progress[hidden]{display:none;}
   .analyse-progress-remplissage{
-    width:40%;height:100%;border-radius:var(--r-pill);background:var(--primary);
+    width:40%;height:100%;border-radius:var(--r-pill);
+    background:linear-gradient(to right,var(--bleu-roi),var(--ok));
     animation:analyseProgressDefile 1.1s ease-in-out infinite;
   }
   @keyframes analyseProgressDefile{
@@ -3336,6 +3345,26 @@
   .pplan-file-remplacer:hover{background:#FEF2F2;color:#DC2626;}
   .pplan-file-rappel{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--ink-4);}
   .pplan-file-rappel .material-symbols-outlined{color:var(--bleu-roi);font-size:16px;}
+  /* Bandeau compact « fichier chargé » (écran 2, pages repérées) — au-dessus
+     du panneau .pages-utiles restylé plus haut, jamais dans .pplan-body pour
+     rester plein-large comme le mockup (edge-to-edge dans .pplan-modal). */
+  .pplan-fichier-bandeau{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 24px;background:var(--surface-soft);border-bottom:1px solid rgba(14,19,51,.1);font-size:12px;flex-wrap:wrap;}
+  .pplan-fichier-bandeau-gauche{display:flex;align-items:center;gap:8px;min-width:0;font-weight:600;color:var(--ink);}
+  .pplan-fichier-bandeau-gauche .material-symbols-outlined{color:var(--bleu-roi);font-size:18px;flex:0 0 auto;}
+  .pplan-fichier-bandeau-nom{font-family:'Space Grotesk',sans-serif;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pplan-fichier-bandeau-detail{color:var(--ink-4);font-weight:500;white-space:nowrap;}
+  /* Écran 3 (« Analyse en cours ») — même carte centrale que le mockup
+     (icône, spinner double-anneau), mais SANS pourcentage ni étapes
+     chiffrées : l'appel réseau réel (extract-maintenance-plan) est opaque,
+     un pourcentage serait fabriqué (choix déjà pris ailleurs dans ce
+     fichier pour la même raison, voir demarrerBarreAnalyse). La barre reste
+     indéterminée (glow qui défile), confirmé avec l'utilisateur. */
+  .pplan-analyse-carte{display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px;text-align:center;}
+  .pplan-analyse-spin{position:relative;width:64px;height:64px;}
+  .pplan-analyse-spin::before{content:'';position:absolute;inset:0;border-radius:999px;border:4px solid rgba(14,19,51,.08);}
+  .pplan-analyse-spin::after{content:'';position:absolute;inset:0;border-radius:999px;border:4px solid transparent;border-top-color:var(--bleu-roi);border-right-color:var(--ok);animation:pplanSpin 1s linear infinite;}
+  .pplan-analyse-spin .material-symbols-outlined{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:auto;color:var(--bleu-roi);font-size:26px;}
+  @keyframes pplanSpin{to{transform:rotate(360deg);}}
   .material-symbols-outlined{
     font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
     font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;
@@ -22497,6 +22526,18 @@ function demarrerBarreAnalyse(overlay) {
   if (!overlay) return;
   const analyse = overlay.querySelector('#f-analysis');
   if (!analyse) return;
+  // Même carte centrale que l'écran 3 du mockup (icône + double anneau qui
+  // tourne), mais SANS pourcentage ni étapes chiffrées — voir la barre
+  // juste en dessous, déjà indéterminée pour la même raison réelle (aucun
+  // signal intermédiaire de l'appel réseau).
+  let spin = overlay.querySelector('.pplan-analyse-spin');
+  if (!spin) {
+    spin = document.createElement('div');
+    spin.className = 'pplan-analyse-spin';
+    spin.innerHTML = '<span class="material-symbols-outlined">document_scanner</span>';
+    analyse.insertAdjacentElement('beforebegin', spin);
+  }
+  spin.hidden = false;
   let barre = overlay.querySelector('.analyse-progress');
   if (!barre) {
     barre = document.createElement('div');
@@ -22507,6 +22548,8 @@ function demarrerBarreAnalyse(overlay) {
   barre.hidden = false;
 }
 function arreterBarreAnalyse(overlay) {
+  const spin = overlay && overlay.querySelector('.pplan-analyse-spin');
+  if (spin) spin.hidden = true;
   const barre = overlay && overlay.querySelector('.analyse-progress');
   if (barre) barre.hidden = true;
 }
@@ -22831,31 +22874,34 @@ function openManualUploadModal(presetMachine, presetFile) {
   function stepReperage() {
     const mode = planIsCounter(machine.plan) ? (counterUnitOf(machine) === 'km' ? trad('km') : 'hours') : 'days';
     shell(`
-      <div class="mform-tete">
-        <div class="mform-tete-titre">
-          <h2>${trad('Déposer un manuel constructeur')}</h2>
-          <span class="badge ok"><span class="card-ico">${picto('bouclier')}</span>${trad('Analyse locale')}</span>
+      <div class="modal pplan-modal is-large">
+        <div class="pplan-head">
+          <div class="pplan-head-titre">
+            <div class="pplan-head-ligne">
+              <h2>${trad('Déposer un manuel constructeur')}</h2>
+              <span class="pplan-badge"><span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>${trad('Analyse locale')}</span>
+            </div>
+            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
+          </div>
+          <button type="button" class="pplan-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}"><span class="material-symbols-outlined">close</span></button>
         </div>
-        <button type="button" class="mform-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      </div>
-      <p class="sub">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
-
-      <div class="mu-fichier-carte">
-        <span class="card-ico">${picto('carnet')}</span>
-        <div class="mu-fichier-corps">
-          <span class="mu-fichier-nom">${esc(file.name)}</span>
-          <span class="mu-fichier-detail">${(file.size / (1024 * 1024)).toFixed(1)} ${trad('Mo')} · ${esc(machine.name)}</span>
+        <div class="pplan-fichier-bandeau">
+          <div class="pplan-fichier-bandeau-gauche">
+            <span class="material-symbols-outlined">description</span>
+            <span class="pplan-fichier-bandeau-nom">${esc(file.name)}</span>
+            <span class="pplan-fichier-bandeau-detail">(${(file.size / (1024 * 1024)).toFixed(1)} ${trad('Mo')} · ${esc(machine.name)})</span>
+          </div>
+          <span class="pplan-badge">${trad('Fichier chargé')}</span>
         </div>
-        <span class="badge ok">${trad('Fichier chargé')}</span>
-      </div>
-
-      <div class="pages-carnet" id="pages-carnet"></div>
-      <div class="pages-utiles" id="pages-utiles"></div>
-      <div class="hint" id="f-analysis"></div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-manuel">${trad('Saisir le plan manuellement')}</button>
-        <button type="button" class="secondary" id="mu-cancel">${trad('Annuler')}</button>
+        <div class="pplan-body" style="max-height:none;">
+          <div class="pages-carnet" id="pages-carnet"></div>
+          <div class="pages-utiles" id="pages-utiles"></div>
+          <div class="hint" id="f-analysis"></div>
+        </div>
+        <div class="pplan-foot">
+          <button type="button" class="pplan-btn-annuler" id="mu-manuel">${trad('Saisir le plan manuellement')}</button>
+          <button type="button" class="pplan-btn-annuler" id="mu-cancel">${trad('Annuler')}</button>
+        </div>
       </div>`);
     overlay.querySelector('#mu-close-x')?.addEventListener('click', close);
     overlay.querySelector('#mu-cancel').addEventListener('click', close);
@@ -24101,12 +24147,14 @@ function afficherReperage(overlay, reperage, contexte, apresAnalyse) {
     const lignes = reperage.retenues.map((p) => `
       <label class="page-utile">
         <input type="checkbox" data-page="${p.numero}"${choisies.has(p.numero) ? ' checked' : ''}>
-        <span class="page-num">${esc(tR('Page {n}', { n: p.numero }))}</span>
-        <span class="page-contenu">
-          <button type="button" class="vignette-bouton" data-page="${p.numero}"
-            aria-label="${esc(tR('Ouvrir la page {n} en grand pour la lire', { n: p.numero }))}"><span class="vignette-attente">${esc(trad('Aperçu…'))}</span></button>
-          <span class="page-lignes" data-page="${p.numero}"></span>
-          <span class="page-apercu">${esc(p.apercu || '')}</span>
+        <span class="page-empilement">
+          <span class="page-num">${esc(tR('Page {n}', { n: p.numero }))}</span>
+          <span class="page-contenu">
+            <button type="button" class="vignette-bouton" data-page="${p.numero}"
+              aria-label="${esc(tR('Ouvrir la page {n} en grand pour la lire', { n: p.numero }))}"><span class="vignette-attente">${esc(trad('Aperçu…'))}</span></button>
+            <span class="page-lignes" data-page="${p.numero}"></span>
+            <span class="page-apercu">${esc(p.apercu || '')}</span>
+          </span>
         </span>
       </label>`).join('');
     const trouvees = reperage.retenues.length
@@ -24129,7 +24177,7 @@ function afficherReperage(overlay, reperage, contexte, apresAnalyse) {
       ? ' ' + trad('L\'analyse reprendra le 1er du mois prochain, ou passez à une offre supérieure depuis votre abonnement.')
       : '';
     zone.innerHTML = `
-      <div class="reperage-titre">${esc(trouvees)}</div>
+      <div class="reperage-titre"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;color:var(--ok);">menu_book</span> ${esc(trouvees)}</div>
       ${lignes}
       <div class="credit-clair${epuise ? ' epuise' : ''}">
         <div class="credit-titre">${esc(creditTitre)}</div>
@@ -24140,10 +24188,10 @@ function afficherReperage(overlay, reperage, contexte, apresAnalyse) {
       <div class="ajout-page">
         <label for="f-page-ajout">${esc(trad('Ajouter une page'))}</label>
         <input id="f-page-ajout" type="number" min="1" max="${reperage.total}" placeholder="${esc(trad('N° de page'))}">
-        <button type="button" class="secondary" id="btn-page-ajout">${esc(trad('Ajouter d\'autres pages'))}</button>
+        <button type="button" class="pplan-btn-annuler" id="btn-page-ajout">${esc(trad('Ajouter d\'autres pages'))}</button>
       </div>
-      <div class="modal-actions">
-        <button type="button" class="primary" id="btn-analyser-pages"${numeros.length && !epuise ? '' : ' disabled'}>${esc(tR('Analyser ces {n} pages', { n: numeros.length }))}</button>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button type="button" class="pplan-btn-activer" id="btn-analyser-pages"${numeros.length && !epuise ? '' : ' disabled'}><span class="material-symbols-outlined">play_arrow</span><span>${esc(tR('Analyser ces {n} pages', { n: numeros.length }))}</span></button>
       </div>`;
     remplirVignettes(overlay, zone, reperage);
     // LE LECTEUR : au clic, la page est RE-RENDUE en haute résolution et ouverte
@@ -24259,7 +24307,7 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
         <div class="reperage-titre">${esc(trad('Repérage impossible : je ne peux pas lire ce document.'))}</div>
         <div class="hint">${esc(trad('Tu peux analyser le document entier — le coût est annoncé avant l\'envoi.'))}</div>
         <div class="modal-actions">
-          <button type="button" class="primary" id="btn-analyser-tout">${esc(trad('Analyser tout le document'))}</button>
+          <button type="button" class="pplan-btn-activer" id="btn-analyser-tout"><span>${esc(trad('Analyser tout le document'))}</span></button>
         </div>`;
       const bouton = zone.querySelector('#btn-analyser-tout');
       if (bouton) bouton.addEventListener('click', () => analyserTout());
@@ -24283,8 +24331,8 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
       <div class="reperage-titre">${esc(trad('Ce document est une image : je ne peux pas repérer les bonnes pages.'))}</div>
       <div class="hint">${esc(trad('Choisis les pages toi-même (gratuit), ou analyse tout le document.'))}</div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="btn-choisir-pages">${esc(trad('Choisir les pages moi-même'))}</button>
-        <button type="button" class="primary" id="btn-analyser-tout">${esc(tR('Analyser tout le document ({n} pages — coût élevé)', { n: reperage.total }))}</button>
+        <button type="button" class="pplan-btn-annuler" id="btn-choisir-pages">${esc(trad('Choisir les pages moi-même'))}</button>
+        <button type="button" class="pplan-btn-activer" id="btn-analyser-tout"><span>${esc(tR('Analyser tout le document ({n} pages — coût élevé)', { n: reperage.total }))}</span></button>
       </div>`;
     const choisir = zone.querySelector('#btn-choisir-pages');
     if (choisir) choisir.addEventListener('click', () => {
