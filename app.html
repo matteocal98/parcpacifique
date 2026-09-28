@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-r2mcWP/iepNgeL26DDm5L/JEbUli5bArmqa+UzQkljQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xc8kmzBXvS6W7vB16yhaYwckyKJCPj5fZfzgksORCh0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -2194,9 +2194,28 @@
 
   .log-bloc{margin:0;padding:16px 20px;border-radius:var(--r-card);border:none;}
   .log-bloc-quand{background:var(--surface-soft);}
-  .log-bloc-elements{background:var(--surface);box-shadow:var(--shadow-soft);}
+  /* --surface-soft, pas --surface : ce bloc vit dans le corps déjà blanc de
+     la modale — blanc sur blanc, seule l'ombre séparait avant. */
+  .log-bloc-elements{background:var(--surface-soft);box-shadow:var(--shadow-soft);}
   .log-bloc-cout{background:var(--surface-soft);}
-  .log-bloc-remarques{background:var(--surface);box-shadow:var(--shadow-soft);}
+  /* --surface-soft, pas --surface : même blanc sur blanc que .log-bloc-elements
+     avant correction — ce bloc vit aussi dans le corps blanc de la modale. */
+  .log-bloc-remarques{background:var(--surface-soft);box-shadow:var(--shadow-soft);}
+  /* Panneaux Dépannage/Frais : mêmes champs "nus" que le bloc 2 avant
+     correction — aucun cadre autour d'eux, contrairement aux blocs 1/2/3
+     (Entretien), signalé par l'utilisateur ("uniformise le bloc 3 comme le
+     bloc 2"). Même traitement : fond teinté sur le bloc entier. */
+  .log-bloc-depannage,.log-bloc-frais{background:var(--surface-soft);}
+  /* Les champs de .log-bloc-quand/.log-bloc-cout/.log-bloc-depannage/
+     .log-bloc-frais vivent DANS un bloc déjà teinté (--surface-soft) : la
+     règle générique (elle aussi --surface-soft au repos, pensée pour un
+     champ posé sur une carte blanche) les rendait indiscernables de leur
+     propre bloc. Blancs ici, comme sur Mon compte. */
+  .log-bloc-quand input,.log-bloc-quand select,.log-bloc-quand .champ-select,
+  .log-bloc-cout input,.log-bloc-cout select,.log-bloc-cout .champ-select,
+  .log-bloc-depannage input,.log-bloc-depannage select,.log-bloc-depannage .champ-select,.log-bloc-depannage textarea,
+  .log-bloc-frais input,.log-bloc-frais select,.log-bloc-frais .champ-select,.log-bloc-frais textarea,
+  .log-bloc-remarques textarea{background:var(--surface);}
 
   .log-section-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .log-section-tete-gauche{display:flex;align-items:center;gap:10px;}
@@ -2212,8 +2231,13 @@
   .log-modal label svg{width:16px;height:16px;flex:0 0 auto;color:var(--dark-ink);}
   .log-modal .hint{font-size:12px;color:var(--ink-2);margin-top:5px;}
 
-  .log-compteur-ligne{display:flex;align-items:stretch;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-soft);}
-  .log-compteur-ligne input{border:none;font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;border-top-right-radius:0;border-bottom-right-radius:0;}
+  /* Hauteur fixée (pas seulement le padding) : la police 21px de ce champ
+     (au lieu des 16px génériques) le rendait plus haut que ses voisins de
+     la même ligne (Date/Intervenant) — repéré par l'utilisateur. Hauteur
+     alignée sur .champ-select/input standard (42.8px rendus) sans renoncer
+     à la mise en avant du chiffre. */
+  .log-compteur-ligne{display:flex;align-items:stretch;height:42.8px;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-soft);}
+  .log-compteur-ligne input{border:none;font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;padding:0 13px;border-top-right-radius:0;border-bottom-right-radius:0;}
   .log-compteur-unite{
     display:inline-flex;align-items:center;justify-content:center;min-width:2.6em;padding:0 12px;
     font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;background:var(--ink);
@@ -2221,6 +2245,11 @@
 
   .log-elements-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .log-elements-tete label{margin:0;}
+  /* Un peu d'air entre le titre/sous-titre de "Coûts d'intervention & TCO"
+     et les premiers champs (collés avant), signalé par l'utilisateur.
+     Scopé à ce bloc précis : .log-elements-tete sert aussi à "Éléments
+     traités & opérations", qui a déjà son propre espacement correct. */
+  .log-bloc-cout .log-elements-tete{margin-bottom:14px;}
   .log-progress-capsule{display:inline-flex;align-items:center;gap:8px;background:var(--surface-soft);padding:6px 12px;border-radius:var(--r-pill);}
   .log-progress-piste{width:64px;height:8px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;flex:0 0 auto;}
   .log-progress-remplie{height:100%;background:var(--ok);border-radius:var(--r-pill);transition:width .2s;}
@@ -2273,6 +2302,12 @@
   .log-mo-ajouter:hover{background:var(--dark);}
   .log-mo-ajouter svg{width:16px;height:16px;flex:0 0 auto;}
 
+  /* Un peu plus d'air entre la ligne Heures/Coût MO et ce label (15px
+     générique trop serré ici), signalé par l'utilisateur. Sélecteur composé
+     (pas juste .log-pieces-label) : .log-modal label{margin:0 0 5px} a une
+     spécificité plus élevée (classe + élément) et gagnait silencieusement —
+     1er essai resté sans effet, corrigé ici. */
+  .log-modal .log-pieces-label{margin-top:26px;}
   .log-bento-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:2px;}
   @media (max-width:640px){.log-bento-grid{grid-template-columns:1fr;}}
   .log-bento-btn{height:140px;padding:16px;background:var(--surface);border:none;border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;cursor:pointer;box-shadow:var(--shadow-soft);transition:background .12s;font-family:inherit;}
@@ -2378,7 +2413,10 @@
 
   .log-gravite-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   @media (max-width:560px){.log-gravite-grid{grid-template-columns:1fr;}}
-  .log-gravite-carte{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:var(--r-chip);border:1.5px solid var(--line);cursor:pointer;font-size:12.5px;font-weight:700;background:var(--surface-soft);color:var(--ink);min-width:0;}
+  /* --surface, pas --surface-soft : cette carte vit maintenant dans
+     .log-bloc-depannage, déjà teinté (uniformisation bloc 3/bloc 2) — sinon
+     indiscernable de son bloc, comme les champs juste au-dessus. */
+  .log-gravite-carte{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:var(--r-chip);border:1.5px solid var(--line);cursor:pointer;font-size:12.5px;font-weight:700;background:var(--surface);color:var(--ink);min-width:0;}
   /* Le radio natif sans taille explicite gonfle différemment selon
      navigateur/OS une fois accent-color posé (même gotcha récurrent que
      picto() sans règle de taille dédiée) — taille fixée pour ne jamais
@@ -26552,7 +26590,7 @@ function openLogInterventionModal(machine, tache) {
 
           <div class="log-panel" id="log-panel-entretien">
             ${items.length ? `
-            <div class="log-bloc-elements" style="background:var(--surface);box-shadow:var(--shadow-soft);border-radius:var(--r-card);padding:16px 20px;margin-top:${avecTypes ? '10px' : '0'};">
+            <div class="log-bloc-elements" style="background:var(--surface-soft);box-shadow:var(--shadow-soft);border-radius:var(--r-card);padding:16px 20px;margin-top:${avecTypes ? '10px' : '0'};">
               <div class="log-elements-tete">
                 <span class="log-section-tete-gauche">
                   <span class="log-section-icone is-indigo">${picto('case')}</span>
@@ -26588,7 +26626,7 @@ function openLogInterventionModal(machine, tache) {
           </div>
 
           ${avecTypes ? `
-          <div class="log-panel" id="log-panel-depannage" hidden style="margin-top:10px;">
+          <div class="log-panel log-bloc log-bloc-depannage" id="log-panel-depannage" hidden style="margin-top:10px;">
             <div>
               <label for="log-organe">${trad('Organe mécanique défaillant')}</label>
               <select id="log-organe" required>${optionsComposantListe('', UI.components)}</select>
@@ -26613,7 +26651,7 @@ function openLogInterventionModal(machine, tache) {
             </div>
           </div>
 
-          <div class="log-panel" id="log-panel-frais" hidden style="margin-top:10px;">
+          <div class="log-panel log-bloc log-bloc-frais" id="log-panel-frais" hidden style="margin-top:10px;">
             <div class="field-row">
               <div>
                 <label for="log-frais-nature">${trad('Nature du frais')}</label>
@@ -26661,7 +26699,7 @@ function openLogInterventionModal(machine, tache) {
               <button type="button" class="log-mo-ajouter" id="log-mo-ajouter" title="${esc(trad('Ajoute ce montant au total pièces & consommables ci-dessous, et remet ces deux champs à zéro'))}">${picto('croix')}<span>${trad('Ajouter')}</span></button>
             </div>
           </div>
-          <label>${picto('boite')}${trad('Pièces détachées & consommables')}</label>
+          <label class="log-pieces-label">${picto('boite')}${trad('Pièces détachées & consommables')}</label>
           <div class="log-bento-grid">
             <button type="button" class="log-bento-btn" id="log-piece-ajouter">
               <span class="log-bento-icone">${picto('croix')}</span>
