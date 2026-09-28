@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XHpSE1JVpWt9Of1NnkKOxWRTeUg9yKrRA5HIUcqSk0o=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HEkcpR5Mt6+JwI21l4a9R3hi9tfPS6MSBOjZb/panpI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -86,7 +86,14 @@
      ============================================================ */
   :root{
     /* Surfaces */
-    --bg:#FFFFFF;
+    /* --bg (fond de PAGE) volontairement distinct de --surface (fond des
+       cartes, resté blanc pur) : sans ça, une carte blanche sur une page
+       blanche ne se distingue que par une ombre à 5 % d'opacité — à peine
+       visible, l'utilisateur a l'impression que rien ne sépare les blocs
+       ("blanc sur blanc"). Même teinte que --surface-soft (l'encre en
+       transparence déjà utilisée pour les zones tintées internes),
+       jamais un gris inventé — une seule et même valeur, référencée. */
+    --bg:var(--surface-soft);
     --surface:#FFFFFF;
     --surface-soft:rgba(14,19,51,.04);
     --dark:#0D1424;
@@ -2245,7 +2252,7 @@
   .log-bento-badge{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:4px;background:var(--voile-ambre);color:var(--late);margin-left:5px;}
 
   .log-pieces-liste{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
-  .log-piece-ligne{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+  .log-piece-ligne{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r-md);background:var(--surface-soft);box-shadow:var(--shadow-soft);}
   .log-piece-icone{width:28px;height:28px;border-radius:6px;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .log-piece-icone svg{width:16px;height:16px;}
   .log-piece-ligne select{flex:1;min-width:0;}
@@ -3171,7 +3178,7 @@
      ------------------------------------------------------------ */
   .taches-cartes{display:none;flex-direction:column;gap:12px;margin-top:8px;}
   .tache-carte{
-    border:1px solid var(--line);border-radius:var(--r-chip);background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r-chip);background:var(--surface-soft);
     padding:13px 15px;text-align:left;
   }
   .tache-titre{font-size:14px;font-weight:700;margin-bottom:8px;text-align:left;}
@@ -4615,7 +4622,10 @@
      ou en pied (téléphone) — jamais les deux pastilles d'état à la fois. */
   .chrono-carte{
     display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;
-    background:var(--surface);border:1px solid var(--line);margin-top:10px;cursor:pointer;
+    /* --surface-soft plutôt que --surface : cette carte vit TOUJOURS à
+       l'intérieur d'une carte blanche (tableau de bord, Agenda) — un blanc
+       sur blanc ne se distinguait que par une bordure de 1px. */
+    background:var(--surface-soft);border:1px solid var(--line);margin-top:10px;cursor:pointer;
   }
   .agenda-chronologie .chrono-carte:first-of-type{margin-top:0;}
   .chrono-bar{flex:0 0 4px;align-self:stretch;border-radius:4px;background:var(--ink-3);}
@@ -5106,7 +5116,7 @@
   .support-liste{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;}
   .support-liste-ligne{
     display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
-    padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);
+    padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-soft);
     text-align:left;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;
   }
   .support-liste-ligne:hover{border-color:var(--primary-line);background:var(--primary-tint);box-shadow:var(--shadow-soft);}
@@ -20339,7 +20349,7 @@ function ouvrirExplicationPump() {
       <p class="sub">${trad('Prix Unitaire Moyen Pondéré — la méthode utilisée par ce module pour donner une valeur réelle à ton stock.')}</p>
       <div class="hint" style="margin-top:10px;line-height:1.6;">
         <p>${trad('À chaque entrée de stock, le coût moyen d\'une référence est recalculé en pondérant l\'ancien stock par son ancien coût, et la quantité entrante par son coût d\'achat réel :')}</p>
-        <p style="margin-top:8px;font-family:monospace;background:var(--surface-soft);padding:10px 12px;border-radius:var(--r-md);">${trad('nouveau coût = (stock × ancien coût + entrée × prix d\'achat) / (stock + entrée)')}</p>
+        <p style="margin-top:8px;font-family:'Space Grotesk',monospace;background:var(--surface-soft);padding:10px 12px;border-radius:var(--r-md);">${trad('nouveau coût = (stock × ancien coût + entrée × prix d\'achat) / (stock + entrée)')}</p>
         <p style="margin-top:8px;">${trad('Une sortie ou un transfert ne modifie jamais ce coût moyen — seule une nouvelle entrée le fait évoluer. C\'est ce coût qui sert à calculer la valeur totale du stock (quantité × coût moyen) affichée en haut de cette page.')}</p>
       </div>
       <div class="modal-actions">
