@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xt841+VZEGzkYWBzb2Zc7uSp9/KV+z5xlWmpFDZjbPc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZinNBnvHAIuu14XTPE3I0Z2+u9uupbZUQfDFKdZs9+s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3181,6 +3181,15 @@
   }
   .ref-table td.item-label{font-weight:700;}
   .ref-table td.muted,.muted{color:var(--ink-4);}
+  /* Cellule fréquence des écrans « Plan proposé » (Modifier ce plan) : la
+     valeur (texte du carnet, ou le libellé posé par ouvrirChoixFrequenceApercu)
+     à gauche, le crayon qui ouvre la modale de choix à droite — même bouton
+     neutre (pas rouge, ce n'est pas une suppression) que .stock-row-actions. */
+  .item-frequence-cell{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .item-frequence-valeur{overflow-wrap:anywhere;}
+  .ref-table .mu-item-label-neuf,
+  .ref-table .wiz-item-label-neuf,
+  .ref-table .fp-item-label-neuf{width:100%;}
   .history-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
   .history-actions{display:flex;gap:6px;}
   .icon-btn{
@@ -9110,43 +9119,47 @@ function tachesApresEntretien(items, plan, machine, cochees, releve, dateEntreti
 //     propre échéance, dans cette unité. Si l'unité diffère de celle du plan,
 //     cette échéance ne compte pas dans l'échéance globale — mais la tâche garde
 //     la sienne, et l'écran le dit.
+// Le choix appliqué à UNE tâche déjà identifiée (extrait de
+// appliquerChoixTache pour être réutilisable par item/index — voir
+// ouvrirChoixFrequenceApercu, la même modale utilisée AVANT qu'un plan
+// existe, où identifier une tâche par son label n'a pas de sens pour une
+// ligne tout juste ajoutée à la main).
+function appliquerChoixSurTache(it, choix, plan, machine) {
+  const t = { ...it };
+  // Compatible avec le plan PRINCIPAL, ou avec le SECOND suivi (compteur ou
+  // calendaire) : les trois comptent comme « suivi », pas seulement le
+  // principal — sinon un choix résolu avant l'existence du second suivi
+  // (ou simplement dans son unité) restait figé en point de contrôle,
+  // même une fois ce second suivi actif. Signalé le 23/09 sur « Filtre
+  // d'habitacle » (Peugeot 208, 20 000 km / 1 an, résolu en années).
+  const compatible = choix.pointDeControle ? false : (
+    uniteCompatiblePlan(choix.unite, plan, machine)
+    || uniteCompatibleCompteur2(choix.unite, machine)
+    || uniteCompatibleCalendaireSecondaire(choix.unite, machine)
+  );
+  if (choix.pointDeControle || (!compatible && !choix.libre)) {
+    delete t.interval;
+    delete t.interval_unite;
+    delete t.due_counter;
+    delete t.due_at;
+    t.point_de_controle = true;
+    t.interval_choisi = choix.pointDeControle
+      ? trad('Point de contrôle')
+      : (choix.libelle || libelleOption(choix));
+    return t;
+  }
+  t.interval = Number(choix.interval);
+  t.interval_unite = choix.unite;
+  t.interval_choisi = choix.libelle || libelleOption({ interval: choix.interval, unite: choix.unite });
+  delete t.point_de_controle;
+  delete t.interval_choices;
+  // MÊME calcul d'échéance propre que la passe de préparation : une seule
+  // implémentation, donc un choix de l'utilisateur et une fréquence lue dans un
+  // carnet ne peuvent pas produire deux échéances différentes.
+  return echeancePropreTacheAppliquee(t, machine);
+}
 function appliquerChoixTache(items, label, choix, plan, machine) {
-  const contreur = planIsCounter(plan);
-  return normalizeItems(items).map(it => {
-    if (it.label !== label) return it;
-    const t = { ...it };
-    // Compatible avec le plan PRINCIPAL, ou avec le SECOND suivi (compteur ou
-    // calendaire) : les trois comptent comme « suivi », pas seulement le
-    // principal — sinon un choix résolu avant l'existence du second suivi
-    // (ou simplement dans son unité) restait figé en point de contrôle,
-    // même une fois ce second suivi actif. Signalé le 23/09 sur « Filtre
-    // d'habitacle » (Peugeot 208, 20 000 km / 1 an, résolu en années).
-    const compatible = choix.pointDeControle ? false : (
-      uniteCompatiblePlan(choix.unite, plan, machine)
-      || uniteCompatibleCompteur2(choix.unite, machine)
-      || uniteCompatibleCalendaireSecondaire(choix.unite, machine)
-    );
-    if (choix.pointDeControle || (!compatible && !choix.libre)) {
-      delete t.interval;
-      delete t.interval_unite;
-      delete t.due_counter;
-      delete t.due_at;
-      t.point_de_controle = true;
-      t.interval_choisi = choix.pointDeControle
-        ? trad('Point de contrôle')
-        : (choix.libelle || libelleOption(choix));
-      return t;
-    }
-    t.interval = Number(choix.interval);
-    t.interval_unite = choix.unite;
-    t.interval_choisi = choix.libelle || libelleOption({ interval: choix.interval, unite: choix.unite });
-    delete t.point_de_controle;
-    delete t.interval_choices;
-    // MÊME calcul d'échéance propre que la passe de préparation : une seule
-    // implémentation, donc un choix de l'utilisateur et une fréquence lue dans un
-    // carnet ne peuvent pas produire deux échéances différentes.
-    return echeancePropreTacheAppliquee(t, machine);
-  });
+  return normalizeItems(items).map(it => it.label === label ? appliquerChoixSurTache(it, choix, plan, machine) : it);
 }
 
 // Relie (ou retire) un kit d'entretien à UNE tâche précise d'un plan. Écrit
@@ -22328,11 +22341,35 @@ function arreterBarreAnalyse(overlay) {
 // apparaît et pilote sa visibilité : Suivre/Faire mon propre plan le
 // masquent (les champs gardent une valeur valide, donc le formulaire reste
 // soumettable sans changement ailleurs), Modifier le réaffiche.
-function presenterChoixPlanEditForm(overlay, resultat) {
+function presenterChoixPlanEditForm(overlay, resultat, machine) {
   const zone = overlay.querySelector('#plan-choix-zone');
   const bloc = overlay.querySelector('#bloc-mode-suivi');
   if (!zone || !bloc) return;
-  const items = normalizeItems(resultat?.items);
+  // `let`, pas `const` : le bouton crayon (voir plus bas) réassigne une
+  // ligne en place via appliquerChoixSurTache, « Ajouter une ligne » en
+  // pousse une nouvelle — `items` est la seule source de vérité de cet
+  // écran, jamais relue depuis le DOM.
+  let items = normalizeItems(resultat?.items);
+  // Contexte minimal pour la modale de fréquence (MÊME fonction que sur un
+  // plan déjà enregistré, voir ouvrirChoixFrequenceApercu) : le mode de
+  // suivi est lu sur le radio DU FORMULAIRE (celui que l'utilisateur a sous
+  // les yeux ici), pas sur `machine.plan`, qui peut être différent tant que
+  // rien n'est encore enregistré.
+  const modeFp = overlay.querySelector('input[name=tm]:checked')?.value || 'days';
+  const planCtxFp = { tracking_mode: modeFp === 'days' ? 'days' : 'hours' };
+  const machineCtxFp = { ...machine, counter_unit: modeFp === 'km' ? 'km' : 'hours' };
+  const filaItemFp = (it, i) => `
+    <tr data-item-index="${i}">
+      <td class="item-label">${it._nouveau
+        ? `<input type="text" class="fp-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+        : esc(it.label || '—')}</td>
+      <td><div class="item-frequence-cell">
+        <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
+        <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+      </div></td>
+      <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+    </tr>`;
+  const tableauItemsFpHtml = () => items.map(filaItemFp).join('');
   zone.innerHTML = `
     <div class="plan-choix-resume">
       ${items.length
@@ -22344,12 +22381,7 @@ function presenterChoixPlanEditForm(overlay, resultat) {
     <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
     <div class="ref-scroll"><table class="ref-table">
       <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-      <tbody id="fp-items-tbody">${items.map((it, i) => `
-        <tr data-item-index="${i}">
-          <td class="item-label">${esc(it.label || '—')}</td>
-          <td><input type="text" class="fp-item-frequency" value="${esc(it.frequency || '')}"></td>
-          <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-        </tr>`).join('')}</tbody>
+      <tbody id="fp-items-tbody">${tableauItemsFpHtml()}</tbody>
     </table></div>
     <button type="button" class="secondary" id="fp-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
     <div class="plan-choix">
@@ -22361,38 +22393,40 @@ function presenterChoixPlanEditForm(overlay, resultat) {
     </div>`;
   bloc.hidden = true;
   const fpTbody = zone.querySelector('#fp-items-tbody');
+  const rafraichirItemsFp = () => { if (fpTbody) fpTbody.innerHTML = tableauItemsFpHtml(); };
   fpTbody?.addEventListener('click', (e) => {
-    const bouton = e.target.closest('.log-piece-retirer');
-    if (bouton) bouton.closest('tr')?.remove();
+    const retirer = e.target.closest('.log-piece-retirer');
+    if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsFp(); return; }
+    const modifier = e.target.closest('.item-frequence-modifier');
+    if (modifier) {
+      const i = Number(modifier.dataset.index);
+      ouvrirChoixFrequenceApercu(items[i], planCtxFp, machineCtxFp, (choix) => {
+        items[i] = appliquerChoixSurTache(items[i], choix, planCtxFp, machineCtxFp);
+        rafraichirItemsFp();
+      });
+    }
   });
   // « Modifier ce plan » ne veut pas dire renommer les tâches détectées —
-  // seule leur fréquence est éditable (l'élément vient du carnet et reste du
-  // texte figé). Ajouter une tâche manquante EST possible : une ligne neuve,
-  // sans `data-item-index`, avec ses deux champs vides à remplir.
-  zone.querySelector('#fp-item-ajouter')?.addEventListener('click', () => {
-    fpTbody.insertAdjacentHTML('beforeend', `
-      <tr>
-        <td><input type="text" class="fp-item-label-neuf" placeholder="${esc(trad('Élément à entretenir'))}"></td>
-        <td><input type="text" class="fp-item-frequency" placeholder="${esc(trad('Fréquence'))}"></td>
-        <td><button type="button" class="log-piece-retirer" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-      </tr>`);
+  // seule leur fréquence est éditable (bouton crayon, voir ci-dessus).
+  // Ajouter une tâche manquante EST possible : une ligne neuve, avec son
+  // propre libellé à saisir.
+  fpTbody?.addEventListener('input', (e) => {
+    const champ = e.target.closest('.fp-item-label-neuf');
+    if (champ) items[Number(champ.dataset.index)].label = champ.value;
   });
-  // Lit l'état actuel du tableau (édité/des lignes retirées/ajoutées) dans
-  // overlay._aiItems — la variable que le formulaire lit déjà au moment
+  zone.querySelector('#fp-item-ajouter')?.addEventListener('click', () => {
+    items.push({ label: '', frequency: '', _nouveau: true });
+    rafraichirItemsFp();
+    fpTbody.querySelector('tr:last-child .fp-item-label-neuf')?.focus();
+  });
+  // overlay._aiItems : la variable que le formulaire lit déjà au moment
   // d'enregistrer (voir #pc-propre juste en dessous, qui la remet à null).
+  // Une ligne ajoutée à la main jamais complétée (libellé resté vide) est
+  // ignorée ; la marque `_nouveau`, propre à cet écran, n'est jamais
+  // enregistrée telle quelle.
   const appliquerItemsEdites = () => {
-    const tbody = zone.querySelector('#fp-items-tbody');
-    if (!tbody) return;
-    overlay._aiItems = [...tbody.querySelectorAll('tr')].map((tr) => {
-      const frequency = tr.querySelector('.fp-item-frequency').value.trim();
-      const champLabelNeuf = tr.querySelector('.fp-item-label-neuf');
-      if (champLabelNeuf) {
-        const label = champLabelNeuf.value.trim();
-        return label ? { label, frequency } : null;
-      }
-      const original = items[Number(tr.dataset.itemIndex)] || {};
-      return { ...original, frequency };
-    }).filter(Boolean);
+    overlay._aiItems = items.filter((it) => (it.label || '').trim())
+      .map(({ _nouveau, ...reste }) => reste);
   };
   zone.querySelector('#pc-suivre').addEventListener('click', () => { appliquerItemsEdites(); bloc.hidden = true; });
   zone.querySelector('#pc-modifier').addEventListener('click', () => {
@@ -22657,6 +22691,22 @@ function openManualUploadModal(presetMachine, presetFile) {
     const montrerChoix = !!result && !choix;
     const montrerChamps = !result || choix === 'modifier';
 
+    // Ligne du tableau des échéances, régénérée à chaque mutation de `items`
+    // (choix de fréquence, ajout, retrait) — `items` est la seule source de
+    // vérité de cet écran, jamais relue depuis le DOM au moment d'enregistrer.
+    const filaItemMu = (it, i) => `
+      <tr data-item-index="${i}">
+        <td class="item-label">${it._nouveau
+          ? `<input type="text" class="mu-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+          : esc(it.label || '—')}</td>
+        <td><div class="item-frequence-cell">
+          <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
+          <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+        </div></td>
+        <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+      </tr>`;
+    const tableauItemsMuHtml = () => items.map(filaItemMu).join('');
+
     // Factorisée pour être appelée SOIT par le bouton « Activer le plan »
     // (après modification), SOIT directement par « Suivre ce plan » — même
     // écriture, seule la source de l'intervalle/des tâches change.
@@ -22688,16 +22738,13 @@ function openManualUploadModal(presetMachine, presetFile) {
           planId = data.id;
         }
         close();
-        // « Modifier ce plan » (signalé par l'utilisateur, capture à l'appui) :
-        // l'intervalle réglé au-dessus ne touche QUE l'échéance de SYNTHÈSE du
-        // plan (interval_days/next_due_at) — chaque tâche garde SA propre
-        // fréquence détectée par l'IA (payload.items, jamais réécrit ici).
-        // Pour ajuster une tâche précise, on amène directement sur la fiche du
-        // plan, qui sait déjà le faire tâche par tâche (openChoixFrequence/
-        // appliquerChoixTache) — pas de second éditeur point par point à
-        // construire ici, en double de celui qui existe déjà. Suivre/Faire
-        // mon propre plan gardent le comportement d'avant (reboot + retour à
-        // l'écran de départ) : rien à ajuster tout de suite dans ces 2 cas.
+        // « Modifier ce plan » amène sur la fiche du plan après activation :
+        // la fréquence de chaque tâche se règle déjà SUR CET ÉCRAN (bouton
+        // crayon, voir ouvrirChoixFrequenceApercu), mais un kit ou un point
+        // de contrôle affiné, eux, se règlent sur la fiche du plan — pas de
+        // raison de dupliquer aussi cet écran-là ici. Suivre/Faire mon propre
+        // plan gardent le comportement d'avant (reboot + retour à l'écran de
+        // départ) : rien à ajuster tout de suite dans ces 2 cas.
         if (choix === 'modifier') {
           machine.plan = { ...(machine.plan || {}), ...payload, id: planId };
           showToast(trad('Plan activé'));
@@ -22746,12 +22793,7 @@ function openManualUploadModal(presetMachine, presetFile) {
           <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
           <div class="ref-scroll"><table class="ref-table">
             <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-            <tbody id="mu-items-tbody">${items.map((it, i) => `
-              <tr data-item-index="${i}">
-                <td class="item-label">${esc(it.label || '—')}</td>
-                <td><input type="text" class="mu-item-frequency" value="${esc(it.frequency || '')}"></td>
-                <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-              </tr>`).join('')}</tbody>
+            <tbody id="mu-items-tbody">${tableauItemsMuHtml()}</tbody>
           </table></div>
           <button type="button" class="secondary" id="mu-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
         <label for="mu-tasks"><span class="label-ico">${picto('message')}</span>${trad('Tâches de maintenance')}</label>
@@ -22777,50 +22819,52 @@ function openManualUploadModal(presetMachine, presetFile) {
       overlay.querySelector('#pc-propre').addEventListener('click', () => stepReview(null));
       return;
     }
-    // Retirer une ligne (détectée ou ajoutée à la main) : simple suppression
-    // DOM, l'état réel n'est lu qu'au moment d'enregistrer (voir
-    // #mu-activate) — jamais besoin de garder un tableau JS synchronisé
-    // pendant la frappe.
+    // `items` est réaffiché à chaque mutation — retirer, ajouter, ou changer
+    // la fréquence d'une ligne modifient `items` puis régénèrent le tbody,
+    // jamais l'inverse (jamais de lecture du DOM pour reconstruire `items`).
     const muTbody = overlay.querySelector('#mu-items-tbody');
+    const rafraichirItemsMu = () => { if (muTbody) muTbody.innerHTML = tableauItemsMuHtml(); };
+    // Contexte minimal (mode + machine réelle) pour la modale de fréquence :
+    // MÊME fonction que sur un plan déjà enregistré (openChoixFrequence),
+    // demandé explicitement par l'utilisateur plutôt qu'un second éditeur —
+    // seule différence, aucune écriture Supabase tant que le plan n'existe
+    // pas encore (voir ouvrirChoixFrequenceApercu).
+    const planCtxMu = { tracking_mode: mode === 'days' ? 'days' : 'hours' };
     muTbody?.addEventListener('click', (e) => {
-      const bouton = e.target.closest('.log-piece-retirer');
-      if (bouton) bouton.closest('tr')?.remove();
+      const retirer = e.target.closest('.log-piece-retirer');
+      if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsMu(); return; }
+      const modifier = e.target.closest('.item-frequence-modifier');
+      if (modifier) {
+        const i = Number(modifier.dataset.index);
+        ouvrirChoixFrequenceApercu(items[i], planCtxMu, machine, (choix) => {
+          items[i] = appliquerChoixSurTache(items[i], choix, planCtxMu, machine);
+          rafraichirItemsMu();
+        });
+      }
     });
     // « Modifier ce plan » ne veut pas dire renommer les tâches détectées —
-    // seule leur fréquence est éditable (l'élément, lui, vient du carnet et
-    // reste du texte figé). Ajouter une tâche manquante EST en revanche
-    // possible : une ligne neuve, sans `data-item-index`, avec ses deux
-    // champs vides à remplir (elle n'a pas de libellé déjà connu).
+    // seule leur fréquence est éditable (voir ci-dessus). Ajouter une tâche
+    // manquante EST en revanche possible : une ligne neuve, avec son propre
+    // libellé à saisir (elle n'a pas de libellé déjà connu), sa fréquence se
+    // réglant ensuite par le même bouton crayon.
+    muTbody?.addEventListener('input', (e) => {
+      const champ = e.target.closest('.mu-item-label-neuf');
+      if (champ) items[Number(champ.dataset.index)].label = champ.value;
+    });
     overlay.querySelector('#mu-item-ajouter')?.addEventListener('click', () => {
-      muTbody.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td><input type="text" class="mu-item-label-neuf" placeholder="${esc(trad('Élément à entretenir'))}"></td>
-          <td><input type="text" class="mu-item-frequency" placeholder="${esc(trad('Fréquence'))}"></td>
-          <td><button type="button" class="log-piece-retirer" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-        </tr>`);
+      items.push({ label: '', frequency: '', _nouveau: true });
+      rafraichirItemsMu();
+      muTbody.querySelector('tr:last-child .mu-item-label-neuf')?.focus();
     });
     overlay.querySelector('#mu-activate').addEventListener('click', () => {
       if (!result) { close(); boot(trad('Carnet attaché')); return; }
       const interval = parseInt(overlay.querySelector('#mu-interval').value, 10) || suggested;
       const tasks = overlay.querySelector('#mu-tasks').value.trim();
-      // Lignes éditées/retirées/ajoutées par l'utilisateur : une ligne
-      // détectée garde tous ses champs d'origine (interval/due_at/etc., déjà
-      // résolus par l'analyse), seule sa fréquence peut avoir été corrigée —
-      // jamais un item reconstruit de zéro qui perdrait ces champs. Une ligne
-      // ajoutée à la main n'a que label+frequency, comme une tâche saisie
-      // sans carnet.
-      if (muTbody) {
-        items = [...muTbody.querySelectorAll('tr')].map((tr) => {
-          const frequency = tr.querySelector('.mu-item-frequency').value.trim();
-          const champLabelNeuf = tr.querySelector('.mu-item-label-neuf');
-          if (champLabelNeuf) {
-            const label = champLabelNeuf.value.trim();
-            return label ? { label, frequency } : null;
-          }
-          const original = items[Number(tr.dataset.itemIndex)] || {};
-          return { ...original, frequency };
-        }).filter(Boolean);
-      }
+      // Une ligne ajoutée à la main jamais complétée (libellé resté vide) est
+      // ignorée ; la marque `_nouveau`, propre à cet écran, n'est jamais
+      // enregistrée telle quelle.
+      items = items.filter((it) => (it.label || '').trim())
+        .map(({ _nouveau, ...reste }) => reste);
       activerPlan(interval, tasks, overlay.querySelector('#mu-activate'), overlay.querySelector('#mu-error'));
     });
   }
@@ -24475,10 +24519,33 @@ function openAddWizard(companyId, categories) {
   //   · Faire mon propre plan → ignore la proposition de l'IA (le PDF reste
   //     attaché à la fiche, lui) et enregistre avec un plan vierge.
   function stepPlanChoice(resultat) {
-    const items = normalizeItems(resultat?.items);
+    // `let`, pas `const` : le bouton crayon (voir plus bas) réassigne une
+    // ligne en place via appliquerChoixSurTache, « Ajouter une ligne » en
+    // pousse une nouvelle — `items` est la seule source de vérité de cet
+    // écran, jamais relue depuis le DOM.
+    let items = normalizeItems(resultat?.items);
     const mode = overlay._aiTrackingSuggestion === 'hours' ? 'hours' : 'days';
     const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
     const suggested = mode === 'hours' ? (overlay._aiIntervalHours || state.intervalHours) : (overlay._aiIntervalDays || state.intervalDays);
+    // Contexte minimal pour la modale de fréquence (MÊME fonction que sur un
+    // plan déjà enregistré, voir ouvrirChoixFrequenceApercu) : la machine
+    // n'existe pas encore à ce stade de l'assistant, donc un objet
+    // synthétique construit à partir de `state` — même motif que celui déjà
+    // utilisé plus loin pour preparerTaches() au moment d'enregistrer.
+    const planCtxWiz = { tracking_mode: mode === 'days' ? 'days' : 'hours' };
+    const machineCtxWiz = { counter_unit: counterUnitFromMode(mode), counter_value: state.currentHours, current_hours: state.currentHours, service_date: state.serviceDate };
+    const filaItemWiz = (it, i) => `
+      <tr data-item-index="${i}">
+        <td class="item-label">${it._nouveau
+          ? `<input type="text" class="wiz-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+          : esc(it.label || '—')}</td>
+        <td><div class="item-frequence-cell">
+          <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
+          <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+        </div></td>
+        <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+      </tr>`;
+    const tableauItemsWizHtml = () => items.map(filaItemWiz).join('');
     shell(`
       ${enteteEtape(trad('Plan proposé par notre algorithme'), { retour: true })}
       <div class="plan-choix-resume">
@@ -24490,12 +24557,7 @@ function openAddWizard(companyId, categories) {
       <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
       <div class="ref-scroll"><table class="ref-table">
         <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-        <tbody id="wiz-items-tbody">${items.map((it, i) => `
-          <tr data-item-index="${i}">
-            <td class="item-label">${esc(it.label || '—')}</td>
-            <td><input type="text" class="wiz-item-frequency" value="${esc(it.frequency || '')}"></td>
-            <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-          </tr>`).join('')}</tbody>
+        <tbody id="wiz-items-tbody">${tableauItemsWizHtml()}</tbody>
       </table></div>
       <button type="button" class="secondary" id="wiz-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
       <div class="plan-choix">
@@ -24510,39 +24572,37 @@ function openAddWizard(companyId, categories) {
     overlay.querySelector('#wiz-back').addEventListener('click', () => stepUpload(false));
     const errEl = overlay.querySelector('#f-error');
     const wizTbody = overlay.querySelector('#wiz-items-tbody');
+    const rafraichirItemsWiz = () => { if (wizTbody) wizTbody.innerHTML = tableauItemsWizHtml(); };
     wizTbody?.addEventListener('click', (e) => {
-      const bouton = e.target.closest('.log-piece-retirer');
-      if (bouton) bouton.closest('tr')?.remove();
+      const retirer = e.target.closest('.log-piece-retirer');
+      if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsWiz(); return; }
+      const modifier = e.target.closest('.item-frequence-modifier');
+      if (modifier) {
+        const i = Number(modifier.dataset.index);
+        ouvrirChoixFrequenceApercu(items[i], planCtxWiz, machineCtxWiz, (choix) => {
+          items[i] = appliquerChoixSurTache(items[i], choix, planCtxWiz, machineCtxWiz);
+          rafraichirItemsWiz();
+        });
+      }
     });
     // « Modifier ce plan » ne veut pas dire renommer les tâches détectées —
-    // seule leur fréquence est éditable (l'élément vient du carnet et reste
-    // du texte figé). Ajouter une tâche manquante EST possible : une ligne
-    // neuve, sans `data-item-index`, avec ses deux champs vides à remplir.
-    overlay.querySelector('#wiz-item-ajouter')?.addEventListener('click', () => {
-      wizTbody.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td><input type="text" class="wiz-item-label-neuf" placeholder="${esc(trad('Élément à entretenir'))}"></td>
-          <td><input type="text" class="wiz-item-frequency" placeholder="${esc(trad('Fréquence'))}"></td>
-          <td><button type="button" class="log-piece-retirer" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
-        </tr>`);
+    // seule leur fréquence est éditable (bouton crayon, voir ci-dessus).
+    // Ajouter une tâche manquante EST possible : une ligne neuve, avec son
+    // propre libellé à saisir.
+    wizTbody?.addEventListener('input', (e) => {
+      const champ = e.target.closest('.wiz-item-label-neuf');
+      if (champ) items[Number(champ.dataset.index)].label = champ.value;
     });
-    // Lit l'état actuel du tableau (édité/des lignes retirées/ajoutées) —
-    // jamais un second tableau JS tenu synchronisé pendant la frappe, lu
-    // seulement au moment où l'utilisateur choisit une des 3 actions.
-    const itemsEdites = () => {
-      const tbody = overlay.querySelector('#wiz-items-tbody');
-      if (!tbody) return items;
-      return [...tbody.querySelectorAll('tr')].map((tr) => {
-        const frequency = tr.querySelector('.wiz-item-frequency').value.trim();
-        const champLabelNeuf = tr.querySelector('.wiz-item-label-neuf');
-        if (champLabelNeuf) {
-          const label = champLabelNeuf.value.trim();
-          return label ? { label, frequency } : null;
-        }
-        const original = items[Number(tr.dataset.itemIndex)] || {};
-        return { ...original, frequency };
-      }).filter(Boolean);
-    };
+    overlay.querySelector('#wiz-item-ajouter')?.addEventListener('click', () => {
+      items.push({ label: '', frequency: '', _nouveau: true });
+      rafraichirItemsWiz();
+      wizTbody.querySelector('tr:last-child .wiz-item-label-neuf')?.focus();
+    });
+    // Une ligne ajoutée à la main jamais complétée (libellé resté vide) est
+    // ignorée ; la marque `_nouveau`, propre à cet écran, n'est jamais
+    // enregistrée telle quelle.
+    const itemsFinaux = () => items.filter((it) => (it.label || '').trim())
+      .map(({ _nouveau, ...reste }) => reste);
     // Même petite logique que stepMode() (recommandation IA → state), reprise
     // ici pour les deux choix qui n'ouvrent PAS cette étape : dupliquée plutôt
     // que sur-abstraite, comme le reste de cet assistant (voir traiterFichiersCarnet).
@@ -24554,12 +24614,12 @@ function openAddWizard(companyId, categories) {
       state.intervalHours = overlay._aiIntervalHours || state.intervalHours;
     }
     overlay.querySelector('#pc-suivre').addEventListener('click', (e) => {
-      state.items = itemsEdites();
+      state.items = itemsFinaux();
       appliquerRecommandationIA();
       saveMachine(e.currentTarget, errEl);
     });
     overlay.querySelector('#pc-modifier').addEventListener('click', () => {
-      state.items = itemsEdites();
+      state.items = itemsFinaux();
       stepMode();
     });
     overlay.querySelector('#pc-propre').addEventListener('click', (e) => {
@@ -26894,6 +26954,121 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
   overlay.querySelector('#choix-controle').addEventListener('click', (e) => appliquer({ pointDeControle: true }, e.currentTarget));
 }
 
+// Même modale que ci-dessus (openChoixFrequence), même présentation — options
+// extraites du carnet, valeur libre, point de contrôle —, mais pour un item
+// PAS ENCORE enregistré : les écrans « Plan proposé par notre algorithme »
+// (dépôt de manuel, assistant d'ajout, fiche machine), avant que le plan
+// existe. Demandé explicitement par l'utilisateur plutôt qu'un simple champ
+// texte : la même modale que celle qui pilote déjà une tâche sur un plan
+// réel, pas un second éditeur divergent. Différences avec la version
+// « live » : pas d'écriture Supabase (le résultat de appliquerChoixSurTache
+// est rendu au consommateur via callback, qui l'applique à son tableau
+// local), pas de verrou d'enregistrement (rien n'est en vol), pas d'encart
+// « recalcule le rang dans l'Agenda » (le plan n'existe pas encore).
+function ouvrirChoixFrequenceApercu(item, plan, machine, onChoix) {
+  const options = optionsTache(item, plan, machine);
+  const uniteMot = (u) => trad((UNITES_INTERVALLE[u] || {}).libelle || u);
+  const unitePlan = uniteIntervalleDuPlan(plan, machine);
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay choix-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const cartesOptions = options.map((o, i) => {
+    const compatible = uniteCompatiblePlan(o.unite, plan, machine);
+    const libelle = libelleOption(o);
+    const estActuel = !!item.interval_choisi && item.interval_choisi === libelle;
+    const note = compatible ? '' : `<div class="hint">${tR('Pas dans l\'unité de ce plan ({unitePlan}) : la tâche restera un point de contrôle, sans échéance automatique.', { unitePlan: uniteMot(unitePlan) })}</div>`;
+    return `
+      <div class="choix-carte${estActuel ? ' is-actuel' : ''}">
+        <span class="choix-carte-ico">${picto('prochain')}</span>
+        <div class="choix-carte-corps">
+          <span class="choix-carte-valeur">${esc(libelle)}</span>
+          ${note}
+        </div>
+        ${estActuel
+          ? `<span class="badge ok">${picto('ajuste')}<span>${trad('Actuellement retenu')}</span></span>`
+          : `<button type="button" class="view-manual choix-option" data-choix="${i}">${trad('Choisir cette option')}</button>`}
+      </div>`;
+  }).join('');
+
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="mform-tete">
+        <div class="mform-tete-titre"><h2>${esc(item.label || trad('Nouvelle tâche'))}</h2></div>
+        <button type="button" class="mform-close" id="choix-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <p class="sub">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</p>
+      ${item.interval_choisi ? `<div class="choix-retenu"><span class="card-ico">${picto('ajuste')}</span>${esc(tR('Actuellement retenu : {choix}', { choix: item.interval_choisi }))}</div>` : ''}
+
+      ${options.length ? `
+      <div class="choix-bloc choix-bloc-carnet">
+        <div class="mform-head">
+          <div class="mform-head-gauche"><span class="mform-section-ico">${picto('carnet')}</span><h3>${trad('Options extraites du carnet constructeur')}</h3></div>
+          <span class="badge neutral">${tR('{n} cycle(s) proposé(s)', { n: options.length })}</span>
+        </div>
+        ${cartesOptions}
+      </div>` : ''}
+
+      <div class="choix-bloc choix-bloc-libre">
+        <div class="mform-head">
+          <div class="mform-head-gauche"><span class="mform-section-ico">${picto('crayon')}</span><h3>${trad('Personnalisation libre')}</h3></div>
+          <span class="mform-eyebrow">${trad('Option sur mesure')}</span>
+        </div>
+        <p class="muted-text">${trad('Si tes conditions d\'usage demandent une périodicité différente de ce que propose le carnet.')}</p>
+        <div class="field-row">
+          <div>
+            <label for="choix-valeur">${trad('Valeur')}</label>
+            <input id="choix-valeur" type="number" min="1" step="1" value="">
+          </div>
+          <div>
+            <label for="choix-unite">${trad('Unité')}</label>
+            <select id="choix-unite">
+              ${[trad('heures'), trad('km'), trad('jours'), trad('mois')].map(u => `<option value="${u}"${u === unitePlan ? ' selected' : ''}>${esc(uniteMot(u))}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="hint">${trad('Valeur dans son unité : la tâche aura sa propre échéance, dans cette unité. Elle ne compte pas dans l\'échéance du plan si l\'unité diffère.')}</div>
+        <div class="modal-actions" style="margin-top:10px;">
+          <button type="button" class="primary" id="choix-enregistrer">${picto('ajuste')}<span>${trad('Appliquer cette valeur')}</span></button>
+        </div>
+      </div>
+
+      <div class="choix-bloc choix-bloc-controle">
+        <button type="button" class="view-manual" id="choix-controle"><span class="card-ico">${picto('case')}</span><span>${trad('Garder comme point de contrôle (sans échéance)')}</span></button>
+        <p class="muted-text">${trad('La tâche reste visible et à cocher lors d\'un entretien, mais son échéance n\'est plus calculée automatiquement.')}</p>
+      </div>
+
+      <div class="hint" id="choix-erreur"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="choix-annuler">${trad('Annuler')}</button>
+      </div>
+    </div>
+  `;
+  const fermer = () => overlay.remove();
+  overlay.querySelector('#choix-close-x')?.addEventListener('click', fermer);
+  overlay.querySelector('#choix-annuler').addEventListener('click', fermer);
+  const appliquer = (choix) => {
+    const erreur = overlay.querySelector('#choix-erreur');
+    if (!choix.pointDeControle && !(Number(choix.interval) > 0)) {
+      erreur.textContent = trad('Renseigne une valeur supérieure à zéro.');
+      return;
+    }
+    fermer();
+    onChoix(choix);
+  };
+  overlay.querySelectorAll('.choix-option').forEach(btn => {
+    btn.addEventListener('click', () => appliquer(options[Number(btn.dataset.choix)]));
+  });
+  habillerSelect(overlay.querySelector('#choix-unite'), trad('Unité'));
+  overlay.querySelector('#choix-enregistrer').addEventListener('click', () => {
+    const valeur = parseFloat(overlay.querySelector('#choix-valeur').value);
+    const unite = overlay.querySelector('#choix-unite').value;
+    appliquer({ interval: valeur, unite, libelle: null, libre: true });
+  });
+  overlay.querySelector('#choix-controle').addEventListener('click', () => appliquer({ pointDeControle: true }));
+}
+
 // Les « points d'attention » viennent de l'analyse du carnet : ils ont été écrits
 // au moment où le compteur était vide. Une fois le compteur renseigné, une phrase
 // comme « La machine ayant 0 heure » contredit le haut de la fiche, qui affiche
@@ -28198,7 +28373,7 @@ function openMachineModal(companyId, categories, existing) {
             serviceDate: overlay.querySelector('#f-service-date')?.value || existing.service_date || null,
           }
         );
-        if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse);
+        if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse, existing);
         if (!existing.image_url && !overlay._pendingPhotoBlob) {
           try {
             const photoBlob = await renderPdfFirstPageAsBlob(blob);
@@ -28294,7 +28469,7 @@ function openMachineModal(companyId, categories, existing) {
     if (champTaches && resultat.taches) champTaches.value = resultat.taches;
     // L'analyse vient de finir : on demande ce que le client veut faire du
     // plan trouvé avant de laisser le bloc 04 « Mode de suivi » visible.
-    presenterChoixPlanEditForm(overlay, resultat);
+    presenterChoixPlanEditForm(overlay, resultat, existing);
   };
   const contexteCarnetPhotos = () => ({
     trackingMode: overlay.querySelector('input[name=tm]:checked')?.value || 'days',
@@ -28325,7 +28500,7 @@ function openMachineModal(companyId, categories, existing) {
       brancherCarnetPdf(overlay, file, contexteModal(), apresCarnetPhotos,
         async () => {
           const resultatAnalyse = await analyzeManualAndFill(overlay, file, contexteModal().trackingMode, contexteModal());
-          if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse);
+          if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse, existing);
         });
       renderPdfFirstPageAsBlob(file).then(blob => {
         overlay._pendingPhotoBlob = blob;
