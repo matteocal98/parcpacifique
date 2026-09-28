@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-scbzu8aRlZDenhA/BxFkLUrAdKLKD0DvMf1Gx2O+36E=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-c4hGgp+mbwcbZ6GQdVbBHnXBiy94ravJ6wkGGBgJ3Rs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5540,8 +5540,8 @@
   @media (min-width:960px){.stock-grid-2.is-magasins{grid-template-columns:1fr 1fr;}}
   @media (min-width:960px){.stock-grid-2.is-catalogue{grid-template-columns:7fr 5fr;}}
 
-  .stock-liste{display:flex;flex-direction:column;gap:10px;}
-  .stock-liste.is-scroll{max-height:360px;overflow-y:auto;padding-right:4px;}
+  .stock-liste{display:flex;flex-direction:column;gap:10px;background:var(--surface-soft);border-radius:var(--r-card);padding:10px;}
+  .stock-liste.is-scroll{max-height:360px;overflow-y:auto;padding-right:8px;}
   .stock-row{padding:13px 14px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .15s,background .15s;}
   .stock-row:hover{border-color:rgba(91,82,223,.3);background:rgba(91,82,223,.02);}
   .stock-row-gauche{display:flex;align-items:center;gap:13px;min-width:0;}
@@ -20195,7 +20195,7 @@ function blocMouvementsStockHtml() {
       </div>
       <div class="stock-section-body">
         <div class="stock-liste" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
-        <button type="button" class="stock-btn-outline" id="stock-mouvements-plus" hidden style="margin-top:14px;width:100%;justify-content:center;">${trad('Voir plus')}</button>
+        <button type="button" class="stock-cta" id="stock-mouvements-plus" hidden style="margin-top:14px;">${trad('Voir plus')}</button>
       </div>
     </section>`;
 }
