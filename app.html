@@ -5103,6 +5103,15 @@
      abonnement »). */
   .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--surface);}
   .vue-compte input:not([type=checkbox]):focus,.vue-compte select:focus,.vue-compte textarea:focus{background:var(--surface);}
+  /* « Activité principale » n'est pas un <select> visible : habillerSelect()
+     le masque et pose un <button class="champ-select"> à la place (même
+     mécanisme que le reste de l'app, pour éviter l'habillage natif Android
+     d'un <select> à options). La règle juste au-dessus ne cible que la
+     balise <select> (masquée) — le bouton, lui, restait sur le fond
+     --surface-soft générique et sur .champ-select:disabled{opacity:.6} :
+     c'est ce qui donnait encore un fond gris-bleu, pas le <select> lui-même. */
+  .vue-compte .champ-select{background:var(--surface);}
+  .vue-compte .champ-select:disabled{opacity:1;}
   .vue-compte button.secondary{background:var(--ink);border-color:var(--ink);color:#fff;}
   .vue-compte button.secondary:hover{background:var(--dark);border-color:var(--dark);}
   .vue-compte .membre-ligne{background:var(--surface-soft);}
