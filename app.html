@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g9K3e4qEMgCEPhx1XZ4I8+XOLIrJPdAhNqynIKYBlzw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hZVLb5qKGmOd2LwmAT4JdX/hqmgDqdOtt1IQZkbR6NE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -22339,6 +22339,12 @@ function presenterChoixPlanEditForm(overlay, resultat) {
         ? esc(tR('{n} échéance(s) détectée(s) dans le manuel.', { n: items.length }))
         : esc(trad('Analyse terminée : vérifie le mode de suivi ci-dessous si besoin.'))}
     </div>
+    ${items.length ? `
+    <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+    <div class="ref-scroll"><table class="ref-table">
+      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
+      <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+    </table></div>` : ''}
     <div class="plan-choix">
       <div class="step-options">
         <button type="button" class="option-tile" id="pc-suivre"><span class="option-ico">${picto('coche')}</span><span class="option-tile-corps">${trad('Suivre ce plan')}<span class="opt-sub">${trad('Le mode de suivi et l\'intervalle déjà proposés sont conservés tels quels.')}</span></span></button>
@@ -22653,6 +22659,12 @@ function openManualUploadModal(presetMachine, presetFile) {
         ${items.length ? ' — ' + tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }) : ''}
         ${result.confidence ? ' — ' + tR('confiance : {valeur}', { valeur: esc(result.confidence) }) : ''}
       </div>` : ''}
+      ${montrerChoix && items.length ? `
+      <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+      <div class="ref-scroll"><table class="ref-table">
+        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
+        <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+      </table></div>` : ''}
       ${montrerChoix ? `
       <div class="plan-choix">
         <div class="step-options">
@@ -24362,6 +24374,12 @@ function openAddWizard(companyId, categories) {
         <strong>${tR('Échéance proposée : tous les {n} {unite}', { n: suggested, unite: mode === 'hours' ? unit.word : trad('jours') })}</strong>
         ${items.length ? ' — ' + tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }) : ''}
       </div>
+      ${items.length ? `
+      <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+      <div class="ref-scroll"><table class="ref-table">
+        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
+        <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+      </table></div>` : ''}
       <div class="plan-choix">
         <div class="step-options">
           <button type="button" class="option-tile" id="pc-suivre"><span class="option-ico">${picto('coche')}</span><span class="option-tile-corps">${trad('Suivre ce plan')}<span class="opt-sub">${trad('On active tel quel le mode de suivi et l\'intervalle proposés.')}</span></span></button>
