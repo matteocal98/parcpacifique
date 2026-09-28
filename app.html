@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YGAhlBXzfw0l2slC5ASULEX0GfiGGEINhlqX0gHJj7Y=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-P7uDu+CVtZHv/lUjewO/lP0Peq+u6q/o5b9OVbO1BuI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -22341,9 +22341,15 @@ function presenterChoixPlanEditForm(overlay, resultat) {
     </div>
     ${items.length ? `
     <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+    <p class="hint">${trad('Corrige le libellé ou la fréquence de chaque ligne, ou retire une ligne détectée par erreur.')}</p>
     <div class="ref-scroll"><table class="ref-table">
-      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
-      <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
+      <tbody id="fp-items-tbody">${items.map((it, i) => `
+        <tr data-item-index="${i}">
+          <td><input type="text" class="fp-item-label" value="${esc(it.label || '')}"></td>
+          <td><input type="text" class="fp-item-frequency" value="${esc(it.frequency || '')}"></td>
+          <td><button type="button" class="fp-item-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+        </tr>`).join('')}</tbody>
     </table></div>` : ''}
     <div class="plan-choix">
       <div class="step-options">
@@ -22353,8 +22359,26 @@ function presenterChoixPlanEditForm(overlay, resultat) {
       </div>
     </div>`;
   bloc.hidden = true;
-  zone.querySelector('#pc-suivre').addEventListener('click', () => { bloc.hidden = true; });
+  zone.querySelector('#fp-items-tbody')?.addEventListener('click', (e) => {
+    const bouton = e.target.closest('.fp-item-retirer');
+    if (bouton) bouton.closest('tr')?.remove();
+  });
+  // Lit l'état actuel du tableau (édité/des lignes retirées) dans
+  // overlay._aiItems — la variable que le formulaire lit déjà au moment
+  // d'enregistrer (voir #pc-propre juste en dessous, qui la remet à null).
+  const appliquerItemsEdites = () => {
+    const tbody = zone.querySelector('#fp-items-tbody');
+    if (!tbody) return;
+    overlay._aiItems = [...tbody.querySelectorAll('tr')].map((tr) => {
+      const original = items[Number(tr.dataset.itemIndex)] || {};
+      const label = tr.querySelector('.fp-item-label').value.trim();
+      const frequency = tr.querySelector('.fp-item-frequency').value.trim();
+      return { ...original, label, frequency };
+    }).filter((it) => it.label);
+  };
+  zone.querySelector('#pc-suivre').addEventListener('click', () => { appliquerItemsEdites(); bloc.hidden = true; });
   zone.querySelector('#pc-modifier').addEventListener('click', () => {
+    appliquerItemsEdites();
     bloc.hidden = false;
     bloc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
@@ -22602,7 +22626,11 @@ function openManualUploadModal(presetMachine, presetFile) {
   // plan » : on n'invente pas un 4ᵉ écran pour ce cas, celui-là existait déjà.
   function stepReview(result, choix) {
     const mode = planIsCounter(machine.plan) ? (counterUnitOf(machine) === 'km' ? trad('km') : 'hours') : 'days';
-    const items = normalizeItems(result?.items);
+    // `let`, pas `const` : sur l'écran « Modifier ce plan », chaque ligne
+    // devient éditable (voir plus bas) — ce tableau est réassigné avec l'état
+    // du formulaire juste avant l'enregistrement, jamais un second tableau
+    // séparé à tenir synchronisé.
+    let items = normalizeItems(result?.items);
     const unit = counterUnitFromMode(mode);
     const suggested = mode === 'days'
       ? (result?.interval_days || machine.plan?.interval_days || FALLBACK_INTERVAL_DAYS)
@@ -22697,9 +22725,15 @@ function openManualUploadModal(presetMachine, presetFile) {
         <input id="mu-interval" type="number" min="1" value="${esc(suggested)}">
         ${items.length ? `
           <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+          <p class="hint">${trad('Corrige le libellé ou la fréquence de chaque ligne, ou retire une ligne détectée par erreur — les tâches supprimées ou modifiées ici sont celles qui seront enregistrées.')}</p>
           <div class="ref-scroll"><table class="ref-table">
-            <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
-            <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+            <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
+            <tbody id="mu-items-tbody">${items.map((it, i) => `
+              <tr data-item-index="${i}">
+                <td><input type="text" class="mu-item-label" value="${esc(it.label || '')}"></td>
+                <td><input type="text" class="mu-item-frequency" value="${esc(it.frequency || '')}"></td>
+                <td><button type="button" class="mu-item-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+              </tr>`).join('')}</tbody>
           </table></div>` : ''}
         <label for="mu-tasks"><span class="label-ico">${picto('message')}</span>${trad('Tâches de maintenance')}</label>
         <textarea id="mu-tasks">${esc(result.tasks || machine.plan?.tasks || '')}</textarea>
@@ -22724,10 +22758,30 @@ function openManualUploadModal(presetMachine, presetFile) {
       overlay.querySelector('#pc-propre').addEventListener('click', () => stepReview(null));
       return;
     }
+    // Retirer une ligne détectée par erreur : simple suppression DOM, l'état
+    // réel n'est lu qu'au moment d'enregistrer (voir #mu-activate) — jamais
+    // besoin de garder un tableau JS synchronisé pendant la frappe.
+    overlay.querySelector('#mu-items-tbody')?.addEventListener('click', (e) => {
+      const bouton = e.target.closest('.mu-item-retirer');
+      if (bouton) bouton.closest('tr')?.remove();
+    });
     overlay.querySelector('#mu-activate').addEventListener('click', () => {
       if (!result) { close(); boot(trad('Carnet attaché')); return; }
       const interval = parseInt(overlay.querySelector('#mu-interval').value, 10) || suggested;
       const tasks = overlay.querySelector('#mu-tasks').value.trim();
+      // Lignes éditées/retirées par l'utilisateur : chaque ligne restante
+      // garde tous ses champs d'origine (interval/due_at/etc., déjà résolus
+      // par l'analyse), seuls label/frequency peuvent avoir été corrigés ici
+      // — jamais un item reconstruit de zéro qui perdrait ces champs.
+      const tbody = overlay.querySelector('#mu-items-tbody');
+      if (tbody) {
+        items = [...tbody.querySelectorAll('tr')].map((tr) => {
+          const original = items[Number(tr.dataset.itemIndex)] || {};
+          const label = tr.querySelector('.mu-item-label').value.trim();
+          const frequency = tr.querySelector('.mu-item-frequency').value.trim();
+          return { ...original, label, frequency };
+        }).filter((it) => it.label);
+      }
       activerPlan(interval, tasks, overlay.querySelector('#mu-activate'), overlay.querySelector('#mu-error'));
     });
   }
@@ -24394,9 +24448,15 @@ function openAddWizard(companyId, categories) {
       </div>
       ${items.length ? `
       <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
+      <p class="hint">${trad('Corrige le libellé ou la fréquence de chaque ligne, ou retire une ligne détectée par erreur.')}</p>
       <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
-        <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
+        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
+        <tbody id="wiz-items-tbody">${items.map((it, i) => `
+          <tr data-item-index="${i}">
+            <td><input type="text" class="wiz-item-label" value="${esc(it.label || '')}"></td>
+            <td><input type="text" class="wiz-item-frequency" value="${esc(it.frequency || '')}"></td>
+            <td><button type="button" class="wiz-item-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
+          </tr>`).join('')}</tbody>
       </table></div>` : ''}
       <div class="plan-choix">
         <div class="step-options">
@@ -24409,6 +24469,23 @@ function openAddWizard(companyId, categories) {
     `);
     overlay.querySelector('#wiz-back').addEventListener('click', () => stepUpload(false));
     const errEl = overlay.querySelector('#f-error');
+    overlay.querySelector('#wiz-items-tbody')?.addEventListener('click', (e) => {
+      const bouton = e.target.closest('.wiz-item-retirer');
+      if (bouton) bouton.closest('tr')?.remove();
+    });
+    // Lit l'état actuel du tableau (édité/des lignes retirées) — jamais un
+    // second tableau JS tenu synchronisé pendant la frappe, lu seulement au
+    // moment où l'utilisateur choisit une des 3 actions.
+    const itemsEdites = () => {
+      const tbody = overlay.querySelector('#wiz-items-tbody');
+      if (!tbody) return items;
+      return [...tbody.querySelectorAll('tr')].map((tr) => {
+        const original = items[Number(tr.dataset.itemIndex)] || {};
+        const label = tr.querySelector('.wiz-item-label').value.trim();
+        const frequency = tr.querySelector('.wiz-item-frequency').value.trim();
+        return { ...original, label, frequency };
+      }).filter((it) => it.label);
+    };
     // Même petite logique que stepMode() (recommandation IA → state), reprise
     // ici pour les deux choix qui n'ouvrent PAS cette étape : dupliquée plutôt
     // que sur-abstraite, comme le reste de cet assistant (voir traiterFichiersCarnet).
@@ -24420,10 +24497,14 @@ function openAddWizard(companyId, categories) {
       state.intervalHours = overlay._aiIntervalHours || state.intervalHours;
     }
     overlay.querySelector('#pc-suivre').addEventListener('click', (e) => {
+      state.items = itemsEdites();
       appliquerRecommandationIA();
       saveMachine(e.currentTarget, errEl);
     });
-    overlay.querySelector('#pc-modifier').addEventListener('click', stepMode);
+    overlay.querySelector('#pc-modifier').addEventListener('click', () => {
+      state.items = itemsEdites();
+      stepMode();
+    });
     overlay.querySelector('#pc-propre').addEventListener('click', (e) => {
       state.items = null;
       state.tasks = '';
