@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MBlNl9xLvw/sjRaksrtiF82pskterNlAEF0aA0OVG1g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-QhS7QFg7S/BZMiqUJ5tvH2a8yP2gARHRbla1IBNlNjw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1488,8 +1488,14 @@
   .machine-jauge-reperes{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:700;color:var(--ink-3);}
   .machine-jauge-reperes .is-late{color:var(--late);}
   .machine-jauge-pied{font-size:11px;font-weight:700;color:var(--ink-4);}
+  /* display:inline-flex (pas inline-block) : cette règle écrasait le
+     display:inline-flex posé plus haut sur le même sélecteur .badge (même
+     spécificité, celle-ci vient après en cascade) — un badge avec picto+
+     texte (ex. « ANALYSÉ » sur une carte de Plan d'entretien) se
+     retrouvait avec le SVG (display:block) sur sa propre ligne, séparé du
+     texte, au lieu d'une seule ligne picto+texte. */
   .badge{
-    display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;text-transform:uppercase;
     letter-spacing:.02em;padding:5px 12px;border-radius:var(--r-pill);border:none;white-space:nowrap;
   }
   .badge.ok{color:var(--ok-ink);background:var(--ok-bg);}
@@ -3947,21 +3953,27 @@
   .prep-pied{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);}
   .priority-ico{display:none;}
   .priority-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-  .dropzone{gap:12px;}
+  /* Bloc « Déposer un manuel PDF » réduit d'au moins moitié en hauteur
+     (signalé par l'utilisateur, trop haut) : dz-zone passait de ~220px de
+     min-height + 36px de padding vertical à un icône compact et un contenu
+     tenant en une ligne, plutôt qu'un grand hero pleine hauteur. */
+  .dropzone{gap:6px;}
   .dropzone .dz-titre{display:flex;align-items:center;gap:10px;color:var(--primary-dark);}
-  .dropzone .dz-title{font-size:19px;font-weight:800;color:var(--ink);}
+  .dropzone .dz-title{font-size:16px;font-weight:800;color:var(--ink);}
+  .dropzone .dz-help{font-size:12px;}
   .dropzone .dz-zone{
-    width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;
-    min-height:220px;padding:36px 20px;border:2px dashed rgba(35,111,224,.4);border-radius:var(--r-card);
+    width:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;text-align:left;
+    min-height:0;padding:12px 16px;border:2px dashed rgba(35,111,224,.4);border-radius:var(--r-card);
     background:rgba(35,111,224,.05);transition:background .15s ease,border-color .15s ease;
   }
   .dropzone .dz-icon{
-    display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;flex:0 0 auto;
     background:rgba(35,111,224,.14);color:#236FE0;font-size:0;
   }
-  .dropzone .dz-icon svg{width:34px;height:34px;}
-  .dropzone .dz-glisser{font-size:18px;font-weight:800;line-height:1.3;color:var(--ink);}
-  .dropzone .dz-formats{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
+  .dropzone .dz-icon svg{width:18px;height:18px;}
+  .dropzone .dz-texte{display:flex;flex-direction:column;gap:2px;text-align:left;min-width:0;}
+  .dropzone .dz-glisser{font-size:14px;font-weight:800;line-height:1.3;color:var(--ink);}
+  .dropzone .dz-formats{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
   .dropzone:hover .dz-zone,.dropzone.is-over .dz-zone{background:var(--primary-tint);border-color:var(--primary-dark);}
   .dropzone:hover,.dropzone.is-over{background:var(--surface);border-color:var(--line-3);}
 
@@ -4236,7 +4248,6 @@
        Android ne le montre pas) : le dépôt reste possible par la carte du manuel
        et par l'onglet « Manuels ». */
     .dash-side .dropzone{display:none;}
-    .dropzone .dz-zone{min-height:0;padding:24px 16px;}
 
     /* Barre d'onglets : icônes plus lisibles, bouton « + » rond et surélevé */
     .tab .tab-icon{font-size:22px;}
@@ -4490,22 +4501,31 @@
      OCR, ni taux — le produit a déjà tranché ce point (voir dueInfo/jaugeIntervalleHtml,
      plus haut) : un pourcentage qui n'est mesuré nulle part n'est pas affiché.
      ══════════════════════════════════════════════════════════════════════════ */
+  /* Plus de carte-mère « Carnets d'entretien » (voir .manuel-carte plus bas) :
+     un en-tête nu, comme le titre de .parc-toolbar-tete sur Machines, pas un
+     .card-head sur fond blanc. */
+  .manuels-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .manuels-titre{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin:0;}
   .manuels-resume{font-size:12.5px;font-weight:700;color:var(--ink-2);white-space:nowrap;}
+  /* Même langage que .parc-filtres (Parc Machines) : une barre blanche
+     flottante, portée par l'ombre, pas un filet à l'intérieur d'une carte. */
   .manuels-barre{
     display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
-    padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--line-2);
+    background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);
+    padding:14px 16px;margin-bottom:16px;
   }
   .manuels-recherche{flex:0 1 260px;min-width:160px;}
   .manuels-recherche input[type=search]{
-    padding-left:38px;min-height:38px;background:var(--surface);border:1.5px solid var(--line);font-size:13.5px;
+    padding-left:38px;min-height:38px;background:var(--surface-soft);border:1.5px solid var(--line);font-size:13.5px;
   }
   .manuels-grille{display:flex;flex-direction:column;gap:12px;}
+  /* Même langage que .mstrip (Parc Machines) : pas de carte-mère blanche qui
+     enveloppe la liste (la page « reprend le design de Machines », signalé
+     par l'utilisateur) — chaque .manuel-carte flotte directement sur le fond
+     de page, blanche et portée par l'ombre plutôt que par un contour. */
   .manuel-carte{
-    display:flex;gap:14px;padding:14px;border:1.5px solid var(--line);border-radius:var(--r-card);
-    /* --surface-soft, pas --surface : cette carte vit toujours à l'intérieur
-       de la carte blanche « Carnets d'entretien » — blanc sur blanc signalé
-       par l'utilisateur. */
-    background:var(--surface-soft);box-shadow:var(--shadow-soft);
+    display:flex;gap:14px;padding:14px;border-radius:var(--r-lg);
+    background:var(--surface);box-shadow:var(--shadow-soft);
   }
   .manuel-vignette{
     flex:0 0 auto;width:72px;height:64px;border-radius:10px;overflow:hidden;
@@ -4525,12 +4545,16 @@
   .manuel-fichier svg{flex:0 0 auto;width:16px;height:16px;color:var(--primary-dark);}
   .manuel-fichier.is-vide{color:var(--ink-3);font-style:italic;}
   .manuel-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px;}
+  /* Contour noir (border:2px solid var(--ink)) retiré, signalé par
+     l'utilisateur : même langage que .mstrip-btn-icone (Parc Machines),
+     un fond teinté sans bordure épaisse plutôt qu'un cadre encre. */
   .manuel-actions .btn-row-action{
-    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
-    background:var(--surface);border:2px solid var(--ink);color:var(--ink);padding:8px 14px;font-size:12.5px;
+    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;height:40px;
+    background:var(--surface-soft);border:none;color:var(--ink);padding:0 14px;font-size:12.5px;font-weight:700;
+    border-radius:var(--r-md);
   }
-  .manuel-actions .btn-row-action:hover{background:rgba(99,102,241,.08);}
-  .manuel-actions .btn-principal{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .manuel-actions .btn-row-action:hover{background:var(--line-2);}
+  .manuel-actions .btn-principal{background:var(--primary-dark);color:#fff;}
   .manuel-actions .btn-principal:hover{background:var(--dark);}
 
   @media (min-width:900px){
@@ -14890,9 +14914,11 @@ function dropzoneHtml(id) {
       <span class="dz-titre"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg><span class="dz-title">${trad('Déposer un manuel PDF')}</span></span>
       <span class="dz-help">${trad('Notre algorithme extrait les échéances (heures, mois) et crée le plan d\'entretien. Tu valides avant activation.')}</span>
       <span class="dz-zone">
-        <span class="dz-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 18a4 4 0 01-.6-7.96A6 6 0 0117.9 8.6 4.5 4.5 0 0117 18M12 12v7M9 15l3-3 3 3"/></svg></span>
-        <span class="dz-glisser">${trad('Glissez votre PDF ici ou parcourez')}</span>
-        <span class="dz-formats">${trad('Format accepté : PDF')}</span>
+        <span class="dz-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 18a4 4 0 01-.6-7.96A6 6 0 0117.9 8.6 4.5 4.5 0 0117 18M12 12v7M9 15l3-3 3 3"/></svg></span>
+        <span class="dz-texte">
+          <span class="dz-glisser">${trad('Glissez votre PDF ici ou parcourez')}</span>
+          <span class="dz-formats">${trad('Format accepté : PDF')}</span>
+        </span>
       </span>
     </div>`;
 }
@@ -16603,25 +16629,22 @@ VIEWS.manuals = {
     const f = manuelsFilters();
     return `
       ${dropzoneHtml('manuals-drop')}
-      <section class="card manuels-liste">
-        <div class="card-head">
-          <h2 class="card-title">${trad('Carnets d\'entretien')}</h2>
-          <span class="spacer"></span>
-          <span class="manuels-resume">${tR('{n} indexé(s)', { n: analyse })}${aValider ? ` · ${tR('{n} à valider', { n: aValider })}` : ''}</span>
+      <div class="manuels-tete">
+        <h2 class="manuels-titre">${trad('Carnets d\'entretien')}</h2>
+        <span class="manuels-resume">${tR('{n} indexé(s)', { n: analyse })}${aValider ? ` · ${tR('{n} à valider', { n: aValider })}` : ''}</span>
+      </div>
+      <div class="manuels-barre">
+        <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
+          ${manuelChipHtml('all', trad('Tous'), total)}
+          ${manuelChipHtml('analyse', trad('Analysés'), analyse)}
+          ${manuelChipHtml('valider', trad('À valider'), aValider)}
         </div>
-        <div class="manuels-barre">
-          <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
-            ${manuelChipHtml('all', trad('Tous'), total)}
-            ${manuelChipHtml('analyse', trad('Analysés'), analyse)}
-            ${manuelChipHtml('valider', trad('À valider'), aValider)}
-          </div>
-          <div class="search-wrap manuels-recherche">
-            <span class="search-icon" aria-hidden="true">⌕</span>
-            <input id="manuels-search" type="search" value="${esc(f.q)}" placeholder="${trad('Filtrer une machine…')}" aria-label="${trad('Filtrer une machine')}">
-          </div>
+        <div class="search-wrap manuels-recherche">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="manuels-search" type="search" value="${esc(f.q)}" placeholder="${trad('Filtrer une machine…')}" aria-label="${trad('Filtrer une machine')}">
         </div>
-        <div class="manuels-grille" id="manuels-list"></div>
-      </section>`;
+      </div>
+      <div class="manuels-grille" id="manuels-list"></div>`;
   },
   mount() {
     const root = document.getElementById('view-root');
