@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hZVLb5qKGmOd2LwmAT4JdX/hqmgDqdOtt1IQZkbR6NE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YGAhlBXzfw0l2slC5ASULEX0GfiGGEINhlqX0gHJj7Y=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -22632,15 +22632,33 @@ function openManualUploadModal(presetMachine, presetFile) {
             planCounterPatch(interval, machine.plan ? planReminderCounter(machine.plan) : FALLBACK_REMINDER_HOURS),
             planNextDueCounterPatch((machineCounter(machine) || 0) + interval));
         }
-        if (machine.plan?.id) {
-          const { error } = await sb.from('maintenance_plans').update(payload).eq('id', machine.plan.id);
+        let planId = machine.plan?.id;
+        if (planId) {
+          const { error } = await sb.from('maintenance_plans').update(payload).eq('id', planId);
           if (error) throw error;
         } else {
-          const { error } = await sb.from('maintenance_plans').insert({ ...payload, machine_id: machine.id });
+          const { data, error } = await sb.from('maintenance_plans').insert({ ...payload, machine_id: machine.id }).select('id').single();
           if (error) throw error;
+          planId = data.id;
         }
         close();
-        boot(trad('Plan activé'));
+        // « Modifier ce plan » (signalé par l'utilisateur, capture à l'appui) :
+        // l'intervalle réglé au-dessus ne touche QUE l'échéance de SYNTHÈSE du
+        // plan (interval_days/next_due_at) — chaque tâche garde SA propre
+        // fréquence détectée par l'IA (payload.items, jamais réécrit ici).
+        // Pour ajuster une tâche précise, on amène directement sur la fiche du
+        // plan, qui sait déjà le faire tâche par tâche (openChoixFrequence/
+        // appliquerChoixTache) — pas de second éditeur point par point à
+        // construire ici, en double de celui qui existe déjà. Suivre/Faire
+        // mon propre plan gardent le comportement d'avant (reboot + retour à
+        // l'écran de départ) : rien à ajuster tout de suite dans ces 2 cas.
+        if (choix === 'modifier') {
+          machine.plan = { ...(machine.plan || {}), ...payload, id: planId };
+          showToast(trad('Plan activé'));
+          openPlanView(machine, UI.companyId, UI.categories);
+        } else {
+          boot(trad('Plan activé'));
+        }
       } catch (err) {
         if (errEl) errEl.textContent = trad('Erreur :') + " " + err.message;
         if (btn) { btn.disabled = false; btn.textContent = trad('Activer le plan'); }
