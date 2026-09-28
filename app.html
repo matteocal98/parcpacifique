@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HEkcpR5Mt6+JwI21l4a9R3hi9tfPS6MSBOjZb/panpI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gSHk+Rm7CdUoTjROYh7jWQc65aXpgeX5y1PqHsweUHY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1956,11 +1956,14 @@
   .icon-btn svg{width:14px;height:14px;flex:0 0 auto;display:block;}
 
   label{display:block;font-size:14px;font-weight:700;margin-bottom:6px;margin-top:15px;color:var(--ink);}
-  /* Champ blanc à bordure visible, plutôt qu'un aplat gris sans contour :
-     c'est le langage des cartes de la page publique. */
+  /* Champ teinté à bordure visible, plutôt qu'un aplat blanc : le champ vit
+     presque toujours dans une carte déjà blanche (var(--surface)), donc un
+     fond identique au sien ne se distinguait que par la bordure — blanc sur
+     blanc signalé par l'utilisateur. --surface-soft au repos, blanc net au
+     focus pour que le champ actif ressorte. */
   input,select,textarea{
     width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--r-chip);
-    background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);
+    background:var(--surface-soft);font-family:inherit;font-size:16px;color:var(--ink);
     transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
   }
   input:focus,select:focus,textarea:focus{
@@ -1976,7 +1979,7 @@
      page ou l'appli. */
   .champ-select{
     width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--r-chip);
-    background:var(--surface);font-family:inherit;font-size:16px;color:var(--ink);text-align:left;
+    background:var(--surface-soft);font-family:inherit;font-size:16px;color:var(--ink);text-align:left;
     cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
     transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
   }
@@ -4483,7 +4486,10 @@
   .manuels-grille{display:flex;flex-direction:column;gap:12px;}
   .manuel-carte{
     display:flex;gap:14px;padding:14px;border:1.5px solid var(--line);border-radius:var(--r-card);
-    background:var(--surface);box-shadow:var(--shadow-soft);
+    /* --surface-soft, pas --surface : cette carte vit toujours à l'intérieur
+       de la carte blanche « Carnets d'entretien » — blanc sur blanc signalé
+       par l'utilisateur. */
+    background:var(--surface-soft);box-shadow:var(--shadow-soft);
   }
   .manuel-vignette{
     flex:0 0 auto;width:72px;height:64px;border-radius:10px;overflow:hidden;
@@ -5062,15 +5068,30 @@
   .badge-auto{font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--primary-dark);background:rgba(91,82,223,.14);border-radius:999px;padding:3px 9px;text-transform:uppercase;white-space:nowrap;}
   .tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:rgba(91,82,223,.08);border-color:rgba(91,82,223,.22);}
 
-  /* Toute la page « Mon compte » contrastée : chaque champ de saisie et chaque
-     bouton porte un léger voile de couleur plutôt qu'un blanc plat sur les
-     cartes blanches — même teinte indigo que le reste du produit
-     (--primary-tint), la zone sensible gardant son propre orange. */
-  .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--primary-tint);}
+  /* Toute la page « Mon compte » contrastée : chaque bouton porte un léger
+     voile de couleur plutôt qu'un blanc plat sur les cartes blanches — même
+     teinte indigo que le reste du produit (--primary-tint), la zone sensible
+     gardant son propre orange. Les CHAMPS, eux, font l'inverse depuis la
+     demande explicite de l'utilisateur : le voile vit sur le sous-bloc
+     .plan-field (règle plus bas), le champ reste blanc pour ressortir dessus
+     — comme n'importe quelle carte du reste de l'app. */
+  .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--surface);}
   .vue-compte input:not([type=checkbox]):focus,.vue-compte select:focus,.vue-compte textarea:focus{background:var(--surface);}
   .vue-compte button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-compte button.secondary:hover{background:var(--primary-tint-2);}
   .vue-compte .membre-ligne{background:var(--primary-tint);}
+
+  /* Sous-bloc de champ des cartes « Société & Identité légale » et
+     « Identifiants & Connexion » : le voile de couleur (ex --primary-tint sur
+     le champ lui-même) se déplace sur ce sous-bloc, resserré par rapport à
+     l'espacement générique (15px) qui donnait trop d'air entre les champs. */
+  .vue-compte .plan-field{
+    background:var(--surface-soft);border:1px solid var(--line-2);border-radius:var(--r-chip);
+    padding:10px 12px;margin-top:0;margin-bottom:10px;
+  }
+  .vue-compte .plan-field:last-child{margin-bottom:0;}
+  .vue-compte .plan-field label,.vue-compte .plan-field .label{margin-top:0;margin-bottom:6px;}
+  .vue-compte .plan-field .value{font-weight:700;}
 
   /* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
      léger voile de couleur plutôt qu'un blanc plat, comme sur « Mon compte ». */
@@ -6107,7 +6128,17 @@
   .tco-donut-legende-carte .heures{font-size:10px;color:var(--dark-ink);font-weight:500;}
   .tco-donut-legende-carte .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:var(--r-chip);}
 
-  .tco-clst-carte{position:relative;overflow:hidden;border-radius:var(--r-lg);background:#fff;border:1px solid var(--line);cursor:pointer;transition:box-shadow .15s,border-color .15s;}
+  /* Classement TCO : le donut et la liste des machines forment 2 blocs
+     distincts (espace entre eux), et les cartes-machine flottent sur un
+     fond teinté au lieu de se toucher sur du blanc pur — signalé par
+     l'utilisateur ("mettre de l'espace entre les blocs et du background sur
+     la liste des machines"). .alert-list garde son style filet ailleurs
+     (.alert-row) : la règle ci-dessous est scopée à ce seul écran. */
+  #tco-classement-dynamique{display:flex;flex-direction:column;gap:16px;}
+  #tco-classement-section .alert-list{
+    gap:10px;background:var(--surface-soft);border-radius:var(--r-md);padding:10px;
+  }
+  .tco-clst-carte{position:relative;overflow:hidden;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);cursor:pointer;transition:box-shadow .15s,border-color .15s;}
   .tco-clst-carte:hover{border-color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
   .tco-clst-carte:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
   .tco-clst-carte-accent{position:absolute;left:0;top:0;bottom:0;width:5px;}
@@ -21368,12 +21399,16 @@ VIEWS.account = {
           <div class="label">${trad('E-mail de connexion actuel')}</div>
           <div class="value">${esc(UI.email || '—')}</div>
         </div>
-        <label for="acc-email">${trad('Nouvel e-mail de connexion')}</label>
-        <input id="acc-email" type="email" autocomplete="email" placeholder="${trad('nouvelle@adresse.nc')}">
-        <label for="acc-password">${trad('Confirmer par mot de passe actuel')}</label>
-        <div class="password-wrap">
-          <input id="acc-password" type="password" autocomplete="current-password">
-          <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+        <div class="plan-field">
+          <label for="acc-email">${trad('Nouvel e-mail de connexion')}</label>
+          <input id="acc-email" type="email" autocomplete="email" placeholder="${trad('nouvelle@adresse.nc')}">
+        </div>
+        <div class="plan-field">
+          <label for="acc-password">${trad('Confirmer par mot de passe actuel')}</label>
+          <div class="password-wrap">
+            <input id="acc-password" type="password" autocomplete="current-password">
+            <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+          </div>
         </div>
         <div class="hint">${trad('Le changement est confirmé par email : la nouvelle adresse ne devient active qu\'après validation. Le mot de passe est demandé pour qu\'une session ouverte ne suffise pas à détourner le compte.')}</div>
         <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
