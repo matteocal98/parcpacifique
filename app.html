@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gSHk+Rm7CdUoTjROYh7jWQc65aXpgeX5y1PqHsweUHY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MBlNl9xLvw/sjRaksrtiF82pskterNlAEF0aA0OVG1g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1969,6 +1969,14 @@
   input:focus,select:focus,textarea:focus{
     outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-tint);background:var(--surface);
   }
+  /* Chrome assombrit un <select disabled> à 70% d'opacité par défaut (pas
+     un <input disabled>, ni notre background:var(--surface-soft) : mesuré
+     en direct, opacity:.7 vient de la feuille de style native, pas de ce
+     fichier) — laisse transparaître la carte/le sous-bloc derrière et
+     donne un faux ton bleu-gris signalé par l'utilisateur. Repassé à 1 :
+     la teinte du champ suffit déjà à montrer qu'il est désactivé, comme
+     pour les <input>. */
+  select:disabled{opacity:1;}
   textarea{resize:vertical;min-height:64px;}
 
   /* MENU MAISON (habillerSelect/ouvrirListeChoix) : un bouton habillé comme
@@ -5028,9 +5036,15 @@
   .compte-formule-lien:hover{color:#fff;}
 
   /* Sections empilées dans une même carte (ex. « Données locales & Sécurité ») :
-     un filet au-dessus, pas une seconde carte — la carte reste l'unité visuelle. */
-  .compte-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2);}
-  .compte-section .label{margin-bottom:8px;}
+     même sous-bloc teinté que .compte-sous-bloc/.plan-field, plutôt qu'un
+     simple filet — l'utilisateur a signalé que certaines sections d'une
+     carte étaient encadrées d'un fond et d'autres non, dans la même carte. */
+  .compte-section{
+    margin-top:10px;padding:12px 14px;border-radius:var(--r-chip);
+    background:var(--surface-soft);border:1px solid var(--line-2);
+  }
+  .compte-section:first-child{margin-top:0;}
+  .compte-section .label{margin-bottom:8px;margin-top:0;}
 
   /* Une ligne de membre : avatar rond teinté par rôle, cadre léger — remplace
      la simple liste de paragraphes d'avant, sans rien retirer de son contenu. */
@@ -5060,26 +5074,41 @@
   .btn-danger-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:rgba(222,122,22,.08);color:var(--late);font-weight:700;cursor:pointer;}
   .btn-danger-outline .card-ico{color:var(--late);}
   .btn-danger-outline:hover{background:rgba(222,122,22,.16);}
-  .compte-sous-bloc{margin-top:14px;padding:14px 16px;border-radius:12px;background:rgba(91,82,223,.07);border:1px solid rgba(91,82,223,.18);}
+  /* Même fond que .plan-field/.compte-section (--surface-soft) : un seul
+     langage de sous-bloc dans toute la page, demandé explicitement après
+     avoir vu tantôt un voile indigo, tantôt --surface-soft, tantôt rien. */
+  .compte-sous-bloc{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line-2);}
   .compte-sous-bloc:first-child{margin-top:0;}
   .compte-sous-bloc-tete{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .compte-sous-bloc-tete .card-ico{color:var(--primary-dark);}
   .compte-sous-bloc-tete .label{margin:0;flex:1;}
   .badge-auto{font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--primary-dark);background:rgba(91,82,223,.14);border-radius:999px;padding:3px 9px;text-transform:uppercase;white-space:nowrap;}
-  .tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:rgba(91,82,223,.08);border-color:rgba(91,82,223,.22);}
+  .tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:var(--surface);border-color:var(--line);}
 
-  /* Toute la page « Mon compte » contrastée : chaque bouton porte un léger
-     voile de couleur plutôt qu'un blanc plat sur les cartes blanches — même
-     teinte indigo que le reste du produit (--primary-tint), la zone sensible
-     gardant son propre orange. Les CHAMPS, eux, font l'inverse depuis la
-     demande explicite de l'utilisateur : le voile vit sur le sous-bloc
-     .plan-field (règle plus bas), le champ reste blanc pour ressortir dessus
-     — comme n'importe quelle carte du reste de l'app. */
+  /* Toute la page « Mon compte » contrastée. Les CHAMPS ont le voile sur leur
+     sous-bloc (.plan-field/.compte-sous-bloc/.compte-section, tous alignés
+     sur --surface-soft désormais), le champ reste blanc pour ressortir dessus.
+     Les BOUTONS sont uniformément noirs (même .primary partout), à
+     l'exception explicite de « Supprimer mon compte » (.btn-danger-outline,
+     inchangé) — demandé après avoir vu certains boutons en encre et d'autres
+     en voile indigo (« Enregistrer les préférences e-mail », « Gérer mon
+     abonnement »). */
   .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--surface);}
   .vue-compte input:not([type=checkbox]):focus,.vue-compte select:focus,.vue-compte textarea:focus{background:var(--surface);}
-  .vue-compte button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
-  .vue-compte button.secondary:hover{background:var(--primary-tint-2);}
-  .vue-compte .membre-ligne{background:var(--primary-tint);}
+  .vue-compte button.secondary{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .vue-compte button.secondary:hover{background:var(--dark);border-color:var(--dark);}
+  .vue-compte .membre-ligne{background:var(--surface-soft);}
+
+  /* Actions de ligne d'équipe (« Générer un nouveau mot de passe », « Changer
+     le rôle », « Retirer ») : de simples liens texte ne se lisaient pas comme
+     des actions — boutons noirs compacts, même langage que le reste de la
+     page, alignés sur .membre-action-retirer pour Retirer (pas de rouge
+     séparé : seule « Supprimer mon compte » sort du noir uniforme). */
+  .membre-action-btn{
+    background:var(--ink);color:#fff;border:none;border-radius:var(--r-chip);
+    padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  .membre-action-btn:hover{background:var(--dark);}
 
   /* Sous-bloc de champ des cartes « Société & Identité légale » et
      « Identifiants & Connexion » : le voile de couleur (ex --primary-tint sur
@@ -21726,9 +21755,9 @@ VIEWS.account = {
         const metier = String(m.metier || '').trim();
         const actions = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
               <div class="modal-actions" style="margin-top:6px;">
-                <button type="button" class="link-inline" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
-                <button type="button" class="link-inline" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le rôle')}</button>
-                <button type="button" class="link-inline" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>
+                <button type="button" class="membre-action-btn" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
+                <button type="button" class="membre-action-btn" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le rôle')}</button>
+                <button type="button" class="membre-action-btn" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>
               </div>` : '';
         // Personne n'a de bouton sur SA PROPRE ligne : on ne se rétrograde pas
         // soi-même, et le retrait de son propre compte est un autre sujet.
