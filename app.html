@@ -555,9 +555,12 @@
      .log-intervention-btn, .chip.is-active, .stat-card .num.primary (du texte
      indigo sur blanc, 4,47:1) et la pastille « bientôt » (.pill-soon, déjà
      corrigée par signal/lot0-socle.patch). */
+  /* 16px, pas 14px : même police que button.primary (gros bouton d'action
+     à fond plein) — les deux sont visuellement le même style de bouton,
+     uniformisés sur une seule police/taille, demandé par l'utilisateur. */
   .btn-primary{
     background:var(--primary-dark);color:#fff;border:none;border-radius:11px;
-    font-size:14px;font-weight:700;padding:12px 18px;cursor:pointer;
+    font-size:16px;font-weight:700;padding:12px 18px;cursor:pointer;font-family:inherit;
     transition:background .15s ease,transform .1s ease;
   }
   .btn-primary:hover{background:var(--primary-dark);}
@@ -917,7 +920,7 @@
   .prep-pied-note{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dark-ink);}
   .prep-pied-note svg{width:14px;height:14px;color:var(--ok);}
   .prep-pied-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;}
   .prep-copier-btn svg{width:16px;height:16px;}
 
   /* Reprise Stitch « Precision Field Matrix » — bloc Agenda « Préparation des
@@ -1015,7 +1018,7 @@
   .parc-count-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink-2);font-size:12px;font-weight:600;}
   .parc-count-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
   .parc-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .parc-export-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;}
+  .parc-export-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
   .parc-export-btn:hover{background:var(--surface-soft);}
   .parc-export-btn svg{width:18px;height:18px;flex:0 0 auto;}
 
@@ -1612,7 +1615,7 @@
 
   .view-manual{
     display:inline-block;background:var(--primary-tint);border:1px solid var(--primary-tint-2);
-    color:var(--primary-dark);font-size:12.5px;font-weight:700;padding:5px 12px;
+    color:var(--primary-dark);font-size:13px;font-weight:700;padding:5px 12px;
     border-radius:var(--r-pill);cursor:pointer;font-family:inherit;
   }
   .view-manual:hover{background:var(--primary-tint-2);}
@@ -2260,7 +2263,7 @@
      ce qui les rétrécit mécaniquement pour lui faire de la place, sans
      largeur fixe à ajuster à la main. */
   .log-mo-ajouter-zone{flex:0 0 auto;}
-  .log-mo-ajouter{height:44px;padding:0 18px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .log-mo-ajouter{height:44px;padding:0 18px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-family:inherit;}
   .log-mo-ajouter:hover{background:var(--dark);}
   .log-mo-ajouter svg{width:16px;height:16px;flex:0 0 auto;}
 
@@ -4225,7 +4228,7 @@
     .prep-pied{border-top:none;padding-top:0;}
     .prep-pied .link-inline{
       display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
-      border-radius:12px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;
+      border-radius:12px;background:var(--ink);color:#fff;font-size:16px;font-weight:700;font-family:inherit;
     }
     .prep-pied .link-inline:hover{color:#fff;text-decoration:none;background:var(--dark);}
 
@@ -4236,7 +4239,7 @@
     }
     #ai-cta.link-inline{
       display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
-      border-radius:12px;background:var(--primary-dark);color:#fff;font-size:15px;font-weight:700;
+      border-radius:12px;background:var(--primary-dark);color:#fff;font-size:16px;font-weight:700;font-family:inherit;
       align-self:stretch !important;
     }
     #ai-cta.link-inline:hover{color:#fff;text-decoration:none;}
@@ -4485,11 +4488,11 @@
     .machine.is-soon .m-actions .btn-principal{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
     .machine.is-ok .m-actions .btn-principal{background:var(--ok);border-color:var(--ok);color:var(--ink);}
     .machine .m-actions .btn-row-action:not(.btn-principal):not([data-open="edit"]){
-      background:var(--surface);border:2px solid var(--ink);color:var(--ink);font-size:12.5px;
+      background:var(--surface);border:2px solid var(--ink);color:var(--ink);font-size:13px;
     }
     .machine .m-actions .btn-row-action:not(.btn-principal):not([data-open="edit"]):hover{background:rgba(99,102,241,.08);}
     .machine .m-actions .btn-row-action[data-open="edit"]{
-      grid-column:1 / -1;min-height:38px;background:rgba(99,102,241,.1);border:none;color:var(--ink-2);font-size:12.5px;
+      grid-column:1 / -1;min-height:38px;background:rgba(99,102,241,.1);border:none;color:var(--ink-2);font-size:13px;
     }
     .machine .m-actions .btn-row-action[data-open="edit"]:hover{color:var(--ink);background:rgba(99,102,241,.18);}
   }
@@ -4550,7 +4553,7 @@
      un fond teinté sans bordure épaisse plutôt qu'un cadre encre. */
   .manuel-actions .btn-row-action{
     display:inline-flex;align-items:center;gap:8px;white-space:nowrap;height:40px;
-    background:var(--surface-soft);border:none;color:var(--ink);padding:0 14px;font-size:12.5px;font-weight:700;
+    background:var(--surface-soft);border:none;color:var(--ink);padding:0 14px;font-size:13px;font-weight:700;font-family:inherit;
     border-radius:var(--r-md);
   }
   .manuel-actions .btn-row-action:hover{background:var(--line-2);}
@@ -4914,7 +4917,7 @@
   .jm-carte-telemetrie-gauche svg{width:15px;height:15px;color:var(--ink-3);}
   .jm-carte-telemetrie-valeur{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--ink);}
   .jm-carte-cta{
-    width:100%;min-height:44px;border-radius:var(--r-md);border:none;font-family:inherit;font-size:13.5px;font-weight:800;
+    width:100%;min-height:44px;border-radius:var(--r-md);border:none;font-family:inherit;font-size:13px;font-weight:700;
     display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--surface-soft);color:var(--ink);
   }
   .jm-carte.is-late .jm-carte-cta{background:var(--primary-dark);color:#fff;}
@@ -5103,7 +5106,7 @@
   }
   .compte-danger .card-title,.compte-danger .muted-text{color:var(--late);}
   .compte-danger .card-title .card-ico{color:var(--late);}
-  .btn-danger-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:rgba(222,122,22,.08);color:var(--late);font-weight:700;cursor:pointer;}
+  .btn-danger-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:rgba(222,122,22,.08);color:var(--late);font-weight:700;font-size:16px;font-family:inherit;cursor:pointer;}
   .btn-danger-outline .card-ico{color:var(--late);}
   .btn-danger-outline:hover{background:rgba(222,122,22,.16);}
   /* Même fond que .plan-field/.compte-section (--surface-soft) : un seul
@@ -5147,7 +5150,7 @@
      séparé : seule « Supprimer mon compte » sort du noir uniforme). */
   .membre-action-btn{
     background:var(--ink);color:#fff;border:none;border-radius:var(--r-chip);
-    padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
   }
   .membre-action-btn:hover{background:var(--dark);}
 
@@ -5184,7 +5187,7 @@
   .support-lance-btn{
     width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
     background:var(--ink);color:#fff;border:2px solid rgba(91,82,223,.35);
-    padding:13px 18px;border-radius:var(--r-card);font-weight:800;font-size:14.5px;
+    padding:13px 18px;border-radius:var(--r-card);font-weight:700;font-size:16px;font-family:inherit;
     cursor:pointer;box-shadow:0 10px 20px rgba(14,19,51,.20);transition:background .15s,border-color .15s;
   }
   .support-lance-btn:hover{background:#161D4C;border-color:var(--primary-dark);}
@@ -5756,7 +5759,7 @@
   .tco-eyebrow-sep{color:var(--dark-ink);font-size:10.5px;}
   .tco-eyebrow-texte{color:var(--ink-2);font-size:12px;font-weight:500;}
   .tco-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
-  .tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;}
+  .tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
   .tco-btn-outil svg{width:20px;height:20px;flex:0 0 auto;color:var(--bleu-roi);}
   .tco-btn-outil[disabled]{opacity:.5;cursor:not-allowed;}
   /* Filet de sécurité : un <svg> de picto() sans taille explicite (aucune
@@ -5905,7 +5908,7 @@
   .stock-select-wrap select{appearance:none;padding-right:32px;font-weight:600;}
   .stock-select-wrap svg{position:absolute;top:0;bottom:0;right:11px;margin:auto;width:14px;height:14px;color:var(--ink-4);pointer-events:none;}
 
-  .stock-cta{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--r-md);background:var(--ink);color:#fff;font-size:13.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 14px 0 rgba(14,19,51,.25);transition:background .15s,transform .1s;}
+  .stock-cta{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--r-md);background:var(--ink);color:#fff;font-size:16px;font-weight:700;font-family:inherit;border:none;cursor:pointer;box-shadow:0 4px 14px 0 rgba(14,19,51,.25);transition:background .15s,transform .1s;}
   .stock-cta:hover{background:var(--primary-dark);}
   .stock-cta:active{transform:scale(.99);}
   .stock-cta svg{width:16px;height:16px;flex:0 0 auto;}
@@ -6164,7 +6167,7 @@
 
   .tco-clst-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-lg);background:var(--surface-soft);}
   .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--line-2);padding:3px;gap:2px;}
-  .tco-filtre-btn{display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:8px 13px;border-radius:calc(var(--r-chip) - 3px);font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+  .tco-filtre-btn{display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:8px 13px;border-radius:calc(var(--r-chip) - 3px);font-size:12px;font-weight:700;font-family:inherit;color:var(--ink-2);cursor:pointer;}
   .tco-filtre-btn svg{width:15px;height:15px;}
   .tco-filtre-btn.is-active{background:#fff;color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
   .tco-clst-selects{display:flex;flex-wrap:wrap;gap:8px;}
@@ -6272,7 +6275,7 @@
   .tco-clst-banniere-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:var(--r-chip);background:#fff;color:var(--late);font-weight:700;font-size:12px;border:1px solid rgba(222,122,22,.4);cursor:pointer;white-space:nowrap;}
   .tco-clst-banniere-btn svg{width:15px;height:15px;}
 
-  .tco-clst-export-btn{width:100%;height:48px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
+  .tco-clst-export-btn{width:100%;height:48px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);font-weight:700;font-size:13px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
   .tco-clst-export-btn svg{width:18px;height:18px;color:var(--bleu-roi);}
   .tco-clst-export-btn.is-primaire{background:var(--ink);color:#fff;border:none;}
   .tco-clst-export-btn.is-primaire svg{color:var(--ok);}
@@ -6319,7 +6322,7 @@
   .tco-seuil-raccourcis{display:flex;gap:6px;flex-wrap:wrap;}
   .tco-seuil-raccourcis:empty{display:none;}
   .tco-seuil-raccourci-btn{
-    font-family:inherit;font-size:11px;font-weight:600;color:var(--primary-dark);
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--primary-dark);
     background:var(--primary-tint);border:none;border-radius:var(--r-pill);padding:4px 10px;cursor:pointer;
   }
   .tco-seuil-raccourci-btn:hover{background:var(--primary-tint-2);}
