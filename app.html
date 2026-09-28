@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZinNBnvHAIuu14XTPE3I0Z2+u9uupbZUQfDFKdZs9+s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bThs35lCe5pLJcit1qMskCh5n4a7bgOHqkH/6Nvx7Dw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -37,6 +37,13 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icones/icone-192.png">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="icones/apple-touch-icon.png">
+<!-- Material Symbols — SEULE police/icône de l'app chargée depuis un CDN
+     externe (toutes les autres sont embarquées en base64 juste plus bas,
+     précisément pour éviter ça, voir le commentaire "POLICES EMBARQUÉES").
+     Exception assumée à la demande explicite de l'utilisateur pour les
+     écrans "Plan proposé par notre algorithme" (reprise Stitch demandée à
+     l'octet près) — CSP mise à jour en conséquence (style-src/font-src). -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <!-- pdf.js n'est plus chargé ici : il ne sert qu'à extraire la 1ère page d'un carnet PDF
      et représente ~350 Ko. Il est chargé à la demande (voir loadPdfLib). -->
@@ -3181,15 +3188,134 @@
   }
   .ref-table td.item-label{font-weight:700;}
   .ref-table td.muted,.muted{color:var(--ink-4);}
-  /* Cellule fréquence des écrans « Plan proposé » (Modifier ce plan) : la
-     valeur (texte du carnet, ou le libellé posé par ouvrirChoixFrequenceApercu)
-     à gauche, le crayon qui ouvre la modale de choix à droite — même bouton
-     neutre (pas rouge, ce n'est pas une suppression) que .stock-row-actions. */
-  .item-frequence-cell{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-  .item-frequence-valeur{overflow-wrap:anywhere;}
-  .ref-table .mu-item-label-neuf,
-  .ref-table .wiz-item-label-neuf,
-  .ref-table .fp-item-label-neuf{width:100%;}
+  /* ── Reprise Stitch « Plan proposé par notre algorithme » ────────────────
+     Écrans d'arbitrage (3 choix) et d'édition (tableau des échéances), dans
+     les 3 points d'entrée (dépôt de manuel, assistant d'ajout, fiche
+     machine) — reprise à l'octet près d'une maquette fournie, demandée
+     explicitement par l'utilisateur. Couleurs mappées sur les jetons déjà
+     existants quand ils correspondent EXACTEMENT : nuit=--dark(#0D1424),
+     encre=--ink(#0E1333), bleu-roi=--bleu-roi(#236FE0),
+     turquoise=--ok(#24B5A8), ambre=--late(#DE7A16), indigo=--primary
+     (#6366F1), ardoise-claire=--dark-ink(#94A3B8) — tous des correspondances
+     exactes, déjà dans la charte. Deux teintes de la maquette n'ont PAS
+     d'équivalent exact dans les douze teintes de la charte (règle du fichier :
+     « aucune autre couleur n'est employée, jamais de gris inventés ») :
+     « fond » (#FAF8FF, un fond très clair teinté) approximé par
+     --surface-soft (même choix déjà fait pour le module Stock) ; « ardoise »
+     (#64748B, le texte secondaire) approximé par --ink-4, la teinte de texte
+     la plus proche visuellement — écart mineur, assumé plutôt que d'ajouter
+     une treizième teinte au fichier. */
+  .pplan-modal{padding:0;max-width:576px;border-radius:24px;overflow:hidden;background:var(--surface);border:1px solid rgba(14,19,51,.1);box-shadow:0 24px 60px -12px rgba(13,20,36,.28),0 0 0 1px rgba(14,19,51,.08);}
+  .pplan-modal.is-large{max-width:672px;}
+  .pplan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 24px 16px;border-bottom:1px solid rgba(14,19,51,.05);}
+  .pplan-head-titre{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .pplan-head-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pplan-head h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--ink);letter-spacing:-.01em;margin:0;line-height:1.2;}
+  .pplan-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;background:rgba(36,181,168,.15);color:var(--ok);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+  .pplan-head .sub{font-size:12px;color:var(--ink-4);margin:0;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pplan-close{width:32px;height:32px;border-radius:999px;background:var(--surface-soft);color:var(--ink-4);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;transition:background .15s;}
+  .pplan-close:hover{background:rgba(14,19,51,.08);}
+  .pplan-resume{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 24px;background:linear-gradient(to right,var(--surface-soft),var(--surface));border-bottom:1px solid rgba(14,19,51,.1);flex-wrap:wrap;}
+  .pplan-resume-gauche{display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap;}
+  .pplan-resume-dot{width:10px;height:10px;border-radius:999px;background:var(--ok);flex:0 0 auto;}
+  .pplan-resume-gauche strong{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);}
+  .pplan-resume-gauche .muted{color:var(--ink-4);}
+  .pplan-resume-pill{font-size:11px;font-weight:600;color:var(--bleu-roi);background:rgba(35,111,224,.1);padding:2px 10px;border-radius:999px;font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+  /* Variante « encastrée » : même bandeau, mais en carte à coins arrondis —
+     pour les écrans qui vivent DANS le padding déjà uniforme d'une modale
+     partagée (l'assistant d'ajout de machine, 5 étapes, même .modal que
+     celui-ci) plutôt que dans .pplan-modal, qui gère son propre padding par
+     bandes et peut se permettre un bandeau plein-large. */
+  .pplan-resume.is-inset{border-radius:16px;margin:0;padding:12px 16px;}
+  .pplan-warning{display:flex;align-items:flex-start;gap:12px;padding:12px 24px;background:linear-gradient(to right,rgba(222,122,22,.15),rgba(222,122,22,.1) 55%,var(--surface));border-bottom:1px solid rgba(222,122,22,.3);}
+  .pplan-warning-ico{width:28px;height:28px;border-radius:8px;background:var(--late);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .pplan-warning-texte{font-size:12px;color:var(--ink);line-height:1.5;}
+  .pplan-warning-texte strong{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--late);text-transform:uppercase;letter-spacing:.02em;}
+  .pplan-body{padding:24px;background:rgba(250,248,255,.4);display:flex;flex-direction:column;gap:20px;max-height:480px;overflow-y:auto;}
+  .pplan-champ-carte{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:16px;border-radius:16px;background:var(--surface);border:1px solid rgba(14,19,51,.1);box-shadow:0 1px 2px rgba(14,19,51,.04);}
+  .pplan-champ-carte label{font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px;font-family:'Space Grotesk',sans-serif;margin:0;}
+  .pplan-champ-carte label .material-symbols-outlined{color:var(--bleu-roi);font-size:16px;}
+  .pplan-champ-carte p{font-size:12px;color:var(--ink-4);margin:2px 0 0;line-height:1.35;}
+  .pplan-champ-valeur{display:flex;align-items:center;gap:8px;}
+  .pplan-champ-valeur input{width:100%;background:var(--surface-soft);border:2px solid rgba(14,19,51,.15);border-radius:12px;padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--ink);text-align:center;box-shadow:inset 0 1px 2px rgba(14,19,51,.06);}
+  .pplan-champ-valeur input:focus{border-color:var(--bleu-roi);background:var(--surface);outline:none;}
+  .pplan-champ-valeur .unite{font-size:12px;font-weight:700;color:var(--ink-4);font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+  .pplan-section-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .pplan-section-tete h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink);display:flex;align-items:center;gap:6px;margin:0;}
+  .pplan-section-tete h3 .material-symbols-outlined{color:var(--ok);font-size:16px;}
+  .pplan-section-tete p{font-size:11.5px;color:var(--ink-4);margin:2px 0 0;}
+  .pplan-filtrer{font-size:12px;color:var(--bleu-roi);font-weight:700;display:flex;align-items:center;gap:4px;font-family:'Space Grotesk',sans-serif;background:none;border:none;cursor:pointer;flex:0 0 auto;padding:0;}
+  .pplan-filtrer:hover{text-decoration:underline;}
+  .pplan-filtre-champ{margin-top:8px;}
+  .pplan-filtre-champ input{width:100%;background:var(--surface);border:1px solid rgba(14,19,51,.15);border-radius:10px;padding:7px 12px;font-size:12.5px;color:var(--ink);}
+  .pplan-filtre-champ input:focus{border-color:var(--bleu-roi);outline:none;}
+  .pplan-table-wrap{border-radius:16px;border:1px solid rgba(14,19,51,.15);background:var(--surface);overflow:hidden;box-shadow:0 1px 2px rgba(14,19,51,.04);}
+  .pplan-table-scroll{overflow-x:auto;}
+  .pplan-table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;min-width:460px;}
+  .pplan-table thead tr{background:var(--surface-soft);border-bottom:1px solid rgba(14,19,51,.1);}
+  .pplan-table th{padding:10px 16px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-4);}
+  .pplan-table th.is-actions{text-align:right;}
+  .pplan-table tbody tr{border-top:1px solid rgba(14,19,51,.05);}
+  .pplan-table tbody tr:hover{background:rgba(250,248,255,.5);}
+  .pplan-table td{padding:12px 16px;font-weight:500;color:var(--ink);vertical-align:middle;}
+  .pplan-elt{display:flex;align-items:center;gap:8px;font-weight:600;}
+  .pplan-elt-input{border:1px solid rgba(14,19,51,.15);border-radius:8px;padding:5px 8px;font-size:12px;width:100%;font-family:'Figtree',sans-serif;}
+  .pplan-elt-input:focus{border-color:var(--bleu-roi);outline:none;}
+  .pplan-elt-dot{width:8px;height:8px;border-radius:999px;flex:0 0 auto;background:var(--bleu-roi);}
+  .pplan-freq-cell{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .pplan-freq-valeur{color:var(--ink-4);font-family:'Space Grotesk',sans-serif;}
+  .pplan-statut{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap;}
+  .pplan-statut.is-ok{background:rgba(36,181,168,.12);color:var(--ok);border:1px solid rgba(36,181,168,.3);}
+  .pplan-statut.is-attn{background:rgba(222,122,22,.12);color:var(--late);border:1px solid rgba(222,122,22,.3);}
+  .pplan-statut.is-neutre{background:var(--surface-soft);color:var(--ink-4);border:1px solid rgba(14,19,51,.1);}
+  .pplan-actions-cell{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
+  .pplan-btn-modifier{padding:6px 10px;border-radius:8px;background:var(--surface-soft);border:1px solid rgba(14,19,51,.15);color:var(--ink);font-size:11.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .pplan-btn-modifier:hover{background:var(--bleu-roi);color:#fff;border-color:var(--bleu-roi);}
+  .pplan-btn-modifier .material-symbols-outlined{color:var(--bleu-roi);font-size:15px;transition:color .15s;}
+  .pplan-btn-modifier:hover .material-symbols-outlined{color:#fff;}
+  .pplan-btn-supprimer{width:32px;height:32px;border-radius:8px;border:1px solid rgba(220,38,38,.2);color:#DC2626;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;transition:background .15s;}
+  .pplan-btn-supprimer:hover{background:#FEF2F2;}
+  .pplan-ajouter{width:100%;padding:10px;border-radius:16px;border:2px dashed rgba(14,19,51,.2);background:rgba(255,255,255,.6);color:var(--ink);font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .15s;}
+  .pplan-ajouter:hover{border-color:var(--bleu-roi);color:var(--bleu-roi);background:var(--surface);}
+  .pplan-ajouter .material-symbols-outlined{color:var(--bleu-roi);font-size:18px;}
+  .pplan-taches label{font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px;font-family:'Space Grotesk',sans-serif;margin:0 0 8px;}
+  .pplan-taches label .material-symbols-outlined{color:var(--bleu-roi);font-size:16px;}
+  .pplan-taches textarea{width:100%;background:var(--surface);border:1px solid rgba(14,19,51,.15);border-radius:12px;padding:12px;font-size:12px;color:var(--ink);line-height:1.5;box-shadow:inset 0 1px 2px rgba(14,19,51,.04);font-family:'Figtree',sans-serif;}
+  .pplan-taches textarea:focus{border-color:var(--bleu-roi);outline:none;}
+  .pplan-note{margin-top:10px;display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:var(--surface-soft);border-radius:12px;font-size:11.5px;color:var(--ink-4);line-height:1.5;}
+  .pplan-note .material-symbols-outlined{color:var(--ok);font-size:16px;flex:0 0 auto;margin-top:1px;}
+  .pplan-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px;background:var(--surface);border-top:1px solid rgba(14,19,51,.1);flex-wrap:wrap;}
+  .pplan-foot .muted{font-size:12px;color:var(--ink-4);}
+  .pplan-btn-annuler{padding:10px 20px;border-radius:12px;border:1px solid rgba(14,19,51,.15);background:none;color:var(--ink);font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:background .15s;}
+  .pplan-btn-annuler:hover{background:var(--surface-soft);}
+  .pplan-btn-activer{padding:10px 24px;border-radius:12px;background:var(--dark);color:#fff;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 10px 20px -6px rgba(13,20,36,.3);border:none;transition:background .15s,transform .1s;}
+  .pplan-btn-activer:hover{background:var(--ink);}
+  .pplan-btn-activer:active{transform:scale(.98);}
+  .pplan-btn-activer .material-symbols-outlined{color:var(--ok);font-size:17px;}
+  .pplan-btn-activer:disabled{opacity:.6;cursor:default;}
+  .pplan-choix{display:flex;flex-direction:column;gap:10px;padding-top:4px;}
+  .pplan-choix-item{padding:14px;border-radius:16px;border:2px solid rgba(14,19,51,.15);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:all .15s;box-shadow:0 1px 2px rgba(14,19,51,.04);width:100%;text-align:left;font-family:inherit;}
+  .pplan-choix-item:hover{border-color:var(--bleu-roi);}
+  .pplan-choix-item.is-recommande{border-color:var(--bleu-roi);background:rgba(35,111,224,.04);}
+  .pplan-choix-item.is-recommande:hover{background:rgba(35,111,224,.08);}
+  .pplan-choix-gauche{display:flex;align-items:center;gap:12px;}
+  .pplan-choix-ico{width:36px;height:36px;border-radius:12px;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:all .15s;}
+  .pplan-choix-item.is-recommande .pplan-choix-ico{background:var(--bleu-roi);color:#fff;box-shadow:0 1px 2px rgba(14,19,51,.1);}
+  .pplan-choix-titre-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pplan-choix-item h4{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--ink);margin:0;}
+  .pplan-choix-reco{font-size:10px;font-weight:700;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;padding:1px 8px;border-radius:6px;background:var(--bleu-roi);color:#fff;}
+  .pplan-choix-item p{font-size:12px;color:var(--ink-4);margin:2px 0 0;}
+  .pplan-choix-fleche{color:var(--ink-4);transition:transform .15s,color .15s;flex:0 0 auto;}
+  .pplan-choix-item:hover .pplan-choix-fleche{color:var(--ink);transform:translateX(3px);}
+  .pplan-choix-item.is-recommande .pplan-choix-fleche{color:var(--bleu-roi);}
+  .material-symbols-outlined{
+    font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
+    font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;
+    display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;
+    -webkit-font-feature-settings:'liga';font-feature-settings:'liga';
+    -webkit-font-smoothing:antialiased;
+    font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;
+  }
   .history-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
   .history-actions{display:flex;gap:6px;}
   .icon-btn{
@@ -8897,6 +9023,31 @@ function classerFrequence(item) {
   return classerDepuisStructure(item && item.frequence)
     || classerDepuisTexte(item && item.frequency);
 }
+
+// Statut affiché sur les écrans « Plan proposé par notre algorithme » (colonne
+// Statut de l'arbitrage, avant que le plan existe) — VRAI, jamais un badge
+// décoratif : un choix déjà fait (interval_choisi/interval, posé par
+// ouvrirChoixFrequenceApercu) est "Optimal" au même titre qu'une fréquence non
+// ambiguë ; une fréquence à plusieurs cycles ("100h ou 2 ans") est "À choisir" ;
+// le reste (conditionnelle, ou texte non reconnu) est "Point de contrôle" —
+// jamais un statut inventé pour une tâche dont on ne sait rien de plus.
+function statutPplan(it) {
+  if (!it) return { libelle: trad('Point de contrôle'), classe: 'is-neutre' };
+  if (it.point_de_controle) return { libelle: trad('Point de contrôle'), classe: 'is-neutre' };
+  if (it.interval_choisi || it.interval) return { libelle: trad('Optimal'), classe: 'is-ok' };
+  const classement = classerFrequence(it);
+  if (!classement) return { libelle: trad('Point de contrôle'), classe: 'is-neutre' };
+  if (classement.nature === 'periodique') return { libelle: trad('Optimal'), classe: 'is-ok' };
+  if (classement.nature === 'a_choisir') return { libelle: trad('À choisir'), classe: 'is-attn' };
+  return { libelle: trad('Point de contrôle'), classe: 'is-neutre' };
+}
+// Couleur d'accent purement décorative devant chaque libellé de tâche (comme
+// la maquette Stitch) : une rotation fixe, pas une catégorisation réelle —
+// aucune donnée de l'app ne classe les tâches par "type", ce serait une
+// distinction fabriquée. Sert seulement à scinder visuellement une longue
+// liste, comme les puces de couleur d'un calendrier.
+const PPLAN_DOT_ROTATION = ['var(--bleu-roi)', 'var(--late)', 'var(--primary)', 'var(--ok)'];
+function pplanDotColor(i) { return PPLAN_DOT_ROTATION[i % PPLAN_DOT_ROTATION.length]; }
 
 // Le carnet mélange-t-il un SECOND suivi (une seconde unité de compteur, ou
 // une unité calendaire quand le principal est un compteur — cas fréquent
@@ -22360,44 +22511,74 @@ function presenterChoixPlanEditForm(overlay, resultat, machine) {
   const machineCtxFp = { ...machine, counter_unit: modeFp === 'km' ? 'km' : 'hours' };
   const filaItemFp = (it, i) => `
     <tr data-item-index="${i}">
-      <td class="item-label">${it._nouveau
-        ? `<input type="text" class="fp-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
-        : esc(it.label || '—')}</td>
-      <td><div class="item-frequence-cell">
-        <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
-        <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+      <td class="pplan-elt">${it._nouveau
+        ? `<input type="text" class="pplan-elt-input fp-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+        : `<span class="pplan-elt-dot" style="background:${pplanDotColor(i)}"></span>${esc(it.label || '—')}`}</td>
+      <td class="pplan-freq-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</td>
+      <td><div class="pplan-actions-cell">
+        <button type="button" class="pplan-btn-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}"><span class="material-symbols-outlined">edit</span><span>${trad('Modifier l\'étape')}</span></button>
+        <button type="button" class="pplan-btn-supprimer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}"><span class="material-symbols-outlined">delete</span></button>
       </div></td>
-      <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
     </tr>`;
   const tableauItemsFpHtml = () => items.map(filaItemFp).join('');
   zone.innerHTML = `
-    <div class="plan-choix-resume">
-      ${items.length
-        ? esc(tR('{n} échéance(s) détectée(s) dans le manuel.', { n: items.length }))
-        : esc(trad('Analyse terminée : vérifie le mode de suivi ci-dessous si besoin.'))}
+    <div class="pplan-resume is-inset">
+      <div class="pplan-resume-gauche">
+        <span class="pplan-resume-dot"></span>
+        <strong>${items.length
+          ? esc(tR('{n} échéance(s) détectée(s) dans le manuel.', { n: items.length }))
+          : esc(trad('Analyse terminée : vérifie le mode de suivi ci-dessous si besoin.'))}</strong>
+      </div>
     </div>
     ${items.length ? `
-    <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
-    <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
-    <div class="ref-scroll"><table class="ref-table">
-      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-      <tbody id="fp-items-tbody">${tableauItemsFpHtml()}</tbody>
-    </table></div>
-    <button type="button" class="secondary" id="fp-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
-    <div class="plan-choix">
-      <div class="step-options">
-        <button type="button" class="option-tile" id="pc-suivre"><span class="option-ico">${picto('coche')}</span><span class="option-tile-corps">${trad('Suivre ce plan')}<span class="opt-sub">${trad('Le mode de suivi et l\'intervalle déjà proposés sont conservés tels quels.')}</span></span></button>
-        <button type="button" class="option-tile" id="pc-modifier"><span class="option-ico">${picto('crayon')}</span><span class="option-tile-corps">${trad('Modifier ce plan')}<span class="opt-sub">${trad('Ajuster le mode de suivi ou l\'intervalle ci-dessous.')}</span></span></button>
-        <button type="button" class="option-tile" id="pc-propre"><span class="option-ico">${picto('plusCercle')}</span><span class="option-tile-corps">${trad('Faire mon propre plan')}<span class="opt-sub">${trad('Ignorer cette proposition ; le carnet reste attaché à la fiche.')}</span></span></button>
+    <div style="margin-top:16px;">
+      <div class="pplan-section-tete">
+        <div>
+          <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
+          <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+        </div>
       </div>
+      <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
+        <table class="pplan-table">
+          <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th class="is-actions">${trad('Actions')}</th></tr></thead>
+          <tbody id="fp-items-tbody">${tableauItemsFpHtml()}</tbody>
+        </table>
+      </div></div>
+      <button type="button" class="pplan-ajouter" id="fp-item-ajouter" style="margin-top:10px;"><span class="material-symbols-outlined">add_circle</span><span>${trad('Ajouter une ligne')}</span></button>
+    </div>` : ''}
+    <div class="pplan-choix" style="margin-top:18px;">
+      <button type="button" class="pplan-choix-item is-recommande" id="pc-suivre">
+        <div class="pplan-choix-gauche">
+          <div class="pplan-choix-ico"><span class="material-symbols-outlined">check</span></div>
+          <div>
+            <div class="pplan-choix-titre-ligne"><h4>${trad('Suivre ce plan')}</h4><span class="pplan-choix-reco">${trad('Recommandé')}</span></div>
+            <p>${trad('Le mode de suivi et l\'intervalle déjà proposés sont conservés tels quels.')}</p>
+          </div>
+        </div>
+        <span class="material-symbols-outlined pplan-choix-fleche">arrow_forward</span>
+      </button>
+      <button type="button" class="pplan-choix-item" id="pc-modifier">
+        <div class="pplan-choix-gauche">
+          <div class="pplan-choix-ico"><span class="material-symbols-outlined">edit_note</span></div>
+          <div><h4>${trad('Modifier ce plan')}</h4><p>${trad('Ajuster le mode de suivi ou l\'intervalle ci-dessous.')}</p></div>
+        </div>
+        <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+      </button>
+      <button type="button" class="pplan-choix-item" id="pc-propre">
+        <div class="pplan-choix-gauche">
+          <div class="pplan-choix-ico"><span class="material-symbols-outlined">add_circle</span></div>
+          <div><h4>${trad('Faire mon propre plan')}</h4><p>${trad('Ignorer cette proposition ; le carnet reste attaché à la fiche.')}</p></div>
+        </div>
+        <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+      </button>
     </div>`;
   bloc.hidden = true;
   const fpTbody = zone.querySelector('#fp-items-tbody');
   const rafraichirItemsFp = () => { if (fpTbody) fpTbody.innerHTML = tableauItemsFpHtml(); };
   fpTbody?.addEventListener('click', (e) => {
-    const retirer = e.target.closest('.log-piece-retirer');
+    const retirer = e.target.closest('.pplan-btn-supprimer');
     if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsFp(); return; }
-    const modifier = e.target.closest('.item-frequence-modifier');
+    const modifier = e.target.closest('.pplan-btn-modifier');
     if (modifier) {
       const i = Number(modifier.dataset.index);
       ouvrirChoixFrequenceApercu(items[i], planCtxFp, machineCtxFp, (choix) => {
@@ -22696,14 +22877,14 @@ function openManualUploadModal(presetMachine, presetFile) {
     // vérité de cet écran, jamais relue depuis le DOM au moment d'enregistrer.
     const filaItemMu = (it, i) => `
       <tr data-item-index="${i}">
-        <td class="item-label">${it._nouveau
-          ? `<input type="text" class="mu-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
-          : esc(it.label || '—')}</td>
-        <td><div class="item-frequence-cell">
-          <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
-          <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+        <td class="pplan-elt">${it._nouveau
+          ? `<input type="text" class="pplan-elt-input mu-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+          : `<span class="pplan-elt-dot" style="background:${pplanDotColor(i)}"></span>${esc(it.label || '—')}`}</td>
+        <td class="pplan-freq-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</td>
+        <td><div class="pplan-actions-cell">
+          <button type="button" class="pplan-btn-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}"><span class="material-symbols-outlined">edit</span><span>${trad('Modifier l\'étape')}</span></button>
+          <button type="button" class="pplan-btn-supprimer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}"><span class="material-symbols-outlined">delete</span></button>
         </div></td>
-        <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
       </tr>`;
     const tableauItemsMuHtml = () => items.map(filaItemMu).join('');
 
@@ -22759,54 +22940,120 @@ function openManualUploadModal(presetMachine, presetFile) {
     }
 
     shell(`
-      <div class="mform-tete">
-        <div class="mform-tete-titre"><h2>${result ? trad('Plan proposé par notre algorithme') : trad('Carnet attaché')}</h2></div>
-        <button type="button" class="mform-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      </div>
-      <p class="sub">${esc(machine.name)} · ${esc(file.name)}</p>
-      ${result ? `
-      <div class="plan-choix-resume">
-        <strong>${tR('Échéance proposée : tous les {n} {unite}', { n: suggested, unite: uniteMot })}</strong>
-        ${items.length ? ' — ' + tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }) : ''}
-        ${result.confidence ? ' — ' + tR('confiance : {valeur}', { valeur: esc(result.confidence) }) : ''}
-      </div>` : ''}
-      ${montrerChoix && items.length ? `
-      <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
-      <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th></tr></thead>
-        <tbody>${items.map(it => `<tr><td class="item-label">${esc(it.label || '—')}</td><td>${esc(it.frequency || '—')}</td></tr>`).join('')}</tbody>
-      </table></div>` : ''}
-      ${montrerChoix ? `
-      <div class="plan-choix">
-        <div class="step-options">
-          <button type="button" class="option-tile" id="pc-suivre"><span class="option-ico">${picto('coche')}</span><span class="option-tile-corps">${trad('Suivre ce plan')}<span class="opt-sub">${trad('On active tel quel l\'intervalle et les tâches proposés.')}</span></span></button>
-          <button type="button" class="option-tile" id="pc-modifier"><span class="option-ico">${picto('crayon')}</span><span class="option-tile-corps">${trad('Modifier ce plan')}<span class="opt-sub">${trad('Ajuster l\'intervalle ou les tâches avant d\'activer.')}</span></span></button>
-          <button type="button" class="option-tile" id="pc-propre"><span class="option-ico">${picto('plusCercle')}</span><span class="option-tile-corps">${trad('Faire mon propre plan')}<span class="opt-sub">${trad('Ignorer cette proposition et renseigner le plan à la main.')}</span></span></button>
+      <div class="modal pplan-modal${montrerChamps ? ' is-large' : ''}">
+        <div class="pplan-head">
+          <div class="pplan-head-titre">
+            <div class="pplan-head-ligne">
+              <h2>${result ? trad('Plan proposé par notre algorithme') : trad('Carnet attaché')}</h2>
+              ${result ? `<span class="pplan-badge">${montrerChamps ? trad('Édition active') : trad('Prêt')}</span>` : ''}
+            </div>
+            <p class="sub">${esc(machine.name)} · ${esc(file.name)}</p>
+          </div>
+          <button type="button" class="pplan-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}"><span class="material-symbols-outlined">close</span></button>
         </div>
-      </div>` : ''}
-      ${montrerChamps ? (result ? `
-      <div class="mu-bloc">
-        <label for="mu-interval"><span class="label-ico">${picto('prochain')}</span>${tR('Échéance {mode}', { mode: mode === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: COUNTER_UNITS[unit].word }) })}</label>
-        <input id="mu-interval" type="number" min="1" value="${esc(suggested)}">
-        ${items.length ? `
-          <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
-          <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
-          <div class="ref-scroll"><table class="ref-table">
-            <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-            <tbody id="mu-items-tbody">${tableauItemsMuHtml()}</tbody>
-          </table></div>
-          <button type="button" class="secondary" id="mu-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
-        <label for="mu-tasks"><span class="label-ico">${picto('message')}</span>${trad('Tâches de maintenance')}</label>
-        <textarea id="mu-tasks">${esc(result.tasks || machine.plan?.tasks || '')}</textarea>
-        ${result.notes ? `<div class="hint">${esc(result.notes)}</div>` : ''}
-      </div>
-      ` : `
-        <div class="hint">${trad('Le PDF est attaché à la fiche. L\'analyse automatique n\'a pas été lancée (fichier volumineux ou service indisponible) : le plan reste à renseigner à la main.')}</div>
-      `) : ''}
-      <div class="hint" id="mu-error"></div>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-cancel">${trad('Annuler')}</button>
-        ${montrerChoix ? '' : `<button type="button" class="primary" id="mu-activate">${result ? trad('Activer le plan') : trad('Terminer')}</button>`}
+        ${result ? `
+        <div class="pplan-resume">
+          <div class="pplan-resume-gauche">
+            <span class="pplan-resume-dot"></span>
+            <strong>${tR('Échéance proposée : tous les {n} {unite}', { n: suggested, unite: uniteMot })}</strong>
+            ${items.length ? `<span class="muted">— ${esc(tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }))}</span>` : ''}
+          </div>
+          <span class="pplan-resume-pill">${trad('Recommandé')}</span>
+        </div>` : ''}
+        ${montrerChamps && result ? `
+        <div class="pplan-warning">
+          <div class="pplan-warning-ico"><span class="material-symbols-outlined">warning</span></div>
+          <div class="pplan-warning-texte"><strong>${trad('Information requise :')}</strong> ${trad('Vous devez renseigner et valider chacune des étapes ci-dessous afin de configurer précisément les périodicités et le déclenchement des alertes d\'entretien.')}</div>
+        </div>` : ''}
+        <div class="pplan-body">
+          ${montrerChoix && items.length ? `
+          <div>
+            <div class="pplan-section-tete">
+              <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
+              <span style="font-size:11px;color:var(--ink-4)">${esc(tR('{n} tâches identifiées', { n: items.length }))}</span>
+            </div>
+            <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
+              <table class="pplan-table">
+                <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th class="is-actions">${trad('Statut')}</th></tr></thead>
+                <tbody>${items.map((it, i) => { const s = statutPplan(it); return `
+                  <tr>
+                    <td class="pplan-elt"><span class="pplan-elt-dot" style="background:${pplanDotColor(i)}"></span>${esc(it.label || '—')}</td>
+                    <td class="pplan-freq-valeur">${esc(it.frequency || '—')}</td>
+                    <td style="text-align:right"><span class="pplan-statut ${s.classe}">${esc(s.libelle)}</span></td>
+                  </tr>`; }).join('')}</tbody>
+              </table>
+            </div></div>
+          </div>` : ''}
+          ${montrerChoix ? `
+          <div class="pplan-choix">
+            <button type="button" class="pplan-choix-item is-recommande" id="pc-suivre">
+              <div class="pplan-choix-gauche">
+                <div class="pplan-choix-ico"><span class="material-symbols-outlined">check</span></div>
+                <div>
+                  <div class="pplan-choix-titre-ligne"><h4>${trad('Suivre ce plan')}</h4><span class="pplan-choix-reco">${trad('Recommandé')}</span></div>
+                  <p>${trad('On active tel quel l\'intervalle et les tâches proposés.')}</p>
+                </div>
+              </div>
+              <span class="material-symbols-outlined pplan-choix-fleche">arrow_forward</span>
+            </button>
+            <button type="button" class="pplan-choix-item" id="pc-modifier">
+              <div class="pplan-choix-gauche">
+                <div class="pplan-choix-ico"><span class="material-symbols-outlined">edit_note</span></div>
+                <div><h4>${trad('Modifier ce plan')}</h4><p>${trad('Ajuster l\'intervalle ou les tâches avant d\'activer.')}</p></div>
+              </div>
+              <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+            </button>
+            <button type="button" class="pplan-choix-item" id="pc-propre">
+              <div class="pplan-choix-gauche">
+                <div class="pplan-choix-ico"><span class="material-symbols-outlined">add_circle</span></div>
+                <div><h4>${trad('Faire mon propre plan')}</h4><p>${trad('Ignorer cette proposition et renseigner le plan à la main.')}</p></div>
+              </div>
+              <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+            </button>
+          </div>` : ''}
+          ${montrerChamps ? (result ? `
+          <div class="pplan-champ-carte">
+            <div>
+              <label><span class="material-symbols-outlined">schedule</span>${tR('Échéance {mode}', { mode: mode === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: COUNTER_UNITS[unit].word }) })}</label>
+              <p>${trad('Fréquence d\'entretien récurrente recommandée d\'après l\'analyse du document.')}</p>
+            </div>
+            <div class="pplan-champ-valeur">
+              <input id="mu-interval" type="number" min="1" value="${esc(suggested)}">
+              <span class="unite">${mode === 'days' ? trad('jours') : COUNTER_UNITS[unit].word}</span>
+            </div>
+          </div>
+          ${items.length ? `
+          <div>
+            <div class="pplan-section-tete">
+              <div>
+                <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
+                <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+              </div>
+              <button type="button" class="pplan-filtrer" id="mu-filtrer-btn"><span class="material-symbols-outlined">filter_list</span>${trad('Filtrer')}</button>
+            </div>
+            <div class="pplan-filtre-champ" id="mu-filtre-zone" hidden><input type="text" id="mu-filtre-input" placeholder="${esc(trad('Filtrer par élément…'))}"></div>
+            <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
+              <table class="pplan-table">
+                <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th class="is-actions">${trad('Actions')}</th></tr></thead>
+                <tbody id="mu-items-tbody">${tableauItemsMuHtml()}</tbody>
+              </table>
+            </div></div>
+            <button type="button" class="pplan-ajouter" id="mu-item-ajouter" style="margin-top:10px;"><span class="material-symbols-outlined">add_circle</span><span>${trad('Ajouter une ligne')}</span></button>
+          </div>` : ''}
+          <div class="pplan-taches">
+            <label><span class="material-symbols-outlined">notes</span>${trad('Tâches de maintenance')}</label>
+            <textarea id="mu-tasks" rows="2">${esc(result.tasks || machine.plan?.tasks || '')}</textarea>
+            ${result.notes ? `<div class="pplan-note"><span class="material-symbols-outlined">info</span><span>${esc(result.notes)}</span></div>` : ''}
+          </div>
+          ` : `
+          <div class="hint">${trad('Le PDF est attaché à la fiche. L\'analyse automatique n\'a pas été lancée (fichier volumineux ou service indisponible) : le plan reste à renseigner à la main.')}</div>
+          `) : ''}
+          <div class="hint" id="mu-error"></div>
+        </div>
+        <div class="pplan-foot">
+          <button type="button" class="pplan-btn-annuler" id="mu-cancel">${trad('Annuler')}</button>
+          ${montrerChoix ? '' : `<button type="button" class="pplan-btn-activer" id="mu-activate"><span class="material-symbols-outlined">verified</span><span>${result ? trad('Activer le plan') : trad('Terminer')}</span></button>`}
+        </div>
       </div>`);
 
     overlay.querySelector('#mu-close-x')?.addEventListener('click', close);
@@ -22831,9 +23078,9 @@ function openManualUploadModal(presetMachine, presetFile) {
     // pas encore (voir ouvrirChoixFrequenceApercu).
     const planCtxMu = { tracking_mode: mode === 'days' ? 'days' : 'hours' };
     muTbody?.addEventListener('click', (e) => {
-      const retirer = e.target.closest('.log-piece-retirer');
+      const retirer = e.target.closest('.pplan-btn-supprimer');
       if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsMu(); return; }
-      const modifier = e.target.closest('.item-frequence-modifier');
+      const modifier = e.target.closest('.pplan-btn-modifier');
       if (modifier) {
         const i = Number(modifier.dataset.index);
         ouvrirChoixFrequenceApercu(items[i], planCtxMu, machine, (choix) => {
@@ -22841,6 +23088,22 @@ function openManualUploadModal(presetMachine, presetFile) {
           rafraichirItemsMu();
         });
       }
+    });
+    // « Filtrer » : simple filtre d'AFFICHAGE sur le libellé (masque des
+    // lignes du tbody), jamais une modification de `items` — désactivé, le
+    // tableau réapparaît intact au prochain rafraîchissement.
+    const filtreBtnMu = overlay.querySelector('#mu-filtrer-btn');
+    const filtreZoneMu = overlay.querySelector('#mu-filtre-zone');
+    filtreBtnMu?.addEventListener('click', () => {
+      filtreZoneMu.hidden = !filtreZoneMu.hidden;
+      if (!filtreZoneMu.hidden) overlay.querySelector('#mu-filtre-input')?.focus();
+    });
+    overlay.querySelector('#mu-filtre-input')?.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      muTbody?.querySelectorAll('tr').forEach((tr) => {
+        const label = (tr.querySelector('.pplan-elt')?.textContent || '').toLowerCase();
+        tr.style.display = !q || label.includes(q) ? '' : 'none';
+      });
     });
     // « Modifier ce plan » ne veut pas dire renommer les tâches détectées —
     // seule leur fréquence est éditable (voir ci-dessus). Ajouter une tâche
@@ -24536,36 +24799,67 @@ function openAddWizard(companyId, categories) {
     const machineCtxWiz = { counter_unit: counterUnitFromMode(mode), counter_value: state.currentHours, current_hours: state.currentHours, service_date: state.serviceDate };
     const filaItemWiz = (it, i) => `
       <tr data-item-index="${i}">
-        <td class="item-label">${it._nouveau
-          ? `<input type="text" class="wiz-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
-          : esc(it.label || '—')}</td>
-        <td><div class="item-frequence-cell">
-          <span class="item-frequence-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</span>
-          <button type="button" class="item-frequence-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}">${picto('crayon')}</button>
+        <td class="pplan-elt">${it._nouveau
+          ? `<input type="text" class="pplan-elt-input wiz-item-label-neuf" data-index="${i}" placeholder="${esc(trad('Élément à entretenir'))}" value="${esc(it.label || '')}">`
+          : `<span class="pplan-elt-dot" style="background:${pplanDotColor(i)}"></span>${esc(it.label || '—')}`}</td>
+        <td class="pplan-freq-valeur">${esc(it.interval_choisi || it.frequency || trad('À définir'))}</td>
+        <td><div class="pplan-actions-cell">
+          <button type="button" class="pplan-btn-modifier" data-index="${i}" title="${esc(trad('Modifier la fréquence'))}"><span class="material-symbols-outlined">edit</span><span>${trad('Modifier l\'étape')}</span></button>
+          <button type="button" class="pplan-btn-supprimer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}"><span class="material-symbols-outlined">delete</span></button>
         </div></td>
-        <td><button type="button" class="log-piece-retirer" data-index="${i}" title="${esc(trad('Retirer cette ligne'))}">${picto('corbeille')}</button></td>
       </tr>`;
     const tableauItemsWizHtml = () => items.map(filaItemWiz).join('');
     shell(`
       ${enteteEtape(trad('Plan proposé par notre algorithme'), { retour: true })}
-      <div class="plan-choix-resume">
-        <strong>${tR('Échéance proposée : tous les {n} {unite}', { n: suggested, unite: mode === 'hours' ? unit.word : trad('jours') })}</strong>
-        ${items.length ? ' — ' + tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }) : ''}
+      <div class="pplan-resume is-inset">
+        <div class="pplan-resume-gauche">
+          <span class="pplan-resume-dot"></span>
+          <strong>${tR('Échéance proposée : tous les {n} {unite}', { n: suggested, unite: mode === 'hours' ? unit.word : trad('jours') })}</strong>
+          ${items.length ? `<span class="muted">— ${esc(tR('{n} échéance(s) détectée(s) dans le manuel', { n: items.length }))}</span>` : ''}
+        </div>
+        <span class="pplan-resume-pill">${trad('Recommandé')}</span>
       </div>
       ${items.length ? `
-      <label><span class="label-ico">${picto('case')}</span>${trad('Échéances détectées dans le manuel')}</label>
-      <p class="hint">${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
-      <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th></th></tr></thead>
-        <tbody id="wiz-items-tbody">${tableauItemsWizHtml()}</tbody>
-      </table></div>
-      <button type="button" class="secondary" id="wiz-item-ajouter" style="margin-top:8px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>` : ''}
-      <div class="plan-choix">
-        <div class="step-options">
-          <button type="button" class="option-tile" id="pc-suivre"><span class="option-ico">${picto('coche')}</span><span class="option-tile-corps">${trad('Suivre ce plan')}<span class="opt-sub">${trad('On active tel quel le mode de suivi et l\'intervalle proposés.')}</span></span></button>
-          <button type="button" class="option-tile" id="pc-modifier"><span class="option-ico">${picto('crayon')}</span><span class="option-tile-corps">${trad('Modifier ce plan')}<span class="opt-sub">${trad('Ajuster le mode de suivi, l\'intervalle ou la photo avant d\'enregistrer.')}</span></span></button>
-          <button type="button" class="option-tile" id="pc-propre"><span class="option-ico">${picto('plusCercle')}</span><span class="option-tile-corps">${trad('Faire mon propre plan')}<span class="opt-sub">${trad('Ignorer cette proposition ; le carnet reste attaché à la fiche.')}</span></span></button>
+      <div style="margin-top:16px;">
+        <div class="pplan-section-tete">
+          <div>
+            <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
+            <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+          </div>
         </div>
+        <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
+          <table class="pplan-table">
+            <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th class="is-actions">${trad('Actions')}</th></tr></thead>
+            <tbody id="wiz-items-tbody">${tableauItemsWizHtml()}</tbody>
+          </table>
+        </div></div>
+        <button type="button" class="pplan-ajouter" id="wiz-item-ajouter" style="margin-top:10px;"><span class="material-symbols-outlined">add_circle</span><span>${trad('Ajouter une ligne')}</span></button>
+      </div>` : ''}
+      <div class="pplan-choix" style="margin-top:18px;">
+        <button type="button" class="pplan-choix-item is-recommande" id="pc-suivre">
+          <div class="pplan-choix-gauche">
+            <div class="pplan-choix-ico"><span class="material-symbols-outlined">check</span></div>
+            <div>
+              <div class="pplan-choix-titre-ligne"><h4>${trad('Suivre ce plan')}</h4><span class="pplan-choix-reco">${trad('Recommandé')}</span></div>
+              <p>${trad('On active tel quel le mode de suivi et l\'intervalle proposés.')}</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined pplan-choix-fleche">arrow_forward</span>
+        </button>
+        <button type="button" class="pplan-choix-item" id="pc-modifier">
+          <div class="pplan-choix-gauche">
+            <div class="pplan-choix-ico"><span class="material-symbols-outlined">edit_note</span></div>
+            <div><h4>${trad('Modifier ce plan')}</h4><p>${trad('Ajuster le mode de suivi, l\'intervalle ou la photo avant d\'enregistrer.')}</p></div>
+          </div>
+          <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+        </button>
+        <button type="button" class="pplan-choix-item" id="pc-propre">
+          <div class="pplan-choix-gauche">
+            <div class="pplan-choix-ico"><span class="material-symbols-outlined">add_circle</span></div>
+            <div><h4>${trad('Faire mon propre plan')}</h4><p>${trad('Ignorer cette proposition ; le carnet reste attaché à la fiche.')}</p></div>
+          </div>
+          <span class="material-symbols-outlined pplan-choix-fleche">chevron_right</span>
+        </button>
       </div>
       <div class="hint" id="f-error"></div>
     `);
@@ -24574,9 +24868,9 @@ function openAddWizard(companyId, categories) {
     const wizTbody = overlay.querySelector('#wiz-items-tbody');
     const rafraichirItemsWiz = () => { if (wizTbody) wizTbody.innerHTML = tableauItemsWizHtml(); };
     wizTbody?.addEventListener('click', (e) => {
-      const retirer = e.target.closest('.log-piece-retirer');
+      const retirer = e.target.closest('.pplan-btn-supprimer');
       if (retirer) { items.splice(Number(retirer.dataset.index), 1); rafraichirItemsWiz(); return; }
-      const modifier = e.target.closest('.item-frequence-modifier');
+      const modifier = e.target.closest('.pplan-btn-modifier');
       if (modifier) {
         const i = Number(modifier.dataset.index);
         ouvrirChoixFrequenceApercu(items[i], planCtxWiz, machineCtxWiz, (choix) => {
