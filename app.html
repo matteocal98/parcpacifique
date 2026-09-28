@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bThs35lCe5pLJcit1qMskCh5n4a7bgOHqkH/6Nvx7Dw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ss3kmRBqSvvt8ZZPTDrM1q+j5wLk1v+3AmNXF9wyc0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -3308,6 +3308,34 @@
   .pplan-choix-fleche{color:var(--ink-4);transition:transform .15s,color .15s;flex:0 0 auto;}
   .pplan-choix-item:hover .pplan-choix-fleche{color:var(--ink);transform:translateX(3px);}
   .pplan-choix-item.is-recommande .pplan-choix-fleche{color:var(--bleu-roi);}
+  /* Écran « Déposer un manuel constructeur » (stepPick, avant l'analyse) —
+     champ Machine concernée + zone de dépôt du PDF avec carte de fichier une
+     fois sélectionné, même reprise Stitch à l'octet près. */
+  .pplan-champ{display:flex;flex-direction:column;gap:6px;}
+  .pplan-champ-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;font-family:'Space Grotesk',sans-serif;margin:0;}
+  .pplan-champ-label .material-symbols-outlined{color:var(--bleu-roi);font-size:16px;}
+  .pplan-champ-ligne{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .pplan-champ-note{font-size:11px;color:var(--ink-4);white-space:nowrap;}
+  select.pplan-select,.champ-select.pplan-select{width:100%;background:var(--surface);border:1px solid rgba(14,19,51,.15);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;color:var(--ink);box-shadow:0 1px 2px rgba(14,19,51,.04);}
+  .champ-select.pplan-select{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .pplan-dropzone{border:2px dashed rgba(35,111,224,.4);background:linear-gradient(to bottom,var(--surface),rgba(35,111,224,.04));border-radius:16px;padding:20px;text-align:center;transition:border-color .15s;cursor:pointer;}
+  .pplan-dropzone:hover,.pplan-dropzone.is-over{border-color:var(--bleu-roi);}
+  .pplan-drop-icon{display:flex;justify-content:center;margin-bottom:10px;}
+  .pplan-drop-icon .material-symbols-outlined{font-size:40px;color:var(--bleu-roi);opacity:.6;}
+  .pplan-drop-titre{display:block;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--ink);}
+  .pplan-drop-formats{display:block;font-size:11px;color:var(--ink-4);margin-top:4px;}
+  .pplan-file-card{background:var(--surface);border:1px solid rgba(35,111,224,.25);border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(14,19,51,.04);display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;margin-bottom:12px;}
+  .pplan-file-gauche{display:flex;align-items:center;gap:12px;min-width:0;}
+  .pplan-file-ico{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--bleu-roi),var(--primary));color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 4px 8px rgba(14,19,51,.15);}
+  .pplan-file-corps{min-width:0;}
+  .pplan-file-nom{display:block;font-size:12px;font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pplan-file-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-4);margin-top:2px;}
+  .pplan-file-verifie{color:var(--ok);font-weight:600;display:flex;align-items:center;gap:3px;}
+  .pplan-file-verifie .material-symbols-outlined{font-size:14px;}
+  .pplan-file-remplacer{width:32px;height:32px;border-radius:8px;background:none;border:none;color:var(--ink-4);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;transition:background .15s,color .15s;}
+  .pplan-file-remplacer:hover{background:#FEF2F2;color:#DC2626;}
+  .pplan-file-rappel{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--ink-4);}
+  .pplan-file-rappel .material-symbols-outlined{color:var(--bleu-roi);font-size:16px;}
   .material-symbols-outlined{
     font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
     font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;
@@ -22671,36 +22699,73 @@ function openManualUploadModal(presetMachine, presetFile) {
       overlay.querySelector('#mu-add').addEventListener('click', () => { close(); handleAddMachine(); });
       return;
     }
-    shell(`
-      <div class="mform-tete">
-        <div class="mform-tete-titre">
-          <h2>${trad('Déposer un manuel constructeur')}</h2>
-          <span class="badge ok"><span class="card-ico">${picto('bouclier')}</span>${trad('Analyse locale')}</span>
+    // Carte du fichier une fois choisi (icône, nom, taille), ou l'invite à
+    // glisser/parcourir tant qu'aucun fichier n'est sélectionné — jamais
+    // « Manuel constructeur vérifié » comme le mockup (rien n'a encore été
+    // vérifié à ce stade, l'analyse n'a même pas commencé : ce serait une
+    // affirmation fabriquée, contraire à l'éthique du reste de l'app).
+    const contenuDropzone = () => file ? `
+        <div class="pplan-file-card">
+          <div class="pplan-file-gauche">
+            <div class="pplan-file-ico"><span class="material-symbols-outlined">auto_stories</span></div>
+            <div class="pplan-file-corps">
+              <span class="pplan-file-nom">${esc(file.name)}</span>
+              <div class="pplan-file-meta">
+                <span>${(file.size / (1024 * 1024)).toFixed(1)} ${trad('Mo')}</span>
+                <span>·</span>
+                <span class="pplan-file-verifie"><span class="material-symbols-outlined">description</span>${trad('Fichier PDF sélectionné')}</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="pplan-file-remplacer" title="${esc(trad('Remplacer le fichier'))}"><span class="material-symbols-outlined">cached</span></button>
         </div>
-        <button type="button" class="mform-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      </div>
-      <p class="sub">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
-
-      <div class="mu-bloc">
-        <label for="mu-machine"><span class="label-ico">${picto('boite')}</span>${trad('Machine concernée')}</label>
-        <select id="mu-machine">
-          ${UI.machines.map(m => `<option value="${esc(m.id)}"${machine && m.id === machine.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}
-        </select>
-
-        <label>${trad('Fichier PDF source')}</label>
-        ${dropzoneHtml('mu-drop')}
-        <div class="hint" id="mu-status">${file ? tR('Fichier sélectionné : {nom}', { nom: esc(file.name) }) : ''}</div>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="mu-cancel">${trad('Annuler')}</button>
-        <button type="button" class="primary" id="mu-start">${picto('carnet')}<span>${trad('Analyser le PDF')}</span></button>
+        <div class="pplan-file-rappel"><span class="material-symbols-outlined">cloud_done</span><span>${trad('Fichier prêt pour l\'analyse. Glissez un autre fichier pour remplacer.')}</span></div>`
+      : `
+        <span class="pplan-drop-icon"><span class="material-symbols-outlined">cloud_upload</span></span>
+        <span class="pplan-drop-titre">${trad('Glissez votre PDF ici ou parcourez')}</span>
+        <span class="pplan-drop-formats">${trad('Format accepté : PDF')}</span>`;
+    shell(`
+      <div class="modal pplan-modal">
+        <div class="pplan-head">
+          <div class="pplan-head-titre">
+            <div class="pplan-head-ligne">
+              <h2>${trad('Déposer un manuel constructeur')}</h2>
+              <span class="pplan-badge"><span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>${trad('Analyse locale')}</span>
+            </div>
+            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
+          </div>
+          <button type="button" class="pplan-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="pplan-body" style="max-height:none;">
+          <div class="pplan-champ">
+            <label class="pplan-champ-label" for="mu-machine"><span class="material-symbols-outlined">precision_manufacturing</span>${trad('Machine concernée')}</label>
+            <select id="mu-machine" class="pplan-select">
+              ${UI.machines.map(m => `<option value="${esc(m.id)}"${machine && m.id === machine.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="pplan-champ">
+            <div class="pplan-champ-ligne">
+              <label class="pplan-champ-label"><span class="material-symbols-outlined">picture_as_pdf</span>${trad('Fichier PDF source')}</label>
+              <span class="pplan-champ-note">${trad('Format PDF (max. 45 Mo)')}</span>
+            </div>
+            <div class="pplan-dropzone" id="mu-drop">${contenuDropzone()}</div>
+          </div>
+          <div class="pplan-note"><span class="material-symbols-outlined">manage_search</span><span>${trad('Extraction assistée : reconnaissance automatique des fréquences horaires, tableau de bord d\'entretien et préconisations d\'huiles.')}</span></div>
+          <div class="hint" id="mu-status"></div>
+        </div>
+        <div class="pplan-foot">
+          <button type="button" class="pplan-btn-annuler" id="mu-cancel">${trad('Annuler')}</button>
+          <button type="button" class="pplan-btn-activer" id="mu-start"><span class="material-symbols-outlined">search</span><span>${trad('Analyser le PDF')}</span><span class="material-symbols-outlined">arrow_forward</span></button>
+        </div>
       </div>`);
     overlay.querySelector('#mu-close-x')?.addEventListener('click', close);
     const statusEl = overlay.querySelector('#mu-status');
-    attachDropzone(overlay.querySelector('#mu-drop'), (f) => {
+    const dropEl = overlay.querySelector('#mu-drop');
+    attachDropzone(dropEl, (f) => {
       file = f;
-      statusEl.textContent = tR('Fichier sélectionné : {nom}', { nom: f.name });
+      dropEl.className = 'pplan-dropzone';
+      dropEl.innerHTML = contenuDropzone();
+      statusEl.textContent = '';
     });
     habillerSelect(overlay.querySelector('#mu-machine'), trad('Machine concernée'));
     overlay.querySelector('#mu-machine').addEventListener('change', (e) => {
