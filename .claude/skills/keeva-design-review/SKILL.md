@@ -67,7 +67,19 @@ faire AVANT de dire "c'est fait".
 - [ ] Space Grotesk réservé aux titres et chiffres techniques ; Figtree pour le
       texte courant — jamais l'inverse sur un nouvel élément.
 
-**5. Avant de livrer**
+**5. Alignement des champs**
+- [ ] Dans une même rangée de champs (`.field-row` ou équivalent), vérifier que
+      tous les champs ont la MÊME hauteur rendue — pas seulement au coup d'œil,
+      mesurer (`getBoundingClientRect().height`). Un champ avec une police plus
+      grande (ex. un compteur en gros chiffres Space Grotesk 21px) déborde
+      facilement de quelques pixels par rapport à ses voisins en police
+      standard, même avec `align-items:flex-end`/`stretch` sur le conteneur —
+      repéré sur "Enregistrer une intervention" (Date / Compteur relevé /
+      Intervenant assigné). Corriger avec une hauteur explicite sur le
+      conteneur du champ en cause plutôt qu'en ajustant le padding au jugé
+      (plus fiable, moins d'aller-retours).
+
+**6. Avant de livrer**
 - [ ] Testé en direct dans le navigateur (`javascript_tool` + `renderApp()`), pas
       seulement relu dans le code — écran cible ET, si le changement est dans une
       classe/fonction partagée, au moins un autre écran qui la réutilise.
