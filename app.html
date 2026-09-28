@@ -3539,12 +3539,14 @@
      elles : le rembourrage passe de 18 px à 16 px, l'écart interne de 12 à 8. */
   .dash-main > .card, .dash-side > .card{padding:16px 20px;gap:8px;}
 
-  /* Le résumé de préparation se sépare du reste : il ANNONCE, il ne détaille
-     pas — la liste complète vit dans l'Agenda, où « Voir la liste » mène.
-     Reprise Stitch « Tableau de bord » : le pointillé distinctif n'est pas
-     dans le mockup (carte pleine comme les autres, demandé « à l'octet
-     près ») — neutralisé ici, sans toucher .card.dash-preparation ailleurs. */
-  .dash-preparation{border-style:solid;border-color:var(--ink);}
+  /* border-style/border-color retirés le 29 sept. 2026 (même décision que
+     la règle des cadres, voir plus bas) : cette règle ne posait QUE le
+     style/la couleur, en s'appuyant sur l'ancienne règle globale des cadres
+     pour l'épaisseur (2px) — un oubli qui, une fois cette dernière retirée,
+     laissait le navigateur retomber sur sa largeur "medium" par défaut et
+     faisait réapparaître un contour non voulu. Plus aucune bordure ici,
+     cohérent avec .card partout ailleurs. */
+  .dash-preparation{border:none;}
   .dash-preparation .card-head{gap:8px;align-items:flex-start;}
   .dash-preparation .pieces-legende{font-size:11px;font-weight:700;letter-spacing:.1em;}
   .dash-preparation .card-title{font-size:15px;}
