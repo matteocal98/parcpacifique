@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-QhS7QFg7S/BZMiqUJ5tvH2a8yP2gARHRbla1IBNlNjw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-9Zd4NjF9+1MoVS2bK2l5IovX46Sgf5534rh5mlO55Sg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -920,7 +920,7 @@
   .prep-pied-note{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dark-ink);}
   .prep-pied-note svg{width:14px;height:14px;color:var(--ok);}
   .prep-pied-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 15px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;}
+  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:16px;font-family:inherit;cursor:pointer;}
   .prep-copier-btn svg{width:16px;height:16px;}
 
   /* Reprise Stitch « Precision Field Matrix » — bloc Agenda « Préparation des
@@ -1185,8 +1185,8 @@
      jamais sous sa largeur de contenu par défaut (min-width:auto) — sans
      ça, ce bouton + les 2 boutons icône à côté débordaient hors de la
      carte sur mobile (trouvé en testant à 375px). */
-  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
-  @media (max-width:480px){.mstrip-btn-principal{white-space:normal;text-align:center;line-height:1.25;height:auto;min-height:40px;padding:8px 12px;}}
+  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
+  @media (max-width:480px){.mstrip-btn-principal{white-space:normal;text-align:center;line-height:1.25;height:auto;min-height:44px;padding:8px 12px;}}
   .mstrip-btn-principal:hover{background:var(--dark);}
   .mstrip-btn-principal svg{width:17px;height:17px;flex:0 0 auto;}
   .mstrip-btn-icone{width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
@@ -1410,8 +1410,15 @@
   .m-actions .btn-principal{grid-column:1 / -1;}
   .m-actions .btn-principal{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
   .m-actions .btn-principal:hover{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
-  .m-actions .btn-row-action:not(.btn-principal){background:var(--surface);border:2px solid var(--ink);color:var(--ink);}
-  .m-actions .btn-row-action:not(.btn-principal):hover{background:var(--surface-soft);border-color:var(--ink);color:var(--ink);}
+  /* Contour noir (border:2px solid var(--ink)) retiré, signalé par
+     l'utilisateur — même motif « voile lavande, sans cadre » déjà en place
+     plus bas (.machine .m-actions .btn-row-action:not(.btn-principal),
+     règle plus spécifique qui gagnait déjà en pratique partout où
+     .m-actions vit dans un .machine, donc ce changement rend cette règle
+     cohérente avec ce qui s'affichait déjà, sans changement visuel réel
+     à cet endroit précis). */
+  .m-actions .btn-row-action:not(.btn-principal){background:rgba(99,102,241,.1);border:none;color:var(--ink);}
+  .m-actions .btn-row-action:not(.btn-principal):hover{background:rgba(99,102,241,.18);color:var(--ink);}
   /* ★ LOT 9 — LE PICTO DES BOUTONS : `build_circle`, `event_repeat`,
      `fact_check`, `settings` — les quatre de la maquette, aux quatre places
      qu'elle leur donne. `photo_camera` sur le geste de la photo. */
@@ -2263,7 +2270,7 @@
      ce qui les rétrécit mécaniquement pour lui faire de la place, sans
      largeur fixe à ajuster à la main. */
   .log-mo-ajouter-zone{flex:0 0 auto;}
-  .log-mo-ajouter{height:44px;padding:0 18px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .log-mo-ajouter{height:44px;padding:0 18px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-family:inherit;}
   .log-mo-ajouter:hover{background:var(--dark);}
   .log-mo-ajouter svg{width:16px;height:16px;flex:0 0 auto;}
 
@@ -4487,8 +4494,10 @@
     .machine.is-late .m-actions .btn-principal{background:var(--late);border-color:var(--late);color:var(--ink);}
     .machine.is-soon .m-actions .btn-principal{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff;}
     .machine.is-ok .m-actions .btn-principal{background:var(--ok);border-color:var(--ok);color:var(--ink);}
+    /* Contour noir retiré (signalé par l'utilisateur), même voile lavande
+       sans cadre que la règle mobile équivalente plus haut. */
     .machine .m-actions .btn-row-action:not(.btn-principal):not([data-open="edit"]){
-      background:var(--surface);border:2px solid var(--ink);color:var(--ink);font-size:13px;
+      background:rgba(99,102,241,.1);border:none;color:var(--ink);font-size:13px;
     }
     .machine .m-actions .btn-row-action:not(.btn-principal):not([data-open="edit"]):hover{background:rgba(99,102,241,.08);}
     .machine .m-actions .btn-row-action[data-open="edit"]{
@@ -4557,7 +4566,11 @@
     border-radius:var(--r-md);
   }
   .manuel-actions .btn-row-action:hover{background:var(--line-2);}
-  .manuel-actions .btn-principal{background:var(--primary-dark);color:#fff;}
+  /* 16px, pas 13 : boutons noirs/pleins uniformisés à 16px partout dans
+     l'app (avis esthétique de l'utilisateur, "pas de tailles différentes
+     sur la même page"), même quand ils voisinent des boutons gris à 13px
+     de la même famille .btn-row-action. */
+  .manuel-actions .btn-principal{background:var(--primary-dark);color:#fff;font-size:16px;height:44px;}
   .manuel-actions .btn-principal:hover{background:var(--dark);}
 
   @media (min-width:900px){
@@ -4920,7 +4933,7 @@
     width:100%;min-height:44px;border-radius:var(--r-md);border:none;font-family:inherit;font-size:13px;font-weight:700;
     display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--surface-soft);color:var(--ink);
   }
-  .jm-carte.is-late .jm-carte-cta{background:var(--primary-dark);color:#fff;}
+  .jm-carte.is-late .jm-carte-cta{background:var(--primary-dark);color:#fff;font-size:16px;}
   .jm-carte-cta svg{width:16px;height:16px;}
   .jm-vide{padding:24px 10px;text-align:center;color:var(--ink-3);font-size:13.5px;}
   .jm-pied{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
@@ -5150,7 +5163,7 @@
      séparé : seule « Supprimer mon compte » sort du noir uniforme). */
   .membre-action-btn{
     background:var(--ink);color:#fff;border:none;border-radius:var(--r-chip);
-    padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    padding:10px 14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
   }
   .membre-action-btn:hover{background:var(--dark);}
 
@@ -6277,7 +6290,7 @@
 
   .tco-clst-export-btn{width:100%;height:48px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);font-weight:700;font-size:13px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
   .tco-clst-export-btn svg{width:18px;height:18px;color:var(--bleu-roi);}
-  .tco-clst-export-btn.is-primaire{background:var(--ink);color:#fff;border:none;}
+  .tco-clst-export-btn.is-primaire{background:var(--ink);color:#fff;border:none;font-size:16px;}
   .tco-clst-export-btn.is-primaire svg{color:var(--ok);}
 
   /* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
@@ -17877,7 +17890,7 @@ function agendaSurveillanceHtml(counters) {
       <div class="card-head"><h2 class="card-title-sm"><span class="card-ico card-ico-plein">${picto('compteur')}</span><span>${trad('Surveillance au compteur')}</span></h2></div>
       <p class="muted-text">${trad('Prédictions sans date de calendrier fixe : ces machines sont suivies à l\'usage, pas au mois.')}</p>
       <div class="agenda-surv-liste">${counters.map(item).join('')}</div>
-      <button type="button" class="primary agenda-surv-cta" data-nav="machines"><span class="card-ico">${picto('croix')}</span><span>${trad('Saisir un relevé compteur')}</span></button>
+      <button type="button" class="primary agenda-surv-cta" data-nav="machines"><span>${trad('Saisir un relevé compteur')}</span></button>
     </section>`;
 }
 // Export CSV et bon de commande, repliés par défaut sous la carte de
