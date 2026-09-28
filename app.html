@@ -489,7 +489,12 @@
   .avatar.sm{width:30px;height:30px;font-size:12px;}
 
   .head-title{display:none;}
-  .head-title h1{margin:0;font-size:26px;font-weight:800;}
+  /* Titre de page unifié sur toutes les pages de menu (Mon compte, Agenda,
+     Rappels, Plan d'entretien, Stock…) — signalé par l'utilisateur comme
+     inconsistant : seul Coûts & TCO avait déjà cette police (héritait de
+     Figtree partout ailleurs). Reprend exactement le spec déjà en place
+     pour TCO, qui devient donc la règle commune au lieu d'une exception. */
+  .head-title h1{margin:0;font-family:'Space Grotesk',sans-serif;font-size:31px;line-height:38px;font-weight:800;letter-spacing:-0.02em;}
   .head-title .sub{font-size:13.5px;color:var(--ink-2);margin-top:4px;}
 
   /* ★ LOT 8 — L'EN-TÊTE DU TABLEAU DE BORD EST CELUI DE LA MAQUETTE.
@@ -1003,7 +1008,10 @@
   .parc-toolbar{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
   .parc-toolbar-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
   .parc-toolbar-titre-ligne{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .parc-toolbar-titre-ligne h1{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin:0;}
+  /* Machines masque .head-title (règle plus bas) et affiche ce titre-ci à la
+     place : même spec que .head-title h1 pour rester uniforme entre pages
+     (26px/700 avant, signalé par l'utilisateur comme différent des autres). */
+  .parc-toolbar-titre-ligne h1{font-family:'Space Grotesk',sans-serif;font-size:31px;line-height:38px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);margin:0;}
   .parc-count-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-2);font-size:12px;font-weight:600;}
   .parc-count-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
   .parc-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -5700,7 +5708,8 @@
      d'élévation Material, pas des couleurs de marque) suivent les gris
      déjà existants (--surface-soft, --line, --line-2).
      ══════════════════════════════════════════════════════════════════════════ */
-  .page-head[data-view="tco"] h1{font-family:'Space Grotesk',sans-serif;font-size:31px;line-height:38px;font-weight:800;letter-spacing:-0.02em;}
+  /* .page-head[data-view="tco"] h1 retiré : désormais identique à la règle
+     commune .head-title h1 (uniformisation des titres de page). */
   .vue-couts-tco input:not([type=checkbox]),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
   .vue-couts-tco input:not([type=checkbox]):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
   .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
