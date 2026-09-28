@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cXe0CqMLGIz3V2prXIoGKJq7Ll0z8kRuQGiaz4o33Us=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g9K3e4qEMgCEPhx1XZ4I8+XOLIrJPdAhNqynIKYBlzw=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5555,12 +5555,14 @@
   .stock-section-icon.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);}
   .stock-section-icon.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);}
   .stock-section-icon.is-ok{background:rgba(36,181,168,.1);color:var(--ok);}
+  .stock-section-icon.is-amber{background:rgba(222,122,22,.08);color:var(--late);}
   .stock-section-titre-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .stock-section-titre{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
   .stock-section-badge{padding:2px 10px;border-radius:var(--r-pill);font-size:11.5px;font-weight:700;border:1px solid transparent;}
   .stock-section-badge.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);border-color:rgba(35,111,224,.15);}
   .stock-section-badge.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);border-color:rgba(91,82,223,.15);}
   .stock-section-badge.is-ok{background:rgba(36,181,168,.1);color:var(--ok);border-color:rgba(36,181,168,.18);}
+  .stock-section-badge.is-amber{background:rgba(222,122,22,.1);color:var(--late);border-color:rgba(222,122,22,.18);}
   .stock-section-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
   .stock-section-body{padding:24px;}
   .stock-section-body.is-tight{padding-top:8px;}
@@ -9144,6 +9146,28 @@ function appliquerChoixTache(items, label, choix, plan, machine) {
     // implémentation, donc un choix de l'utilisateur et une fréquence lue dans un
     // carnet ne peuvent pas produire deux échéances différentes.
     return echeancePropreTacheAppliquee(t, machine);
+  });
+}
+
+// Relie (ou retire) un kit d'entretien à UNE tâche précise d'un plan. Écrit
+// TOUT le tableau items (même motif que appliquerChoixTache ci-dessus —
+// aucune RPC de patch JSONB n'existe pour ces plans). Identifie la tâche par
+// `item_id` quand elle en a déjà un ; sinon par SA POSITION dans le tableau
+// (jamais par `label` seul, qui peut être dupliqué entre deux tâches — voir
+// appliquerChoixTache, qui a encore cette faille, non corrigée ici pour
+// rester un diff séparé et facile à relire). La position est un identifiant
+// sûr ici : tachesAffichees/projectionTaches/preparerTaches ne font que des
+// `.map()` sur `items`, jamais de tri ni de filtre — l'ordre affiché à
+// l'écran est TOUJOURS celui de `plan.items` en base, vérifié en lisant ces
+// trois fonctions avant d'écrire ce code.
+function appliquerKitTache(items, index, itemId, kitId) {
+  return normalizeItems(items).map((it, i) => {
+    const estLaTache = itemId ? it.item_id === itemId : i === index;
+    if (!estLaTache) return it;
+    const t = { ...it };
+    if (!t.item_id) t.item_id = crypto.randomUUID();
+    if (kitId) t.kit_id = kitId; else delete t.kit_id;
+    return t;
   });
 }
 
@@ -16398,6 +16422,35 @@ function listePreparation(machines, jours, maintenant) {
       continue;
     }
     for (const item of items) {
+      // Tâche reliée à un kit d'entretien réel (voir ouvrirChoixKitTache) :
+      // une ligne de besoin PAR LIGNE DE KIT, clé sur part_id — jamais le
+      // parsing texte libre lireQuantite/totalQuantites (une ligne de kit
+      // porte déjà un nombre propre). Un kit_id qui ne résout plus (kit
+      // supprimé/désactivé) retombe silencieusement sur le chemin texte
+      // libre ci-dessous, comme avant ce chantier.
+      const kit = item && item.kit_id
+        ? (UI.maintenanceKits || []).find((k) => String(k.id) === String(item.kit_id) && k.active !== false)
+        : null;
+      if (kit) {
+        const lignesDeKit = (UI.maintenanceKitLines || []).filter((l) => String(l.kit_id) === String(kit.id));
+        for (const ligne of lignesDeKit) {
+          const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(ligne.part_id));
+          besoins.push({
+            cle: `piece:${ligne.part_id}`,
+            label: piece ? piece.designation : trad('Référence supprimée'),
+            spec: piece && piece.reference ? piece.reference : '',
+            machine,
+            quantite: Number(ligne.quantity) || 0,
+            date,
+            estKit: true,
+            partId: ligne.part_id,
+            kitId: kit.id,
+            kitNom: kit.name,
+            tacheLabel: item.label ? String(item.label).trim() : '',
+          });
+        }
+        continue;
+      }
       const label = item && item.label ? String(item.label).trim() : '';
       if (!label) continue;
       const spec = item && item.spec ? String(item.spec).trim() : '';
@@ -16415,14 +16468,75 @@ function listePreparation(machines, jours, maintenant) {
     if (!parCle.has(besoin.cle)) parCle.set(besoin.cle, { label: besoin.label, spec: besoin.spec, besoins: [] });
     parCle.get(besoin.cle).besoins.push(besoin);
   }
-  const produits = [...parCle.values()].map((produit) => ({
-    ...produit,
-    total: totalQuantites(produit.besoins.map((b) => b.quantite)),
-    premiereDate: produit.besoins.map((b) => b.date).filter(Boolean).sort()[0] || null,
-  }));
+  const produits = [...parCle.values()].map((produit) => {
+    const estKit = produit.besoins[0] && produit.besoins[0].estKit === true;
+    const total = estKit
+      ? produit.besoins.reduce((s, b) => s + (Number(b.quantite) || 0), 0)
+      : totalQuantites(produit.besoins.map((b) => b.quantite));
+    const premiereDate = produit.besoins.map((b) => b.date).filter(Boolean).sort()[0] || null;
+    const resultat = { ...produit, total, premiereDate };
+    if (estKit) {
+      const ref = produit.besoins[0];
+      resultat.partId = ref.partId;
+      resultat.kitId = ref.kitId;
+      resultat.kitNom = ref.kitNom;
+      resultat.tacheLabel = ref.tacheLabel;
+      // Couverture de stock : uniquement pour un besoin réellement relié à
+      // une pièce du catalogue — jamais pour le texte libre, faute de
+      // référence à comparer à un vrai stock.
+      resultat.stockCouverture = calculerCouverturePiece(ref.partId, total, premiereDate);
+    }
+    return resultat;
+  });
   produits.sort((a, b) => String(a.premiereDate || '9999').localeCompare(String(b.premiereDate || '9999')));
 
   return { entretiens, auCompteur, produits, groupes: grouperProduits(produits), sansItems };
+}
+
+// Compare le besoin projeté d'une pièce (issu d'un kit relié à une tâche) au
+// stock réel, TOUS MAGASINS CONFONDUS — un signal d'approvisionnement pour la
+// flotte entière, pas une vue par magasin (même périmètre que la KPI
+// « valeur totale du stock », qui fait déjà cette même somme). RIEN N'EST
+// INVENTÉ (même règle que dueInfo) : sans délai d'appro renseigné sur la
+// pièce, ou sans échéance calendaire pour la porter, aucune date de
+// commande n'est fabriquée — l'état devient 'inconnu', jamais une date au
+// hasard.
+function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const stockDisponible = (UI.stockItems || [])
+    .filter((it) => String(it.part_id) === String(partId))
+    .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+  const solde = stockDisponible - besoinTotal;
+  let commanderAvantLe = null;
+  if (premiereDateEcheance && piece && piece.avg_lead_time_days != null) {
+    commanderAvantLe = addDaysIso(premiereDateEcheance, -Number(piece.avg_lead_time_days));
+  }
+  let state = 'ok';
+  if (solde < 0) {
+    if (commanderAvantLe == null) {
+      state = 'inconnu';
+    } else {
+      const jours = daysUntil(commanderAvantLe);
+      state = jours < 0 ? 'late' : (jours <= SOON_DAYS ? 'soon' : 'ok');
+    }
+  }
+  return {
+    partId,
+    designation: piece ? piece.designation : trad('Référence supprimée'),
+    reference: piece ? piece.reference : null,
+    besoin: besoinTotal,
+    stockDisponible,
+    solde,
+    commanderAvantLe,
+    state,
+  };
+}
+// Libellé de l'état de couverture — état 'inconnu' distinct de badgeLabel()
+// (son repli « Plan à définir » n'a pas de sens pour une pièce en manque
+// sans délai d'appro connu).
+function libelleCouverturePiece(state) {
+  if (state === 'inconnu') return trad('Délai d\'appro non renseigné');
+  return badgeLabel(state);
 }
 
 // --- Familles de produits ---------------------------------------------------
@@ -16823,6 +16937,14 @@ function preparationCompleteAgendaHtml() {
     const besoinPrincipal = produit.besoins.find((b) => b.date === produit.premiereDate) || produit.besoins[0];
     const etat = etatBesoin(besoinPrincipal);
     const total = produit.total ? formatteTotal(produit.total) : '';
+    // Couverture de stock (uniquement les produits reliés à un kit — voir
+    // listePreparation) : un second badge, jamais à la place de l'état
+    // d'échéance existant — ce sont deux informations distinctes.
+    const couv = produit.stockCouverture;
+    const badgeCouverture = couv ? `<span class="badge ${badgeClass(couv.state)}">${couv.solde < 0
+      ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) : libelleCouverturePiece('inconnu'))
+      : tR('Stock {n}/{b}', { n: texteAvecSeparateurs(couv.stockDisponible), b: texteAvecSeparateurs(couv.besoin) })
+    }</span>` : '';
     return `
       <div class="prep-detail-produit">
         <span class="card-ico prep-case">${picto('coche')}</span>
@@ -16831,7 +16953,7 @@ function preparationCompleteAgendaHtml() {
             <span class="prep-detail-produit-nom">${esc(produit.label)}</span>
             ${produit.spec ? `<span class="prep-detail-produit-spec">${esc(produit.spec)}</span>` : ''}
           </div>
-          <div class="prep-detail-produit-tags">${tags}<span class="badge ${etat.classe}">${esc(etat.mot)}</span></div>
+          <div class="prep-detail-produit-tags">${tags}<span class="badge ${etat.classe}">${esc(etat.mot)}</span>${badgeCouverture}</div>
         </div>
         ${total ? `<span class="prep-detail-produit-total">${esc(total)}</span>` : ''}
       </div>`;
@@ -19939,6 +20061,13 @@ function designationPiece(id) {
   const p = (UI.partsCatalog || []).find((x) => String(x.id) === String(id));
   return p ? p.designation : trad('Référence supprimée');
 }
+function nomKit(id) {
+  const k = (UI.maintenanceKits || []).find((x) => String(x.id) === String(id));
+  return k ? k.name : trad('Kit supprimé');
+}
+function lignesKit(kitId) {
+  return (UI.maintenanceKitLines || []).filter((l) => String(l.kit_id) === String(kitId));
+}
 function badgeTypeMouvement(type) {
   const map = {
     entree: { texte: trad('Entrée'), classe: 'ok' },
@@ -20230,6 +20359,251 @@ function blocMouvementsStockHtml() {
     </section>`;
 }
 
+// ── Kits d'entretien ── bundles nommés et réutilisables de pièces +
+// quantités, reliables à une étape de plan d'entretien (voir openPlanView /
+// ouvrirChoixKitTache). CRUD réservé au gérant (peutGererParametresStock),
+// même palier que la gestion des magasins.
+function ligneKitHtml(kit) {
+  const gerant = peutGererParametresStock();
+  const nbLignes = lignesKit(kit.id).length;
+  return `
+    <div class="stock-row" data-kit-id="${esc(kit.id)}">
+      <div class="stock-row-gauche">
+        <div class="stock-row-icone" style="background:rgba(222,122,22,.08);color:var(--late);">${picto('mallette')}</div>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(kit.name)}</span>${kit.active === false ? `<span class="stock-tag">${trad('Inactif')}</span>` : ''}</div>
+          <div class="stock-row-sub">${tR('{n} pièce(s)', { n: nbLignes })}${kit.note ? ' · ' + esc(kit.note) : ''}</div>
+        </div>
+      </div>
+      ${gerant ? `
+      <div class="stock-row-actions">
+        <button type="button" data-kit-modifier="${esc(kit.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+        <button type="button" class="is-danger" data-kit-retirer="${esc(kit.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
+      </div>` : ''}
+    </div>`;
+}
+function blocKitsEntretienStockHtml() {
+  const kits = UI.maintenanceKits || [];
+  const peut = peutGererParametresStock();
+  const liste = kits.length ? kits.map(ligneKitHtml).join('') : `<div class="hint">${trad('Aucun kit pour l\'instant — un kit regroupe les pièces nécessaires à une étape d\'entretien.')}</div>`;
+  return `
+    <section class="stock-section" id="stock-kits-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-amber">${picto('mallette')}</div>
+          <div>
+            <div class="stock-section-titre-row">
+              <h2 class="stock-section-titre">${trad('Kits d\'entretien')}</h2>
+              <span class="stock-section-badge is-amber">${tR('{n} kit(s)', { n: kits.length })}</span>
+            </div>
+            <p class="stock-section-sub">${trad('Un kit regroupe les pièces nécessaires à une étape d\'entretien — à relier depuis la fiche d\'une machine pour anticiper les besoins.')}</p>
+          </div>
+        </div>
+        ${peut ? `<button type="button" class="stock-btn-outline" id="stock-kit-nouveau">${picto('plusCercle')}<span>${trad('Nouveau kit')}</span></button>` : ''}
+      </div>
+      <div class="stock-section-body">
+        <div class="stock-liste" id="stock-kits-liste">${liste}</div>
+      </div>
+    </section>`;
+}
+
+// Modale d'édition d'un kit (création ou modification) — nom/note/actif +
+// lignes (pièce du catalogue + quantité). Enregistrement : upsert du kit,
+// puis suppression totale + réinsertion des lignes — fenêtre non atomique
+// acceptée pour le petit nombre de lignes qu'un kit porte réellement,
+// éditées rarement par un gérant (contrairement aux mouvements de stock,
+// qui eux exigent l'atomicité du calcul PUMP via une RPC dédiée).
+function ouvrirEditionKit(kit) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
+  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`).join('');
+  const lignesExistantes = kit ? lignesKit(kit.id) : [];
+
+  const ligneEditHtml = () => `
+    <div class="stock-field-row" data-kit-ligne style="grid-template-columns:2fr 1fr auto;align-items:center;">
+      <select data-kit-ligne-piece>${optionsPieces}</select>
+      <input type="text" inputmode="decimal" data-kit-ligne-qte placeholder="${trad('Quantité')}">
+      <button type="button" class="stock-row-actions is-danger" data-kit-ligne-retirer title="${esc(trad('Retirer cette ligne'))}" style="padding:7px;">${picto('corbeille')}</button>
+    </div>`;
+
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kit-titre">
+      <h2 id="kit-titre">${kit ? trad('Modifier le kit') : trad('Nouveau kit d\'entretien')}</h2>
+      <label for="kit-nom">${trad('Nom du kit')}</label>
+      <input id="kit-nom" required placeholder="${trad('Ex : Kit vidange 500h')}" value="${kit ? esc(kit.name) : ''}">
+      <label for="kit-note" style="margin-top:8px;display:block;">${trad('Note (optionnel)')}</label>
+      <input id="kit-note" placeholder="${trad('Note (optionnel)')}" value="${kit && kit.note ? esc(kit.note) : ''}">
+      ${kit ? `
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;">
+        <input type="checkbox" id="kit-actif" ${kit.active !== false ? 'checked' : ''} style="width:16px;height:16px;">
+        ${trad('Kit actif (proposable sur une fiche machine)')}
+      </label>` : ''}
+      <div style="margin-top:14px;">
+        <div style="font-weight:600;font-size:13.5px;color:var(--ink);margin-bottom:8px;">${trad('Pièces du kit')}</div>
+        <div id="kit-lignes" style="display:flex;flex-direction:column;gap:8px;">
+          ${lignesExistantes.length ? lignesExistantes.map(() => ligneEditHtml()).join('') : ligneEditHtml()}
+        </div>
+        <button type="button" class="stock-btn-outline" id="kit-ligne-ajouter" style="margin-top:10px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>
+      </div>
+      <div class="hint" id="kit-msg" role="status" aria-live="polite" style="margin-top:10px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="kit-fermer">${trad('Fermer')}</button>
+        <button type="button" class="primary" id="kit-enregistrer"><span>${trad('Enregistrer le kit')}</span></button>
+      </div>
+    </div>`;
+
+  // Pré-remplit chaque ligne existante (pièce + quantité) puis habille tous
+  // les sélecteurs de pièce (recherche cherchable, même composant que
+  // partout ailleurs dans le module Stock).
+  const lignesDom = () => [...overlay.querySelectorAll('[data-kit-ligne]')];
+  lignesExistantes.forEach((ligne, i) => {
+    const ligneEl = lignesDom()[i];
+    if (!ligneEl) return;
+    ligneEl.querySelector('[data-kit-ligne-piece]').value = String(ligne.part_id);
+    ligneEl.querySelector('[data-kit-ligne-qte]').value = texteAvecSeparateurs(ligne.quantity);
+  });
+  overlay.querySelectorAll('[data-kit-ligne-piece]').forEach((sel) => habillerSelectPieceCatalogue(sel));
+
+  const dire = (texte, erreur) => {
+    const el = overlay.querySelector('#kit-msg');
+    if (!el) return;
+    el.textContent = texte;
+    el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
+  };
+  const geler = (g) => { overlay.querySelectorAll('button,input,select').forEach((el) => { el.disabled = g; }); };
+
+  overlay.querySelector('#kit-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#kit-ligne-ajouter').addEventListener('click', () => {
+    const conteneur = overlay.querySelector('#kit-lignes');
+    conteneur.insertAdjacentHTML('beforeend', ligneEditHtml());
+    const selects = conteneur.querySelectorAll('[data-kit-ligne-piece]');
+    habillerSelectPieceCatalogue(selects[selects.length - 1]);
+  });
+  overlay.querySelector('#kit-lignes').addEventListener('click', (e) => {
+    const retirer = e.target.closest('[data-kit-ligne-retirer]');
+    if (!retirer) return;
+    const ligneEl = retirer.closest('[data-kit-ligne]');
+    // Toujours garder au moins une ligne à l'écran, jamais un formulaire vide
+    // sans aucune action possible.
+    if (lignesDom().length <= 1) {
+      const sel = ligneEl.querySelector('[data-kit-ligne-piece]');
+      if (sel) sel.selectedIndex = 0;
+      const qte = ligneEl.querySelector('[data-kit-ligne-qte]');
+      if (qte) qte.value = '';
+      return;
+    }
+    ligneEl.remove();
+  });
+
+  overlay.querySelector('#kit-enregistrer').addEventListener('click', async () => {
+    const nom = overlay.querySelector('#kit-nom').value.trim();
+    if (!nom) { dire(trad('Le nom du kit est obligatoire.'), true); return; }
+    const actifEl = overlay.querySelector('#kit-actif');
+    const actif = actifEl ? actifEl.checked : true;
+    const note = overlay.querySelector('#kit-note').value.trim();
+    const lignesSaisies = lignesDom().map((ligneEl) => {
+      const partId = ligneEl.querySelector('[data-kit-ligne-piece]').value;
+      const qte = nombreDepuisTexte(ligneEl.querySelector('[data-kit-ligne-qte]').value);
+      return partId && qte > 0 ? { part_id: partId, quantity: qte } : null;
+    }).filter(Boolean);
+    if (!lignesSaisies.length) { dire(trad('Ajoute au moins une pièce avec une quantité.'), true); return; }
+
+    geler(true);
+    dire(trad('Enregistrement…'), false);
+    try {
+      let kitId = kit ? kit.id : null;
+      if (kitId) {
+        const { data, error } = await sb.from('maintenance_kits')
+          .update({ name: nom, note: note || null, active: actif })
+          .eq('id', kitId)
+          .select('id, name, note, active')
+          .single();
+        if (error) throw error;
+        UI.maintenanceKits = (UI.maintenanceKits || []).map((k) => (String(k.id) === String(kitId) ? data : k));
+      } else {
+        const { data, error } = await sb.from('maintenance_kits')
+          .insert({ company_id: UI.companyId, name: nom, note: note || null })
+          .select('id, name, note, active')
+          .single();
+        if (error) throw error;
+        kitId = data.id;
+        UI.maintenanceKits = [...(UI.maintenanceKits || []), data];
+      }
+      const { error: delErr } = await sb.from('maintenance_kit_lines').delete().eq('kit_id', kitId);
+      if (delErr) throw delErr;
+      const { data: nouvellesLignes, error: insErr } = await sb.from('maintenance_kit_lines')
+        .insert(lignesSaisies.map((l) => ({ company_id: UI.companyId, kit_id: kitId, part_id: l.part_id, quantity: l.quantity })))
+        .select('id, kit_id, part_id, quantity, note');
+      if (insErr) throw insErr;
+      UI.maintenanceKitLines = [...(UI.maintenanceKitLines || []).filter((l) => String(l.kit_id) !== String(kitId)), ...(nouvellesLignes || [])];
+      showToast(kit ? trad('Kit modifié') : trad('Kit créé'));
+      overlay.remove();
+      renderApp();
+    } catch (err) {
+      dire(trad('Erreur :') + ' ' + (err.message || err), true);
+      geler(false);
+    }
+  });
+}
+
+// ── Besoins à risque ── le vrai bénéfice de configurer des kits : parmi
+// TOUTES les pièces reliées à un kit sur une tâche à venir, celles dont le
+// stock ne couvrira pas le besoin projeté. Réutilise listePreparation (même
+// fonction que le Tableau de bord/Agenda, jamais un second calcul) avec le
+// plus grand horizon existant (un délai d'appro peut dépasser la fenêtre
+// courte du tableau de bord).
+function ligneBesoinRisqueHtml(produit) {
+  const couv = produit.stockCouverture;
+  const texteEtat = couv.commanderAvantLe
+    ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) })
+    : libelleCouverturePiece(couv.state);
+  return `
+    <div class="stock-row">
+      <div class="stock-row-gauche">
+        <div class="stock-row-icone">${picto('boite')}</div>
+        <div class="stock-row-corps">
+          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(produit.label)}</span><span class="badge ${badgeClass(couv.state)}">${esc(texteEtat)}</span></div>
+          <div class="stock-row-sub">${produit.kitNom ? esc(produit.kitNom) : ''}${produit.tacheLabel ? ' · ' + esc(produit.tacheLabel) : ''}</div>
+        </div>
+      </div>
+      <div class="stock-row-valeur">
+        <span class="montant">${texteAvecSeparateurs(couv.stockDisponible)}/${texteAvecSeparateurs(couv.besoin)}</span>
+        <span class="unite">${trad('dispo/besoin')}</span>
+      </div>
+    </div>`;
+}
+function blocBesoinsRisqueStockHtml() {
+  const horizon = Math.max(...PREPARATION_HORIZON);
+  const liste = listePreparation(UI.machines, horizon);
+  const ordreGravite = { late: 0, soon: 1, inconnu: 2, ok: 3 };
+  const aRisque = (liste.produits || [])
+    .filter((p) => p.stockCouverture && p.stockCouverture.solde < 0)
+    .sort((a, b) => (ordreGravite[a.stockCouverture.state] ?? 9) - (ordreGravite[b.stockCouverture.state] ?? 9));
+  return `
+    <section class="stock-section" id="stock-besoins-risque-section">
+      <div class="stock-section-head">
+        <div class="stock-section-head-gauche">
+          <div class="stock-section-icon is-amber">${picto('alerte')}</div>
+          <div>
+            <div class="stock-section-titre-row">
+              <h2 class="stock-section-titre">${trad('Besoins à risque')}</h2>
+              <span class="stock-section-badge is-amber">${tR('{n} pièce(s)', { n: aRisque.length })}</span>
+            </div>
+            <p class="stock-section-sub">${tR('Pièces reliées à un kit dont le stock ne couvrira pas les entretiens des {n} prochains jours.', { n: horizon })}</p>
+          </div>
+        </div>
+      </div>
+      <div class="stock-section-body">
+        <div class="stock-liste">
+          ${aRisque.length ? aRisque.map(ligneBesoinRisqueHtml).join('') : `<div class="hint">${trad('Aucune pièce à risque pour l\'instant.')}</div>`}
+        </div>
+      </div>
+    </section>`;
+}
+
 function exporterInventaireStockCsv() {
   const gerant = peutGererParametresStock();
   const header = gerant
@@ -20429,6 +20803,8 @@ VIEWS.stock = {
         ${blocCatalogueTcoHtml()}
         ${blocInventaireStockHtml()}
         ${blocMouvementsStockHtml()}
+        ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}
+        ${SCHEMA.hasKits ? blocBesoinsRisqueStockHtml() : ''}
       </div>`;
   },
   mount() {
@@ -20441,6 +20817,37 @@ VIEWS.stock = {
     };
 
     root.querySelector('#stock-pump-info')?.addEventListener('click', ouvrirExplicationPump);
+
+    // ── Kits d'entretien : CRUD réservé au gérant. ──
+    if (SCHEMA.hasKits) {
+      root.querySelector('#stock-kit-nouveau')?.addEventListener('click', () => ouvrirEditionKit(null));
+      root.querySelector('#stock-kits-liste')?.addEventListener('click', (e) => {
+        const modifier = e.target.closest('[data-kit-modifier]');
+        if (modifier) {
+          const kitVise = (UI.maintenanceKits || []).find((k) => String(k.id) === modifier.getAttribute('data-kit-modifier'));
+          if (kitVise) ouvrirEditionKit(kitVise);
+          return;
+        }
+        const retirer = e.target.closest('[data-kit-retirer]');
+        if (!retirer) return;
+        const id = retirer.getAttribute('data-kit-retirer');
+        if (!window.confirm(trad('Supprimer ce kit ? Les tâches de plan qui le référencent afficheront « Kit supprimé ».'))) return;
+        (async () => {
+          try {
+            const { error: errLignes } = await sb.from('maintenance_kit_lines').delete().eq('kit_id', id);
+            if (errLignes) throw errLignes;
+            const { error: errKit } = await sb.from('maintenance_kits').delete().eq('id', id);
+            if (errKit) throw errKit;
+            UI.maintenanceKits = (UI.maintenanceKits || []).filter((k) => String(k.id) !== String(id));
+            UI.maintenanceKitLines = (UI.maintenanceKitLines || []).filter((l) => String(l.kit_id) !== String(id));
+            showToast(trad('Kit supprimé'));
+            renderApp();
+          } catch (err) {
+            window.alert(trad('Erreur :') + ' ' + (err.message || err));
+          }
+        })();
+      });
+    }
 
     // Catalogue de pièces : déplacé ici depuis Coûts & TCO pour les
     // sociétés Enterprise (demande explicite de l'utilisateur — sa place
@@ -26359,6 +26766,85 @@ function notesUtiles(notes, compteur) {
   return resultat.length >= 40 ? resultat : texte;
 }
 
+// Relie (ou retire) un kit d'entretien à une tâche précise — même plomberie
+// que openChoixFrequence juste au-dessus (verrou pendant l'écriture, même
+// bug de fermeture prématurée déjà corrigé une fois pour cette famille de
+// modales, voir son commentaire), mais un choix distinct et non fusionné :
+// fréquence et kit sont deux décisions indépendantes, les mélanger dans une
+// seule modale brouillerait ce que l'utilisateur est en train de choisir.
+function ouvrirChoixKitTache(machine, item, index, companyId, categories, planScrollTop) {
+  const plan = machine.plan || {};
+  const kits = (UI.maintenanceKits || []).filter((k) => k.active !== false);
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay choix-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="mform-tete">
+        <div class="mform-tete-titre"><h2>${trad('Kit associé à cette tâche')}</h2></div>
+        <button type="button" class="mform-close" id="kit-tache-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <p class="sub">${esc(item.label || '')}</p>
+      <label class="sr-only" for="kit-tache-select">${trad('Kit')}</label>
+      <select id="kit-tache-select">
+        <option value="">${trad('— Aucun kit —')}</option>
+        ${kits.map((k) => `<option value="${esc(k.id)}"${item.kit_id === k.id ? ' selected' : ''}>${esc(k.name)}</option>`).join('')}
+      </select>
+      ${!kits.length ? `<p class="hint">${trad('Aucun kit actif pour l\'instant — crée-en un depuis Stocks & SAV.')}</p>` : ''}
+      <div class="hint" id="kit-tache-erreur"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="kit-tache-annuler">${trad('Annuler')}</button>
+        <button type="button" class="primary" id="kit-tache-enregistrer"><span>${trad('Enregistrer')}</span></button>
+      </div>
+    </div>`;
+
+  let enregistrementEnCours = false;
+  let fermetureDemandee = false;
+  const fermerEtRouvrir = () => {
+    if (enregistrementEnCours) { fermetureDemandee = true; return; }
+    if (!overlay.isConnected) return;
+    overlay.remove();
+    openPlanView(machine, companyId, categories, { scrollTop: planScrollTop });
+  };
+  overlay.querySelector('#kit-tache-close-x').addEventListener('click', fermerEtRouvrir);
+  overlay.querySelector('#kit-tache-annuler').addEventListener('click', fermerEtRouvrir);
+
+  overlay.querySelector('#kit-tache-enregistrer').addEventListener('click', async () => {
+    const erreur = overlay.querySelector('#kit-tache-erreur');
+    const kitId = overlay.querySelector('#kit-tache-select').value || null;
+    const items = appliquerKitTache(plan.items, index, item.item_id || null, kitId);
+    const maj = { items };
+    erreur.textContent = '';
+    enregistrementEnCours = true;
+    const bouton = overlay.querySelector('#kit-tache-enregistrer');
+    const label = bouton.querySelector('span');
+    const texteInitial = label.textContent;
+    bouton.disabled = true;
+    label.textContent = trad('Enregistrement…');
+    try {
+      if (plan.id) {
+        const { error } = await sb.from('maintenance_plans').update(maj).eq('id', plan.id);
+        if (error) throw error;
+      }
+      // Aucun recalcul d'échéance de plan ici (contrairement à
+      // openChoixFrequence) : relier un kit ne touche à aucun champ
+      // d'intervalle/échéance de la tâche, echeancePlanDepuisTaches
+      // produirait donc exactement le même résultat qu'avant cet écrit.
+      Object.assign(plan, maj);
+      overlay.remove();
+      openPlanView(machine, companyId, categories, { scrollTop: planScrollTop });
+    } catch (err) {
+      erreur.textContent = trad('Erreur :') + ' ' + err.message;
+      bouton.disabled = false;
+      label.textContent = texteInitial;
+    } finally {
+      enregistrementEnCours = false;
+      if (fermetureDemandee) fermerEtRouvrir();
+    }
+  });
+}
+
 function openPlanView(machine, companyId, categories, options = {}) {
   // L'état GLOBAL (voir infoMachine), pour rester cohérent avec la carte :
   // les deux jauges plus bas détaillent ensuite CHAQUE suivi séparément.
@@ -26394,7 +26880,20 @@ function openPlanView(machine, companyId, categories, options = {}) {
   //     pas dans un téléphone, et la dernière colonne finissait rognée par la
   //     bordure. Dans une carte, chaque information a sa ligne et son libellé,
   //     et la pastille d'échéance se pose sur SA ligne, à gauche du texte.
-  const ligneTableau = (it) => {
+  // Colonne « Kit associé » : gated comme le reste du module Stock (le kit
+  // n'a de sens que pour une société Enterprise qui a la migration). Position
+  // dans `items` = identifiant sûr pour appliquerKitTache (voir son
+  // commentaire) — jamais le label seul.
+  const avecKits = SCHEMA.hasKits && planCouvreStock();
+  const celluleKit = (it, index) => {
+    if (!avecKits) return '';
+    const gerant = peutGererParametresStock();
+    const nomAssocie = it.kit_id ? nomKit(it.kit_id) : null;
+    if (!gerant) return nomAssocie ? esc(nomAssocie) : '<span class="muted">—</span>';
+    const libelleBouton = nomAssocie ? trad('Modifier') : trad('Associer un kit');
+    return `${nomAssocie ? esc(nomAssocie) + ' ' : ''}<button type="button" class="view-manual choisir-kit" data-tache-kit="${index}">${esc(libelleBouton)}</button>`;
+  };
+  const ligneTableau = (it, index) => {
     const enRetard = infoTache(it, machine.plan, machine).state === 'late';
     return `
           <tr class="${enRetard ? 'is-late-row' : ''}">
@@ -26404,9 +26903,10 @@ function openPlanView(machine, companyId, categories, options = {}) {
             <td>${cell(it.spec)}</td>
             <td>${cell(it.qty)}</td>
             <td>${cell(it.note)}</td>
+            ${avecKits ? `<td>${celluleKit(it, index)}</td>` : ''}
           </tr>`;
   };
-  const carteTache = (it) => {
+  const carteTache = (it, index) => {
     const enRetard = infoTache(it, machine.plan, machine).state === 'late';
     return `
         <div class="tache-carte${enRetard ? ' is-late-row' : ''}">
@@ -26416,12 +26916,13 @@ function openPlanView(machine, companyId, categories, options = {}) {
           <div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>
+          ${avecKits ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Kit associé')}</span><span class="tache-valeur">${celluleKit(it, index)}</span></div>` : ''}
         </div>`;
   };
 
   const tableHtml = hasItemDetail ? `
     <div class="ref-scroll ref-scroll-plan"><table class="ref-table">
-      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th></tr></thead>
+      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th>${avecKits ? `<th>${trad('Kit associé')}</th>` : ''}</tr></thead>
       <tbody>${items.map(ligneTableau).join('')}</tbody>
     </table></div>
     <div class="taches-cartes">${items.map(carteTache).join('')}</div>
@@ -26583,6 +27084,18 @@ function openPlanView(machine, companyId, categories, options = {}) {
       const planScrollTop = overlay.scrollTop;
       overlay.remove();
       openChoixFrequence(machine, item, companyId, categories, planScrollTop);
+    });
+  });
+  // Kit d'entretien associé à une tâche — même idiome que .choisir-frequence
+  // ci-dessus, position dans `items` plutôt que label (voir appliquerKitTache).
+  overlay.querySelectorAll('.choisir-kit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = Number(btn.dataset.tacheKit);
+      const item = items[index];
+      if (!item) return;
+      const planScrollTop = overlay.scrollTop;
+      overlay.remove();
+      ouvrirChoixKitTache(machine, item, index, companyId, categories, planScrollTop);
     });
   });
   if (machine.manual_url) {
@@ -28119,6 +28632,8 @@ function afficherDepuisCache(cache) {
   UI.warehouses = cache.warehouses || [];
   UI.stockItems = cache.stockItems || [];
   UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+  UI.maintenanceKits = cache.maintenanceKits || [];
+  UI.maintenanceKitLines = cache.maintenanceKitLines || [];
   UI.machines = cache.machines || [];
   UI.scheduledMaintenances = cache.scheduledMaintenances || [];
   UI.reminders = loadReminders();
@@ -28237,6 +28752,10 @@ async function boot(toastMessage) {
   // sonde dédiée, ne pas supposer sa présence sous SCHEMA.hasStock qui a
   // pu être migré avant elle.
   SCHEMA.hasStockPackaging = await sonderColonne('parts_catalog', 'packaging');
+  // Kits d'entretien (bundles de pièces réutilisables, reliables à une étape
+  // de plan) : migration séparée, sonde dédiée — même discipline que
+  // hasStockPackaging, ne jamais supposer sa présence sous SCHEMA.hasStock.
+  SCHEMA.hasKits = await sonderColonne('maintenance_kits', 'id');
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -28425,6 +28944,26 @@ async function boot(toastMessage) {
     stockItems = soldes || [];
   }
 
+  // Kits d'entretien : bundles de pièces réutilisables, reliables à une
+  // étape de plan (maintenance_plans.items[].kit_id) — chargés une fois ici
+  // comme le reste du module Stock. Absent tant que la migration n'est pas
+  // visible.
+  let maintenanceKits = [];
+  let maintenanceKitLines = [];
+  if (SCHEMA.hasKits) {
+    const [{ data: kits }, { data: lignes }] = await Promise.all([
+      sb.from('maintenance_kits')
+        .select('id, name, note, active')
+        .eq('company_id', profile.company_id)
+        .order('name'),
+      sb.from('maintenance_kit_lines')
+        .select('id, kit_id, part_id, quantity, note')
+        .eq('company_id', profile.company_id),
+    ]);
+    maintenanceKits = kits || [];
+    maintenanceKitLines = lignes || [];
+  }
+
   // Référentiel des organes défaillants (Dépannage curatif) : même endroit
   // que les catégories/le catalogue pièces — chargé une fois, réutilisé
   // partout où openLogInterventionModal est appelée (voir composantsUtiles).
@@ -28481,6 +29020,8 @@ async function boot(toastMessage) {
   UI.warehouses = warehouses;
   UI.stockItems = stockItems;
   UI.stockCounts = calculerStockCounts(stockItems, partsCatalog);
+  UI.maintenanceKits = maintenanceKits;
+  UI.maintenanceKitLines = maintenanceKitLines;
   UI.machines = (machines || []).map(m => ({
     ...m,
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
@@ -28519,6 +29060,8 @@ async function boot(toastMessage) {
     partsCatalog: UI.partsCatalog,
     warehouses: UI.warehouses,
     stockItems: UI.stockItems,
+    maintenanceKits: UI.maintenanceKits,
+    maintenanceKitLines: UI.maintenanceKitLines,
     machines: UI.machines,
     scheduledMaintenances: UI.scheduledMaintenances,
   });
