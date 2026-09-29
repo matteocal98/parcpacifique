@@ -5585,6 +5585,22 @@
   .agenda-pieces-detail-toggle[aria-expanded="true"] .prep-groupes-chevron svg{transform:rotate(180deg);}
   .agenda-pieces-detail{display:flex;flex-direction:column;gap:16px;margin-top:12px;}
 
+  /* Fond de modale #F2F4F8 (règle établie sur Modifier/Ajouter une machine,
+     demande explicite de l'utilisateur d'appliquer la même règle aux
+     modales Agenda, sans repasser par un nouveau mockup Stitch) : override
+     scopé du .modal générique — jamais touché à la source, partagée par
+     toutes les autres modales de l'app. */
+  .agenda-planifier-modal .modal{background:#F2F4F8;}
+  /* Champs de saisie (date, recherche) et lignes machine sélectionnables :
+     passés en blanc plein pour qu'ils se détachent du nouveau fond teinté —
+     avant cette règle, ils étaient DÉJÀ teintés (--surface-soft) sur un
+     fond de modale blanc, l'inverse exact de ce qui est demandé ailleurs
+     dans l'app. */
+  .agenda-planifier-modal .pe-date-bloc .champ-select{background:var(--surface);}
+  .agenda-planifier-modal .pe-recherche input{background:var(--surface);}
+  .agenda-planifier-modal .pe-recherche input:focus{background:var(--surface);}
+  .agenda-planifier-modal .pe-machine{background:var(--surface);}
+  .agenda-planifier-modal .pe-machine:hover{background:var(--line-2);}
   /* ══════════════════════════════════════════════════════════════════════════
      ★ Reprise Stitch « modale_agenda_planifier_un_entretien_keeva » — même
      système que precision_field_matrix (couleurs déjà en variables CSS ici,
@@ -5658,6 +5674,11 @@
     font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
   }
 
+  /* Fond de modale #F2F4F8 (même règle que .agenda-planifier-modal
+     ci-dessus) : override scopé du .modal générique. .jm-carte est déjà
+     blanche (var(--surface)) — elle se détache correctement sans rien
+     changer d'autre. */
+  .agenda-jour-modal .modal{background:#F2F4F8;}
   /* ══════════════════════════════════════════════════════════════════════════
      ★ Reprise Stitch « modale_agenda_v_nements_du_jour_keeva » — la fenêtre
      qui s'ouvre au clic sur une case du calendrier (ouvrirJourAgenda). Une
