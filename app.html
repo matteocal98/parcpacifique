@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xc8kmzBXvS6W7vB16yhaYwckyKJCPj5fZfzgksORCh0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vzg/XXnQJGREviA+XDZsw50h0/mvWm2xcffcNPPOpYc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1064,7 +1064,12 @@
   .mstrip-identite{display:flex;align-items:center;gap:14px;min-width:0;width:100%;}
   @media (min-width:1180px){.mstrip-identite{width:auto;flex:1 1 260px;}}
   .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
-  .mstrip-photo img{width:100%;height:100%;object-fit:cover;}
+  /* object-fit:contain, pas cover : une débroussailleuse (longue et
+     étroite) recadrée en cover dans une vignette large finissait tronquée
+     au seul manche, le reste (tête de coupe, moteur) hors cadre — signalé
+     par l'utilisateur. La photo entière reste visible, quitte à laisser
+     apparaître le fond teinté du cadre sur les côtés. */
+  .mstrip-photo img{width:100%;height:100%;object-fit:contain;}
   .mstrip-photo-tag{position:absolute;bottom:3px;left:3px;right:3px;padding:2px 5px;border-radius:4px;background:rgba(14,19,51,.82);color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .mstrip-photo-vide{color:var(--dark-ink);}
   .mstrip-photo-vide svg{width:26px;height:26px;}
@@ -1830,7 +1835,14 @@
      référence (6 colonnes) tienne sans ascenseur horizontal — c'est cet
      ascenseur qui donnait l'impression de défaut d'affichage sous le
      tableau. */
-  .plan-modal .modal{max-width:1180px;}
+  /* Reskin Stitch (29 sept. 2026, validé par l'utilisateur) : la modale
+     elle-même passe en fond teinté — chaque section à l'intérieur (héros,
+     TCO, tâches, coûts, historique) devient sa propre carte blanche qui s'y
+     détache, au lieu d'une seule grande carte blanche unique. */
+  /* Couleur EXACTE du mockup (#F2F4F8, pas le token --bg de l'app — beaucoup
+     trop subtil, quasiment invisible une fois posé derrière des cartes
+     blanches : signalé par l'utilisateur, « je n'ai même pas de fond »). */
+  .plan-modal .modal{max-width:1180px;background:#F2F4F8;}
   /* Fil d'Ariane, au-dessus de tout : « Retour au parc » ferme la modale,
      comme le bouton Fermer — il n'y a pas d'autre page à revenir. */
   .plan-fil-ariane{
@@ -1845,19 +1857,6 @@
   .plan-fil-retour svg{width:15px;height:15px;display:block;}
   .plan-fil-sep{color:var(--line-3);}
   .plan-fil-courant{color:var(--ink);}
-  /* Barre d'outils : les 3 gestes de la maquette, juste sous le fil
-     d'Ariane. « Enregistrer un entretien » est le geste principal (plein,
-     sombre), les deux autres restent en contour. */
-  .plan-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
-  .plan-toolbar-btn{
-    display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;
-    border-radius:var(--r-pill);border:1.5px solid var(--line-3);background:var(--surface);
-    color:var(--ink);font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
-  }
-  .plan-toolbar-btn svg{width:15px;height:15px;flex:0 0 auto;display:block;}
-  .plan-toolbar-btn:hover{background:var(--surface-soft);border-color:var(--ink-2);}
-  .plan-toolbar-btn.is-primary{background:var(--ink);border-color:var(--ink);color:#fff;}
-  .plan-toolbar-btn.is-primary:hover{background:var(--dark);}
   .plan-modal .modal-actions{justify-content:flex-end;}
   /* Le bouton Fermer, seul en pied de modale, ne reste pas gris neutre :
      même teinte indigo que le reste de la fiche (mini-champs, icônes). */
@@ -1865,84 +1864,248 @@
     flex:0 0 auto;min-width:140px;color:var(--primary-dark);border-color:var(--primary-tint-2);background:var(--primary-tint);
   }
   .plan-modal .modal-actions #close-plan:hover{background:var(--primary-tint-2);border-color:var(--primary-dark);}
-  /* En-tête de la fiche : photo (si connue), nom et badge d'état, comme la
-     maquette « WEB fiche plan entretien » — sans rien inventer (moteur, poids,
-     chantier ne sont pas des champs du produit, ils restent absents). */
+  /* En-tête de la fiche : photo (si connue), nom et badge d'état — sans rien
+     inventer (moteur, poids, chantier ne sont pas des champs du produit, ils
+     restent absents). */
   .plan-eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:6px;}
-  /* La ligne s'étire : la photo et la carte compteur prennent toutes deux la
-     hauteur du bloc central (nom, sous-titre, mini-champs), au lieu d'une
-     photo étriquée à côté d'un grand bloc vide — c'est ce que dit la
-     maquette (« même hauteur que le bloc en haut à droite »). */
-  .plan-hero{display:flex;gap:14px;align-items:stretch;margin-bottom:14px;flex-wrap:wrap;}
-  .plan-hero-photo{flex:0 0 220px;width:220px;border-radius:var(--r-chip);overflow:hidden;border:1.5px solid var(--line);background:var(--surface-soft);}
-  .plan-hero-photo img{width:100%;height:100%;object-fit:cover;display:block;}
-  .plan-hero-corps{flex:1 1 180px;min-width:180px;display:flex;flex-direction:column;}
-  .plan-hero-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .plan-hero-tete h2{margin:0;}
-  .plan-hero .sub{margin:4px 0 0;}
-  .plan-hero-echeance{display:flex;align-items:flex-start;gap:7px;margin-top:10px;font-size:13.5px;font-weight:700;color:var(--ink-2);flex-wrap:wrap;}
-  .plan-hero-echeance>span:first-child{padding-top:5px;}
-  .plan-hero-echeance .due{font-size:13.5px;font-weight:800;color:var(--ink);}
-  /* Échéance déjà dépassée : une VRAIE boîte (coins arrondis, pas une
-     pilule) — une pilule ne peut pas encadrer un texte de plusieurs lignes
-     sans déborder de son propre fond, exactement le défaut signalé. Texte en
-     ambre vif, comme demandé : ce n'est plus la teinte d'un badge court, mais
-     un bloc de texte, donc lisible même en couleur pleine. */
-  .plan-hero-echeance .due.is-late{
-    display:block;background:var(--late-bg);color:var(--late);
-    padding:7px 12px;border-radius:10px;line-height:1.5;font-weight:800;
+  /* ============================================================
+     FICHE MACHINE — reconstruction fidèle du mockup Stitch validé
+     (29 sept. 2026). Namespace .fm-* dédié à cet écran : aucune classe
+     partagée ailleurs dans l'app n'est redéfinie ici, tout est scopé à
+     .plan-modal ou porté par de nouvelles classes propres à cette fiche.
+     Trois libertés prises par rapport au fichier HTML original de Stitch,
+     toutes pour rester sur des VRAIES données produit :
+       - pas de bandeau télématique/« En ligne » (aucun capteur réel) ;
+       - pas de VIN ni de « chantier » sur la photo (champs inexistants) ;
+       - pas de puces de filtre Tous/À venir/Réalisés (aucun filtre câblé).
+     ============================================================ */
+  .fm-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .fm-btn{
+    display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;border:none;
+    background:var(--surface);box-shadow:0 2px 8px -2px rgba(14,19,51,.05),0 1px 3px rgba(14,19,51,.04);
+    color:var(--ink);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
   }
-  /* Les 3 mini-champs de cadence, comme la maquette : compacts, en ligne,
-     réutilisant le même style de libellé indigo que .plan-field .label. */
-  .plan-hero-champs{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;}
-  .plan-hero-champ{display:flex;flex-direction:column;gap:3px;}
-  .plan-hero-champ .label{font-size:11px;font-weight:800;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.05em;}
-  .plan-hero-champ .value{font-size:14px;font-weight:800;color:var(--ink);}
-  /* Le VRAI widget de relevé de compteur (compteurHtml, déjà câblé au
-     document) posé en carte sombre — le bloc « horamètre » de la maquette,
-     sans rien y ajouter que le produit n'ait déjà. */
-  .plan-hero-compteur{
-    flex:1 1 260px;min-width:240px;background:var(--dark);border-radius:var(--r-card);
-    padding:16px;display:flex;flex-direction:column;gap:12px;justify-content:center;
+  .fm-btn:hover{background:var(--surface-soft);}
+  .fm-btn svg{width:16px;height:16px;flex:0 0 auto;display:block;}
+  .fm-btn-ico-primary{color:var(--primary);}
+  .fm-btn-ico-accent{color:var(--bleu-roi);}
+  .fm-btn-primary{background:var(--ink);color:#fff;padding:10px 20px;font-size:16px;box-shadow:0 4px 14px rgba(14,19,51,.22);}
+  .fm-btn-primary:hover{background:var(--dark);}
+  .fm-btn-primary .fm-btn-ico-ok{color:var(--ok);}
+  .fm-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* Carte de base : chaque section de la fiche (héros, TCO, tâches, coûts,
+     historique) flotte comme sa propre carte blanche sur le fond teinté de
+     la modale (voir .plan-modal .modal) — même principe que les pages
+     Machines/Plan d'entretien, jamais une grande carte-mère unique. */
+  .fm-card{background:var(--surface);border-radius:16px;padding:24px;box-shadow:0 8px 24px -4px rgba(14,19,51,.07),0 3px 8px -2px rgba(14,19,51,.04);margin-bottom:20px;}
+  .fm-card:last-of-type{margin-bottom:0;}
+  .fm-card-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
+  .fm-card-title-row{display:flex;align-items:center;gap:12px;}
+  .fm-card-ico{width:32px;height:32px;border-radius:999px;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .fm-card-ico svg{width:16px;height:16px;display:block;}
+  .fm-card-ico.is-warn{background:var(--late-bg);color:var(--late);}
+  .fm-card-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:var(--ink);margin:0;}
+  .fm-card-sub{font-size:12px;color:var(--ink-3);margin:2px 0 0;}
+
+  .fm-chip{font-size:11px;font-weight:700;padding:4px 11px;border-radius:999px;background:var(--surface-soft);color:var(--ink-2);}
+  .fm-chip-accent{background:var(--primary-tint);color:var(--primary-dark);}
+  /* Pastille de recommandation (Scorecard TCO) : peut porter une phrase
+     longue. */
+  .fm-card-head .badge{white-space:normal;line-height:1.4;text-align:left;}
+  /* Puces de filtre des tâches (Tous/En retard/Bientôt/À jour, comptes
+     réels) — même famille que .fm-btn, juste plus compactes. */
+  .fm-filtres{display:flex;flex-wrap:wrap;gap:6px;}
+  .fm-filtre-chip{
+    padding:6px 12px;border-radius:999px;border:none;background:var(--surface-soft);
+    color:var(--ink-2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
   }
-  /* Regroupe relevé/seuil + jauge détaillée : BUREAU UNIQUEMENT (.desktop-only,
-     voir plus bas). Sur téléphone, la carte compteur fusionnée de compteurHtml
-     (branche mobile, ★ CARTE COMPTEUR FUSIONNÉE) montre déjà cette même
-     information (relevé, échéance, état) — la dupliquer ici ferait doublon. */
-  .phc-desktop{flex-direction:column;gap:12px;width:100%;}
-  /* Tête : relevé actuel (grand, à gauche) et seuil d'alerte (petit, à
-     droite) — les deux vraies valeurs déjà connues du plan et du compteur,
-     simplement mises en avant comme la maquette. */
-  .phc-tete{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
-  .phc-tete .phc-mot{font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.85);}
-  .phc-tete .phc-mot.phc-mot-seuil{font-size:10.5px;color:rgba(255,255,255,.55);}
-  .phc-valeurs{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
-  .phc-valeurs .phc-valeur{font-size:32px;font-weight:800;color:#fff;line-height:1;font-family:inherit;}
-  .phc-valeurs .phc-valeur-seuil{font-size:17px;font-weight:800;color:rgba(255,255,255,.7);}
-  /* La jauge détaillée, reprise dans la carte sombre : mêmes repères, teinte
-     claire sur fond sombre. */
-  .plan-hero-compteur .machine-jauge{background:none;padding:0;gap:6px;}
-  .plan-hero-compteur .machine-jauge-mot{color:rgba(255,255,255,.6);}
-  .plan-hero-compteur .machine-jauge-valeur{color:#fff;}
-  .plan-hero-compteur .machine-jauge-piste{background:rgba(255,255,255,.16);}
-  .plan-hero-compteur .machine-jauge-reperes{color:rgba(255,255,255,.65);}
-  .plan-hero-compteur .machine-jauge-reperes .is-late{color:#fbbf6b;}
-  .plan-hero-compteur .machine-jauge-pied{color:rgba(255,255,255,.5);}
-  .plan-hero-compteur .compteur,.plan-hero-compteur .compteur-bureau{
-    margin:0;border:none;background:none;padding:0;padding-top:10px;border-top:1px solid rgba(255,255,255,.14);
+  .fm-filtre-chip:hover{background:var(--line-2);}
+  .fm-filtre-chip.is-active{background:var(--ink);color:#fff;}
+  /* Chaque puce d'état reprend la couleur de son état (même palette que les
+     .badge/pastilles du tableau juste en dessous) — sinon la carte perd le
+     repère de couleur que l'app utilise partout ailleurs pour ces 3 états. */
+  .fm-filtre-chip.is-late{background:var(--late-bg);color:var(--late);}
+  .fm-filtre-chip.is-soon{background:var(--soon-bg);color:var(--soon);}
+  .fm-filtre-chip.is-ok{background:var(--ok-bg);color:var(--ok);}
+  .fm-filtre-chip.is-late.is-active{background:var(--late);color:#fff;}
+  .fm-filtre-chip.is-soon.is-active{background:var(--soon);color:#fff;}
+  .fm-filtre-chip.is-ok.is-active{background:var(--ok);color:#fff;}
+
+  /* ============================================================
+     BANDEAU FICHE MACHINE — reprise à l'octet du mockup Stitch fourni par
+     l'utilisateur (2 déclinaisons Tailwind traduites en CSS, valeurs
+     inchangées : couleurs, tailles, rayons, ombres). Namespace .fm2-*,
+     strictement local à ce bandeau — n'affecte rien d'autre. */
+  .fm2-hero{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 20px -2px rgba(20,23,56,.06),0 2px 6px -1px rgba(20,23,56,.04);position:relative;margin-bottom:20px;}
+  @media(min-width:768px){.fm2-hero-o2{padding:24px;}}
+  .fm2-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px;align-items:center;}
+
+  /* -------- Déclinaison 1 : 1 seul intervalle -------- */
+  .fm2-o1-photo,.fm2-o1-body,.fm2-o1-side{grid-column:span 12;}
+  @media(min-width:768px){
+    .fm2-o1-photo{grid-column:span 3;}
+    .fm2-o1-body{grid-column:span 6;}
+    .fm2-o1-side{grid-column:span 3;}
   }
-  .plan-hero-compteur .compteur-titre,.plan-hero-compteur .compteur-jour-valeur{color:#fff;}
-  .plan-hero-compteur .compteur-titre{color:rgba(255,255,255,.7);}
-  .plan-hero-compteur .compteur-champ{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;}
-  .plan-hero-compteur .compteur-unite{background:rgba(255,255,255,.16);color:#fff;}
-  /* Vert demandé précisément par sa valeur (#24B5A8 = --ok), texte noir.
-     Spécificité forcée à 3 classes : à ≥900px, une règle du Parc
-     (.compteur-bureau .compteur-enregistrer, même poids que 2 classes)
-     l'emportait sinon par ordre de source. */
-  .plan-hero-compteur .compteur-bureau .compteur-enregistrer,
-  .plan-hero-compteur .compteur-mobile .compteur-enregistrer{background:var(--ok);color:#000;}
-  .plan-hero-compteur .compteur-note{color:rgba(255,255,255,.7);}
-  .plan-hero-compteur .compteur-note.is-late{color:#fbbf6b;}
+  @media(min-width:1024px){
+    .fm2-o1-photo{grid-column:span 2;}
+    .fm2-o1-body{grid-column:span 7;}
+    .fm2-o1-side{grid-column:span 3;}
+  }
+  .fm2-o1-photo-box{position:relative;width:100%;height:144px;border-radius:12px;overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;}
+  /* object-fit:contain (voir .mstrip-photo pour le même correctif et sa
+     raison) : la photo entière reste visible, jamais recadrée au seul
+     manche d'une débroussailleuse. */
+  .fm2-o1-photo-box img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block;}
+  .fm2-vin{position:absolute;background:rgba(20,23,56,.85);backdrop-filter:blur(4px);color:#fff;font-weight:500;}
+  .fm2-vin-o1{bottom:6px;left:6px;padding:2px 8px;border-radius:4px;font-size:10px;}
+  .fm2-o1-body{display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:2px 0;}
+  .fm2-o1-head{display:flex;flex-direction:column;gap:4px;}
+  .fm2-o1-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .fm2-badge-echeance{display:inline-flex;align-items:center;border-radius:9999px;font-size:12px;font-weight:600;}
+  .fm2-badge-echeance svg{width:14px;height:14px;flex:0 0 auto;display:block;}
+  .fm2-badge-echeance-o1{gap:6px;padding:2px 10px;}
+  .fm2-chip-cat-o1{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#F1F5F9;color:#475569;}
+  .fm2-meta-o1{font-size:11px;color:#94A3B8;font-weight:500;}
+  .fm2-o1-titre-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .fm2-titre-o1{font-size:20px;font-weight:900;color:#141738;letter-spacing:-.025em;margin:0;}
+  @media(min-width:768px){.fm2-titre-o1{font-size:24px;}}
+  .fm2-sous-titre-o1{font-size:12px;color:#64748B;font-weight:500;}
+  .fm2-o1-cartes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:2px;}
+  .fm2-mini-carte-o1{background:rgba(248,250,252,.9);border-radius:12px;padding:10px;min-width:0;}
+  .fm2-mini-tete-o1{display:flex;align-items:center;justify-content:space-between;font-size:10px;text-transform:uppercase;font-weight:700;color:#64748B;}
+  .fm2-mini-ico-o1{display:flex;flex:0 0 auto;}
+  .fm2-mini-ico-o1 svg{width:12px;height:12px;display:block;}
+  .fm2-mini-valeur-o1{font-size:12px;font-weight:700;color:#141738;margin-top:4px;}
+  .fm2-o1-side{display:flex;flex-direction:column;justify-content:center;gap:8px;border-top:1px solid #F1F5F9;padding-top:12px;}
+  @media(min-width:768px){.fm2-o1-side{border-top:none;border-left:1px solid #F1F5F9;padding-top:0;padding-left:16px;}}
+  .fm2-releve-row-o1{display:flex;align-items:baseline;justify-content:space-between;}
+  .fm2-label-o1{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94A3B8;}
+  .fm2-releve-valeur-o1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:#141738;}
+  .fm2-releve-valeur-o1 span{font-family:'Figtree',sans-serif;font-size:14px;font-weight:600;color:#64748B;}
+  .fm2-seuil-valeur-o1{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#475569;}
+  .fm2-intervalle-o1{background:#EFF2FE;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .fm2-intervalle-o1-row1{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#475569;}
+  .fm2-fort-o1{font-weight:700;color:#334155;}
+  .fm2-intervalle-o1-label{font-size:9px;text-transform:uppercase;font-weight:700;letter-spacing:.03em;color:#64748B;}
+  .fm2-intervalle-o1-row2{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:#141738;}
+  .fm2-reste-o1{color:#D97706;font-weight:600;}
+  .fm2-piste-o1{width:100%;background:rgba(226,232,240,.8);border-radius:9999px;height:8px;overflow:hidden;}
+  .fm2-fill-o1{background:#4F46E5;height:8px;border-radius:9999px;}
+  .fm2-pied-o1{font-size:10px;color:#64748B;display:flex;justify-content:space-between;}
+  .fm2-pct-o1{font-weight:600;color:#4338CA;}
+
+  /* -------- Déclinaison 2 : 2 intervalles -------- */
+  .fm2-o2-photo,.fm2-o2-main{grid-column:span 12;}
+  @media(min-width:768px){
+    .fm2-o2-photo{grid-column:span 4;}
+    .fm2-o2-main{grid-column:span 8;}
+  }
+  @media(min-width:1024px){
+    .fm2-o2-photo{grid-column:span 3;}
+    .fm2-o2-main{grid-column:span 9;}
+  }
+  .fm2-o2-photo-box{position:relative;width:100%;height:224px;border-radius:12px;overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.05);border:1px solid #F1F5F9;}
+  .fm2-o2-photo-box img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block;}
+  .fm2-vin-o2{bottom:8px;left:8px;padding:4px 10px;border-radius:4px;font-size:11px;}
+  .fm2-statut-o2{position:absolute;top:8px;left:8px;background:#00B4D8;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.05em;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .fm2-o2-main{display:flex;flex-direction:column;justify-content:space-between;gap:14px;}
+  .fm2-o2-ligne1{display:flex;flex-direction:column;justify-content:space-between;gap:12px;border-bottom:1px solid #F1F5F9;padding-bottom:12px;}
+  @media(min-width:768px){.fm2-o2-ligne1{flex-direction:row;align-items:flex-start;}}
+  .fm2-o2-titre-bloc{display:flex;flex-direction:column;gap:6px;}
+  .fm2-o2-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .fm2-badge-echeance-o2{gap:4px;padding:2px 10px;}
+  .fm2-chip-cat-o2{padding:2px 10px;border-radius:4px;font-size:11px;font-weight:600;background:#F1F5F9;color:#334155;}
+  .fm2-meta-o2{font-size:12px;color:#94A3B8;font-weight:500;}
+  .fm2-titre-o2{font-size:24px;font-weight:900;color:#141738;letter-spacing:-.025em;margin:0;}
+  @media(min-width:768px){.fm2-titre-o2{font-size:30px;}}
+  .fm2-compteur-entete-o2{display:flex;align-items:center;gap:24px;background:rgba(248,250,252,.8);padding:8px 16px;border-radius:12px;flex:0 0 auto;}
+  .fm2-label-o2{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94A3B8;}
+  .fm2-releve-valeur-o2{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:900;color:#141738;line-height:1;}
+  .fm2-releve-valeur-o2 span{font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;color:#64748B;}
+  .fm2-divider-o2{width:1px;height:32px;background:#E2E8F0;}
+  .fm2-seuil-valeur-o2{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#334155;line-height:1;}
+  .fm2-o2-ligne2{display:flex;flex-direction:column;gap:6px;}
+  .fm2-o2-ligne2-tete{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;}
+  .fm2-o2-suivi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#64748B;}
+  .fm2-o2-suivi-hint{font-size:11px;color:#64748B;font-weight:500;}
+  .fm2-o2-intervalles{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media(min-width:768px){.fm2-o2-intervalles{grid-template-columns:1fr 1fr;}}
+  .fm2-bloc-intervalle{border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;border-left-width:4px;border-left-style:solid;}
+  .fm2-bloc-horaire{background:#EEF2FF;border-left-color:#6366F1;}
+  .fm2-bloc-calendaire{background:#E6F8F6;border-left-color:#14B8A6;}
+  .fm2-bloc-row1{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+  .fm2-bloc-row1>span:first-child{color:#475569;font-weight:500;}
+  .fm2-fort-o2{font-weight:700;color:#1E293B;}
+  .fm2-bloc-label{font-size:9px;text-transform:uppercase;font-weight:700;letter-spacing:.03em;}
+  .fm2-bloc-label-horaire{color:#4338CA;}
+  .fm2-bloc-label-calendaire{color:#115E59;}
+  .fm2-bloc-row2{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:#141738;margin-top:2px;gap:8px;flex-wrap:wrap;}
+  .fm2-bloc-reste{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+  .fm2-bloc-piste{width:100%;background:rgba(226,232,240,.9);border-radius:9999px;height:10px;overflow:hidden;}
+  .fm2-bloc-fill{height:10px;border-radius:9999px;}
+  .fm2-bloc-fill-horaire{background:#4F46E5;}
+  .fm2-bloc-fill-calendaire{background:#0D9488;}
+  .fm2-bloc-pied{font-size:10px;color:#64748B;display:flex;justify-content:space-between;align-items:center;font-weight:500;}
+  .fm2-bloc-pct{font-weight:700;}
+  .fm2-bloc-pct-horaire{color:#4338CA;}
+  .fm2-bloc-pct-calendaire{color:#0F766E;}
+  .fm2-o2-ligne3{display:grid;grid-template-columns:1fr;gap:12px;padding-top:2px;}
+  @media(min-width:640px){.fm2-o2-ligne3{grid-template-columns:repeat(3,1fr);}}
+  .fm2-mini-carte-o2{background:#F8FAFC;border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .fm2-mini-label-o2{font-size:10px;text-transform:uppercase;font-weight:700;color:#94A3B8;}
+  .fm2-mini-valeur-o2{font-size:12px;font-weight:700;color:#141738;margin-top:2px;}
+  .fm2-mini-ico-o2{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .fm2-mini-ico-o2 svg{width:14px;height:14px;display:block;}
+
+  /* Scorecard TCO : 4 KPI réels (jamais de « taux de refacturation
+     chantier », inexistant côté produit) + la jauge Garder/Remplacer déjà
+     câblée (jaugeTcoHtml), posée à plat sous les cartes. */
+  .fm-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  .fm-kpi-card{background:#F8FAFD;border-radius:14px;padding:14px;box-shadow:0 2px 8px -2px rgba(14,19,51,.05),0 1px 3px rgba(14,19,51,.04);}
+  .fm-kpi-label{font-size:11.5px;font-weight:700;color:var(--ink-3);}
+  .fm-kpi-value{display:flex;align-items:baseline;gap:4px;margin-top:6px;flex-wrap:wrap;}
+  .fm-kpi-value .num{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:800;color:var(--ink);}
+  .fm-kpi-value .unit{font-size:11.5px;font-weight:700;color:var(--ink-3);}
+  .fm-reco-bar{margin-top:16px;}
+  .fm-reco-bar .machine-jauge{background:var(--surface-soft);border-radius:12px;padding:12px 14px;}
+
+  /* Encart texte libre (Points d'attention) : même famille que les cartes
+     teintées ci-dessus, pas de compteur d'alertes inventé (le champ
+     produit est un texte libre, pas une liste structurée). */
+  .fm-notebox{background:var(--late-bg);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6;color:var(--ink-2);}
+
+  /* « Fréquences à préciser » (blocChoixTache, fonction réelle inchangée) :
+     chaque tâche redescend en mini-carte teintée à l'intérieur de la carte
+     de section, plutôt qu'une carte blanche dans une carte blanche. */
+  .fm-card .plan-field.choix-frequence-bloc{
+    background:var(--surface-soft);border-radius:12px;padding:14px 16px;margin:0 0 10px;
+  }
+  .fm-card .plan-field.choix-frequence-bloc:last-child{margin-bottom:0;}
+
+  /* Tableaux (tâches, coûts d'exploitation, historique) : réutilisent la
+     VRAIE marque .ref-table/.ref-scroll (tachesAffichees, renderOperatingCosts,
+     l'historique) — seule l'habillage change, scopé à cette modale : en-tête
+     neutre (pas la teinte indigo utilisée ailleurs dans l'app), lignes plus
+     aérées, pas de cadre. */
+  .plan-modal .ref-scroll,.plan-modal .ref-table{border-color:transparent;}
+  .plan-modal .ref-table th{background:var(--surface-soft);color:var(--ink-3);font-size:11px;}
+  .plan-modal .ref-table td{padding:13px 14px;border-top-color:var(--line-2);}
+  .plan-modal .ref-scroll-plan .ref-table th:nth-child(2),
+  .plan-modal .ref-scroll-plan .ref-table td:nth-child(2){width:13%;}
+  .plan-modal .ref-scroll-plan .ref-table th:nth-child(3),
+  .plan-modal .ref-scroll-plan .ref-table td:nth-child(3){width:17%;}
+  .plan-modal .cell-echeance .muted,.plan-modal .cell-echeance-ligne .muted{color:var(--ink-2);}
+  /* Statut d'échéance dans une table/carte de tâche (etatTacheHtml, fonction
+     réelle inchangée) : une pastille de couleur devant le texte, comme le
+     mockup — scopé à cette modale, le .badge générique du reste de l'app
+     n'a pas de pastille. */
+  .plan-modal .ref-table .badge,.plan-modal .tache-carte .badge{position:relative;padding-left:22px;font-size:10.5px;}
+  .plan-modal .ref-table .badge::before,.plan-modal .tache-carte .badge::before{
+    content:'';position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    width:5px;height:5px;border-radius:999px;background:currentColor;
+  }
   /* Un petit picto devant un libellé de section (Points d'attention, Historique). */
   .label-ico{display:inline-flex;vertical-align:-3px;margin-right:5px;color:var(--primary-dark);}
   .label-ico svg{width:14px;height:14px;display:block;}
@@ -3210,23 +3373,9 @@
     letter-spacing:.05em;text-align:left;padding:9px 10px;font-weight:800;
   }
   .ref-table td{padding:9px 10px;border-top:1px solid var(--line-2);vertical-align:top;}
-  /* Modale du plan : la maquette ne boxe pas son tableau d'un cadre — juste
-     l'en-tête teinté et des liserés horizontaux entre les lignes. Scopé à
-     cette modale : les autres tableaux de référence (carnet, etc.) gardent
-     leur cadre. */
-  .plan-modal .ref-scroll,.plan-modal .ref-table{border-color:transparent;}
-  .plan-modal .ref-table td{border-top-color:var(--line-2);}
-  /* Fréquence un peu plus étroite, Échéance un peu plus large : c'est la
-     colonne qui porte le badge + le texte court, elle respirait moins que
-     les autres. */
-  .plan-modal .ref-scroll-plan .ref-table th:nth-child(2),
-  .plan-modal .ref-scroll-plan .ref-table td:nth-child(2){width:13%;}
-  .plan-modal .ref-scroll-plan .ref-table th:nth-child(3),
-  .plan-modal .ref-scroll-plan .ref-table td:nth-child(3){width:17%;}
-  /* Le texte secondaire de la colonne Échéance (hors badge) était nettement
-     plus clair que le texte des autres colonnes (Spec/Quantité/Remarque) :
-     même encre atténuée qu'ailleurs dans la fiche, pas la plus faible. */
-  .plan-modal .cell-echeance .muted,.plan-modal .cell-echeance-ligne .muted{color:var(--ink-2);}
+  /* Modale du plan : styles scopés à .plan-modal regroupés plus haut, avec
+     le reste du reskin Stitch de la fiche machine (voir .fm-card et
+     alentours). */
   /* Colonne « Échéance » : le centrage doit être IMPOSSIBLE. Cellule et en-tête
      sont explicitement à gauche, et le cadre est une colonne flex dont les
      enfants se collent au bord gauche (aucun `margin:auto`, aucune marge
@@ -5454,21 +5603,20 @@
      même carte ce que .mstrip-jauge / la jauge détaillée de la fiche
      affichaient À CÔTÉ (échéance, delta, état) — un seul bloc, comme la
      maquette, au lieu de deux qui répètent la même information. Skin CLAIR
-     par défaut (carte du Parc, fond clair) ; surchargé juste après pour le
-     contexte carte sombre de la fiche machine (.plan-hero-compteur). Les
-     couleurs d'état reprennent la palette TRI-ÉTAT déjà déclarée
+     partout, y compris dans la fiche machine (.plan-hero-compteur) depuis
+     le reskin Stitch du 29 sept. 2026 — plus de carte sombre à distinguer.
+     Les couleurs d'état reprennent la palette TRI-ÉTAT déjà déclarée
      (--late/--soon/--ok) — PAS le rouge/vert de la maquette, qui ne
      correspond à aucun état réel de ce produit (3 états, jamais 2).
-     ⚠️ .compteur-carte se pose DANS deux conteneurs qui neutralisent déjà
-     le `.compteur` générique (fond/marge/cadre à 0) via un sélecteur à 2
-     classes — .mstrip-compteur-bloc .compteur (ligne ~1041) et
-     .plan-hero-compteur .compteur (ligne ~1814) — donc à SPÉCIFICITÉ ÉGALE
-     à la mienne (.compteur-carte, 1 seule classe, perdrait sinon LA
-     TOTALITÉ du fond/padding malgré son ordre plus tardif dans la
-     feuille). D'où les deux surcharges complètes et explicites plus bas
-     (.mstrip-compteur-bloc .compteur-carte / .plan-hero-compteur
-     .compteur-carte), à la même spécificité à 2 classes, qui l'emportent
-     par l'ordre.
+     ⚠️ .compteur-carte se pose DANS un conteneur qui neutralise déjà le
+     `.compteur` générique (fond/marge/cadre à 0) via un sélecteur à 2
+     classes — .mstrip-compteur-bloc .compteur (ligne ~1041) — donc à
+     SPÉCIFICITÉ ÉGALE à la mienne (.compteur-carte, 1 seule classe,
+     perdrait sinon LA TOTALITÉ du fond/padding malgré son ordre plus
+     tardif dans la feuille). D'où la surcharge complète et explicite plus
+     bas (.mstrip-compteur-bloc .compteur-carte), à la même spécificité à 2
+     classes, qui l'emporte par l'ordre — la fiche machine a son équivalent
+     juste à côté de .plan-hero-compteur (voir plus haut), même technique.
      ⚠️ AUCUN `display` ici, volontairement : .compteur-mobile bascule déjà
      flex/none selon le seuil des 900 px (ligne ~1470/1504), à la MÊME
      spécificité qu'un .compteur-carte qui en poserait un — et le mien,
@@ -5506,18 +5654,6 @@
      .compteur (ligne ~1041) — carte BLANCHE, distincte du fond gris clair
      de .mstrip-compteur-bloc, comme la maquette. */
   .mstrip-compteur-bloc .compteur-carte{background:#fff;box-shadow:var(--shadow-soft);padding:12px;margin-top:0;border:none;border-radius:12px;}
-  /* Contexte carte sombre (fiche machine, .plan-hero-compteur) : mêmes
-     classes, palette inversée — jamais de nouvelle classe ni de doublon.
-     Surcharge à spécificité égale (2 classes) elle aussi, complète pour la
-     même raison (annule fond/marge/padding/cadre de la ligne ~1814). */
-  .plan-hero-compteur .compteur-carte{background:rgba(255,255,255,.08);box-shadow:none;margin:0;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;}
-  .plan-hero-compteur .compteur-carte-mot{color:rgba(255,255,255,.65);}
-  .plan-hero-compteur .compteur-carte-ajuster{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;}
-  .plan-hero-compteur .compteur-carte-valeur{color:#fff;}
-  .plan-hero-compteur .compteur-carte-unite{color:rgba(255,255,255,.6);}
-  .plan-hero-compteur .compteur-carte-piste{background:rgba(255,255,255,.16);}
-  .plan-hero-compteur .compteur-carte-echeance{color:rgba(255,255,255,.6);}
-  .plan-hero-compteur .compteur-lecture{color:rgba(255,255,255,.85);}
 
   /* Le module de rouleaux : overlay plein écran, palette claire normale
      (ajouté à document.body, pas dans la carte sombre). */
@@ -16762,7 +16898,14 @@ function totalQuantites(quantites) {
 }
 
 function formatteTotal(total) {
-  if (!total) return '';
+  if (!total && total !== 0) return '';
+  // Deux formes possibles depuis le chantier Kits d'entretien (listePreparation
+  // ligne ~16978) : un NOMBRE nu pour un besoin relié à un kit (quantité déjà
+  // propre, sans unité texte à afficher), ou l'objet {nombre, unite} du parsing
+  // texte libre historique (lireQuantite/totalQuantites). Sans cette
+  // distinction, .nombre sur un nombre nu vaut undefined et plantait tout
+  // l'écran d'Agenda/Préparation qui l'affiche (signalé par l'utilisateur).
+  if (typeof total === 'number') return total.toLocaleString(localeActive());
   const nombre = total.nombre.toLocaleString(localeActive());
   return total.unite ? `${nombre} ${total.unite}` : nombre;
 }
@@ -25685,7 +25828,16 @@ function openAddWizard(companyId, categories) {
           if (intervalleReel != null) Object.assign(planPayload, SCHEMA.hasCounter ? { interval_counter: intervalleReel } : { interval_hours: intervalleReel });
         }
         if (secondaireActif) {
-          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
+          // Filet de sécurité : si aucune tâche n'est encore rattachée à
+          // l'unité du second suivi (carnet 100% heures, second suivi
+          // calendaire ajouté à la main, par exemple), echeancePlanDepuis
+          // TachesSecondaire ne trouve rien et renvoie null — sans repli, le
+          // second suivi restait indéfiniment sans échéance concrète malgré
+          // une cadence bien réglée (visible en Cadence/Mode de suivi, mais
+          // aucun bloc d'intervalle à afficher). `duePlanSecondaire`, calculé
+          // plus haut, est cette même valeur déjà utilisée pour préparer les
+          // tâches (preparerTaches) — pas une improvisation.
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2) ?? duePlanSecondaire, machineVue2));
           const intervalleReelSec = intervalleDepuisTacheGouvernante(tacheGouvernanteSecondaire(planPayload.items, machineVue2), !secondaireCalendrier);
           if (intervalleReelSec != null) {
             Object.assign(planPayload, secondaireCalendrier ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
@@ -25711,7 +25863,9 @@ function openAddWizard(companyId, categories) {
           if (intervalleReel != null) planPayload.interval_days = intervalleReel;
         }
         if (secondaireActif) {
-          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2), machineVue2));
+          // Même filet de sécurité que dans la branche compteur ci-dessus
+          // (voir son commentaire).
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2) ?? duePlanSecondaire, machineVue2));
           const intervalleReelSec = intervalleDepuisTacheGouvernante(tacheGouvernanteSecondaire(planPayload.items, machineVue2), !secondaireCalendrier);
           if (intervalleReelSec != null) {
             Object.assign(planPayload, secondaireCalendrier ? { interval_days_2: intervalleReelSec } : (SCHEMA.hasCounter2 ? { interval_counter_2: intervalleReelSec } : {}));
@@ -27346,6 +27500,114 @@ function grouperParMachine(lignes) {
 //   • une valeur LIBRE est un vrai intervalle dans son unité : la tâche reçoit sa
 //     propre échéance, même si cette unité n'est pas celle du plan (elle ne
 //     compte alors pas dans l'échéance globale, et l'écran le dit).
+// Détecte le cas signalé par l'utilisateur : choisir une fréquence dans une
+// unité que la machine ne suit pas encore laissait la tâche retomber en
+// simple point de contrôle, SANS AUCUN message expliquant pourquoi ni
+// comment y remédier — juste une mention grisée dans le coin. Ne se
+// déclenche QUE si aucun second suivi n'existe déjà (en changer un déjà
+// actif, avec ses propres tâches déjà accrochées dessus, est une décision à
+// part — hors périmètre ici).
+function uniteBesoinSecondCompteur(unite, plan, machine) {
+  if (!SCHEMA.hasCounter2 || modeSecondaireDe(machine)) return false;
+  if (uniteCompatiblePlan(unite, plan, machine)) return false;
+  return !!UNITES_INTERVALLE[unite];
+}
+
+// Avertit ET configure en un seul geste, au lieu de renvoyer vers « Modifier
+// la machine » pour un simple oubli. Reprend le MÊME motif que le second
+// suivi de openMachineModal (mêmes 3 cartes heures/km/calendaire, mêmes
+// fonctions réelles machineCounter2Patch/planJours2Patch/planCounter2Patch —
+// aucune nouvelle logique d'écriture), réduit au strict nécessaire pour
+// activer CE suivi précis. `onConfigure` est rappelée une fois l'écriture
+// réussie, pour appliquer le choix de fréquence qui a révélé le besoin.
+function avertirSecondCompteurManquant(machine, uniteManquante, choix, onConfigure) {
+  const infoUnite = UNITES_INTERVALLE[uniteManquante];
+  const calendrier = infoUnite?.genre === 'date';
+  const uniteParDefaut = calendrier ? 'days' : (uniteManquante === trad('km') ? 'km' : 'hours');
+  const modePrincipal = planIsCounter(machine.plan) ? counterUnitOf(machine) : 'days';
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay choix-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const carte = (valeur, icone, titre, texte) => modePrincipal === valeur ? '' : `
+    <label class="mform-card" data-carte-tm2="${valeur}">
+      <input type="radio" name="second-compteur-unite" value="${valeur}" ${uniteParDefaut === valeur ? 'checked' : ''}>
+      <span class="mform-card-ico">${picto(icone)}</span>
+      <span class="mform-card-corps"><span class="mform-card-titre">${titre}</span><span class="mform-card-texte">${texte}</span></span>
+    </label>`;
+
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="mform-tete">
+        <div class="mform-tete-titre"><h2>${trad('Second suivi nécessaire')}</h2></div>
+        <button type="button" class="mform-close" id="second-compteur-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <p class="sub">${trad('Vous venez de sélectionner un deuxième type de suivi. Pour qu\'il soit pris en compte, il faut ajouter ce second suivi à la machine.')}</p>
+      <div class="mform-cards">
+        ${carte('hours', 'compteur', trad('Compteur horaire'), trad('Heures'))}
+        ${carte('km', 'vehicule', trad('Kilométrage'), trad('Kilomètres'))}
+        ${carte('days', 'prochain', trad('Calendaire'), trad('Jours / semaines'))}
+      </div>
+      <div class="field-row" id="second-compteur-valeur-row" style="display:${uniteParDefaut === 'days' ? 'none' : 'flex'};">
+        <div>
+          <label for="second-compteur-valeur">${trad('Relevé actuel')}</label>
+          <input id="second-compteur-valeur" type="number" min="0" value="">
+        </div>
+      </div>
+      <div class="hint" id="second-compteur-erreur"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="second-compteur-annuler">${trad('Annuler')}</button>
+        <button type="button" class="primary" id="second-compteur-confirmer">${trad('Ajouter ce second suivi')}</button>
+      </div>
+    </div>
+  `;
+  const fermer = () => overlay.remove();
+  overlay.querySelector('#second-compteur-close-x').addEventListener('click', fermer);
+  overlay.querySelector('#second-compteur-annuler').addEventListener('click', fermer);
+  const radios = () => [...overlay.querySelectorAll('input[name="second-compteur-unite"]')];
+  radios().forEach(r => r.addEventListener('change', () => {
+    overlay.querySelector('#second-compteur-valeur-row').style.display = r.value === 'days' ? 'none' : 'flex';
+  }));
+  overlay.querySelector('#second-compteur-confirmer').addEventListener('click', async () => {
+    const bouton = overlay.querySelector('#second-compteur-confirmer');
+    const choisi = radios().find(r => r.checked)?.value || uniteParDefaut;
+    const enCalendrier = choisi === 'days';
+    const valeur = enCalendrier ? null : (nombreDepuisTexte(overlay.querySelector('#second-compteur-valeur').value) ?? 0);
+    const erreur = overlay.querySelector('#second-compteur-erreur');
+    erreur.textContent = '';
+    bouton.disabled = true;
+    bouton.textContent = trad('Enregistrement…');
+    try {
+      const machinePatch = machineCounter2Patch(valeur, choisi);
+      if (Object.keys(machinePatch).length) {
+        const { error } = await sb.from('machines').update(machinePatch).eq('id', machine.id);
+        if (error) throw error;
+      }
+      // Cadence du second suivi : reprend directement la fréquence qui vient
+      // d'être choisie pour CETTE tâche (c'est elle qui a révélé le besoin),
+      // rappel par défaut comme tout nouveau suivi (même repli que
+      // openMachineModal pour un suivi qui n'existait pas encore).
+      const intervalle = Math.max(1, Number(choix?.interval) || (enCalendrier ? 30 : 250));
+      const planPatch = enCalendrier
+        ? { ...planJours2Patch(intervalle, FALLBACK_REMINDER_DAYS), ...planNextDueAt2Patch(addDaysIso(todayIso(), intervalle)) }
+        : { ...planCounter2Patch(intervalle, FALLBACK_REMINDER_HOURS), ...planNextDueCounter2Patch((valeur || 0) + intervalle) };
+      if (machine.plan?.id && Object.keys(planPatch).length) {
+        const { error } = await sb.from('maintenance_plans').update(planPatch).eq('id', machine.plan.id);
+        if (error) throw error;
+        Object.assign(machine.plan, planPatch);
+      }
+      Object.assign(machine, machinePatch);
+      overlay.remove();
+      onConfigure();
+    } catch (err) {
+      erreur.textContent = trad('Erreur :') + ' ' + err.message;
+      bouton.disabled = false;
+      bouton.textContent = trad('Ajouter ce second suivi');
+    }
+  });
+}
+
 function openChoixFrequence(machine, item, companyId, categories, planScrollTop) {
   if (refuserSiNonCouverte(machine)) return;
   const plan = machine.plan || {};
@@ -27506,8 +27768,21 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
     }
   };
 
+  // Signalé par l'utilisateur : choisir une fréquence hors de l'unité du plan
+  // ET hors de tout second suivi déjà actif ne disait jusqu'ici rien de plus
+  // qu'un petit texte grisé sur la carte — la tâche retombait en simple point
+  // de contrôle sans que ce soit visible nulle part ailleurs. On l'annonce
+  // maintenant AVANT d'enregistrer, avec le geste pour l'activer tout de
+  // suite plutôt que de renvoyer vers « Modifier la machine ».
+  const appliquerAvecGardeSecondCompteur = (choix, bouton) => {
+    if (choix.unite && uniteBesoinSecondCompteur(choix.unite, plan, machine)) {
+      avertirSecondCompteurManquant(machine, choix.unite, choix, () => appliquer(choix, bouton));
+      return;
+    }
+    appliquer(choix, bouton);
+  };
   overlay.querySelectorAll('.choix-option').forEach(btn => {
-    btn.addEventListener('click', () => appliquer(options[Number(btn.dataset.choix)], btn));
+    btn.addEventListener('click', () => appliquerAvecGardeSecondCompteur(options[Number(btn.dataset.choix)], btn));
   });
   habillerSelect(overlay.querySelector('#choix-unite'), trad('Unité'));
   overlay.querySelector('#choix-enregistrer').addEventListener('click', () => {
@@ -27516,7 +27791,7 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
     // `libre: true` : c'est un intervalle exprimé par l'utilisateur, avec son
     // unité — il est accepté même si l'unité n'est pas celle du plan, et la tâche
     // reçoit sa propre échéance dans cette unité.
-    appliquer({ interval: valeur, unite, libelle: null, libre: true }, overlay.querySelector('#choix-enregistrer'));
+    appliquerAvecGardeSecondCompteur({ interval: valeur, unite, libelle: null, libre: true }, overlay.querySelector('#choix-enregistrer'));
   });
   overlay.querySelector('#choix-controle').addEventListener('click', (e) => appliquer({ pointDeControle: true }, e.currentTarget));
 }
@@ -27688,9 +27963,55 @@ function notesUtiles(notes, compteur) {
 // modales, voir son commentaire), mais un choix distinct et non fusionné :
 // fréquence et kit sont deux décisions indépendantes, les mélanger dans une
 // seule modale brouillerait ce que l'utilisateur est en train de choisir.
+// Marqueur posé sur `maintenance_kits.note` pour un kit auto-créé par
+// résoudreKitPourPieceDirecte() — jamais affiché tel quel (nomKit/l'écran de
+// gestion des kits montrent son `name`, une vraie désignation de pièce, pas
+// ce marqueur), il sert seulement à retrouver un kit à 1 pièce déjà créé
+// pour ne pas en semer un nouveau à chaque association identique.
+const MARQUEUR_KIT_PIECE_DIRECTE = '__piece_directe__';
+
+// Associer une pièce du catalogue SANS passer par la création manuelle d'un
+// kit — signalé par l'utilisateur : « associer un kit » n'avait de sens que
+// pour un vrai ensemble de pièces, pas pour une tâche qui n'a besoin que
+// d'UNE pièce. Le concept de kit réutilisable reste inchangé (décision
+// d'origine du chantier Kits d'entretien) : on crée ici, discrètement, un
+// kit à une seule ligne — appliquerKitTache/listePreparation/
+// calculerCouverturePiece n'ont donc rien à changer, ils continuent de ne
+// connaître que des kit_id. Réutilise un kit à 1 pièce déjà créé pour EXACTEMENT
+// la même pièce et la même quantité (jamais une correspondance approximative :
+// une quantité différente doit rester une association séparée).
+async function resoudreKitPourPieceDirecte(partId, quantity) {
+  const existant = (UI.maintenanceKits || []).find((k) => k.note === MARQUEUR_KIT_PIECE_DIRECTE
+    && (UI.maintenanceKitLines || []).some((l) => String(l.kit_id) === String(k.id)
+      && String(l.part_id) === String(partId) && Number(l.quantity) === Number(quantity)));
+  if (existant) return existant.id;
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const nom = piece ? piece.designation : trad('Pièce');
+  const { data: kitData, error: kitErr } = await sb.from('maintenance_kits')
+    .insert({ company_id: UI.companyId, name: nom, note: MARQUEUR_KIT_PIECE_DIRECTE })
+    .select('id, name, note, active')
+    .single();
+  if (kitErr) throw kitErr;
+  UI.maintenanceKits = [...(UI.maintenanceKits || []), kitData];
+  const { data: ligneData, error: ligneErr } = await sb.from('maintenance_kit_lines')
+    .insert({ company_id: UI.companyId, kit_id: kitData.id, part_id: partId, quantity })
+    .select('id, kit_id, part_id, quantity, note');
+  if (ligneErr) throw ligneErr;
+  UI.maintenanceKitLines = [...(UI.maintenanceKitLines || []), ...(ligneData || [])];
+  return kitData.id;
+}
+
 function ouvrirChoixKitTache(machine, item, index, companyId, categories, planScrollTop) {
   const plan = machine.plan || {};
-  const kits = (UI.maintenanceKits || []).filter((k) => k.active !== false);
+  const kits = (UI.maintenanceKits || []).filter((k) => k.active !== false && k.note !== MARQUEUR_KIT_PIECE_DIRECTE);
+  const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
+  // Le kit actuellement relié peut être un kit à 1 pièce auto-créé (voir
+  // resoudreKitPourPieceDirecte) — il n'apparaît pas dans le <select> de kit
+  // ci-dessus (filtré), donc sans ça la fiche semblait n'avoir plus rien
+  // d'associé en rouvrant cette modale alors qu'une pièce l'est bien.
+  const kitActuel = item.kit_id ? (UI.maintenanceKits || []).find((k) => String(k.id) === String(item.kit_id)) : null;
+  const ligneActuelle = (kitActuel && kitActuel.note === MARQUEUR_KIT_PIECE_DIRECTE) ? lignesKit(kitActuel.id)[0] : null;
+  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}"${ligneActuelle && String(ligneActuelle.part_id) === String(p.id) ? ' selected' : ''}>${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`).join('');
   const overlay = document.createElement('div');
   overlay.className = 'overlay choix-modal';
   document.body.appendChild(overlay);
@@ -27698,22 +28019,47 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
   overlay.innerHTML = `
     <div class="modal">
       <div class="mform-tete">
-        <div class="mform-tete-titre"><h2>${trad('Kit associé à cette tâche')}</h2></div>
+        <div class="mform-tete-titre"><h2>${trad('Pièces de maintenance associées à cette tâche')}</h2></div>
         <button type="button" class="mform-close" id="kit-tache-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
       <p class="sub">${esc(item.label || '')}</p>
-      <label class="sr-only" for="kit-tache-select">${trad('Kit')}</label>
+      <label for="kit-tache-select">${trad('Kit d\'entretien')}</label>
       <select id="kit-tache-select">
         <option value="">${trad('— Aucun kit —')}</option>
         ${kits.map((k) => `<option value="${esc(k.id)}"${item.kit_id === k.id ? ' selected' : ''}>${esc(k.name)}</option>`).join('')}
       </select>
-      ${!kits.length ? `<p class="hint">${trad('Aucun kit actif pour l\'instant — crée-en un depuis Stocks & SAV.')}</p>` : ''}
+      ${!kits.length ? `<p class="hint">${trad('Aucun kit actif pour l\'instant — tu peux quand même associer une pièce seule ci-dessous, ou en créer un depuis Stocks & SAV.')}</p>` : ''}
+      <div class="hint" style="margin:10px 0;">${trad('— ou —')}</div>
+      <label for="kit-tache-piece-select">${trad('Pièce seule du catalogue (sans créer de kit)')}</label>
+      <select id="kit-tache-piece-select">
+        <option value="">${trad('— Aucune —')}</option>
+        ${optionsPieces}
+      </select>
+      <div class="field-row" id="kit-tache-piece-qte-row" style="display:${ligneActuelle ? 'flex' : 'none'};margin-top:8px;">
+        <div>
+          <label for="kit-tache-piece-qte">${trad('Quantité')}</label>
+          <input id="kit-tache-piece-qte" type="text" inputmode="decimal" value="${ligneActuelle ? esc(texteAvecSeparateurs(ligneActuelle.quantity)) : '1'}">
+        </div>
+      </div>
+      ${!pieces.length ? `<p class="hint">${trad('Aucune pièce dans le catalogue pour l\'instant — ajoute-la depuis Stocks & SAV.')}</p>` : ''}
       <div class="hint" id="kit-tache-erreur"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="kit-tache-annuler">${trad('Annuler')}</button>
         <button type="button" class="primary" id="kit-tache-enregistrer"><span>${trad('Enregistrer')}</span></button>
       </div>
     </div>`;
+
+  const selectKit = overlay.querySelector('#kit-tache-select');
+  const selectPiece = overlay.querySelector('#kit-tache-piece-select');
+  const ligneQte = overlay.querySelector('#kit-tache-piece-qte-row');
+  habillerSelectPieceCatalogue(selectPiece);
+  // Mutuellement exclusifs : choisir l'un remet l'autre à vide, pour ne
+  // jamais se demander lequel des deux sera réellement enregistré.
+  selectKit.addEventListener('change', () => { if (selectKit.value) { selectPiece.value = ''; selectPiece.dispatchEvent(new Event('change', { bubbles: true })); } });
+  selectPiece.addEventListener('change', () => {
+    ligneQte.style.display = selectPiece.value ? 'flex' : 'none';
+    if (selectPiece.value) selectKit.value = '';
+  });
 
   let enregistrementEnCours = false;
   let fermetureDemandee = false;
@@ -27728,17 +28074,25 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
 
   overlay.querySelector('#kit-tache-enregistrer').addEventListener('click', async () => {
     const erreur = overlay.querySelector('#kit-tache-erreur');
-    const kitId = overlay.querySelector('#kit-tache-select').value || null;
-    const items = appliquerKitTache(plan.items, index, item.item_id || null, kitId);
-    const maj = { items };
-    erreur.textContent = '';
-    enregistrementEnCours = true;
     const bouton = overlay.querySelector('#kit-tache-enregistrer');
     const label = bouton.querySelector('span');
+    const pieceId = selectPiece.value || null;
+    const qte = pieceId ? nombreDepuisTexte(overlay.querySelector('#kit-tache-piece-qte').value) : null;
+    if (pieceId && !(qte > 0)) {
+      erreur.textContent = trad('Renseigne une quantité supérieure à zéro.');
+      return;
+    }
+    erreur.textContent = '';
+    enregistrementEnCours = true;
     const texteInitial = label.textContent;
     bouton.disabled = true;
     label.textContent = trad('Enregistrement…');
     try {
+      // La pièce seule prend le pas sur le kit sélectionné (déjà mutuellement
+      // exclusifs à la saisie, cette priorité ne sert que de filet).
+      const kitId = pieceId ? await resoudreKitPourPieceDirecte(pieceId, qte) : (selectKit.value || null);
+      const items = appliquerKitTache(plan.items, index, item.item_id || null, kitId);
+      const maj = { items };
       if (plan.id) {
         const { error } = await sb.from('maintenance_plans').update(maj).eq('id', plan.id);
         if (error) throw error;
@@ -27759,6 +28113,267 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
       if (fermetureDemandee) fermerEtRouvrir();
     }
   });
+}
+
+// ============================================================
+// BANDEAU FICHE MACHINE — reprise à l'octet du mockup Stitch fourni par
+// l'utilisateur (stitch_refonte_ui_ux_keeva (2), 2 déclinaisons : 1
+// intervalle / 2 intervalles). Directive explicite : aucune modification du
+// design, structure et valeurs Tailwind traduites telles quelles en CSS.
+// Seul le contenu change : chaque nombre/texte du mockup est un exemple,
+// remplacé ici par la vraie donnée équivalente (jamais une valeur inventée
+// quand le mockup montre un exemple qui n'a pas d'équivalent réel — voir
+// commentaires ciblés plus bas, notamment l'estimation en jours d'un
+// intervalle horaire, qu'aucun modèle de rythme d'usage ne permet de
+// calculer honnêtement dans ce produit).
+// ------------------------------------------------------------
+const FM2_SVG_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+const FM2_SVG_SABLIER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14m-2 20v-5a7 7 0 0 0-14 0v5m14-20v5a7 7 0 0 1-14 0V2"></path></svg>';
+const FM2_SVG_CLOCHE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+const FM2_SVG_MODE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 12l-4-4-4 4"></path></svg>';
+// Palette d'état du badge d'échéance : le mockup ne montre que l'état
+// « imminent » (ambre, #F58220, littéralement sa couleur). Les 2 autres
+// états réels de ce produit (à jour / en retard) reprennent les couleurs
+// « Operational/OK » et « Critical » déjà documentées dans le DESIGN.md
+// fourni avec ce même mockup — jamais de rouge (règle KEEVA constante,
+// remplacé par le même ambre qu'« imminent », un simple dépassement de la
+// même urgence).
+const FM2_ETAT_COULEUR = {
+  late: { bg: '#FFFBEB', fg: '#F58220' },
+  soon: { bg: '#FFFBEB', fg: '#F58220' },
+  ok: { bg: '#ECFDF5', fg: '#047857' },
+  unknown: { bg: '#F1F5F9', fg: '#64748B' },
+};
+// Reprend EXACTEMENT les mêmes valeurs que jaugeIntervalleHtml (même
+// garde-fou : intervalle/reste absents → null, rien n'est affiché) — juste
+// exposées en données brutes plutôt qu'en HTML, pour les poser dans le
+// balisage exact du mockup plutôt que dans .machine-jauge.
+function detailsIntervalleReel(info, m) {
+  if (!m || !m.plan) return null;
+  const enCompteur = planIsCounter(m.plan);
+  const intervalle = enCompteur ? planIntervalCounter(m.plan) : (m.plan.interval_days ?? null);
+  const reste = info.sortKey;
+  if (!Number.isFinite(intervalle) || intervalle <= 0 || !Number.isFinite(reste)) return null;
+  const part = pourcentageIntervalle(info, m) ?? 0;
+  const unite = enCompteur ? counterUnitOf(m) : null;
+  const echeance = enCompteur ? formatCounter(planNextDueCounter(m.plan), unite) : formatShortDate(m.plan.next_due_at);
+  const debut = enCompteur ? formatCounter(0, unite) : formatShortDate(addDaysIso(m.plan.next_due_at, -intervalle));
+  const objectif = enCompteur ? formatCounter(intervalle, unite) : tR('{n} j', { n: intervalle });
+  const enRetard = reste < 0;
+  const resteValeur = enCompteur ? formatCounter(Math.abs(reste), unite) : tR('{n} j', { n: Math.round(Math.abs(reste)) });
+  return { part, echeance, debut, objectif, enRetard, resteValeur, state: info.state };
+}
+// Texte de la puce « Reste »/« Dépassement » d'un bloc d'intervalle — même
+// mot que le reste de l'app (jaugeIntervalleHtml), jamais « en retard de »
+// dupliqué avec un vocabulaire différent selon l'écran.
+function fm2ResteTexte(detail) {
+  return detail.enRetard
+    ? tR('Dépassement +{valeur}', { valeur: detail.resteValeur })
+    : tR('Reste {valeur}', { valeur: detail.resteValeur });
+}
+// Mini-carte Cadence/Rappel/Mode de suivi — déclinaison 1 : icône nue à
+// côté du libellé, sur la même ligne (structure exacte de l'Option 1).
+function fm2MiniCarteO1(label, valeur, svg, couleurIco) {
+  return `<div class="fm2-mini-carte-o1">
+      <div class="fm2-mini-tete-o1"><span>${esc(label)}</span><span class="fm2-mini-ico-o1" style="color:${couleurIco};">${svg}</span></div>
+      <div class="fm2-mini-valeur-o1">${esc(valeur)}</div>
+    </div>`;
+}
+// Même pastille, déclinaison 2 : icône dans un carré teinté à droite,
+// libellé + valeur à gauche (structure exacte de l'Option 2, LIGNE 3).
+function fm2MiniCarteO2(label, valeur, svg, bgIco, fgIco) {
+  return `<div class="fm2-mini-carte-o2">
+      <div>
+        <div class="fm2-mini-label-o2">${esc(label)}</div>
+        <div class="fm2-mini-valeur-o2">${esc(valeur)}</div>
+      </div>
+      <div class="fm2-mini-ico-o2" style="background:${bgIco};color:${fgIco};">${svg}</div>
+    </div>`;
+}
+
+// Déclinaison « 1 seul intervalle » (aucun second suivi actif sur la
+// machine) — reprise à l'octet de la section « Option 1 » du mockup.
+function fm2BandeauSimpleHtml(machine, info, unit, isCounterMode, releveCompteur, seuilCompteur, cadenceTexte, rappelTexte, modeTexte, photoFiche, sousTitre) {
+  const detail = detailsIntervalleReel(info, machine);
+  const couleur = FM2_ETAT_COULEUR[info.state] || FM2_ETAT_COULEUR.unknown;
+  const idAffiche = identifiantAffiche(machine);
+  return `
+    <div class="fm2-hero">
+      <div class="fm2-grid">
+        <div class="fm2-o1-photo">
+          <div class="fm2-o1-photo-box">
+            ${photoFiche ? `<img src="${esc(photoFiche)}" alt="${esc(machine.name)}" loading="lazy">` : ''}
+            ${idAffiche ? `<div class="fm2-vin fm2-vin-o1">${esc(idAffiche)}</div>` : ''}
+          </div>
+        </div>
+        <div class="fm2-o1-body">
+          <div class="fm2-o1-head">
+            <div class="fm2-o1-badges">
+              <span class="fm2-badge-echeance fm2-badge-echeance-o1" style="background:${couleur.bg};color:${couleur.fg};">${FM2_SVG_CLOCK}<span>${esc(info.label.toUpperCase())}</span></span>
+              ${machine.category?.name ? `<span class="fm2-chip-cat-o1">${esc(machine.category.name.toUpperCase())}</span>` : ''}
+              ${idAffiche ? `<span class="fm2-meta-o1">${esc(idAffiche)}</span>` : ''}
+            </div>
+            <div class="fm2-o1-titre-row">
+              <h1 class="fm2-titre-o1">${esc(machine.name.toUpperCase())}</h1>
+              ${sousTitre ? `<span class="fm2-sous-titre-o1">${esc(sousTitre)}</span>` : ''}
+            </div>
+          </div>
+          <div class="fm2-o1-cartes">
+            ${fm2MiniCarteO1(trad('Cadence'), cadenceTexte, FM2_SVG_SABLIER, '#6366F1')}
+            ${fm2MiniCarteO1(trad('Rappel anticipé'), rappelTexte, FM2_SVG_CLOCHE, '#F59E0B')}
+            ${fm2MiniCarteO1(trad('Mode de suivi'), modeTexte, FM2_SVG_MODE, '#00B4D8')}
+          </div>
+        </div>
+        <div class="fm2-o1-side">
+          ${isCounterMode ? `
+          <div class="fm2-releve-row-o1">
+            <div>
+              <div class="fm2-label-o1">${trad('Relevé actuel')}</div>
+              <div class="fm2-releve-valeur-o1">${esc(releveCompteur)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="fm2-label-o1">${trad('Seuil d\'alerte')}</div>
+              <div class="fm2-seuil-valeur-o1">${esc(seuilCompteur)}</div>
+            </div>
+          </div>` : ''}
+          ${detail ? `
+          <div class="fm2-intervalle-o1">
+            <div class="fm2-intervalle-o1-row1">
+              <span>${esc(tR('Dernier cycle ({valeur})', { valeur: detail.debut }))}</span>
+              <span class="fm2-fort-o1">${esc(tR('Objectif {valeur}', { valeur: detail.objectif }))}</span>
+            </div>
+            <div>
+              <div class="fm2-intervalle-o1-label">${trad('INTERVALLE')}</div>
+              <div class="fm2-intervalle-o1-row2">
+                <span>${esc(tR('Échéance {valeur}', { valeur: detail.echeance }))}</span>
+                <span class="fm2-reste-o1">${esc(fm2ResteTexte(detail))}</span>
+              </div>
+            </div>
+            <div class="fm2-piste-o1"><div class="fm2-fill-o1" style="width:${detail.part}%;"></div></div>
+            <div class="fm2-pied-o1">
+              <span>${esc(tR('Cycle standard {valeur}', { valeur: detail.objectif }))}</span>
+              <span class="fm2-pct-o1">${tR('{n}% réalisé', { n: detail.part })}</span>
+            </div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// Déclinaison « 2 intervalles » (second suivi actif) — reprise à l'octet de
+// la section « Option 2 (Demandée) » du mockup.
+// `infoBadge` : le PIRE des deux suivis (infoMachine), pour le badge du
+// haut — cohérent avec le reste de l'app (carte machine, tri, compteurs).
+// `infoPrincipal` : le suivi PRINCIPAL seul (dueInfo(machine.plan, machine)),
+// jamais celui d'infoBadge quand il a basculé sur le secondaire — sinon le
+// bloc « INTERVALLE HORAIRE » afficherait par erreur les chiffres du suivi
+// calendaire dès que celui-ci est le plus urgent des deux.
+function fm2BandeauDoubleHtml(machine, infoBadge, infoPrincipal, v2, unit, isCounterMode, releveCompteur, seuilCompteur, cadenceTexte, rappelTexte, modeTexte, photoFiche, sousTitre) {
+  const detailPrincipal = detailsIntervalleReel(infoPrincipal, machine);
+  const detailSecondaire = detailsIntervalleReel(v2.info, v2.machineVue);
+  const couleur = FM2_ETAT_COULEUR[infoBadge.state] || FM2_ETAT_COULEUR.unknown;
+  const idAffiche = identifiantAffiche(machine);
+  const statutTexte = machine.status === 'en_service' ? trad('Actif') : esc(machine.status || '');
+  // Puce « Reste » de chaque bloc : ambre partagé si cette échéance précise
+  // est en retard/imminente (même sémantique que le badge du haut), sinon
+  // la couleur d'identité de SON intervalle (indigo horaire / turquoise
+  // calendaire) — exactement ce que montre le mockup (bloc calendaire à
+  // échéance confortable resté dans sa propre teinte, bloc horaire proche
+  // de l'échéance basculé en ambre partagé).
+  const resteStyle = (d, bgOk, fgOk) => (d.state === 'late' || d.state === 'soon')
+    ? 'background:rgba(245,158,11,.15);color:#D97706;'
+    : `background:${bgOk};color:${fgOk};`;
+  return `
+    <div class="fm2-hero fm2-hero-o2">
+      <div class="fm2-grid">
+        <div class="fm2-o2-photo">
+          <div class="fm2-o2-photo-box">
+            ${photoFiche ? `<img src="${esc(photoFiche)}" alt="${esc(machine.name)}" loading="lazy">` : ''}
+            ${idAffiche ? `<div class="fm2-vin fm2-vin-o2">${esc(idAffiche)}</div>` : ''}
+            ${statutTexte ? `<div class="fm2-statut-o2">${esc(statutTexte.toUpperCase())}</div>` : ''}
+          </div>
+        </div>
+        <div class="fm2-o2-main">
+
+          <div class="fm2-o2-ligne1">
+            <div class="fm2-o2-titre-bloc">
+              <div class="fm2-o2-badges">
+                <span class="fm2-badge-echeance fm2-badge-echeance-o2" style="background:${couleur.bg};color:${couleur.fg};">${FM2_SVG_CLOCK}<span>${esc(infoBadge.label.toUpperCase())}</span></span>
+                ${machine.category?.name ? `<span class="fm2-chip-cat-o2">${esc(machine.category.name.toUpperCase())}</span>` : ''}
+                ${(idAffiche || sousTitre) ? `<span class="fm2-meta-o2">${esc([idAffiche, sousTitre].filter(Boolean).join(' • '))}</span>` : ''}
+              </div>
+              <h1 class="fm2-titre-o2">${esc(machine.name.toUpperCase())}</h1>
+            </div>
+            ${isCounterMode ? `
+            <div class="fm2-compteur-entete-o2">
+              <div>
+                <div class="fm2-label-o2">${trad('Relevé Horamètre')}</div>
+                <div class="fm2-releve-valeur-o2">${esc(releveCompteur)}</div>
+              </div>
+              <div class="fm2-divider-o2"></div>
+              <div>
+                <div class="fm2-label-o2">${trad('Seuil d\'Alerte')}</div>
+                <div class="fm2-seuil-valeur-o2">${esc(seuilCompteur)}</div>
+              </div>
+            </div>` : ''}
+          </div>
+
+          <div class="fm2-o2-ligne2">
+            <div class="fm2-o2-ligne2-tete">
+              <span class="fm2-o2-suivi-label">${trad('Suivi des 2 intervalles de révision (compteur & calendrier)')}</span>
+              <span class="fm2-o2-suivi-hint">${trad('1ère échéance atteinte déclenche l\'entretien')}</span>
+            </div>
+            <div class="fm2-o2-intervalles">
+              ${detailPrincipal ? `
+              <div class="fm2-bloc-intervalle fm2-bloc-horaire">
+                <div class="fm2-bloc-row1">
+                  <span>${esc(tR('Dernier cycle ({valeur})', { valeur: detailPrincipal.debut }))}</span>
+                  <span class="fm2-fort-o2">${esc(tR('Objectif {valeur}', { valeur: detailPrincipal.objectif }))}</span>
+                </div>
+                <div>
+                  <div class="fm2-bloc-label fm2-bloc-label-horaire">${trad('INTERVALLE HORAIRE')}</div>
+                  <div class="fm2-bloc-row2">
+                    <span>${esc(tR('Échéance : {valeur}', { valeur: detailPrincipal.echeance }))}</span>
+                    <span class="fm2-bloc-reste" style="${resteStyle(detailPrincipal, '#EEF2FF', '#4338CA')}">${esc(fm2ResteTexte(detailPrincipal))}</span>
+                  </div>
+                </div>
+                <div class="fm2-bloc-piste"><div class="fm2-bloc-fill fm2-bloc-fill-horaire" style="width:${detailPrincipal.part}%;"></div></div>
+                <div class="fm2-bloc-pied">
+                  <span>${esc(tR('Cycle standard {valeur}', { valeur: detailPrincipal.objectif }))}</span>
+                  <span class="fm2-bloc-pct fm2-bloc-pct-horaire">${tR('{n}% atteint', { n: detailPrincipal.part })}</span>
+                </div>
+              </div>` : ''}
+              ${detailSecondaire ? `
+              <div class="fm2-bloc-intervalle fm2-bloc-calendaire">
+                <div class="fm2-bloc-row1">
+                  <span>${esc(tR('Dernier cycle ({valeur})', { valeur: detailSecondaire.debut }))}</span>
+                  <span class="fm2-fort-o2">${esc(tR('Objectif {valeur}', { valeur: detailSecondaire.objectif }))}</span>
+                </div>
+                <div>
+                  <div class="fm2-bloc-label fm2-bloc-label-calendaire">${trad('INTERVALLE CALENDAIRE')}</div>
+                  <div class="fm2-bloc-row2">
+                    <span>${esc(tR('Échéance : {valeur}', { valeur: detailSecondaire.echeance }))}</span>
+                    <span class="fm2-bloc-reste" style="${resteStyle(detailSecondaire, '#F0FDFA', '#0F766E')}">${esc(fm2ResteTexte(detailSecondaire))}</span>
+                  </div>
+                </div>
+                <div class="fm2-bloc-piste"><div class="fm2-bloc-fill fm2-bloc-fill-calendaire" style="width:${detailSecondaire.part}%;"></div></div>
+                <div class="fm2-bloc-pied">
+                  <span>${esc(tR('Cycle standard {valeur}', { valeur: detailSecondaire.objectif }))}</span>
+                  <span class="fm2-bloc-pct fm2-bloc-pct-calendaire">${tR('{n}% atteint', { n: detailSecondaire.part })}</span>
+                </div>
+              </div>` : ''}
+            </div>
+          </div>
+
+          <div class="fm2-o2-ligne3">
+            ${fm2MiniCarteO2(trad('Cadence'), cadenceTexte, FM2_SVG_SABLIER, '#EEF2FF', '#4F46E5')}
+            ${fm2MiniCarteO2(trad('Rappel anticipé'), rappelTexte, FM2_SVG_CLOCHE, '#FFFBEB', '#D97706')}
+            ${fm2MiniCarteO2(trad('Mode de suivi'), modeTexte, FM2_SVG_MODE, '#F0FDFA', '#0D9488')}
+          </div>
+
+        </div>
+      </div>
+    </div>`;
 }
 
 function openPlanView(machine, companyId, categories, options = {}) {
@@ -27806,13 +28421,13 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const gerant = peutGererParametresStock();
     const nomAssocie = it.kit_id ? nomKit(it.kit_id) : null;
     if (!gerant) return nomAssocie ? esc(nomAssocie) : '<span class="muted">—</span>';
-    const libelleBouton = nomAssocie ? trad('Modifier') : trad('Associer un kit');
+    const libelleBouton = nomAssocie ? trad('Modifier') : trad('Associer des pièces de maintenance');
     return `${nomAssocie ? esc(nomAssocie) + ' ' : ''}<button type="button" class="view-manual choisir-kit" data-tache-kit="${index}">${esc(libelleBouton)}</button>`;
   };
   const ligneTableau = (it, index) => {
-    const enRetard = infoTache(it, machine.plan, machine).state === 'late';
+    const state = infoTache(it, machine.plan, machine).state;
     return `
-          <tr class="${enRetard ? 'is-late-row' : ''}">
+          <tr class="${state === 'late' ? 'is-late-row' : ''}" data-etat-tache="${state}">
             <td class="item-label"><span class="item-label-ligne"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</span></td>
             <td>${cell(it.frequency)}</td>
             <td>${etatTacheHtml(it, machine.plan, machine, 'colonne')}</td>
@@ -27823,22 +28438,22 @@ function openPlanView(machine, companyId, categories, options = {}) {
           </tr>`;
   };
   const carteTache = (it, index) => {
-    const enRetard = infoTache(it, machine.plan, machine).state === 'late';
+    const state = infoTache(it, machine.plan, machine).state;
     return `
-        <div class="tache-carte${enRetard ? ' is-late-row' : ''}">
+        <div class="tache-carte${state === 'late' ? ' is-late-row' : ''}" data-etat-tache="${state}">
           <div class="tache-titre"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Fréquence')}</span><span class="tache-valeur">${cell(it.frequency)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>
-          ${avecKits ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Kit associé')}</span><span class="tache-valeur">${celluleKit(it, index)}</span></div>` : ''}
+          ${avecKits ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Pièces associées')}</span><span class="tache-valeur">${celluleKit(it, index)}</span></div>` : ''}
         </div>`;
   };
 
   const tableHtml = hasItemDetail ? `
     <div class="ref-scroll ref-scroll-plan"><table class="ref-table">
-      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th>${avecKits ? `<th>${trad('Kit associé')}</th>` : ''}</tr></thead>
+      <thead><tr><th>${trad('Élément')}</th><th>${trad('Fréquence')}</th><th>${trad('Échéance')}</th><th>${trad('Huile / graisse / pièce')}</th><th>${trad('Quantité')}</th><th>${trad('Remarque')}</th>${avecKits ? `<th>${trad('Pièces associées')}</th>` : ''}</tr></thead>
       <tbody>${items.map(ligneTableau).join('')}</tbody>
     </table></div>
     <div class="taches-cartes">${items.map(carteTache).join('')}</div>
@@ -27846,12 +28461,67 @@ function openPlanView(machine, companyId, categories, options = {}) {
       ? `<ul class="plan-tasks">${simpleItems.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
       : `<div class="value" style="color:var(--ink-soft);">${trad('Aucune tâche détaillée')}</div>`);
 
+  // Puces de filtre (comme la maquette « Tous / À venir / Réalisés ») —
+  // mais sur les VRAIS 3 états déjà utilisés partout dans l'app
+  // (retard/bientôt/à jour), pas une notion de tâche « réalisée » que ce
+  // produit ne modélise pas (un plan d'entretien est récurrent, pas une
+  // liste de tâches cochées). Une puce par état RÉELLEMENT présent parmi
+  // les tâches, jamais une puce à 0 pour un état absent.
+  const ETATS_FILTRE = { late: trad('En retard'), soon: trad('Bientôt'), ok: trad('À jour') };
+  const comptesEtats = hasItemDetail ? items.reduce((acc, it) => {
+    const s = infoTache(it, machine.plan, machine).state;
+    if (ETATS_FILTRE[s]) acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {}) : {};
+  const etatsPresents = Object.keys(ETATS_FILTRE).filter(s => comptesEtats[s]);
+  const filtreTachesHtml = etatsPresents.length > 1 ? `
+    <div class="fm-filtres" role="group" aria-label="${esc(trad('Filtrer les tâches par état'))}">
+      <button type="button" class="fm-filtre-chip is-active" data-filtre-etat="">${trad('Tous')} (${items.length})</button>
+      ${etatsPresents.map(s => `<button type="button" class="fm-filtre-chip is-${s}" data-filtre-etat="${s}">${ETATS_FILTRE[s]} (${comptesEtats[s]})</button>`).join('')}
+    </div>` : '';
+
   const photoFiche = safeUrl(machine.image_url);
   // Tête de la carte compteur : le relevé actuel et le seuil d'alerte, les
   // deux VRAIES valeurs déjà lues plus haut (machineCounter / planNextDueCounter) —
   // simplement mises en avant, en grand, comme la maquette.
   const seuilCompteur = machine.plan ? formatCounter(planNextDueCounter(machine.plan), unit) : null;
   const releveCompteur = machine.plan ? formatCounter(machineCounter(machine), unit) : null;
+
+  // Bandeau du haut (mockup Stitch, reprise à l'octet — voir fm2BandeauSimpleHtml/
+  // fm2BandeauDoubleHtml). Déclinaison choisie par la VRAIE présence d'un
+  // second suivi (vueCompteurSecondaire), jamais par préférence esthétique.
+  const v2ForBandeau = machine.plan ? vueCompteurSecondaire(machine) : null;
+  const cadenceTexte = machine.plan ? (() => {
+    const p = isCounterMode ? tR('Tous les {n}', { n: formatCounter(planIntervalCounter(machine.plan), unit) }) : tR('Tous les {n} jours', { n: machine.plan.interval_days });
+    if (!v2ForBandeau) return p;
+    const mode2 = modeSecondaireDe(machine);
+    const s = mode2 === 'days' ? tR('{n} j', { n: planIntervalDays2(machine.plan) }) : formatCounter(planIntervalCounter2(machine.plan), mode2);
+    return `${p} / ${s}`;
+  })() : '';
+  const rappelTexte = machine.plan ? (() => {
+    const pVal = isCounterMode ? formatCounter(planReminderCounter(machine.plan), unit) : tR('{n} j', { n: machine.plan.reminder_days_before });
+    if (!v2ForBandeau) return tR('{val} avant', { val: pVal });
+    const mode2 = modeSecondaireDe(machine);
+    const sVal = mode2 === 'days' ? tR('{n} j', { n: planReminderDays2(machine.plan) }) : formatCounter(planReminderCounter2(machine.plan), mode2);
+    return tR('{pVal} ou {sVal} avant', { pVal, sVal });
+  })() : '';
+  const modeTexte = machine.plan ? (() => {
+    const principal = machine.plan.tracking_mode === 'days' ? trad('Calendaire (jours)') : (unit === 'km' ? trad('Kilométrage') : trad('Compteur horaire'));
+    const mode2 = modeSecondaireDe(machine);
+    const libelleMode2 = { km: trad('Kilométrage'), hours: trad('Compteur horaire'), days: trad('Calendaire') };
+    return mode2 ? tR('{principal} + {second}', { principal, second: libelleMode2[mode2] }) : principal;
+  })() : '';
+  const miseEnServiceTexte = (() => {
+    const [y, m] = String(machine.service_date || '').split('-').map(Number);
+    return (y && m) ? tR('Mise en service {mois} {annee}', { mois: moisLong(m - 1), annee: y }) : '';
+  })();
+  const sousTitreBandeau = [machine.brand_model, miseEnServiceTexte].filter(Boolean).join(' • ');
+  const bandeauHtml = machine.plan
+    ? (v2ForBandeau
+        ? fm2BandeauDoubleHtml(machine, info, dueInfo(machine.plan, machine), v2ForBandeau, unit, isCounterMode, releveCompteur, seuilCompteur, cadenceTexte, rappelTexte, modeTexte, photoFiche, sousTitreBandeau)
+        : fm2BandeauSimpleHtml(machine, info, unit, isCounterMode, releveCompteur, seuilCompteur, cadenceTexte, rappelTexte, modeTexte, photoFiche, sousTitreBandeau))
+    : fm2BandeauSimpleHtml(machine, info, unit, isCounterMode, releveCompteur, seuilCompteur, '', '', '', photoFiche, sousTitreBandeau);
+
   overlay.innerHTML = `
     <div class="modal">
       <nav class="plan-fil-ariane" aria-label="${esc(trad('Fil d\'Ariane'))}">
@@ -27863,97 +28533,83 @@ function openPlanView(machine, companyId, categories, options = {}) {
         <span class="plan-fil-sep">/</span>
         <span class="plan-fil-courant">${trad('Plan d\'entretien & historique')}</span>
       </nav>
-      <div class="plan-toolbar">
-        <button type="button" class="plan-toolbar-btn" id="edit-from-plan">${picto('crayon')}<span>${trad('Modifier la machine')}</span></button>
-        ${machine.manual_url ? `<button type="button" class="plan-toolbar-btn" id="plan-view-manual">${picto('carnet')}<span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
-        <button type="button" class="plan-toolbar-btn" id="plan-qr-code">${picto('qrcode')}<span>${trad('QR code')}</span></button>
-        <button type="button" class="plan-toolbar-btn is-primary" id="log-from-plan">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
+      <div class="fm-toolbar">
+        <button type="button" class="fm-btn" id="edit-from-plan"><span class="fm-btn-ico-primary">${picto('crayon')}</span><span>${trad('Modifier la machine')}</span></button>
+        ${machine.manual_url ? `<button type="button" class="fm-btn" id="plan-view-manual"><span class="fm-btn-ico-accent">${picto('carnet')}</span><span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
+        <button type="button" class="fm-btn" id="plan-qr-code">${picto('qrcode')}<span>${trad('QR code')}</span></button>
+        <button type="button" class="fm-btn fm-btn-primary" id="log-from-plan"><span class="fm-btn-ico-ok">${picto('entretien')}</span><span>${trad('Enregistrer une intervention')}</span></button>
       </div>
-      <div class="plan-hero">
-        ${photoFiche ? `<div class="plan-hero-photo"><img src="${esc(photoFiche)}" alt="${esc(machine.name)}" loading="lazy"></div>` : ''}
-        <div class="plan-hero-corps">
-          <div class="plan-hero-tete">
-            <h2>${esc(machine.name)}</h2>
-            <span class="badge ${badgeClass(info.state)}">${pictoEtat(info.state)}<span>${machine.status === 'en_service' ? badgeLabel(info.state) : esc(machine.status)}</span></span>
-          </div>
-          <p class="sub">${esc(machine.category?.name) || trad('Sans catégorie')}${machine.brand_model ? ' · ' + esc(machine.brand_model) : ''}${identifiantAffiche(machine) ? ' · ' + esc(identifiantAffiche(machine)) : ''}</p>
-          <div class="plan-hero-echeance"><span>${trad('Échéance')}</span><span class="due${info.state === 'late' ? ' is-late' : ''}">${esc(info.label)}${machine.plan?.next_due_at ? ` ${tR('(le {date})', { date: esc(machine.plan.next_due_at) })}` : ''}</span></div>
-          ${machine.plan ? `
-          <div class="plan-hero-champs">
-            <div class="plan-hero-champ"><span class="label">${trad('Cadence')}</span><span class="value">${isCounterMode ? tR('Tous les {n}', { n: formatCounter(planIntervalCounter(machine.plan), unit) }) : tR('Tous les {n} jours', { n: machine.plan.interval_days })}</span></div>
-            <div class="plan-hero-champ"><span class="label">${trad('Rappel anticipé')}</span><span class="value">${isCounterMode ? tR('{n} avant', { n: formatCounter(planReminderCounter(machine.plan), unit) }) : tR('{n} jour(s) avant', { n: machine.plan.reminder_days_before })}</span></div>
-            <div class="plan-hero-champ"><span class="label">${trad('Mode de suivi')}</span><span class="value">${(() => {
-              const principal = machine.plan.tracking_mode === 'days' ? trad('Calendaire (jours)') : (unit === 'km' ? trad('Kilométrage') : trad('Compteur horaire'));
-              const mode2 = modeSecondaireDe(machine);
-              const libelleMode2 = { km: trad('Kilométrage'), hours: trad('Compteur horaire'), days: trad('Calendaire') };
-              return mode2 ? tR('{principal} + {second}', { principal, second: libelleMode2[mode2] }) : principal;
-            })()}</span></div>
-          </div>` : ''}
-        </div>
-        ${machine.plan ? `<div class="plan-hero-compteur">
-          <div class="phc-desktop desktop-only">
-            ${isCounterMode ? `
-            <div class="phc-tete">
-              <span class="phc-mot">${trad('Relevé horamètre actuel')}</span>
-              <span class="phc-mot phc-mot-seuil">${trad('Seuil d\'alerte')}</span>
-            </div>
-            <div class="phc-valeurs">
-              <span class="phc-valeur">${releveCompteur}</span>
-              <span class="phc-valeur phc-valeur-seuil">${seuilCompteur}</span>
-            </div>
-            ` : ''}
-            ${jaugeIntervalleHtml(dueInfo(machine.plan, machine), machine, true)}
-          </div>
-          ${(() => { const v2 = vueCompteurSecondaire(machine); return v2 ? jaugeIntervalleHtml(v2.info, v2.machineVue, true) : ''; })()}
-          ${compteurHtml(machine, 'bureau', 'Mettre à jour', 'Valider')}${compteurHtml(machine, 'mobile', 'Mettre à jour', 'Valider')}
-          ${compteur2Html(machine, 'bureau')}${compteur2Html(machine, 'mobile')}
-        </div>` : ''}
-      </div>
+      ${bandeauHtml}
 
       ${SCHEMA.hasTco ? `
-      <div class="plan-field" id="tco-scorecard-section">
-        <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Scorecard TCO')}</div>
-        <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
-      </div>` : ''}
+      <section class="fm-card" id="tco-scorecard-section">
+        <div class="fm-card-head">
+          <div class="fm-card-title-row">
+            <h3 class="fm-card-title">${trad('Scorecard TCO')}</h3>
+            ${machine.purchase_price != null && machine.purchase_price !== '' ? `<span class="fm-chip fm-chip-accent">${tR('Prix d\'achat initial : {valeur}', { valeur: formatMontant(machine.purchase_price) })}</span>` : ''}
+          </div>
+        </div>
+        <div class="fm-card-sub">${trad('Chargement…')}</div>
+      </section>` : ''}
 
       ${machine.plan ? `
-        <div class="plan-field">
-          <div class="label">${hasItemDetail ? trad('Tableau de référence entretien') : trad('Tâches de maintenance')}</div>
-          ${tableHtml}
-        </div>
-        ${tachesAChoisir.length ? `
-          <div class="plan-field">
-            <div class="label">${trad('Fréquences à préciser')}</div>
-            ${tachesAChoisir.map(it => blocChoixTache(it, machine.plan, machine)).join('')}
+        <section class="fm-card">
+          <div class="fm-card-head">
+            <div class="fm-card-title-row">
+              <h3 class="fm-card-title">${hasItemDetail ? trad('Tableau de référence entretien') : trad('Tâches de maintenance')}</h3>
+            </div>
+            ${filtreTachesHtml}
           </div>
+          ${tableHtml}
+        </section>
+        ${tachesAChoisir.length ? `
+          <section class="fm-card">
+            <div class="fm-card-head">
+              <div class="fm-card-title-row">
+                <h3 class="fm-card-title">${trad('Fréquences à préciser')}</h3>
+              </div>
+            </div>
+            ${tachesAChoisir.map(it => blocChoixTache(it, machine.plan, machine)).join('')}
+          </section>
         ` : ''}
         ${machine.plan.notes ? `
-          <div class="plan-field">
-            <div class="label"><span class="label-ico is-warn">${picto('alerte')}</span>${trad('Points d\'attention')}</div>
-            <div class="attention-box">${esc(notesUtiles(machine.plan.notes, machineCounter(machine)))}</div>
-          </div>
+          <section class="fm-card">
+            <div class="fm-card-head">
+              <div class="fm-card-title-row">
+                <span class="fm-card-ico is-warn">${picto('alerte')}</span>
+                <h3 class="fm-card-title">${trad('Points d\'attention')}</h3>
+              </div>
+            </div>
+            <div class="fm-notebox">${esc(notesUtiles(machine.plan.notes, machineCounter(machine)))}</div>
+          </section>
         ` : ''}
-      ` : `<div class="plan-field"><div class="value" style="color:var(--ink-soft);">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></div>`}
+      ` : `<section class="fm-card"><div class="fm-card-sub">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></section>`}
 
       ${SCHEMA.hasTco ? `
-      <div class="plan-field" id="operating-costs-section">
-        <div class="history-head">
-          <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Coûts d\'exploitation')}</div>
+      <section class="fm-card" id="operating-costs-section">
+        <div class="fm-card-head">
+          <div class="fm-card-title-row">
+            <h3 class="fm-card-title">${trad('Coûts d\'exploitation')}</h3>
+            <span class="fm-chip">${trad('Lecture seule atelier')}</span>
+          </div>
+          <span class="fm-card-sub" id="operating-costs-total"></span>
         </div>
-        <p class="muted-text" style="margin-top:-4px;">${trad('Carburant, assurance, taxe, stockage… Pour en ajouter un, utilise « Enregistrer un entretien » sur la carte de cette machine.')}</p>
-        <div class="value" style="color:var(--ink-soft);" id="operating-costs-liste">${trad('Chargement…')}</div>
-      </div>` : ''}
+        <p class="fm-card-sub" style="margin-bottom:10px;">${trad('Carburant, assurance, taxe, stockage… Pour en ajouter un, utilise « Enregistrer un entretien » sur la carte de cette machine.')}</p>
+        <div class="fm-card-sub" id="operating-costs-liste">${trad('Chargement…')}</div>
+      </section>` : ''}
 
-      <div class="plan-field" id="history-section">
-        <div class="history-head">
-          <div class="label"><span class="label-ico">${picto('carnet')}</span>${trad('Historique des entretiens')}</div>
+      <section class="fm-card" id="history-section">
+        <div class="fm-card-head">
+          <div class="fm-card-title-row">
+            <h3 class="fm-card-title">${trad('Historique des entretiens')}</h3>
+          </div>
           <div class="history-actions">
-            <button type="button" class="icon-btn" id="export-history-csv" disabled>${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
-            <button type="button" class="icon-btn" id="share-history-email" disabled>${picto('partage')}<span>${trad('Partager par email')}</span></button>
+            <button type="button" class="fm-btn" id="export-history-csv" disabled>${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+            <button type="button" class="fm-btn" id="share-history-email" disabled>${picto('partage')}<span>${trad('Partager par email')}</span></button>
           </div>
         </div>
-        <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
-      </div>
+        <div class="fm-card-sub value">${trad('Chargement…')}</div>
+      </section>
 
       <div class="modal-actions">
         <button type="button" class="secondary" id="close-plan">${trad('Fermer')}</button>
@@ -28014,6 +28670,18 @@ function openPlanView(machine, companyId, categories, options = {}) {
       ouvrirChoixKitTache(machine, item, index, companyId, categories, planScrollTop);
     });
   });
+  // Puces de filtre des tâches (voir filtreTachesHtml) : masque/affiche les
+  // lignes déjà rendues plutôt que de reconstruire le tableau — les données
+  // sont déjà toutes là, filtrer côté DOM suffit et reste instantané.
+  overlay.querySelectorAll('.fm-filtre-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      overlay.querySelectorAll('.fm-filtre-chip').forEach(c => c.classList.toggle('is-active', c === chip));
+      const etat = chip.dataset.filtreEtat;
+      overlay.querySelectorAll('[data-etat-tache]').forEach(row => {
+        row.style.display = (!etat || row.dataset.etatTache === etat) ? '' : 'none';
+      });
+    });
+  });
   if (machine.manual_url) {
     // ⚠️ `?.` N'EST PAS UNE PRÉCAUTION DE STYLE. Ce bouton n'est rendu QUE si la
     // machine a un carnet (`${machine.manual_url ? … : ''}`) : sans le `?.`, la
@@ -28035,6 +28703,16 @@ function openPlanView(machine, companyId, categories, options = {}) {
   const renderOperatingCosts = () => {
     const liste = overlay.querySelector('#operating-costs-liste');
     if (!liste) return;
+    // Total glissant sur 12 mois, comme la maquette — recalculé sur les VRAIS
+    // coûts chargés, jamais un chiffre à part.
+    const totalEl = overlay.querySelector('#operating-costs-total');
+    if (totalEl) {
+      const ilYA365j = addDaysIso(todayIso(), -365);
+      const total12mois = operatingCosts
+        .filter(c => c.incurred_at && c.incurred_at >= ilYA365j)
+        .reduce((s, c) => s + (Number(c.amount) || 0), 0);
+      totalEl.textContent = tR('Total cumulé 12 derniers mois : {valeur}', { valeur: formatMontant(total12mois) });
+    }
     if (!operatingCosts.length) { liste.textContent = trad('Aucun coût d\'exploitation enregistré pour l\'instant.'); return; }
     liste.innerHTML = `<div class="ref-scroll"><table class="ref-table">
         <thead><tr><th>${trad('Date')}</th><th>${trad('Type')}</th><th>${trad('Montant')}</th><th>${trad('Note')}</th></tr></thead>
@@ -28054,17 +28732,32 @@ function openPlanView(machine, companyId, categories, options = {}) {
     if (!section) return;
     const tco = tcoMachine(machine, historyData, operatingCosts);
     if (!tco) { section.remove(); return; }
-    const uniteCourte = counterShort(counterUnitOf(machine));
+    const kpi = (label, valeur, unite, alerte) => `
+      <div class="fm-kpi-card">
+        <span class="fm-kpi-label">${label}</span>
+        <div class="fm-kpi-value"><span class="num">${valeur}</span>${unite ? `<span class="unit">${unite}</span>` : ''}${alerte ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</div>
+      </div>`;
+    // Même recommandation « Garder / Remplacer » que jaugeTcoHtml (même
+    // fonction réelle : ratioDecisionTco/etatTco/TCO_ETAT_LABEL), présentée
+    // en pastille dans l'en-tête plutôt qu'en barre de progression — comme
+    // la maquette (« Recommandation KEEVA : Garder la machine »).
+    const decision = ratioDecisionTco(tco);
+    const etat = decision ? etatTco(decision.ratio, decision.base) : null;
+    const libelleReco = decision ? (TCO_ETAT_LABEL[decision.base] || TCO_ETAT_LABEL.achat)[etat]() : null;
     section.innerHTML = `
-      <div class="label"><span class="label-ico">${picto('reglages')}</span>${trad('Scorecard TCO')}</div>
-      <div class="plan-hero-champs">
-        <div class="plan-hero-champ"><span class="label">${trad('TCO Total')}</span><span class="value">${formatMontant(tco.total)}</span></div>
-        <div class="plan-hero-champ"><span class="label">${trad('Coût / unité d\'usage')}</span><span class="value">${tco.coutParUnite != null ? tR('{valeur} / {unite}', { valeur: formatMontant(tco.coutParUnite), unite: uniteCourte }) : '—'}</span></div>
-        <div class="plan-hero-champ"><span class="label">${trad('Ratio entretien / achat')}</span><span class="value">${tco.ratioMaintenanceAchat != null ? tR('{n} %', { n: Math.round(tco.ratioMaintenanceAchat * 100) }) : '—'}${tco.ratioMaintenanceAchat != null && tco.ratioMaintenanceAchat >= 0.5 ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</span></div>
-        ${tco.ratioAmortissement != null ? `
-        <div class="plan-hero-champ"><span class="label">${trad('Entretien annuel / dépréciation')}</span><span class="value">${tR('{n} %', { n: Math.round(tco.ratioAmortissement * 100) })}${tco.ratioAmortissement >= 1 ? ` <span class="pill" style="background:var(--late-bg);color:var(--late-ink);">${trad('Alerte')}</span>` : ''}</span></div>` : ''}
+      <div class="fm-card-head">
+        <div class="fm-card-title-row">
+          <h3 class="fm-card-title">${trad('Scorecard TCO')}</h3>
+          ${machine.purchase_price != null && machine.purchase_price !== '' ? `<span class="fm-chip fm-chip-accent">${tR('Prix d\'achat initial : {valeur}', { valeur: formatMontant(machine.purchase_price) })}</span>` : ''}
+        </div>
+        ${libelleReco ? `<span class="badge ${badgeClass(etat)}">${pictoEtat(etat)}<span>${tR('Recommandation KEEVA : {libelle}', { libelle: libelleReco })}</span></span>` : ''}
       </div>
-      ${jaugeTcoHtml(tco)}
+      <div class="fm-kpi-row">
+        ${kpi(trad('Coût de revient effectif'), tco.coutParUnite != null ? formatMontant(tco.coutParUnite) : '—', tco.coutParUnite != null ? tR('/ {unite}', { unite: counterShort(counterUnitOf(machine)) }) : '')}
+        ${kpi(trad('Dépenses totales cumulées'), formatMontant(tco.parEntretien + tco.parExploitation))}
+        ${kpi(trad('Valeur résiduelle estimée'), formatMontant(tco.revente))}
+        ${kpi(trad('Ratio entretien / achat'), tco.ratioMaintenanceAchat != null ? tR('{n} %', { n: Math.round(tco.ratioMaintenanceAchat * 100) }) : '—', '', tco.ratioMaintenanceAchat != null && tco.ratioMaintenanceAchat >= 0.5)}
+      </div>
     `;
   };
   const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
@@ -29437,7 +30130,17 @@ function openMachineModal(companyId, categories, existing) {
             }
           }
           if (secondaryUnit) {
-            Object.assign(planUpdate, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2), machineVue2));
+            // Filet de sécurité : si AUCUNE tâche n'est encore rattachée à
+            // l'unité du second suivi (carnet uniquement en heures, second
+            // suivi calendaire ajouté à la main, par exemple), echeancePlan
+            // DepuisTachesSecondaire ne trouve rien et renvoie null — sans ce
+            // repli, le second suivi restait indéfiniment « Plan à définir »
+            // malgré une cadence bien réglée (Cadence/Mode de suivi
+            // l'affichaient déjà, mais aucune échéance concrète n'existait
+            // jamais). `duePlanSecondaire`, calculé juste au-dessus, est
+            // cette même valeur de repli déjà utilisée pour préparer les
+            // tâches (preparerTaches) — pas une improvisation.
+            Object.assign(planUpdate, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(itemsMaj, machineVue2) ?? duePlanSecondaire, machineVue2));
             const intervalleReelSec = intervalleDepuisTacheGouvernante(
               tacheGouvernanteSecondaire(itemsMaj, machineVue2), !secondaireCalendrierActif);
             if (intervalleReelSec != null) {
@@ -29499,7 +30202,12 @@ function openMachineModal(companyId, categories, existing) {
           }
         }
         if (secondaryUnit) {
-          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau), machineVue2Nouveau));
+          // Même filet de sécurité que sur la modification (voir son
+          // commentaire) : sans lui, un second suivi ajouté sur une machine
+          // dont aucune tâche n'est encore dans son unité (carnet 100%
+          // heures, second suivi calendaire ajouté à la main) n'avait
+          // JAMAIS d'échéance concrète, malgré une cadence bien réglée.
+          Object.assign(planPayload, echeancePlanPatch2(echeancePlanDepuisTachesSecondaire(planPayload.items, machineVue2Nouveau) ?? duePlanSecondaireNouveau, machineVue2Nouveau));
           const intervalleReelSec = intervalleDepuisTacheGouvernante(
             tacheGouvernanteSecondaire(planPayload.items, machineVue2Nouveau), !secondaireCalendrierNouveau);
           if (intervalleReelSec != null) {
