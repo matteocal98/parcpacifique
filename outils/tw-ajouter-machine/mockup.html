@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter une machine — KEEVA</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#006591',
+            'primary-dark': '#004f73',
+            'on-surface': '#0b1c30',
+            surface: '#f8f9ff',
+            'surface-container-lowest': '#ffffff',
+            'surface-container-low': '#eff4ff',
+            'surface-container': '#e5eeff',
+            'tertiary-container': '#ee7d1a',
+            'tertiary-container-hover': '#d96c0d',
+            'tertiary-light': '#fff7ed',
+            outline: '#6e7881',
+            'modal-bg': '#F2F4F8',
+            'navy-deep': '#0E1333',
+            'turquoise-keeva': '#24B5A8'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            heading: ['"Space Grotesk"', 'sans-serif']
+          },
+          boxShadow: {
+            'modal': '0 25px 60px -15px rgba(14, 19, 51, 0.28)',
+            'subtle': '0 1px 3px rgba(14, 19, 51, 0.05), 0 1px 2px rgba(14, 19, 51, 0.03)',
+            'card': '0 2px 10px -2px rgba(14, 19, 51, 0.04)',
+            'inner-soft': 'inset 0 2px 4px rgba(14, 19, 51, 0.04)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 22;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 22;
+    }
+    /* Masquer la scrollbar standard pour un look épuré tout en permettant le défilement */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #EAEFF6;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #C4D2E5;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #A0B5D0;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900/60 font-sans text-on-surface antialiased min-h-screen flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm">
+
+  <!-- =========================================================================
+       MODALE AJOUTER UNE MACHINE (56rem / max-w-4xl, fond #F2F4F8, rounded-2xl)
+       ========================================================================= -->
+  <div class="w-full max-w-4xl bg-modal-bg rounded-2xl shadow-modal flex flex-col max-h-[92vh] overflow-hidden border-0">
+    
+    <!-- -----------------------------------------------------------------------
+         HEADER FIXE (Sans badge statut, sans nom de machine existante)
+         ----------------------------------------------------------------------- -->
+    <header class="bg-modal-bg px-6 sm:px-8 py-5 flex items-center justify-between border-b border-slate-200/70 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-2xl">add_circle</span>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-on-surface">Ajouter une machine</h1>
+          <p class="text-xs sm:text-sm text-slate-500 font-medium">Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.</p>
+        </div>
+      </div>
+      
+      <!-- Bouton Fermeture -->
+      <button type="button" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-on-surface hover:bg-slate-200/80 transition-colors" title="Fermer la fenêtre">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </header>
+
+    <!-- -----------------------------------------------------------------------
+         CORPS DÉFILANT UNIQUE (Sections 01 à 05)
+         ----------------------------------------------------------------------- -->
+    <main class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-7 custom-scrollbar">
+
+      <!-- =====================================================================
+           SECTION 01 — IDENTIFICATION DU MATÉRIEL
+           ===================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">01</span>
+          <h2 class="text-base font-bold text-on-surface tracking-tight">Identification du matériel</h2>
+        </div>
+
+        <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+          <!-- Type d'équipement (Sélection Cartes) -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Type d'équipement & compteur principal</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="equipment-type-group">
+              <!-- Option 1: Engin (Sélectionné par défaut) -->
+              <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer ring-2 ring-primary transition-all">
+                <input type="radio" name="equipment_type" value="machine" class="sr-only" checked onchange="handleTypeChange('machine')">
+                <div class="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center mr-3 shrink-0">
+                  <span class="material-symbols-outlined">agriculture</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-bold text-on-surface">Machine / Engin de chantier</div>
+                  <div class="text-xs text-slate-500">Compteur horaire (horamètre)</div>
+                </div>
+                <div class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-xs ml-2">
+                  <span class="material-symbols-outlined text-sm font-bold">check</span>
+                </div>
+              </label>
+
+              <!-- Option 2: Véhicule -->
+              <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer opacity-80 hover:opacity-100 hover:bg-white transition-all">
+                <input type="radio" name="equipment_type" value="vehicle" class="sr-only" onchange="handleTypeChange('vehicle')">
+                <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mr-3 shrink-0">
+                  <span class="material-symbols-outlined">local_shipping</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-semibold text-on-surface">Véhicule roulant / Fourgon</div>
+                  <div class="text-xs text-slate-500">Odomètre kilométrique (km)</div>
+                </div>
+                <div class="w-5 h-5 rounded-full border border-slate-300 ml-2"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Nom et Catégorie -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="machine_name">Nom usuel ou désignation <span class="text-primary">*</span></label>
+              <input type="text" id="machine_name" placeholder="Ex. Mini-pelle Kubota U17, Kangoo Atelier..." class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="machine_category">Catégorie <span class="text-primary">*</span></label>
+              <select id="machine_category" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium">
+                <option value="" disabled selected>Sélectionner une catégorie...</option>
+                <option value="terrassement">Engin de terrassement / Mini-pelle</option>
+                <option value="levage">Levage & Manutention (Chariot, Nacelle)</option>
+                <option value="utilitaire">Véhicule utilitaire & Fourgon</option>
+                <option value="poids_lourd">Poids lourd & Benne</option>
+                <option value="compactage">Compactage & Route</option>
+                <option value="espaces_verts">Espaces verts & Motoculture</option>
+                <option value="energie">Groupe électrogène & Compresseur</option>
+                <option value="autre">Autre matériel</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Marque, Modèle, Année et Mise en service -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="brand">Marque</label>
+              <input type="text" id="brand" placeholder="Ex. Kubota" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="model">Modèle</label>
+              <input type="text" id="model" placeholder="Ex. U17-3 Alpha" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="year">Année du modèle</label>
+              <input type="number" id="year" placeholder="Ex. 2021" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="commissioning_date">Mise en service</label>
+              <input type="date" id="commissioning_date" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium">
+            </div>
+          </div>
+
+          <!-- Numéro de série / Immatriculation -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="serial_number" id="label-serial">N° de série (constructeur)</label>
+              <input type="text" id="serial_number" placeholder="Ex. KUB-89421-FR" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="internal_code">Code ou matricule interne</label>
+              <input type="text" id="internal_code" placeholder="Ex. PELLE-02" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium">
+            </div>
+          </div>
+
+          <!-- Bloc repliable / optionnel : Acquisition & TCO -->
+          <div class="pt-2 border-t border-slate-200/60">
+            <details class="group">
+              <summary class="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-600 hover:text-primary list-none select-none">
+                <span class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base">payments</span>
+                  Acquisition & TCO (facultatif — utile pour le calcul de rentabilité)
+                </span>
+                <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
+              </summary>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 mt-1">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="purchase_price">Prix d'achat (€ HT)</label>
+                  <input type="number" id="purchase_price" placeholder="Ex. 24500" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="purchase_date">Date d'achat</label>
+                  <input type="date" id="purchase_date" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="ownership_status">Statut</label>
+                  <select id="ownership_status" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium">
+                    <option value="" selected>Sélectionner...</option>
+                    <option value="achat">Achat comptant / Crédit</option>
+                    <option value="leasing">Crédit-bail / Leasing</option>
+                    <option value="lld">Location Longue Durée (LLD)</option>
+                  </select>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 02 — CARNET D'ENTRETIEN DU CONSTRUCTEUR (Nouveau contenu clé)
+           ===================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">02</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">Carnet d'entretien du constructeur</h2>
+          </div>
+          <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-0.5 rounded-full">Recommandé</span>
+        </div>
+
+        <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-4">
+          <!-- Zone de glisser-déposer PDF + Prise de photo -->
+          <div class="bg-surface-container-lowest rounded-xl p-6 sm:p-7 border-2 border-dashed border-slate-300 hover:border-primary/60 transition-colors flex flex-col items-center justify-center text-center group cursor-pointer shadow-subtle">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-3xl">upload_file</span>
+            </div>
+            <div class="text-sm sm:text-base font-bold text-on-surface mb-1">
+              Glissez votre manuel ou carnet PDF ici
+            </div>
+            <div class="text-xs text-slate-500 mb-4 max-w-md">
+              PDF du carnet d'entretien, notice constructeur ou tableau de préconisations (jusqu'à 50 Mo).
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-center gap-2.5">
+              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer text-xs font-bold shadow-subtle">
+                <span class="material-symbols-outlined text-base">folder_open</span>
+                <span>Parcourir mes fichiers</span>
+                <input type="file" accept=".pdf,image/*" class="sr-only">
+              </label>
+
+              <button type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container text-slate-700 hover:bg-slate-200 transition-colors text-xs font-bold shadow-subtle">
+                <span class="material-symbols-outlined text-base">photo_camera</span>
+                <span>Photographier le carnet</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Ligne d'aide explicative KEEVA -->
+          <div class="flex items-start gap-2.5 text-xs text-slate-600 bg-white/70 p-3 rounded-xl shadow-subtle">
+            <span class="material-symbols-outlined text-primary text-lg shrink-0 mt-0.5">auto_awesome</span>
+            <p>Notre algorithme extrait les échéances (heures, mois) et crée le plan d'entretien. Tu valides avant activation.</p>
+          </div>
+
+          <!-- Carte "Vous ne trouvez pas votre carnet ? Plan à 29€" (fond tertiary-light, accent #ee7d1a) -->
+          <div class="bg-tertiary-light rounded-xl p-4 sm:p-5 shadow-card border-l-4 border-tertiary-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-tertiary-container/15 text-tertiary-container flex items-center justify-center shrink-0 mt-0.5">
+                <span class="material-symbols-outlined text-xl">contact_support</span>
+              </div>
+              <div class="space-y-1">
+                <div class="text-sm font-bold text-on-surface">Vous ne trouvez pas votre carnet constructeur ?</div>
+                <p class="text-xs text-slate-600 leading-relaxed max-w-xl">
+                  Pour 29 € (paiement unique), nous configurons votre plan d'entretien modifiable directement dans l'application (aucun manuel constructeur fourni). Si les données de la machine sont insuffisantes, nous vous avertissons avant tout paiement, sans rien inventer.
+                </p>
+              </div>
+            </div>
+
+            <button type="button" class="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs font-bold transition-all shadow-subtle">
+              <span>Demander l'établissement de mon plan — 29 €</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 03 — MODE DE SUIVI & ÉCHÉANCES D'ENTRETIEN
+           ===================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">03</span>
+          <h2 class="text-base font-bold text-on-surface tracking-tight">Mode de suivi & échéances d'entretien</h2>
+        </div>
+
+        <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+          <!-- Cartes sélectionnables de suivi -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Mode de suivi principal</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- Calendaire -->
+              <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer hover:bg-white transition-all group">
+                <input type="radio" name="tracking_mode" value="calendar" class="sr-only" onchange="handleTrackingChange('calendar')">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-primary/10 text-slate-600 group-hover:text-primary flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-lg">calendar_month</span>
+                  </div>
+                  <div class="mode-check w-4 h-4 rounded-full border border-slate-300"></div>
+                </div>
+                <div class="text-sm font-bold text-on-surface">Calendaire</div>
+                <div class="text-[11px] text-slate-500">Mois, trimestres, années</div>
+              </label>
+
+              <!-- Compteur horaire (Sélectionné) -->
+              <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer ring-2 ring-primary transition-all group">
+                <input type="radio" name="tracking_mode" value="hours" class="sr-only" checked onchange="handleTrackingChange('hours')">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">hourglass_top</span>
+                  </div>
+                  <div class="mode-check w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[10px]">
+                    <span class="material-symbols-outlined text-xs font-bold">check</span>
+                  </div>
+                </div>
+                <div class="text-sm font-bold text-on-surface">Compteur horaire</div>
+                <div class="text-[11px] text-slate-500">Horamètre en heures (h)</div>
+              </label>
+
+              <!-- Kilométrage -->
+              <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer hover:bg-white transition-all group">
+                <input type="radio" name="tracking_mode" value="km" class="sr-only" onchange="handleTrackingChange('km')">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-primary/10 text-slate-600 group-hover:text-primary flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-lg">speed</span>
+                  </div>
+                  <div class="mode-check w-4 h-4 rounded-full border border-slate-300"></div>
+                </div>
+                <div class="text-sm font-bold text-on-surface">Kilométrage</div>
+                <div class="text-[11px] text-slate-500">Odomètre en kilomètres (km)</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Champs Relevé actuel, Échéance, Rappel anticipé -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="tracking-fields-container">
+            <!-- Relevé actuel (normé avec unité dynamique) -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="current_reading" id="label-reading">Relevé actuel au compteur</label>
+              <div class="relative">
+                <input type="number" id="current_reading" placeholder="0" class="w-full h-11 px-3.5 pr-12 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow">
+                <span class="absolute right-3.5 top-3 text-xs font-bold text-slate-400" id="unit-reading">heures</span>
+              </div>
+            </div>
+
+            <!-- Échéance d'entretien standard -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="maintenance_interval" id="label-interval">Prochaine révision / Cadence</label>
+              <div class="relative">
+                <input type="number" id="maintenance_interval" placeholder="Ex. 250" class="w-full h-11 px-3.5 pr-12 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow">
+                <span class="absolute right-3.5 top-3 text-xs font-bold text-slate-400" id="unit-interval">heures</span>
+              </div>
+            </div>
+
+            <!-- Seuil de rappel anticipé -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="reminder_lead" id="label-reminder">Alerte & rappel anticipé</label>
+              <div class="relative">
+                <input type="number" id="reminder_lead" placeholder="Ex. 20" class="w-full h-11 px-3.5 pr-14 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow">
+                <span class="absolute right-3.5 top-3 text-xs font-bold text-slate-400" id="unit-reminder">h avant</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloc optionnel : Ajouter un second suivi (ex. Heures + Calendaire) -->
+          <div class="pt-3 border-t border-slate-200/60">
+            <div class="flex items-center justify-between">
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="toggle-second-tracking" class="w-4 h-4 rounded text-primary focus:ring-primary focus:ring-offset-0 border-slate-300" onchange="document.getElementById('second-tracking-panel').classList.toggle('hidden', !this.checked)">
+                <span class="text-xs font-bold text-slate-700">Ajouter un second mode de suivi (ex. révision à 100 h OU tous les 12 mois)</span>
+              </label>
+              <span class="text-[11px] font-semibold text-slate-400 hidden sm:inline">Double suivi prédictif</span>
+            </div>
+
+            <!-- Panneau repliable du second suivi -->
+            <div id="second-tracking-panel" class="hidden mt-3 p-4 bg-surface-container-lowest rounded-xl shadow-subtle space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Mode secondaire</label>
+                  <select class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0">
+                    <option value="calendar">Calendaire (Mois / Jours)</option>
+                    <option value="hours">Compteur horaire (h)</option>
+                    <option value="km">Kilométrage (km)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Dernière date / relevé</label>
+                  <input type="date" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-medium border-0">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Cadence secondaire</label>
+                  <input type="text" placeholder="Ex. 12 mois" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-medium border-0">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Rappel anticipé</label>
+                  <input type="text" placeholder="Ex. 15 jours avant" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-medium border-0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 04 — TÂCHES DE MAINTENANCE (Textarea libre comme "Modifier")
+           ===================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">04</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">Tâches de maintenance</h2>
+          </div>
+          <span class="text-xs text-slate-500">Pré-rempli si carnet analysé</span>
+        </div>
+
+        <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-2">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="maintenance_tasks">
+            Opérations récurrentes ou notes d'atelier
+          </label>
+          <textarea id="maintenance_tasks" rows="3" placeholder="Ex. Vidange moteur + filtre à huile, contrôle tension des chenilles, graissage de tous les axes, vérification des niveaux hydrauliques..." class="w-full p-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium"></textarea>
+          <p class="text-[11px] text-slate-500">
+            Ces tâches s'afficheront sur la fiche d'intervention lors de la confirmation d'entretien par le chauffeur ou le chef d'atelier.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 05 — VISUEL & PHOTO DU MATÉRIEL (Cadre blanc)
+           ===================================================================== -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">05</span>
+          <h2 class="text-base font-bold text-on-surface tracking-tight">Visuel & photo du matériel</h2>
+        </div>
+
+        <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm">
+          <div class="flex flex-col sm:flex-row items-center gap-5">
+            <!-- Cadre photo (Fond BLANC normé, pas teinté) -->
+            <div class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl bg-surface-container-lowest shadow-card flex flex-col items-center justify-center text-slate-400 shrink-0 border border-slate-100 overflow-hidden relative group">
+              <span class="material-symbols-outlined text-4xl mb-1 text-slate-300">image</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center px-2">Aucune photo</span>
+            </div>
+
+            <!-- Actions d'ajout photo -->
+            <div class="space-y-2.5 text-center sm:text-left flex-1">
+              <div class="text-xs font-bold text-slate-700">Personnaliser la photo de l'équipement</div>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Une photo claire facilite l'identification immédiate sur le terrain et sur le tableau de bord de la flotte.
+              </p>
+
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                <button type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors">
+                  <span class="material-symbols-outlined text-base text-primary">photo_library</span>
+                  <span>Choisir une photo</span>
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors">
+                  <span class="material-symbols-outlined text-base text-primary">photo_camera</span>
+                  <span>Prendre une photo</span>
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors">
+                  <span class="material-symbols-outlined text-base text-primary">search</span>
+                  <span>Chercher sur le web</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- -----------------------------------------------------------------------
+         PIED DE PAGE FIXE (Annuler à gauche, CTA #ee7d1a "Ajouter la machine")
+         ----------------------------------------------------------------------- -->
+    <footer class="bg-modal-bg px-6 sm:px-8 py-4 flex items-center justify-between border-t border-slate-200/70 shrink-0">
+      <button type="button" class="px-5 py-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-bold transition-colors">
+        Annuler
+      </button>
+
+      <button type="button" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.99]">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        <span>Ajouter la machine</span>
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- SCRIPT LOGIQUE INTERACTION SIMPLE -->
+  <script>
+    function handleTypeChange(type) {
+      const serialLabel = document.getElementById('label-serial');
+      const readingLabel = document.getElementById('label-reading');
+      const unitReading = document.getElementById('unit-reading');
+      const unitInterval = document.getElementById('unit-interval');
+      const unitReminder = document.getElementById('unit-reminder');
+
+      if (type === 'vehicle') {
+        serialLabel.innerText = "Immatriculation ou N° de série";
+        readingLabel.innerText = "Relevé kilométrique actuel";
+        unitReading.innerText = "km";
+        unitInterval.innerText = "km";
+        unitReminder.innerText = "km avant";
+      } else {
+        serialLabel.innerText = "N° de série (constructeur)";
+        readingLabel.innerText = "Relevé actuel au compteur";
+        unitReading.innerText = "heures";
+        unitInterval.innerText = "heures";
+        unitReminder.innerText = "h avant";
+      }
+    }
+
+    function handleTrackingChange(mode) {
+      const readingLabel = document.getElementById('label-reading');
+      const unitReading = document.getElementById('unit-reading');
+      const unitInterval = document.getElementById('unit-interval');
+      const unitReminder = document.getElementById('unit-reminder');
+
+      if (mode === 'calendar') {
+        readingLabel.innerText = "Date du dernier entretien";
+        unitReading.innerText = "date";
+        unitInterval.innerText = "mois";
+        unitReminder.innerText = "j avant";
+      } else if (mode === 'km') {
+        readingLabel.innerText = "Relevé kilométrique actuel";
+        unitReading.innerText = "km";
+        unitInterval.innerText = "km";
+        unitReminder.innerText = "km avant";
+      } else {
+        readingLabel.innerText = "Relevé actuel au compteur";
+        unitReading.innerText = "heures";
+        unitInterval.innerText = "heures";
+        unitReminder.innerText = "h avant";
+      }
+    }
+  </script>
+</body>
+</html>

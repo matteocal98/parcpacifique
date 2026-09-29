@@ -1,0 +1,577 @@
+  function stepFormUnique() {
+    overlay.className = 'overlay machine-modal-add';
+    const mode = state.trackingMode;
+    const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
+    const isCounter = mode !== 'days';
+    const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
+    // Pas shell() ici : elle enveloppe déjà dans <div class="modal"> (480px,
+    // la modale générique de l'app) — cette page porte son PROPRE conteneur
+    // Tailwind compilé (w-full max-w-4xl…), un second wrapper l'aurait
+    // piégée dans les 480px de l'autre.
+    overlay.innerHTML = `
+      <div class="w-full max-w-4xl bg-modal-bg rounded-2xl shadow-modal flex flex-col max-h-[92vh] overflow-hidden border-0">
+        <header class="bg-modal-bg px-6 sm:px-8 py-5 flex items-center justify-between border-b border-slate-200/70 shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">add_circle</span>
+            </div>
+            <div>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-on-surface">${trad('Ajouter une machine')}</h1>
+              <p class="text-xs sm:text-sm text-slate-500 font-medium">${trad('Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.')}</p>
+            </div>
+          </div>
+          <button type="button" id="wiz-close" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-on-surface hover:bg-slate-200/80 transition-colors" aria-label="${esc(trad('Fermer'))}">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </header>
+
+        <form id="step-form" class="flex-1 flex flex-col min-h-0">
+        <main class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-7">
+
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">01</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Identification du matériel')}</h2>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+            ${SCHEMA.hasKind ? `
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">${trad('Type d\'unité de surveillance principale')}</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="f-kind-cards">
+                <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="kind" value="${TYPE_MACHINE}" class="sr-only" ${state.kind === TYPE_MACHINE ? 'checked' : ''}>
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center mr-3 shrink-0" data-ring-ico>
+                    <span class="material-symbols-outlined">agriculture</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-sm font-bold text-on-surface">${trad('Machine / Engin de chantier')}</div>
+                    <div class="text-xs text-slate-500">${trad('Compteur horaire (horamètre)')}</div>
+                  </div>
+                  <div class="w-5 h-5 rounded-full ml-2 flex items-center justify-center" data-ring-check></div>
+                </label>
+                <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="kind" value="${TYPE_VEHICULE}" class="sr-only" ${state.kind === TYPE_VEHICULE ? 'checked' : ''}>
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center mr-3 shrink-0" data-ring-ico>
+                    <span class="material-symbols-outlined">local_shipping</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-sm font-bold text-on-surface">${trad('Véhicule roulant / Fourgon')}</div>
+                    <div class="text-xs text-slate-500">${trad('Odomètre kilométrique (km)')}</div>
+                  </div>
+                  <div class="w-5 h-5 rounded-full ml-2 flex items-center justify-center" data-ring-check></div>
+                </label>
+              </div>
+            </div>` : ''}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-name">${trad('Nom de la machine')} <span class="text-primary">*</span></label>
+                <input type="text" id="f-name" class="majuscules w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" autocapitalize="characters" required placeholder="${trad('Ex. OREC 4X4 - ATELIER')}" value="${esc(state.name)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-category">${trad('Catégorie')} <span class="text-primary">*</span></label>
+                <select id="f-category" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" required>${optionsCategorieListe(state.category, categories)}</select>
+              </div>
+            </div>
+            <input id="f-category-autre" class="majuscules w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" autocapitalize="characters" placeholder="${trad('Ex. DÉBROUSSAILLEUSE À DOS')}" hidden>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-brand">${trad('Marque')}</label>
+                <input type="text" id="f-brand" class="majuscules w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. KUBOTA')}" autocapitalize="characters" value="${esc(state.brand)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-model">${trad('Modèle')}</label>
+                <input type="text" id="f-model" class="majuscules w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. U17-3')}" autocapitalize="characters" value="${esc(state.model)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-year">${trad('Année du modèle')}</label>
+                <input type="number" id="f-year" inputmode="numeric" min="1950" max="2100" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. 2019')}" value="${esc(state.annee)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-service-date">${trad('Date de mise en service')}</label>
+                <input id="f-service-date" type="date" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.serviceDate)}" required>
+              </div>
+            </div>
+            <div class="text-xs text-slate-500 -mt-2">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
+              <input id="f-serial" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
+            </div>
+
+            ${SCHEMA.hasTco ? `
+            <div class="pt-2 border-t border-slate-200/60">
+              <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-600 hover:text-primary list-none select-none">
+                  <span class="flex items-center gap-2"><span class="material-symbols-outlined text-base">payments</span>${trad('Acquisition & TCO (facultatif)')}</span>
+                  <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
+                </summary>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 mt-1">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-prix-achat">${trad('Prix d\'achat')}</label>
+                    <input id="f-prix-achat" type="text" inputmode="decimal" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-date-achat">${trad('Date d\'achat')}</label>
+                    <input id="f-date-achat" type="date" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.purchaseDate || state.serviceDate)}">
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-500 pt-2">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laisse vide si tu ne le sais pas, tu pourras le renseigner plus tard.')}</div>
+              </details>
+            </div>` : ''}
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">02</span>
+              <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Carnet d\'entretien du constructeur')}</h2>
+            </div>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-0.5 rounded-full">${trad('Recommandé')}</span>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-4">
+            <div class="mform-carnet-ligne">
+              <div class="mform-carnet-zone">
+                ${dropzoneHtml('f-manual-drop')}
+                <input id="f-manual" type="file" accept="application/pdf,image/*" multiple hidden>
+                <div class="hint" id="f-manual-statut"></div>
+              </div>
+              <button type="button" id="btn-camera" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container text-slate-700 hover:bg-slate-200 transition-colors text-xs font-bold shadow-subtle shrink-0">
+                <span class="material-symbols-outlined text-base">photo_camera</span><span>${trad('Photographier le carnet')}</span>
+              </button>
+            </div>
+            <input id="f-camera" type="file" accept="image/*" capture="environment" hidden>
+            <div class="pages-carnet" id="pages-carnet"></div>
+            <div class="pages-utiles" id="pages-utiles"></div>
+            <div class="hint" id="f-analysis"></div>
+
+            <div class="bg-tertiary-light rounded-xl p-4 sm:p-5 shadow-card border-l-4 border-tertiary-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-tertiary-container/15 text-tertiary-container flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-xl">contact_support</span>
+                </div>
+                <div class="space-y-1">
+                  <div class="text-sm font-bold text-on-surface">${trad('Vous ne trouvez pas votre carnet ?')}</div>
+                  <p class="text-xs text-slate-600 leading-relaxed max-w-xl">${trad('Pour 29 € (paiement unique), nous configurons votre plan d\'entretien modifiable directement dans l\'application (aucun manuel constructeur fourni). Si les données de la machine sont insuffisantes, nous vous avertissons avant tout paiement, sans rien inventer.')}</p>
+                </div>
+              </div>
+              <button type="button" id="btn-plan-payant" class="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs font-bold transition-all shadow-subtle">
+                <span>${trad('Demander l\'établissement de mon plan — 29 €')}</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+            <div class="text-xs text-slate-500"><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher le manuel du fabricant sur le web →')}</a></div>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">03</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Mode de suivi & échéances d\'entretien')}</h2>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">${trad('Mode de suivi de la maintenance')}</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="days" class="sr-only" ${mode === 'days' ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">calendar_month</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Calendaire')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Jours / semaines')}</div>
+                </label>
+                <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="hours" class="sr-only" ${mode === 'hours' ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">hourglass_top</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Compteur horaire')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Horamètre en heures (h)')}</div>
+                </label>
+                ${SCHEMA.hasCounter ? `<label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="km" class="sr-only" ${mode === trad('km') ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">speed</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Kilométrage')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Odomètre en kilomètres (km)')}</div>
+                </label>` : ''}
+              </div>
+            </div>
+
+            <div id="hours-field" style="display:${mode === 'days' ? 'none' : 'block'};">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-current-hours" id="f-current-hours-label">${unit.field}</label>
+              <input id="f-current-hours" type="number" min="0" step="${unit.step}" class="w-full sm:w-1/3 h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${state.currentHours ?? ''}" placeholder="${unit.placeholder}">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-interval" id="f-interval-label">${tR('Échéance {mode}', { mode: isCounter ? tR('tous les ({unite})', { unite: unit.word }) : trad('toutes les (jours)') })}</label>
+                <input id="f-interval" type="number" min="1" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${isCounter ? state.intervalHours : state.intervalDays}" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-reminder" id="f-reminder-label">${tR('Rappel avant ({unite})', { unite: isCounter ? unit.word : trad('jours') })}</label>
+                <input id="f-reminder" type="number" min="0" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${isCounter ? state.reminderHoursBefore : state.reminderDays}" required>
+              </div>
+            </div>
+
+            ${SCHEMA.hasCounter2 ? `
+            <div class="pt-3 border-t border-slate-200/60">
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="f-secondaire-active" class="w-4 h-4 rounded text-primary focus:ring-primary focus:ring-offset-0 border-slate-300" ${state.secondaryUnit ? 'checked' : ''}>
+                <span class="text-xs font-bold text-slate-700">${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</span>
+              </label>
+              <div id="secondaire-champs" class="mt-3 p-4 bg-surface-container-lowest rounded-xl shadow-subtle space-y-3" style="display:${state.secondaryUnit ? 'flex' : 'none'};flex-direction:column;">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-hours" style="display:${mode === 'hours' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="hours" ${state.secondaryUnit === 'hours' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">hourglass_top</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Compteur horaire')}</span>
+                  </label>
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-km" style="display:${mode === 'km' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="km" ${state.secondaryUnit === 'km' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">speed</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Kilométrage')}</span>
+                  </label>
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-days" style="display:${mode === 'days' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="days" ${state.secondaryUnit === 'days' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">calendar_month</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Calendaire')}</span>
+                  </label>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="secondaire-valeur-row" style="display:${state.secondaryUnit === 'days' ? 'none' : 'flex'};">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
+                    <input id="f-secondaire-valeur" type="number" min="0" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryValue ?? ''}">
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-interval" id="f-secondaire-interval-label">${tR('Échéance tous les ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                    <input id="f-secondaire-interval" type="number" min="1" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryUnit === 'days' ? state.secondaryIntervalDays : state.secondaryIntervalCounter}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-reminder" id="f-secondaire-reminder-label">${tR('Rappel avant ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                    <input id="f-secondaire-reminder" type="number" min="0" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryUnit === 'days' ? state.secondaryReminderDays : state.secondaryReminderCounter}">
+                  </div>
+                </div>
+              </div>
+            </div>` : ''}
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">04</span>
+              <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Tâches de maintenance')}</h2>
+            </div>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-2">
+            <textarea id="f-tasks" rows="3" class="w-full p-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${esc(state.tasks)}</textarea>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">05</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Visuel & photo du matériel')}</h2>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-center gap-5">
+              <div class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl bg-surface-container-lowest shadow-card flex flex-col items-center justify-center text-slate-400 shrink-0 border border-slate-100 overflow-hidden relative" id="photo-preview">
+                <span class="material-symbols-outlined text-4xl mb-1 text-slate-300">image</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center px-2">${trad('Aucune photo')}</span>
+              </div>
+              <div class="space-y-2.5 text-center sm:text-left flex-1">
+                <div class="text-xs font-bold text-slate-700">${trad('Personnaliser la photo de l\'équipement')}</div>
+                <p class="text-xs text-slate-500 leading-relaxed">${trad('Une photo claire facilite l\'identification immédiate sur le terrain et sur le tableau de bord de la flotte.')}</p>
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  <button type="button" id="pick-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_library</span><span>${trad('Choisir une photo')}</span></button>
+                  <button type="button" id="shoot-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_camera</span><span>${trad('Prendre une photo')}</span></button>
+                  <button type="button" id="fetch-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">search</span><span>${trad('Chercher sur le web')}</span></button>
+                </div>
+                <input id="f-machine-photo" type="file" accept="image/*" hidden>
+                <input id="f-machine-photo-camera" type="file" accept="image/*" capture="environment" hidden>
+                <div class="hint" id="photo-status"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="hint" id="f-error"></div>
+        </main>
+
+        <footer class="bg-modal-bg px-6 sm:px-8 py-4 flex items-center justify-between border-t border-slate-200/70 shrink-0">
+          <button type="button" id="cancel" class="px-5 py-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-bold transition-colors">${trad('Annuler')}</button>
+          <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.99]">
+            <span class="material-symbols-outlined text-base">add_circle</span><span>${trad('Ajouter la machine')}</span>
+          </button>
+        </footer>
+        </form>
+      </div>
+    `;
+    overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
+    habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
+    habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
+    forcerMajuscules(overlay.querySelector('#f-brand'));
+    forcerMajuscules(overlay.querySelector('#f-model'));
+
+    // ── 01 — Identification ────────────────────────────────────────────
+    const radiosKind = overlay.querySelectorAll('input[name=kind]');
+    if (radiosKind.length) {
+      marquerChoixRing('kind');
+      const ancienType = overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE;
+      radiosKind.forEach((radio) => radio.addEventListener('change', () => {
+        marquerChoixRing('kind');
+        const kind = overlay.querySelector('input[name=kind]:checked').value;
+        const label = overlay.querySelector('#f-identifiant-label');
+        if (label) label.textContent = IDENTIFIANT_LIBELLE[kind];
+        const champ = overlay.querySelector('#f-serial');
+        if (champ) champ.placeholder = IDENTIFIANT_PLACEHOLDER[kind];
+        if (Number(state.intervalHours) === INTERVALLE_DEFAUT[ancienType]) {
+          state.intervalHours = INTERVALLE_DEFAUT[kind];
+        }
+      }));
+    }
+    preparerChampsMajuscules(overlay);
+    normaliserMajusculesAEnregistrement(overlay);
+    brancherCategorie(overlay, categories, state.category);
+    if (SCHEMA.hasTco) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
+
+    // ── 02 — Carnet d'entretien ─────────────────────────────────────────
+    const apresCarnet = (resultat) => {
+      state.items = resultat.items;
+      state.notes = resultat.notes;
+      state.tasks = resultat.taches;
+      overlay.querySelector('#f-tasks').value = resultat.taches || '';
+      // L'analyse vient de finir : l'utilisateur voit et valide ce qui a été
+      // détecté AVANT que ça devienne le plan réel (écran à part, .pplan-*,
+      // volontairement — voir prompt-stitch-ajouter-machine.md).
+      stepPlanChoice(resultat);
+    };
+    const contexteCarnet = () => ({
+      trackingMode: state.trackingMode, currentHours: state.currentHours, serviceDate: state.serviceDate,
+    });
+    const traiterFichiersCarnet = (choix) => {
+      const images = choix.filter(f => /^image\//.test(f.type));
+      const file = choix.find(f => f.type === 'application/pdf') || null;
+      if (images.length) {
+        state.pendingFile = null;
+        brancherCarnetPhotos(overlay, images, contexteCarnet, apresCarnet);
+        return;
+      }
+      state.pendingFile = file || null;
+      if (file) {
+        brancherCarnetPdf(overlay, file, contexteCarnet(), apresCarnet,
+          () => analyzeManualAndFill(overlay, file, state.trackingMode, { currentHours: state.currentHours, serviceDate: state.serviceDate }));
+        renderPdfFirstPageAsBlob(file)
+          .then(blob => {
+            state.pendingPhotoBlob = blob;
+            state._carnetPhotoBlob = blob;
+            const zone = overlay.querySelector('#photo-preview');
+            if (zone && !zone.querySelector('img')) zone.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(blob)}" alt="">`;
+          })
+          .catch(err => console.error('Extraction photo (1ère page du PDF) échouée :', err));
+      }
+    };
+    const champManualReel = overlay.querySelector('#f-manual');
+    const statutDepotCarnet = overlay.querySelector('#f-manual-statut');
+    const annoncerFichiersCarnet = (fichiers) => {
+      if (!statutDepotCarnet || !fichiers.length) return;
+      statutDepotCarnet.textContent = fichiers.length > 1
+        ? tR('{n} fichier(s) sélectionné(s).', { n: fichiers.length })
+        : tR('Fichier sélectionné : {nom}', { nom: fichiers[0].name });
+    };
+    champManualReel.addEventListener('change', (e) => {
+      const fichiers = Array.from(e.target.files || []);
+      annoncerFichiersCarnet(fichiers);
+      traiterFichiersCarnet(fichiers);
+    });
+    const zoneDepotCarnet = overlay.querySelector('#f-manual-drop');
+    if (zoneDepotCarnet) {
+      zoneDepotCarnet.addEventListener('click', () => champManualReel.click());
+      ['dragenter', 'dragover'].forEach((ev) => zoneDepotCarnet.addEventListener(ev, (e) => { e.preventDefault(); zoneDepotCarnet.classList.add('is-over'); }));
+      ['dragleave', 'drop'].forEach((ev) => zoneDepotCarnet.addEventListener(ev, (e) => { e.preventDefault(); zoneDepotCarnet.classList.remove('is-over'); }));
+      zoneDepotCarnet.addEventListener('drop', (e) => {
+        const fichiers = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+        if (!fichiers.length) return;
+        annoncerFichiersCarnet(fichiers);
+        traiterFichiersCarnet(fichiers);
+      });
+    }
+    overlay.querySelector('#btn-camera').addEventListener('click', () => overlay.querySelector('#f-camera').click());
+    overlay.querySelector('#f-camera').addEventListener('change', (e) => {
+      const images = Array.from(e.target.files || []).filter(f => /^image\//.test(f.type));
+      e.target.value = '';
+      if (images.length) brancherCarnetPhotos(overlay, images, contexteCarnet, apresCarnet);
+    });
+    brancherOffrePlan(overlay, () => ({
+      name: state.name, brand: state.brand, model: state.model, annee: state.annee,
+      category: state.category, serial_number: state.serial,
+    }));
+
+    // ── 03 — Mode de suivi & échéances ──────────────────────────────────
+    marquerChoixRing('tm');
+    overlay.querySelectorAll('input[name=tm]').forEach(r => {
+      r.addEventListener('change', () => {
+        marquerChoixRing('tm');
+        const choix = overlay.querySelector('input[name=tm]:checked').value;
+        const u = COUNTER_UNITS[counterUnitFromMode(choix)];
+        overlay.querySelector('#hours-field').style.display = choix === 'days' ? 'none' : 'block';
+        const labelEl = overlay.querySelector('#f-current-hours-label');
+        if (labelEl) labelEl.textContent = u.field;
+        const intervalLabel = overlay.querySelector('#f-interval-label');
+        const reminderLabel = overlay.querySelector('#f-reminder-label');
+        const mot = choix === 'days' ? trad('jours') : u.word;
+        if (intervalLabel) {
+          intervalLabel.textContent = tR('Échéance {mode}', {
+            mode: choix === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: mot }),
+          });
+        }
+        if (reminderLabel) reminderLabel.textContent = tR('Rappel avant ({unite})', { unite: mot });
+        const champIntervalle = overlay.querySelector('#f-interval');
+        if (champIntervalle && !overlay._intervalTouche) {
+          champIntervalle.value = intervallePropose(choix, intervallesIA(overlay));
+        }
+        const carteSecH = overlay.querySelector('#carte-secondaire-hours');
+        const carteSecK = overlay.querySelector('#carte-secondaire-km');
+        const carteSecJ = overlay.querySelector('#carte-secondaire-days');
+        if (carteSecH) carteSecH.style.display = choix === 'hours' ? 'none' : 'flex';
+        if (carteSecK) carteSecK.style.display = choix === 'km' ? 'none' : 'flex';
+        if (carteSecJ) carteSecJ.style.display = choix === 'days' ? 'none' : 'flex';
+        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
+        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+          radioDevenuInvalide.checked = false;
+          marquerCarteSelectionnee('tm2');
+          if (typeof majLabelsSecondaire === 'function') majLabelsSecondaire();
+        }
+      });
+    });
+    function majLabelsSecondaire() {
+      const uniteChoisie = overlay.querySelector('input[name=tm2]:checked')?.value || null;
+      const ligneValeur = overlay.querySelector('#secondaire-valeur-row');
+      if (ligneValeur) ligneValeur.style.display = uniteChoisie === 'days' ? 'none' : 'flex';
+      const mot = uniteChoisie === 'days' ? trad('jours') : (COUNTER_UNITS[uniteChoisie || 'hours'] || COUNTER_UNITS.hours).word;
+      const labelInterval = overlay.querySelector('#f-secondaire-interval-label');
+      const labelReminder = overlay.querySelector('#f-secondaire-reminder-label');
+      if (labelInterval) labelInterval.textContent = tR('Échéance tous les ({unite})', { unite: mot });
+      if (labelReminder) labelReminder.textContent = tR('Rappel avant ({unite})', { unite: mot });
+    }
+    if (SCHEMA.hasCounter2) {
+      const caseSecondaire = overlay.querySelector('#f-secondaire-active');
+      const champsSecondaire = overlay.querySelector('#secondaire-champs');
+      caseSecondaire?.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
+        if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
+        if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
+      });
+      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
+        marquerCarteSelectionnee('tm2');
+        majLabelsSecondaire();
+      }));
+      marquerCarteSelectionnee('tm2');
+      majLabelsSecondaire();
+    }
+    const champIntervalleWizard = overlay.querySelector('#f-interval');
+    if (champIntervalleWizard) champIntervalleWizard.addEventListener('input', () => { overlay._intervalTouche = true; });
+
+    // ── 05 — Photo ────────────────────────────────────────────────────
+    brancherPhotoManuelle(overlay, { apercu: '#photo-preview', surState: state });
+    const photoPreview = overlay.querySelector('#photo-preview');
+    if (photoPreview && state.pendingPhotoBlob && !photoPreview.querySelector('img')) {
+      photoPreview.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(state.pendingPhotoBlob)}" alt="">`;
+    }
+    // Pas de machine créée à ce stade : impossible de chercher une photo en
+    // direct (le quota/la recherche, voir openMachineModal#fetch-photo-btn,
+    // s'appuie sur un id de machine réel). On diffère donc à l'enregistrement,
+    // comme le faisait déjà l'ancien assistant (case à cocher devenue bouton).
+    const fetchBtn = overlay.querySelector('#fetch-photo-btn');
+    const photoStatus = overlay.querySelector('#photo-status');
+    if (fetchBtn) {
+      fetchBtn.addEventListener('click', () => {
+        state.searchPhoto = true;
+        state.pendingPhotoBlob = null;
+        if (photoPreview) {
+          photoPreview.innerHTML = `<span class="material-symbols-outlined text-4xl mb-1 text-primary">travel_explore</span><span class="text-[10px] font-bold uppercase tracking-wider text-primary text-center px-2">${esc(trad('Recherche automatique'))}</span>`;
+        }
+        if (photoStatus) photoStatus.textContent = trad('Une photo sera recherchée automatiquement à l\'enregistrement.');
+      });
+    }
+
+    // ── Envoi ────────────────────────────────────────────────────────
+    overlay.querySelector('#step-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      state.name = majuscules(overlay.querySelector('#f-name').value);
+      state.category = majuscules(overlay.querySelector('#f-category').value);
+      if (state.category) retenirCategorie(state.category);
+      state.brand = overlay.querySelector('#f-brand').value.trim();
+      state.model = overlay.querySelector('#f-model').value.trim();
+      state.annee = overlay.querySelector('#f-year') ? overlay.querySelector('#f-year').value.trim() : '';
+      state.serial = overlay.querySelector('#f-serial').value.trim();
+      state.kind = radiosKind.length ? (overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE) : TYPE_MACHINE;
+      state.serviceDate = overlay.querySelector('#f-service-date').value;
+      if (SCHEMA.hasTco) {
+        const prix = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
+        state.purchasePrice = prix == null ? '' : prix;
+        state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
+      }
+      state.tasks = overlay.querySelector('#f-tasks').value.trim();
+      state.items = overlay._aiItems || state.items || null;
+      state.notes = overlay._aiNotes || state.notes || '';
+      state.trackingMode = overlay.querySelector('input[name=tm]:checked').value;
+      state.currentHours = state.trackingMode !== 'days'
+        ? parseFloat(overlay.querySelector('#f-current-hours').value) || 0
+        : null;
+      const intervalValue = parseInt(overlay.querySelector('#f-interval').value, 10);
+      const reminderValue = parseInt(overlay.querySelector('#f-reminder').value, 10);
+      if (state.trackingMode !== 'days') {
+        state.intervalHours = intervalValue;
+        state.reminderHoursBefore = reminderValue;
+        state.intervalDays = overlay._aiIntervalDays || state.intervalDays;
+      } else {
+        state.intervalDays = intervalValue;
+        state.reminderDays = reminderValue;
+        state.intervalHours = overlay._aiIntervalHours || state.intervalHours;
+      }
+      const caseSecondaireActive = overlay.querySelector('#f-secondaire-active');
+      if (caseSecondaireActive?.checked) {
+        const radioSecondaire = overlay.querySelector('input[name=tm2]:checked');
+        state.secondaryUnit = radioSecondaire ? radioSecondaire.value : null;
+        const enCalendrier = state.secondaryUnit === 'days';
+        state.secondaryValue = (state.secondaryUnit && !enCalendrier)
+          ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
+        if (enCalendrier) {
+          state.secondaryIntervalDays = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_DAYS;
+          state.secondaryReminderDays = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_DAYS;
+        } else if (state.secondaryUnit) {
+          state.secondaryIntervalCounter = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS;
+          state.secondaryReminderCounter = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_HOURS;
+        }
+      } else {
+        state.secondaryUnit = null;
+        state.secondaryValue = null;
+      }
+      // Le formulaire est désormais unique (plus de stepMode/stepChecklist) :
+      // on enregistre directement, qu'il y ait eu un carnet ou non.
+      saveMachine(e.target.querySelector('button[type=submit]'), overlay.querySelector('#f-error'));
+    });
+  }
+  // ── ÉTAPE « CHOIX DU PLAN » — juste après l'analyse du carnet ──────────
+  // Nouvelle étape : avant de proposer la suite (mode de suivi + photo), on
+  // demande explicitement ce que le client veut faire du plan que l'IA
+  // vient de proposer.
+  //   · Suivre ce plan        → active tel quel (mode/intervalle recommandés
+  //     par l'analyse), enregistre directement — SANS repasser par l'étape
+  //     « Mode de suivi » : c'est tout l'intérêt du choix « tel quel » ;
+  //   · Modifier ce plan      → ouvre l'étape « Mode de suivi » comme avant
+  //     cette évolution, rien ne change sur ce chemin ;
+  //   · Faire mon propre plan → ignore la proposition de l'IA (le PDF reste
+  //     attaché à la fiche, lui) et enregistre avec un plan vierge.
+  function stepPlanChoice(resultat) {

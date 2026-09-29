@@ -2065,12 +2065,22 @@
      les classes du mockup ne couvrent pas elles-mêmes (aucune classe
      border ou appearance dans code.html, puisqu'il compte sur Preflight
      pour un bouton/input/select sans bordure par défaut). */
-  .machine-modal-edit button{margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;-webkit-appearance:none;appearance:none;}
-  .machine-modal-edit input{margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
-  .machine-modal-edit select{margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
-  .machine-modal-edit textarea{margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
-  .machine-modal-edit button{cursor:pointer;text-transform:none;}
-  .machine-modal-edit select{-webkit-appearance:none;appearance:none;background-image:none;}
+  /* :where(button/input/…) plutôt que le sélecteur nu : :where() ne compte
+     JAMAIS dans la spécificité, donc ce reset (sinon (0,1,1), au-dessus de
+     n'importe quel composant maison à une seule classe comme .pplan-btn-
+     activer, (0,1,0)) retombe à (0,1,0) — égalité, l'ordre du fichier
+     tranche, et .pplan-* (plus bas dans ce fichier) regagne la main. Sans
+     ça, un bouton .pplan-* affiché DANS cette modale (l'écran de repérage
+     des pages du carnet, par ex.) perdait son fond foncé mais gardait sa
+     couleur de texte héritée — illisible au survol, capture d'écran à
+     l'appui. Les !important sur margin/border restent : ils protègent d'un
+     tout autre bug (voir plus haut), sans lien avec le texte illisible. */
+  .machine-modal-edit :where(button){margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;-webkit-appearance:none;appearance:none;}
+  .machine-modal-edit :where(input){margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
+  .machine-modal-edit :where(select){margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
+  .machine-modal-edit :where(textarea){margin:0 !important;border:0 !important;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
+  .machine-modal-edit :where(button){cursor:pointer;text-transform:none;}
+  .machine-modal-edit :where(select){-webkit-appearance:none;appearance:none;background-image:none;}
   /* BUG RÉEL TROUVÉ (capture d'écran utilisateur) : les champs de cette
      modale ressortaient teintés indigo au lieu du blanc/bleu pâle voulu par
      les classes Tailwind. Cause : l'overlay portait AUSSI la classe
@@ -2387,6 +2397,258 @@
   .machine-modal-edit .md\:flex-row{flex-direction:row}
   .machine-modal-edit .md\:items-center{align-items:center}
 }
+
+/* -----------------------------------------------------------------------
+   MODALE "AJOUTER UNE MACHINE" — reprise à l'octet du mockup Stitch (voir
+   outils/tw-ajouter-machine/), même méthode que .machine-modal-edit :
+   config Tailwind du mockup recompilée telle quelle, scopée par
+   "important: '.machine-modal-add'". Palette IDENTIQUE à .machine-modal-edit
+   (le prompt donné à Stitch imposait la reprise exacte des mêmes tokens),
+   sauf modal-bg/navy-deep/turquoise-keeva, nouveaux ici. Formulaire unique
+   qui remplace l'ancien assistant multi-écrans (openAddWizard) — seul
+   l'écran "Plan proposé par notre algorithme" (.pplan-*, ailleurs dans ce
+   fichier) reste un écran à part, inchangé : voir prompt-stitch-ajouter-
+   machine.md, section "Hors périmètre".
+   ----------------------------------------------------------------------- */
+.machine-modal-add .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0}
+.machine-modal-add .absolute{position:absolute}
+.machine-modal-add .relative{position:relative}
+.machine-modal-add .right-3\.5{right:0.875rem}
+.machine-modal-add .top-3{top:0.75rem}
+.machine-modal-add .-mt-2{margin-top:-0.5rem}
+.machine-modal-add .mb-1{margin-bottom:0.25rem}
+.machine-modal-add .mb-1\.5{margin-bottom:0.375rem}
+.machine-modal-add .mb-2{margin-bottom:0.5rem}
+.machine-modal-add .mb-3{margin-bottom:0.75rem}
+.machine-modal-add .mb-4{margin-bottom:1rem}
+.machine-modal-add .ml-2{margin-left:0.5rem}
+.machine-modal-add .mr-3{margin-right:0.75rem}
+.machine-modal-add .mt-0\.5{margin-top:0.125rem}
+.machine-modal-add .mt-1{margin-top:0.25rem}
+.machine-modal-add .mt-3{margin-top:0.75rem}
+.machine-modal-add .block{display:block}
+.machine-modal-add .flex{display:flex}
+.machine-modal-add .inline-flex{display:inline-flex}
+.machine-modal-add .grid{display:grid}
+.machine-modal-add .hidden{display:none}
+.machine-modal-add .h-10{height:2.5rem}
+.machine-modal-add .h-11{height:2.75rem}
+.machine-modal-add .h-14{height:3.5rem}
+.machine-modal-add .h-32{height:8rem}
+.machine-modal-add .h-4{height:1rem}
+.machine-modal-add .h-5{height:1.25rem}
+.machine-modal-add .h-8{height:2rem}
+.machine-modal-add .h-9{height:2.25rem}
+.machine-modal-add .h-full{height:100%}
+.machine-modal-add .max-h-\[92vh\]{max-height:92vh}
+.machine-modal-add .min-h-0{min-height:0px}
+.machine-modal-add .min-h-screen{min-height:100vh}
+.machine-modal-add .w-10{width:2.5rem}
+.machine-modal-add .w-14{width:3.5rem}
+.machine-modal-add .w-32{width:8rem}
+.machine-modal-add .w-4{width:1rem}
+.machine-modal-add .w-5{width:1.25rem}
+.machine-modal-add .w-8{width:2rem}
+.machine-modal-add .w-9{width:2.25rem}
+.machine-modal-add .w-full{width:100%}
+.machine-modal-add .max-w-4xl{max-width:56rem}
+.machine-modal-add .max-w-md{max-width:28rem}
+.machine-modal-add .max-w-xl{max-width:36rem}
+.machine-modal-add .flex-1{flex:1 1 0%}
+.machine-modal-add .shrink-0{flex-shrink:0}
+.machine-modal-add .cursor-pointer{cursor:pointer}
+.machine-modal-add .select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+.machine-modal-add .list-none{list-style-type:none}
+.machine-modal-add .grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}
+.machine-modal-add .grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}
+.machine-modal-add .flex-col{flex-direction:column}
+.machine-modal-add .flex-wrap{flex-wrap:wrap}
+.machine-modal-add .items-start{align-items:flex-start}
+.machine-modal-add .items-center{align-items:center}
+.machine-modal-add .justify-center{justify-content:center}
+.machine-modal-add .justify-between{justify-content:space-between}
+.machine-modal-add .gap-1\.5{gap:0.375rem}
+.machine-modal-add .gap-2{gap:0.5rem}
+.machine-modal-add .gap-2\.5{gap:0.625rem}
+.machine-modal-add .gap-3{gap:0.75rem}
+.machine-modal-add .gap-4{gap:1rem}
+.machine-modal-add .gap-5{gap:1.25rem}
+.machine-modal-add :is(.space-y-1 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-2 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-2\.5 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-3 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-4 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-5 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}
+.machine-modal-add :is(.space-y-7 > :not([hidden]) ~ :not([hidden])){--tw-space-y-reverse:0;margin-top:calc(1.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.75rem * var(--tw-space-y-reverse))}
+.machine-modal-add .overflow-hidden{overflow:hidden}
+.machine-modal-add .overflow-y-auto{overflow-y:auto}
+.machine-modal-add .rounded{border-radius:0.25rem}
+.machine-modal-add .rounded-2xl{border-radius:1rem}
+.machine-modal-add .rounded-full{border-radius:9999px}
+.machine-modal-add .rounded-lg{border-radius:0.5rem}
+.machine-modal-add .rounded-md{border-radius:0.375rem}
+.machine-modal-add .rounded-xl{border-radius:0.75rem}
+.machine-modal-add .border{border-width:1px}
+.machine-modal-add .border-0{border-width:0px}
+.machine-modal-add .border-2{border-width:2px}
+.machine-modal-add .border-b{border-bottom-width:1px}
+.machine-modal-add .border-l-4{border-left-width:4px}
+.machine-modal-add .border-t{border-top-width:1px}
+.machine-modal-add .border-dashed{border-style:dashed}
+.machine-modal-add .border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}
+.machine-modal-add .border-slate-200\/60{border-color:rgb(226 232 240 / 0.6)}
+.machine-modal-add .border-slate-200\/70{border-color:rgb(226 232 240 / 0.7)}
+.machine-modal-add .border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}
+.machine-modal-add .border-tertiary-container{--tw-border-opacity:1;border-color:rgb(238 125 26 / var(--tw-border-opacity, 1))}
+.machine-modal-add .bg-modal-bg{--tw-bg-opacity:1;background-color:rgb(242 244 248 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-primary{--tw-bg-opacity:1;background-color:rgb(0 101 145 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-primary\/10{background-color:rgb(0 101 145 / 0.1)}
+.machine-modal-add .bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-slate-200\/60{background-color:rgb(226 232 240 / 0.6)}
+.machine-modal-add .bg-slate-200\/80{background-color:rgb(226 232 240 / 0.8)}
+.machine-modal-add .bg-slate-900\/60{background-color:rgb(15 23 42 / 0.6)}
+.machine-modal-add .bg-surface-container{--tw-bg-opacity:1;background-color:rgb(229 238 255 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-surface-container-low{--tw-bg-opacity:1;background-color:rgb(239 244 255 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-surface-container-low\/70{background-color:rgb(239 244 255 / 0.7)}
+.machine-modal-add .bg-surface-container-lowest{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-tertiary-container{--tw-bg-opacity:1;background-color:rgb(238 125 26 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-tertiary-container\/15{background-color:rgb(238 125 26 / 0.15)}
+.machine-modal-add .bg-tertiary-light{--tw-bg-opacity:1;background-color:rgb(255 247 237 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .bg-white\/70{background-color:rgb(255 255 255 / 0.7)}
+.machine-modal-add .p-2\.5{padding:0.625rem}
+.machine-modal-add .p-3{padding:0.75rem}
+.machine-modal-add .p-3\.5{padding:0.875rem}
+.machine-modal-add .p-4{padding:1rem}
+.machine-modal-add .p-5{padding:1.25rem}
+.machine-modal-add .p-6{padding:1.5rem}
+.machine-modal-add .px-2{padding-left:0.5rem;padding-right:0.5rem}
+.machine-modal-add .px-2\.5{padding-left:0.625rem;padding-right:0.625rem}
+.machine-modal-add .px-3{padding-left:0.75rem;padding-right:0.75rem}
+.machine-modal-add .px-3\.5{padding-left:0.875rem;padding-right:0.875rem}
+.machine-modal-add .px-4{padding-left:1rem;padding-right:1rem}
+.machine-modal-add .px-5{padding-left:1.25rem;padding-right:1.25rem}
+.machine-modal-add .px-6{padding-left:1.5rem;padding-right:1.5rem}
+.machine-modal-add .py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}
+.machine-modal-add .py-1{padding-top:0.25rem;padding-bottom:0.25rem}
+.machine-modal-add .py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}
+.machine-modal-add .py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+.machine-modal-add .py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}
+.machine-modal-add .py-4{padding-top:1rem;padding-bottom:1rem}
+.machine-modal-add .py-5{padding-top:1.25rem;padding-bottom:1.25rem}
+.machine-modal-add .py-6{padding-top:1.5rem;padding-bottom:1.5rem}
+.machine-modal-add .pr-12{padding-right:3rem}
+.machine-modal-add .pr-14{padding-right:3.5rem}
+.machine-modal-add .pt-1{padding-top:0.25rem}
+.machine-modal-add .pt-2{padding-top:0.5rem}
+.machine-modal-add .pt-3{padding-top:0.75rem}
+.machine-modal-add .text-center{text-align:center}
+.machine-modal-add .font-sans{font-family:"Plus Jakarta Sans", system-ui, sans-serif}
+.machine-modal-add .text-2xl{font-size:1.5rem;line-height:2rem}
+.machine-modal-add .text-3xl{font-size:1.875rem;line-height:2.25rem}
+.machine-modal-add .text-4xl{font-size:2.25rem;line-height:2.5rem}
+.machine-modal-add .text-\[10px\]{font-size:10px}
+.machine-modal-add .text-\[11px\]{font-size:11px}
+.machine-modal-add .text-base{font-size:1rem;line-height:1.5rem}
+.machine-modal-add .text-lg{font-size:1.125rem;line-height:1.75rem}
+.machine-modal-add .text-sm{font-size:0.875rem;line-height:1.25rem}
+.machine-modal-add .text-xl{font-size:1.25rem;line-height:1.75rem}
+.machine-modal-add .text-xs{font-size:0.75rem;line-height:1rem}
+.machine-modal-add .font-bold{font-weight:700}
+.machine-modal-add .font-medium{font-weight:500}
+.machine-modal-add .font-semibold{font-weight:600}
+.machine-modal-add .uppercase{text-transform:uppercase}
+.machine-modal-add .leading-relaxed{line-height:1.625}
+.machine-modal-add .tracking-tight{letter-spacing:-0.025em}
+.machine-modal-add .tracking-wider{letter-spacing:0.05em}
+.machine-modal-add .text-on-surface{--tw-text-opacity:1;color:rgb(11 28 48 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-primary{--tw-text-opacity:1;color:rgb(0 101 145 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-tertiary-container{--tw-text-opacity:1;color:rgb(238 125 26 / var(--tw-text-opacity, 1))}
+.machine-modal-add .text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}
+.machine-modal-add .antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.machine-modal-add .opacity-80{opacity:0.8}
+.machine-modal-add .shadow-card{--tw-shadow:0 2px 10px -2px rgba(14, 19, 51, 0.04);--tw-shadow-colored:0 2px 10px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .shadow-modal{--tw-shadow:0 25px 60px -15px rgba(14, 19, 51, 0.28);--tw-shadow-colored:0 25px 60px -15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .shadow-subtle{--tw-shadow:0 1px 3px rgba(14, 19, 51, 0.05), 0 1px 2px rgba(14, 19, 51, 0.03);--tw-shadow-colored:0 1px 3px var(--tw-shadow-color), 0 1px 2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .outline{outline-style:solid}
+.machine-modal-add .ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}
+.machine-modal-add .ring-primary{--tw-ring-opacity:1;--tw-ring-color:rgb(0 101 145 / var(--tw-ring-opacity, 1))}
+.machine-modal-add .filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}
+.machine-modal-add .backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}
+.machine-modal-add .transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}
+.machine-modal-add .transition-colors{transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}
+.machine-modal-add .transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}
+.machine-modal-add .transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}
+.machine-modal-add .placeholder\:text-slate-400::-moz-placeholder{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}
+.machine-modal-add .placeholder\:text-slate-400::placeholder{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}
+.machine-modal-add .hover\:border-primary\/60:hover{border-color:rgb(0 101 145 / 0.6)}
+.machine-modal-add .hover\:bg-primary:hover{--tw-bg-opacity:1;background-color:rgb(0 101 145 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .hover\:bg-slate-200\/80:hover{background-color:rgb(226 232 240 / 0.8)}
+.machine-modal-add .hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .hover\:bg-tertiary-container-hover:hover{--tw-bg-opacity:1;background-color:rgb(217 108 13 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .hover\:bg-white:hover{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}
+.machine-modal-add .hover\:text-on-surface:hover{--tw-text-opacity:1;color:rgb(11 28 48 / var(--tw-text-opacity, 1))}
+.machine-modal-add .hover\:text-primary:hover{--tw-text-opacity:1;color:rgb(0 101 145 / var(--tw-text-opacity, 1))}
+.machine-modal-add .hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}
+.machine-modal-add .hover\:underline:hover{text-decoration-line:underline}
+.machine-modal-add .hover\:opacity-100:hover{opacity:1}
+.machine-modal-add .hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}
+.machine-modal-add .focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}
+.machine-modal-add .focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}
+.machine-modal-add .focus\:ring-primary:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(0 101 145 / var(--tw-ring-opacity, 1))}
+.machine-modal-add .focus\:ring-offset-0:focus{--tw-ring-offset-width:0px}
+.machine-modal-add .active\:scale-\[0\.99\]:active{--tw-scale-x:0.99;--tw-scale-y:0.99;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.machine-modal-add :is(.group[open] .group-open\:rotate-180){--tw-rotate:180deg;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.machine-modal-add :is(.group:hover .group-hover\:scale-105){--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}
+.machine-modal-add :is(.group:hover .group-hover\:bg-primary\/10){background-color:rgb(0 101 145 / 0.1)}
+.machine-modal-add :is(.group:hover .group-hover\:text-primary){--tw-text-opacity:1;color:rgb(0 101 145 / var(--tw-text-opacity, 1))}
+@media (min-width:640px){
+  .machine-modal-add .sm\:inline{display:inline}
+  .machine-modal-add .sm\:h-36{height:9rem}
+  .machine-modal-add .sm\:w-1\/3{width:33.333333%}
+  .machine-modal-add .sm\:w-36{width:9rem}
+  .machine-modal-add .sm\:w-auto{width:auto}
+  .machine-modal-add .sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}
+  .machine-modal-add .sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}
+  .machine-modal-add .sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}
+  .machine-modal-add .sm\:flex-row{flex-direction:row}
+  .machine-modal-add .sm\:items-center{align-items:center}
+  .machine-modal-add .sm\:justify-start{justify-content:flex-start}
+  .machine-modal-add .sm\:p-5{padding:1.25rem}
+  .machine-modal-add .sm\:p-6{padding:1.5rem}
+  .machine-modal-add .sm\:p-7{padding:1.75rem}
+  .machine-modal-add .sm\:px-8{padding-left:2rem;padding-right:2rem}
+  .machine-modal-add .sm\:text-left{text-align:left}
+  .machine-modal-add .sm\:text-2xl{font-size:1.5rem;line-height:2rem}
+  .machine-modal-add .sm\:text-base{font-size:1rem;line-height:1.5rem}
+  .machine-modal-add .sm\:text-sm{font-size:0.875rem;line-height:1.25rem}
+}
+/* Icônes : même override que .machine-modal-edit (même police variable déjà
+   chargée dans <head>, pas de nouveau <link>) — cohérence entre les 2
+   modales sœurs, plutôt que le wght 450/opsz 22 du mockup (proche mais pas
+   identique). */
+.machine-modal-add .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;line-height:1;vertical-align:middle;}
+/* Champs natifs (input/select/textarea/button) : même reset que
+   .machine-modal-edit, pour les mêmes raisons (bordures/fonds natifs qui
+   dépassent sinon des classes Tailwind compilées). */
+/* :where(...) : voir le commentaire identique sur .machine-modal-edit —
+   sans ça, un composant maison à une seule classe (.pplan-btn-activer,
+   affiché dans cette modale sur l'écran de repérage des pages du carnet)
+   perd son fond foncé au repos mais pas sa couleur de texte au survol
+   (règle :hover plus spécifique) → texte illisible, signalé par
+   l'utilisateur avec capture à l'appui. */
+.machine-modal-add :where(button){margin:0;border:0;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;-webkit-appearance:none;appearance:none;cursor:pointer;}
+.machine-modal-add :where(input),.machine-modal-add :where(select),.machine-modal-add :where(textarea){margin:0;border:0;padding:0;background:transparent;color:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;box-sizing:border-box;}
+.machine-modal-add :where(select){-webkit-appearance:none;appearance:none;background-image:none;}
+.machine-modal-add :is(h1,h2,h3,h4,p,label){margin:0;}
+.machine-modal-add input:focus,.machine-modal-add select:focus,.machine-modal-add textarea:focus{outline:none;}
 
   /* Scorecard TCO : 4 KPI réels (jamais de « taux de refacturation
      chantier », inexistant côté produit) + la jauge Garder/Remplacer déjà

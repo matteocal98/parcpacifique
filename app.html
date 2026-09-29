@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KVkx8sLNuzrEo474k8z2MetCP6uBptI94hVS2UD+33g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eeckMg+buFT7LKTFJe66156976FPDZL+hqOfUPwPOHY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -18437,121 +18437,398 @@ function openAddWizard(companyId, categories) {
     if (e.target.closest('#wiz-close')) overlay.remove();
   });
 
-  function stepIdentification() {
-    shell(`
-      ${enteteEtape(trad('Ajouter une machine'), { sous: trad('Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.') })}
-      <form id="step-form">
-        <section class="mform-section mform-section-1">
-          <div class="mform-head">
-            <div class="mform-head-gauche"><span class="mform-num">1</span><span class="mform-section-ico">${picto('batiment')}</span><h3>${trad('Identification du matériel')}</h3></div>
-            <span class="mform-eyebrow">${trad('Chantier & administration')}</span>
-          </div>
-
-          ${SCHEMA.hasKind ? `
-          <label>${trad('Type d\'unité de surveillance principale')}</label>
-          <div class="mform-cards" id="f-kind-cards">
-            <label class="mform-card">
-              <input type="radio" name="kind" value="machine" ${state.kind === TYPE_MACHINE ? 'checked' : ''}>
-              <span class="mform-card-ico">${picto('compteur')}</span>
-              <span class="mform-card-corps">
-                <span class="mform-card-titre">${trad('Machine / Engin de chantier')}</span>
-                <span class="mform-card-texte">${trad('Suivi périodique au compteur horaire (heures)')}</span>
-              </span>
-            </label>
-            <label class="mform-card">
-              <input type="radio" name="kind" value="vehicle" ${state.kind === TYPE_VEHICULE ? 'checked' : ''}>
-              <span class="mform-card-ico">${picto('vehicule')}</span>
-              <span class="mform-card-corps">
-                <span class="mform-card-titre">${trad('Véhicule roulant / Fourgon')}</span>
-                <span class="mform-card-texte">${trad('Suivi périodique à l\'odomètre (kilomètres)')}</span>
-              </span>
-            </label>
-          </div>` : ''}
-
-          <div class="field-row">
-            <div>
-              <label for="f-name" class="label-avec-note"><span>${trad('Nom de la machine')}</span><span class="label-annotation">${trad('Visible chantier')}</span></label>
-              <input id="f-name" class="majuscules" autocapitalize="characters" required placeholder="${trad('Ex. OREC 4X4 - ATELIER')}" value="${esc(state.name)}">
+  // ★ FORMULAIRE UNIQUE — reprise Stitch (voir outils/tw-ajouter-machine/ et
+  // prompt-stitch-ajouter-machine.md) : remplace les 4 écrans successifs
+  // stepIdentification/stepChoice/stepUpload/stepMode + la variante
+  // stepChecklist (tâches à cocher, sans carnet) par UNE page qui défile,
+  // même principe que openMachineModal. Seul stepPlanChoice (l'écran
+  // « Plan proposé par notre algorithme », .pplan-*) reste un écran à part
+  // — volontairement, voir son commentaire plus bas : l'utilisateur doit le
+  // voir et le valider explicitement, jamais un remplissage silencieux des
+  // champs. `depuisPlanChoice` (bool) : cette page peut être ouverte deux
+  // fois — au début (vide) et depuis « Modifier ce plan » (state déjà
+  // rempli par l'analyse) ; le rendu lit `state` dans les deux cas, jamais
+  // de valeur écrite en dur.
+  function marquerChoixRing(nomGroupe) {
+    overlay.querySelectorAll(`input[name=${nomGroupe}]`).forEach((radio) => {
+      const label = radio.closest('label');
+      if (!label) return;
+      const on = radio.checked;
+      label.classList.toggle('ring-2', on);
+      label.classList.toggle('ring-primary', on);
+      const ico = label.querySelector('[data-ring-ico]');
+      if (ico) {
+        ico.classList.toggle('bg-primary/10', on);
+        ico.classList.toggle('text-primary', on);
+        ico.classList.toggle('bg-slate-100', !on);
+        ico.classList.toggle('text-slate-600', !on);
+      }
+      const check = label.querySelector('[data-ring-check]');
+      if (check) {
+        check.classList.toggle('bg-primary', on);
+        check.classList.toggle('text-white', on);
+        check.classList.toggle('border', !on);
+        check.classList.toggle('border-slate-300', !on);
+        check.innerHTML = on ? '<span class="material-symbols-outlined text-xs font-bold">check</span>' : '';
+      }
+    });
+  }
+  function stepFormUnique() {
+    overlay.className = 'overlay machine-modal-add';
+    const mode = state.trackingMode;
+    const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
+    const isCounter = mode !== 'days';
+    const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
+    // Pas shell() ici : elle enveloppe déjà dans <div class="modal"> (480px,
+    // la modale générique de l'app) — cette page porte son PROPRE conteneur
+    // Tailwind compilé (w-full max-w-4xl…), un second wrapper l'aurait
+    // piégée dans les 480px de l'autre.
+    overlay.innerHTML = `
+      <div class="w-full max-w-4xl bg-modal-bg rounded-2xl shadow-modal flex flex-col max-h-[92vh] overflow-hidden border-0">
+        <header class="bg-modal-bg px-6 sm:px-8 py-5 flex items-center justify-between border-b border-slate-200/70 shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-2xl">add_circle</span>
             </div>
             <div>
-              <label for="f-category">${trad('Catégorie')}</label>
-              <select id="f-category" required>${optionsCategorieListe(state.category, categories)}</select>
-            </div>
-          </div>
-          <input id="f-category-autre" class="majuscules" autocapitalize="characters" placeholder="${trad('Ex. DÉBROUSSAILLEUSE À DOS')}" hidden>
-
-          <div class="field-row">
-            <div>
-              <label for="f-brand">${trad('Marque')}</label>
-              <input id="f-brand" class="majuscules" placeholder="${trad('Ex. KUBOTA')}" autocapitalize="characters" value="${esc(state.brand)}">
-            </div>
-            <div>
-              <label for="f-model">${trad('Modèle')}</label>
-              <input id="f-model" class="majuscules" placeholder="${trad('Ex. U17-3')}" autocapitalize="characters" value="${esc(state.model)}">
-            </div>
-            <div>
-              <label for="f-year">${trad('Année du modèle')}</label>
-              <input id="f-year" type="number" inputmode="numeric" min="1950" max="2100" placeholder="${trad('Ex. 2019')}" value="${esc(state.annee)}">
-            </div>
-            <div>
-              <label for="f-service-date">${trad('Date de mise en service')}</label>
-              <input id="f-service-date" type="date" value="${esc(state.serviceDate)}" required>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-on-surface">${trad('Ajouter une machine')}</h1>
+              <p class="text-xs sm:text-sm text-slate-500 font-medium">${trad('Elle apparaîtra immédiatement dans la liste, avec son plan de maintenance.')}</p>
             </div>
           </div>
-          <div class="hint">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
+          <button type="button" id="wiz-close" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-on-surface hover:bg-slate-200/80 transition-colors" aria-label="${esc(trad('Fermer'))}">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </header>
 
-          <label for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
-          <input id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
+        <form id="step-form" class="flex-1 flex flex-col min-h-0">
+        <main class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-7">
 
-          ${SCHEMA.hasTco ? `
-          <div class="field-row">
-            <div>
-              <label for="f-prix-achat" class="label-avec-note"><span>${trad('Prix d\'achat')}</span><span class="label-annotation">${trad('Facultatif')}</span></label>
-              <input id="f-prix-achat" type="text" inputmode="decimal" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
-            </div>
-            <div>
-              <label for="f-date-achat">${trad('Date d\'achat')}</label>
-              <input id="f-date-achat" type="date" value="${esc(state.purchaseDate || state.serviceDate)}">
-            </div>
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">01</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Identification du matériel')}</h2>
           </div>
-          <div class="hint">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laisse vide si tu ne le sais pas, tu pourras le renseigner plus tard.')}</div>` : ''}
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+            ${SCHEMA.hasKind ? `
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">${trad('Type d\'unité de surveillance principale')}</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="f-kind-cards">
+                <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="kind" value="${TYPE_MACHINE}" class="sr-only" ${state.kind === TYPE_MACHINE ? 'checked' : ''}>
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center mr-3 shrink-0" data-ring-ico>
+                    <span class="material-symbols-outlined">agriculture</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-sm font-bold text-on-surface">${trad('Machine / Engin de chantier')}</div>
+                    <div class="text-xs text-slate-500">${trad('Compteur horaire (horamètre)')}</div>
+                  </div>
+                  <div class="w-5 h-5 rounded-full ml-2 flex items-center justify-center" data-ring-check></div>
+                </label>
+                <label class="relative flex items-center p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="kind" value="${TYPE_VEHICULE}" class="sr-only" ${state.kind === TYPE_VEHICULE ? 'checked' : ''}>
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center mr-3 shrink-0" data-ring-ico>
+                    <span class="material-symbols-outlined">local_shipping</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-sm font-bold text-on-surface">${trad('Véhicule roulant / Fourgon')}</div>
+                    <div class="text-xs text-slate-500">${trad('Odomètre kilométrique (km)')}</div>
+                  </div>
+                  <div class="w-5 h-5 rounded-full ml-2 flex items-center justify-center" data-ring-check></div>
+                </label>
+              </div>
+            </div>` : ''}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-name">${trad('Nom de la machine')} <span class="text-primary">*</span></label>
+                <input type="text" id="f-name" class="majuscules w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" autocapitalize="characters" required placeholder="${trad('Ex. OREC 4X4 - ATELIER')}" value="${esc(state.name)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-category">${trad('Catégorie')} <span class="text-primary">*</span></label>
+                <select id="f-category" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" required>${optionsCategorieListe(state.category, categories)}</select>
+              </div>
+            </div>
+            <input id="f-category-autre" class="majuscules w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" autocapitalize="characters" placeholder="${trad('Ex. DÉBROUSSAILLEUSE À DOS')}" hidden>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-brand">${trad('Marque')}</label>
+                <input type="text" id="f-brand" class="majuscules w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. KUBOTA')}" autocapitalize="characters" value="${esc(state.brand)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-model">${trad('Modèle')}</label>
+                <input type="text" id="f-model" class="majuscules w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. U17-3')}" autocapitalize="characters" value="${esc(state.model)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-year">${trad('Année du modèle')}</label>
+                <input type="number" id="f-year" inputmode="numeric" min="1950" max="2100" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. 2019')}" value="${esc(state.annee)}">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-service-date">${trad('Date de mise en service')}</label>
+                <input id="f-service-date" type="date" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.serviceDate)}" required>
+              </div>
+            </div>
+            <div class="text-xs text-slate-500 -mt-2">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[state.kind]}</label>
+              <input id="f-serial" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
+            </div>
+
+            ${SCHEMA.hasTco ? `
+            <div class="pt-2 border-t border-slate-200/60">
+              <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-600 hover:text-primary list-none select-none">
+                  <span class="flex items-center gap-2"><span class="material-symbols-outlined text-base">payments</span>${trad('Acquisition & TCO (facultatif)')}</span>
+                  <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
+                </summary>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 mt-1">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-prix-achat">${trad('Prix d\'achat')}</label>
+                    <input id="f-prix-achat" type="text" inputmode="decimal" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-date-achat">${trad('Date d\'achat')}</label>
+                    <input id="f-date-achat" type="date" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.purchaseDate || state.serviceDate)}">
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-500 pt-2">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laisse vide si tu ne le sais pas, tu pourras le renseigner plus tard.')}</div>
+              </details>
+            </div>` : ''}
+          </div>
         </section>
 
-        <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel">${trad('Annuler')}</button>
-          <button type="submit" class="primary">${trad('Suivant')}${picto('flecheDroite')}</button>
-        </div>
-      </form>
-    `);
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">02</span>
+              <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Carnet d\'entretien du constructeur')}</h2>
+            </div>
+            <span class="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-0.5 rounded-full">${trad('Recommandé')}</span>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-4">
+            <div class="mform-carnet-ligne">
+              <div class="mform-carnet-zone">
+                ${dropzoneHtml('f-manual-drop')}
+                <input id="f-manual" type="file" accept="application/pdf,image/*" multiple hidden>
+                <div class="hint" id="f-manual-statut"></div>
+              </div>
+              <button type="button" id="btn-camera" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container text-slate-700 hover:bg-slate-200 transition-colors text-xs font-bold shadow-subtle shrink-0">
+                <span class="material-symbols-outlined text-base">photo_camera</span><span>${trad('Photographier le carnet')}</span>
+              </button>
+            </div>
+            <input id="f-camera" type="file" accept="image/*" capture="environment" hidden>
+            <div class="pages-carnet" id="pages-carnet"></div>
+            <div class="pages-utiles" id="pages-utiles"></div>
+            <div class="hint" id="f-analysis"></div>
+
+            <div class="bg-tertiary-light rounded-xl p-4 sm:p-5 shadow-card border-l-4 border-tertiary-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-tertiary-container/15 text-tertiary-container flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="material-symbols-outlined text-xl">contact_support</span>
+                </div>
+                <div class="space-y-1">
+                  <div class="text-sm font-bold text-on-surface">${trad('Vous ne trouvez pas votre carnet ?')}</div>
+                  <p class="text-xs text-slate-600 leading-relaxed max-w-xl">${trad('Pour 29 € (paiement unique), nous configurons votre plan d\'entretien modifiable directement dans l\'application (aucun manuel constructeur fourni). Si les données de la machine sont insuffisantes, nous vous avertissons avant tout paiement, sans rien inventer.')}</p>
+                </div>
+              </div>
+              <button type="button" id="btn-plan-payant" class="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs font-bold transition-all shadow-subtle">
+                <span>${trad('Demander l\'établissement de mon plan — 29 €')}</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+            <div class="text-xs text-slate-500"><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher le manuel du fabricant sur le web →')}</a></div>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">03</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Mode de suivi & échéances d\'entretien')}</h2>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">${trad('Mode de suivi de la maintenance')}</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="days" class="sr-only" ${mode === 'days' ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">calendar_month</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Calendaire')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Jours / semaines')}</div>
+                </label>
+                <label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="hours" class="sr-only" ${mode === 'hours' ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">hourglass_top</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Compteur horaire')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Horamètre en heures (h)')}</div>
+                </label>
+                ${SCHEMA.hasCounter ? `<label class="relative flex flex-col p-3.5 bg-surface-container-lowest rounded-xl shadow-subtle cursor-pointer transition-all">
+                  <input type="radio" name="tm" value="km" class="sr-only" ${mode === trad('km') ? 'checked' : ''}>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" data-ring-ico><span class="material-symbols-outlined text-lg">speed</span></div>
+                    <div class="w-4 h-4 rounded-full" data-ring-check></div>
+                  </div>
+                  <div class="text-sm font-bold text-on-surface">${trad('Kilométrage')}</div>
+                  <div class="text-[11px] text-slate-500">${trad('Odomètre en kilomètres (km)')}</div>
+                </label>` : ''}
+              </div>
+            </div>
+
+            <div id="hours-field" style="display:${mode === 'days' ? 'none' : 'block'};">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-current-hours" id="f-current-hours-label">${unit.field}</label>
+              <input id="f-current-hours" type="number" min="0" step="${unit.step}" class="w-full sm:w-1/3 h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${state.currentHours ?? ''}" placeholder="${unit.placeholder}">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-interval" id="f-interval-label">${tR('Échéance {mode}', { mode: isCounter ? tR('tous les ({unite})', { unite: unit.word }) : trad('toutes les (jours)') })}</label>
+                <input id="f-interval" type="number" min="1" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${isCounter ? state.intervalHours : state.intervalDays}" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-reminder" id="f-reminder-label">${tR('Rappel avant ({unite})', { unite: isCounter ? unit.word : trad('jours') })}</label>
+                <input id="f-reminder" type="number" min="0" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${isCounter ? state.reminderHoursBefore : state.reminderDays}" required>
+              </div>
+            </div>
+
+            ${SCHEMA.hasCounter2 ? `
+            <div class="pt-3 border-t border-slate-200/60">
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                <input type="checkbox" id="f-secondaire-active" class="w-4 h-4 rounded text-primary focus:ring-primary focus:ring-offset-0 border-slate-300" ${state.secondaryUnit ? 'checked' : ''}>
+                <span class="text-xs font-bold text-slate-700">${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</span>
+              </label>
+              <div id="secondaire-champs" class="mt-3 p-4 bg-surface-container-lowest rounded-xl shadow-subtle space-y-3" style="display:${state.secondaryUnit ? 'flex' : 'none'};flex-direction:column;">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-hours" style="display:${mode === 'hours' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="hours" ${state.secondaryUnit === 'hours' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">hourglass_top</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Compteur horaire')}</span>
+                  </label>
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-km" style="display:${mode === 'km' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="km" ${state.secondaryUnit === 'km' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">speed</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Kilométrage')}</span>
+                  </label>
+                  <label class="p-2.5 flex items-center gap-2 rounded-lg bg-surface-container-low cursor-pointer" id="carte-secondaire-days" style="display:${mode === 'days' ? 'none' : 'flex'};">
+                    <input type="radio" name="tm2" value="days" ${state.secondaryUnit === 'days' ? 'checked' : ''}>
+                    <span class="material-symbols-outlined text-base text-primary">calendar_month</span>
+                    <span class="text-xs font-bold text-on-surface">${trad('Calendaire')}</span>
+                  </label>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="secondaire-valeur-row" style="display:${state.secondaryUnit === 'days' ? 'none' : 'flex'};">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
+                    <input id="f-secondaire-valeur" type="number" min="0" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryValue ?? ''}">
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-interval" id="f-secondaire-interval-label">${tR('Échéance tous les ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                    <input id="f-secondaire-interval" type="number" min="1" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryUnit === 'days' ? state.secondaryIntervalDays : state.secondaryIntervalCounter}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-secondaire-reminder" id="f-secondaire-reminder-label">${tR('Rappel avant ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
+                    <input id="f-secondaire-reminder" type="number" min="0" class="w-full h-10 px-2.5 rounded-xl bg-surface-container-low text-xs text-on-surface font-semibold border-0" value="${state.secondaryUnit === 'days' ? state.secondaryReminderDays : state.secondaryReminderCounter}">
+                  </div>
+                </div>
+              </div>
+            </div>` : ''}
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">04</span>
+              <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Tâches de maintenance')}</h2>
+            </div>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm space-y-2">
+            <textarea id="f-tasks" rows="3" class="w-full p-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${esc(state.tasks)}</textarea>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-1 rounded-md">05</span>
+            <h2 class="text-base font-bold text-on-surface tracking-tight">${trad('Visuel & photo du matériel')}</h2>
+          </div>
+          <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-center gap-5">
+              <div class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl bg-surface-container-lowest shadow-card flex flex-col items-center justify-center text-slate-400 shrink-0 border border-slate-100 overflow-hidden relative" id="photo-preview">
+                <span class="material-symbols-outlined text-4xl mb-1 text-slate-300">image</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center px-2">${trad('Aucune photo')}</span>
+              </div>
+              <div class="space-y-2.5 text-center sm:text-left flex-1">
+                <div class="text-xs font-bold text-slate-700">${trad('Personnaliser la photo de l\'équipement')}</div>
+                <p class="text-xs text-slate-500 leading-relaxed">${trad('Une photo claire facilite l\'identification immédiate sur le terrain et sur le tableau de bord de la flotte.')}</p>
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  <button type="button" id="pick-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_library</span><span>${trad('Choisir une photo')}</span></button>
+                  <button type="button" id="shoot-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_camera</span><span>${trad('Prendre une photo')}</span></button>
+                  <button type="button" id="fetch-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">search</span><span>${trad('Chercher sur le web')}</span></button>
+                </div>
+                <input id="f-machine-photo" type="file" accept="image/*" hidden>
+                <input id="f-machine-photo-camera" type="file" accept="image/*" capture="environment" hidden>
+                <div class="hint" id="photo-status"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="hint" id="f-error"></div>
+        </main>
+
+        <footer class="bg-modal-bg px-6 sm:px-8 py-4 flex items-center justify-between border-t border-slate-200/70 shrink-0">
+          <button type="button" id="cancel" class="px-5 py-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-bold transition-colors">${trad('Annuler')}</button>
+          <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.99]">
+            <span class="material-symbols-outlined text-base">add_circle</span><span>${trad('Ajouter la machine')}</span>
+          </button>
+        </footer>
+        </form>
+      </div>
+    `;
     overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
     habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
     habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
     forcerMajuscules(overlay.querySelector('#f-brand'));
     forcerMajuscules(overlay.querySelector('#f-model'));
-    // Le type d'unité (machine / véhicule) est deux cartes sélectionnables
-    // (input[name=kind]), comme sur la fiche machine — pas un <select>.
+
+    // ── 01 — Identification ────────────────────────────────────────────
     const radiosKind = overlay.querySelectorAll('input[name=kind]');
     if (radiosKind.length) {
-      marquerCarteSelectionnee('kind');
+      marquerChoixRing('kind');
       const ancienType = overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE;
       radiosKind.forEach((radio) => radio.addEventListener('change', () => {
-        marquerCarteSelectionnee('kind');
+        marquerChoixRing('kind');
         const kind = overlay.querySelector('input[name=kind]:checked').value;
         const label = overlay.querySelector('#f-identifiant-label');
         if (label) label.textContent = IDENTIFIANT_LIBELLE[kind];
         const champ = overlay.querySelector('#f-serial');
         if (champ) champ.placeholder = IDENTIFIANT_PLACEHOLDER[kind];
-        // Le MODE n'est plus choisi à cette étape (il vient après le carnet) :
-        // c'est l'étape « Mode de suivi » qui part du type de machine — véhicule
-        // au kilométrage, machine au calendrier — sauf recommandation du carnet.
-        // L'intervalle suit l'unité, tant que l'utilisateur n'a pas saisi le sien.
         if (Number(state.intervalHours) === INTERVALLE_DEFAUT[ancienType]) {
           state.intervalHours = INTERVALLE_DEFAUT[kind];
         }
       }));
     }
-    overlay.querySelector('#step-form').addEventListener('submit', (e) => {
-      e.preventDefault();
+    preparerChampsMajuscules(overlay);
+    normaliserMajusculesAEnregistrement(overlay);
+    brancherCategorie(overlay, categories, state.category);
+    if (SCHEMA.hasTco) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
+
+    // ★ Lit TOUS les champs du formulaire unique dans `state` — factorisé
+    // car il y a désormais DEUX façons de quitter cette page, pas une
+    // seule : le vrai submit (bouton « Ajouter la machine »), MAIS AUSSI
+    // le dépôt d'un carnet, qui déclenche l'analyse puis saute directement
+    // vers stepPlanChoice (apresCarnet, plus bas) SANS jamais passer par le
+    // submit. Avant ce correctif, stepPlanChoice appelait saveMachine avec
+    // un `state` resté aux valeurs par défaut du formulaire — nom, catégorie,
+    // marque… jamais lus — d'où des machines créées sans aucune donnée,
+    // signalé par l'utilisateur avec capture à l'appui.
+    function lireFormulaireDansState() {
       state.name = majuscules(overlay.querySelector('#f-name').value);
       state.category = majuscules(overlay.querySelector('#f-category').value);
       if (state.category) retenirCategorie(state.category);
@@ -18566,119 +18843,65 @@ function openAddWizard(companyId, categories) {
         state.purchasePrice = prix == null ? '' : prix;
         state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
       }
-      // Le MODE et la PHOTO ne sont plus demandés ici : ils viennent après le
-      // carnet (voir stepMode). Personne ne sait s'il faut un compteur ou un
-      // calendrier avant d'avoir vu ce que dit le manuel, et la photo trouvée sur
-      // le web serait de toute façon écrasée par la première page du carnet.
-      stepChoice();
-    });
-    // MAJUSCULES : à la frappe (visible tout de suite) ET à l'enregistrement (la
-    // valeur stockée, par le contrôle en capture sur l'overlay). La catégorie,
-    // elle, vient du menu déroulant ou de la saisie libre « Autre… ».
-    preparerChampsMajuscules(overlay);
-    normaliserMajusculesAEnregistrement(overlay);
-    brancherCategorie(overlay, categories, state.category);
-    if (SCHEMA.hasTco) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
-  }
+      state.tasks = overlay.querySelector('#f-tasks').value.trim();
+      state.items = overlay._aiItems || state.items || null;
+      state.notes = overlay._aiNotes || state.notes || '';
+      state.trackingMode = overlay.querySelector('input[name=tm]:checked').value;
+      state.currentHours = state.trackingMode !== 'days'
+        ? parseFloat(overlay.querySelector('#f-current-hours').value) || 0
+        : null;
+      const intervalValue = parseInt(overlay.querySelector('#f-interval').value, 10);
+      const reminderValue = parseInt(overlay.querySelector('#f-reminder').value, 10);
+      if (state.trackingMode !== 'days') {
+        state.intervalHours = intervalValue;
+        state.reminderHoursBefore = reminderValue;
+        state.intervalDays = overlay._aiIntervalDays || state.intervalDays;
+      } else {
+        state.intervalDays = intervalValue;
+        state.reminderDays = reminderValue;
+        state.intervalHours = overlay._aiIntervalHours || state.intervalHours;
+      }
+      const caseSecondaireActive = overlay.querySelector('#f-secondaire-active');
+      if (caseSecondaireActive?.checked) {
+        const radioSecondaire = overlay.querySelector('input[name=tm2]:checked');
+        state.secondaryUnit = radioSecondaire ? radioSecondaire.value : null;
+        const enCalendrier = state.secondaryUnit === 'days';
+        state.secondaryValue = (state.secondaryUnit && !enCalendrier)
+          ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
+        if (enCalendrier) {
+          state.secondaryIntervalDays = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_DAYS;
+          state.secondaryReminderDays = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_DAYS;
+        } else if (state.secondaryUnit) {
+          state.secondaryIntervalCounter = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS;
+          state.secondaryReminderCounter = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_HOURS;
+        }
+      } else {
+        state.secondaryUnit = null;
+        state.secondaryValue = null;
+      }
+    }
 
-  function stepChoice() {
-    shell(`
-      ${enteteEtape(trad('Carnet d\'entretien'), { retour: true, sous: tR('As-tu le carnet d\'entretien du fabricant pour « {nom} » ?', { nom: esc(state.name) }) })}
-      <div class="step-options">
-        <button type="button" class="option-tile" id="opt-have"><span class="option-ico">${picto('carnet')}</span><span class="option-tile-corps">${trad('Oui, je l\'ai en PDF')}<span class="opt-sub">${trad('Notre algorithme lit le document et propose le plan de maintenance.')}</span></span></button>
-        <button type="button" class="option-tile" id="opt-help"><span class="option-ico">${picto('info')}</span><span class="option-tile-corps">${trad('Non et j\'ai besoin d\'aide pour construire mon plan')}<span class="opt-sub">${trad('Chercher le carnet en ligne, ou nous confier l\'établissement du plan (29 €).')}</span></span></button>
-        <button type="button" class="option-tile" id="opt-none"><span class="option-ico">${picto('crayon')}</span><span class="option-tile-corps">${trad('Non et je vais le faire moi-même')}<span class="opt-sub">${trad('On construit un plan simple à partir de ce que tu veux suivre.')}</span></span></button>
-      </div>
-    `);
-    overlay.querySelector('#wiz-back').addEventListener('click', stepIdentification);
-    overlay.querySelector('#opt-have').addEventListener('click', () => stepUpload(false));
-    overlay.querySelector('#opt-help').addEventListener('click', () => stepUpload(true));
-    overlay.querySelector('#opt-none').addEventListener('click', () => {
-      // « Non et je vais le faire moi-même » déclare explicitement qu'il n'y a
-      // pas de carnet — même si l'utilisateur avait déjà touché à l'étape
-      // d'upload avant de revenir en arrière ici : `overlay._pagesCarnet` et
-      // `state.pendingFile` sont des propriétés qui SURVIVENT à `shell()`
-      // (elle ne remplace que le HTML, pas les propriétés posées sur
-      // l'overlay), donc sans ce nettoyage `aUnCarnet` restait vrai dans
-      // stepMode() et cachait à tort la case « chercher une photo sur le web ».
-      overlay._pagesCarnet = [];
-      state.pendingFile = null;
-      stepMode();
-    });
-  }
-
-  function stepUpload(withSearchHelper) {
-    const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
-    shell(`
-      ${enteteEtape(trad('Carnet d\'entretien'), { retour: true })}
-      <form id="upload-form">
-        <section class="mform-section mform-section-2">
-          <div class="mform-head">
-            <div class="mform-head-gauche"><span class="mform-num">2</span><span class="mform-section-ico">${picto('carnet')}</span><h3>${trad('Carnet d\'entretien constructeur & Manuel')}</h3></div>
-            <span class="mform-eyebrow">${trad('Analyse locale')}</span>
-          </div>
-          ${withSearchHelper ? `
-          <p class="muted-text">${trad('Deux façons d\'obtenir ton plan : la première te donne le document à analyser, la seconde te donne directement le plan.')}</p>
-          <div class="chemin">
-            <div class="chemin-titre">${trad('1. Chercher le carnet en ligne')}</div>
-            <a class="option-tile" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener"><span class="option-ico">${picto('boite')}</span><span class="option-tile-corps">${tR('Chercher « {nom} » sur le web', { nom: esc(designation(state.brand, state.model, state.name)) })}<span class="opt-sub">${trad('Cherche le manuel du fabricant, télécharge-le, puis ajoute-le ci-dessous.')}</span></span></a>
-          </div>
-          <div class="chemin-titre">${trad('2. Ajouter le PDF ici')}</div>
-          ` : `<p class="muted-text">${trad('Ajoute le PDF : notre algorithme propose l\'intervalle et les tâches à partir de son contenu.')}</p>`}
-
-          <div class="mform-carnet-ligne">
-            <div class="mform-carnet-zone">
-              ${dropzoneHtml('f-manual-drop')}
-              <input id="f-manual" type="file" accept="application/pdf,image/*" multiple hidden>
-              <div class="hint" id="f-manual-statut"></div>
-            </div>
-            <button type="button" class="view-manual mform-carnet-camera" id="btn-camera">${picto('photo')}<span>${trad('Photographier le carnet')}</span></button>
-          </div>
-          <input id="f-camera" type="file" accept="image/*" capture="environment" hidden>
-          <div class="pages-carnet" id="pages-carnet"></div>
-          <div class="pages-utiles" id="pages-utiles"></div>
-          <div class="hint" id="f-analysis"></div>
-
-          <div class="offre-plan">
-            <div class="offre-titre"><span class="card-ico">${picto('boite')}</span>${trad('Vous ne trouvez pas votre carnet ?')}</div>
-            <p>${trad('Nous établissons votre plan d\'entretien — tâches, intervalles et périodicités — à partir des informations disponibles sur la machine. Aucun document du constructeur ne vous sera transmis. Le plan est livré dans l\'application, et il reste modifiable. Prix : 29 €, réglés une fois, sans abonnement supplémentaire.')}</p>
-            <p>${trad('Si le carnet de ce modèle est introuvable et que les informations sont insuffisantes, nous vous le dirons avant tout règlement : nous préférons refuser une vente que livrer un plan inventé.')}</p>
-            <button type="button" class="secondary" id="btn-plan-payant">${trad('Demander l\'établissement de mon plan — 29 €')}</button>
-          </div>
-
-          <label for="f-tasks">${trad('Tâches de maintenance')}</label>
-          <textarea id="f-tasks" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${esc(state.tasks)}</textarea>
-        </section>
-        <div class="hint" id="f-error"></div>
-
-        <div class="modal-actions">
-          <button type="button" class="secondary" id="no-manual">${trad('Je n\'ai pas de carnet')}</button>
-          <button type="submit" class="primary">${trad('Suivant')}${picto('flecheDroite')}</button>
-        </div>
-      </form>
-    `);
-    overlay.querySelector('#wiz-back').addEventListener('click', stepChoice);
-    overlay.querySelector('#no-manual').addEventListener('click', stepChecklist);
+    // ── 02 — Carnet d'entretien ─────────────────────────────────────────
     const apresCarnet = (resultat) => {
+      // Capture l'identification/le TCO/le mode AVANT de sauter à
+      // stepPlanChoice (voir lireFormulaireDansState ci-dessus) — puis
+      // seulement, les valeurs propres au résultat de l'analyse.
+      lireFormulaireDansState();
       state.items = resultat.items;
       state.notes = resultat.notes;
       state.tasks = resultat.taches;
       overlay.querySelector('#f-tasks').value = resultat.taches || '';
-      // L'analyse vient de finir : on demande maintenant ce que le client veut
-      // faire du plan trouvé, AVANT de proposer la suite (mode de suivi/photo).
+      // L'analyse vient de finir : l'utilisateur voit et valide ce qui a été
+      // détecté AVANT que ça devienne le plan réel (écran à part, .pplan-*,
+      // volontairement — voir prompt-stitch-ajouter-machine.md).
       stepPlanChoice(resultat);
     };
     const contexteCarnet = () => ({
       trackingMode: state.trackingMode, currentHours: state.currentHours, serviceDate: state.serviceDate,
     });
-    // Extrait pour être partagé entre le vrai champ #f-manual et la zone de
-    // glisser-déposer (dropzoneHtml, la même que le Tableau de bord et la
-    // fiche machine) : les deux chemins déposent le même fichier, donc la
-    // même suite.
     const traiterFichiersCarnet = (choix) => {
       const images = choix.filter(f => /^image\//.test(f.type));
       const file = choix.find(f => f.type === 'application/pdf') || null;
-      // PHOTOS DU CARNET : le client a le carnet sous la main, pas toujours le PDF.
       if (images.length) {
         state.pendingFile = null;
         brancherCarnetPhotos(overlay, images, contexteCarnet, apresCarnet);
@@ -18686,18 +18909,14 @@ function openAddWizard(companyId, categories) {
       }
       state.pendingFile = file || null;
       if (file) {
-        // REPÉRAGE D'ABORD, ENVOI ENSUITE : on repère les pages utiles localement,
-        // le client les voit et les confirme, et RIEN ne part avant son accord.
-        // `analyserTout` reste le chemin d'avant (le document entier).
         brancherCarnetPdf(overlay, file, contexteCarnet(), apresCarnet,
           () => analyzeManualAndFill(overlay, file, state.trackingMode, { currentHours: state.currentHours, serviceDate: state.serviceDate }));
         renderPdfFirstPageAsBlob(file)
           .then(blob => {
             state.pendingPhotoBlob = blob;
-            // Copie de secours : si l'utilisateur coche « chercher sur le web »
-            // à l'étape suivante puis se ravise, on peut lui rendre cette
-            // photo sans avoir à ré-analyser le PDF.
             state._carnetPhotoBlob = blob;
+            const zone = overlay.querySelector('#photo-preview');
+            if (zone && !zone.querySelector('img')) zone.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(blob)}" alt="">`;
           })
           .catch(err => console.error('Extraction photo (1ère page du PDF) échouée :', err));
       }
@@ -18715,9 +18934,6 @@ function openAddWizard(companyId, categories) {
       annoncerFichiersCarnet(fichiers);
       traiterFichiersCarnet(fichiers);
     });
-    // dropzoneHtml() sert pour le VISUEL, pas pour son clic : le clic ouvre le
-    // vrai champ #f-manual (multiple, PDF + images) ; seul le glisser-déposer
-    // est câblé à la main, pour accepter plusieurs fichiers d'un coup.
     const zoneDepotCarnet = overlay.querySelector('#f-manual-drop');
     if (zoneDepotCarnet) {
       zoneDepotCarnet.addEventListener('click', () => champManualReel.click());
@@ -18736,38 +18952,109 @@ function openAddWizard(companyId, categories) {
       e.target.value = '';
       if (images.length) brancherCarnetPhotos(overlay, images, contexteCarnet, apresCarnet);
     });
-    // L'offre « nous établissons votre plan » : e-mail pré-rempli, rien d'automatique.
-    // LES VALEURS VIENNENT DE L'ÉTAT DU FORMULAIRE, pas du document : à cette étape
-    // l'assistant a été redessiné, les champs de l'étape 1 (« #f-brand », « #f-year »…)
-    // ne sont PLUS dans la page. Les relire ici donnait un e-mail entièrement vide —
-    // chaque ligne à « — » — et obligeait le client à tout retaper. L'état, lui, a
-    // été rempli au moment du « Suivant » de l'étape 1 : c'est la seule source juste.
     brancherOffrePlan(overlay, () => ({
-      name: state.name,
-      brand: state.brand,
-      model: state.model,
-      annee: state.annee,
-      category: state.category,
-      serial_number: state.serial,
+      name: state.name, brand: state.brand, model: state.model, annee: state.annee,
+      category: state.category, serial_number: state.serial,
     }));
-    overlay.querySelector('#upload-form').addEventListener('submit', (e) => {
+
+    // ── 03 — Mode de suivi & échéances ──────────────────────────────────
+    marquerChoixRing('tm');
+    overlay.querySelectorAll('input[name=tm]').forEach(r => {
+      r.addEventListener('change', () => {
+        marquerChoixRing('tm');
+        const choix = overlay.querySelector('input[name=tm]:checked').value;
+        const u = COUNTER_UNITS[counterUnitFromMode(choix)];
+        overlay.querySelector('#hours-field').style.display = choix === 'days' ? 'none' : 'block';
+        const labelEl = overlay.querySelector('#f-current-hours-label');
+        if (labelEl) labelEl.textContent = u.field;
+        const intervalLabel = overlay.querySelector('#f-interval-label');
+        const reminderLabel = overlay.querySelector('#f-reminder-label');
+        const mot = choix === 'days' ? trad('jours') : u.word;
+        if (intervalLabel) {
+          intervalLabel.textContent = tR('Échéance {mode}', {
+            mode: choix === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: mot }),
+          });
+        }
+        if (reminderLabel) reminderLabel.textContent = tR('Rappel avant ({unite})', { unite: mot });
+        const champIntervalle = overlay.querySelector('#f-interval');
+        if (champIntervalle && !overlay._intervalTouche) {
+          champIntervalle.value = intervallePropose(choix, intervallesIA(overlay));
+        }
+        const carteSecH = overlay.querySelector('#carte-secondaire-hours');
+        const carteSecK = overlay.querySelector('#carte-secondaire-km');
+        const carteSecJ = overlay.querySelector('#carte-secondaire-days');
+        if (carteSecH) carteSecH.style.display = choix === 'hours' ? 'none' : 'flex';
+        if (carteSecK) carteSecK.style.display = choix === 'km' ? 'none' : 'flex';
+        if (carteSecJ) carteSecJ.style.display = choix === 'days' ? 'none' : 'flex';
+        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
+        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
+          radioDevenuInvalide.checked = false;
+          marquerCarteSelectionnee('tm2');
+          if (typeof majLabelsSecondaire === 'function') majLabelsSecondaire();
+        }
+      });
+    });
+    function majLabelsSecondaire() {
+      const uniteChoisie = overlay.querySelector('input[name=tm2]:checked')?.value || null;
+      const ligneValeur = overlay.querySelector('#secondaire-valeur-row');
+      if (ligneValeur) ligneValeur.style.display = uniteChoisie === 'days' ? 'none' : 'flex';
+      const mot = uniteChoisie === 'days' ? trad('jours') : (COUNTER_UNITS[uniteChoisie || 'hours'] || COUNTER_UNITS.hours).word;
+      const labelInterval = overlay.querySelector('#f-secondaire-interval-label');
+      const labelReminder = overlay.querySelector('#f-secondaire-reminder-label');
+      if (labelInterval) labelInterval.textContent = tR('Échéance tous les ({unite})', { unite: mot });
+      if (labelReminder) labelReminder.textContent = tR('Rappel avant ({unite})', { unite: mot });
+    }
+    if (SCHEMA.hasCounter2) {
+      const caseSecondaire = overlay.querySelector('#f-secondaire-active');
+      const champsSecondaire = overlay.querySelector('#secondaire-champs');
+      caseSecondaire?.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
+        if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
+        if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
+      });
+      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
+        overlay._secondaireToucheForce = true;
+        marquerCarteSelectionnee('tm2');
+        majLabelsSecondaire();
+      }));
+      marquerCarteSelectionnee('tm2');
+      majLabelsSecondaire();
+    }
+    const champIntervalleWizard = overlay.querySelector('#f-interval');
+    if (champIntervalleWizard) champIntervalleWizard.addEventListener('input', () => { overlay._intervalTouche = true; });
+
+    // ── 05 — Photo ────────────────────────────────────────────────────
+    brancherPhotoManuelle(overlay, { apercu: '#photo-preview', surState: state });
+    const photoPreview = overlay.querySelector('#photo-preview');
+    if (photoPreview && state.pendingPhotoBlob && !photoPreview.querySelector('img')) {
+      photoPreview.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(state.pendingPhotoBlob)}" alt="">`;
+    }
+    // Pas de machine créée à ce stade : impossible de chercher une photo en
+    // direct (le quota/la recherche, voir openMachineModal#fetch-photo-btn,
+    // s'appuie sur un id de machine réel). On diffère donc à l'enregistrement,
+    // comme le faisait déjà l'ancien assistant (case à cocher devenue bouton).
+    const fetchBtn = overlay.querySelector('#fetch-photo-btn');
+    const photoStatus = overlay.querySelector('#photo-status');
+    if (fetchBtn) {
+      fetchBtn.addEventListener('click', () => {
+        state.searchPhoto = true;
+        state.pendingPhotoBlob = null;
+        if (photoPreview) {
+          photoPreview.innerHTML = `<span class="material-symbols-outlined text-4xl mb-1 text-primary">travel_explore</span><span class="text-[10px] font-bold uppercase tracking-wider text-primary text-center px-2">${esc(trad('Recherche automatique'))}</span>`;
+        }
+        if (photoStatus) photoStatus.textContent = trad('Une photo sera recherchée automatiquement à l\'enregistrement.');
+      });
+    }
+
+    // ── Envoi ────────────────────────────────────────────────────────
+    overlay.querySelector('#step-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      // Sans PDF et sans photo, il n'y a RIEN a analyser : on le dit, au lieu de
-      // laisser passer un formulaire vide (le champ accepte desormais des images,
-      // donc il n'est plus `required` : la validation du navigateur ne suffit plus).
-      if (!state.pendingFile && !pagesCarnet(overlay).length) {
-        overlay.querySelector('#f-error').textContent = trad('Ajoute le PDF du carnet, ou photographie le tableau d\'entretien.');
-        return;
-      }
-      state.tasks = overlay.querySelector('#f-tasks').value.trim();
-      state.items = overlay._aiItems || state.items || null;
-      state.notes = overlay._aiNotes || state.notes || '';
-      // LE MODE VIENT APRÈS LE CARNET : l'analyse a lu le document, l'étape
-      // suivante propose donc le mode de suivi qu'il recommande.
-      stepMode();
+      lireFormulaireDansState();
+      // Le formulaire est désormais unique (plus de stepMode/stepChecklist) :
+      // on enregistre directement, qu'il y ait eu un carnet ou non.
+      saveMachine(e.target.querySelector('button[type=submit]'), overlay.querySelector('#f-error'));
     });
   }
-
   // ── ÉTAPE « CHOIX DU PLAN » — juste après l'analyse du carnet ──────────
   // Nouvelle étape : avant de proposer la suite (mode de suivi + photo), on
   // demande explicitement ce que le client veut faire du plan que l'IA
@@ -18780,6 +19067,14 @@ function openAddWizard(companyId, categories) {
   //   · Faire mon propre plan → ignore la proposition de l'IA (le PDF reste
   //     attaché à la fiche, lui) et enregistre avec un plan vierge.
   function stepPlanChoice(resultat) {
+    // Écran .pplan-* hors du scope Tailwind compilé de stepFormUnique : le
+    // reset ".machine-modal-add input{border:0;padding:0;…}" (spécificité
+    // plus haute que les classes .pplan-* elles-mêmes) écraserait sinon la
+    // bordure/le padding de .pplan-elt-input. .machine-modal (l'ancienne
+    // classe du wizard, inchangée) porte déjà le .modal{max-width:900px}
+    // dont cet écran a besoin — stepFormUnique() restaure sa propre classe
+    // au retour (« Modifier ce plan »).
+    overlay.className = 'overlay machine-modal';
     // `let`, pas `const` : le bouton crayon (voir plus bas) réassigne une
     // ligne en place via appliquerChoixSurTache, « Ajouter une ligne » en
     // pousse une nouvelle — `items` est la seule source de vérité de cet
@@ -18861,7 +19156,7 @@ function openAddWizard(companyId, categories) {
       </div>
       <div class="hint" id="f-error"></div>
     `);
-    overlay.querySelector('#wiz-back').addEventListener('click', () => stepUpload(false));
+    overlay.querySelector('#wiz-back').addEventListener('click', () => stepFormUnique());
     const errEl = overlay.querySelector('#f-error');
     const wizTbody = overlay.querySelector('#wiz-items-tbody');
     const rafraichirItemsWiz = () => { if (wizTbody) wizTbody.innerHTML = tableauItemsWizHtml(); };
@@ -18912,7 +19207,7 @@ function openAddWizard(companyId, categories) {
     });
     overlay.querySelector('#pc-modifier').addEventListener('click', () => {
       state.items = itemsFinaux();
-      stepMode();
+      stepFormUnique();
     });
     overlay.querySelector('#pc-propre').addEventListener('click', (e) => {
       state.items = null;
@@ -18920,366 +19215,6 @@ function openAddWizard(companyId, categories) {
       state.notes = '';
       appliquerRecommandationIA();
       saveMachine(e.currentTarget, errEl);
-    });
-  }
-
-  // ── ÉTAPE « MODE DE SUIVI » — APRÈS le carnet, AVANT la photo ──────────
-  // Ordre voulu par l'usage : identité → carnet → MODE → photo.
-  //  • le mode est PRÉ-SÉLECTIONNÉ d'après ce que dit le carnet : l'utilisateur
-  //    confirme ou corrige, il ne devine plus ;
-  //  • sans carnet, c'est la SEULE source du mode : défaut raisonnable
-  //    (calendaire) et rappel que le plan reste modifiable dans la fiche ;
-  //  • la case photo ne s'affiche QUE sans carnet — avec un carnet, c'est sa
-  //    première page qui sert de photo et la chercher sur le web ne servirait à
-  //    rien, puisqu'elle serait écrasée.
-  function stepMode() {
-    // Un carnet, c'est un PDF… ou des PHOTOS du tableau : les deux comptent.
-    const aUnCarnet = !!state.pendingFile || pagesCarnet(overlay).length > 0;
-    const reco = overlay._aiTrackingSuggestion || null;
-    // Un véhicule se suit au kilométrage : si l'analyse propose « heures » pour un
-    // véhicule, c'est l'unité de la machine qui l'emporte (l'analyse ne connaît
-    // que « heures » ou « jours »).
-    const recoRetenue = (reco === 'hours' && state.kind === TYPE_VEHICULE && SCHEMA.hasCounter) ? trad('km') : reco;
-    if (recoRetenue && !overlay._modeToucheForce) state.trackingMode = recoRetenue;
-    // Sans carnet, le TYPE de machine donne un défaut raisonnable : un véhicule se
-    // suit au kilométrage, tout le reste au calendrier. L'utilisateur corrige s'il
-    // veut — et le plan reste modifiable ensuite, dans la fiche de la machine.
-    if (!recoRetenue && !overlay._modeToucheForce) {
-      state.trackingMode = (state.kind === TYPE_VEHICULE && SCHEMA.hasCounter) ? trad('km') : 'days';
-    }
-    const mode = state.trackingMode;
-    const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
-    const isCounter = mode !== 'days';
-    // Second suivi suggéré par l'analyse (voir detecterUniteSecondaire),
-    // proposé — pas imposé : pré-coché tant que l'utilisateur n'a pas
-    // touché la section lui-même, jamais s'il coïncide avec le principal
-    // (le kilométrage a pu remplacer « heures » entre-temps, ligne 15170).
-    if (overlay._aiUniteSecondaire && overlay._aiUniteSecondaire !== mode
-        && !overlay._secondaireToucheForce && !state.secondaryUnit) {
-      state.secondaryUnit = overlay._aiUniteSecondaire;
-    }
-    const mention = recoRetenue
-      ? `<div class="hint" id="mode-reco">${recoRetenue === 'km'
-        ? trad('Le carnet décrit un suivi au kilométrage : ce mode est proposé, tu peux le corriger.')
-        : trad('Le carnet exprime ses échéances en heures : le compteur horaire est proposé, tu peux le corriger.')}</div>`
-      : '';
-    // stepChecklist() (l'écran suivant si pas de carnet) ne doit pas reposer
-    // la même question : elle vient d'être posée ici, dans tous les cas
-    // désormais (avec ou sans carnet — voir blocRecherchePhotoWeb()).
-    demandePhotoWebFaite = true;
-    shell(`
-      ${enteteEtape(trad('Mode de suivi'), { retour: true, sous: aUnCarnet
-        ? trad('Vérifie le mode proposé d\'après le carnet, puis l\'échéance et le rappel.')
-        : trad('Pas de carnet : choisis le mode qui correspond à ta machine. Le plan reste modifiable ensuite, dans la fiche de la machine.') })}
-
-      <form id="mode-form">
-      <section class="mform-section mform-section-4">
-        <div class="mform-head">
-          <div class="mform-head-gauche"><span class="mform-num">3</span><span class="mform-section-ico">${picto('reglages')}</span><h3>${trad('Mode de suivi & échéances d\'entretien')}</h3></div>
-        </div>
-        ${mention}
-        <label>${trad('Mode de suivi de la maintenance')}</label>
-        <div class="mform-cards">
-          <label class="mform-card"><input type="radio" name="tm" value="days" ${state.trackingMode === 'days' ? 'checked' : ''}>
-            <span class="mform-card-ico">${picto('prochain')}</span>
-            <span class="mform-card-corps"><span class="mform-card-titre">${trad('Calendaire')}</span><span class="mform-card-texte">${trad('Jours / semaines')}</span></span>
-          </label>
-          <label class="mform-card"><input type="radio" name="tm" value="hours" ${state.trackingMode === 'hours' ? 'checked' : ''}>
-            <span class="mform-card-ico">${picto('compteur')}</span>
-            <span class="mform-card-corps"><span class="mform-card-titre">${trad('Compteur horaire')}</span><span class="mform-card-texte">${trad('Heures')}</span></span>
-          </label>
-          ${SCHEMA.hasCounter ? `<label class="mform-card"><input type="radio" name="tm" value="km" ${state.trackingMode === trad('km') ? 'checked' : ''}>
-            <span class="mform-card-ico">${picto('vehicule')}</span>
-            <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
-          </label>` : ''}
-        </div>
-        <div class="hint" style="margin:-4px 0 10px;">${trad('Compteur horaire pour les moteurs thermiques (BTP, agricole, motoculture), kilométrage pour les véhicules.')}</div>
-        <div id="hours-field" style="display:${state.trackingMode === 'days' ? 'none' : 'block'};">
-          <label for="f-current-hours" id="f-current-hours-label">${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].field}</label>
-          <input id="f-current-hours" type="number" min="0" step="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].step}" value="${state.currentHours ?? ''}" placeholder="${COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].placeholder}">
-        </div>
-
-        <div class="field-row" style="margin-top:14px;">
-          <div>
-            <label for="f-interval" id="f-interval-label">${tR('Échéance {mode}', { mode: isCounter ? tR('tous les ({unite})', { unite: unit.word }) : trad('toutes les (jours)') })}</label>
-            <input id="f-interval" type="number" min="1" value="${isCounter ? state.intervalHours : state.intervalDays}" required>
-          </div>
-          <div>
-            <label for="f-reminder" id="f-reminder-label">${tR('Rappel avant ({unite})', { unite: isCounter ? unit.word : trad('jours') })}</label>
-            <input id="f-reminder" type="number" min="0" value="${isCounter ? state.reminderHoursBefore : state.reminderDays}" required>
-          </div>
-        </div>
-        ${SCHEMA.hasCounter2 ? `
-        <label class="mform-photo-web" for="f-secondaire-active" style="margin-top:10px;">
-          <input type="checkbox" id="f-secondaire-active" ${state.secondaryUnit ? 'checked' : ''}>
-          <span class="mform-photo-web-corps">
-            <span>${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</span>
-          </span>
-        </label>
-        <div id="secondaire-champs" style="display:${state.secondaryUnit ? 'flex' : 'none'};flex-direction:column;gap:10px;margin-top:10px;">
-          <div class="mform-cards">
-            <label class="mform-card" id="carte-secondaire-hours" style="display:${mode === 'hours' ? 'none' : 'flex'};">
-              <input type="radio" name="tm2" value="hours" ${state.secondaryUnit === 'hours' ? 'checked' : ''}>
-              <span class="mform-card-ico">${picto('compteur')}</span>
-              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Compteur horaire')}</span><span class="mform-card-texte">${trad('Heures')}</span></span>
-            </label>
-            <label class="mform-card" id="carte-secondaire-km" style="display:${mode === 'km' ? 'none' : 'flex'};">
-              <input type="radio" name="tm2" value="km" ${state.secondaryUnit === 'km' ? 'checked' : ''}>
-              <span class="mform-card-ico">${picto('vehicule')}</span>
-              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Kilométrage')}</span><span class="mform-card-texte">${trad('Kilomètres')}</span></span>
-            </label>
-            <label class="mform-card" id="carte-secondaire-days" style="display:${mode === 'days' ? 'none' : 'flex'};">
-              <input type="radio" name="tm2" value="days" ${state.secondaryUnit === 'days' ? 'checked' : ''}>
-              <span class="mform-card-ico">${picto('prochain')}</span>
-              <span class="mform-card-corps"><span class="mform-card-titre">${trad('Calendaire')}</span><span class="mform-card-texte">${trad('Jours / semaines')}</span></span>
-            </label>
-          </div>
-          <div class="field-row" id="secondaire-valeur-row" style="display:${state.secondaryUnit === 'days' ? 'none' : 'flex'};">
-            <div>
-              <label for="f-secondaire-valeur">${trad('Relevé actuel')}</label>
-              <input id="f-secondaire-valeur" type="number" min="0" value="${state.secondaryValue ?? ''}">
-            </div>
-          </div>
-          <div class="field-row">
-            <div>
-              <label for="f-secondaire-interval" id="f-secondaire-interval-label">${tR('Échéance tous les ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
-              <input id="f-secondaire-interval" type="number" min="1" value="${state.secondaryUnit === 'days' ? state.secondaryIntervalDays : state.secondaryIntervalCounter}">
-            </div>
-            <div>
-              <label for="f-secondaire-reminder" id="f-secondaire-reminder-label">${tR('Rappel avant ({unite})', { unite: state.secondaryUnit === 'days' ? trad('jours') : (COUNTER_UNITS[state.secondaryUnit || 'hours'] || COUNTER_UNITS.hours).word })}</label>
-              <input id="f-secondaire-reminder" type="number" min="0" value="${state.secondaryUnit === 'days' ? state.secondaryReminderDays : state.secondaryReminderCounter}">
-            </div>
-          </div>
-        </div>` : ''}
-      </section>
-
-      <section class="mform-section mform-section-2">
-        <div class="mform-head">
-          <div class="mform-head-gauche"><span class="mform-num">4</span><span class="mform-section-ico">${picto('photo')}</span><h3>${trad('Visuel de la machine')}</h3></div>
-        </div>
-        ${blocPhotoManuelle({ apercu: '#photo-manuelle-apercu' })}
-        ${blocRecherchePhotoWeb()}
-      </section>
-      <div class="hint" id="f-error"></div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="cancel">${trad('Annuler')}</button>
-        <button type="submit" class="primary">${aUnCarnet ? trad('Enregistrer') : trad('Suivant')}${aUnCarnet ? '' : picto('flecheDroite')}</button>
-      </div>
-      </form>
-    `);
-    overlay.querySelector('#wiz-back').addEventListener('click', () => (aUnCarnet ? stepUpload(false) : stepChoice()));
-    overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
-    marquerCarteSelectionnee('tm');
-    overlay.querySelectorAll('input[name=tm]').forEach(r => {
-      r.addEventListener('change', () => {
-        marquerCarteSelectionnee('tm');
-        const choix = overlay.querySelector('input[name=tm]:checked').value;
-        const u = COUNTER_UNITS[counterUnitFromMode(choix)];
-        overlay.querySelector('#hours-field').style.display = choix === 'days' ? 'none' : 'block';
-        const labelEl = overlay.querySelector('#f-current-hours-label');
-        if (labelEl) labelEl.textContent = u.field;
-        const intervalLabel = overlay.querySelector('#f-interval-label');
-        const reminderLabel = overlay.querySelector('#f-reminder-label');
-        const mot = choix === 'days' ? trad('jours') : u.word;
-        if (intervalLabel) {
-          intervalLabel.textContent = tR('Échéance {mode}', {
-            mode: choix === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: mot }),
-          });
-        }
-        if (reminderLabel) reminderLabel.textContent = tR('Rappel avant ({unite})', { unite: mot });
-        // L'intervalle suit l'unité choisie : « 90 » (jours) ne doit pas devenir
-        // « 90 heures ». On ne remplace que si l'utilisateur n'a rien saisi.
-        const champIntervalle = overlay.querySelector('#f-interval');
-        if (champIntervalle && !overlay._intervalTouche) {
-          champIntervalle.value = intervallePropose(choix, intervallesIA(overlay));
-        }
-        // Le second suivi ne peut pas être la MÊME unité que le principal : la
-        // carte devenue redondante se cache, et se décoche si elle l'était.
-        const carteSecH = overlay.querySelector('#carte-secondaire-hours');
-        const carteSecK = overlay.querySelector('#carte-secondaire-km');
-        const carteSecJ = overlay.querySelector('#carte-secondaire-days');
-        if (carteSecH) carteSecH.style.display = choix === 'hours' ? 'none' : 'flex';
-        if (carteSecK) carteSecK.style.display = choix === 'km' ? 'none' : 'flex';
-        if (carteSecJ) carteSecJ.style.display = choix === 'days' ? 'none' : 'flex';
-        const radioDevenuInvalide = overlay.querySelector(`input[name=tm2][value="${choix}"]`);
-        if (radioDevenuInvalide && radioDevenuInvalide.checked) {
-          radioDevenuInvalide.checked = false;
-          marquerCarteSelectionnee('tm2');
-          if (typeof majLabelsSecondaire === 'function') majLabelsSecondaire();
-        }
-      });
-    });
-    // Second suivi, optionnel : repliable, sans rien écrire tant qu'il n'est
-    // pas coché (voir SCHEMA.hasCounter2). Une unité calendaire n'a pas de
-    // relevé à saisir (chaque tâche porte déjà sa propre date) : la ligne
-    // « Relevé actuel » se cache, et les libellés d'intervalle/rappel suivent
-    // l'unité choisie (jours, ou l'unité du compteur).
-    function majLabelsSecondaire() {
-      const uniteChoisie = overlay.querySelector('input[name=tm2]:checked')?.value || null;
-      const ligneValeur = overlay.querySelector('#secondaire-valeur-row');
-      if (ligneValeur) ligneValeur.style.display = uniteChoisie === 'days' ? 'none' : 'flex';
-      const mot = uniteChoisie === 'days' ? trad('jours') : (COUNTER_UNITS[uniteChoisie || 'hours'] || COUNTER_UNITS.hours).word;
-      const labelInterval = overlay.querySelector('#f-secondaire-interval-label');
-      const labelReminder = overlay.querySelector('#f-secondaire-reminder-label');
-      if (labelInterval) labelInterval.textContent = tR('Échéance tous les ({unite})', { unite: mot });
-      if (labelReminder) labelReminder.textContent = tR('Rappel avant ({unite})', { unite: mot });
-    }
-    if (SCHEMA.hasCounter2) {
-      const caseSecondaire = overlay.querySelector('#f-secondaire-active');
-      const champsSecondaire = overlay.querySelector('#secondaire-champs');
-      caseSecondaire?.addEventListener('change', () => {
-        overlay._secondaireToucheForce = true;
-        if (champsSecondaire) champsSecondaire.style.display = caseSecondaire.checked ? 'flex' : 'none';
-        if (!caseSecondaire.checked) overlay.querySelectorAll('input[name=tm2]').forEach(r => { r.checked = false; });
-      });
-      overlay.querySelectorAll('input[name=tm2]').forEach(r => r.addEventListener('change', () => {
-        overlay._secondaireToucheForce = true;
-        marquerCarteSelectionnee('tm2');
-        majLabelsSecondaire();
-      }));
-      marquerCarteSelectionnee('tm2');
-      majLabelsSecondaire();
-    }
-    const champIntervalleWizard = overlay.querySelector('#f-interval');
-    if (champIntervalleWizard) {
-      champIntervalleWizard.addEventListener('input', () => { overlay._intervalTouche = true; });
-    }
-    brancherPhotoManuelle(overlay, { apercu: '#photo-manuelle-apercu', surState: state });
-    // La photo extraite de la 1ère page du carnet (state.pendingPhotoBlob) ne
-    // passe pas par brancherPhotoManuelle() : sans cet aperçu, l'écran semblait
-    // vide alors qu'une photo était déjà prête à être enregistrée.
-    const apercuPhoto = overlay.querySelector('#photo-manuelle-apercu');
-    if (apercuPhoto && state.pendingPhotoBlob && !apercuPhoto.innerHTML.trim()) {
-      apercuPhoto.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(state.pendingPhotoBlob)}" alt="">`;
-    }
-    // Cocher « chercher sur le web » doit RÉELLEMENT avoir un effet : à
-    // l'enregistrement, pendingPhotoBlob est prioritaire sur searchPhoto (voir
-    // saveMachine) — sans ce câblage, cocher la case pendant qu'une photo du
-    // carnet est déjà prête n'aurait donc rien changé. Décocher restaure cette
-    // photo (gardée à part dans state._carnetPhotoBlob) plutôt que de la perdre.
-    const caseRecherchePhoto = overlay.querySelector('#f-search-photo');
-    if (caseRecherchePhoto) {
-      caseRecherchePhoto.addEventListener('change', () => {
-        state.searchPhoto = caseRecherchePhoto.checked;
-        if (caseRecherchePhoto.checked) {
-          state.pendingPhotoBlob = null;
-          if (apercuPhoto) apercuPhoto.innerHTML = '';
-        } else if (state._carnetPhotoBlob) {
-          state.pendingPhotoBlob = state._carnetPhotoBlob;
-          if (apercuPhoto) apercuPhoto.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(state._carnetPhotoBlob)}" alt="">`;
-        }
-      });
-    }
-    overlay.querySelector('#mode-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      state.trackingMode = overlay.querySelector('input[name=tm]:checked').value;
-      state.currentHours = state.trackingMode !== 'days'
-        ? parseFloat(overlay.querySelector('#f-current-hours').value) || 0
-        : null;
-      const intervalValue = parseInt(overlay.querySelector('#f-interval').value, 10);
-      const reminderValue = parseInt(overlay.querySelector('#f-reminder').value, 10);
-      if (state.trackingMode !== 'days') {
-        state.intervalHours = intervalValue;
-        state.reminderHoursBefore = reminderValue;
-        state.intervalDays = overlay._aiIntervalDays || state.intervalDays;
-      } else {
-        state.intervalDays = intervalValue;
-        state.reminderDays = reminderValue;
-        state.intervalHours = overlay._aiIntervalHours || state.intervalHours;
-      }
-      const photo = overlay.querySelector('#f-search-photo');
-      state.searchPhoto = photo ? !!photo.checked : false;
-      // Second suivi, optionnel : rien n'est écrit s'il n'a pas été coché.
-      // Calendaire n'a pas de relevé (chaque tâche porte déjà sa propre
-      // date) : seul l'intervalle/rappel (en jours) est retenu.
-      const caseSecondaireActive = overlay.querySelector('#f-secondaire-active');
-      if (caseSecondaireActive?.checked) {
-        const radioSecondaire = overlay.querySelector('input[name=tm2]:checked');
-        state.secondaryUnit = radioSecondaire ? radioSecondaire.value : null;
-        const enCalendrier = state.secondaryUnit === 'days';
-        state.secondaryValue = (state.secondaryUnit && !enCalendrier)
-          ? (parseFloat(overlay.querySelector('#f-secondaire-valeur').value) || 0) : null;
-        if (enCalendrier) {
-          state.secondaryIntervalDays = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_DAYS;
-          state.secondaryReminderDays = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_DAYS;
-        } else if (state.secondaryUnit) {
-          state.secondaryIntervalCounter = parseInt(overlay.querySelector('#f-secondaire-interval').value, 10) || FALLBACK_INTERVAL_HOURS;
-          state.secondaryReminderCounter = parseInt(overlay.querySelector('#f-secondaire-reminder').value, 10) || FALLBACK_REMINDER_HOURS;
-        }
-      } else {
-        state.secondaryUnit = null;
-        state.secondaryValue = null;
-      }
-      if (aUnCarnet) {
-        saveMachine(e.target.querySelector('button[type=submit]'), overlay.querySelector('#f-error'));
-      } else {
-        stepChecklist();
-      }
-    });
-  }
-
-  function stepChecklist() {
-    const commonTasks = [trad('Graissage'), trad('Vidange (huile/carburant)'), trad('Nettoyage'), trad('Contrôle/changement de pièces d\'usure'), trad('Contrôle des niveaux'), trad('Contrôle visuel général')];
-    shell(`
-      ${enteteEtape(trad('Suivi simplifié'), { retour: true, sous: tR('Sélectionne ce que tu veux suivre pour « {nom} ». Pas de carnet constructeur : ce plan reste modifiable ensuite.', { nom: esc(state.name) }) })}
-      <form id="checklist-form">
-        <section class="mform-section mform-section-3">
-          <div class="mform-head">
-            <div class="mform-head-gauche"><span class="mform-num">4</span><span class="mform-section-ico">${picto('entretien')}</span><h3>${trad('Tâches de maintenance')}</h3></div>
-          </div>
-          <div class="checklist">
-            ${commonTasks.map(t => `<label><input type="checkbox" value="${t}"> ${t}</label>`).join('')}
-          </div>
-          <label for="f-other-task">${trad('Autre (optionnel)')}</label>
-          <input id="f-other-task" placeholder="${trad('Ex. Contrôle courroie')}">
-        </section>
-
-        <section class="mform-section mform-section-2">
-          <div class="mform-head">
-            <div class="mform-head-gauche"><span class="mform-section-ico">${picto('photo')}</span><h3>${trad('Visuel de la machine')}</h3></div>
-          </div>
-          ${blocPhotoManuelle({ apercu: '#photo-manuelle-apercu' })}
-          ${demandePhotoWebFaite ? '' : blocRecherchePhotoWeb()}
-        </section>
-
-        <div class="hint" id="f-error"></div>
-
-        <div class="modal-actions">
-          <button type="button" class="secondary" id="cancel">${trad('Annuler')}</button>
-          <button type="submit" class="primary">${trad('Enregistrer')}</button>
-        </div>
-      </form>
-    `);
-    overlay.querySelector('#wiz-back').addEventListener('click', stepMode);
-    overlay.querySelector('#cancel').addEventListener('click', () => overlay.remove());
-    brancherPhotoManuelle(overlay, { apercu: '#photo-manuelle-apercu', surState: state });
-    overlay.querySelector('#checklist-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const checked = Array.from(overlay.querySelectorAll('.checklist input:checked')).map(c => c.value);
-      const other = overlay.querySelector('#f-other-task').value.trim();
-      if (other) checked.push(other);
-      state.tasks = checked.join(', ');
-      state.pendingFile = null;
-      // L'échéance et le rappel ont été réglés à l'étape du mode de suivi : plus
-      // de champs en double ici (deux endroits pour la même valeur finissent
-      // toujours par diverger).
-      const intervalValue = state.trackingMode !== 'days' ? state.intervalHours : state.intervalDays;
-      const freqLabel = state.trackingMode !== 'days'
-        ? tR('Tous les {n} {unite}', { n: intervalValue, unite: COUNTER_UNITS[counterUnitFromMode(state.trackingMode)].short })
-        : tR('Tous les {n} jours', { n: intervalValue });
-      state.items = checked.length
-        ? checked.map(label => ({ label, frequency: freqLabel, spec: '', qty: '', note: '' }))
-        : null;
-      // Cet écran n'avait jamais lu la case « chercher une photo sur le web »
-      // (elle n'y était même pas affichée) : sans ça, un client passé par
-      // « Je n'ai pas de carnet » ne pouvait jamais obtenir de photo — ni la
-      // sienne (pas de carnet), ni celle du web (case absente). Si la case a
-      // déjà été répondue dans stepMode() (demandePhotoWebFaite), elle n'est
-      // pas redemandée ici : on garde alors la valeur déjà dans `state`.
-      const photo = overlay.querySelector('#f-search-photo');
-      if (photo) state.searchPhoto = !!photo.checked;
-      saveMachine(e.target.querySelector('button[type=submit]'), overlay.querySelector('#f-error'));
     });
   }
 
@@ -19472,7 +19407,7 @@ function openAddWizard(companyId, categories) {
     }
   }
 
-  stepIdentification();
+  stepFormUnique();
 }
 function openNextMaintenanceView(machine) {
   // « Prochain entretien » fixe une échéance : c'est une écriture sur le plan.
