@@ -2050,7 +2050,14 @@
      icônes (material-symbols-outlined) sont utilisées TELLES QUELLES dans
      le template JS, à l'identique de code.html — aucune classe maison ni
      icône de repli à retenir, hors composants interactifs ci-dessous. */
-  .machine-modal-edit .modal{max-width:56rem;width:100%;padding:0;border:none;overflow:hidden;display:flex;flex-direction:column;max-height:88vh;box-sizing:border-box;}
+  /* Fond de la modale entière #F2F4F8 (demande utilisateur) : la modale
+     de base (.modal, styles.css ~1798) est blanche — override scopé ici
+     plutôt que touchée à la source, partagée par toutes les autres
+     modales de l'app. L'en-tête et le pied de page portaient chacun leur
+     propre bg-surface-container-lowest (blanc) en dur dans le HTML ; ils
+     ont été retirés pour laisser transparaître ce fond unique sur toute
+     la hauteur (voir openMachineModal). */
+  .machine-modal-edit .modal{max-width:56rem;width:100%;padding:0;border:none;overflow:hidden;display:flex;flex-direction:column;max-height:88vh;box-sizing:border-box;background:#F2F4F8;}
   .machine-modal-edit .modal>form{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
   /* Preflight de Tailwind est désactivé (il resterait global, hors de
      portée de l'option "important" — seules les utilitaires le sont) :
@@ -2143,7 +2150,30 @@
   }
   .machine-modal-edit .mform-photo-web input[type=checkbox]{width:18px;height:18px;accent-color:#006591;flex:0 0 auto;}
   .machine-modal-edit .mform-photo-web-corps span{font-size:13px;font-weight:600;color:#0b1c30;}
-  .machine-modal-edit .mmod-second-panel{background:#eff4ff;border-radius:0.75rem;padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+  .machine-modal-edit .mmod-second-panel{background:#F2F4F8;border-radius:0.75rem;padding:1rem;display:flex;flex-direction:column;gap:1rem;}
+  /* Blocs TCO et photo (demande utilisateur) : mêmes classes maison que
+     .mmod-second-panel, plutôt qu'une surcharge de la classe Tailwind
+     compilée bg-surface-container-low — cette dernière est réutilisée par
+     d'autres blocs de la modale (carnet déjà enregistré, case "second
+     suivi", bouton Annuler) qui doivent garder leur teinte d'origine. */
+  .machine-modal-edit .mmod-tco-panel{background:#F2F4F8;}
+  .machine-modal-edit .mmod-photo-panel{background:#F2F4F8;}
+  /* Cadre photo (#photo-preview, id unique dans tout app.html — sûr à cibler
+     directement) : fond passé au blanc (au lieu de bg-surface-container,
+     teinté indigo) pour que le "letterboxing" autour d'une photo qui ne
+     remplit pas tout le cadre (object-fit:contain, ratio du cadre 44:28 ≠
+     ratio réel de la photo) ne fasse plus dépasser un bandeau bleu visible,
+     signalé par l'utilisateur avec capture à l'appui.
+     La règle .machine-photo{} générique (styles.css ~1762, utilisée par
+     TOUT le reste de l'app) impose son propre ratio 16/9, sa marge et son
+     fond — override nécessaire ici via #photo-preview .machine-photo (le
+     sélecteur ID passe devant les classes Tailwind compilées, y compris
+     celles absentes des 3 endroits qui réinjectent une photo après coup
+     (choisir/prendre/chercher sur le web) sans les classes w-full h-full
+     object-contain posées au premier rendu — d'où un rendu incohérent
+     avant ce correctif, jamais ajusté après le remplacement de la photo. */
+  .machine-modal-edit #photo-preview{background:#fff;}
+  .machine-modal-edit #photo-preview .machine-photo{width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:contain;margin:0;border:none;background:transparent;}
   .machine-modal-edit .mmod-second-panel-head{display:flex;align-items:center;justify-content:space-between;}
   .machine-modal-edit .mmod-second-panel-head span:first-child{font-size:12px;font-weight:700;color:#0b1c30;}
   .machine-modal-edit .mmod-pill-actif{padding:2px 8px;border-radius:0.25rem;background:#c9e6ff;color:#004c6e;font-size:11px;font-weight:600;}

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1KVa3JT7M0UeKoF/aiHLGM9m5s2agyoAC675DlGMmqs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KVkx8sLNuzrEo474k8z2MetCP6uBptI94hVS2UD+33g=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -22765,7 +22765,7 @@ function openMachineModal(companyId, categories, existing) {
   const kindActuel = isEdit ? machineKind(existing) : TYPE_MACHINE;
   overlay.innerHTML = `
     <div class="modal">
-      <div class="px-space-xl pt-space-lg pb-space-md flex items-start justify-between bg-surface-container-lowest">
+      <div class="px-space-xl pt-space-lg pb-space-md flex items-start justify-between">
         <div class="flex flex-col gap-space-xs">
           <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">${isEdit ? trad('Modifier une machine') : trad('Ajouter une machine')}</h2>
           <div class="flex items-center gap-space-xs">
@@ -22793,16 +22793,16 @@ function openMachineModal(companyId, categories, existing) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-name">${trad('Nom de la machine')}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-name" autocapitalize="characters" required placeholder="${trad('Ex. OREC 4X4 - ATELIER')}" value="${isEdit ? esc(existing.name) : ''}">
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-name" autocapitalize="characters" required placeholder="${trad('Ex. OREC 4X4 - ATELIER')}" value="${isEdit ? esc(existing.name) : ''}">
             </div>
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-category">${trad('Catégorie')}</label>
               <div class="relative">
-                <select class="w-full h-10 px-space-md pr-10 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md appearance-none focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer" id="f-category" required>${optionsCategorieListe(isEdit ? existing.category?.name || '' : '', categories)}</select>
+                <select class="w-full h-10 px-space-md pr-10 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md appearance-none focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer" id="f-category" required>${optionsCategorieListe(isEdit ? existing.category?.name || '' : '', categories)}</select>
               </div>
             </div>
           </div>
-          <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" id="f-category-autre" autocapitalize="characters" placeholder="${trad('Ex. DÉBROUSSAILLEUSE À DOS')}" hidden>
+          <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" id="f-category-autre" autocapitalize="characters" placeholder="${trad('Ex. DÉBROUSSAILLEUSE À DOS')}" hidden>
 
           ${SCHEMA.hasKind ? `
           <div class="flex flex-col gap-space-xs">
@@ -22838,15 +22838,15 @@ function openMachineModal(companyId, categories, existing) {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-brand">${trad('Marque')}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-brand" placeholder="${trad('Ex. KUBOTA')}" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-brand" placeholder="${trad('Ex. KUBOTA')}" autocapitalize="characters" value="${isEdit ? esc(machineBrand(existing)) : ''}">
             </div>
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-model">${trad('Modèle')}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-model" placeholder="${trad('Ex. U17-3')}" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm majuscules" type="text" id="f-model" placeholder="${trad('Ex. U17-3')}" autocapitalize="characters" value="${isEdit ? esc(machineModel(existing)) : ''}">
             </div>
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-year">${trad('Année du modèle')}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-year" type="number" inputmode="numeric" min="1950" max="2100" placeholder="${trad('Ex. 2019')}" value="${isEdit && machineYear(existing) ? machineYear(existing) : ''}">
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-year" type="number" inputmode="numeric" min="1950" max="2100" placeholder="${trad('Ex. 2019')}" value="${isEdit && machineYear(existing) ? machineYear(existing) : ''}">
             </div>
           </div>
           <div class="hint">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
@@ -22854,16 +22854,16 @@ function openMachineModal(companyId, categories, existing) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-serial" id="f-identifiant-label">${IDENTIFIANT_LIBELLE[kindActuel]}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md font-mono focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[kindActuel]}" value="${isEdit ? esc(machineIdentifiant(existing)) : ''}">
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-mono focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-serial" placeholder="${IDENTIFIANT_PLACEHOLDER[kindActuel]}" value="${isEdit ? esc(machineIdentifiant(existing)) : ''}">
             </div>
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-service-date">${trad('Date de mise en service')}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-service-date" type="date" value="${isEdit ? esc(existing.service_date || today) : today}" required>
             </div>
           </div>
 
           ${SCHEMA.hasTco ? `
-          <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-md">
+          <div class="p-space-md rounded-xl flex flex-col gap-space-md mmod-tco-panel">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-space-xs">
                 <span class="material-symbols-outlined text-primary text-[18px]">price_change</span>
@@ -22906,7 +22906,7 @@ function openMachineModal(companyId, categories, existing) {
               <h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">${trad('Visuel & photo du matériel')}</h3>
             </div>
           </div>
-          <div class="flex flex-col md:flex-row items-start md:items-center gap-space-lg p-space-md rounded-xl bg-surface-container-low">
+          <div class="flex flex-col md:flex-row items-start md:items-center gap-space-lg p-space-md rounded-xl mmod-photo-panel">
             <div class="relative w-44 h-28 rounded-xl overflow-hidden shadow-sm flex-shrink-0 bg-surface-container" id="photo-preview">
               ${isEdit && safeUrl(existing.image_url) ? `<img class="machine-photo w-full h-full object-contain" src="${esc(safeUrl(existing.image_url))}" alt="${esc(existing.name)}">` : ''}
             </div>
@@ -22960,8 +22960,7 @@ function openMachineModal(companyId, categories, existing) {
               <div class="w-10 h-10 rounded-lg bg-tertiary-container text-on-tertiary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-[22px]">contact_support</span></div>
               <div class="flex flex-col">
                 <span class="font-label-md text-label-md font-bold text-on-surface">${trad('Vous ne trouvez pas votre carnet ?')}</span>
-                <span class="font-body-sm text-body-sm text-on-surface-variant">${trad('Nous établissons votre plan d\'entretien — tâches, intervalles et périodicités — à partir des informations disponibles sur la machine. Aucun document du constructeur ne vous sera transmis. Le plan est livré dans l\'application, et il reste modifiable. Prix : 29 €, réglés une fois, sans abonnement supplémentaire.')}</span>
-                <span class="font-body-sm text-body-sm text-on-surface-variant">${trad('Si le carnet de ce modèle est introuvable et que les informations sont insuffisantes, nous vous le dirons avant tout règlement : nous préférons refuser une vente que livrer un plan inventé.')}</span>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">${trad('Pour 29 € (paiement unique), nous configurons votre plan d\'entretien modifiable directement dans l\'application (aucun manuel constructeur fourni). Si les données de la machine sont insuffisantes, nous vous avertissons avant tout paiement, sans rien inventer.')}</span>
               </div>
             </div>
             <button class="px-space-md py-2.5 rounded-lg bg-tertiary-container text-on-tertiary font-label-sm text-label-sm font-bold hover:opacity-95 transition-opacity shadow-sm flex items-center gap-space-xs flex-shrink-0" type="button" id="btn-plan-payant"><span class="material-symbols-outlined text-[18px]">verified_user</span>${trad('Demander l\'établissement de mon plan — 29 €')}</button>
@@ -23019,11 +23018,11 @@ function openMachineModal(companyId, categories, existing) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-interval" id="f-interval-label">${tR('Échéance {mode}', { mode: editMode === 'days' ? trad('toutes les (jours)') : tR('tous les ({unite})', { unite: COUNTER_UNITS[editUnit].word }) })}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md font-semibold focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-interval" type="number" min="1" value="${isEdit ? esc(editInterval) : FALLBACK_INTERVAL_DAYS}" required>
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-interval" type="number" min="1" value="${isEdit ? esc(editInterval) : FALLBACK_INTERVAL_DAYS}" required>
             </div>
             <div class="flex flex-col gap-space-xs">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-reminder" id="f-reminder-label">${tR('Rappel avant ({unite})', { unite: editMode === 'days' ? trad('jours') : COUNTER_UNITS[editUnit].word })}</label>
-              <input class="h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md font-semibold focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-reminder" type="number" min="0" value="${isEdit ? esc(editReminder) : FALLBACK_REMINDER_DAYS}" required>
+              <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-reminder" type="number" min="0" value="${isEdit ? esc(editReminder) : FALLBACK_REMINDER_DAYS}" required>
             </div>
           </div>
           ${SCHEMA.hasCounter2 ? `
@@ -23031,7 +23030,7 @@ function openMachineModal(companyId, categories, existing) {
             <input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-0 bg-surface-container cursor-pointer" id="f-secondaire-active" type="checkbox" ${editSecondaryUnit ? 'checked' : ''}>
             <label class="font-label-md text-label-md text-on-surface font-semibold cursor-pointer" for="f-secondaire-active">${trad('Ajouter un second suivi (le carnet mélange plusieurs unités, ex. heures ET km)')}</label>
           </div>
-          <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-md shadow-sm mmod-second-panel" id="secondaire-champs" style="display:${editSecondaryUnit ? 'flex' : 'none'};">
+          <div class="p-space-md rounded-xl flex flex-col gap-space-md shadow-sm mmod-second-panel" id="secondaire-champs" style="display:${editSecondaryUnit ? 'flex' : 'none'};">
             <div class="flex items-center justify-between mmod-second-panel-head">
               <span class="font-label-md text-label-md font-bold text-on-surface">${trad('Configuration du second paramètre de surveillance')}</span>
               <span class="mmod-pill-actif">${trad('Actif')}</span>
@@ -23084,13 +23083,13 @@ function openMachineModal(companyId, categories, existing) {
             <div class="flex items-center justify-between">
               <label class="font-label-md text-label-md text-on-surface-variant font-semibold" for="f-tasks">${trad('Tâches de maintenance')}</label>
             </div>
-            <textarea class="w-full p-space-md rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary shadow-sm leading-relaxed" id="f-tasks" rows="3" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
+            <textarea class="w-full p-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm leading-relaxed" id="f-tasks" rows="3" placeholder="${trad('Ex. Vidange, contrôle lame, graissage')}">${isEdit ? esc(existing.plan?.tasks || '') : ''}</textarea>
           </div>
         </section>
 
         </div>
 
-        <div class="px-space-xl py-space-md bg-surface-container-lowest flex flex-col gap-space-sm shadow-[0_-4px_12px_rgba(14,19,51,0.03)]">
+        <div class="px-space-xl py-space-md flex flex-col gap-space-sm shadow-[0_-4px_12px_rgba(14,19,51,0.03)]">
           <div class="hint" id="f-error"></div>
           <div class="flex items-center justify-between">
             <button class="px-space-lg py-2.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container transition-colors" type="button" id="cancel-add">${trad('Annuler')}</button>
