@@ -1071,30 +1071,51 @@
   .mstrip-compteur-bloc .compteur-jour-valeur{font-size:15px;font-weight:800;}
   .mstrip-compteur-bloc .compteur-jour,.mstrip-compteur-bloc .compteur-lecture{min-width:0;}
 
-  /* Compteur au format « une ligne » : saisie + 2 boutons icône (voir
-     compteurHtml, branche emplacement==='strip'). */
-  /* Ligne : gap-1.5 (6px) du fichier fourni. « h » est un TEXTE À CÔTÉ de
-     l'input (ml-1.5), pas une pastille superposée dedans — d'où
-     .compteur-strip-saisie en flex (input + span), non plus en position
-     relative/absolute. */
-  .compteur-strip-ligne{display:flex;align-items:center;gap:6px;}
-  .compteur-strip-saisie{display:flex;align-items:center;flex:1;min-width:64px;}
-  /* w-20 h-9 px-2.5 rounded (4px, PAS --r-chip=10px) shadow-sm — le fichier
-     n'arrondit presque pas l'input, contrairement à ma première passe. */
-  .compteur-strip-saisie .compteur-champ{width:80px;flex:0 0 auto;height:36px;padding:0 10px;border-radius:4px;border:1px solid var(--line);background:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;text-align:center;color:var(--ink);box-shadow:var(--shadow-soft);}
-  .compteur-strip-unite{margin-left:6px;font-size:15px;font-weight:600;color:var(--ink-2);flex:0 0 auto;}
-  /* h-9 w-9 rounded (4px) — carré, pas la pastille --r-chip d'avant. Bouton
-     valider = bg-on-background (var(--dark)) ; bouton photo =
-     bg-surface-container, un gris clair distinct du fond du bloc parent
-     (surface-soft), pas du blanc pur avec ombre comme la première passe. */
-  .compteur-strip-icone{width:36px;height:36px;flex:0 0 auto;border-radius:4px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .compteur-strip-icone svg{width:16px;height:16px;}
+  /* Compteur au format « une ligne » (voir compteurHtml, branche
+     emplacement==='strip'). */
+  /* ★ Reprise Stitch « composant horamètre — option 2 : segmenté tactile »
+     (2 fichiers fournis par l'utilisateur : horamètre + kilométrique ; le
+     3e, calendaire, reste .compteur-jour plus haut, fidèle à cet export qui
+     ne lui donne ni -/+ ni OK). Stepper tactile -/+ directement sur la
+     carte, remplace la simple saisie clavier + icône coche. #0E1333/#24B5A8
+     = var(--ink)/var(--cyan) (valeurs identiques, vérifiées dans :root,
+     donc pas de remap approximatif) ; #F4F7FC (fond du stepper) n'a pas
+     d'équivalent exact dans la charte — gardé en littéral, même logique que
+     .mform-card sur la modale Modifier une machine. */
+  /* ★ Compacté à la demande de l'utilisateur pour retrouver le même
+     encombrement que le bloc calendaire voisin (.compteur-jour, 220×77.8px
+     à ≥1180px — son min-width/hauteur naturels, non touchés) : le premier
+     jet reprenait les dimensions littérales de la maquette Stitch (pensée
+     comme composant isolé, pas comme ligne dans une carte compacte), d'où
+     un bloc nettement plus grand une fois posé ici. Tailles réduites, MÊME
+     structure/comportement. */
+  .compteur-strip-ligne{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap;}
+  .compteur-strip-saisie{display:flex;align-items:center;flex:0 0 auto;background:#f4f7fc;border-radius:12px;padding:3px;box-shadow:inset 0 2px 4px rgba(0,0,0,.05);}
+  .compteur-strip-pas{width:24px;height:24px;flex:0 0 auto;border-radius:8px;border:none;background:transparent;color:var(--ink-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;line-height:1;cursor:pointer;transition:background .15s ease,color .15s ease,transform .1s ease;}
+  .compteur-strip-pas:hover{background:rgba(0,0,0,.06);color:var(--ink);}
+  .compteur-strip-pas:active{transform:scale(.95);}
+  .compteur-strip-valeur-bloc{display:flex;align-items:baseline;gap:2px;padding:0 5px;}
+  .compteur-strip-saisie .compteur-champ{width:34px;flex:0 0 auto;border:none;background:transparent;padding:0;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;text-align:center;color:var(--ink);}
+  .compteur-strip-saisie .compteur-champ:focus{outline:none;}
+  .compteur[data-unite="km"] .compteur-strip-saisie .compteur-champ{width:54px;}
+  .compteur-strip-unite{font-size:9px;font-weight:700;color:var(--ink-3);flex:0 0 auto;}
+  /* Bouton OK : pastille encre pleine + coche turquoise + texte, remplace
+     l'ancienne icône coche seule (var(--dark) carré 36px). */
+  .compteur-strip-icone{height:39px;flex:0 0 auto;border-radius:14px;border:none;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:background .15s ease,transform .1s ease;}
+  .compteur-strip-icone svg{width:12px;height:12px;}
   .compteur-strip-icone.is-photo svg{width:18px;height:18px;}
-  .compteur-strip-icone.is-valider{background:var(--dark);color:#fff;}
-  .compteur-strip-icone.is-valider:hover{background:var(--ink);}
+  .compteur-strip-icone.is-valider{background:var(--ink);color:#fff;box-shadow:0 3px 10px rgba(14,19,51,.2);}
+  .compteur-strip-icone.is-valider svg{color:var(--cyan);}
+  .compteur-strip-icone.is-valider span{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .compteur-strip-icone.is-valider:hover{background:#1b2354;}
+  .compteur-strip-icone.is-valider:active{transform:scale(.95);}
   .compteur-strip-icone.is-photo{background:var(--line-2);color:var(--ink-2);}
   .compteur-strip-icone.is-photo:hover{background:var(--line);}
   .mstrip-compteur-bloc .compteur-lecture:not(:empty){margin-top:6px;font-size:11px;}
+  /* Note vide (aucun relevé en attente) : ne réserve aucune hauteur — c'est
+     ce bloc-là, jamais rempli en usage normal, qui empêchait le stepper de
+     retrouver la hauteur compacte du bloc calendaire voisin. */
+  .mstrip-compteur-bloc .compteur-note:empty{display:none;}
   .mstrip-compteur-bloc .compteur-note{font-size:10.5px;margin-top:3px;}
 
   .mstrip-jauge{flex:0 0 auto;width:100%;display:flex;flex-direction:column;gap:4px;}

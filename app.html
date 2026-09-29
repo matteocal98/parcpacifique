@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-m7Jh+tR4CZjOjkiOPtbBPcuPUziQrdWTEJ0+Pblj7eU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-1KVa3JT7M0UeKoF/aiHLGM9m5s2agyoAC675DlGMmqs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9291,10 +9291,12 @@ async function viderCompteursEnAttente() {
 async function enregistrerCompteur(machine, valeurBrute) {
   if (!machine) return false;
   if (typeof refuserSiNonCouverte === 'function' && refuserSiNonCouverte(machine)) return false;
-  const texte = String(valeurBrute == null ? '' : valeurBrute).replace(',', '.').trim();
-  const valeur = Number(texte);
-  if (!texte) { annoncerCompteur(machine.id, trad('Saisis un relevé.'), 'late'); return false; }
-  if (!isFinite(valeur) || valeur < 0) {
+  // nombreDepuisTexte (pas Number+replace) : le champ desktop affiche
+  // désormais un séparateur de milliers en kilométrique (stepper tactile
+  // Stitch), "300 000" doit se lire correctement, pas juste "300 000" → NaN.
+  const valeur = nombreDepuisTexte(valeurBrute);
+  if (valeur == null) { annoncerCompteur(machine.id, trad('Saisis un relevé.'), 'late'); return false; }
+  if (valeur < 0) {
     annoncerCompteur(machine.id, trad('Relevé invalide : un nombre positif est attendu.'), 'late');
     return false;
   }
@@ -9437,20 +9439,31 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
   }
-  // BUREAU (fiche machine ET bandeau du Parc sur grand écran) : saisie
-  // manuelle classique, inchangée à part le retrait de la photo/OCR.
+  // BUREAU (fiche machine ET bandeau du Parc sur grand écran) : stepper
+  // tactile -/+ — reprise Stitch « composant horamètre — option 2 : segmenté
+  // tactile » (3 fichiers fournis par l'utilisateur : horamètre/km/
+  // calendaire — ce dernier reste .compteur-jour plus haut, sans stepper,
+  // fidèle à l'export Stitch qui ne lui donne ni -/+ ni OK). type="text"
+  // inputmode="decimal" (pas type=number) : le kilométrique affiche un
+  // séparateur de milliers au repos (activerSeparateurMilliers, voir
+  // wireMachineCards) — un <input type=number> refuse tout caractère qui
+  // n'est pas un chiffre, donc refuserait l'espace du séparateur.
   if (emplacement === 'strip') {
     return `
     <div class="compteur compteur-${emplacement}" data-compteur="${id}" data-unite="${esc(u.short)}">
       <span class="compteur-titre">${picto('compteur')}${esc(u.label)}</span>
       <div class="compteur-strip-ligne">
         <div class="compteur-strip-saisie">
-          <input id="${champId}" class="compteur-champ" type="number" inputmode="decimal" min="0" step="${esc(u.step)}"
-            value="${montre == null ? '' : esc(montre)}" placeholder="—"
-            aria-label="${esc(tR('Relevé du compteur de {machine}', { machine: m.name }))}">
-          <span class="compteur-strip-unite" aria-hidden="true">${esc(u.short)}</span>
+          <button type="button" class="compteur-strip-pas is-moins" data-compteur-moins aria-label="${esc(trad('Diminuer'))}">−</button>
+          <div class="compteur-strip-valeur-bloc">
+            <input id="${champId}" class="compteur-champ" type="text" inputmode="decimal"${unite === 'km' ? ' data-milliers' : ''}
+              value="${montre == null ? '' : esc(montre)}" placeholder="—"
+              aria-label="${esc(tR('Relevé du compteur de {machine}', { machine: m.name }))}">
+            <span class="compteur-strip-unite" aria-hidden="true">${esc(u.short)}</span>
+          </div>
+          <button type="button" class="compteur-strip-pas is-plus" data-compteur-plus aria-label="${esc(trad('Augmenter'))}">+</button>
         </div>
-        <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}</button>
+        <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}<span>${trad('OK')}</span></button>
       </div>
       <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>
     </div>`;
@@ -9699,6 +9712,20 @@ function compteurMachineVisee(noeud, genre) {
   return ref ? (UI.machines.find((m) => m.id === ref) || null) : null;
 }
 
+// Les boutons -/+ du stepper tactile (compteurHtml, branche 'strip') : un tap
+// = ±1 unité entière, jamais le pas fin u.step (pensé pour le spinner natif
+// du <input type=number> qu'on n'utilise plus ici). C'est aussi le
+// comportement des 2 fichiers Stitch fournis (script identique sur les
+// variantes horamètre/km : val±1, sans décimale).
+function ajusterCompteurChamp(champ, unite, sens) {
+  if (!champ) return;
+  const actuel = nombreDepuisTexte(champ.value) ?? 0;
+  let val = actuel + sens;
+  if (val < 0) val = 0;
+  val = unite === 'km' ? Math.round(val) : Math.round(val * 10) / 10;
+  champ.value = unite === 'km' ? texteAvecSeparateurs(val) : String(val);
+}
+
 if (typeof document !== 'undefined' && document.addEventListener) {
   // Le bouton « Enregistrer » de chaque carte.
   document.addEventListener('click', (e) => {
@@ -9709,6 +9736,17 @@ if (typeof document !== 'undefined' && document.addEventListener) {
     const bloc = bouton.closest('.compteur');
     const champ = bloc ? bloc.querySelector('.compteur-champ') : null;
     enregistrerCompteur(machine, champ ? champ.value : '');
+  });
+  // Les boutons -/+ du stepper : même délégation, pour survivre aux
+  // re-rendus de la liste (refreshFleetList).
+  document.addEventListener('click', (e) => {
+    const bouton = e.target && e.target.closest ? e.target.closest('[data-compteur-moins],[data-compteur-plus]') : null;
+    if (!bouton) return;
+    const machine = compteurMachineVisee(bouton, 'champ');
+    if (!machine) return;
+    const bloc = bouton.closest('.compteur');
+    const champ = bloc ? bloc.querySelector('.compteur-champ') : null;
+    ajusterCompteurChamp(champ, counterUnitOf(machine), bouton.hasAttribute('data-compteur-moins') ? -1 : 1);
   });
   // La touche Entrée dans le champ : la saisie rapide, sans quitter le clavier.
   document.addEventListener('keydown', (e) => {
@@ -9836,6 +9874,10 @@ function fleetListHtml() {
 }
 
 function wireMachineCards(root) {
+  // Séparateur de milliers du stepper kilométrique (voir compteurHtml,
+  // branche 'strip', attribut data-milliers) : même helper que les champs de
+  // prix TCO/Stock, brut au focus, formaté au blur.
+  root.querySelectorAll('.compteur-champ[data-milliers]').forEach((input) => activerSeparateurMilliers(input));
   root.querySelectorAll('.view-manual').forEach(btn => {
     btn.addEventListener('click', () => viewManual(btn.dataset.path, btn));
   });
