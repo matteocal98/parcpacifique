@@ -2903,7 +2903,7 @@
 
   /* ══════════════════════════════════════════════════════════════════════
      ★ CRÉER UN COMPTE (Stitch « modale_création_de_compte ») */
-  .signup-modal .modal{max-width:760px;}
+  .signup-modal .modal{max-width:760px;background:#F2F4F8;}
   /* Un libellé avec une annotation courte à droite (« MAJUSCULES »,
      « Min. 6 car. ») : toujours une règle RÉELLE du champ, jamais une
      décoration — le contact prend la casse forcée, le mot de passe a
@@ -2921,8 +2921,13 @@
      seule utilité où le nuancier fermé de la charte s'efface devant une
      convention d'accessibilité déjà connue de tous. */
   .requis{color:#D92D20;font-weight:800;}
-  .signup-modal input:not([type=radio]),.signup-modal select,.signup-modal textarea{background:var(--primary-tint);}
-  .signup-modal input:not([type=radio]):focus,.signup-modal select:focus,.signup-modal textarea:focus{background:var(--surface);}
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : les champs (dont le
+     select d'activité et l'indicatif téléphonique, tous deux habillés en
+     bouton .champ-select) repassent en blanc au lieu du fond teinté par
+     défaut — l'inverse de la règle, comme partout ailleurs avant
+     correction. Remplace l'ancien "teinté par défaut, blanc au focus". */
+  .signup-modal input:not([type=radio]),.signup-modal select,.signup-modal textarea,
+  .signup-modal .champ-select{background:var(--surface);}
   .signup-login-line .link-inline{font-weight:700;}
 
   /* ══════════════════════════════════════════════════════════════════════
