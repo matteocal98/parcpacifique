@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KTJEwKhns5MAcCA7qtYZlynIqfG84DAwJ63Ak9F+CKk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hwLQxmaoCi6mNFIjHrqLaPm44OenLjbwNkOQPgEGBHc=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1434,7 +1434,7 @@ function planNextDueCounterPatch(nextDue) {
 }
 
 // ── TCO (coût total de possession), optionnel ────────────────────
-// Rien de tout ça ne s'affiche ni ne se calcule tant que SCHEMA.hasTco est
+// Rien de tout ça ne s'affiche ni ne se calcule tant que tcoActif() est
 // faux (colonnes absentes) OU que machine.purchase_price n'est pas renseigné
 // — une machine sans donnée d'acquisition ne montre AUCUN bloc TCO nulle
 // part, même philosophie que vueCompteurSecondaire sans second suivi
@@ -5351,6 +5351,22 @@ function planCouvreQr() {
   return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
 }
 
+// TCO : réservé aux paliers Business et Enterprise (demande explicite de
+// l'utilisateur — dissocié du Starter). Même principe que planCouvreQr()
+// juste au-dessus : offreDeLaGrille() gère le grandfathering, même
+// fonction que l'écran des offres. `SCHEMA.hasTco` (le VRAI indicateur de
+// schéma, sondé au boot) reste volontairement indépendant du palier — une
+// société qui rétrograde continue de savoir que sa base a la migration,
+// seul `tcoActif()` décide si le module reste ACCESSIBLE. Tous les points
+// d'affichage/écriture du fichier lisent `tcoActif()`, jamais `SCHEMA.hasTco`
+// seul, pour ce calcul.
+function planCouvreTco() {
+  return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
+}
+function tcoActif() {
+  return SCHEMA.hasTco && planCouvreTco();
+}
+
 // Stock & SAV : réservé au palier Enterprise UNIQUEMENT (demande explicite
 // de l'utilisateur — contrairement aux QR codes ci-dessus, pas de palier
 // intermédiaire). `offreDeLaGrille()` gère déjà le grandfathering
@@ -7825,7 +7841,7 @@ const NAV_ITEMS = [
   { id: 'stock', label: trad('Stocks & SAV'), short: trad('Stocks'), icon: 'stock' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
-// NAV_ITEMS est une constante évaluée une seule fois, AVANT que SCHEMA.hasTco
+// NAV_ITEMS est une constante évaluée une seule fois, AVANT que tcoActif()
 // ne soit connu (la sonde tourne au boot, bien après) : on ne peut donc pas
 // filtrer ici. `navItemsVisibles()` refait le filtre à CHAQUE rendu — même
 // garde-fou que le reste de la fonctionnalité (rien tant que la migration
@@ -7833,7 +7849,7 @@ const NAV_ITEMS = [
 // conditions (migration visible ET palier Enterprise) — voir planCouvreStock().
 function navItemsVisibles() {
   return NAV_ITEMS.filter((item) => {
-    if (item.id === 'tco') return SCHEMA.hasTco;
+    if (item.id === 'tco') return tcoActif();
     if (item.id === 'stock') return SCHEMA.hasStock && planCouvreStock();
     return true;
   });
@@ -8941,7 +8957,7 @@ VIEWS.dashboard = {
         <div class="dash-side">
           ${dropzoneHtml('dash-drop')}
           ${remindersCardHtml()}
-          ${SCHEMA.hasTco ? tcoDashboardCarteHtml() : ''}
+          ${tcoActif() ? tcoDashboardCarteHtml() : ''}
         </div>
       </div>
     `;
@@ -12434,7 +12450,7 @@ VIEWS.reminders = {
 // Page à part (bandeau vertical), pas une carte de plus dans « Mon compte » :
 // les réglages financiers ne doivent pas se noyer dans les réglages
 // d'identité de société. N'existe dans NAV_ITEMS/le menu mobile que si
-// SCHEMA.hasTco (voir navItemsVisibles) — même garde-fou que le reste de la
+// tcoActif() (voir navItemsVisibles) — même garde-fou que le reste de la
 // fonctionnalité (voir keeva-tco-feature).
 // Bandeau eyebrow + actions, au-dessus du h1 (déjà rendu par pageHeadHtml).
 // « Journal d'audit » retiré (aucun journal n'existe). « Rapport TCO (PDF) »
@@ -12868,7 +12884,7 @@ function tcoDashboardCarteHtml() {
     </section>`;
 }
 async function chargerCarteTcoDashboard(root) {
-  if (!SCHEMA.hasTco) return;
+  if (!tcoActif()) return;
   const carte = root?.querySelector('#tco-dashboard-carte');
   if (!carte) return;
   const valueEl = carte.querySelector('.value');
@@ -13551,7 +13567,7 @@ VIEWS.tco = {
       <div class="vue-couts-tco">
         ${tcoEyebrowToolbarHtml()}
         ${tcoKpiGridHtml()}
-        ${SCHEMA.hasTco ? tcoClassementFlotteHtml() : ''}
+        ${tcoActif() ? tcoClassementFlotteHtml() : ''}
         <div class="dash-grid agenda-grid tco-parametres-grid">
           <div class="dash-main">
             ${blocParametresTcoHtml()}
@@ -13577,8 +13593,8 @@ VIEWS.tco = {
     // sur toute la flotte (§1), jamais fait ailleurs sur cette page, jamais
     // refait au changement d'un filtre (tout se recalcule en mémoire à
     // partir des deux tableaux flotte-entière déjà chargés). Section
-    // absente si SCHEMA.hasTco est faux (voir render()).
-    if (SCHEMA.hasTco) {
+    // absente si tcoActif() est faux (voir render()).
+    if (tcoActif()) {
       (async () => {
         const section = root.querySelector('#tco-classement-section');
         if (!section) return;
@@ -16650,7 +16666,7 @@ function openPlusSheet() {
           ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Plan d\'entretien'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
           ${itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '')}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
-          ${SCHEMA.hasTco ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
+          ${tcoActif() ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
           ${(SCHEMA.hasStock && planCouvreStock()) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
         </div>
         <div class="plus-sheet-separateur"></div>
@@ -18658,7 +18674,7 @@ function openAddWizard(companyId, categories) {
     // consomme un credit et n'a de sens que sans carnet PDF a scanner.
     searchPhoto: false,
     model: '',
-    // TCO, facultatif (voir SCHEMA.hasTco) : strict minimum à la création,
+    // TCO, facultatif (voir tcoActif()) : strict minimum à la création,
     // le reste (revente estimée, durée de vie) se règle plus tard sur la
     // fiche machine — pas de formulaire interminable ici.
     purchasePrice: '', purchaseDate: '',
@@ -18856,7 +18872,7 @@ function openAddWizard(companyId, categories) {
               <input id="f-serial" class="w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow placeholder:text-slate-400 font-medium" placeholder="${IDENTIFIANT_PLACEHOLDER[state.kind]}" value="${esc(state.serial)}">
             </div>
 
-            ${SCHEMA.hasTco ? `
+            ${tcoActif() ? `
             <div class="pt-2 border-t border-slate-200/60">
               <details class="group">
                 <summary class="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-600 hover:text-primary list-none select-none">
@@ -19098,7 +19114,7 @@ function openAddWizard(companyId, categories) {
     preparerChampsMajuscules(overlay);
     normaliserMajusculesAEnregistrement(overlay);
     brancherCategorie(overlay, categories, state.category);
-    if (SCHEMA.hasTco) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
+    if (tcoActif()) activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
 
     // ★ Lit TOUS les champs du formulaire unique dans `state` — factorisé
     // car il y a désormais DEUX façons de quitter cette page, pas une
@@ -19119,7 +19135,7 @@ function openAddWizard(companyId, categories) {
       state.serial = overlay.querySelector('#f-serial').value.trim();
       state.kind = radiosKind.length ? (overlay.querySelector('input[name=kind]:checked')?.value || TYPE_MACHINE) : TYPE_MACHINE;
       state.serviceDate = overlay.querySelector('#f-service-date').value;
-      if (SCHEMA.hasTco) {
+      if (tcoActif()) {
         const prix = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
         state.purchasePrice = prix == null ? '' : prix;
         state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
@@ -19531,7 +19547,7 @@ function openAddWizard(companyId, categories) {
             { counter_unit: counterUnitFromMode(state.trackingMode) }
           ),
           ...(state.secondaryUnit ? machineCounter2Patch(state.secondaryValue, state.secondaryUnit) : {}),
-          ...(SCHEMA.hasTco && state.purchasePrice !== '' ? {
+          ...(tcoActif() && state.purchasePrice !== '' ? {
             purchase_price: Number(state.purchasePrice),
             purchase_date: state.purchaseDate || state.serviceDate,
           } : {}),
@@ -20169,7 +20185,7 @@ function ligneLogPieceHtml(idx) {
 // `operating_costs` (fond ici l'ancien openLogOperatingCostModal). Fusionner
 // les DONNÉES aurait mélangé deux historiques que le TCO ventile séparément
 // (Pièces/MO/Frais Fixes) ; seule la PORTE D'ENTRÉE et le formulaire sont
-// communs. Le sélecteur de type n'apparaît que si SCHEMA.hasTco (Dépannage/
+// communs. Le sélecteur de type n'apparaît que si tcoActif() (Dépannage/
 // Frais dépendent tous les deux du chantier TCO) — sans lui, la modale se
 // comporte exactement comme avant (entretien seul).
 // MENU DE CHOIX MAISON, GÉNÉRIQUE. Remplace le rendu d'un <select> natif dont
@@ -20415,7 +20431,7 @@ function openLogInterventionModal(machine, tache) {
 
   const identifiant = identifiantAffiche(machine);
   const compteurActuel = machineCounter(machine);
-  const avecTypes = SCHEMA.hasTco;
+  const avecTypes = tcoActif();
 
   // Organe mécanique défaillant (Dépannage) : référentiel configurable —
   // voir COMPOSANTS_DEPART/composantsUtiles/brancherComposant, écrit dans
@@ -20623,7 +20639,7 @@ function openLogInterventionModal(machine, tache) {
           </div>` : ''}
         </div>
 
-        ${SCHEMA.hasTco ? `
+        ${tcoActif() ? `
         <div class="log-bloc log-bloc-cout" id="log-couts-section">
           <div class="log-elements-tete">
             <span class="log-section-tete-gauche">
@@ -20689,7 +20705,7 @@ function openLogInterventionModal(machine, tache) {
 
         <div class="log-footer2">
           <button type="button" class="secondary" id="cancel-log">${trad('Annuler')}</button>
-          <button type="submit" class="primary" id="log-submit-btn">${picto('ajuste')}<span><span id="log-submit-verbe">${SCHEMA.hasTco ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention')}</span>${SCHEMA.hasTco ? ` (<span id="log-total-badge">0 ${deviseCourte()}</span>)` : ''}</span></button>
+          <button type="submit" class="primary" id="log-submit-btn">${picto('ajuste')}<span><span id="log-submit-verbe">${tcoActif() ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention')}</span>${tcoActif() ? ` (<span id="log-total-badge">0 ${deviseCourte()}</span>)` : ''}</span></button>
         </div>
       </form>
     </div>
@@ -20718,7 +20734,7 @@ function openLogInterventionModal(machine, tache) {
   })();
 
   // ── Choix du type (Entretien / Dépannage / Frais) — voir le commentaire
-  // en tête de fonction. Absent quand !SCHEMA.hasTco : kindActif reste
+  // en tête de fonction. Absent quand !tcoActif() : kindActif reste
   // 'entretien' pour toujours, comportement identique à avant ce chantier.
   let kindActif = 'entretien';
   const panelEls = {
@@ -20746,7 +20762,7 @@ function openLogInterventionModal(machine, tache) {
       const qte = Number(overlay.querySelector('#log-frais-qte')?.value) || 0;
       const prix = Number(overlay.querySelector('#log-frais-prix')?.value) || 0;
       total = qte * prix;
-    } else if (SCHEMA.hasTco) {
+    } else if (tcoActif()) {
       total = (nombreDepuisTexte(overlay.querySelector('#log-cout-mo')?.value) || 0)
         + (nombreDepuisTexte(overlay.querySelector('#log-pieces-total')?.value) || 0);
     }
@@ -20862,8 +20878,8 @@ function openLogInterventionModal(machine, tache) {
     majApercu();
   });
 
-  // ── Coûts (optionnel, voir SCHEMA.hasTco) ──────────────────────
-  if (SCHEMA.hasTco) {
+  // ── Coûts (optionnel, voir tcoActif()) ──────────────────────
+  if (tcoActif()) {
     let pieceIdx = 0;
     const piecesListe = overlay.querySelector('#log-pieces-liste');
     const totalPiecesChamp = overlay.querySelector('#log-pieces-total');
@@ -21005,7 +21021,7 @@ function openLogInterventionModal(machine, tache) {
     e.preventDefault();
     const submitBtn = overlay.querySelector('#log-submit-btn');
     const submitVerbeEl = overlay.querySelector('#log-submit-verbe');
-    const verbeRepos = SCHEMA.hasTco ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention');
+    const verbeRepos = tcoActif() ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention');
     const errorEl = overlay.querySelector('#log-error');
     submitBtn.disabled = true;
     if (submitVerbeEl) submitVerbeEl.textContent = trad('Enregistrement…');
@@ -21066,13 +21082,13 @@ function openLogInterventionModal(machine, tache) {
       : overlay.querySelector('#log-notes').value.trim();
     const componentVal = kindActif === 'depannage' ? (overlay.querySelector('#log-organe')?.value || null) : null;
     const severiteVal = kindActif === 'depannage' ? (overlay.querySelector('input[name="log-gravite"]:checked')?.value || null) : null;
-    // Coûts (optionnel, voir SCHEMA.hasTco) : le total pièces vient du champ
+    // Coûts (optionnel, voir tcoActif()) : le total pièces vient du champ
     // (recalculé depuis les lignes, mais éditable — voir le câblage
     // ci-dessus), les lignes elles-mêmes de intervention_parts pour le détail.
-    const laborHours = SCHEMA.hasTco ? (parseFloat(overlay.querySelector('#log-heures-mo')?.value) || null) : null;
-    const laborCost = SCHEMA.hasTco ? nombreDepuisTexte(overlay.querySelector('#log-cout-mo')?.value) : null;
-    const partsCost = SCHEMA.hasTco ? nombreDepuisTexte(overlay.querySelector('#log-pieces-total')?.value) : null;
-    const pieceLignes = SCHEMA.hasTco
+    const laborHours = tcoActif() ? (parseFloat(overlay.querySelector('#log-heures-mo')?.value) || null) : null;
+    const laborCost = tcoActif() ? nombreDepuisTexte(overlay.querySelector('#log-cout-mo')?.value) : null;
+    const partsCost = tcoActif() ? nombreDepuisTexte(overlay.querySelector('#log-pieces-total')?.value) : null;
+    const pieceLignes = tcoActif()
       ? Array.from(overlay.querySelectorAll('.log-piece-ligne'))
           .map((ligne) => ({
             partId: ligne.querySelector('.log-piece-select')?.value || null,
@@ -21114,11 +21130,11 @@ function openLogInterventionModal(machine, tache) {
         items_done: checkedItems.length ? checkedItems : null,
         performed_by: operateur,
         ...(avecTypes ? { kind: kindActif, component: componentVal, severity: severiteVal } : {}),
-        ...(SCHEMA.hasTco ? { parts_cost: partsCost, labor_cost: laborCost, labor_hours: laborHours } : {}),
+        ...(tcoActif() ? { parts_cost: partsCost, labor_cost: laborCost, labor_hours: laborHours } : {}),
       }).select('id').single();
       if (logErr) throw logErr;
 
-      if (SCHEMA.hasTco && pieceLignes.length && intervention?.id) {
+      if (tcoActif() && pieceLignes.length && intervention?.id) {
         // Détail des pièces : jamais bloquant pour l'enregistrement de
         // l'intervention elle-même — une erreur ici est signalée, pas fatale.
         const { error: piecesErr } = await sb.from('intervention_parts').insert(
@@ -21196,7 +21212,7 @@ function openLogInterventionModal(machine, tache) {
 
 // Coûts d'exploitation d'une machine (carburant, assurance, taxes…) — une
 // ligne par événement réel, jamais un total recalculé silencieusement (voir
-// keeva-tco-feature). Absent tant que SCHEMA.hasTco est faux.
+// keeva-tco-feature). Absent tant que tcoActif() est faux.
 async function fetchOperatingCosts(machineId) {
   const { data, error } = await sb.from('operating_costs')
     .select('id, kind, amount, incurred_at, notes')
@@ -21211,7 +21227,7 @@ async function fetchOperatingCosts(machineId) {
 async function fetchAllInterventions(machineId) {
   const pageSize = 1000;
   const all = [];
-  const colonnesCout = SCHEMA.hasTco ? ', parts_cost, labor_cost, labor_hours' : '';
+  const colonnesCout = tcoActif() ? ', parts_cost, labor_cost, labor_hours' : '';
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await sb.from('interventions')
       .select(`id, performed_at, hours_at_intervention, description, items_done, performed_by${colonnesCout}`)
@@ -22339,7 +22355,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
       </div>
       ${bandeauHtml}
 
-      ${SCHEMA.hasTco ? `
+      ${tcoActif() ? `
       <section class="fm-card" id="tco-scorecard-section">
         <div class="fm-card-head">
           <div class="fm-card-title-row">
@@ -22383,7 +22399,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
         ` : ''}
       ` : `<section class="fm-card"><div class="fm-card-sub">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></section>`}
 
-      ${SCHEMA.hasTco ? `
+      ${tcoActif() ? `
       <section class="fm-card" id="operating-costs-section">
         <div class="fm-card-head">
           <div class="fm-card-title-row">
@@ -22494,7 +22510,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
   // id -> nom affiché, rempli une fois avec l'historique (voir plus bas) :
   // une seule requête équipe pour tout l'écran (table, CSV, email).
   let nomsEquipe = new Map();
-  // Coûts d'exploitation (voir SCHEMA.hasTco) : chargés en même temps que
+  // Coûts d'exploitation (voir tcoActif()) : chargés en même temps que
   // l'historique, réutilisés par la scorecard TCO ci-dessous.
   let operatingCosts = [];
   const OC_LABELS = { fuel: trad('Carburant'), insurance: trad('Assurance'), tax: trad('Taxe'), storage: trad('Stockage'), other: trad('Autre') };
@@ -22561,7 +22577,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
   const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
   const buildHistoryCsv = () => {
     const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Operateur'), trad('Remarques')];
-    if (SCHEMA.hasTco) header.push(trad('Cout total'));
+    if (tcoActif()) header.push(trad('Cout total'));
     const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const rows = historyData.map(h => {
       const row = [
@@ -22571,7 +22587,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
         nomOperateurTexte(h),
         h.description ?? '',
       ];
-      if (SCHEMA.hasTco) {
+      if (tcoActif()) {
         row.push((h.parts_cost != null || h.labor_cost != null) ? (Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0) : '');
       }
       return row;
@@ -22640,7 +22656,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
         equipePourAttribution().catch(() => []),
         // La scorecard TCO ne doit pas attendre un second aller-retour : elle
         // se calcule dès que l'historique (déjà nécessaire à l'écran) est là.
-        SCHEMA.hasTco ? fetchOperatingCosts(machine.id).catch(() => []) : Promise.resolve([]),
+        tcoActif() ? fetchOperatingCosts(machine.id).catch(() => []) : Promise.resolve([]),
       ]);
       historyData = interventions;
       nomsEquipe = new Map(equipe.map(m => [m.id, m.nom_affiche]));
@@ -22662,7 +22678,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const hidden = historyData.length - shown.length;
     section.insertAdjacentHTML('beforeend', `
       <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th>${SCHEMA.hasTco ? `<th>${trad('Coût total')}</th>` : ''}</tr></thead>
+        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? '<th>Compteur</th>' : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th>${tcoActif() ? `<th>${trad('Coût total')}</th>` : ''}</tr></thead>
         <tbody>
           ${shown.map(h => `
             <tr>
@@ -22671,7 +22687,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
               <td>${Array.isArray(h.items_done) && h.items_done.length ? esc(h.items_done.join(', ')) : '<span class="muted">—</span>'}</td>
               <td>${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
               <td>${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
-              ${SCHEMA.hasTco ? `<td>${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
+              ${tcoActif() ? `<td>${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
             </tr>`).join('')}
         </tbody>
       </table></div>
@@ -23078,7 +23094,7 @@ function openMachineModal(companyId, categories, existing) {
             </div>
           </div>
 
-          ${SCHEMA.hasTco ? `
+          ${tcoActif() ? `
           <div class="p-space-md rounded-xl flex flex-col gap-space-md mmod-tco-panel">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-space-xs">
@@ -23330,7 +23346,7 @@ function openMachineModal(companyId, categories, existing) {
   brancherCategorie(overlay, categories, isEdit ? (existing.category?.name || '') : '');
   habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
   habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
-  if (SCHEMA.hasTco) {
+  if (tcoActif()) {
     ['#f-prix-achat', '#f-revente-estimee', '#f-duree-vie'].forEach((sel) => {
       activerSeparateurMilliers(overlay.querySelector(sel));
     });
@@ -23851,7 +23867,7 @@ function openMachineModal(companyId, categories, existing) {
           ? machineCounter2Patch(secondaryValue, secondaryUnit)
           : { counter_value_2: null, counter_unit_2: null });
       }
-      if (SCHEMA.hasTco) {
+      if (tcoActif()) {
         const dateAchat = overlay.querySelector('#f-date-achat')?.value || '';
         updatePayload.purchase_price = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
         updatePayload.purchase_date = dateAchat || null;
@@ -24282,7 +24298,7 @@ async function boot(toastMessage) {
   const colonnesContact = SCHEMA.hasContactNames ? ['contact_first_name', 'contact_last_name'] : [];
   const colonnesRappels = SCHEMA.hasReminders
     ? ['notification_email', 'reminders_email', 'reminders_whatsapp'] : [];
-  const colonnesTco = SCHEMA.hasTco
+  const colonnesTco = tcoActif()
     ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly', 'currency'] : [];
   // Colonnes de ciblage du push par rôle — ajoutées seulement à la tentative
   // la plus riche : c'est la plus récente des migrations optionnelles, donc
@@ -24386,7 +24402,7 @@ async function boot(toastMessage) {
     // L'ordre de création : c'est lui qui décide quelles machines une offre
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
-    ...(SCHEMA.hasTco
+    ...(tcoActif()
       ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
       : []),
   ].join(', ');
@@ -24403,9 +24419,9 @@ async function boot(toastMessage) {
   ].join(', ');
 
   // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
-  // ajouté seulement si SCHEMA.hasTco : la colonne n'existe que pour les
+  // ajouté seulement si tcoActif() : la colonne n'existe que pour les
   // sociétés ayant la migration TCO, comme le reste des champs TCO.
-  const colonnesCategorie = SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name';
+  const colonnesCategorie = tcoActif() ? 'id, name, target_hourly_cost' : 'id, name';
   const { data: machines, error: machinesErr } = await sb
     .from('machines')
     .select(`${colonnesMachine}, category:machine_categories(${colonnesCategorie}), plan:maintenance_plans(${colonnesPlan})`)
@@ -24429,7 +24445,7 @@ async function boot(toastMessage) {
   // catégories), réutilisé partout où une pièce se sélectionne (voir
   // keeva-tco-feature). Absent tant que la migration TCO n'est pas visible.
   let partsCatalog = [];
-  if (SCHEMA.hasTco) {
+  if (tcoActif()) {
     const { data: pieces } = await sb
       .from('parts_catalog')
       .select(colonnesCatalogueePiece())
