@@ -3323,6 +3323,18 @@
   .choix-modal .modal-actions #choix-annuler:hover{background:var(--primary-tint-2);border-color:var(--primary-dark);}
   .machine-modal .modal .sub{margin-bottom:18px;}
 
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) — scopé à cette seule
+     modale du groupe .choix-modal (ouvrirChoixKitTache) : les 3 autres
+     modales partageant .choix-modal n'ont pas encore été passées en
+     revue, donc la règle de base .choix-modal .modal reste blanche. Le
+     select natif #kit-tache-select reste un <select> visible tel quel ;
+     #kit-tache-piece-select est habillé par habillerSelectPieceCatalogue
+     en un bouton .champ-select (le select natif devient invisible). */
+  .kit-tache-modal .modal{background:#F2F4F8;}
+  .kit-tache-modal #kit-tache-select,
+  .kit-tache-modal .champ-select,
+  .kit-tache-modal #kit-tache-piece-qte{background:var(--surface);}
+
   /* Les 4 blocs se distinguent par un fond, chacun sa teinte reprise de la
      charte, ET un cadre — pour rythmer la fiche (et son picto de section). */
   .mform-section{
