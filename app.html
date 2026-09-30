@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-gqvDzfVC/v4CCjSwPZGBiX0cR7gfWGRUWgZS4yc8t1Y=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KTJEwKhns5MAcCA7qtYZlynIqfG84DAwJ63Ak9F+CKk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11814,7 +11814,7 @@ function ouvrirProgrammerEntretien(dateInitiale) {
 // l'entretien, pas en la supprimant).
 function ouvrirProgrammeActions(programme, m) {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay programme-actions-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   overlay.innerHTML = `
@@ -21324,7 +21324,7 @@ function avertirSecondCompteurManquant(machine, uniteManquante, choix, onConfigu
   const uniteParDefaut = calendrier ? 'days' : (uniteManquante === trad('km') ? 'km' : 'hours');
   const modePrincipal = planIsCounter(machine.plan) ? counterUnitOf(machine) : 'days';
   const overlay = document.createElement('div');
-  overlay.className = 'overlay choix-modal';
+  overlay.className = 'overlay choix-modal second-compteur-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
@@ -21414,7 +21414,7 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
   const uniteMot = (u) => trad((UNITES_INTERVALLE[u] || {}).libelle || u);
   const uniteMinuscule = (u) => trad((UNITES_INTERVALLE[u] || {}).mot || u);
   const overlay = document.createElement('div');
-  overlay.className = 'overlay choix-modal';
+  overlay.className = 'overlay choix-modal choix-frequence-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
@@ -21610,7 +21610,7 @@ function ouvrirChoixFrequenceApercu(item, plan, machine, onChoix) {
   const uniteMot = (u) => trad((UNITES_INTERVALLE[u] || {}).libelle || u);
   const unitePlan = uniteIntervalleDuPlan(plan, machine);
   const overlay = document.createElement('div');
-  overlay.className = 'overlay choix-modal';
+  overlay.className = 'overlay choix-modal choix-frequence-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 

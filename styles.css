@@ -3335,6 +3335,25 @@
   .kit-tache-modal .champ-select,
   .kit-tache-modal #kit-tache-piece-qte{background:var(--surface);}
 
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) — modales utilitaires
+     restantes, chacune scopée séparément sans toucher .choix-modal (les
+     4 modales partagent cette classe de base, revues une par une). */
+  .programme-actions-modal .modal{background:#F2F4F8;}
+  /* avertirSecondCompteurManquant : .mform-card est déjà blanche par
+     défaut (var(--surface)) — seul le champ numérique doit être corrigé. */
+  .second-compteur-modal .modal{background:#F2F4F8;}
+  .second-compteur-modal #second-compteur-valeur{background:var(--surface);}
+  /* openChoixFrequence / ouvrirChoixFrequenceApercu (même modale, deux
+     appelants) : .choix-carte est déjà blanche, .choix-bloc-carnet/-libre
+     ont leur propre teinte d'accent (violet/turquoise, auto-suffisante) —
+     seuls le champ #choix-valeur, le select #choix-unite habillé en
+     .champ-select, et le sous-bloc .choix-bloc-controle (gris neutre,
+     invisible sur #F2F4F8 sans correction) doivent passer en blanc. */
+  .choix-frequence-modal .modal{background:#F2F4F8;}
+  .choix-frequence-modal #choix-valeur,
+  .choix-frequence-modal .champ-select,
+  .choix-frequence-modal .choix-bloc-controle{background:var(--surface);}
+
   /* Les 4 blocs se distinguent par un fond, chacun sa teinte reprise de la
      charte, ET un cadre — pour rythmer la fiche (et son picto de section). */
   .mform-section{
