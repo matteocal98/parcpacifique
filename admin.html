@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>KEEVA — Console Superviseur</title>
+<title>KALEA — Console Superviseur</title>
 <!--
   CONSOLE SUPERVISEUR — fichier séparé de app.html, jamais mélangé au
   bundle livré aux clients (voir keeva-redesign-project.md et
@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Sk3uv5bcxkOhYNa5miqdkBEVICBvr7nErEpuAr+BPPg=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eh3ktrSQM9s1Jh5F+jwGSyEmEj9Qe87V9Kn/9hqRil8=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -40,7 +40,7 @@
         <span class="material-symbols-outlined text-2xl">shield_person</span>
       </div>
       <div>
-        <div class="font-headline-sm text-headline-sm font-bold text-on-surface">KEEVA</div>
+        <div class="font-headline-sm text-headline-sm font-bold text-on-surface">KALEA</div>
         <div class="font-label-sm text-label-sm text-on-surface-variant">Console Superviseur</div>
       </div>
     </div>
@@ -66,7 +66,7 @@
       <span class="material-symbols-outlined text-2xl">block</span>
     </div>
     <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Accès réservé</h2>
-    <p class="font-body-sm text-body-sm text-on-surface-variant">Ce compte n'a pas les droits de supervision KEEVA. Cette console est réservée à l'équipe KEEVA.</p>
+    <p class="font-body-sm text-body-sm text-on-surface-variant">Ce compte n'a pas les droits de supervision KALEA. Cette console est réservée à l'équipe KALEA.</p>
     <button id="refuse-deconnexion" type="button" class="h-11 px-5 rounded bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors">Se déconnecter</button>
   </div>
 </div>
@@ -77,12 +77,12 @@
   <div class="flex flex-col gap-space-md">
     <div class="flex items-center justify-between px-space-xs py-space-sm">
       <div class="flex items-center gap-space-sm">
-        <!-- Le vrai logo KEEVA (hexagone + barre), même SVG que marqueSvg() dans
+        <!-- Le vrai logo KALEA (hexagone + barre), même SVG que marqueSvg() dans
              app.html — jamais une icône Material générique à la place de la
              marque. Barre blanche : même choix que la variante fond sombre déjà
              utilisée pour la barre mobile de app.html (bm-logo). -->
         <span class="w-6 h-6 shrink-0" aria-hidden="true"><svg viewBox="0 0 1 1" focusable="false"><defs><linearGradient id="keeva-admin-barre" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#236FE0"/><stop offset="58%" stop-color="#14B8A6"/><stop offset="100%" stop-color="#8B9B37"/></linearGradient></defs><path d="M 0.5 0 L 0.9563 0.25 L 0.9563 0.75 L 0.5 1 L 0.0437 0.75 L 0.0437 0.25 Z M 0.0849 0.2726 L 0.0849 0.7274 L 0.5 0.9548 L 0.9151 0.7274 L 0.9151 0.2726 L 0.5 0.0452 Z" fill="url(#keeva-admin-barre)"/><path d="M 0.349 0.52 L 0.3729 0.5299 L 0.3963 0.541 L 0.4195 0.5529 L 0.4424 0.5654 L 0.4652 0.5785 L 0.4878 0.592 L 0.5103 0.606 L 0.5326 0.6204 L 0.5547 0.6351 L 0.5768 0.6503 L 0.5987 0.6657 L 0.6205 0.6815 L 0.6422 0.6976 L 0.6638 0.714 A 0.0794 0.0794 0 0 0 0.7162 0.564 L 0.6891 0.5634 L 0.662 0.5625 L 0.6351 0.5613 L 0.6084 0.5597 L 0.5817 0.5579 L 0.5552 0.5556 L 0.5287 0.553 L 0.5025 0.55 L 0.4764 0.5465 L 0.4504 0.5426 L 0.4247 0.5381 L 0.3991 0.533 L 0.3739 0.5271 L 0.349 0.52 Z" fill="#DE7A16"/><path d="M 0.3175 0.472 L 0.3421 0.4616 L 0.3672 0.4525 L 0.3928 0.4442 L 0.4187 0.4365 L 0.4449 0.4294 L 0.4713 0.4228 L 0.498 0.4166 L 0.5249 0.4109 L 0.5519 0.4056 L 0.5792 0.4006 L 0.6066 0.396 L 0.6342 0.3917 L 0.662 0.3878 L 0.6899 0.3842 A 0.0873 0.0873 0 0 0 0.6121 0.2278 L 0.5924 0.2479 L 0.5725 0.2677 L 0.5524 0.2871 L 0.5322 0.3062 L 0.5118 0.325 L 0.4913 0.3434 L 0.4705 0.3614 L 0.4495 0.3789 L 0.4283 0.396 L 0.4068 0.4126 L 0.3851 0.4287 L 0.363 0.4441 L 0.3406 0.4587 L 0.3175 0.472 Z" fill="#24B5A8"/><path d="M 0.4345 0.5 a 0.0615 0.0615 0 1 0 0.123 0 a 0.0615 0.0615 0 1 0 -0.123 0 Z" fill="#6366F1"/><path d="M 0.26 0.194 L 0.26 0.798 A 0.0377 0.0377 0 0 0 0.3354 0.798 L 0.3354 0.194 A 0.0377 0.0377 0 0 0 0.26 0.194 Z" fill="#FFFFFF"/></svg></span>
-        <span class="font-headline-lg text-headline-sm font-bold tracking-tight text-surface-bright uppercase">KEEVA</span>
+        <span class="font-headline-lg text-headline-sm font-bold tracking-tight text-surface-bright uppercase">KALEA</span>
         <span class="px-space-xs py-0.5 rounded bg-primary-container text-on-primary font-code-sm text-code-sm uppercase tracking-wider font-semibold">HQ</span>
       </div>
       <span class="h-2 w-2 rounded-full bg-tertiary-fixed"></span>
@@ -132,7 +132,7 @@
       <div class="flex items-center gap-space-sm">
         <div class="text-right hidden sm:block">
           <div id="staff-nom" class="font-label-md text-label-md text-on-surface leading-tight">—</div>
-          <div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Superviseur KEEVA</div>
+          <div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Superviseur KALEA</div>
         </div>
         <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
       </div>
@@ -154,7 +154,7 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Supervision Multi-Tenant
               </span>
             </div>
-            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Console Superviseur &amp; Support KEEVA</h1>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Console Superviseur &amp; Support KALEA</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Vue d'ensemble des organisations clientes réelles et de leur parc.</p>
           </div>
         </div>
@@ -244,7 +244,7 @@
           <div class="flex flex-col md:flex-row items-start md:items-center gap-space-md">
             <div class="w-12 h-12 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
             <div class="flex flex-col gap-1 flex-1">
-              <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Protocole Zéro-Capteur KEEVA</h3>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Protocole Zéro-Capteur KALEA</h3>
               <p class="font-body-md text-body-md text-on-surface-variant">Tous les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés. Aucune sonde matérielle ni module connecté requis.</p>
             </div>
           </div>
@@ -404,7 +404,7 @@
                   <th class="py-3 px-space-md">Matériel &amp; Série</th>
                   <th class="py-3 px-space-md">Organisation</th>
                   <th class="py-3 px-space-md">Dernier relevé</th>
-                  <th class="py-3 px-space-md">Carnet KEEVA</th>
+                  <th class="py-3 px-space-md">Carnet KALEA</th>
                   <th class="py-3 px-space-md">Échéance de maintenance</th>
                   <th class="py-3 px-space-md text-right">TCO Déclaré</th>
                   <th class="py-3 px-space-md text-center">Compteur</th>
@@ -425,7 +425,7 @@
               <span class="material-symbols-outlined text-[16px]">verified</span><span>Supervision Financière Multi-Devises</span>
             </div>
             <h1 class="font-headline-lg text-headline-lg text-on-surface">Audit TCO &amp; Facturation</h1>
-            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Coûts d'entretien réels par organisation, et abonnements SaaS KEEVA lus en direct depuis Stripe (jamais un tarif recopié à la main).</p>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Coûts d'entretien réels par organisation, et abonnements SaaS KALEA lus en direct depuis Stripe (jamais un tarif recopié à la main).</p>
           </div>
           <div class="flex items-center gap-space-sm self-start md:self-auto">
             <button id="tco-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
@@ -576,7 +576,7 @@
             <div class="w-12 h-12 rounded bg-surface-container-high flex-shrink-0 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
             <div class="flex flex-col gap-space-xs">
               <h2 class="font-headline-sm text-headline-sm text-on-surface">Politique Zéro-Capteur &amp; Hybridation des Relevés</h2>
-              <p class="font-body-md text-body-md text-on-surface-variant">KEEVA évite les boîtiers télématiques intrusifs coûteux et fragiles en environnement agricole ou travaux publics. Les relevés proviennent des <strong>carnets de maintenance physiques</strong> et des <strong>photos instantanées des horamètres</strong> capturées par les chauffeurs et chefs de chantier, puis lus par OCR.</p>
+              <p class="font-body-md text-body-md text-on-surface-variant">KALEA évite les boîtiers télématiques intrusifs coûteux et fragiles en environnement agricole ou travaux publics. Les relevés proviennent des <strong>carnets de maintenance physiques</strong> et des <strong>photos instantanées des horamètres</strong> capturées par les chauffeurs et chefs de chantier, puis lus par OCR.</p>
             </div>
           </div>
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
@@ -1068,12 +1068,12 @@ async function ouvrirTicket(ticketId) {
       </div>
       <div class="flex items-center gap-4 text-ardoise">
         <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">schedule</span>Ouvert ${ilYA(t?.created_at)}</span>
-        ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KEEVA assigné</span>` : ''}
+        ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KALEA assigné</span>` : ''}
       </div>
     </div>` : `
     <div class="px-space-md py-2 border-b border-outline-variant/60 flex items-center gap-4 text-xs text-ardoise">
       <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">schedule</span>Ouvert ${ilYA(t?.created_at)}</span>
-      ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KEEVA assigné</span>` : ''}
+      ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KALEA assigné</span>` : ''}
     </div>`;
 
   panneau.innerHTML = `
@@ -1134,7 +1134,7 @@ async function ouvrirTicket(ticketId) {
     // un accès client (cas réel ici, gérant ET superviseur du même compte) doit
     // se voir lui-même, jamais confondu avec « le client » côté admin.
     const estStaffAutre = !deMoi && msg.profiles?.is_staff;
-    const auteur = deMoi ? 'Toi' : (estStaffAutre ? 'Support KEEVA' : (msg.profiles?.full_name || msg.profiles?.login || '?'));
+    const auteur = deMoi ? 'Toi' : (estStaffAutre ? 'Support KALEA' : (msg.profiles?.full_name || msg.profiles?.login || '?'));
     const ligne = document.createElement('div');
     ligne.className = deMoi ? 'flex items-end justify-end gap-2' : 'flex items-end gap-2';
     const avatar = deMoi ? '' : `<div class="w-6 h-6 rounded-full ${estStaffAutre ? 'bg-encre' : 'bg-surface-container-high'} text-on-primary flex items-center justify-center font-display font-bold text-[9px] shrink-0 mb-4">${echapper(estStaffAutre ? 'KV' : initiales(auteur))}</div>`;
