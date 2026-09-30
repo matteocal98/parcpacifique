@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5fFPXS/X57yjZ3LK++AG4N9Y+rWrOEYU6MieQnE8z+c=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Sk3uv5bcxkOhYNa5miqdkBEVICBvr7nErEpuAr+BPPg=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -106,6 +106,9 @@
       </a>
       <a data-path="ocr" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">document_scanner</span><span class="font-label-md text-label-md">Carnets &amp; OCR</span>
+      </a>
+      <a data-path="stock" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-label-md text-label-md">Gestion des Stocks</span>
       </a>
     </nav>
   </div>
@@ -608,6 +611,83 @@
         </div>
       </section>
 
+      <!-- ═══════ VUE : Gestion des Stocks ═══════ -->
+      <section id="vue-stock" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">inventory_2</span><span>Supervision Cross-Entreprises</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Gestion des Stocks</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Adoption du module Stock &amp; SAV, valorisation réelle (coût PUMP) et alertes de seuil bas par organisation — le détail complet (mouvements, magasins, kits) reste dans le compte de chaque société, via « Se connecter en tant que ».</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <button id="stock-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Sociétés avec Stock &amp; SAV actif</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">inventory_2</span>
+            </div>
+            <span id="stock-kpi-societes" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Valeur totale du stock</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-secondary material-symbols-outlined text-[20px]">payments</span>
+            </div>
+            <span id="stock-kpi-valeur" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Alertes seuil bas</span>
+              <span class="p-1.5 rounded-lg bg-error-container text-on-error-container material-symbols-outlined text-[20px]">warning</span>
+            </div>
+            <span id="stock-kpi-alertes" class="font-display text-display text-error mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Mouvements ce mois</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant material-symbols-outlined text-[20px]">sync_alt</span>
+            </div>
+            <span id="stock-kpi-mouvements" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+            <div>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Stock par organisation</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Sociétés ayant au moins une pièce au catalogue — les autres n'ont pas encore touché au module.</p>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">filter_list</span>
+              <input id="stock-recherche" class="h-10 pl-9 pr-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant/70 rounded focus:outline-none focus:ring-2 focus:ring-primary w-56" placeholder="Filtrer organisation..." type="text"/>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-body-sm text-body-sm">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                  <th class="py-3 px-space-md">Organisation</th>
+                  <th class="py-3 px-space-md text-center">Pièces au catalogue</th>
+                  <th class="py-3 px-space-md text-right">Valeur du stock</th>
+                  <th class="py-3 px-space-md text-center">Alertes seuil bas</th>
+                  <th class="py-3 px-space-md">Dernier mouvement</th>
+                  <th class="py-3 px-space-md text-center"></th>
+                </tr>
+              </thead>
+              <tbody id="stock-corps-tableau" class="divide-y divide-surface-container-low"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════ VUE : Bientôt disponible ═══════ -->
       <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
         <span class="material-symbols-outlined text-4xl text-on-surface-variant">construction</span>
@@ -751,6 +831,8 @@ async function demarrer() {
   el('parc-rafraichir')?.addEventListener('click', () => chargerParc());
   el('tco-rafraichir')?.addEventListener('click', () => chargerTco());
   el('ocr-recherche')?.addEventListener('input', () => rendreTableauOcr());
+  el('stock-rafraichir')?.addEventListener('click', () => chargerStock());
+  el('stock-recherche')?.addEventListener('input', () => rendreTableauStock());
 
   sb.auth.onAuthStateChange((_event, session) => {
     if (session?.user) verifierAccesEtCharger(session.user.id);
@@ -805,11 +887,12 @@ async function verifierAccesEtCharger(userId) {
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
   if (chemin === 'ocr') chargerOcr();
+  if (chemin === 'stock') chargerStock();
 }
 
 // ── Clients & Organisations ─────────────────────────────────────────────
@@ -1437,6 +1520,65 @@ function rendreTableauOcr() {
       <td class="px-space-md py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-on-surface">${s.recherches_photo}</span></td>
       <td class="px-space-lg py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-primary font-bold">${s.lectures_compteur}</span></td>
     </tr>`).join('');
+}
+
+// ── Gestion des Stocks ───────────────────────────────────────────────────
+let STOCK_LIGNES = [];
+
+async function chargerStock() {
+  const { data: societes, error } = await sb.rpc('admin_audit_stock_societes');
+  if (error) { console.error(error); return; }
+  STOCK_LIGNES = societes || [];
+
+  el('stock-kpi-societes').textContent = STOCK_LIGNES.length;
+
+  // Regroupé PAR DEVISE réelle, jamais converti (même règle que l'audit
+  // TCO — aucun taux de change n'existe dans ce produit).
+  const parDevise = {};
+  STOCK_LIGNES.forEach((s) => {
+    parDevise[s.devise] = (parDevise[s.devise] || 0) + (Number(s.valeur_stock) || 0);
+  });
+  const devises = Object.keys(parDevise).filter((d) => Math.round(parDevise[d]) !== 0);
+  el('stock-kpi-valeur').innerHTML = devises.length
+    ? devises.map((d) => echapper(formatMontant(parDevise[d], d))).join('<br>')
+    : '0';
+
+  el('stock-kpi-alertes').textContent = STOCK_LIGNES.reduce((a, s) => a + Number(s.nb_alertes_seuil_bas || 0), 0);
+  el('stock-kpi-mouvements').textContent = STOCK_LIGNES.reduce((a, s) => a + Number(s.nb_mouvements_mois || 0), 0);
+
+  rendreTableauStock();
+}
+
+function rendreTableauStock() {
+  const recherche = (el('stock-recherche')?.value || '').toLowerCase();
+  const visibles = STOCK_LIGNES.filter((s) => !recherche || s.company_name.toLowerCase().includes(recherche));
+  el('stock-corps-tableau').innerHTML = visibles.map((s) => `
+    <tr class="hover:bg-surface-container-low/40 transition-colors">
+      <td class="py-4 px-space-md">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-headline-sm text-primary font-bold">${echapper(initiales(s.company_name).slice(0, 1))}</div>
+          <span class="font-label-md text-label-md text-on-surface">${echapper(s.company_name)}</span>
+        </div>
+      </td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${s.nb_pieces}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-semibold text-on-surface">${echapper(formatMontant(s.valeur_stock, s.devise))}</td>
+      <td class="py-4 px-space-md text-center">
+        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${Number(s.nb_alertes_seuil_bas) > 0 ? 'bg-error-container text-error' : 'bg-surface-container-highest text-on-surface-variant'}">${s.nb_alertes_seuil_bas}</span>
+      </td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${s.dernier_mouvement_at ? echapper(ilYA(s.dernier_mouvement_at)) : '—'}</td>
+      <td class="py-4 px-space-md text-center">
+        <button type="button" class="btn-stock-connecter min-h-[40px] px-space-sm rounded hover:bg-surface-container text-primary font-label-md text-label-md transition-colors inline-flex items-center gap-1" data-company-id="${echapper(s.company_id)}">
+          <span class="material-symbols-outlined text-[18px]">login</span><span>Voir</span>
+        </button>
+      </td>
+    </tr>`).join('');
+  el('stock-corps-tableau').querySelectorAll('.btn-stock-connecter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const societe = SOCIETES.find((o) => o.company_id === btn.dataset.companyId);
+      if (societe) connecterEnTantQue(societe);
+      else alert("Société introuvable dans la vue Clients — actualise cette page.");
+    });
+  });
 }
 
 // ── Outillage d'écriture : correction de compteur / barème horaire ──────
