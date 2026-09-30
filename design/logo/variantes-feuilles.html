@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KALEA — Feuilles renforcées</title>
+<style>
+@font-face{font-family:Inter;font-weight:700;src:url(../../polices/inter-latin-700-normal.woff2)}
+@font-face{font-family:Inter;font-weight:800;src:url(../../polices/inter-latin-800-normal.woff2)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:#F4F4F8;color:#18183A;padding:20px 24px}
+h1{font-size:22px;margin:0 0 16px}
+.v{background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;gap:36px;flex-wrap:wrap}
+.v h2{flex-basis:100%;margin:0;font-size:16px}.v h2 span{font-weight:400;color:#777;font-size:13px}
+.lock{display:flex;align-items:center;gap:16px}.lock svg{flex:none;overflow:visible}
+.mot{font-weight:700;font-size:44px;letter-spacing:.13em}
+.mot.b{font-weight:800;letter-spacing:.1em}
+.nuit{background:#18183A;border-radius:12px;padding:14px 20px}.nuit .mot{color:#fff}
+.tailles{display:flex;align-items:end;gap:14px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <!-- Ancienne B3 : fût 6, feuilles de rayons 34 / 21 -->
+  <symbol id="avant" viewBox="-4 -4 40 42"><rect x="-3" y="0" width="6" height="34" rx="3" fill="var(--fut)"/><path d="M6,21A34,34 0 0 0 29,0A34,34 0 0 0 6,21Z" fill="#6864DF"/><path d="M6,21A21,21 0 0 1 21,34A21,21 0 0 1 6,21Z" fill="#16B2CB"/><circle cx="33" cy="5" r="3.09" fill="#E78B20"/></symbol>
+  <!-- Renforcée : fût 8, feuilles de rayons 21 / 13 (largeurs 12,3 et 7,6 : rapport 1,618) -->
+  <symbol id="apres" viewBox="-5 -4 43 42"><rect x="-4" y="0" width="8" height="34" rx="4" fill="var(--fut)"/><path d="M7,21A21,21 0 0 0 28,0A21,21 0 0 0 7,21Z" fill="#6864DF"/><path d="M7,21A13,13 0 0 1 20,34A13,13 0 0 1 7,21Z" fill="#16B2CB"/><circle cx="33.5" cy="6.5" r="4" fill="#E78B20"/></symbol>
+  <symbol id="icone" viewBox="0 0 100 100"><rect width="100" height="100" rx="22.4" fill="#18183A"/><g transform="translate(30 26.5) scale(1.38)"><rect x="-4" y="0" width="8" height="34" rx="4" fill="#fff"/><path d="M7,21A21,21 0 0 0 28,0A21,21 0 0 0 7,21Z" fill="#6864DF"/><path d="M7,21A13,13 0 0 1 20,34A13,13 0 0 1 7,21Z" fill="#16B2CB"/><circle cx="33.5" cy="6.5" r="4" fill="#E78B20"/></g></symbol>
+ </defs>
+</svg>
+<h1>Piste B3 — Feuilles renforcées</h1>
+
+<div class="v" style="--fut:#18183A"><h2>Avant <span>— B3 d'origine, pour comparer</span></h2>
+<div class="lock"><svg viewBox="-4 -4 40 42" width="69" height="72"><use href="#avant"/></svg><span class="mot">KALEA</span></div>
+</div>
+
+<div class="v" style="--fut:#18183A"><h2>B3 renforcée <span>— fût plus épais (8), feuilles plus pleines, point orange plus présent</span></h2>
+<div class="lock"><svg viewBox="-5 -4 43 42" width="74" height="72"><use href="#apres"/></svg><span class="mot">KALEA</span></div>
+<div class="nuit lock" style="--fut:#fff"><svg viewBox="-5 -4 43 42" width="74" height="72"><use href="#apres"/></svg><span class="mot">KALEA</span></div>
+</div>
+
+<div class="v" style="--fut:#18183A"><h2>B3 renforcée + texte plus gras <span>— le mot KALEA s'accorde au poids du symbole</span></h2>
+<div class="lock"><svg viewBox="-5 -4 43 42" width="74" height="72"><use href="#apres"/></svg><span class="mot b">KALEA</span></div>
+<div class="nuit lock" style="--fut:#fff"><svg viewBox="-5 -4 43 42" width="74" height="72"><use href="#apres"/></svg><span class="mot b">KALEA</span></div>
+</div>
+
+<div class="v"><h2>Icône à différentes tailles <span>— test de solidité (écran d'accueil, notification, onglet)</span></h2>
+<div class="tailles"><svg width="120" height="120"><use href="#icone"/></svg><svg width="64" height="64"><use href="#icone"/></svg><svg width="40" height="40"><use href="#icone"/></svg><svg width="24" height="24"><use href="#icone"/></svg></div>
+</div>
+</body></html>
