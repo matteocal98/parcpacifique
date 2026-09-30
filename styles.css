@@ -6590,6 +6590,11 @@
      ne s'applique donc pas, il en faut une dédiée. */
   .rapport-tco-modal .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .rapport-tco-modal .modal-actions button svg{width:18px;height:18px;flex:0 0 auto;}
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : #rapport-tco-email
+     héritait du fond teinté par défaut sur un .modal blanc, l'inverse de
+     la règle. */
+  .rapport-tco-modal .modal{background:#F2F4F8;}
+  .rapport-tco-modal #rapport-tco-email{background:var(--surface);}
   /* Les blocs de la page (bandeau, tuiles KPI, classement flotte, grille
      Paramètres/Catalogue) sont des enfants directs de .vue-couts-tco sans
      .dash-grid autour : sans gap ici, ils se touchaient (contrairement aux
