@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-8isypwIgiUaJaLPALp81OiEKPu37MOL4xkTwRBjjyY4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KK7A8wk6ty/ew1X/ZVZt3sxg6r7xB9YoUYm/lsNA7tM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -14411,7 +14411,7 @@ function blocInventaireStockHtml() {
             ${picto('chevronBas')}
           </div>
         </div>
-        <div class="stock-liste" id="stock-inventaire-liste"></div>
+        <div class="stock-liste is-scroll" id="stock-inventaire-liste"></div>
         <div class="hint" id="stock-inventaire-vide"></div>
       </div>
     </section>`;
@@ -14452,10 +14452,14 @@ function blocMouvementsStockHtml() {
             <p class="stock-section-sub" style="color:var(--primary-dark);font-weight:600;">${trad('Entrées, sorties, transferts et ajustements')}</p>
           </div>
         </div>
-        ${peut ? `<button type="button" class="stock-btn-outline" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : ''}
+        ${peut ? `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" class="stock-btn-outline" id="stock-mouvements-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
+          <button type="button" class="stock-btn-outline" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>
+        </div>` : ''}
       </div>
       <div class="stock-section-body">
-        <div class="stock-liste" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
+        <div class="stock-liste is-scroll" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
         <button type="button" class="stock-cta" id="stock-mouvements-plus" hidden style="margin-top:14px;">${trad('Voir plus')}</button>
       </div>
     </section>`;
@@ -14504,7 +14508,7 @@ function blocKitsEntretienStockHtml() {
         ${peut ? `<button type="button" class="stock-btn-outline" id="stock-kit-nouveau">${picto('plusCercle')}<span>${trad('Nouveau kit')}</span></button>` : ''}
       </div>
       <div class="stock-section-body">
-        <div class="stock-liste" id="stock-kits-liste">${liste}</div>
+        <div class="stock-liste is-scroll" id="stock-kits-liste">${liste}</div>
       </div>
     </section>`;
 }
@@ -14517,7 +14521,7 @@ function blocKitsEntretienStockHtml() {
 // qui eux exigent l'atomicité du calcul PUMP via une RPC dédiée).
 function ouvrirEditionKit(kit) {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay stock-kit-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
@@ -14699,7 +14703,7 @@ function blocBesoinsRisqueStockHtml() {
         </div>
       </div>
       <div class="stock-section-body">
-        <div class="stock-liste">
+        <div class="stock-liste is-scroll">
           ${aRisque.length ? aRisque.map(ligneBesoinRisqueHtml).join('') : `<div class="hint">${trad('Aucune pièce à risque pour l\'instant.')}</div>`}
         </div>
       </div>
@@ -14738,7 +14742,7 @@ function exporterInventaireStockCsv() {
 // — ce code ne fait que collecter les champs et interpréter l'erreur.
 function ouvrirNouveauMouvementModal() {
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay stock-mouvement-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
@@ -14893,6 +14897,277 @@ function ouvrirNouveauMouvementModal() {
   });
 }
 
+// ── IMPORT CSV DES MOUVEMENTS DE STOCK ─────────────────────────────────
+// Réservé aux ENTRÉES (demande explicite de l'utilisateur — cas d'usage :
+// grosses arrivées de stock, coûts unitaires différents d'une ligne à
+// l'autre). Un seul magasin pour tout le fichier, choisi dans la modale —
+// pas de colonne Magasin dans le CSV. Même silhouette que ouvrirImportCatalogue
+// (terminal d'en-tête, règles, zone de dépôt) mais PAS un upsert : chaque
+// ligne appelle la RPC enregistrer_mouvement_stock, dans l'ordre du fichier
+// et JAMAIS en parallèle — le coût moyen pondéré (PUMP) de chaque ligne
+// dépend du solde que la ligne précédente vient d'écrire ; un Promise.all()
+// donnerait un résultat qui dépend de l'ordre d'arrivée réseau, pas de
+// l'ordre du fichier. Voir ouvrirExplicationPump() pour la formule.
+function enteteCsvMouvements() {
+  return ['Référence', 'Quantité', 'Coût unitaire', 'Motif'];
+}
+// Format identique à enteteCsvPieces()/modeleCsvCatalogue : en-tête EXACT,
+// ordre positionnel strict. La Référence doit déjà exister dans le
+// catalogue (colonnesCatalogueePiece()/UI.partsCatalog) — pas de création
+// de pièce à la volée depuis ce fichier, jamais deux formats d'import qui
+// créent des pièces différemment.
+function analyserCsvMouvements(texte) {
+  const lignesBrutes = String(texte || '').split(/\r\n|\r|\n/).filter((l) => l.trim() !== '');
+  if (!lignesBrutes.length) return { lignes: [], erreurs: [trad('Fichier vide.')] };
+  const entete = analyserLigneCsv(lignesBrutes[0]).map((c) => c.trim());
+  const enteteAttendu = enteteCsvMouvements();
+  const enteteOk = entete.length === enteteAttendu.length
+    && entete.every((c, i) => c.toLowerCase() === enteteAttendu[i].toLowerCase());
+  if (!enteteOk) {
+    return {
+      lignes: [],
+      erreurs: [tR('En-tête invalide. Attendu : {attendu} — reçu : {recu}', {
+        attendu: enteteAttendu.join(','), recu: entete.join(',') || trad('(vide)'),
+      })],
+    };
+  }
+  const lignes = [];
+  const erreurs = [];
+  for (let i = 1; i < lignesBrutes.length; i++) {
+    const champs = analyserLigneCsv(lignesBrutes[i]).map((c) => (c || '').trim());
+    const numero = i + 1;
+    const [referenceTexte, qteTexte, coutTexte, motif] = champs;
+    if (!referenceTexte) { erreurs.push(tR('Ligne {n} : référence manquante, ignorée.', { n: numero })); continue; }
+    const piece = (UI.partsCatalog || []).find((p) => (p.reference || '').trim().toLowerCase() === referenceTexte.toLowerCase());
+    if (!piece) { erreurs.push(tR('Ligne {n} : référence « {ref} » introuvable dans le catalogue, ignorée.', { n: numero, ref: referenceTexte })); continue; }
+    const qte = nombreDepuisTexte(qteTexte);
+    if (qte == null || qte <= 0) { erreurs.push(tR('Ligne {n} : quantité invalide, ignorée.', { n: numero })); continue; }
+    const cout = nombreDepuisTexte(coutTexte);
+    if (cout == null || cout < 0) { erreurs.push(tR('Ligne {n} : coût unitaire invalide, ignorée.', { n: numero })); continue; }
+    lignes.push({
+      numero, part_id: piece.id, reference: piece.reference || piece.designation,
+      quantity: qte, unit_cost: cout, reason: motif || null,
+    });
+  }
+  return { lignes, erreurs };
+}
+function modeleCsvMouvements() {
+  const exemple = ['FLT-0142', '50', '24.90', trad('Livraison BL-2026-0142')];
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  return [enteteCsvMouvements(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
+}
+function telechargerModeleCsvMouvements() {
+  const blob = new Blob([csvToUtf16Buffer(modeleCsvMouvements())], { type: 'text/csv;charset=utf-16le;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'modele_mouvements_stock.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function ouvrirImportMouvementsStock() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay import-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  const optionsMagasins = magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
+
+  const REGLES = [
+    { icone: 'boite', teinte: 'is-bleu', titre: trad('Référence :'), texte: trad('doit correspondre à une pièce déjà présente dans le catalogue.') },
+    { icone: 'devise', teinte: 'is-vert', titre: trad('Coût unitaire :'), texte: trad('nombre (virgule ou point décimal accepté), obligatoire.') },
+    { icone: 'info', teinte: 'is-bleu', titre: trad('Motif :'), texte: trad('texte libre (ex : n° de bon de livraison), facultatif.') },
+  ];
+
+  overlay.innerHTML = `
+    <div class="modal import-csv-modal">
+      <div class="import-csv-barre"></div>
+      <div class="import-csv-corps">
+        <div class="import-csv-entete">
+          <div class="import-csv-entete-gauche">
+            <div class="import-csv-icone">${picto('televerser')}</div>
+            <div>
+              <h2>${trad('Importer des mouvements depuis un CSV')}</h2>
+              <p class="import-csv-sous-titre">${trad('Enregistre plusieurs entrées de stock en une fois')}</p>
+            </div>
+          </div>
+          <button type="button" class="log-close2" id="import-mvt-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+        </div>
+
+        <div class="import-csv-section">
+          <p class="import-csv-libelle">${trad('Magasin de destination')} <strong class="import-csv-badge">${trad('OBLIGATOIRE')}</strong></p>
+          <select id="import-mvt-magasin">
+            <option value="">${trad('Choisir un magasin…')}</option>
+            ${optionsMagasins}
+          </select>
+          <p class="hint">${trad('Toutes les lignes du fichier seront enregistrées comme des ENTRÉES dans ce magasin — une colonne « Magasin » séparée n\'est pas prise en charge.')}</p>
+        </div>
+
+        <div class="import-csv-section">
+          <p class="import-csv-libelle">${trad('Fichier CSV avec un en-tête')} <strong class="import-csv-badge">${trad('EXACTEMENT')}</strong> ${trad('dans cet ordre :')}</p>
+          <div class="import-csv-terminal">
+            <div class="import-csv-terminal-tete">
+              <span><span class="dot"></span>${tR('En-tête requis (colonnes 1 à {n})', { n: enteteCsvMouvements().length })}</span>
+              <button type="button" id="import-mvt-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
+            </div>
+            <div class="import-csv-terminal-code">${esc(enteteCsvMouvements().join(','))}</div>
+          </div>
+        </div>
+
+        <div class="import-csv-section">
+          <span class="import-csv-eyebrow">${trad('Règles & conditions de traitement')}</span>
+          <div class="import-csv-regles">
+            ${REGLES.map((r) => `
+              <div class="import-csv-regle">
+                <div class="import-csv-regle-icone ${r.teinte}">${picto(r.icone)}</div>
+                <div><strong>${esc(r.titre)}</strong> ${esc(r.texte)}</div>
+              </div>`).join('')}
+            <div class="import-csv-regle is-accent">
+              <div class="import-csv-regle-icone is-primaire">${picto('rafraichir')}</div>
+              <div><strong>${trad('Chaque ligne = une entrée distincte :')}</strong> ${trad('si une même référence apparaît plusieurs fois, chaque ligne recalcule le coût moyen pondéré à son tour, dans l\'ordre du fichier — jamais un import groupé.')}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="import-csv-section">
+          <button type="button" class="import-csv-bouton-modele" id="import-mvt-modele">${picto('export')}<span>${trad('Télécharger un modèle')}</span></button>
+          <input id="import-mvt-fichier" type="file" accept=".csv,text/csv" hidden>
+          <div class="import-csv-zone" id="import-mvt-zone">
+            <div class="import-csv-zone-icone">${picto('televerser')}</div>
+            <span class="import-csv-zone-nom" id="import-mvt-choisir-label">${trad('Choisir un fichier…')}</span>
+            <span class="import-csv-zone-aide">${trad('(ou glisser le .csv ici)')}</span>
+          </div>
+        </div>
+
+        <div id="import-mvt-msg" role="status" aria-live="polite"></div>
+      </div>
+      <div class="import-csv-pied">
+        <button type="button" class="secondary" id="import-mvt-fermer">${trad('Fermer')}</button>
+        <button type="button" class="primary" id="import-mvt-go" disabled>${picto('coche')}<span>${trad('Importer')}</span></button>
+      </div>
+    </div>`;
+
+  overlay.querySelector('#import-mvt-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#import-mvt-fermer-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#import-mvt-modele').addEventListener('click', telechargerModeleCsvMouvements);
+
+  const boutonCopier = overlay.querySelector('#import-mvt-copier');
+  boutonCopier?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(enteteCsvMouvements().join(','));
+      const texteBtn = boutonCopier.querySelector('span');
+      const avant = texteBtn.textContent;
+      boutonCopier.classList.add('is-copie');
+      texteBtn.textContent = trad('Copié !');
+      setTimeout(() => { boutonCopier.classList.remove('is-copie'); texteBtn.textContent = avant; }, 2000);
+    } catch (err) { /* presse-papiers indisponible : sans conséquence */ }
+  });
+
+  const inputFichier = overlay.querySelector('#import-mvt-fichier');
+  const zone = overlay.querySelector('#import-mvt-zone');
+  const labelChoisir = overlay.querySelector('#import-mvt-choisir-label');
+  const boutonGo = overlay.querySelector('#import-mvt-go');
+  const selMagasin = overlay.querySelector('#import-mvt-magasin');
+  const msg = overlay.querySelector('#import-mvt-msg');
+  let fichierChoisi = null;
+
+  const majBoutonGo = () => { boutonGo.disabled = !fichierChoisi || !selMagasin.value; };
+  selMagasin.addEventListener('change', majBoutonGo);
+
+  const definirFichier = (fichier) => {
+    fichierChoisi = fichier || null;
+    labelChoisir.textContent = fichierChoisi ? fichierChoisi.name : trad('Choisir un fichier…');
+    zone.classList.toggle('is-rempli', !!fichierChoisi);
+    majBoutonGo();
+    msg.textContent = '';
+  };
+
+  zone.addEventListener('click', () => inputFichier.click());
+  inputFichier.addEventListener('change', () => definirFichier(inputFichier.files?.[0] || null));
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('is-survol'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('is-survol'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('is-survol');
+    const depose = e.dataTransfer?.files?.[0];
+    if (depose) definirFichier(depose);
+  });
+
+  const labelGo = boutonGo.querySelector('span');
+  boutonGo.addEventListener('click', async () => {
+    if (!fichierChoisi || !selMagasin.value) return;
+    boutonGo.disabled = true;
+    selMagasin.disabled = true;
+    msg.textContent = '';
+    msg.style.color = '';
+    try {
+      const texte = await lireTexteFichier(fichierChoisi);
+      const { lignes, erreurs } = analyserCsvMouvements(texte);
+      if (!lignes.length) {
+        msg.style.color = 'var(--danger, #c0392b)';
+        msg.textContent = erreurs.length ? erreurs.join(' ') : trad('Aucune ligne valide trouvée dans ce fichier.');
+        boutonGo.disabled = false;
+        selMagasin.disabled = false;
+        return;
+      }
+      // SÉQUENTIEL, JAMAIS EN PARALLÈLE (voir le commentaire en tête de
+      // fichier de cette section) : le résultat de chaque appel dépend de
+      // l'état que le précédent vient d'écrire.
+      const erreursEnvoi = [];
+      let reussies = 0;
+      for (const ligne of lignes) {
+        labelGo.textContent = tR('Import en cours… ({n}/{total})', { n: reussies + erreursEnvoi.length + 1, total: lignes.length });
+        try {
+          const { error } = await sb.rpc('enregistrer_mouvement_stock', {
+            p_type: 'entree',
+            p_part_id: ligne.part_id,
+            p_warehouse_id: selMagasin.value,
+            p_destination_warehouse_id: null,
+            p_quantity: ligne.quantity,
+            p_unit_cost: ligne.unit_cost,
+            p_intervention_id: null,
+            p_reason: ligne.reason,
+          });
+          if (error) throw error;
+          reussies++;
+        } catch (err) {
+          erreursEnvoi.push(tR('Ligne {n} ({ref}) : {erreur}', { n: ligne.numero, ref: ligne.reference, erreur: err.message || String(err) }));
+        }
+      }
+      const { data: soldes } = await sb.from('stock_items')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at')
+        .eq('company_id', UI.companyId);
+      UI.stockItems = soldes || [];
+      UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+      renderApp();
+
+      const toutesErreurs = [...erreurs, ...erreursEnvoi];
+      const succes = tR('{n} mouvement(s) enregistré(s).', { n: reussies });
+      if (toutesErreurs.length) {
+        msg.style.color = '';
+        msg.innerHTML = `<div>${esc(succes)}</div>`
+          + `<div style="margin-top:6px;color:var(--danger, #c0392b);">${esc(tR('{m} ligne(s) ignorée(s) :', { m: toutesErreurs.length }))}</div>`
+          + `<ul style="margin:4px 0 0 18px;padding:0;">${toutesErreurs.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
+        boutonGo.disabled = false;
+        selMagasin.disabled = false;
+        labelGo.textContent = trad('Importer');
+      } else {
+        showToast(succes);
+        overlay.remove();
+      }
+    } catch (err) {
+      msg.style.color = 'var(--danger, #c0392b)';
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      boutonGo.disabled = false;
+      selMagasin.disabled = false;
+      labelGo.textContent = trad('Importer');
+    }
+  });
+}
+
 VIEWS.stock = {
   title: trad('Stocks & SAV'),
   subtitle: () => trad('Magasins, mouvements et valorisation du stock'),
@@ -14903,10 +15178,15 @@ VIEWS.stock = {
         ${stockKpiGridHtml()}
         ${blocMagasinsStockHtml()}
         ${blocCatalogueTcoHtml()}
-        ${blocInventaireStockHtml()}
-        ${blocMouvementsStockHtml()}
-        ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}
-        ${SCHEMA.hasKits ? blocBesoinsRisqueStockHtml() : ''}
+        <div class="stock-grid-2 is-inventaire-mouvements">
+          ${blocInventaireStockHtml()}
+          ${blocMouvementsStockHtml()}
+        </div>
+        ${SCHEMA.hasKits ? `
+        <div class="stock-grid-2 is-kits-risques">
+          ${blocKitsEntretienStockHtml()}
+          ${blocBesoinsRisqueStockHtml()}
+        </div>` : ''}
       </div>`;
   },
   mount() {
@@ -15131,6 +15411,7 @@ VIEWS.stock = {
       rafraichirMouvements();
     });
     root.querySelector('#stock-mouvements-nouveau')?.addEventListener('click', () => ouvrirNouveauMouvementModal());
+    root.querySelector('#stock-mouvements-importer')?.addEventListener('click', () => ouvrirImportMouvementsStock());
   },
 };
 

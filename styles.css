@@ -6697,6 +6697,31 @@
   .stock-form-tete svg{width:15px;height:15px;color:var(--primary-dark);}
   .stock-form-tete span{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink);}
   .stock-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  /* Bug de largeur signalé par l'utilisateur (capture à l'appui) : une
+     désignation de pièce longue forçait le bouton .champ-select à dépasser
+     sa piste de grille (2fr), poussant quantité/bouton hors de la modale.
+     Ce n'est PAS le <select> natif (masqué par habillerSelectPieceCatalogue,
+     remplacé par ce bouton) — .champ-select span tronque déjà bien son
+     texte (overflow:hidden + ellipsis), mais le BOUTON lui-même, item de
+     grille, garde un min-width:auto implicite (jamais plus étroit que son
+     contenu) tant qu'on ne le met pas à 0 explicitement. Scopé à ce
+     contexte précis : .champ-select est un composant partagé, pas touché
+     ailleurs. */
+  .stock-field-row[data-kit-ligne] .champ-select{min-width:0;}
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : Kit d'entretien et
+     Nouveau mouvement utilisent le <select>/<input> nu (pas .stock-form-
+     panel, déjà blanc sur ce fond soft) — ils héritaient donc du fond
+     teinté PAR DÉFAUT (input,select,textarea{background:var(--surface-
+     soft)}, styles.css ~ligne 2600), l'inverse de la règle demandée. */
+  .stock-kit-modal .modal{background:#F2F4F8;}
+  .stock-kit-modal #kit-nom,.stock-kit-modal #kit-note,
+  .stock-kit-modal .stock-field-row[data-kit-ligne] .champ-select,
+  .stock-kit-modal .stock-field-row[data-kit-ligne] input{background:var(--surface);}
+  .stock-mouvement-modal .modal{background:#F2F4F8;}
+  .stock-mouvement-modal #mvt-piece,.stock-mouvement-modal #mvt-magasin,
+  .stock-mouvement-modal #mvt-destination,.stock-mouvement-modal #mvt-quantite,
+  .stock-mouvement-modal #mvt-cout,.stock-mouvement-modal #mvt-machine,
+  .stock-mouvement-modal #mvt-intervention,.stock-mouvement-modal #mvt-motif{background:var(--surface);}
   .stock-form-panel input, .stock-form-panel select{width:100%;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;color:var(--ink);transition:border-color .15s,box-shadow .15s;}
   .stock-form-panel input::placeholder{color:var(--ink-4);}
   .stock-form-panel input:focus, .stock-form-panel select:focus{outline:none;border-color:var(--primary-dark);box-shadow:0 0 0 3px rgba(91,82,223,.12);}
