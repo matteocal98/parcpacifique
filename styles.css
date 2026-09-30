@@ -3465,6 +3465,12 @@
      Une zone à part, en bas de « Mon compte » : le bouton est visible mais
      jamais à côté d'une action courante. La liste dit ce qui sera perdu, et
      l'alerte d'abonnement ne peut pas être manquée. */
+  /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : #suppr-mot (le champ
+     "tape SUPPRIMER") héritait du fond teinté par défaut sur un .modal
+     blanc, l'inverse de la règle — d'autant plus important ici qu'un
+     champ qui ressort clairement compte pour une action irréversible. */
+  .suppr-compte-modal .modal{background:#F2F4F8;}
+  .suppr-compte-modal #suppr-mot{background:var(--surface);}
   .suppr-liste{margin:10px 0 14px;padding-left:20px;}
   .suppr-liste li{font-size:14.5px;color:var(--ink);margin-bottom:4px;}
   .suppr-alerte{
