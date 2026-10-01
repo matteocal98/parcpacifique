@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XVKf38+xO4B28fjhvvPwLTDiktq53IhKABWVOHVRSjY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vLOqTX4dBMwrESbiP5pSG5paC4l543ZFdpLriuy7EUk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4256,7 +4256,12 @@ async function uploadMachinePhoto(companyId, machineId, blob) {
   const { error } = await sb.storage.from('machine-photos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
   if (error) throw error;
   const { data } = sb.storage.from('machine-photos').getPublicUrl(path);
-  return data.publicUrl;
+  // Le chemin de stockage est stable (companyId/machineId.jpg) et `upsert`
+  // écrase le même objet : l'URL publique ne change donc jamais d'un envoi à
+  // l'autre, et le navigateur (voire le CDN) continue de servir l'ancienne
+  // image en cache après un remplacement de photo. Le paramètre `v` force une
+  // URL différente à chaque envoi pour que la nouvelle photo soit bien rechargée.
+  return `${data.publicUrl}?v=${Date.now()}`;
 }
 
 // Le lien de réinitialisation arrive ici AVEC l'erreur dans l'adresse quand il a
