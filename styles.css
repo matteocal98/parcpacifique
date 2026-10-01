@@ -1019,7 +1019,9 @@
      au contenu par défaut ; les 260px ne reviennent qu'en ligne. */
   .mstrip-identite{display:flex;align-items:center;gap:14px;min-width:0;width:100%;}
   @media (min-width:1180px){.mstrip-identite{width:auto;flex:1 1 260px;}}
-  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  /* Fond blanc, pas var(--surface-soft) (teinté) : même correctif que
+     #photo-preview (styles.css ~2171) et .fm2-o1-photo-box ci-dessous. */
+  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:#fff;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
   /* object-fit:contain, pas cover : une débroussailleuse (longue et
      étroite) recadrée en cover dans une vignette large finissait tronquée
      au seul manche, le reste (tête de coupe, moteur) hors cadre — signalé
@@ -1930,7 +1932,12 @@
     .fm2-o1-body{grid-column:span 7;}
     .fm2-o1-side{grid-column:span 3;}
   }
-  .fm2-o1-photo-box{position:relative;width:100%;height:144px;border-radius:12px;overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;}
+  /* Fond blanc, pas #F8FAFC (teinté) : même correctif que #photo-preview dans
+     la modale d'édition (styles.css ~2171) — la photo elle-même a presque
+     toujours un fond blanc, donc un cadre légèrement teinté crée un
+     letterboxing visible dès que la photo ne remplit pas tout le cadre
+     (object-fit:contain), signalé par l'utilisateur avec capture à l'appui. */
+  .fm2-o1-photo-box{position:relative;width:100%;height:144px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;}
   /* object-fit:contain (voir .mstrip-photo pour le même correctif et sa
      raison) : la photo entière reste visible, jamais recadrée au seul
      manche d'une débroussailleuse. */
@@ -1983,7 +1990,8 @@
     .fm2-o2-photo{grid-column:span 3;}
     .fm2-o2-main{grid-column:span 9;}
   }
-  .fm2-o2-photo-box{position:relative;width:100%;height:224px;border-radius:12px;overflow:hidden;background:#F8FAFC;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.05);border:1px solid #F1F5F9;}
+  /* Fond blanc : même correctif que .fm2-o1-photo-box ci-dessus. */
+  .fm2-o2-photo-box{position:relative;width:100%;height:224px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.05);border:1px solid #F1F5F9;}
   .fm2-o2-photo-box img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block;}
   .fm2-vin-o2{bottom:8px;left:8px;padding:4px 10px;border-radius:4px;font-size:11px;}
   .fm2-statut-o2{position:absolute;top:8px;left:8px;background:#00B4D8;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.05em;box-shadow:0 1px 2px rgba(0,0,0,.05);}
