@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AGyvxLM4rXxTwk/I6HlZY8uZwdMAuWg1SvKoqRWmVBE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XVKf38+xO4B28fjhvvPwLTDiktq53IhKABWVOHVRSjY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -24290,7 +24290,15 @@ async function boot(toastMessage) {
   const colonnesContact = SCHEMA.hasContactNames ? ['contact_first_name', 'contact_last_name'] : [];
   const colonnesRappels = SCHEMA.hasReminders
     ? ['notification_email', 'reminders_email', 'reminders_whatsapp'] : [];
-  const colonnesTco = tcoActif()
+  // SCHEMA.hasTco (pas tcoActif()) : à cet instant du boot, UI.companyPlan
+  // n'est pas encore affecté (voir plus bas, après le chargement des
+  // machines) — tcoActif() y lirait toujours 'free' et viderait news
+  // colonnes même pour une société qui a bien le palier requis. Même bug
+  // que celui déjà documenté plus haut (SCHEMA.* sondé une fois, jamais
+  // dépendant d'un état pas encore prêt) — trouvé en direct le 1er oct.
+  // 2026 : le classement TCO et le barème horaire disparaissaient alors
+  // que les données existaient bien en base.
+  const colonnesTco = SCHEMA.hasTco
     ? ['labor_hourly_rate', 'default_insurance_yearly', 'default_storage_yearly', 'currency'] : [];
   // Colonnes de ciblage du push par rôle — ajoutées seulement à la tentative
   // la plus riche : c'est la plus récente des migrations optionnelles, donc
@@ -24394,7 +24402,9 @@ async function boot(toastMessage) {
     // L'ordre de création : c'est lui qui décide quelles machines une offre
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
-    ...(tcoActif()
+    // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco ci-dessus
+    // (UI.companyPlan pas encore prêt à ce stade du boot).
+    ...(SCHEMA.hasTco
       ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
       : []),
   ].join(', ');
@@ -24411,9 +24421,9 @@ async function boot(toastMessage) {
   ].join(', ');
 
   // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
-  // ajouté seulement si tcoActif() : la colonne n'existe que pour les
-  // sociétés ayant la migration TCO, comme le reste des champs TCO.
-  const colonnesCategorie = tcoActif() ? 'id, name, target_hourly_cost' : 'id, name';
+  // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco plus haut
+  // (UI.companyPlan pas encore prêt à ce stade du boot).
+  const colonnesCategorie = SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name';
   const { data: machines, error: machinesErr } = await sb
     .from('machines')
     .select(`${colonnesMachine}, category:machine_categories(${colonnesCategorie}), plan:maintenance_plans(${colonnesPlan})`)
@@ -24437,7 +24447,9 @@ async function boot(toastMessage) {
   // catégories), réutilisé partout où une pièce se sélectionne (voir
   // keeva-tco-feature). Absent tant que la migration TCO n'est pas visible.
   let partsCatalog = [];
-  if (tcoActif()) {
+  // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco plus haut
+  // (UI.companyPlan pas encore prêt à ce stade du boot).
+  if (SCHEMA.hasTco) {
     const { data: pieces } = await sb
       .from('parts_catalog')
       .select(colonnesCatalogueePiece())
