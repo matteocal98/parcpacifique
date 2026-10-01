@@ -1168,7 +1168,7 @@
      jamais sous sa largeur de contenu par défaut (min-width:auto) — sans
      ça, ce bouton + les 2 boutons icône à côté débordaient hors de la
      carte sur mobile (trouvé en testant à 375px). */
-  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
+  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:37px;padding:0 7px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
   @media (max-width:480px){.mstrip-btn-principal{white-space:normal;text-align:center;line-height:1.25;height:auto;min-height:44px;padding:8px 12px;}}
   .mstrip-btn-principal:hover{background:var(--dark);}
   .mstrip-btn-principal svg{width:17px;height:17px;flex:0 0 auto;}
@@ -1868,7 +1868,7 @@
   .fm-btn svg{width:16px;height:16px;flex:0 0 auto;display:block;}
   .fm-btn-ico-primary{color:var(--primary);}
   .fm-btn-ico-accent{color:var(--bleu-roi);}
-  .fm-btn-primary{background:var(--ink);color:#fff;padding:10px 20px;font-size:16px;box-shadow:0 4px 14px rgba(14,19,51,.22);}
+  .fm-btn-primary{background:var(--ink);color:#fff;padding:0 7px;font-size:14px;height:37px;box-shadow:0 4px 14px rgba(14,19,51,.22);}
   .fm-btn-primary:hover{background:var(--dark);}
   .fm-btn-primary .fm-btn-ico-ok{color:var(--ok);}
   .fm-btn:disabled{opacity:.45;cursor:not-allowed;}
@@ -4482,7 +4482,7 @@
   /* Même règle, pour le nouveau bandeau .parc-toolbar-actions (reprise
      Stitch « Parc Machines ») — .toolbar-parc n'existe plus dans son
      balisage, cette règle-ci ne l'aurait donc jamais visé. */
-  .parc-toolbar-actions .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:44px;}
+  .parc-toolbar-actions .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:44px;font-size:14px;padding:0 14px;}
 
   /* ★ LOT 7 — LA COULEUR DES FILTRES DE L'ÉTAT. Quatre pastilles à compteur :
      chacune porte sa teinte d'état (un point) et son compteur sur un voile, la
