@@ -884,8 +884,15 @@
      données (listePreparation/grouperProduits/etatBesoin), même classement
      par catégorie, même badge .prep-famille-icone/.prep-famille-badge —
      seule la présentation par produit change, pour ce contexte précis. */
-  .prep-detail-groupe{border-radius:var(--r-lg);background:var(--surface-soft);padding:14px 14px 10px;margin-top:14px;}
-  .prep-detail-groupe:first-child{margin-top:0;}
+  /* 2 sous-blocs côte à côte à partir de 900px (demande explicite : la liste
+     à une seule colonne était « beaucoup trop longue ») plutôt qu'un seul
+     flux vertical — l'espacement vit ENTIÈREMENT dans le gap de la grille
+     (row-gap ET column-gap), jamais plus dans le margin-top de chaque
+     famille : un margin-top individuel n'aurait aligné que la 1ʳᵉ colonne
+     (:first-child), pas la 2ᵉ, sur la première ligne de la grille. */
+  .prep-detail-groupes-grid{display:grid;grid-template-columns:1fr;row-gap:14px;column-gap:16px;}
+  @media (min-width:900px){ .prep-detail-groupes-grid{grid-template-columns:1fr 1fr;} }
+  .prep-detail-groupe{border-radius:var(--r-lg);background:var(--surface-soft);padding:14px 14px 10px;min-width:0;}
   .prep-detail-groupe-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .prep-detail-groupe-gauche{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .prep-detail-groupe-nom{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--ink);}
@@ -5635,25 +5642,13 @@
     .agenda-nav-label{min-width:auto;font-size:13px;}
   }
 
-  /* Carte « Surveillance au compteur » : même jauge que .mstrip-jauge-part
-     (bandeau Parc), avec le display:block explicite d'emblée — cette classe
-     a été le bug trouvé et corrigé ailleurs (span inline ignorant width). */
-  .agenda-surveillance{display:flex;flex-direction:column;gap:12px;}
-  .agenda-surv-liste{display:flex;flex-direction:column;gap:14px;}
-  .agenda-surv-item{padding:12px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:8px;}
-  .agenda-surv-tete{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-  .agenda-surv-mots{display:flex;flex-direction:column;gap:2px;min-width:0;}
-  .agenda-surv-nom{font-weight:700;font-size:13.5px;}
-  .agenda-surv-reste{font-size:12px;font-weight:600;color:var(--ink-2);}
-  .agenda-surv-reste.is-late{color:var(--late);}
-  .agenda-surv-reste.is-soon{color:var(--soon);}
-  .agenda-surv-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;}
-  .agenda-surv-part{display:block;height:100%;min-width:4px;border-radius:var(--r-pill);}
-  .agenda-surv-part.is-late{background:var(--late);}
-  .agenda-surv-part.is-soon{background:var(--soon);}
-  .agenda-surv-part.is-ok{background:var(--ok);}
-  .agenda-surv-meta{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--ink-3);font-family:'Space Grotesk',sans-serif;font-feature-settings:"tnum" 1;}
-  .agenda-surv-cta{width:100%;justify-content:center;}
+  /* Plus de second track (ex-carte « Surveillance au compteur », supprimée) :
+     .agenda-grid passe sur une seule colonne pleine largeur. Scopé à
+     .vue-agenda, JAMAIS sur .agenda-grid seule — cette classe est partagée
+     avec Rappels/TCO, qui gardent le ratio φ (1.618fr/1fr) par défaut de
+     .dash-grid (voir le même principe déjà appliqué à .tco-parametres-grid
+     plus bas dans ce fichier). */
+  .vue-agenda .agenda-grid{grid-template-columns:1fr;}
 
   .agenda-pieces-bloc{display:flex;flex-direction:column;}
   .agenda-pieces-detail-toggle{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:700;align-self:flex-start;}

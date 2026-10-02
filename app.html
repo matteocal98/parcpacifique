@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Vx7lur+Jt+fEJ96S65JTFaLBVkX6A4sD18S6QyFY3Ew=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/U2KAvgsnx2vWszkV7zx+vN/gbHVnV4Fg/BimfJKFng=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11084,7 +11084,7 @@ function preparationCompleteAgendaHtml() {
   // indépendamment des autres, jamais un seul interrupteur global pour toute
   // la carte). Même patron que le repli des familles de preparationHtml()
   // (PREP_GROUPES_VISIBLES/UI.prepGroupesTous), appliqué ici aux produits.
-  const PREP_PRODUITS_VISIBLES = 3;
+  const PREP_PRODUITS_VISIBLES = 2;
   const groupeHtml = (groupe, i) => {
     const teinte = TEINTES_FAMILLE[i % TEINTES_FAMILLE.length];
     const nbBesoins = groupe.produits.reduce((total, p) => total + p.besoins.length, 0);
@@ -11162,7 +11162,7 @@ function preparationCompleteAgendaHtml() {
           ${PREPARATION_HORIZON.map((j) => `<button type="button" class="seg-btn${j === jours ? ' is-active' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${esc(tR('{n} j', { n: j }))}${j === jours ? ` (${trad('Actif')})` : ''}</button>`).join('')}
         </div>
       </div>
-      ${groupesHtml}${sansItemsHtml}
+      <div class="prep-detail-groupes-grid">${groupesHtml}${sansItemsHtml}</div>
       <div class="prep-pied">
         <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
         <div class="prep-pied-actions">
@@ -11694,35 +11694,6 @@ function ouvrirJourAgenda(iso) {
 // séparées du calendrier pour la raison expliquée plus haut. Même jauge que
 // le bandeau Parc (pourcentageIntervalle, déjà réel et vérifié) — jamais un
 // second calcul de pourcentage.
-function agendaSurveillanceHtml(counters) {
-  if (!counters.length) return '';
-  const item = ({ m, info }) => {
-    const part = pourcentageIntervalle(info, m) ?? 0;
-    const unit = counterUnitOf(m);
-    return `
-      <div class="agenda-surv-item">
-        <div class="agenda-surv-tete">
-          <div class="agenda-surv-mots">
-            <span class="agenda-surv-nom">${esc(m.name)}</span>
-            <span class="agenda-surv-reste is-${info.state}">${esc(info.label)}</span>
-          </div>
-          <span class="pill ${info.state === 'late' ? 'late' : info.state === 'soon' ? 'soon' : 'ok'}">${part}%</span>
-        </div>
-        <div class="agenda-surv-piste"><div class="agenda-surv-part is-${info.state}" style="width:${part}%"></div></div>
-        <div class="agenda-surv-meta">
-          <span>${esc(tR('Relevé actuel : {v}', { v: formatCounter(machineCounter(m), unit) }))}</span>
-          <span>${esc(tR('Palier cible : {v}', { v: formatCounter(planNextDueCounter(m.plan), unit) }))}</span>
-        </div>
-      </div>`;
-  };
-  return `
-    <section class="card agenda-surveillance">
-      <div class="card-head"><h2 class="card-title-sm"><span class="card-ico card-ico-plein">${picto('compteur')}</span><span>${trad('Surveillance au compteur')}</span></h2></div>
-      <p class="muted-text">${trad('Prédictions sans date de calendrier fixe : ces machines sont suivies à l\'usage, pas au mois.')}</p>
-      <div class="agenda-surv-liste">${counters.map(item).join('')}</div>
-      <button type="button" class="primary agenda-surv-cta" data-nav="machines"><span>${trad('Saisir un relevé compteur')}</span></button>
-    </section>`;
-}
 // Export CSV et bon de commande, repliés par défaut sous la carte de
 // préparation — celle-ci montre déjà chaque famille et chaque produit
 // (preparationCompleteAgendaHtml), donc plus besoin de reproduire la liste
@@ -12104,7 +12075,6 @@ VIEWS.agenda = {
     if (!UI.machines.length) {
       return `<div class="empty">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div>`;
     }
-    const { counters } = agendaEvenements();
     const piecesHtml = preparationCompleteAgendaHtml();
     return `
       <div class="vue-agenda">
@@ -12120,9 +12090,6 @@ VIEWS.agenda = {
         <div class="dash-main">
           <section class="card agenda-calendrier">${agendaContenuHtml()}</section>
           ${piecesHtml ? `<div class="agenda-pieces-bloc">${piecesHtml}${agendaPiecesDetailToggleHtml()}</div>` : ''}
-        </div>
-        <div class="dash-side">
-          ${agendaSurveillanceHtml(counters)}
         </div>
       </div>
       </div>`;
