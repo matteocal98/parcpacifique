@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3dVyBxpIprBdaJrRDSkVKRekP6ESCnvl98sI+VRq5Rs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Vx7lur+Jt+fEJ96S65JTFaLBVkX6A4sD18S6QyFY3Ew=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11552,6 +11552,65 @@ function agendaJourCarteHtml(m, info, programme) {
       </div>
     </article>`;
 }
+// Infobulle au survol d'une case (desktop/souris uniquement — voir
+// wireAgenda, un survol n'existe pas au doigt). Reprend EXACTEMENT la même
+// liste filtrée que la case (agendaEvenementsDuJour), jamais recalculée
+// différemment : ce qu'annoncent les pastilles est ce que montre l'infobulle.
+const AGENDA_TOOLTIP_MAX = 6;
+function agendaTooltipHtml(iso, evenements) {
+  const visibles = evenements.slice(0, AGENDA_TOOLTIP_MAX);
+  const reste = evenements.length - visibles.length;
+  const lignes = visibles.map(({ m, info, programme }) => {
+    const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
+    return `
+      <div class="agenda-tooltip-ligne">
+        <span class="agenda-tooltip-dot is-${info.state}"></span>
+        <span class="agenda-tooltip-nom">${esc(m.name)}</span>
+        <span class="agenda-tooltip-tache">${esc(tache)}</span>
+      </div>`;
+  }).join('');
+  return `
+    <div class="agenda-tooltip-date">${esc(formatLongDate(iso))}</div>
+    <div class="agenda-tooltip-liste">${lignes}</div>
+    ${reste > 0 ? `<div class="agenda-tooltip-reste">${esc(tR('+{n} autre(s)', { n: reste }))}</div>` : ''}`;
+}
+// Nœud UNIQUE réutilisé à chaque survol (créé une fois, déplacé/rempli à
+// chaque case) plutôt qu'un élément par case : une seule infobulle peut être
+// visible à la fois, pas besoin d'en garder 42 dans le DOM.
+function agendaTooltipElement() {
+  let el = document.getElementById('agenda-tooltip');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'agenda-tooltip';
+    el.className = 'agenda-tooltip';
+    el.setAttribute('role', 'tooltip');
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function agendaTooltipCacher() {
+  document.getElementById('agenda-tooltip')?.classList.remove('is-visible');
+}
+function agendaTooltipAfficher(cell) {
+  const iso = cell.dataset.jour;
+  if (!iso) return;
+  const evenements = agendaEvenementsDuJour(iso);
+  if (!evenements.length) return;
+  const el = agendaTooltipElement();
+  el.innerHTML = agendaTooltipHtml(iso, evenements);
+  el.classList.add('is-visible');
+  // Position sous la case, centrée sur sa largeur, puis ramenée dans la
+  // fenêtre si elle en sortirait (bas → au-dessus, côtés → butée à 8px).
+  const rc = cell.getBoundingClientRect();
+  const marge = 8;
+  const tw = el.offsetWidth, th = el.offsetHeight;
+  let left = rc.left + rc.width / 2 - tw / 2;
+  left = Math.max(marge, Math.min(left, window.innerWidth - tw - marge));
+  let top = rc.bottom + marge;
+  if (top + th > window.innerHeight - marge) top = rc.top - th - marge;
+  el.style.left = `${Math.round(left)}px`;
+  el.style.top = `${Math.round(top)}px`;
+}
 // Clic sur une case du calendrier : liste chaque machine concernée (ou
 // « aucune échéance » sur un jour vide — dans les deux cas la même fenêtre,
 // avec toujours un bouton « Planifier un entretien » : un seul comportement
@@ -11985,6 +12044,10 @@ async function telechargerPlanningIcs() {
 
 function wireAgenda(root) {
   if (!root) return;
+  // Un re-rendu (changement de mois, de filtre…) peut survenir pendant
+  // qu'une infobulle est affichée — elle vit hors de `root` (sur
+  // document.body), donc rien ne la ferme automatiquement sans ceci.
+  agendaTooltipCacher();
   root.querySelectorAll('[data-agenda-vue]').forEach((btn) => btn.addEventListener('click', () => {
     UI.agendaVue = btn.dataset.agendaVue;
     renderApp();
@@ -12012,6 +12075,16 @@ function wireAgenda(root) {
   root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => cell.addEventListener('click', () => {
     ouvrirJourAgenda(cell.dataset.jour);
   }));
+  // Infobulle au survol — DESKTOP UNIQUEMENT (matchMedia hover:hover) : au
+  // doigt, aucun survol n'existe, et le tap ouvre déjà directement la même
+  // information via ouvrirJourAgenda() ci-dessus — rien à câbler là pour le
+  // tactile, pas même en repli dégradé.
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    root.querySelectorAll('.agenda-jour[data-jour]').forEach((cell) => {
+      cell.addEventListener('mouseenter', () => agendaTooltipAfficher(cell));
+      cell.addEventListener('mouseleave', agendaTooltipCacher);
+    });
+  }
   root.querySelector('#agenda-planifier')?.addEventListener('click', () => ouvrirProgrammerEntretien());
   root.querySelector('#agenda-export-ics')?.addEventListener('click', telechargerPlanningIcs);
   root.querySelector('#agenda-pieces-detail-toggle')?.addEventListener('click', () => {

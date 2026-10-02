@@ -5608,6 +5608,28 @@
   .agenda-legende-item .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
   .agenda-pills .dot{width:8px;height:8px;border-radius:50%;}
 
+  /* Infobulle au survol d'une case (desktop/souris uniquement — voir
+     wireAgenda). Un seul nœud réutilisé, positionné en JS (position:fixed) :
+     ce bloc ne gère que l'apparence, jamais la position par défaut (0,0
+     avant le premier placement, invisible tant que .is-visible manque). */
+  .agenda-tooltip{
+    position:fixed;top:0;left:0;z-index:65;max-width:260px;background:var(--surface);
+    border-radius:var(--r-md);box-shadow:var(--shadow-soft),0 8px 24px rgba(14,19,51,.12);
+    padding:10px 12px;pointer-events:none;opacity:0;visibility:hidden;
+    transform:translateY(-4px);transition:opacity .12s ease,transform .12s ease;
+  }
+  .agenda-tooltip.is-visible{opacity:1;visibility:visible;transform:translateY(0);}
+  .agenda-tooltip-date{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink);margin-bottom:6px;}
+  .agenda-tooltip-liste{display:flex;flex-direction:column;gap:5px;}
+  .agenda-tooltip-ligne{display:flex;align-items:baseline;gap:6px;font-size:12px;}
+  .agenda-tooltip-dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--ink-3);}
+  .agenda-tooltip-dot.is-late{background:var(--late);}
+  .agenda-tooltip-dot.is-soon{background:var(--soon);}
+  .agenda-tooltip-dot.is-ok{background:var(--ok);}
+  .agenda-tooltip-nom{font-weight:700;color:var(--ink);flex:0 1 auto;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .agenda-tooltip-tache{color:var(--ink-3);flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .agenda-tooltip-reste{margin-top:6px;font-size:11px;font-weight:700;color:var(--ink-3);}
+
   @media (max-width:640px){
     .agenda-jour{min-height:52px;padding:6px;}
     .agenda-nav-label{min-width:auto;font-size:13px;}
