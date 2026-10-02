@@ -1,897 +1,1232 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KALEA — La juste mesure de votre parc | Precise tracking for your fleet</title>
-<meta name="description" content="KALEA transforme vos manuels constructeur en plans de maintenance : suivi par calendrier, heures ou kilomètres, rappels d'échéance et liste de pièces à commander. Gratuit pour 2 machines, puis 12 €/mois jusqu'à 5 machines.">
-<meta name="robots" content="index, follow">
-<meta name="theme-color" content="#0D1424">
-<link rel="canonical" href="https://kalea.pro/decouvrir.html">
-<link rel="icon" type="image/svg+xml" href="./favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="./icones/favicon-32x32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="./icones/apple-touch-icon.png">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="KALEA">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:locale:alternate" content="en_GB">
-<meta property="og:title" content="KALEA — La juste mesure de votre parc">
-<meta property="og:description" content="Vos manuels constructeur deviennent des plans de maintenance. Suivi par calendrier, heures ou kilomètres, rappels et liste de pièces prête à commander.">
-<meta property="og:url" content="https://kalea.pro/decouvrir.html">
-<meta property="og:image" content="https://kalea.pro/icones/icone-512.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KALEA — Precise tracking for your fleet">
-<meta name="twitter:description" content="Manuals become maintenance plans. Track by calendar, hours or kilometres, get reminders and an order list.">
-<meta name="twitter:image" content="https://kalea.pro/icones/icone-512.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "KALEA",
-  "slogan": "La juste mesure de votre parc",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web, Android",
-  "inLanguage": ["fr", "en"],
-  "description": "Suivi d'entretien de parc matériel : le manuel constructeur devient un plan de maintenance, échéances en dates ou au compteur, rappels et liste de pièces à commander.",
-  "url": "https://kalea.pro/decouvrir.html",
-  "offers": [
-    { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "EUR", "description": "2 machines suivies, 1 utilisateur." },
-    { "@type": "Offer", "name": "Starter / Artisan", "price": "12", "priceCurrency": "EUR", "description": "Jusqu'à 5 machines suivies, 1 utilisateur, export CSV." },
-    { "@type": "Offer", "name": "Business / Flotte", "price": "39", "priceCurrency": "EUR", "description": "Jusqu'à 20 machines suivies, 3 utilisateurs, QR codes et préparation groupée." },
-    { "@type": "Offer", "name": "Enterprise / Parc", "price": "49", "priceCurrency": "EUR", "description": "Parc sur mesure, rôles d'équipe et support dédié ; au-delà de 20 machines, 1 € par machine et par mois." }
-  ],
-  "featureList": [
-    "Lecture automatique des manuels constructeur",
-    "Plans de maintenance automatiques",
-    "Suivi calendaire, horaire ou kilométrique",
-    "Rappels d'échéance",
-    "Liste de pièces détachées prête à commander",
-    "Historique des interventions et export CSV",
-    "Consultation hors connexion",
-    "Français et anglais"
-  ]
-}
-</script>
-<style>
-  /* ==========================================================================
-     KALEA — refonte alignée sur la maquette Stitch « WEB accueil keeva ».
-     Polices AUTO-HÉBERGÉES (Inter, servie depuis NOTRE domaine dans `polices/`)
-     et icônes en SVG inline : ni CDN Tailwind, ni Google Fonts, ni police
-     d'icônes distante. La page revendique plus loin « aucun traceur
-     publicitaire » — ça ne vaudrait rien si le simple chargement de la page
-     tirait déjà des requêtes vers fonts.googleapis.com et cdn.tailwindcss.com.
-
-     JETONS DE COULEUR : repris tels quels de la charte (mêmes valeurs que la
-     maquette). AUCUNE autre couleur n'est employée.
-     ⚠️ LE TEXTE D'ACCENT EST LA SIGNATURE EN (#5B52DF), PAS LA SIGNATURE FR :
-     la Signature FR #24B5A8 ne donne que 2,55:1 sur blanc (illisible en plein
-     soleil pour du texte), quand la Signature EN donne 5,65:1. La Signature FR
-     reste utilisée, mais uniquement en décoratif (icônes, puces, dégradés).
-     ========================================================================== */
-  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:600;src:url(./polices/inter-latin-600-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-  @font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:800;src:url(./polices/inter-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
-
-  :root{
-    --nuit:#0D1424;
-    --blanc:#FFFFFF;
-    --encre:#0E1333;
-    --signature-fr:#24B5A8;
-    --ambre:#DE7A16;
-    --indigo:#6366F1;
-    --bleu-roi:#236FE0;
-    --turquoise:#14B8A6;
-    --olive:#8B9B37;
-    --signature-en:#5B52DF;
-    --cyan:#009BDE;
-    --ardoise:#94A3B8;
-    --erreur:#BA1A1A;
-
-    --texte:var(--encre);
-    --texte-doux:#46464E;
-    --accent:var(--signature-en);
-    --lien:var(--bleu-roi);
-
-    --fond:var(--blanc);
-    --surface-1:#FAF8FF;
-    --surface-2:#F2F3FF;
-    --surface-3:#E9EDFF;
-    --ligne:rgba(14,19,51,.10);
-    --ligne-forte:rgba(14,19,51,.22);
-
-    --ombre-sm:0 1px 2px rgba(14,19,51,.05);
-    --ombre-md:0 10px 24px rgba(14,19,51,.08);
-    --ombre-lg:0 20px 40px rgba(14,19,51,.12);
-    --ombre-xl:0 28px 64px rgba(14,19,51,.18);
-
-    --r:12px;
-    --r-lg:16px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --fond:var(--nuit);
-      --texte:var(--blanc);
-      --texte-doux:rgba(255,255,255,.72);
-      --surface-1:#0D1424;
-      --surface-2:#131B2E;
-      --surface-3:#1A2338;
-      --ligne:rgba(255,255,255,.12);
-      --ligne-forte:rgba(255,255,255,.26);
-      --ombre-sm:0 0 0 1px rgba(255,255,255,.08);
-      --ombre-md:0 0 0 1px rgba(255,255,255,.10);
-      --ombre-lg:0 0 0 1px rgba(255,255,255,.12);
-      --ombre-xl:0 0 0 1px rgba(255,255,255,.14);
+<!DOCTYPE html><html class="scroll-smooth" data-lang="fr" lang="fr" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>KALEA — Présentation &amp; Vitrine (Agencement Moderne &amp; Captures Optimisées)</title>
+<!-- Google Fonts: Space Grotesk & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              ink: '#0E1333',
+              dark: '#070B19',
+              primary: '#236FE0',
+              indigo: '#5B52DF',
+              teal: '#24B5A8',
+              amber: '#EE7D1A',
+              surface: '#F8F9FC',
+              cardBg: '#FFFFFF',
+              subtleBg: '#EFF4FF',
+              borderMuted: '#E4E8F2'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+<style data-purpose="custom-typography-and-helpers">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFBFC;
+      color: #0E1333;
     }
-    /* Le petit texte d'accent (surtitres, tagline) donne 5,65:1 sur blanc mais
-       seulement 3,25:1 sur la nuit — sous la barre de 4,5:1 pour de petites
-       capitales. Il passe donc en blanc en thème sombre. */
-    .tagline,.sur-titre{color:var(--blanc);}
-  }
+    
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
 
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{margin:0;background:var(--fond);color:var(--texte);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
-  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0;font-weight:800;}
-  a{color:inherit;}
-  ul{margin:0;padding:0;}
-  :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;border-radius:8px;}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 20px;}
-  @media(min-width:640px){.wrap{padding:0 32px;}}
-  section{padding:64px 0;}
-  @media(min-width:768px){section{padding:88px 0;}}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+    /* Bilingual Switcher Classes */
+    html[data-lang="fr"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-fr { display: none !important; }
 
-  /* --- Icônes : traits ronds 2px, cohérentes, jamais une police distante --- */
-  .ic{flex:0 0 auto;display:block;}
+    /* Custom Gradients */
+    .brand-gradient-text {
+      background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-glow {
+      background: radial-gradient(circle at 80% 20%, rgba(36, 181, 168, 0.08) 0%, rgba(35, 111, 224, 0.04) 40%, transparent 70%);
+    }
 
-  /* --- Boutons --------------------------------------------------------- */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 24px;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;text-decoration:none;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .15s ease,box-shadow .2s ease,background-color .2s ease;}
-  .btn-primaire{background:var(--encre);color:var(--blanc);box-shadow:var(--ombre-lg);}
-  .btn-primaire:hover{background:var(--indigo);transform:translateY(-1px);}
-  .btn-secondaire{background:var(--surface-2);color:var(--encre);}
-  .btn-secondaire:hover{background:var(--surface-3);}
-  .btn-clair{background:var(--blanc);color:var(--encre);font-weight:700;box-shadow:var(--ombre-md);}
-  .btn-clair:hover{background:var(--surface-2);}
-  .btn-contour{background:rgba(255,255,255,.10);color:var(--blanc);border-color:rgba(255,255,255,.28);font-weight:700;}
-  .btn-contour:hover{background:rgba(255,255,255,.18);}
+    /* Effet zoom au survol des captures d'écran (.ecran / .ecran-fonction) :
+       voir le script "screenshot-zoom" en bas de page pour le comportement
+       (zoom qui suit le curseur). Ici, juste la mise en forme du badge
+       d'invite et le point d'ancrage pour son positionnement absolu —
+       .ecran-fonction n'a pas `relative` dans son balisage d'origine. */
+    .ecran, .ecran-fonction { position: relative; cursor: zoom-in; }
+    .zoom-hint-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 10px rgba(14, 19, 51, 0.15);
+      font-size: 11px;
+      font-weight: 700;
+      color: #0E1333;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .ecran:hover .zoom-hint-badge, .ecran-fonction:hover .zoom-hint-badge {
+      opacity: 0;
+    }
 
-  /* --- En-tête ----------------------------------------------------------- */
-  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);border-bottom:1.5px solid var(--ligne);}
-  @supports (backdrop-filter:blur(12px)){header{backdrop-filter:blur(12px);}}
-  @media (prefers-color-scheme:dark){header{background:rgba(13,20,36,.92);}}
-  .entete{display:flex;align-items:center;gap:20px;height:72px;}
-  .marque{display:inline-flex;align-items:center;gap:9px;text-decoration:none;}
-  .marque svg{display:block;flex:0 0 auto;}
-  .marque .mot{font-weight:800;font-size:19px;letter-spacing:-.01em;color:var(--texte);}
-  .entete nav{display:none;align-items:center;gap:22px;}
-  @media(min-width:960px){.entete nav{display:flex;}}
-  .entete nav a{font-size:14px;font-weight:600;color:var(--texte-doux);text-decoration:none;padding:4px 0;border-bottom:2px solid transparent;}
-  .entete nav a:hover{color:var(--texte);}
-  .entete .pousse{flex:1;}
-  .lang{display:none;align-items:center;gap:2px;background:var(--surface-2);border:1px solid var(--ligne);border-radius:10px;padding:3px;}
-  @media(min-width:640px){.lang{display:flex;}}
-  .lang button{border:none;background:transparent;color:var(--texte-doux);font:inherit;font-size:12.5px;font-weight:700;letter-spacing:.02em;padding:6px 11px;border-radius:8px;cursor:pointer;text-transform:uppercase;}
-  .lang button.actif{background:var(--fond);color:var(--texte);box-shadow:var(--ombre-sm);}
-  .lien-connexion{display:none;font-size:14px;font-weight:600;color:var(--texte);text-decoration:none;padding:10px 14px;border-radius:var(--r);}
-  @media(min-width:640px){.lien-connexion{display:inline-flex;align-items:center;}}
-  .lien-connexion:hover{background:var(--surface-2);}
-
-  /* --- Accroche ------------------------------------------------------------ */
-  .heros{position:relative;overflow:hidden;padding-top:48px;padding-bottom:48px;}
-  @media(min-width:768px){.heros{padding-top:72px;padding-bottom:72px;}}
-  .heros .lueur{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
-  .heros .lueur-1{top:-140px;right:-40px;width:380px;height:380px;background:rgba(36,181,168,.14);}
-  .heros .lueur-2{top:45%;left:-80px;width:340px;height:340px;background:rgba(91,82,223,.14);}
-  .heros-grille{position:relative;display:grid;gap:44px;align-items:center;}
-  @media(min-width:1024px){.heros-grille{grid-template-columns:1.5fr 1fr;gap:56px;}}
-  .pastille{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;background:var(--surface-2);box-shadow:var(--ombre-sm);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);}
-  .point{position:relative;width:9px;height:9px;border-radius:50%;background:var(--turquoise);flex:0 0 auto;}
-  .point::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--turquoise);animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite;}
-  @keyframes ping{75%,100%{transform:scale(2.6);opacity:0;}}
-  @media(prefers-reduced-motion:reduce){.point::after{animation:none;}}
-  .tagline{display:block;font-size:14px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:18px 0 8px;}
-  h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.02em;margin:0;}
-  @media(min-width:640px){h1{line-height:1.12;}}
-  .accroche-degrade{background:linear-gradient(90deg,var(--bleu-roi),var(--turquoise),var(--olive));-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .sous-titre{font-size:clamp(16px,1.6vw,18px);font-weight:600;color:var(--texte-doux);max-width:56ch;margin:18px 0 28px;}
-  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
-  .note{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ardoise);margin-top:18px;}
-  .note .ic{color:var(--signature-fr);}
-
-  /* --- Aperçu produit (maquette honnête, exemples génériques) ------------- */
-  .visuel{position:relative;}
-  .maquette{position:relative;background:var(--fond);border-radius:var(--r-lg);box-shadow:var(--ombre-xl);padding:20px;}
-  .maquette .tete{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:14px;margin-bottom:14px;}
-  .maquette .points{display:flex;align-items:center;gap:6px;}
-  .maquette .points span{width:11px;height:11px;border-radius:50%;display:inline-block;}
-  .maquette .points span:nth-child(1){background:var(--ambre);}
-  .maquette .points span:nth-child(2){background:var(--signature-fr);}
-  .maquette .points span:nth-child(3){background:var(--indigo);}
-  .maquette .tete .titre{font-size:11px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--ardoise);}
-  .maquette .tete .plan{font-size:12px;color:var(--texte-doux);font-weight:600;}
-  .ligne-machine{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:6px;}
-  .ligne-machine:hover{background:var(--surface-1);}
-  .ligne-machine .nom{font-weight:700;font-size:14px;}
-  .ligne-machine .meta{font-size:12px;color:var(--texte-doux);}
-  .etat{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;flex:0 0 auto;text-transform:uppercase;letter-spacing:.02em;}
-  .etat.retard{background:rgba(222,122,22,.16);color:var(--ambre);}
-  .etat.bientot{background:rgba(91,82,223,.14);color:var(--signature-en);}
-  .etat.ajour{background:rgba(36,181,168,.14);color:var(--signature-fr);}
-  .bloc-pieces{border-radius:10px;background:var(--surface-2);padding:12px 14px;margin-top:10px;}
-  .bloc-pieces .titre{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte);}
-  .bloc-pieces .titre .ic{color:var(--signature-fr);}
-  .bloc-pieces p{margin:6px 0 0;font-size:12.5px;color:var(--texte-doux);font-weight:600;}
-  .legende{font-size:11px;color:var(--ardoise);text-align:center;margin:14px 0 0;}
-
-  /* --- Têtes de section ---------------------------------------------------- */
-  .section-tete{max-width:60ch;margin-bottom:40px;}
-  .sur-titre{display:block;font-size:12.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
-  h2{font-size:clamp(24px,3.4vw,34px);}
-  .section-tete p{color:var(--texte-doux);font-size:16.5px;font-weight:600;margin:12px 0 0;}
-
-  /* --- Cartes (constat, fonctionnalités) ------------------------------------ */
-  .cartes{display:grid;gap:24px;}
-  @media(min-width:768px){.cartes{grid-template-columns:repeat(3,1fr);}}
-  .carte{background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);transition:box-shadow .25s ease,transform .25s ease;}
-  .carte:hover{box-shadow:var(--ombre-lg);transform:translateY(-2px);}
-  .badge-icone{width:48px;height:48px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
-  .badge-icone.ambre{background:rgba(222,122,22,.14);color:var(--ambre);}
-  .badge-icone.erreur{background:rgba(186,26,26,.12);color:var(--erreur);}
-  .badge-icone.nuit{background:var(--encre);color:var(--blanc);}
-  .badge-icone.degrade{background:linear-gradient(135deg,var(--bleu-roi),var(--turquoise),var(--olive));color:var(--blanc);box-shadow:var(--ombre-md);}
-  .carte h3{font-size:19px;margin-bottom:8px;}
-  .carte p{margin:0;color:var(--texte-doux);font-size:15px;}
-  .rassurance{margin-top:24px;padding:18px 20px;border-radius:var(--r-lg);background:var(--surface-2);display:flex;align-items:center;gap:16px;}
-  .rassurance .rond{width:40px;height:40px;border-radius:50%;background:rgba(36,181,168,.18);color:var(--signature-fr);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-  .rassurance p{margin:0;font-weight:700;font-size:15px;}
-
-  /* --- Comment ça marche : étapes numérotées ------------------------------- */
-  .etapes{list-style:none;display:grid;gap:24px;}
-  @media(min-width:768px){.etapes{grid-template-columns:repeat(3,1fr);}}
-  .etape{background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);}
-  .etape .num{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--bleu-roi),var(--turquoise));color:var(--blanc);font-weight:800;font-size:16px;margin-bottom:16px;}
-  .etape h3{font-size:17px;margin-bottom:7px;}
-  .etape p{margin:0;color:var(--texte-doux);font-size:15px;}
-
-  /* --- Vos données ----------------------------------------------------------- */
-  .confiance-bloc{background:var(--surface-2);border-radius:var(--r-lg);padding:32px 28px;}
-  @media(min-width:768px){.confiance-bloc{padding:40px 36px;}}
-  .confiance{display:grid;gap:26px;}
-  @media(min-width:640px){.confiance{grid-template-columns:repeat(2,1fr);}}
-  @media(min-width:1024px){.confiance{grid-template-columns:repeat(4,1fr);}}
-  .confiance h4{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 7px;}
-  .confiance h4 .ic{color:var(--signature-fr);}
-  .confiance p{margin:0;font-size:14px;color:var(--texte-doux);}
-  .confiance-suite{margin-top:24px;padding-top:18px;border-top:1px solid var(--ligne-forte);font-size:13.5px;color:var(--texte-doux);}
-  .confiance-suite a{color:var(--accent);font-weight:700;text-decoration:none;}
-  .confiance-suite a:hover{text-decoration:underline;}
-
-  /* --- Tarifs -------------------------------------------------------------- */
-  .tarifs{display:grid;gap:22px;align-items:stretch;}
-  @media(min-width:720px){.tarifs{grid-template-columns:repeat(2,1fr);}}
-  @media(min-width:1180px){.tarifs{grid-template-columns:repeat(4,1fr);}}
-  .offre{position:relative;display:flex;flex-direction:column;background:var(--fond);border-radius:var(--r-lg);padding:28px;box-shadow:var(--ombre-sm);}
-  .offre.recommandee{box-shadow:0 0 0 2px var(--encre),var(--ombre-xl);}
-  @media(prefers-color-scheme:dark){.offre.recommandee{box-shadow:0 0 0 2px var(--blanc),var(--ombre-xl);}}
-  .badge-recommande{position:absolute;top:0;right:20px;transform:translateY(-50%);background:var(--accent);color:var(--blanc);font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px 12px;border-radius:999px;white-space:nowrap;box-shadow:var(--ombre-sm);}
-  .offre h3{font-size:19px;}
-  .prix{display:flex;align-items:baseline;gap:6px;margin:14px 0 6px;}
-  .prix .montant{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1;}
-  .prix .periode{color:var(--ardoise);font-size:14px;font-weight:600;}
-  .offre .limite{margin:0;font-size:15.5px;font-weight:700;}
-  .offre .pour{color:var(--texte-doux);margin:10px 0 20px;font-size:13.5px;}
-  .avantages{list-style:none;display:grid;gap:11px;margin:0 0 24px;flex:1;}
-  .avantages li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--texte-doux);}
-  .avantages .ic{color:var(--signature-fr);margin-top:2px;}
-  .offre.recommandee .avantages{color:var(--texte);}
-  .offre.recommandee .avantages li{color:var(--texte);font-weight:600;}
-  .offre .btn{width:100%;margin-top:auto;}
-  .notes-tarifs{display:grid;gap:16px;margin-top:28px;}
-  @media(min-width:768px){.notes-tarifs{grid-template-columns:repeat(2,1fr);}}
-  .note-tarif{display:flex;gap:10px;margin:0;font-size:13.5px;color:var(--texte-doux);}
-  .note-tarif .ic{color:var(--signature-fr);margin-top:2px;flex:0 0 auto;}
-
-  /* --- FAQ ------------------------------------------------------------------ */
-  .faq-grille{display:grid;gap:12px;}
-  @media(min-width:900px){.faq-grille{grid-template-columns:repeat(2,1fr);gap:14px 24px;align-items:start;}}
-  details.faq{background:var(--fond);border-radius:var(--r);box-shadow:var(--ombre-sm);overflow:hidden;}
-  details.faq[open]{box-shadow:var(--ombre-md);}
-  details.faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;font-weight:700;font-size:15px;}
-  details.faq summary::-webkit-details-marker{display:none;}
-  details.faq summary .ic{color:var(--ardoise);transition:transform .2s ease;flex:0 0 auto;}
-  details.faq[open] summary .ic{transform:rotate(180deg);}
-  details.faq .reponse{padding:0 20px 20px;color:var(--texte-doux);font-size:14.5px;}
-  details.faq .reponse a{color:var(--accent);font-weight:700;}
-
-  /* --- Bandeau final --------------------------------------------------------- */
-  .bandeau-final{position:relative;overflow:hidden;background:var(--nuit);color:var(--blanc);border-radius:24px;padding:56px 28px;text-align:center;}
-  @media(min-width:768px){.bandeau-final{padding:72px 48px;}}
-  .bandeau-final .lueur{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
-  .bandeau-final .lueur-1{right:-70px;bottom:-70px;width:300px;height:300px;background:rgba(35,111,224,.18);}
-  .bandeau-final .lueur-2{left:-70px;top:-70px;width:300px;height:300px;background:rgba(36,181,168,.16);}
-  .bandeau-final .pastille{position:relative;background:rgba(36,181,168,.18);color:var(--signature-fr);box-shadow:none;margin-bottom:14px;}
-  .bandeau-final h2{position:relative;color:var(--blanc);font-size:clamp(24px,4vw,36px);max-width:38ch;margin:0 auto;}
-  .bandeau-final p{position:relative;color:rgba(255,255,255,.76);font-weight:600;max-width:52ch;margin:16px auto 28px;}
-  .bandeau-final .actions{position:relative;justify-content:center;}
-
-  /* --- Pied de page ------------------------------------------------------------ */
-  footer{background:var(--nuit);color:var(--ardoise);padding:64px 0 28px;}
-  .pied{display:grid;gap:36px;}
-  @media(min-width:860px){.pied{grid-template-columns:1.6fr 1fr 1fr 1fr;}}
-  footer .marque .mot{color:var(--blanc);}
-  footer .description{color:var(--ardoise);font-size:14px;margin:16px 0 0;max-width:36ch;}
-  footer .editeur{color:var(--ardoise);font-size:13px;margin:10px 0 0;max-width:36ch;}
-  footer h3{color:var(--blanc);font-size:12.5px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;margin:0 0 16px;}
-  footer .liste{list-style:none;display:grid;gap:11px;}
-  footer .liste a{color:var(--ardoise);text-decoration:none;font-size:14px;}
-  footer .liste a:hover{color:var(--blanc);}
-  .pied-bas{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);font-size:12.5px;color:var(--ardoise);}
-  footer .lang{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);}
-  footer .lang button{color:var(--ardoise);}
-  footer .lang button.actif{background:rgba(255,255,255,.14);color:var(--blanc);}
-
-  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
-</style>
+    /* Accordion transitions */
+    details > summary svg {
+      transition: transform 0.25s ease-in-out;
+    }
+    details[open] > summary svg {
+      transform: rotate(180deg);
+    }
+  </style>
 </head>
-<body>
-
-<!-- ================= PICTOGRAMME (défini une fois, réutilisé) ================= -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <symbol id="picto-keeva" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#FFFFFF" stroke="#6864DF" stroke-width="31"/><rect x="694" y="528" width="92" height="700" rx="46" fill="#18183A"/><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"/><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"/><circle cx="946" cy="878" r="73" fill="#6864DF"/></symbol>
-    <symbol id="picto-keeva-nuit" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#18183A" stroke="#8F8FCB" stroke-width="31"/><rect x="694" y="528" width="92" height="700" rx="46" fill="#FFFFFF"/><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"/><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"/><circle cx="946" cy="878" r="73" fill="#8F8FCB"/></symbol>
-  </defs>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
+<!-- Logo KALEA réel (picto-keeva), défini une fois, réutilisé en-tête + pied de page -->
+<svg aria-hidden="true" height="0" style="position:absolute" width="0">
+<defs>
+<symbol id="picto-keeva" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#FFFFFF" stroke="#6864DF" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#18183A"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#6864DF"></circle></symbol>
+<symbol id="picto-keeva-nuit" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#18183A" stroke="#8F8FCB" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#FFFFFF"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#8F8FCB"></circle></symbol>
+</defs>
 </svg>
+<!-- BEGIN: MainHeader -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-borderMuted">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Brand Logo -->
+<a aria-label="Accueil KALEA" class="flex items-center gap-3 group" href="./decouvrir.html"><div class="w-16 h-16 group-hover:scale-105 transition-transform"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-brand-ink">KALEA</span></a>
+<!-- Desktop Navigation Menu -->
+<nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+<a class="hover:text-brand-primary transition-colors" href="#fonctionnalites">
+<span class="lang-fr">Fonctionnalités</span>
 
-<!-- ================= EN-TÊTE ================= -->
-<header>
-  <div class="wrap entete">
-    <a class="marque" href="./decouvrir.html" aria-label="KALEA">
-      <svg width="30" height="30" aria-hidden="true"><use href="#picto-keeva"/></svg>
-      <span class="mot">KALEA</span>
-    </a>
-    <nav aria-label="Navigation principale">
-      <a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a>
-      <a href="#comment"><span class="fr">Comment ça marche</span><span class="en">How it works</span></a>
-      <a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a>
-      <a href="#tarifs"><span class="fr">Tarifs</span><span class="en">Pricing</span></a>
-      <a href="#faq">FAQ</a>
-    </nav>
-    <span class="pousse"></span>
-    <div class="lang" role="group" aria-label="Langue / Language">
-      <button type="button" data-langue="fr">FR</button>
-      <button type="button" data-langue="en">EN</button>
-    </div>
-    <a class="lien-connexion" href="./app.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a>
-    <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Essai gratuit</span><span class="en">Start free</span></a>
-  </div>
+</a>
+<a class="hover:text-brand-primary transition-colors" href="#comment-ca-marche">
+<span class="lang-fr">Comment ça marche</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="#vos-donnees">
+<span class="lang-fr">Vos données</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="#tarifs">
+<span class="lang-fr">Tarifs</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="#faq">
+<span class="lang-fr">FAQ</span>
+
+</a>
+</nav>
+<!-- Language Switcher & Action CTA -->
+<div class="flex items-center gap-4">
+<!-- Interactive Language Toggle -->
+
+<a class="hidden sm:inline-block text-sm font-semibold text-slate-700 hover:text-brand-primary transition-colors px-2 py-1" href="./app.html">
+<span class="lang-fr">Se connecter</span>
+
+</a>
+<a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow-md" href="./app.html?inscription=1">
+<span class="lang-fr">Essai gratuit</span>
+
+</a>
+</div>
+</div>
 </header>
-
+<!-- END: MainHeader -->
 <main>
+<!-- BEGIN: HeroSection -->
+<section class="relative overflow-hidden hero-glow py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+<!-- Left Column Content -->
+<div class="lg:col-span-7 flex flex-col items-start space-y-6">
+<!-- Live Status Badge -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200/80 text-xs font-semibold tracking-wide text-brand-ink uppercase shadow-sm">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-teal opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-teal"></span>
+</span>
+<span class="lang-fr">LECTURE AUTOMATIQUE DES MANUELS — DISPONIBLE</span>
 
-<!-- ================= ACCROCHE ================= -->
-<section class="heros">
-  <div class="lueur lueur-1" aria-hidden="true"></div>
-  <div class="lueur lueur-2" aria-hidden="true"></div>
-  <div class="wrap heros-grille">
-    <div>
-      <span class="pastille"><span class="point" aria-hidden="true"></span>
-        <span class="fr">Lecture automatique des manuels — disponible</span>
-        <span class="en">Automatic manual reading — live</span>
-      </span>
-      <span class="tagline fr">La juste mesure de votre parc</span>
-      <span class="tagline en">Precise tracking for your fleet</span>
-      <h1>
-        <span class="fr">Le carnet d'entretien de votre flotte, <span class="accroche-degrade">lu par notre algorithme</span>.</span>
-        <span class="en">Your fleet's service logbook, <span class="accroche-degrade">read by our algorithm</span>.</span>
-      </h1>
-      <p class="sous-titre">
-        <span class="fr">Importez vos manuels constructeur : KALEA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
-        <span class="en">Import your manufacturer manuals: KALEA extracts the intervals and builds the maintenance plan. Track by calendar, hours or kilometres — then send the parts list straight to your suppliers.</span>
-      </p>
-      <div class="actions">
-        <a class="btn btn-primaire" href="./app.html?inscription=1">
-          <span class="fr">Commencer gratuitement</span><span class="en">Start for free</span>
-          <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="btn btn-secondaire" href="#comment">
-          <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/></svg>
-          <span class="fr">Voir comment ça marche</span><span class="en">See how it works</span>
-        </a>
-      </div>
-      <p class="note">
-        <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-        <span class="fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · sans carte bancaire</span>
-        <span class="en">Free for 2 machines · Starter €12/month · Business €39/month · no credit card</span>
-      </p>
-    </div>
+</div>
+<!-- Overline -->
+<p class="font-bold text-xs uppercase tracking-wider text-brand-indigo font-display">
+<span class="lang-fr">LA JUSTE MESURE DE VOTRE PARC</span>
 
-    <!-- L'APERÇU : la mise en page réelle de l'application (une carte machine, son
-         compteur, son échéance, la liste de pièces), avec des exemples GÉNÉRIQUES.
-         Aucun modèle de machine, aucune donnée de client, aucune télémétrie : la
-         télémétrie n'existe pas dans le produit. -->
-    <div class="visuel">
-      <div class="maquette" role="img" aria-label="Aperçu de l'écran des échéances dans KALEA">
-        <div class="tete">
-          <div class="points" aria-hidden="true"><span></span><span></span><span></span></div>
-          <span class="titre fr">Aperçu de l'interface</span>
-          <span class="titre en">Interface preview</span>
-          <span class="plan fr">Plan d'entretien · 250 h</span>
-          <span class="plan en">Maintenance plan · 250 h</span>
-        </div>
-        <div class="ligne-machine">
-          <span><span class="nom fr">Mini-pelle</span><span class="nom en">Mini excavator</span><br><span class="meta fr">Vidange, filtre à huile · compteur 243 h</span><span class="meta en">Oil change, oil filter · meter 243 h</span></span>
-          <span class="etat retard fr">en retard +3 j</span><span class="etat retard en">overdue +3 d</span>
-        </div>
-        <div class="ligne-machine">
-          <span><span class="nom fr">Tronçonneuse</span><span class="nom en">Chainsaw</span><br><span class="meta fr">Filtre à air, bougie · compteur 118 h</span><span class="meta en">Air filter, spark plug · meter 118 h</span></span>
-          <span class="etat bientot fr">bientôt dans 12 h</span><span class="etat bientot en">due in 12 h</span>
-        </div>
-        <div class="ligne-machine">
-          <span><span class="nom fr">Tracteur</span><span class="nom en">Tractor</span><br><span class="meta fr">Graissage, filtres hydrauliques</span><span class="meta en">Greasing, hydraulic filters</span></span>
-          <span class="etat ajour fr">à jour</span><span class="etat ajour en">up to date</span>
-        </div>
-        <div class="bloc-pieces">
-          <span class="titre">
-            <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
-            <span class="fr">À prévoir — Filtres</span><span class="en">To order — Filters</span>
-          </span>
-          <p><span class="fr">2 références · 4 unités · dès le 12/10</span><span class="en">2 items · 4 units · from 12/10</span></p>
-        </div>
-        <p class="legende fr">Aperçu de la mise en page : les exemples sont génériques, aucune donnée de client.</p>
-        <p class="legende en">Layout preview: the examples are generic, no customer data.</p>
-      </div>
-    </div>
-  </div>
+</p>
+<!-- Main Heading with Brand Gradient -->
+<h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]">
+<span class="lang-fr">Le carnet d'entretien de votre flotte, <span class="brand-gradient-text">lu par notre algorithme</span>.</span>
+
+</h1>
+<!-- Hero Subtitle -->
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">
+<span class="lang-fr">Importez vos manuels constructeur : KALEA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.</span>
+
+</p>
+<!-- CTA Buttons -->
+<div class="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-ink hover:bg-slate-900 text-white font-bold text-base shadow-sm hover:shadow transition-all group" href="./app.html?inscription=1">
+<span class="lang-fr">Commencer gratuitement</span>
+
+<svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-subtleBg hover:bg-blue-100 text-brand-primary font-bold text-base transition-colors" href="#comment-ca-marche">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon fill="currentColor" points="10 8 16 12 10 16 10 8"></polygon></svg>
+<span class="lang-fr">Voir comment ça marche</span>
+
+</a>
+</div>
+<!-- Trust Indicator -->
+<p class="text-xs sm:text-sm text-slate-500 font-medium flex items-center gap-1.5 pt-1">
+<svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="lang-fr">Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois ·&nbsp; Entreprise 49&nbsp;<span style="font-size: 0.875rem; background-color: initial;" class="">€/mois</span></span>
+
+</p>
+</div>
+<!-- Right Column: Interface Mockup -->
+<div class="lg:col-span-5 flex flex-col items-center"><div class="w-full max-w-xl mx-auto"><div class="bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden transform hover:-translate-y-1 transition-all duration-300"><div class="h-10 bg-slate-100/90 border-b border-slate-200 px-4 flex items-center justify-between select-none"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-400 inline-block"></span><span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span><span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span></div><div class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-slate-200/70 text-[11px] font-medium text-slate-500 shadow-2xs"><svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" fill-rule="evenodd"></path></svg><span class="">app.kalea.work/dashboard</span></div><span class="text-[10px] font-bold text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded uppercase font-display">Live</span></div><div class="relative h-[420px] bg-slate-50 overflow-hidden group ecran"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Survoler pour zoomer</span></div><img alt="Tableau de bord KALEA" class="w-full h-full object-cover object-left-top transition-transform duration-500 group-hover:scale-[1.02]" src="./captures-app/tableau-de-bord.png"><div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-900/40 via-slate-900/10 to-transparent flex items-end p-4 pointer-events-none"><span class="text-xs font-semibold text-white bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="lang-fr">Vue d'ensemble en temps réel</span></span></div></div></div><p class="text-[11px] text-slate-500 mt-3.5 text-center flex items-center justify-center gap-1.5 font-medium"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg><span class="lang-fr">Tableau de bord : alertes d'entretien, pièces consolidées et TCO</span></p></div></div>
+</div>
+</div>
 </section>
+<!-- END: HeroSection -->
+<!-- BEGIN: ProblemCostSection -->
+<section class="bg-white border-t border-slate-100 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Section Header -->
+<div class="mb-6">
+<p class="text-xs font-bold text-brand-indigo uppercase tracking-wider mb-2 font-display">
+<span class="lang-fr">CE QU'UN MAUVAIS SUIVI COÛTE</span>
 
-<!-- ================= CE QU'UN MAUVAIS SUIVI COÛTE ================= -->
-<section class="wrap" style="padding-top:0;">
-  <div class="section-tete">
-    <span class="sur-titre fr">Ce qu'un mauvais suivi coûte</span>
-    <span class="sur-titre en">What poor tracking costs</span>
-    <h2><span class="fr">Un entretien en retard ne se rattrape pas toujours</span><span class="en">Late maintenance cannot always be caught up</span></h2>
-    <p>
-      <span class="fr">Rien de théorique : c'est ce qui arrive quand les échéances ne sont suivies nulle part.</span>
-      <span class="en">Nothing theoretical: this is what happens when intervals are tracked nowhere.</span>
-    </p>
-  </div>
-  <div class="cartes">
-    <article class="carte">
-      <span class="badge-icone ambre" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a5 5 0 006 6L11 19l-6-6z"/><path d="M7 17l-3.5 3.5"/></svg>
-      </span>
-      <h3><span class="fr">Des réparations plus coûteuses</span><span class="en">More expensive repairs</span></h3>
-      <p>
-        <span class="fr">Une échéance manquée use la pièce avant l'heure : ce qui relevait de l'entretien courant devient une réparation, parfois une pièce à remplacer.</span>
-        <span class="en">A missed interval wears the part out early: what was routine servicing becomes a repair, sometimes a part to replace.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="badge-icone erreur" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l9 16H3z"/><path d="M12 9.5v4.5M12 17v.01"/></svg>
-      </span>
-      <h3><span class="fr">Des pannes évitables</span><span class="en">Avoidable breakdowns</span></h3>
-      <p>
-        <span class="fr">Les défaillances que l'entretien prévient ne choisissent pas leur moment : elles tombent souvent quand la machine sert le plus.</span>
-        <span class="en">Failures that servicing prevents do not pick their moment: they tend to happen when the machine is needed most.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="badge-icone nuit" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9M16 21c0-5-8-5-8-9"/></svg>
-      </span>
-      <h3><span class="fr">Des immobilisations</span><span class="en">Downtime</span></h3>
-      <p>
-        <span class="fr">Un engin arrêté, c'est du travail qui attend, un chantier décalé, ou une location à payer à la place.</span>
-        <span class="en">A machine standing still means work waiting, a job pushed back, or a rental to pay for instead.</span>
-      </p>
-    </article>
-  </div>
-  <div class="rassurance">
-    <span class="rond" aria-hidden="true">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
-    </span>
-    <p>
-      <span class="fr">À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années.</span>
-      <span class="en">Conversely, a regularly tracked fleet lasts longer: what is already invested keeps working for more years.</span>
-    </p>
-  </div>
+</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold text-brand-ink tracking-tight font-display mb-3">
+<span class="lang-fr">Un entretien en retard ne se rattrape pas toujours</span>
+
+</h2>
+<p class="text-slate-600 text-base max-w-2xl">
+<span class="lang-fr">Rien de théorique : c'est ce qui arrive quand les échéances ne sont suivies nulle part.</span>
+
+</p>
+</div>
+<!-- 3 Problem Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Card 1 -->
+<div class="p-8 rounded-3xl bg-slate-50/70 border border-slate-150 hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all"><div class="w-full h-44 rounded-xl overflow-hidden mb-5 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC710v6F8hjrSmIRiJEiNOxI0wtdyUr4zDKcpGZV7PTxCi3t1ZA6aj_1bz-piKSqmUy29gnojRPrRzHcqUKJuE69ljaXaXrIDlUUZGg0NqI1xEmQGJL9d15--ky1QwBZSaTC9t9p0TxV3V1593g_hFrPwcotthZy-YFSyci9M61N9d8OziBpp-IENSGKFzErMbd6m7dYfsraJBpjkj7V7TzewhAHCkm26-IPkck2baUQk1Oj7FJVsIgqg" alt="Engrenage industriel usé nécessitant réparation" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div>
+<div class="w-12 h-12 rounded-2xl bg-amber-100/70 text-amber-700 flex items-center justify-center mb-6">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h3 class="text-lg font-bold text-brand-ink mb-2">
+<span class="lang-fr">Des réparations plus coûteuses</span>
+
+</h3>
+<p class="text-sm text-slate-600 leading-relaxed">
+<span class="lang-fr">Une échéance manquée use la pièce avant l'heure : ce qui relevait de l'entretien courant devient une réparation, parfois une pièce à remplacer.</span>
+
+</p>
+</div>
+<!-- Card 2 -->
+<div class="p-8 rounded-3xl bg-slate-50/70 border border-slate-150 hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all"><div class="w-full h-44 rounded-xl overflow-hidden mb-5 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVyL-t5DlnwBUz-XtqkwQDws4ZCcYQ9fP0eC5GLhRy7lWlfd-_ANrRDl_ST-qm-W93mF4NCpQ53YV4zFxYdlG5YGd6OUhdHvFBrof-fGitzlhNcZmUJHRml2w8GbX58mesfhR74YOmsmHGHswl5Qwl0jlQFZzTYjXx06NRqaaNRKRLgF_MD6U-y6xQbb7D_yX9-dBUJueseL_qAYf8uLcBfkAjQf_wWMZo3FOZEBLxDI69XqVimjOkzQ" alt="Pelleteuse de chantier en panne examinée par un mécanicien" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div>
+<div class="w-12 h-12 rounded-2xl bg-red-100/70 text-red-600 flex items-center justify-center mb-6">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h3 class="text-lg font-bold text-brand-ink mb-2">
+<span class="lang-fr">Des pannes évitables</span>
+
+</h3>
+<p class="text-sm text-slate-600 leading-relaxed">
+<span class="lang-fr">Les défaillances que l'entretien prévient ne choisissent pas leur moment : elles tombent souvent quand la machine sert le plus.</span>
+
+</p>
+</div>
+<!-- Card 3 -->
+<div class="p-8 rounded-3xl bg-slate-50/70 border border-slate-150 hover:bg-white hover:shadow-lg hover:border-slate-200 transition-all"><div class="w-full h-44 rounded-xl overflow-hidden mb-5 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKt69FziGS8Rga9KuHyg556-S7P6vXejiA94xm_u08vnTn5kBZOkXSOY0lhSPA5xIJ6TDwI7AtADaWWLRQLBADsTGREvx3s9u5Anc2FT_OF7lbp5fITUwMNoPEekalpfXiEZsKV9dzeKShAgQd_Zj8pjC_rEMyNuGSApeZ9LQiRMLMaLPemTQuzvlNqxBVkm8Tidflwa74EZjLBj-KfG5m9kGdXZWm--pmB7rlkG5QEIG77AvJYAu45A" alt="Machine de chantier à l'arrêt sur un chantier lot en attente de pièces" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div>
+<div class="w-12 h-12 rounded-2xl bg-brand-indigo/10 text-brand-indigo flex items-center justify-center mb-6">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<h3 class="text-lg font-bold text-brand-ink mb-2">
+<span class="lang-fr">Des immobilisations</span>
+
+</h3>
+<p class="text-sm text-slate-600 leading-relaxed">
+<span class="lang-fr">Un engin arrêté, c'est du travail qui attend, un chantier décalé, ou une location à payer à la place.</span>
+
+</p>
+</div>
+</div>
+<!-- Positive Contrast Banner -->
+<div class="p-4 sm:p-5 rounded-2xl bg-brand-subtleBg border border-blue-200/60 flex items-center gap-4">
+<div class="w-9 h-9 rounded-xl bg-teal-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<p class="text-xs sm:text-sm font-semibold text-brand-ink">
+<span class="lang-fr">À l'inverse, un parc suivi régulièrement tient plus longtemps : ce qui est déjà investi travaille plus d'années.</span>
+
+</p>
+</div>
+</div>
 </section>
+<!-- END: ProblemCostSection -->
+<!-- BEGIN: FeaturesSection -->
+<section class="bg-brand-surface py-10" id="fonctionnalites"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10"><div class="text-center max-w-3xl mx-auto"><p class="text-xs font-bold text-brand-indigo uppercase tracking-wider mb-2 font-display"><span class="lang-fr">FONCTIONNALITÉS &amp; INTERFACES</span></p><h2 class="text-3xl sm:text-4xl font-extrabold text-brand-ink tracking-tight font-display mb-3"><span class="lang-fr">Trois gestes, et le suivi se tient tout seul</span></h2><p class="text-slate-600 text-base"><span class="lang-fr">Rien à paramétrer pendant des heures : le manuel fait le travail, vous validez. Découvrez les modules clés en action.</span></p></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"><div class="space-y-5 order-2 lg:order-1"><div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-brand-teal flex items-center justify-center shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><h3 class="text-2xl font-extrabold text-brand-ink font-display"><span class="lang-fr">Extraction automatique depuis vos manuels PDF</span></h3><p class="text-slate-600 text-base leading-relaxed"><span class="lang-fr">Déposez le PDF constructeur de votre machine. KALEA extrait immédiatement les intervalles récurrents (heures ou calendrier), les fiches d'entretien et les préconisations sans saisie manuelle.</span></p><div class="flex flex-wrap gap-2 pt-2"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">OCR &amp; algorithme</span><span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-brand-primary border border-blue-200/80">Échéances heures &amp; mois</span><span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Plans validés en 1 clic</span></div></div><div class="order-1 lg:order-2"><div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden"><div class="h-9 bg-slate-100/90 border-b border-slate-200 px-3.5 flex items-center justify-between"><div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div><span class="text-[11px] font-semibold text-slate-500">app.kalea.work/plans-entretien</span><span class="text-[10px] font-bold text-brand-indigo bg-brand-indigo/10 px-2 py-0.5 rounded">PDF OCR</span></div><div class="h-[380px] bg-slate-50 overflow-hidden ecran-fonction"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Zoom</span></div><img alt="Plans d'entretien et PDF KALEA" class="w-full h-full object-cover object-top" src="./captures-app/plan-entretien.png"></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"><div class="order-1"><div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden"><div class="h-9 bg-slate-100/90 border-b border-slate-200 px-3.5 flex items-center justify-between"><div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div><span class="text-[11px] font-semibold text-slate-500">app.kalea.work/machines/detail</span><span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Suivi Précis</span></div><div class="h-[380px] bg-slate-50 overflow-hidden ecran-fonction"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Zoom</span></div><img alt="Fiche machine et double intervalle KALEA" class="w-full h-full object-cover object-top" src="./captures-app/fiche-machine.png"></div></div></div><div class="space-y-5 order-2"><div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-brand-primary flex items-center justify-center shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><h3 class="text-2xl font-extrabold text-brand-ink font-display"><span class="lang-fr">Double suivi intelligent (Compteur horaire + Calendrier)</span></h3><p class="text-slate-600 text-base leading-relaxed"><span class="lang-fr">Chaque machine possède son propre cycle. La première échéance atteinte (horaire ou date calendaire) déclenche l'alerte proactive et prépare la check-list d'intervention.</span></p><div class="flex flex-wrap gap-2 pt-2"><span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">Anticipation des retards</span><span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Scorecard TCO</span><span class="px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">Relevé en 1 clic</span></div></div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6"><div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"><div class="mb-4"><div class="h-9 bg-slate-100/90 border-b border-slate-200 px-4 flex items-center justify-between rounded-t-xl -mx-6 sm:-mx-8 -mt-6 sm:-mt-8 mb-6"><div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div><span class="text-xs font-bold text-slate-500 font-display">Agenda &amp; Pièces</span></div><div class="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 mb-6 bg-slate-50 relative group ecran"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Zoom</span></div><img alt="Agenda et planning pièces KALEA" class="w-full h-full object-contain object-top transition-transform duration-500 group-hover:scale-[1.03]" src="./captures-app/agenda.png"></div><h4 class="text-xl sm:text-2xl font-extrabold text-brand-ink font-display mb-2.5"><span class="lang-fr">Planning &amp; Commandes</span></h4><p class="text-sm sm:text-base text-slate-600 leading-relaxed"><span class="lang-fr">Consolidation automatique de toutes les pièces et filtres à commander sur 30, 90 ou 180 jours.</span></p></div></div><div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"><div class="mb-4"><div class="h-9 bg-slate-100/90 border-b border-slate-200 px-4 flex items-center justify-between rounded-t-xl -mx-6 sm:-mx-8 -mt-6 sm:-mt-8 mb-6"><div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div><span class="text-xs font-bold text-slate-500 font-display">Coûts &amp; TCO</span></div><div class="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 mb-6 bg-slate-50 relative group ecran"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Zoom</span></div><img alt="Coûts d'exploitation et TCO KALEA" class="w-full h-full object-contain object-top transition-transform duration-500 group-hover:scale-[1.03]" src="./captures-app/tco.png"></div><h4 class="text-xl sm:text-2xl font-extrabold text-brand-ink font-display mb-2.5"><span class="lang-fr">Maîtrise du TCO Réel</span></h4><p class="text-sm sm:text-base text-slate-600 leading-relaxed"><span class="lang-fr">Barèmes d'atelier, coût horaire par machine, amortissement et alertes de seuil de rentabilité.</span></p></div></div><div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"><div class="mb-4"><div class="h-9 bg-slate-100/90 border-b border-slate-200 px-4 flex items-center justify-between rounded-t-xl -mx-6 sm:-mx-8 -mt-6 sm:-mt-8 mb-6"><div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div><span class="text-xs font-bold text-slate-500 font-display">Stocks &amp; SAV</span></div><div class="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 mb-6 bg-slate-50 relative group ecran"><div class="zoom-hint-badge"><svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg><span class="">Zoom</span></div><img alt="Gestion des stocks et pièces détachées KALEA" class="w-full h-full object-contain object-top transition-transform duration-500 group-hover:scale-[1.03]" src="./captures-app/stock.png"></div><h4 class="text-xl sm:text-2xl font-extrabold text-brand-ink font-display mb-2.5"><span class="lang-fr">Stocks &amp; Kits d'entretien</span></h4><p class="text-sm sm:text-base text-slate-600 leading-relaxed"><span class="lang-fr">Valorisation PUMP, mouvements magasins, alertes de rupture et kits d'entretien packagés.</span></p></div></div></div></div></section>
+<!-- END: FeaturesSection -->
+<!-- BEGIN: HowItWorksSection -->
+<section class="bg-white py-10" id="comment-ca-marche">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mb-6">
+<p class="text-xs font-bold text-brand-indigo uppercase tracking-wider mb-2 font-display">
+<span class="lang-fr">COMMENT ÇA MARCHE</span>
 
-<!-- ================= FONCTIONNALITÉS ================= -->
-<section class="wrap" style="padding-top:0;" id="fonctionnalites">
-  <div class="section-tete">
-    <span class="sur-titre fr">Fonctionnalités</span>
-    <span class="sur-titre en">Features</span>
-    <h2>
-      <span class="fr">Trois gestes, et le suivi se tient tout seul</span>
-      <span class="en">Three moves, and the tracking holds itself</span>
-    </h2>
-    <p>
-      <span class="fr">Rien à paramétrer pendant des heures : le manuel fait le travail, vous validez.</span>
-      <span class="en">Nothing to configure for hours: the manual does the work, you approve it.</span>
-    </p>
-  </div>
-  <div class="cartes">
-    <article class="carte">
-      <span class="badge-icone degrade" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 014 4v12a3 3 0 00-3-3H2z"/><path d="M22 4h-6a4 4 0 00-4 4v12a3 3 0 013-3h7z"/></svg>
-      </span>
-      <h3><span class="fr">Manuels intelligents</span><span class="en">Smart manuals</span></h3>
-      <p>
-        <span class="fr">Importez le manuel constructeur (PDF). Notre algorithme en extrait les échéances et les tâches pour créer un plan de maintenance structuré — premier entretien compris.</span>
-        <span class="en">Import the manufacturer's manual (PDF). Our algorithm extracts intervals and tasks to build a structured maintenance plan — including the first service.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="badge-icone degrade" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
-      </span>
-      <h3><span class="fr">Suivi flexible</span><span class="en">Flexible tracking</span></h3>
-      <p>
-        <span class="fr">Alertes fondées sur le calendrier, les heures moteur ou le kilométrage. Le mode se déduit du carnet ; vous gardez la main.</span>
-        <span class="en">Alerts based on the calendar, engine hours or mileage. The mode is inferred from the manual; you stay in control.</span>
-      </p>
-    </article>
-    <article class="carte">
-      <span class="badge-icone degrade" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h2.2l2.3 12.2A2 2 0 008.5 17h9.7a2 2 0 002-1.6L22 7H5"/></svg>
-      </span>
-      <h3><span class="fr">Commandes simplifiées</span><span class="en">Simplified ordering</span></h3>
-      <p>
-        <span class="fr">Les pièces et consommables à prévoir sont regroupés par famille, avec quantités et dates — prêts à envoyer au fournisseur.</span>
-        <span class="en">Parts and consumables are grouped by family, with quantities and dates — ready to send to your supplier.</span>
-      </p>
-    </article>
-  </div>
+</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold text-brand-ink tracking-tight font-display mb-3">
+<span class="lang-fr">Du PDF au carnet d'entretien, en trois étapes</span>
+
+</h2>
+<p class="text-slate-600 text-base max-w-2xl">
+<span class="lang-fr">Aucun paramétrage interminable : vous importez, vous validez, vous suivez.</span>
+
+</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Step 1 -->
+<div class="p-8 rounded-3xl bg-slate-50/50 border border-slate-200 flex flex-col justify-start"><div class="w-full h-44 rounded-xl overflow-hidden mb-6 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEgpTBgnX6NemPRAVP8D_2JtcjiD6ueRk3CdieQkgCngtt04sXrXPkQs66EHNt7MQsl3i6SIyySrejmc4aSVUEGw2b-HB7ULaz_iz7nYDXRX6n8XxiE9orNQnIC-zxMJPbHogU_XU7SkhHQRX4wULojOoQZa151ke5YsaquY_6wcPG3Swdh42R2dVEavaPY4scc2ZRaEuhZfj0VaXlbZxCY6SSxrd3JlCU8KaT3yHcMfNmfMyBN10JqA" alt="Technicienne prenant en photo la plaque constructeur et le manuel d'un engin" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div><div class="w-10 h-10 rounded-full bg-brand-primary text-white font-display font-extrabold flex items-center justify-center text-sm mb-6 shadow-sm">1</div><h3 class="text-lg font-bold text-brand-ink mb-2"><span class="lang-fr">Importez le manuel</span></h3><p class="text-sm text-slate-600 leading-relaxed"><span class="lang-fr">Déposez le PDF constructeur de la machine. Une photo de la plaque ou du carnet suffit à retrouver le bon document, et le modèle comme l'année peuvent être précisés.</span></p></div>
+<!-- Step 2 -->
+<div class="p-8 rounded-3xl bg-slate-50/50 border border-slate-200 flex flex-col justify-start"><div class="w-full h-44 rounded-xl overflow-hidden mb-6 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuANlZuN9C8XWRRLxzCYd-uB5eyUvtl4XxgGLYv5Kws5ItHN6nucx94syS1Lw91kJ8kz2wggJ2rfYqjnAAawD9Gd6cZspA97wvnUSkcg01xEyEGGbDnZc-4Z0HxX1CjqCgKxndkrYDrTWzcGHccsyWycv0iDLCIC4DGvFl3ycMwxOThOH_m04LAKwL6UqS11PrNzDTighhCPRPxWBZCp-bk13FU-65YE6lov76jB9A_YJznkAeEV9mx6cQ" alt="Validation et contrôle d'un plan de maintenance numérique sur tablette" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div><div class="w-10 h-10 rounded-full bg-brand-primary text-white font-display font-extrabold flex items-center justify-center text-sm mb-6 shadow-sm">2</div><h3 class="text-lg font-bold text-brand-ink mb-2"><span class="lang-fr">Validez le plan proposé</span></h3><p class="text-sm text-slate-600 leading-relaxed"><span class="lang-fr">KALEA en tire les tâches, les échéances et l'unité de suivi (heures, kilomètres ou mois), premier entretien compris. Vous relisez, vous corrigez si besoin, puis vous confirmez.</span></p></div>
+<!-- Step 3 -->
+<div class="p-8 rounded-3xl bg-slate-50/50 border border-slate-200 flex flex-col justify-start"><div class="w-full h-44 rounded-xl overflow-hidden mb-6 border border-slate-200/60 shadow-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq_yVek3BuCWro5Mef2FAbXP1mY65feqp3IIicmu7tampZFUNAMb61mF0VVdAsVLJuUKMLkJuf66_K2x7KpTqPo6bgXlqy-wJQXBr8Wv3aGil1brWLKhEjH3leaCjcu4VT2PS5dXu6YmG3E2cOYu-wpq6iRXaB6hFLrjU38Cr9GHKoBsIUypiWQh78GUXOsM8WK65iysLpniDQDweA3_gCxnACsOR6ZeokzdOcA4T-C04pzP9fAmZ-Xw" alt="Contrôle du compteur d'heures et préparation des pièces de rechange" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"></div><div class="w-10 h-10 rounded-full bg-brand-primary text-white font-display font-extrabold flex items-center justify-center text-sm mb-6 shadow-sm">3</div><h3 class="text-lg font-bold text-brand-ink mb-2"><span class="lang-fr">Suivez, puis commandez</span></h3><p class="text-sm text-slate-600 leading-relaxed"><span class="lang-fr">Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.</span></p></div>
+</div>
+</div>
 </section>
+<!-- END: HowItWorksSection -->
+<!-- BEGIN: DataSecuritySection -->
+<section class="py-8" id="vos-donnees">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Contained Blue Panel -->
+<div class="rounded-3xl bg-brand-subtleBg border border-blue-200/70 shadow-sm p-6">
+<div class="mb-10">
+<p class="text-xs font-bold text-brand-indigo uppercase tracking-wider mb-2 font-display">
+<span class="lang-fr">VOS DONNÉES</span>
 
-<!-- ================= COMMENT ÇA MARCHE ================= -->
-<section class="wrap" style="padding-top:0;" id="comment">
-  <div class="section-tete">
-    <span class="sur-titre fr">Comment ça marche</span>
-    <span class="sur-titre en">How it works</span>
-    <h2><span class="fr">Du PDF au carnet d'entretien, en trois étapes</span><span class="en">From PDF to service logbook, in three steps</span></h2>
-    <p>
-      <span class="fr">Aucun paramétrage interminable : vous importez, vous validez, vous suivez.</span>
-      <span class="en">No endless setup: you import, you approve, you track.</span>
-    </p>
-  </div>
-  <ol class="etapes">
-    <li class="etape">
-      <span class="num" aria-hidden="true">1</span>
-      <h3><span class="fr">Importez le manuel</span><span class="en">Import the manual</span></h3>
-      <p>
-        <span class="fr">Déposez le PDF constructeur de la machine. Une photo de la plaque ou du carnet suffit à retrouver le bon document, et le modèle comme l'année peuvent être précisés.</span>
-        <span class="en">Drop the machine's manufacturer PDF. A photo of the plate or the logbook is enough to find the right document, and model and year can be specified.</span>
-      </p>
-    </li>
-    <li class="etape">
-      <span class="num" aria-hidden="true">2</span>
-      <h3><span class="fr">Validez le plan proposé</span><span class="en">Approve the proposed plan</span></h3>
-      <p>
-        <span class="fr">KALEA en tire les tâches, les échéances et l'unité de suivi (heures, kilomètres ou mois), premier entretien compris. Vous relisez, vous corrigez si besoin, puis vous confirmez.</span>
-        <span class="en">KALEA derives the tasks, the intervals and the tracking unit (hours, kilometres or months), first service included. You review, adjust if needed, then confirm.</span>
-      </p>
-    </li>
-    <li class="etape">
-      <span class="num" aria-hidden="true">3</span>
-      <h3><span class="fr">Suivez, puis commandez</span><span class="en">Track, then order</span></h3>
-      <p>
-        <span class="fr">Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.</span>
-        <span class="en">Log the meter whenever you like: the schedule updates, reminders go out ahead of the date, and the parts list groups itself by family.</span>
-      </p>
-    </li>
-  </ol>
+</p>
+<h2 class="text-2xl sm:text-3xl font-extrabold text-brand-ink tracking-tight font-display">
+<span class="lang-fr">Quatre engagements, vérifiables dans le produit</span>
+
+</h2>
+</div>
+<!-- 4 Pillars Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Pillar 1 -->
+<div>
+<div class="flex items-center gap-2 mb-3 text-brand-teal">
+<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h3 class="text-sm font-bold text-brand-ink">
+<span class="lang-fr">Parc cloisonné</span>
+
+</h3>
+</div>
+<p class="text-xs text-slate-600 leading-relaxed">
+<span class="lang-fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
+
+</p>
+</div>
+<!-- Pillar 2 -->
+<div>
+<div class="flex items-center gap-2 mb-3 text-brand-teal">
+<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h3 class="text-sm font-bold text-brand-ink">
+<span class="lang-fr">Analyse sur votre action</span>
+
+</h3>
+</div>
+<p class="text-xs text-slate-600 leading-relaxed">
+<span class="lang-fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
+
+</p>
+</div>
+<!-- Pillar 3 -->
+<div>
+<div class="flex items-center gap-2 mb-3 text-brand-teal">
+<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h3 class="text-sm font-bold text-brand-ink">
+<span class="lang-fr">Aucun traceur publicitaire</span>
+
+</h3>
+</div>
+<p class="text-xs text-slate-600 leading-relaxed">
+<span class="lang-fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
+
+</p>
+</div>
+<!-- Pillar 4 -->
+<div>
+<div class="flex items-center gap-2 mb-3 text-brand-teal">
+<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h3 class="text-sm font-bold text-brand-ink">
+<span class="lang-fr">Emporter et effacer</span>
+
+</h3>
+</div>
+<p class="text-xs text-slate-600 leading-relaxed">
+<span class="lang-fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
+
+</p>
+</div>
+</div>
+<!-- Bottom Privacy Note -->
+<div class="mt-8 pt-6 border-t border-blue-200/60 text-xs text-slate-500">
+<span class="lang-fr">Le détail figure dans la <a class="text-brand-primary underline hover:text-blue-800" href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
+
+</div>
+</div>
+</div>
 </section>
+<!-- END: DataSecuritySection -->
+<!-- BEGIN: PricingSection -->
+<section class="bg-white py-10" id="tarifs">
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+<!-- En-tête de la section -->
+<div class="text-center max-w-3xl mx-auto">
+<span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase mb-3 bg-[#5B52DF]/10 text-[#5B52DF] border border-[#5B52DF]/20">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+<span class="fr">Tarifs clairs &amp; sans engagement</span>
 
-<!-- ================= VOS DONNÉES ================= -->
-<section class="wrap" style="padding-top:0;" id="confidentialite">
-  <div class="confiance-bloc">
-    <div class="section-tete" style="margin-bottom:28px;">
-      <span class="sur-titre fr">Vos données</span>
-      <span class="sur-titre en">Your data</span>
-      <h2 style="font-size:clamp(22px,3vw,28px);"><span class="fr">Quatre engagements, vérifiables dans le produit</span><span class="en">Four commitments, verifiable in the product</span></h2>
-    </div>
-    <div class="confiance">
-      <div>
-        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V6z"/><path d="M9.5 12.2l1.8 1.8 3.4-3.6"/></svg><span class="fr">Parc cloisonné</span><span class="en">Isolated fleet</span></h4>
-        <p>
-          <span class="fr">Les règles d'accès sont appliquées côté serveur : votre parc n'est lisible que par les comptes de votre société.</span>
-          <span class="en">Access rules are enforced server-side: your fleet is readable only by your company's accounts.</span>
-        </p>
-      </div>
-      <div>
-        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg><span class="fr">Analyse sur votre action</span><span class="en">Analysis on your action</span></h4>
-        <p>
-          <span class="fr">La lecture d'un manuel ne démarre que lorsque vous l'importez, et le document ne sert qu'à construire votre plan de maintenance.</span>
-          <span class="en">Reading a manual starts only when you import it, and the document is used only to build your maintenance plan.</span>
-        </p>
-      </div>
-      <div>
-        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.2A9.7 9.7 0 0112 6c5 0 9 4.5 9 6a11 11 0 01-2.6 3.4M6.2 7.6C4 9 3 11 3 12a12 12 0 003.4 3.5"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg><span class="fr">Aucun traceur publicitaire</span><span class="en">No advertising tracker</span></h4>
-        <p>
-          <span class="fr">Pas de régie publicitaire, pas de revente. La langue et la session sont les seuls éléments gardés par le navigateur.</span>
-          <span class="en">No ad network, no resale. Language and session are the only things the browser keeps.</span>
-        </p>
-      </div>
-      <div>
-        <h4><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20h16"/></svg><span class="fr">Emporter et effacer</span><span class="en">Export and erase</span></h4>
-        <p>
-          <span class="fr">L'historique s'exporte en CSV, et la suppression du compte emporte les documents associés.</span>
-          <span class="en">History exports to CSV, and deleting the account takes the related documents with it.</span>
-        </p>
-      </div>
-    </div>
-    <p class="confiance-suite">
-      <span class="fr">Le détail figure dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</span>
-      <span class="en">Details are in the <a href="./politique-confidentialite.html">privacy policy</a>.</span>
-    </p>
-  </div>
+</span>
+<h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-brand-ink mb-4 font-display"><span class="fr">Une offre adaptée à chaque taille&nbsp;</span></h2>
+<p class="text-base sm:text-lg text-slate-600">
+<span class="fr">Commencez gratuitement, changez d'offre au prorata ou résiliez en un clic sans préavis.</span>
+
+</p>
+</div>
+<!-- Grille des 4 cartes d'offres -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+<!-- ================= 1. GRATUIT ================= -->
+<div class="card-kalea p-6 flex flex-col justify-between border border-slate-200/80 relative">
+<div>
+<!-- Nom & Badge -->
+<div class="flex items-center justify-between mb-4">
+<div>
+<span class="text-[11px] font-bold tracking-wider uppercase text-slate-400 block mb-0.5">
+<span class="fr">Sans carte bancaire</span>
+
+</span>
+<h3 class="text-2xl font-bold tracking-tight text-brand-ink font-display">
+<span class="fr">Gratuit</span>
+
+</h3>
+</div>
+<span class="text-xs font-bold tracking-wide uppercase px-3 py-1 rounded-full bg-slate-100 text-slate-600">
+<span class="fr">Découverte</span>
+
+</span>
+</div>
+<!-- Prix -->
+<div class="mb-5 pb-5 border-b border-slate-100">
+<div class="flex items-baseline gap-1.5">
+<span class="text-4xl sm:text-5xl font-extrabold tracking-tight text-brand-ink font-display">0 €</span>
+<span class="text-sm font-semibold text-slate-500">
+<span class="fr">/mois à vie</span>
+
+</span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5">
+<span class="fr">Idéal pour tester l'application sereinement</span>
+
+</p>
+</div>
+<!-- PRIORITÉ 1 : Capacité de flotte -->
+<div class="p-3.5 rounded-2xl bg-slate-50 mb-6 border border-slate-100">
+<div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between">
+<span class="">
+<span class="fr">Capacité de flotte</span>
+
+</span>
+<span class="text-emerald-600 font-bold">
+<span class="fr">Inclus</span>
+
+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-slate-200/60 flex items-center justify-center text-slate-700">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<span class="text-base font-bold text-brand-ink font-display">
+<span class="fr">2 machines</span>
+
+</span>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white text-slate-500 shadow-sm border border-slate-100">
+<span class="fr">1 utilisateur</span>
+
+</span>
+</div>
+</div>
+<!-- PRIORITÉ 2 : Modules & Fonctionnalités -->
+<div class="mb-6">
+<div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+<span class="fr">Fonctionnalités incluses</span>
+
+</div>
+<ul class="space-y-3 text-sm text-brand-ink">
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-600">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Consultation et gestion du parc</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-600">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Rappels e-mail automatiques</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 text-slate-600">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Notifications d'échéances en direct</span>
+
+</span>
+</li>
+</ul>
+</div>
+</div>
+<div>
+<!-- PRIORITÉ 3 : Quota IA -->
+<div class="pt-3.5 pb-4 border-t border-slate-100 mb-5 bg-slate-50/70 -mx-6 px-6">
+<div class="text-[11px] text-slate-500 leading-relaxed flex items-start gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Inclus chaque mois :</span>
+
+</span>
+<span class="fr"> 10 analyses carnet · 10 recherches photo · 30 lectures compteur</span>
+
+</div>
+</div>
+</div>
+<!-- Bouton d'action -->
+<a class="w-full py-3 px-4 rounded-xl border border-slate-300 text-center font-bold text-sm text-brand-ink hover:bg-slate-50 transition-all block shadow-sm" href="./app.html?inscription=1">
+<span class="fr">Commencer gratuitement</span>
+
+</a>
+</div>
+</div>
+<!-- ================= 2. STARTER (BLEU ROI) ================= -->
+<div class="card-kalea p-6 flex flex-col justify-between border-2 border-[#236FE0]/30 hover:border-[#236FE0] relative">
+<div>
+<!-- Nom & Badge -->
+<div class="flex items-center justify-between mb-4">
+<div>
+<span class="text-[11px] font-bold tracking-wider uppercase text-[#236FE0] block mb-0.5">
+<span class="fr">Artisan &amp; Indépendant</span>
+
+</span>
+<h3 class="text-2xl font-bold tracking-tight text-brand-ink font-display">
+<span class="">Starter</span>
+</h3>
+</div>
+<span class="text-xs font-bold tracking-wide uppercase px-3 py-1 rounded-full bg-[#236FE0]/10 text-[#236FE0] border border-[#236FE0]/20 font-semibold">
+<span class="fr">Artisan</span>
+
+</span>
+</div>
+<!-- Prix -->
+<div class="mb-5 pb-5 border-b border-slate-100">
+<div class="flex items-baseline gap-1.5">
+<span class="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#236FE0] font-display">12 €</span>
+<span class="text-sm font-semibold text-slate-500">
+<span class="fr">/mois</span>
+
+</span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5">
+<span class="fr">Facturation mensuelle sans engagement</span>
+
+</p>
+</div>
+<!-- PRIORITÉ 1 : Capacité de flotte -->
+<div class="p-3.5 rounded-2xl bg-[#236FE0]/5 mb-6 border border-[#236FE0]/15">
+<div class="text-[10px] font-extrabold uppercase tracking-wider text-[#236FE0] mb-1 flex items-center justify-between">
+<span class="">
+<span class="fr">Capacité de flotte</span>
+
+</span>
+<span class="text-xs font-bold text-[#236FE0]">
+<span class="fr">+3 vs Gratuit</span>
+
+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-[#236FE0]/15 flex items-center justify-center text-[#236FE0]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<span class="text-base font-bold text-brand-ink font-display">
+<span class="fr">5 machines</span>
+
+</span>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white text-slate-500 shadow-sm border border-slate-100">
+<span class="fr">1 utilisateur</span>
+
+</span>
+</div>
+</div>
+<!-- PRIORITÉ 2 : Modules & Fonctionnalités (Cumulatif) -->
+<div class="mb-6">
+<div class="text-[11px] font-bold uppercase tracking-wider text-[#236FE0] mb-3">
+<span class="fr">Tout ce qui est dans Gratuit, plus :</span>
+
+</div>
+<ul class="space-y-3 text-sm text-brand-ink">
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#236FE0]/15 flex items-center justify-center shrink-0 text-[#236FE0]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="font-semibold text-brand-ink">
+<span class="fr">Export CSV des données</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#236FE0]/15 flex items-center justify-center shrink-0 text-[#236FE0]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Rappels d'échéances personnalisés</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#236FE0]/15 flex items-center justify-center shrink-0 text-[#236FE0]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Historique étendu d'entretien</span>
+
+</span>
+</li>
+</ul>
+</div>
+</div>
+<div>
+<!-- PRIORITÉ 3 : Quota IA -->
+<div class="pt-3.5 pb-4 border-t border-slate-100 mb-5 bg-[#236FE0]/5 -mx-6 px-6">
+<div class="text-[11px] text-slate-500 leading-relaxed flex items-start gap-1.5">
+<svg class="w-3.5 h-3.5 text-[#236FE0] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Inclus chaque mois :</span>
+
+</span>
+<span class="fr"> 20 analyses · 10 photos · 200 lectures</span>
+
+</div>
+</div>
+</div>
+<!-- Bouton d'action -->
+<a class="w-full py-3 px-4 rounded-xl bg-[#236FE0] text-white text-center font-bold text-sm hover:bg-[#1f63cb] transition-all block shadow-md hover:shadow-lg" href="./app.html?inscription=1">
+<span class="fr">Choisir Starter</span>
+
+</a>
+</div>
+</div>
+<!-- ================= 3. BUSINESS (RECOMMANDÉE - INDIGO) ================= -->
+<div class="card-kalea p-6 flex flex-col justify-between border-2 border-[#5B52DF] shadow-xl relative bg-gradient-to-b from-[#5B52DF]/[0.03] to-transparent">
+<!-- Ruban Recommandé -->
+<div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+<span class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase bg-gradient-to-r from-[#5B52DF] to-[#6366F1] text-white shadow-lg shadow-[#5B52DF]/30">
+<svg class="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+<span class="fr">Recommandé</span>
+
+</span>
+</div>
+<div>
+<!-- Nom & Badge -->
+<div class="flex items-center justify-between mb-4 mt-2">
+<div>
+<span class="text-[11px] font-bold tracking-wider uppercase text-[#5B52DF] block mb-0.5">
+<span class="fr">PME &amp; Parcs Actifs</span>
+
+</span>
+<h3 class="text-2xl font-black tracking-tight text-brand-ink font-display">
+<span class="">Business</span>
+</h3>
+</div>
+<span class="text-xs font-bold tracking-wide uppercase px-3 py-1 rounded-full bg-[#5B52DF]/15 text-[#5B52DF] border border-[#5B52DF]/30 font-display">
+<span class="fr">Flotte</span>
+
+</span>
+</div>
+<!-- Prix -->
+<div class="mb-5 pb-5 border-b border-slate-100">
+<div class="flex items-baseline gap-1.5">
+<span class="text-4xl sm:text-5xl font-black tracking-tight text-[#5B52DF] font-display">39 €</span>
+<span class="text-sm font-semibold text-slate-500">
+<span class="fr">/mois</span>
+
+</span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5">
+<span class="fr">Pour équipes et parcs actifs en pleine croissance</span>
+
+</p>
+</div>
+<!-- PRIORITÉ 1 : Capacité de flotte -->
+<div class="p-3.5 rounded-2xl bg-[#5B52DF]/10 mb-6 border border-[#5B52DF]/25">
+<div class="text-[10px] font-extrabold uppercase tracking-wider text-[#5B52DF] mb-1 flex items-center justify-between">
+<span class="">
+<span class="fr">Capacité de flotte</span>
+
+</span>
+<span class="text-xs font-bold text-[#5B52DF]">
+<span class="fr">Jusqu'à 20 engins</span>
+
+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-[#5B52DF]/20 flex items-center justify-center text-[#5B52DF]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<span class="text-base font-extrabold text-brand-ink font-display">
+<span class="fr">20 machines</span>
+
+</span>
+</div>
+<span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#5B52DF] text-white shadow-sm">
+<span class="fr">3 utilisateurs</span>
+
+</span>
+</div>
+</div>
+<!-- PRIORITÉ 2 : Modules & Fonctionnalités (Cumulatif mis en avant) -->
+<div class="mb-6">
+<div class="text-[11px] font-bold uppercase tracking-wider text-[#5B52DF] mb-3">
+<span class="fr">Tout ce qui est dans Starter, plus :</span>
+
+</div>
+<ul class="space-y-3 text-sm text-brand-ink">
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#5B52DF]/20 flex items-center justify-center shrink-0 text-[#5B52DF]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Multi-utilisateurs (3 accès inclus)</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#5B52DF]/20 flex items-center justify-center shrink-0 text-[#5B52DF]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">QR codes équipements &amp; chantiers</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#5B52DF]/20 flex items-center justify-center shrink-0 text-[#5B52DF]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="">
+<span class="fr">Préparation groupée d'atelier</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#5B52DF]/20 flex items-center justify-center shrink-0 text-[#5B52DF]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="font-extrabold text-[#5B52DF]">
+<span class="fr">Module Coûts &amp; TCO complet</span>
+
+</span>
+</li>
+</ul>
+</div>
+</div>
+<div>
+<!-- PRIORITÉ 3 : Quota IA -->
+<div class="pt-3.5 pb-4 border-t border-slate-100 mb-5 bg-[#5B52DF]/5 -mx-6 px-6">
+<div class="text-[11px] text-slate-500 leading-relaxed flex items-start gap-1.5">
+<svg class="w-3.5 h-3.5 text-[#5B52DF] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Inclus chaque mois :</span>
+
+</span>
+<span class="fr"> 30 analyses · 30 photos · 500 lectures</span>
+
+</div>
+</div>
+</div>
+<!-- Bouton d'action mis en avant -->
+<a class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#5B52DF] to-[#4F46E5] text-white text-center font-extrabold text-sm hover:opacity-95 transition-all shadow-lg shadow-[#5B52DF]/30 block" href="./app.html?inscription=1">
+<span class="fr">Choisir l'offre Business</span>
+
+</a>
+</div>
+</div>
+<!-- ================= 4. ENTERPRISE (TURQUOISE / TEAL) ================= -->
+<div class="card-kalea p-6 flex flex-col justify-between border-2 border-[#24B5A8]/30 hover:border-[#24B5A8] relative">
+<div>
+<!-- Nom & Badge -->
+<div class="flex items-center justify-between mb-4">
+<div>
+<span class="text-[11px] font-bold tracking-wider uppercase text-[#24B5A8] block mb-0.5">
+<span class="fr">Grands Parcs &amp; BTP</span>
+
+</span>
+<h3 class="text-2xl font-bold tracking-tight text-brand-ink font-display">
+<span class="">Enterprise</span>
+</h3>
+</div>
+<span class="text-xs font-bold tracking-wide uppercase px-3 py-1 rounded-full bg-[#24B5A8]/10 text-[#24B5A8] border border-[#24B5A8]/20 font-semibold">
+<span class="fr">Grand Compte</span>
+
+</span>
+</div>
+<!-- Prix -->
+<div class="mb-5 pb-5 border-b border-slate-100">
+<div class="flex items-baseline gap-1.5">
+<span class="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#24B5A8] font-display">49 €</span>
+<span class="text-sm font-semibold text-slate-500">
+<span class="fr">/mois</span>
+
+</span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5">
+<span class="fr">+ 1 € / machine au-delà de 20</span>
+
+</p>
+</div>
+<!-- PRIORITÉ 1 : Capacité de flotte -->
+<div class="p-3.5 rounded-2xl bg-[#24B5A8]/5 mb-6 border border-[#24B5A8]/15">
+<div class="text-[10px] font-extrabold uppercase tracking-wider text-[#24B5A8] mb-1 flex items-center justify-between">
+<span class="">
+<span class="fr">Capacité de flotte</span>
+
+</span>
+<span class="text-xs font-bold text-[#24B5A8]">
+<span class="fr">Sur-mesure</span>
+
+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-[#24B5A8]/15 flex items-center justify-center text-[#24B5A8]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<span class="text-base font-bold text-brand-ink font-display">
+<span class="fr">Parc sur mesure</span>
+
+</span>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white text-slate-500 shadow-sm border border-slate-100">
+<span class="fr">Rôles d'équipe</span>
+
+</span>
+</div>
+</div>
+<!-- PRIORITÉ 2 : Modules & Fonctionnalités (Cumulatif) -->
+<div class="mb-6">
+<div class="text-[11px] font-bold uppercase tracking-wider text-[#24B5A8] mb-3">
+<span class="fr">Tout ce qui est dans Business, plus :</span>
+
+</div>
+<ul class="space-y-3 text-sm text-brand-ink">
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#24B5A8]/15 flex items-center justify-center shrink-0 text-[#24B5A8]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Support dédié prioritaire</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#24B5A8]/15 flex items-center justify-center shrink-0 text-[#24B5A8]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="font-extrabold text-[#24B5A8]">
+<span class="fr">Module Stocks &amp; SAV</span>
+
+</span>
+</li>
+<li class="flex items-start gap-2.5">
+<div class="w-4 h-4 mt-0.5 rounded-full bg-[#24B5A8]/15 flex items-center justify-center shrink-0 text-[#24B5A8]">
+<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path></svg>
+</div>
+<span class="text-xs text-slate-500">
+<span class="fr">Magasins, mouvements de pièces, kits d'entretien</span>
+
+</span>
+</li>
+</ul>
+</div>
+</div>
+<div>
+<!-- PRIORITÉ 3 : Quota IA -->
+<div class="pt-3.5 pb-4 border-t border-slate-100 mb-5 bg-[#24B5A8]/5 -mx-6 px-6">
+<div class="text-[11px] text-slate-500 leading-relaxed flex items-start gap-1.5">
+<svg class="w-3.5 h-3.5 text-[#24B5A8] mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<div>
+<span class="font-bold text-brand-ink">
+<span class="fr">Inclus chaque mois :</span>
+
+</span>
+<span class="fr"> 5 000 analyses · 5 000 photos · 2 000 lectures</span>
+
+</div>
+</div>
+</div>
+<!-- Bouton d'action -->
+<a class="w-full py-3 px-4 rounded-xl border-2 border-[#24B5A8] text-center font-bold text-sm text-[#24B5A8] hover:bg-[#24B5A8] hover:text-white transition-all block shadow-sm" href="mailto:support@keeva.work?subject=Demande%20Offre%20Enterprise">
+<span class="fr">Contacter l'équipe</span>
+
+</a>
+</div>
+</div>
+</div>
+<!-- ================= BLOC SERVICE : ÉTABLISSEMENT DE PLAN D'ENTRETIEN (29 €) ================= -->
+<div class="p-6 sm:p-7 rounded-2xl bg-white border border-slate-200/80 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-[#5B52DF]/10 flex items-center justify-center text-[#5B52DF] shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2.5 mb-1.5">
+<h4 class="text-lg font-bold text-brand-ink font-display">
+<span class="fr">Établissement de ton plan d'entretien</span>
+
+</h4>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#5B52DF]/15 text-[#5B52DF]">
+<span class="fr">29 € l'acte</span>
+
+</span>
+</div>
+<p class="text-sm text-slate-600 max-w-2xl leading-relaxed">
+<span class="fr">Tu n'as pas le temps ou tu ne trouves pas le carnet constructeur ? Envoie-nous la photo de la plaque constructeur : nous recherchons et configurons votre plan complet dans l'application.</span>
+
+</p>
+</div>
+</div>
+<a class="w-full md:w-auto shrink-0 px-5 py-2.5 rounded-xl border border-slate-300 text-center font-bold text-sm text-brand-ink hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm" href="mailto:support@keeva.work?subject=Demande%20Etablissement%20Plan%2029E">
+<span class="">
+<span class="fr">Demander un plan</span>
+
+</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</a>
+</div>
+<!-- ================= RÉASSURANCE / FOOTER SECTION ================= -->
+<div class="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center sm:justify-between gap-4 text-xs font-semibold text-slate-600">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<span class="fr">Paiement sécurisé par Stancer</span>
+
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<span class="fr">Résiliable à tout moment en 1 clic</span>
+
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<span class="fr">Lectures de compteur</span>
+
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" fill-rule="evenodd"></path></svg>
+<span class="fr">Changement d'offre au prorata</span>
+
+</div>
+</div>
+</div>
 </section>
+<!-- END: PricingSection -->
+<!-- BEGIN: FAQSection -->
+<section class="bg-brand-surface border-t border-slate-100 py-10" id="faq">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mb-6">
+<p class="text-xs font-bold text-brand-indigo uppercase tracking-wider mb-2 font-display">
+<span class="lang-fr">QUESTIONS FRÉQUENTES</span>
 
-<!-- ================= TARIFS + FAQ ================= -->
-<section class="wrap" style="padding-top:0;" id="tarifs">
-  <div class="section-tete">
-    <span class="sur-titre fr">Tarifs</span>
-    <span class="sur-titre en">Pricing</span>
-    <h2><span class="fr">Quatre offres, des limites annoncées</span><span class="en">Four plans, clear limits</span></h2>
-    <p>
-      <span class="fr">Gratuit pour deux machines, Starter jusqu'à cinq, Business jusqu'à vingt, Enterprise sur mesure — sans engagement.</span>
-      <span class="en">Free for two machines, Starter up to five, Business up to twenty, Enterprise built to measure — no commitment.</span>
-    </p>
-  </div>
-  <div class="tarifs">
-    <article class="offre">
-      <h3><span class="fr">Gratuit</span><span class="en">Free</span></h3>
-      <div class="prix"><span class="montant">0 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">2 machines · 1 utilisateur</span><span class="en">2 machines · 1 user</span></p>
-      <p class="pour fr">Pour un particulier, ou pour essayer KALEA.</p>
-      <p class="pour en">For an individual, or to try KALEA.</p>
-      <ul class="avantages">
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">10 analyses de carnet, 10 recherches de photo, 30 lectures de compteur par mois</span><span class="en">10 logbook analyses, 10 photo searches, 30 meter readings per month</span></li>
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Consultation, rappels e-mail et notifications</span><span class="en">Reading, email reminders and notifications</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Créer un compte</span><span class="en">Create an account</span></a>
-    </article>
+</p>
+<h2 class="text-3xl sm:text-4xl font-extrabold text-brand-ink tracking-tight font-display">
+<span class="lang-fr">Ce qu'on nous demande le plus</span>
 
-    <article class="offre">
-      <h3><span class="fr">Starter / Artisan</span><span class="en">Starter / Artisan</span></h3>
-      <div class="prix"><span class="montant">12 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">5 machines · 1 utilisateur</span><span class="en">5 machines · 1 user</span></p>
-      <p class="pour fr">Pour un petit parc qu'il faut suivre de près.</p>
-      <p class="pour en">For a small fleet that needs close tracking.</p>
-      <ul class="avantages">
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">20 analyses de carnet, 10 recherches de photo, 200 lectures de compteur par mois</span><span class="en">20 logbook analyses, 10 photo searches, 200 meter readings per month</span></li>
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Tout ce qui est inclus dans Gratuit, plus l'export CSV</span><span class="en">Everything included in Free, plus CSV export</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="./app.html?inscription=1"><span class="fr">Passer à Starter</span><span class="en">Move to Starter</span></a>
-    </article>
+</h2>
+</div>
+<!-- 2 Columns Grid of Accordions -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Item 1 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Qu'est-ce qui compte comme une machine ?</span>
 
-    <article class="offre recommandee">
-      <span class="badge-recommande fr">RECOMMANDÉ</span>
-      <span class="badge-recommande en">RECOMMENDED</span>
-      <h3><span class="fr">Business / Flotte</span><span class="en">Business / Fleet</span></h3>
-      <div class="prix"><span class="montant">39 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">20 machines · 3 utilisateurs</span><span class="en">20 machines · 3 users</span></p>
-      <p class="pour fr">Pour une flotte suivie par plusieurs personnes.</p>
-      <p class="pour en">For a fleet tracked by several people.</p>
-      <ul class="avantages">
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">30 analyses de carnet, 30 recherches de photo, 500 lectures de compteur par mois</span><span class="en">30 logbook analyses, 30 photo searches, 500 meter readings per month</span></li>
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Multi-utilisateurs, QR codes, préparation groupée, module Coûts &amp; TCO</span><span class="en">Multi-user, QR codes, grouped preparation, Costs &amp; TCO module</span></li>
-      </ul>
-      <a class="btn btn-primaire" href="./app.html?inscription=1"><span class="fr">Passer à Business</span><span class="en">Move to Business</span></a>
-    </article>
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">Chaque engin motorisé, équipement de chantier, véhicule utilitaire ou machine d'atelier disposant de son propre carnet ou compteur représente 1 unité. Les accessoires non motorisés sans échéance propre sont inclus sans supplément.</span>
 
-    <article class="offre">
-      <h3><span class="fr">Enterprise / Parc</span><span class="en">Enterprise / Fleet</span></h3>
-      <div class="prix"><span class="montant">49 €</span><span class="periode">/ <span class="fr">mois</span><span class="en">month</span></span></div>
-      <p class="limite"><span class="fr">Parc sur mesure · rôles d'équipe</span><span class="en">Fleet built to measure · team roles</span></p>
-      <p class="pour fr">Pour un grand parc, avec un interlocuteur dédié. Au-delà de 20 machines, chaque machine supplémentaire est facturée 1 € par mois.</p>
-      <p class="pour en">For a large fleet, with a dedicated contact. Beyond 20 machines, each additional machine is billed at €1 per month.</p>
-      <ul class="avantages">
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">5 000 analyses de carnet, 5 000 recherches de photo, 2 000 lectures de compteur par mois</span><span class="en">5,000 logbook analyses, 5,000 photo searches, 2,000 meter readings per month</span></li>
-        <li><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span class="fr">Support dédié, module Stocks &amp; SAV</span><span class="en">Dedicated support, Stock &amp; SAV module</span></li>
-      </ul>
-      <a class="btn btn-secondaire" href="mailto:support@kalea.pro"><span class="fr">Nous contacter</span><span class="en">Contact us</span></a>
-    </article>
-  </div>
-  <div class="notes-tarifs">
-    <p class="note-tarif">
-      <svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01M11.5 11h1v6h-1"/></svg>
-      <span class="fr">Les lectures de compteur ne consomment pas vos analyses de carnet. Et si vous n'avez pas de carnet pour un modèle, nous établissons le plan d'entretien : 29 € par plan, demandé depuis l'application — un e-mail pré-rempli part vers notre support, et le règlement se fait hors application.</span>
-      <span class="en">Meter readings do not use up your logbook analyses. And if you have no manual for a model, we draw up the maintenance plan: €29 per plan, requested from the application — a pre-filled email goes to our support team, and payment is made outside the application.</span>
-    </p>
-    <p class="note-tarif">
-      <svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>
-      <span class="fr">Le changement d'offre se fait depuis l'application, à tout moment et sans engagement. Vos machines, votre historique et vos manuels restent en place.</span>
-      <span class="en">You change plan from inside the app, at any time and with no commitment. Your machines, your history and your manuals stay in place.</span>
-    </p>
-  </div>
+</p>
+</details>
+<!-- Item 2 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Puis-je changer d'offre à tout moment ?</span>
 
-  <div class="section-tete" style="margin-top:64px;">
-    <span class="sur-titre fr">Questions fréquentes</span>
-    <span class="sur-titre en">Frequently asked questions</span>
-    <h2><span class="fr">Ce qu'on nous demande le plus</span><span class="en">What we are asked most</span></h2>
-  </div>
-  <div class="faq-grille" id="faq">
-    <details class="faq">
-      <summary><span class="fr">Qu'est-ce qui compte comme une machine ?</span><span class="en">What counts as a machine?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Un équipement unique suivi : pelleteuse, tracteur, groupe électrogène, utilitaire. Vous pouvez en ajouter ou en retirer à tout moment — la limite de votre offre porte sur le nombre suivi en même temps : 2 machines en Gratuit, 5 en Starter, 20 en Business, et un parc sur mesure en Enterprise.</div>
-      <div class="reponse en">A single tracked piece of equipment: excavator, tractor, generator, van. Add or remove them at any time — your plan limits how many are tracked at once: 2 machines on Free, 5 on Starter, 20 on Business, and a fleet built to measure on Enterprise.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Puis-je changer d'offre à tout moment ?</span><span class="en">Can I change plan at any time?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Oui, sans engagement : le changement se fait depuis l'application, prend effet immédiatement, et la facturation se fait au prorata le mois suivant. Vos données et vos manuels restent en place.</div>
-      <div class="reponse en">Yes, with no commitment: you change plan from inside the app, it takes effect immediately, and billing is prorated the following month. Your data and manuals stay in place.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Mes données et mes manuels sont-ils en sécurité ?</span><span class="en">Are my data and manuals safe?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Chaque société ne voit que son parc : les règles d'accès sont appliquées côté serveur. Les documents servent uniquement à construire votre plan de maintenance, et l'analyse automatique ne part que d'une action de votre part. Aucun traceur publicitaire, aucune revente. Détail dans la <a href="./politique-confidentialite.html">politique de confidentialité</a>.</div>
-      <div class="reponse en">Each company only sees its own fleet: access rules are enforced server-side. Documents are used only to build your maintenance plan, and the automatic analysis starts only with an action of yours. No advertising trackers, no resale. Details in the <a href="./politique-confidentialite.html">privacy policy</a>.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Est-ce utilisable sur le terrain, sans réseau ?</span><span class="en">Can I use it on site, with no signal?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Oui. La consultation hors connexion s'active sur l'appareil : le dernier état connu du parc reste lisible, et les relevés faits sans réseau sont repris à la reconnexion. Les rappels d'échéance sont locaux, donc ils ne dépendent pas du réseau.</div>
-      <div class="reponse en">Yes. Offline viewing is enabled on the device: the last known state of the fleet stays readable, and readings taken without a network are picked up again on reconnection. Due-date reminders are local, so they do not depend on the network.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Faut-il forcément un manuel au format PDF ?</span><span class="en">Do I need a manual in PDF format?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">C'est le cas le plus courant et le mieux pris en charge. À défaut, l'analyse d'une photo de la plaque ou du carnet permet de retrouver le bon document en ligne, et un plan peut aussi être saisi à la main : aucune machine n'est bloquée faute de notice.</div>
-      <div class="reponse en">That is the most common and best supported case. Failing that, analysing a photo of the plate or the logbook finds the right document online, and a plan can also be entered by hand: no machine is blocked for lack of a manual.</div>
-    </details>
-    <details class="faq">
-      <summary><span class="fr">Les rappels partent-ils aussi par WhatsApp ?</span><span class="en">Are reminders also sent by WhatsApp?</span>
-        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="reponse fr">Pas encore : aujourd'hui, les rappels d'échéance partent par e-mail, à l'adresse configurée dans l'application, et par notification sur téléphone Android. Les rappels WhatsApp sont à venir, sans date annoncée — la rubrique « Rappels » le dira le jour où ce sera disponible.</div>
-      <div class="reponse en">Not yet: today, due-date reminders are sent by email, to the address configured in the application, and by notification on Android phones. WhatsApp reminders are coming soon, with no announced date — the “Reminders” section will say so on the day they become available.</div>
-    </details>
-  </div>
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">Oui, tout se fait en un clic depuis les paramètres de votre compte. Le montant est immédiatement ajusté au prorata des jours restants, et aucune donnée n'est perdue.</span>
+
+</p>
+</details>
+<!-- Item 3 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Mes données et mes manuels sont-ils en sécurité ?</span>
+
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">Vos documents sont chiffrés et strictement cantonnés à votre organisation. KALEA ne revend aucune donnée et n'utilise pas vos manuels pour réentraîner des modèles publics.</span>
+
+</p>
+</details>
+<!-- Item 4 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Est-ce utilisable sur le terrain, sans réseau ?</span>
+
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">L'application web est responsive et progressive (PWA). Les saisies de compteur effectuées en zone blanche sont synchronisées dès le retour d'une connexion réseau.</span>
+
+</p>
+</details>
+<!-- Item 5 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Faut-il forcément un manuel au format PDF ?</span>
+
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">Non. Une simple photo nette des tableaux d'entretien de votre carnet papier, ou la plaque de série de la machine suffit. Notre outil identifie le guide adéquat.</span>
+
+</p>
+</details>
+<!-- Item 6 -->
+<details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all">
+<summary class="flex justify-between items-center font-bold text-sm sm:text-base text-brand-ink cursor-pointer list-none select-none">
+<span class="lang-fr">Les rappels partent-ils aussi par WhatsApp ?</span>
+
+<svg class="w-5 h-5 text-slate-400 group-open:text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</summary>
+<p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
+<span class="lang-fr">Les alertes sont envoyées en priorité par e-mail et notifications in-app. L'intégration SMS et WhatsApp est disponible sur les offres Business et Enterprise.</span>
+
+</p>
+</details>
+</div>
+</div>
 </section>
+<!-- END: FAQSection -->
+<!-- BEGIN: FinalCTASection -->
+<section class="py-16 sm:py-20 bg-white">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Big Dark Indigo/Ink Banner -->
+<div class="rounded-3xl bg-[#0E1333] px-6 sm:px-12 text-center relative overflow-hidden shadow-2xl py-10">
+<!-- Radial ambient background glow -->
+<div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-teal/20 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Centered badge -->
+<div class="relative z-10 inline-flex items-center px-3.5 py-1 rounded-full bg-teal-900/60 border border-teal-500/40 text-[11px] font-extrabold text-teal-300 tracking-wider uppercase mb-6">
+<span class="lang-fr">DÉMARRAGE IMMÉDIAT</span>
 
-<!-- ================= BANDEAU FINAL ================= -->
-<section class="wrap">
-  <div class="bandeau-final">
-    <div class="lueur lueur-1" aria-hidden="true"></div>
-    <div class="lueur lueur-2" aria-hidden="true"></div>
-    <span class="pastille">
-      <span class="fr">Démarrage immédiat</span><span class="en">Get started right away</span>
-    </span>
-    <h2><span class="fr">Le juste suivi de votre parc commence aujourd'hui</span><span class="en">Precise tracking for your fleet starts today</span></h2>
-    <p>
-      <span class="fr">Un compte, un manuel, et vous saurez si KALEA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.</span>
-      <span class="en">One account, one manual, and you will know whether KALEA holds up on your machines. Free for two machines, €12/month up to five.</span>
-    </p>
-    <div class="actions">
-      <a class="btn btn-clair" href="./app.html?inscription=1"><span class="fr">Commencer gratuitement</span><span class="en">Start for free</span></a>
-      <a class="btn btn-contour" href="mailto:support@keeva.work"><span class="fr">Poser une question</span><span class="en">Ask a question</span></a>
-    </div>
-  </div>
+</div>
+<!-- Main Title -->
+<h2 class="relative z-10 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight font-display mb-4 max-w-3xl mx-auto">
+<span class="lang-fr">Le juste suivi de votre parc commence aujourd'hui</span>
+
+</h2>
+<!-- Subtitle -->
+<p class="relative z-10 text-slate-300 text-sm sm:text-base max-w-xl mx-auto mb-8 font-normal leading-relaxed">
+<span class="lang-fr">Un compte, un manuel, et vous saurez si KALEA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.</span>
+
+</p>
+<!-- Buttons -->
+<div class="relative z-10 flex flex-wrap items-center justify-center gap-4">
+<a class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white text-brand-ink font-bold text-sm hover:bg-slate-100 transition-colors shadow-sm" href="./app.html?inscription=1">
+<span class="lang-fr">Commencer gratuitement</span>
+
+</a>
+<a class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-transparent border border-slate-700 hover:border-slate-500 text-white font-bold text-sm transition-colors" href="mailto:support@keeva.work">
+<span class="lang-fr">Poser une question</span>
+
+</a>
+</div>
+</div>
+</div>
 </section>
-
+<!-- END: FinalCTASection -->
 </main>
+<!-- BEGIN: Footer -->
+<footer class="bg-brand-dark text-white border-t border-slate-800 pt-12 pb-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800/80">
+<!-- Column 1: Brand details -->
+<div class="md:col-span-4 space-y-4">
+<div class="flex items-center gap-3"><div class="w-16 h-16"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva-nuit"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-white">KALEA</span></div>
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
 
-<!-- ================= PIED DE PAGE ================= -->
-<footer>
-  <div class="wrap">
-    <div class="pied">
-      <div>
-        <span class="marque">
-          <svg width="28" height="28" aria-hidden="true"><use href="#picto-keeva-nuit"/></svg>
-          <span class="mot">KALEA</span>
-        </span>
-        <p class="description">
-          <span class="fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
-          <span class="en">Maintenance tracking for machines and vehicles: plans from manufacturer manuals, due dates by calendar or meter, reminders and a parts list.</span>
-        </p>
-        <p class="editeur">
-          <span class="fr">Édité par Matthieu Courtois, entrepreneur individuel — Nouvelle-Calédonie.</span>
-          <span class="en">Published by Matthieu Courtois, sole trader — New Caledonia.</span>
-        </p>
-      </div>
-      <div>
-        <h3><span class="fr">Produit</span><span class="en">Product</span></h3>
-        <ul class="liste">
-          <li><a href="#fonctionnalites"><span class="fr">Fonctionnalités</span><span class="en">Features</span></a></li>
-          <li><a href="#confidentialite"><span class="fr">Vos données</span><span class="en">Your data</span></a></li>
-          <li><a href="#tarifs"><span class="fr">Tarification</span><span class="en">Pricing</span></a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <li><a href="./app.html"><span class="fr">Se connecter</span><span class="en">Sign in</span></a></li>
-        </ul>
-      </div>
-      <div>
-        <h3><span class="fr">Légal</span><span class="en">Legal</span></h3>
-        <ul class="liste">
-          <li><a href="./mentions-legales.html"><span class="fr">Mentions légales</span><span class="en">Legal notice</span></a></li>
-          <li><a href="./cgu.html"><span class="fr">CGU</span><span class="en">Terms</span></a></li>
-          <li><a href="./politique-confidentialite.html"><span class="fr">Confidentialité</span><span class="en">Privacy</span></a></li>
-          <li><a href="./suppression-compte.html"><span class="fr">Suppression du compte</span><span class="en">Account deletion</span></a></li>
-          <li><a href="./supprimer-mes-donnees.html"><span class="fr">Supprimer mes données</span><span class="en">Delete my data</span></a></li>
-        </ul>
-      </div>
-      <div>
-        <h3>Contact</h3>
-        <ul class="liste">
-          <li><a href="mailto:support@keeva.work">support@keeva.work</a></li>
-          <li><span class="fr">Une question, un manuel qui résiste ? Écrivez-nous.</span><span class="en">A question, a stubborn manual? Write to us.</span></li>
-        </ul>
-      </div>
-    </div>
-    <div class="pied-bas">
-      <span>© <span id="annee">2026</span> KALEA — <span class="fr">KALEA aide à organiser l'entretien ; elle ne certifie ni ne garantit rien.</span><span class="en">KALEA helps you organise maintenance; it certifies and guarantees nothing.</span></span>
-      <div class="lang" style="display:flex" role="group" aria-label="Langue / Language">
-        <button type="button" data-langue="fr">FR</button>
-        <button type="button" data-langue="en">EN</button>
-      </div>
-    </div>
-  </div>
+</p>
+<p class="text-[11px] text-slate-500 pt-2">
+<span class="lang-fr">Édité par Matthieu Courtois, entrepreneur individuel — Nouvelle-Calédonie.</span>
+
+</p>
+</div>
+<!-- Column 2: Produit -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">PRODUIT</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="#fonctionnalites">Fonctionnalités</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="#vos-donnees">Vos données</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="#tarifs">Tarification</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="#faq">FAQ</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./app.html">Se connecter</a></li>
+</ul>
+</div>
+<!-- Column 3: Légal -->
+<div class="md:col-span-2 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">LÉGAL</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="./mentions-legales.html">Mentions légales</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./cgu.html">CGU</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./politique-confidentialite.html">Confidentialité</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./suppression-compte.html">Suppression du compte</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./supprimer-mes-donnees.html">Supprimer mes données</a></li>
+</ul>
+</div>
+<!-- Column 4: Contact -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">CONTACT</span>
+
+</p>
+<p class="text-xs">support@kalea.pro</p>
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Une question, un manuel qui résiste ? Écrivez-nous.</span>
+
+</p>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+<p class="">© <span class="" id="year-placeholder">2026</span> KALEA. Tous droits réservés.</p>
+<div class="flex items-center gap-6">
+<a class="hover:text-slate-300" href="./politique-confidentialite.html">Politique de confidentialité</a>
+<a class="hover:text-slate-300" href="./cgu.html">Conditions générales</a>
+</div>
+</div>
+</div>
 </footer>
-
-<script>
-// Même clé de stockage que l'application : la langue choisie ici est celle de
-// l'app, et inversement. Le texte des deux langues est écrit en clair dans la
-// page (aucune traduction à l'exécution) : la page reste indexable.
-(function () {
-  var CLE = 'parcpacific.langue';
-  var TITRES = {
-    fr: 'KALEA — La juste mesure de votre parc | Precise tracking for your fleet',
-    en: 'KALEA — Precise tracking for your fleet | La juste mesure de votre parc'
-  };
-
-  function lire() {
-    try {
-      var choisie = localStorage.getItem(CLE);
-      if (choisie === 'fr' || choisie === 'en') return choisie;
-    } catch (err) { /* stockage indisponible */ }
-    var appareil = (navigator.language || '').slice(0, 2).toLowerCase();
-    return appareil === 'en' ? 'en' : 'fr';
-  }
-
-  function appliquer(code) {
-    document.documentElement.lang = code;
-    document.title = TITRES[code];
-    var boutons = document.querySelectorAll('.lang button');
-    for (var i = 0; i < boutons.length; i++) {
-      var actif = boutons[i].getAttribute('data-langue') === code;
-      boutons[i].classList.toggle('actif', actif);
-      boutons[i].setAttribute('aria-pressed', actif ? 'true' : 'false');
-    }
-    try { localStorage.setItem(CLE, code); } catch (err) { /* sans conséquence */ }
-  }
-
-  appliquer(lire());
-  document.getElementById('annee').textContent = String(new Date().getFullYear());
-  var boutons = document.querySelectorAll('.lang button');
-  for (var i = 0; i < boutons.length; i++) {
-    boutons[i].addEventListener('click', function (e) {
-      appliquer(e.currentTarget.getAttribute('data-langue'));
-    });
-  }
-
-  // Micro-interaction : défilement doux vers les ancres internes.
-  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-    a.addEventListener('click', function (e) {
-      var cible = this.getAttribute('href');
-      if (cible && cible !== '#') {
-        var el = document.querySelector(cible);
-        if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+<!-- END: Footer -->
+<!-- BEGIN: InteractiveScripts -->
+<script data-purpose="year-autofill">
+    // Le sélecteur FR/EN n'existe plus dans cette version de la page (texte
+    // anglais retiré) : l'ancien script plantait au chargement en cherchant
+    // des boutons #btn-fr/#btn-en absents du DOM. Il ne reste que l'année.
+    document.addEventListener('DOMContentLoaded', () => {
+      const yearSpan = document.getElementById('year-placeholder');
+      if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
       }
     });
-  });
-})();
-</script>
-</body>
-</html>
+  </script>
+  <script data-purpose="screenshot-zoom">
+    // Vrai zoom au survol (comme une fiche produit) : l'image grossit et suit
+    // le curseur, au lieu du léger scale(1.02/1.03) Tailwind d'origine qui ne
+    // rendait rien de lisible. Désactivé sur tactile (pas de `hover` réel, le
+    // survol resterait "collé" après un tap) : ces appareils gardent l'image
+    // telle quelle, sans zoom.
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+      const ZOOM = 2.2;
+      document.querySelectorAll('.ecran, .ecran-fonction').forEach((conteneur) => {
+        const img = conteneur.querySelector('img');
+        if (!img) return;
+
+        img.style.transformOrigin = 'center center';
+
+        conteneur.addEventListener('mouseenter', () => {
+          img.style.transition = 'transform 0.25s ease-out';
+        });
+
+        conteneur.addEventListener('mousemove', (e) => {
+          const rect = conteneur.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          img.style.transition = 'transform 0.05s linear';
+          img.style.transformOrigin = `${x}% ${y}%`;
+          img.style.transform = `scale(${ZOOM})`;
+        });
+
+        conteneur.addEventListener('mouseleave', () => {
+          img.style.transition = 'transform 0.3s ease-out';
+          img.style.transformOrigin = 'center center';
+          img.style.transform = 'scale(1)';
+        });
+      });
+    });
+  </script>
+<!-- END: InteractiveScripts -->
+
+
+
+
+
+
+
+
+
+
+</body></html>
