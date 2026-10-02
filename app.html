@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-vLOqTX4dBMwrESbiP5pSG5paC4l543ZFdpLriuy7EUk=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3dVyBxpIprBdaJrRDSkVKRekP6ESCnvl98sI+VRq5Rs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8361,7 +8361,11 @@ async function doLogout() {
 // Limite de machines par offre. Une offre absente de cette table n'a pas de
 // limite (Pro, compte illimité de l'éditeur) : c'est la même règle que le
 // déclencheur de la base, qui ne contrôle que les offres connues.
-const LIMITES_OFFRES = { free: 1, eco: 5 };
+// ⚠️ free corrigé à 2 le 2026-10-02 (était à 1, en désaccord avec le tarif
+// affiché partout ailleurs — OFFRE_GRILLE, CGU — qui a toujours annoncé 2
+// machines pour l'offre Gratuite). Si le déclencheur de la base applique
+// encore 1, il doit être corrigé pour rester en phase avec cette table.
+const LIMITES_OFFRES = { free: 2, eco: 5 };
 
 // ── Couverture par l'offre ────────────────────────────────────────────────────
 // Quand une période payée s'achève et que le compte repasse en gratuit, RIEN
