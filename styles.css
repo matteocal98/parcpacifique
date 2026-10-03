@@ -7243,3 +7243,24 @@
     #qr-impression .qr-impression-nom{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;}
     #qr-impression .qr-impression-id{font-size:13px;color:#555;}
   }
+
+  /* ═══ TÉLÉMÉTRIE — compteur automatique ═══ */
+  .tele-badge{display:inline-block;align-self:flex-start;margin-top:6px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--ok-bg);color:var(--ok-ink);}
+  .tele-badge.is-attente{background:var(--surface-soft);color:var(--ink-2);}
+  .tele-badge.is-silence{background:var(--late-bg);color:var(--late);}
+  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line);}
+  .tele-carte .tele-source-ligne{grid-template-columns:minmax(0,1fr) auto;}
+  .tele-carte .tele-ligne{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;}
+  .tele-carte .tele-ligne .tele-nom{grid-column:1/-1;}
+  .tele-carte .tele-nom{font-weight:700;font-size:14px;min-width:0;overflow-wrap:anywhere;}
+  .tele-carte .tele-sous{display:block;font-weight:500;font-size:12px;color:var(--ink-2);margin-top:2px;}
+  .tele-carte .tele-creation-ligne{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;}
+  .tele-carte .tele-creation-ligne input{grid-column:1/-1;}
+  .tele-carte .tele-jeton{margin:12px 0;padding:14px;border-radius:12px;background:var(--surface-soft);}
+  .tele-carte .tele-code{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
+  .tele-carte .tele-code-label{font-size:12px;font-weight:700;color:var(--ink-2);min-width:96px;}
+  .tele-carte .tele-code code{font-size:12px;overflow-wrap:anywhere;flex:1 1 220px;}
+  @media (max-width:720px){
+    .tele-carte .tele-ligne,.tele-carte .tele-creation-ligne{grid-template-columns:1fr;}
+    .tele-carte .tele-source-ligne{grid-template-columns:1fr;}
+  }

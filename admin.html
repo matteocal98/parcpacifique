@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eh3ktrSQM9s1Jh5F+jwGSyEmEj9Qe87V9Kn/9hqRil8=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Qgh+Lgq5Jd03bP385jaTC3XtYnZTSsi6Gnl/b8YJY2I=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -109,6 +109,9 @@
       </a>
       <a data-path="stock" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-label-md text-label-md">Gestion des Stocks</span>
+      </a>
+      <a data-path="telemetrie" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">sensors</span><span class="font-label-md text-label-md">Télémétrie</span>
       </a>
     </nav>
   </div>
@@ -244,8 +247,8 @@
           <div class="flex flex-col md:flex-row items-start md:items-center gap-space-md">
             <div class="w-12 h-12 rounded-lg bg-surface-container-highest text-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
             <div class="flex flex-col gap-1 flex-1">
-              <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Protocole Zéro-Capteur KALEA</h3>
-              <p class="font-body-md text-body-md text-on-surface-variant">Tous les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés. Aucune sonde matérielle ni module connecté requis.</p>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Zéro-Capteur par défaut, télémétrie en option</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">Par défaut, les relevés proviennent des saisies déclaratives des équipes et de l'OCR des carnets/factures importés : aucune sonde ni module connecté n'est requis. Les offres Business et Enterprise peuvent, en option et machine par machine, recevoir les compteurs automatiquement depuis un boîtier (voir la page Télémétrie).</p>
             </div>
           </div>
         </div>
@@ -575,8 +578,8 @@
           <div class="flex items-start gap-space-md">
             <div class="w-12 h-12 rounded bg-surface-container-high flex-shrink-0 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[28px]">sensors_off</span></div>
             <div class="flex flex-col gap-space-xs">
-              <h2 class="font-headline-sm text-headline-sm text-on-surface">Politique Zéro-Capteur &amp; Hybridation des Relevés</h2>
-              <p class="font-body-md text-body-md text-on-surface-variant">KALEA évite les boîtiers télématiques intrusifs coûteux et fragiles en environnement agricole ou travaux publics. Les relevés proviennent des <strong>carnets de maintenance physiques</strong> et des <strong>photos instantanées des horamètres</strong> capturées par les chauffeurs et chefs de chantier, puis lus par OCR.</p>
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Zéro-Capteur par défaut &amp; Hybridation des Relevés</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant">KALEA n'impose aucun boîtier télématique (coûteux et fragile en environnement agricole ou travaux publics) mais peut en accepter un, en option, sur les offres Business et Enterprise. Par défaut, les relevés proviennent des <strong>carnets de maintenance physiques</strong> et des <strong>photos instantanées des horamètres</strong> capturées par les chauffeurs et chefs de chantier, puis lus par OCR.</p>
             </div>
           </div>
           <div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
@@ -685,6 +688,44 @@
               <tbody id="stock-corps-tableau" class="divide-y divide-surface-container-low"></tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VUE : Télémétrie ═══════ -->
+      <section id="vue-telemetrie" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">sensors</span><span>Supervision Cross-Entreprises</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Télémétrie</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Sociétés ayant créé une source de compteur automatique : dernier signal reçu, machines reliées, et relevés refusés comme suspects (compteur en baisse, saut impossible) sur les 7 derniers jours.</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <button id="telemetrie-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-body-sm text-body-sm">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                  <th class="py-3 px-space-md">Organisation</th>
+                  <th class="py-3 px-space-md">Offre</th>
+                  <th class="py-3 px-space-md text-center">Sources</th>
+                  <th class="py-3 px-space-md text-center">Machines reliées</th>
+                  <th class="py-3 px-space-md">Dernier signal</th>
+                  <th class="py-3 px-space-md text-center">Relevés (7 j)</th>
+                  <th class="py-3 px-space-md text-center">Suspects (7 j)</th>
+                </tr>
+              </thead>
+              <tbody id="telemetrie-corps-tableau" class="divide-y divide-surface-container-low"></tbody>
+            </table>
+          </div>
+          <p id="telemetrie-vide" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant">Aucune société n'a encore créé de source de télémétrie.</p>
         </div>
       </section>
 
@@ -832,6 +873,7 @@ async function demarrer() {
   el('tco-rafraichir')?.addEventListener('click', () => chargerTco());
   el('ocr-recherche')?.addEventListener('input', () => rendreTableauOcr());
   el('stock-rafraichir')?.addEventListener('click', () => chargerStock());
+  el('telemetrie-rafraichir')?.addEventListener('click', () => chargerTelemetrie());
   el('stock-recherche')?.addEventListener('input', () => rendreTableauStock());
 
   sb.auth.onAuthStateChange((_event, session) => {
@@ -887,12 +929,13 @@ async function verifierAccesEtCharger(userId) {
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
   if (chemin === 'ocr') chargerOcr();
   if (chemin === 'stock') chargerStock();
+  if (chemin === 'telemetrie') chargerTelemetrie();
 }
 
 // ── Clients & Organisations ─────────────────────────────────────────────
@@ -1523,6 +1566,34 @@ function rendreTableauOcr() {
 }
 
 // ── Gestion des Stocks ───────────────────────────────────────────────────
+// ── Télémétrie ───────────────────────────────────────────────────────────
+// Supervision en lecture seule : tout vient de admin_audit_telemetrie_societes()
+// (réservée au staff côté base). Aucune action d'écriture ici.
+async function chargerTelemetrie() {
+  const { data, error } = await sb.rpc('admin_audit_telemetrie_societes');
+  const corps = el('telemetrie-corps-tableau');
+  if (error) { console.error(error); corps.innerHTML = ''; el('telemetrie-vide').textContent = 'Lecture impossible : ' + (error.message || error) + ' (la migration telemetrie.sql est-elle passée ?)'; el('telemetrie-vide').classList.remove('hidden'); return; }
+  const lignes = data || [];
+  el('telemetrie-vide').classList.toggle('hidden', lignes.length > 0);
+  corps.innerHTML = lignes.map((t) => `
+    <tr class="hover:bg-surface-container-low/40 transition-colors">
+      <td class="py-4 px-space-md">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-headline-sm text-primary font-bold">${echapper(initiales(t.societe).slice(0, 1))}</div>
+          <span class="font-label-md text-label-md text-on-surface">${echapper(t.societe)}</span>
+        </div>
+      </td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${echapper(t.plan || '—')}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${t.nb_sources}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${t.nb_machines_reliees}</td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${t.dernier_signal ? echapper(ilYA(t.dernier_signal)) : 'Aucun signal'}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${t.releves_7j}</td>
+      <td class="py-4 px-space-md text-center">
+        <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${Number(t.releves_suspects_7j) > 0 ? 'bg-error-container text-error' : 'bg-surface-container-low text-on-surface-variant'}">${t.releves_suspects_7j}</span>
+      </td>
+    </tr>`).join('');
+}
+
 let STOCK_LIGNES = [];
 
 async function chargerStock() {

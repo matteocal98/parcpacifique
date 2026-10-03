@@ -194,6 +194,8 @@
     [`Non. Une simple photo nette des tableaux d'entretien de votre carnet papier, ou la plaque de série de la machine suffit. Notre outil identifie le guide adéquat.`, `No. A clear photo of the maintenance tables in your paper logbook, or the machine's serial plate, is enough. Our tool identifies the right guide.`],
     [`Les rappels partent-ils aussi par WhatsApp ?`, `Are reminders also sent by WhatsApp?`],
     [`Les alertes sont envoyées en priorité par e-mail et notifications in-app. L'intégration SMS et WhatsApp est disponible sur les offres Business et Enterprise.`, `Alerts are sent primarily by email and in-app notifications. SMS and WhatsApp integration is available on the Business and Enterprise plans.`],
+    [`Peut-on relier des boîtiers de télémétrie ?`, `Can telemetry trackers be connected?`],
+    [`Oui, en option sur les offres Business et Enterprise : un boîtier compatible (ou un système tiers) envoie les heures ou les kilomètres de vos machines, et le compteur, les échéances et les rappels se mettent à jour tout seuls. Sans boîtier, KALEA fonctionne exactement pareil avec vos relevés manuels ou photo.`, `Yes, as an option on the Business and Enterprise plans: a compatible tracker (or a third-party system) sends your machines' hours or kilometres, and the counter, due dates and reminders update on their own. Without a tracker, KALEA works exactly the same with your manual or photo readings.`],
 
     // Appel final et pied de page
     [`DÉMARRAGE IMMÉDIAT`, `GET STARTED NOW`],
