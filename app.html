@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-h239QjMBi5gPa8DAgRkIzdGqyJqA+WNwhCocP5/A3QQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ssTLdCDY2PIfDoF1UVtz1/lwnKDAKTwpkQuPk07QgQA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -175,11 +175,49 @@ function changerLangue(code, options) {
   try { document.documentElement.lang = choisie; } catch (err) { /* document absent */ }
   if (options && options.silencieux) return;
   if (change && window.location && typeof window.location.reload === 'function') {
-    window.location.reload();
+    // Le serveur doit connaître la langue choisie (e-mails de rappel, rapport,
+    // e-mails d'authentification) : on la lui transmet AVANT de recharger, sinon
+    // le rechargement interrompt la requête.
+    memoriserLangueServeur(choisie).then(() => window.location.reload());
     return;
   }
   if (UI && UI.view) renderApp();
   else renderLogin();
+}
+
+// Transmet la langue choisie au serveur : dans les métadonnées de l'utilisateur
+// (lues par les modèles d'e-mails d'authentification) et, pour le gérant, sur la
+// société (lue par les rappels d'entretien envoyés par la fonction serveur).
+// Jamais bloquant : sans réseau, sans session ou sans la migration, on ne fait
+// rien et la langue reste simplement celle de l'appareil. Plafonné à 2,5 s pour
+// ne pas retarder le rechargement.
+async function memoriserLangueServeur(code) {
+  try {
+    if (typeof sb === 'undefined' || !sb) return;
+    const { data } = await sb.auth.getSession();
+    if (!data || !data.session) return;
+    const taches = [sb.auth.updateUser({ data: { langue: code } })];
+    if (typeof UI !== 'undefined' && UI && UI.role === 'gerant') {
+      taches.push(sb.rpc('definir_langue_societe', { p_langue: code }));
+    }
+    await Promise.race([Promise.allSettled(taches), new Promise((ok) => setTimeout(ok, 2500))]);
+  } catch (err) { /* sans conséquence : la langue de l'appareil reste appliquée */ }
+}
+
+// Première initialisation côté serveur pour un compte qui n'a encore jamais
+// changé de langue : sans cela, la société resterait « sans langue » et ses
+// e-mails partiraient en français même si l'appli est utilisée en anglais.
+// Ne remplace JAMAIS une valeur déjà enregistrée (deux appareils réglés
+// différemment ne doivent pas s'écraser l'un l'autre à chaque ouverture).
+async function initialiserLangueServeur(session) {
+  try {
+    const meta = session && session.user && session.user.user_metadata;
+    if (!meta || !meta.langue) await sb.auth.updateUser({ data: { langue: LANGUE } });
+    if (UI.role !== 'gerant' || !UI.companyId) return;
+    const { data, error } = await sb.from('companies').select('langue').eq('id', UI.companyId).maybeSingle();
+    if (error || !data || data.langue) return;
+    await sb.rpc('definir_langue_societe', { p_langue: LANGUE });
+  } catch (err) { /* colonne absente avant migration : on ignore */ }
 }
 
 // Deux drapeaux, comme demandé. Le nom accompagne le drapeau : un drapeau est
@@ -3880,6 +3918,7 @@ async function envoyerRapportTcoParEmail(arrayBuffer, destinataire, nomFichier, 
       'x-keeva-destinataire': encodeURIComponent(destinataire),
       'x-keeva-fichier': encodeURIComponent(nomFichier),
       'x-keeva-periode': encodeURIComponent(periodeLabel || ''),
+      'x-keeva-langue': LANGUE,
     },
     body: arrayBuffer,
   });
@@ -5076,7 +5115,7 @@ function openSignupWizard() {
       state.password = overlay.querySelector('#su-password').value;
 
       try {
-        const { data, error } = await sb.auth.signUp({ email: state.email, password: state.password });
+        const { data, error } = await sb.auth.signUp({ email: state.email, password: state.password, options: { data: { langue: LANGUE } } });
         if (error) throw error;
         // Supabase ne dit pas « cette adresse a déjà un compte » (protection contre
         // l'énumération) : il renvoie un utilisateur SANS identité et n'envoie
@@ -24600,6 +24639,7 @@ async function boot(toastMessage) {
     currency: company?.currency || 'EUR',
   };
   UI.contactName = company?.contact_name || '';
+  initialiserLangueServeur(session); // sans await : ne retarde jamais l'affichage
   UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
   UI.categories = categories || [];

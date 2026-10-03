@@ -19,7 +19,7 @@
 - Rebranding KEEVA → KALEA terminé (nom affiché, logo, domaine) ; la palette de couleurs de l'app n'a volontairement pas été alignée sur la nouvelle charte graphique (écart jugé imperceptible en usage normal).
 
 ## Points ouverts
-- `support@kalea.pro` n'est pas encore une boîte mail active — les adresses de réponse et de destinataire interne restent sur `support@keeva.work` en attendant.
+- `support@kalea.pro` est l'adresse de contact partout (pages publiques et e-mails). Vérifier que la boîte reçoit bien. Restent volontairement sur l'ancien domaine : l'identifiant interne `UID:…@keeva.work` des événements du calendrier (.ics) et le domaine technique `membres.keeva.work` des identifiants de membres — les changer dupliquerait des événements / casserait des connexions.
 - Noms des produits Stripe toujours "KEEVA Éco/Pro" — en suspens tant que la bascule vers Stancer n'est pas tranchée.
 - Modèles d'e-mails Supabase (connexion, mot de passe oublié) rédigés mais pas confirmé installés côté Dashboard.
 - Modale "Fenêtre d'upgrade" volontairement pas retouchée, en attendant des ajustements sur la grille d'offres.
