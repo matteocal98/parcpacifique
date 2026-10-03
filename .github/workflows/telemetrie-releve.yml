@@ -1,0 +1,56 @@
+# Relève de télémétrie KALEA — déclencheur planifié (toutes les heures).
+#
+# CE QUE ÇA FAIT : appelle la fonction `telemetrie-ingest` en mode « relève » : elle
+# va lire, chez leur constructeur (norme ISO 15143-3 / AEMP 2.0), les heures moteur
+# des machines reliées à un compte constructeur, et met leurs compteurs à jour.
+# Les boîtiers, eux, POUSSENT leurs relevés quand ils veulent : ils n'ont pas besoin
+# de cette tâche.
+#
+# MÊME CHOIX QUE recap-hebdo.yml (voir ses explications) : le jeton vit dans les
+# secrets GitHub, jamais dans la base ; l'historique des exécutions est le contrôle
+# (un échec est visible et GitHub prévient par e-mail).
+#
+# CE QU'IL FAUT AVOIR POSÉ (une fois) :
+#   1. secret de dépôt  TELEMETRIE_CRON_TOKEN             = chaîne aléatoire de 32+ caractères
+#   2. secret de fonction Supabase TELEMETRIE_CRON_TOKEN  = LA MÊME valeur
+#   3. secret de fonction Supabase TELEMETRIE_CLE         = 32 octets en base64 (chiffrement
+#      des identifiants constructeur — voir chiffrement.ts)
+#   4. la fonction déployée avec --no-verify-jwt
+#
+# À SAVOIR : GitHub peut retarder une tâche planifiée de quelques minutes, et désactive
+# celles d'un dépôt PUBLIC resté 60 jours sans activité (l'onglet Actions le dit).
+# Un décalage ou une relève manquée est sans conséquence : la suivante rattrape
+# (les compteurs ne font qu'augmenter).
+
+name: Relève de télémétrie
+
+on:
+  schedule:
+    - cron: '7 * * * *'   # à la 7e minute de chaque heure (évite le pic de :00)
+  workflow_dispatch:      # et à la main, pour éprouver sans attendre
+
+jobs:
+  releve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lancer la relève
+        env:
+          TELEMETRIE_CRON_TOKEN: ${{ secrets.TELEMETRIE_CRON_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TELEMETRIE_CRON_TOKEN:-}" ]; then
+            echo "::error::le secret TELEMETRIE_CRON_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' --max-time 150 \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/telemetrie-ingest" \
+            -H "x-kalea-cron: ${TELEMETRIE_CRON_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d '{}')
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::la relève de télémétrie a échoué (HTTP $code)"
+            exit 1
+          fi
