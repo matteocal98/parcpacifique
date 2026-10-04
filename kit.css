@@ -291,3 +291,8 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
 /* ── 17. Lignes machine du Parc : l'action de ligne est une pastille teintée (règle 6) ─── */
 .mstrip .mstrip-btn-principal{background:var(--primary-tint);color:var(--ink);}
 .mstrip .mstrip-btn-principal:hover{background:var(--primary-tint-2);color:var(--ink);}
+
+/* Deux zones (texte | actions) : les actions restent côte à côte */
+@container (min-width:640px){
+  .ui-ligne.is-deux .ui-ligne-action.is-etiquettes{flex-direction:row;align-items:center;justify-content:flex-end;}
+}

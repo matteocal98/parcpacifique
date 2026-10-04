@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-R+NdKRNWXa615L+y/EinCMCCe3j9jANPdr4wkEr11NU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-C+fPYIRWYuPnG4Mxk4ydH4IQsOCdpzkzpXOMZ1JFYN4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11100,7 +11100,7 @@ function manuelsMatches() {
 
 function manuelChipHtml(status, label, count) {
   const active = manuelsFilters().status === status;
-  return `<button type="button" class="chip chip-${status}${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="chip-mot">${esc(label)}</span><span class="chip-count">${count}</span></button>`;
+  return `<button type="button" class="ui-puce${active ? ' is-actif' : ''}" data-manuel-chip data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span>${esc(label)}</span><span class="ui-compte">${count}</span></button>`;
 }
 
 // Une carte par machine : vignette (photo, ou repère du carnet), état,
@@ -11110,7 +11110,7 @@ function manuelCarteHtml(m) {
   const items = normalizeItems(m.plan?.items);
   const hasManual = !!m.manual_url;
   const etat = etatManuel(m);
-  const pastille = { analyse: 'ok', valider: 'soon', aucun: 'neutral' }[etat];
+  const classe = { analyse: 'is-ok', valider: 'is-bientot', aucun: '' }[etat];
   const label = { analyse: trad('ANALYSÉ'), valider: trad('À VALIDER'), aucun: trad('AUCUN') }[etat];
   const sub = hasManual
     ? (items.length ? tR('{n} échéance(s) extraite(s) du carnet', { n: items.length }) : trad('Carnet déposé, plan non encore extrait'))
@@ -11118,29 +11118,26 @@ function manuelCarteHtml(m) {
   const meta = [machineBrandModel(m), m.category?.name].filter(Boolean).join(' · ');
   const photo = safeUrl(m.image_url);
   return `
-    <article class="manuel-carte">
-      <span class="manuel-vignette" aria-hidden="true">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : `<span class="manuel-vignette-ico">${picto('carnet')}</span>`}</span>
-      <div class="manuel-corps">
-        <div class="manuel-tete">
-          <span class="manuel-nom">${esc(m.name)}</span>
-          <span class="badge ${pastille}">${pictoEtat(etat === 'analyse' ? 'ok' : (etat === 'valider' ? 'soon' : 'neutral'))}<span>${label}</span></span>
+    <article class="ui-ligne is-deux ${classe}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone" aria-hidden="true">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : picto('carnet')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(m.name)}<span class="ui-statut ${classe}">${label}</span></span>
+          ${meta ? `<span class="ui-ligne-sous">${esc(meta)}</span>` : ''}
+          <span class="ui-ligne-sous">${esc(sub)}</span>
         </div>
-        <div class="manuel-ligne">
-          ${meta ? `<div class="manuel-meta">${esc(meta)}</div>` : '<span></span>'}
-          <div class="manuel-actions">
-            ${items.length ? `<button type="button" class="btn-row-action btn-principal" data-plan="${esc(m.id)}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
-            ${hasManual ? `<button type="button" class="btn-row-action view-manual" data-path="${esc(m.manual_url)}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
-            <button type="button" class="btn-row-action" data-manual="${esc(m.id)}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
-          </div>
-        </div>
-        <div class="manuel-fichier${hasManual ? '' : ' is-vide'}">${hasManual ? picto('carnet') : ''}<span class="manuel-fichier-sub">${esc(sub)}</span></div>
+      </div>
+      <div class="ui-ligne-action is-etiquettes">
+        ${items.length ? `<button type="button" class="ui-btn ui-btn-pastille" data-plan="${esc(m.id)}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
+        ${hasManual ? `<button type="button" class="ui-btn ui-btn-teinte view-manual" data-path="${esc(m.manual_url)}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
+        <button type="button" class="ui-btn ui-btn-teinte" data-manual="${esc(m.id)}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
       </div>
     </article>`;
 }
 
 function manuelsListeHtml() {
   const matches = manuelsMatches();
-  return matches.length ? matches.map(manuelCarteHtml).join('') : `<div class="empty">${trad('Aucune machine ne correspond à ce filtre.')}</div>`;
+  return matches.length ? matches.map(manuelCarteHtml).join('') : `<div class="ui-aide">${trad('Aucune machine ne correspond à ce filtre.')}</div>`;
 }
 
 // Même découpage que refreshFleetList() : seule la grille est réécrite, la
@@ -11162,34 +11159,36 @@ function refreshManuelsListe() {
 }
 
 VIEWS.manuals = {
+  fondBlanc: true,
   title: trad('Plan d\'entretien'),
   subtitle: () => tR('{n} plan(s) extrait(s) de vos carnets sur {total} machine(s)', { n: UI.counts.analysed, total: UI.machines.length }),
   render() {
     if (!UI.machines.length) {
-      return `<div class="empty">${trad('Ajoute une machine pour pouvoir déposer son carnet d\'entretien.')}</div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Ajoute une machine pour pouvoir déposer son carnet d\'entretien.')}</div></section></div>`;
     }
     const total = UI.machines.length;
     const analyse = UI.machines.filter((m) => etatManuel(m) === 'analyse').length;
     const aValider = UI.machines.filter((m) => etatManuel(m) === 'valider').length;
     const f = manuelsFilters();
     return `
-      ${dropzoneHtml('manuals-drop')}
-      <div class="manuels-tete">
-        <h2 class="manuels-titre">${trad('Carnets d\'entretien')}</h2>
-        <span class="manuels-resume">${tR('{n} indexé(s)', { n: analyse })}${aValider ? ` · ${tR('{n} à valider', { n: aValider })}` : ''}</span>
-      </div>
-      <div class="manuels-barre">
-        <div class="chips" role="group" aria-label="${trad('Filtrer par état')}">
-          ${manuelChipHtml('all', trad('Tous'), total)}
-          ${manuelChipHtml('analyse', trad('Analysés'), analyse)}
-          ${manuelChipHtml('valider', trad('À valider'), aValider)}
-        </div>
-        <div class="search-wrap manuels-recherche">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input id="manuels-search" type="search" value="${esc(f.q)}" placeholder="${trad('Filtrer une machine…')}" aria-label="${trad('Filtrer une machine')}">
-        </div>
-      </div>
-      <div class="manuels-grille" id="manuels-list"></div>`;
+      <div class="ui-page">
+        <section class="ui-section">${dropzoneHtml('manuals-drop')}</section>
+        <section class="ui-section">
+          ${teteSectionKit('carnet', trad('Carnets d\'entretien'), '',
+            `<span class="ui-tag">${tR('{n} indexé(s)', { n: analyse })}${aValider ? ` · ${tR('{n} à valider', { n: aValider })}` : ''}</span>`)}
+          <div class="ui-section-corps">
+            <div class="ui-barre">
+              <input id="manuels-search" class="ui-champ" type="search" value="${esc(f.q)}" placeholder="${trad('Filtrer une machine…')}" aria-label="${trad('Filtrer une machine')}">
+            </div>
+            <div class="ui-puces" role="group" aria-label="${trad('Filtrer par état')}">
+              ${manuelChipHtml('all', trad('Tous'), total)}
+              ${manuelChipHtml('analyse', trad('Analysés'), analyse)}
+              ${manuelChipHtml('valider', trad('À valider'), aValider)}
+            </div>
+            <div class="ui-liste" id="manuels-list"></div>
+          </div>
+        </section>
+      </div>`;
   },
   mount() {
     const root = document.getElementById('view-root');
@@ -11202,11 +11201,11 @@ VIEWS.manuals = {
       search.addEventListener('search', () => { manuelsFilters().q = search.value; refreshManuelsListe(); });
     }
 
-    root.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('click', () => {
+    root.querySelectorAll('[data-manuel-chip]').forEach((chip) => chip.addEventListener('click', () => {
       manuelsFilters().status = chip.dataset.status;
-      root.querySelectorAll('.chip').forEach((c) => {
+      root.querySelectorAll('[data-manuel-chip]').forEach((c) => {
         const active = c === chip;
-        c.classList.toggle('is-active', active);
+        c.classList.toggle('is-actif', active);
         c.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
       refreshManuelsListe();
