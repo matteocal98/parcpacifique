@@ -5586,11 +5586,11 @@
   .agenda-semaine-noms span{text-align:center;font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em;}
   .agenda-grille{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;}
   .agenda-jour{
-    min-width:0;min-height:64px;padding:8px;border-radius:var(--r-md);background:var(--surface-soft);
+    min-width:0;min-height:64px;padding:8px;border-radius:var(--r-md);background:var(--surface);
     display:flex;flex-direction:column;gap:5px;border:1px solid transparent;position:relative;
   }
   .agenda-jour.is-hors-mois{opacity:.35;}
-  .agenda-jour.is-weekend{background:rgba(14,19,51,.02);}
+  .agenda-jour.is-weekend{background:var(--surface-soft);}
   /* Toute la case est cliquable — vers la fenêtre récapitulative du jour
      (ouvrirJourAgenda) s'il y a au moins une échéance, vers « Planifier un
      entretien » sinon — ça fonctionne au doigt, pas seulement au hover : le
@@ -5602,10 +5602,7 @@
   .agenda-jour.is-cliquable:hover{background:rgba(99,102,241,.06);}
   .agenda-jour-tete{display:flex;align-items:center;justify-content:space-between;}
   .agenda-jour-num{font-weight:700;font-size:13.5px;font-family:'Space Grotesk',sans-serif;}
-  .agenda-jour.is-aujourdhui .agenda-jour-num{color:var(--primary-dark);}
-  .agenda-jour.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.3);}
-  .agenda-jour.is-soon{background:var(--soon-bg);border-color:rgba(99,102,241,.25);}
-  .agenda-jour.is-ok{background:var(--ok-bg);border-color:rgba(36,181,168,.25);}
+  .agenda-jour.is-aujourdhui .agenda-jour-num{background:var(--ink);color:#fff;border-radius:6px;padding:1px 6px;}
   /* Pastilles : une par échéance (4 max, puis « +N ») — remplace les
      anciennes mini-cartes nom/tâche/badge, devenues illisibles dans une case
      de calendrier sur petit écran. */
@@ -5616,7 +5613,7 @@
   .agenda-jour-dot.is-ok{background:var(--ok);}
   .agenda-jour-plus{font-size:10.5px;font-weight:700;color:var(--ink-3);}
 
-  .agenda-legende{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2);}
+  .agenda-legende{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px;}
   .agenda-legende-item{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink-2);}
   .agenda-legende-item .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
   .agenda-pills .dot{width:8px;height:8px;border-radius:50%;}

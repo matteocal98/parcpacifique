@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/Fa3k78ZrHw7xBgJ53TgY1KpFEpvs6p3IuZwfg+Q3Bg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ty2mi796ccJ3oMCwwSaO56usF9A7buuAFDdz/RM9D0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11701,19 +11701,17 @@ function bonCommandeHtml() {
   const liste = listePreparation(UI.machines, jours);
   const rien = !liste.produits.length && !liste.sansItems.length;
   return `
-    <section class="card bon-commande">
-      <div class="card-head">
-        <h2 class="card-title-sm"><span class="card-ico">${picto('carnet')}</span><span>${trad('Bon de commande express')}</span></h2>
+    <div class="ui-groupe bon-commande">
+      <div class="ui-groupe-tete">${picto('carnet')}<span class="ui-groupe-titre">${trad('Bon de commande express')}</span></div>
+      <p class="ui-aide">${trad('Le même texte que « Copier la liste », prêt à coller dans un message au fournisseur.')}</p>
+      ${rien ? `<p class="ui-aide">${trad('Rien à commander pour l\'instant.')}</p>` : `
+      <pre class="ui-code bon-commande-texte">${esc(preparationTexte())}</pre>
+      <div class="ui-barre">
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-copier">${picto('carnet')}<span>${trad('Copier')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-partager">${picto('partage')}<span>${trad('Partager')}</span></button>
       </div>
-      <p class="muted-text">${trad('Le même texte que « Copier la liste », prêt à coller dans un message au fournisseur.')}</p>
-      ${rien ? `<p class="muted-text">${trad('Rien à commander pour l\'instant.')}</p>` : `
-      <pre class="bon-commande-texte">${esc(preparationTexte())}</pre>
-      <div class="modal-actions">
-        <button type="button" class="secondary" id="bon-copier"><span class="card-ico">${picto('carnet')}</span><span>${trad('Copier')}</span></button>
-        <button type="button" class="secondary" id="bon-partager"><span class="card-ico">${picto('partage')}</span><span>${trad('Partager')}</span></button>
-      </div>
-      <p class="muted-text bon-commande-compte">${tR('{n} référence(s) au total', { n: liste.produits.length })}</p>`}
-    </section>`;
+      <p class="ui-aide">${tR('{n} référence(s) au total', { n: liste.produits.length })}</p>`}
+    </div>`;
 }
 
 // Version courte, pour le TABLEAU DE BORD.
@@ -11808,95 +11806,72 @@ function preparationCompleteAgendaHtml() {
       if (machinesVues.has(b.machine.id)) return false;
       machinesVues.add(b.machine.id);
       return true;
-    }).map((b) => `<span class="prep-detail-tag">${esc(b.machine.name)}</span>`).join('');
+    }).map((b) => `<span class="ui-tag">${esc(b.machine.name)}</span>`).join('');
     const besoinPrincipal = produit.besoins.find((b) => b.date === produit.premiereDate) || produit.besoins[0];
     const etat = etatBesoin(besoinPrincipal);
     const total = produit.total ? formatteTotal(produit.total) : '';
     // Couverture de stock (uniquement les produits reliés à un kit — voir
-    // listePreparation) : un second badge, jamais à la place de l'état
+    // listePreparation) : un second repère, jamais à la place de l'état
     // d'échéance existant — ce sont deux informations distinctes.
     const couv = produit.stockCouverture;
-    const badgeCouverture = couv ? `<span class="badge ${badgeClass(couv.state)}">${couv.solde < 0
+    const repereCouverture = couv ? `<span class="ui-statut ${classeEtatKit(couv.state)}">${couv.solde < 0
       ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) : libelleCouverturePiece('inconnu'))
       : tR('Stock {n}/{b}', { n: texteAvecSeparateurs(couv.stockDisponible), b: texteAvecSeparateurs(couv.besoin) })
     }</span>` : '';
+    const classeBesoin = classeEtatKit(String(etat.classe || '').replace('alert', 'late'));
     return `
-      <div class="prep-detail-produit">
-        <span class="card-ico prep-case">${picto('coche')}</span>
-        <div class="prep-detail-produit-corps">
-          <div class="prep-detail-produit-tete">
-            <span class="prep-detail-produit-nom">${esc(produit.label)}</span>
-            ${produit.spec ? `<span class="prep-detail-produit-spec">${esc(produit.spec)}</span>` : ''}
+      <div class="ui-ligne is-deux ${classeBesoin}">
+        <div class="ui-ligne-id">
+          <div class="ui-ligne-textes">
+            <span class="ui-ligne-nom">${esc(produit.label)}${produit.spec ? `<span class="ui-tag">${esc(produit.spec)}</span>` : ''}</span>
+            <span class="ui-ligne-sous">${tags}</span>
+            <span class="ui-ligne-sous"><span class="ui-statut ${classeBesoin}">${esc(etat.mot)}</span>${repereCouverture}</span>
           </div>
-          <div class="prep-detail-produit-tags">${tags}<span class="badge ${etat.classe}">${esc(etat.mot)}</span>${badgeCouverture}</div>
         </div>
-        ${total ? `<span class="prep-detail-produit-total">${esc(total)}</span>` : ''}
+        ${total ? `<div class="ui-ligne-action"><span class="ui-chiffre-valeur">${esc(total)}</span></div>` : ''}
       </div>`;
   };
 
-  // Une famille peut lister beaucoup de produits : seules les 3 premières
-  // lignes restent visibles par défaut, le reste est déplié PAR FAMILLE (état
-  // gardé dans UI.prepFamillesOuvertes, indexé par groupe.cle — dépliée
-  // indépendamment des autres, jamais un seul interrupteur global pour toute
-  // la carte). Même patron que le repli des familles de preparationHtml()
-  // (PREP_GROUPES_VISIBLES/UI.prepGroupesTous), appliqué ici aux produits.
+  // Une famille peut lister beaucoup de produits : seules les premières lignes
+  // restent visibles par défaut, le reste est déplié PAR FAMILLE (état gardé
+  // dans UI.prepFamillesOuvertes, indexé par groupe.cle).
   const PREP_PRODUITS_VISIBLES = 2;
-  const groupeHtml = (groupe, i) => {
-    const teinte = TEINTES_FAMILLE[i % TEINTES_FAMILLE.length];
+  const groupeHtml = (groupe) => {
     const nbBesoins = groupe.produits.reduce((total, p) => total + p.besoins.length, 0);
-    let chipClasse = 'neutral';
     let chipTexte = trad('Suivi au compteur');
+    let chipClasse = '';
     if (groupe.premiereDate) {
       const besoinProche = groupe.produits.flatMap((p) => p.besoins).find((b) => b.date === groupe.premiereDate);
-      chipClasse = besoinProche ? etatBesoin(besoinProche).classe : 'neutral';
+      chipClasse = besoinProche ? classeEtatKit(String(etatBesoin(besoinProche).classe || '').replace('alert', 'late')) : '';
       chipTexte = tR('Premier besoin : dès le {date}', { date: formatShortDate(groupe.premiereDate) });
     }
     const ouvert = !!(UI.prepFamillesOuvertes && UI.prepFamillesOuvertes[groupe.cle]);
-    const visibles = groupe.produits.slice(0, PREP_PRODUITS_VISIBLES).map(produitHtml).join('');
     const reste = groupe.produits.slice(PREP_PRODUITS_VISIBLES);
+    const affiches = ouvert ? groupe.produits : groupe.produits.slice(0, PREP_PRODUITS_VISIBLES);
     const repli = reste.length ? `
-        <div class="prep-groupes-plus${ouvert ? ' is-ouvert' : ''}">${reste.map(produitHtml).join('')}</div>
-        <button type="button" class="link-inline prep-detail-famille-toggle" data-famille="${esc(groupe.cle)}" aria-expanded="${ouvert ? 'true' : 'false'}">
-          <span class="card-ico prep-groupes-chevron">${picto('chevron')}</span>
+        <div><button type="button" class="ui-btn ui-btn-teinte prep-detail-famille-toggle" data-famille="${esc(groupe.cle)}" aria-expanded="${ouvert ? 'true' : 'false'}">
           <span>${ouvert ? trad('Réduire') : tR('Voir {n} produit(s) de plus', { n: reste.length })}</span>
-        </button>` : '';
+        </button></div>` : '';
     return `
-      <div class="prep-detail-groupe">
-        <div class="prep-detail-groupe-tete">
-          <div class="prep-detail-groupe-gauche">
-            <span class="prep-famille-icone ${teinte}">${picto(PICTO_CATEGORIE[groupe.cle] || 'boite')}</span>
-            <span class="prep-detail-groupe-nom">${esc(groupe.nom.toUpperCase())}</span>
-            <span class="prep-famille-badge">${tR('{n} référence(s) · {m} pièce(s)', { n: groupe.produits.length, m: nbBesoins })}</span>
-          </div>
-          <span class="badge ${chipClasse}">${esc(chipTexte)}</span>
-        </div>
-        <div class="prep-detail-groupe-corps">${visibles}${repli}</div>
+      <div class="ui-champ-groupe">
+        <span class="ui-etiquette">${esc(groupe.nom.toUpperCase())} <span class="ui-tag">${tR('{n} référence(s) · {m} pièce(s)', { n: groupe.produits.length, m: nbBesoins })}</span> <span class="ui-statut ${chipClasse}">${esc(chipTexte)}</span></span>
+        <div class="ui-liste">${affiches.map(produitHtml).join('')}</div>
+        ${repli}
       </div>`;
   };
 
   const groupesHtml = (liste.groupes || []).map(groupeHtml).join('');
   // Les plans sans carnet analysé (aucun item) n'ont pas de famille — perdus
-  // par le résumé condensé du Tableau de bord, mais pas ici : même principe
-  // que preparationHtml(), qui les liste déjà à part.
+  // par le résumé condensé du Tableau de bord, mais pas ici.
   const sansItemsHtml = liste.sansItems.length ? `
-    <div class="prep-detail-groupe">
-      <div class="prep-detail-groupe-tete">
-        <div class="prep-detail-groupe-gauche">
-          <span class="prep-famille-icone is-amber">${picto('carnet')}</span>
-          <span class="prep-detail-groupe-nom">${esc(trad('Entretiens sans liste de pièces').toUpperCase())}</span>
-          <span class="prep-famille-badge">${tR('{n} machine(s)', { n: liste.sansItems.length })}</span>
-        </div>
-      </div>
-      <div class="prep-detail-groupe-corps">${liste.sansItems.map((entree) => `
-        <div class="prep-detail-produit">
-          <span class="card-ico prep-case">${picto('coche')}</span>
-          <div class="prep-detail-produit-corps">
-            <div class="prep-detail-produit-tete">
-              <span class="prep-detail-produit-nom">${esc(entree.machine.name)}</span>
-              ${entree.date ? `<span class="prep-detail-produit-spec">${esc(formatShortDate(entree.date))}</span>` : ''}
-            </div>
-            <div class="prep-detail-produit-tags"><span class="prep-detail-tag">${entree.taches ? esc(entree.taches) : esc(trad('Tâches non renseignées'))}</span></div>
-          </div>
+    <div class="ui-champ-groupe">
+      <span class="ui-etiquette">${esc(trad('Entretiens sans liste de pièces').toUpperCase())} <span class="ui-tag">${tR('{n} machine(s)', { n: liste.sansItems.length })}</span></span>
+      <div class="ui-liste">${liste.sansItems.map((entree) => `
+        <div class="ui-ligne is-deux">
+          <div class="ui-ligne-id"><div class="ui-ligne-textes">
+            <span class="ui-ligne-nom">${esc(entree.machine.name)}${entree.date ? `<span class="ui-tag">${esc(formatShortDate(entree.date))}</span>` : ''}</span>
+            <span class="ui-ligne-sous">${entree.taches ? esc(entree.taches) : esc(trad('Tâches non renseignées'))}</span>
+          </div></div>
         </div>`).join('')}</div>
     </div>` : '';
   const resume = nombre
@@ -11904,26 +11879,18 @@ function preparationCompleteAgendaHtml() {
     : tR('Rien à commander pour l\'instant, mais {n} plan(s) sans liste de produits.', { n: liste.sansItems.length });
 
   return `
-    <section class="card dash-preparation prep-detail-carte">
-      <div class="card-head">
-        <div class="pieces-tete">
-          <span class="card-ico" aria-hidden="true">${picto('boite')}</span>
-          <div>
-            <h2 class="card-title">${trad('Préparation des pièces et consommables')}</h2>
-            <p class="muted-text" style="margin:1px 0 0;">${esc(resume)}</p>
-          </div>
+    <section class="ui-section dash-preparation prep-detail-carte">
+      ${teteSectionKit('boite', trad('Préparation des pièces et consommables'), esc(resume),
+        `<div class="ui-segment" role="group" aria-label="${trad('Période')}">
+          ${PREPARATION_HORIZON.map((j) => `<button type="button" class="${j === jours ? 'is-actif' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${esc(tR('{n} j', { n: j }))}</button>`).join('')}
+        </div>`)}
+      <div class="ui-section-corps">
+        ${groupesHtml}${sansItemsHtml}
+        <div class="ui-barre">
+          <span class="ui-aide">${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
+          <div class="ui-section-acces"><button type="button" class="ui-btn ui-btn-pastille" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button></div>
         </div>
-        <span class="spacer"></span>
-        <div class="seg-horizon" role="group" aria-label="${trad('Période')}">
-          ${PREPARATION_HORIZON.map((j) => `<button type="button" class="seg-btn${j === jours ? ' is-active' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${esc(tR('{n} j', { n: j }))}${j === jours ? ` (${trad('Actif')})` : ''}</button>`).join('')}
-        </div>
-      </div>
-      <div class="prep-detail-groupes-grid">${groupesHtml}${sansItemsHtml}</div>
-      <div class="prep-pied">
-        <span class="prep-pied-note">${picto('coche')}${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
-        <div class="prep-pied-actions">
-          <button type="button" class="prep-copier-btn" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button>
-        </div>
+        ${agendaPiecesDetailToggleHtml()}
       </div>
     </section>`;
 }
@@ -12144,15 +12111,13 @@ function agendaPillsHtml() {
   const tous = [...dated, ...counters];
   const compte = (statut) => (statut === 'tous' ? tous.length : tous.filter((e) => e.info.state === statut).length);
   const actif = agendaStatutActif();
-  const pill = (statut, label, teinte) => {
-    const active = actif === statut;
-    const dot = teinte ? `<span class="dot" style="background:var(--${teinte});"></span>` : '';
-    return `<button type="button" class="parc-pill${active ? ' is-active' : ''}" data-agenda-statut="${statut}" aria-pressed="${active}">${dot}<span>${esc(label)}</span><span class="compte">${compte(statut)}</span></button>`;
+  const pill = (statut, label) => {
+    const point = statut === 'tous' ? '' : `<span class="ui-point ${classeEtatKit(statut)}"></span>`;
+    return `<button type="button" class="ui-puce${actif === statut ? ' is-actif' : ''}" data-agenda-statut="${statut}" aria-pressed="${actif === statut}">${point}<span>${esc(label)}</span><span class="ui-compte">${compte(statut)}</span></button>`;
   };
   return `
-    <div class="agenda-pills">
-      <span class="agenda-pills-label">${trad('Statut :')}</span>
-      ${pill('tous', trad('Tous'), null)}${pill('late', trad('En retard'), 'late')}${pill('soon', trad('Bientôt'), 'soon')}${pill('ok', trad('À jour'), 'ok')}
+    <div class="ui-puces agenda-pills">
+      ${pill('tous', trad('Tous'))}${pill('late', trad('En retard'))}${pill('soon', trad('Bientôt'))}${pill('ok', trad('À jour'))}
     </div>`;
 }
 function agendaNavHtml() {
@@ -12163,27 +12128,27 @@ function agendaNavHtml() {
   const debutSemaine = agendaDebutSemaine(ref);
   const labelSemaine = `${formatShortDate(debutSemaine)} – ${formatShortDate(addDaysIso(debutSemaine, 6))}`;
   return `
-    <div class="agenda-outils">
-      <div class="agenda-vues seg-horizon" role="group" aria-label="${trad('Affichage')}">
-        <button type="button" class="seg-btn${vue === 'mois' ? ' is-active' : ''}" data-agenda-vue="mois">${trad('Mois')}</button>
-        <button type="button" class="seg-btn${vue === 'semaine' ? ' is-active' : ''}" data-agenda-vue="semaine">${trad('Semaine')}</button>
-        <button type="button" class="seg-btn${vue === 'liste' ? ' is-active' : ''}" data-agenda-vue="liste">${trad('Liste chronologique')}</button>
+    <div class="ui-barre agenda-outils">
+      <div class="ui-segment agenda-vues" role="group" aria-label="${trad('Affichage')}">
+        <button type="button" class="${vue === 'mois' ? 'is-actif' : ''}" data-agenda-vue="mois">${trad('Mois')}</button>
+        <button type="button" class="${vue === 'semaine' ? 'is-actif' : ''}" data-agenda-vue="semaine">${trad('Semaine')}</button>
+        <button type="button" class="${vue === 'liste' ? 'is-actif' : ''}" data-agenda-vue="liste">${trad('Liste chronologique')}</button>
       </div>
       ${vue !== 'liste' ? `
       <div class="agenda-nav">
-        <button type="button" class="agenda-nav-btn is-prev" id="agenda-prev" aria-label="${esc(trad(vue === 'mois' ? 'Mois précédent' : 'Semaine précédente'))}">${picto('chevron')}</button>
-        <span class="agenda-nav-label">${esc(vue === 'mois' ? labelMois : labelSemaine)}</span>
-        <button type="button" class="agenda-nav-btn is-next" id="agenda-next" aria-label="${esc(trad(vue === 'mois' ? 'Mois suivant' : 'Semaine suivante'))}">${picto('chevron')}</button>
-        <button type="button" class="agenda-nav-today" id="agenda-today">${trad('Aujourd\'hui')}</button>
+        <button type="button" class="ui-btn ui-btn-icone is-gauche" id="agenda-prev" aria-label="${esc(trad(vue === 'mois' ? 'Mois précédent' : 'Semaine précédente'))}">${picto('chevron')}</button>
+        <span class="ui-valeur agenda-nav-label">${esc(vue === 'mois' ? labelMois : labelSemaine)}</span>
+        <button type="button" class="ui-btn ui-btn-icone is-droite" id="agenda-next" aria-label="${esc(trad(vue === 'mois' ? 'Mois suivant' : 'Semaine suivante'))}">${picto('chevron')}</button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="agenda-today">${trad('Aujourd\'hui')}</button>
       </div>` : ''}
-      ${agendaPillsHtml()}
-    </div>`;
+    </div>
+    ${agendaPillsHtml()}`;
 }
 // Liste chronologique : la vue d'origine (une carte par échéance, groupées
 // par mois), désormais aussi filtrable par statut — elle ne l'était pas.
 function agendaListeHtml(datedFiltres, countersFiltres) {
   if (!datedFiltres.length && !countersFiltres.length) {
-    return `<div class="empty">${trad('Aucune échéance ne correspond à ce filtre.')}</div>`;
+    return `<div class="ui-aide">${trad('Aucune échéance ne correspond à ce filtre.')}</div>`;
   }
   const moisMois = (iso) => {
     const mi = Number(String(iso).slice(5, 7)) - 1;
@@ -12199,16 +12164,18 @@ function agendaListeHtml(datedFiltres, countersFiltres) {
   const datedHtml = sorted.map(({ m, info }) => {
     const mois = moisMois(m.plan.next_due_at);
     const header = mois !== currentMonth
-      ? `<div class="agenda-month"><span>${esc(mois)}</span><span class="agenda-month-compte">${tR('{n} intervention(s)', { n: moisComptes.get(mois) })}</span></div>`
+      ? `<span class="ui-etiquette agenda-month">${esc(mois)} <span class="ui-tag">${tR('{n} intervention(s)', { n: moisComptes.get(mois) })}</span></span>`
       : '';
     currentMonth = mois;
     return header + chronologieCarteHtml(m, info);
   }).join('');
   return `
+    <div class="ui-liste">
     ${datedHtml}
     ${countersFiltres.length ? `
-    ${sorted.length ? `<div class="agenda-souscompteur"><span class="card-ico">${picto('compteur')}</span><span>${trad('Suivi au compteur')}</span></div>` : ''}
-    ${countersFiltres.map(({ m, info }) => chronologieCarteHtml(m, info)).join('')}` : ''}`;
+    ${sorted.length ? `<span class="ui-etiquette agenda-souscompteur">${trad('Suivi au compteur')}</span>` : ''}
+    ${countersFiltres.map(({ m, info }) => chronologieCarteHtml(m, info)).join('')}` : ''}
+    </div>`;
 }
 // Entretiens PROGRAMMÉS (table scheduled_maintenances, saisie manuelle par
 // jour de calendrier) — groupés par jour comme agendaParJour(), mais depuis
@@ -12457,12 +12424,11 @@ function ouvrirJourAgenda(iso) {
 function agendaPiecesDetailToggleHtml() {
   const ouvert = !!UI.agendaPiecesDetail;
   return `
-    <button type="button" class="link-inline agenda-pieces-detail-toggle" id="agenda-pieces-detail-toggle" aria-expanded="${ouvert}">
-      <span class="card-ico prep-groupes-chevron">${picto('chevron')}</span>
+    <div><button type="button" class="ui-btn ui-btn-teinte agenda-pieces-detail-toggle" id="agenda-pieces-detail-toggle" aria-expanded="${ouvert}">
       <span>${ouvert ? trad('Réduire') : trad('Export et bon de commande')}</span>
-    </button>
-    ${ouvert ? `<div class="agenda-pieces-detail">
-      <button type="button" class="secondary" id="prep-export"><span class="card-ico">${picto('export')}</span><span>${trad('Exporter la liste (CSV)')}</span></button>
+    </button></div>
+    ${ouvert ? `<div class="ui-section-corps agenda-pieces-detail">
+      <div><button type="button" class="ui-btn ui-btn-pastille" id="prep-export">${picto('export')}<span>${trad('Exporter la liste (CSV)')}</span></button></div>
       ${bonCommandeHtml()}
     </div>` : ''}`;
 }
@@ -12820,6 +12786,7 @@ function wireAgenda(root) {
 }
 
 VIEWS.agenda = {
+  fondBlanc: true,
   title: trad('Agenda'),
   subtitle: () => trad('Échéances datées et compteurs à surveiller'),
   render() {
@@ -12828,25 +12795,23 @@ VIEWS.agenda = {
     // entretien à la main (scheduled_maintenances) — une raison de plus de
     // ne jamais bloquer l'écran tant qu'au moins une machine existe.
     if (!UI.machines.length) {
-      return `<div class="empty">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div></section></div>`;
     }
     const piecesHtml = preparationCompleteAgendaHtml();
+    const calendrier = `
+        <section class="ui-section vue-agenda">
+          ${teteSectionKit('calendrier', trad('Agenda'), trad('Échéances datées et compteurs à surveiller'),
+            `<button type="button" class="ui-btn ui-btn-pastille" id="agenda-export-ics">${picto('export')}<span>${dansApplication() ? trad('Intégrer à l\'agenda du téléphone') : trad('Intégrer à l\'agenda de cet ordinateur')}</span></button><button type="button" class="ui-btn ui-btn-plein" id="agenda-planifier">${picto('croix')}<span>${trad('Planifier un entretien')}</span></button>`)}
+          <div class="ui-section-corps">
+            ${agendaNavHtml()}
+            <div class="agenda-calendrier">${agendaContenuHtml()}</div>
+          </div>
+        </section>`;
     return `
-      <div class="vue-agenda">
-      <div class="agenda-toolbar">
-        <span class="agenda-eyebrow">${trad('Planification & logistique')}</span>
-        <div class="agenda-toolbar-actions">
-          <button type="button" class="secondary" id="agenda-export-ics"><span class="card-ico">${picto('export')}</span><span>${dansApplication() ? trad('Intégrer à l\'agenda du téléphone') : trad('Intégrer à l\'agenda de cet ordinateur')}</span></button>
-          <button type="button" class="primary" id="agenda-planifier"><span class="card-ico">${picto('croix')}</span><span>${trad('Planifier un entretien')}</span></button>
-        </div>
-      </div>
-      ${agendaNavHtml()}
-      <div class="dash-grid agenda-grid">
-        <div class="dash-main">
-          <section class="card agenda-calendrier">${agendaContenuHtml()}</section>
-          ${piecesHtml ? `<div class="agenda-pieces-bloc">${piecesHtml}${agendaPiecesDetailToggleHtml()}</div>` : ''}
-        </div>
-      </div>
+      <div class="ui-page">
+        ${piecesHtml
+          ? `<div class="ui-colonnes"><div class="ui-colonne">${calendrier}</div><div class="ui-colonne">${piecesHtml}</div></div>`
+          : calendrier}
       </div>`;
   },
   mount() {
