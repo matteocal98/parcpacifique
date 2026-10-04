@@ -248,3 +248,24 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
   .ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto;}
   .ui-ligne.is-deux .ui-ligne-action{justify-content:flex-end;}
 }
+
+/* ── 14. Compléments pour les listes de gestion (stock, kits, catalogue…) ───────────── */
+.ui-liste.is-defilant{max-height:440px;overflow-y:auto;}
+.ui-btn-icone.is-danger{color:var(--late);}
+.ui-btn-icone svg{width:18px;height:18px;}
+.ui-chiffre.is-droite{align-items:flex-end;text-align:right;}
+.ui-chiffre-valeur.is-ok{color:var(--ok);}
+.ui-chiffre-valeur.is-retard{color:var(--late);}
+.ui-chiffre-valeur.is-bientot{color:var(--primary-dark);}
+.ui-ligne-nom .ui-tag,.ui-ligne-nom .ui-statut{margin-left:8px;vertical-align:middle;}
+.ui-ligne-id > .ui-statut{flex:0 0 auto;}
+/* Liste déroulante native avec une flèche posée par-dessus (le select reste un champ du kit) */
+.ui-select-wrap{position:relative;min-width:0;}
+.ui-select-wrap select{appearance:none;-webkit-appearance:none;width:100%;padding-right:38px;cursor:pointer;}
+.ui-select-wrap > svg{position:absolute;right:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);pointer-events:none;color:var(--ink-2);}
+.ui-barre .ui-select-wrap{flex:0 1 220px;}
+/* Deux zones côte à côte DANS une section pleine largeur (ex. liste | formulaire) */
+.ui-deux{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start;}
+@container (min-width:880px){
+  .ui-deux{grid-template-columns:repeat(2,minmax(0,1fr));}
+}

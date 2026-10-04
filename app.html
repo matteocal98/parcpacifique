@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-GWb089zqvqmmLY8WAfWGEt96yaR47kFRGU0mKoB0U1A=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ICc+V8qGGdqhw/enmjPDzRtN8ilMA0fjyNiiPVe1B78=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8328,13 +8328,15 @@ function ligneRappelEnAttenteHtml(item) {
     ? (passee ? trad('IMMÉDIAT') : `${formatShortDate(item.quand.toISOString().slice(0, 10))} · ${item.quand.toTimeString().slice(0, 5)}`)
     : '';
   return `
-    <div class="rappel-file-ligne${passee ? ' is-immediat' : ''}">
-      <span class="card-ico">${picto('cloche')}</span>
-      <span class="rappel-file-texte">
-        <span class="rappel-file-titre">${esc(item.titre)}</span>
-        <span class="rappel-file-corps">${esc(item.corps)}</span>
-      </span>
-      ${quand ? `<span class="pill ${passee ? 'late' : 'soon'}">${esc(quand)}</span>` : ''}
+    <div class="ui-ligne is-deux">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('cloche')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(item.titre)}</span>
+          <span class="ui-ligne-sous">${esc(item.corps)}</span>
+        </div>
+      </div>
+      ${quand ? `<div class="ui-ligne-action"><span class="ui-statut ${passee ? 'is-retard' : 'is-bientot'}">${esc(quand)}</span></div>` : ''}
     </div>`;
 }
 
@@ -8346,9 +8348,9 @@ async function majRappelsLocaux(root) {
   if (ligneAutorisation) {
     const etat = await etatAutorisationRappels();
     ligneAutorisation.innerHTML = etat
-      ? `<span class="card-ico">${picto(etat === 'denied' ? 'alerte' : 'case')}</span><span>${esc(texteAutorisation(etat))}</span>`
+      ? `${picto(etat === 'denied' ? 'alerte' : 'case')}<p>${esc(texteAutorisation(etat))}</p>`
       : '';
-    ligneAutorisation.className = `callout${etat === 'denied' ? ' is-late' : (etat === 'granted' ? ' is-ok' : '')}`;
+    ligneAutorisation.className = `ui-encadre${etat === 'denied' ? ' is-attention' : ''}`;
     ligneAutorisation.hidden = !etat;
   }
   const liste = await rappelsEnAttenteListe();
@@ -8358,7 +8360,7 @@ async function majRappelsLocaux(root) {
   if (zoneFile) {
     zoneFile.innerHTML = liste.length
       ? liste.slice(0, 6).map(ligneRappelEnAttenteHtml).join('')
-      : `<p class="muted-text">${trad('Aucun rappel daté programmé pour le moment.')}</p>`;
+      : `<p class="ui-aide">${trad('Aucun rappel daté programmé pour le moment.')}</p>`;
   }
   const tuileValeur = document.getElementById('rappel-tuile-file');
   if (tuileValeur) tuileValeur.textContent = String(liste.length);
@@ -8421,30 +8423,29 @@ const ID_TEST_NOTIFICATION = 987654;
 
 function blocRappelsHtml() {
   if (!rappelsDisponibles()) {
-    return `<p class="muted-text">${trad('Les notifications locales sont gérées directement par le terminal Android, sans dépendre de la couverture réseau ni d\'un compte cloud tiers. Elles n\'existent que dans l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
+    return `<p class="ui-aide">${trad('Les notifications locales sont gérées directement par le terminal Android, sans dépendre de la couverture réseau ni d\'un compte cloud tiers. Elles n\'existent que dans l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
   }
   const actif = rappelsActifs();
   return `
-    <div class="switch-row rappel-switch-row">
-      <span class="switch-label">
-        <span class="rappel-switch-titre">${trad('Me rappeler les échéances datées sur cet appareil')}</span>
-        <span class="rappel-switch-sous">${trad('Déclenche des bannières prioritaires, même écran verrouillé')}</span>
-      </span>
-      <button type="button" class="switch${actif ? ' on' : ''}" id="acc-rappels" role="switch" aria-checked="${actif ? 'true' : 'false'}" aria-label="${trad('Me rappeler les échéances datées sur cet appareil')}"><span></span></button>
+    <div class="ui-groupe">
+      <div class="switch-row rappel-switch-row">
+        <span class="switch-label">
+          <span class="rappel-switch-titre">${trad('Me rappeler les échéances datées sur cet appareil')}</span>
+          <span class="rappel-switch-sous">${trad('Déclenche des bannières prioritaires, même écran verrouillé')}</span>
+        </span>
+        <button type="button" class="switch${actif ? ' on' : ''}" id="acc-rappels" role="switch" aria-checked="${actif ? 'true' : 'false'}" aria-label="${trad('Me rappeler les échéances datées sur cet appareil')}"><span></span></button>
+      </div>
+      <div class="ui-aide">${trad('Les rappels peuvent arriver avec quelques minutes de retard : l\'application n\'utilise pas les alarmes exactes d\'Android, pour ne pas demander une permission sensible.')}</div>
     </div>
-    <div class="hint">${trad('Les rappels peuvent arriver avec quelques minutes de retard : l\'application n\'utilise pas les alarmes exactes d\'Android, pour ne pas demander une permission sensible.')}</div>
-    <div class="callout" id="acc-rappels-autorisation" role="status" hidden></div>
+    <div class="ui-encadre" id="acc-rappels-autorisation" role="status" hidden></div>
 
-    <div class="rappel-file-tete">
-      <span class="rappel-file-titre-section">${trad('Prochaines alertes programmées en file d\'attente locale')}</span>
-      <span class="pill soon" id="acc-rappels-compte"></span>
+    <div class="ui-champ-groupe">
+      <span class="ui-etiquette">${trad('Prochaines alertes programmées en file d\'attente locale')} <span class="ui-tag" id="acc-rappels-compte"></span></span>
     </div>
-    <div id="acc-rappels-file" role="status" aria-live="polite"></div>
+    <div id="acc-rappels-file" class="ui-liste" role="status" aria-live="polite"></div>
 
-    <div class="modal-actions">
-      <button type="button" class="secondary" id="acc-rappels-test"><span class="card-ico">${picto('cloche')}</span><span>${trad('Tester le rappel local maintenant')}</span></button>
-    </div>
-    <div class="hint" id="acc-rappels-msg" role="status" aria-live="polite"></div>`;
+    <div><button type="button" class="ui-btn ui-btn-pastille" id="acc-rappels-test">${picto('cloche')}<span>${trad('Tester le rappel local maintenant')}</span></button></div>
+    <div class="ui-aide" id="acc-rappels-msg" role="status" aria-live="polite"></div>`;
 }
 
 // ── RAPPELS PUSH (FCM), CIBLÉS PAR RÔLE ─────────────────────────────────────
@@ -12869,6 +12870,17 @@ VIEWS.agenda = {
 // serveur qui s'en sert pour envoyer l'e-mail. Rien n'est gardé sur l'appareil :
 // un réglage local ne pourrait pas déclencher un envoi quand l'application est
 // fermée — c'est-à-dire dans le cas le plus utile.
+// En-tête de section du kit (icône + titre + sous-titre, repère optionnel à droite) :
+// partagé par les écrans migrés vers kit.css. Les textes arrivent déjà traduits.
+function teteSectionKit(icone, titre, sous, acces) {
+  return `
+        <div class="ui-section-tete">
+          <div class="ui-section-icone">${picto(icone)}</div>
+          <div class="ui-section-titres"><h2 class="ui-section-titre">${titre}</h2>${sous ? `<p class="ui-section-sous">${sous}</p>` : ''}</div>
+          ${acces ? `<div class="ui-section-acces">${acces}</div>` : ''}
+        </div>`;
+}
+
 function blocReglagesRappelsHtml() {
   // Colonnes absentes en base (migration-rappels-email.sql non exécutée) : le
   // formulaire est montré, mais désactivé et accompagné de la marche à suivre.
@@ -12877,25 +12889,23 @@ function blocReglagesRappelsHtml() {
   const bloque = dispo ? '' : ' disabled';
   const actif = rappelsEmailActifs();
   return `
-    <section class="card">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('mail')}</span><span>${trad('Recevoir les rappels par e-mail')}</span></h2>
-        <span class="spacer"></span>
-        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
+    <section class="ui-section">
+      ${teteSectionKit('mail', trad('Recevoir les rappels par e-mail'), '', `<span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>`)}
+      <div class="ui-section-corps">
+        <div class="ui-encadre">
+          ${picto('case')}
+          <p>${trad('L\'e-mail est envoyé directement par le serveur KALEA : il part même si l\'application n\'est pas ouverte, sur le téléphone comme au poste d\'atelier.')}</p>
+        </div>
+        <div class="ui-champ-groupe">
+          <label class="ui-etiquette" for="rap-email">${trad('Adresse de destination des alertes')}</label>
+          <input id="rap-email" class="ui-champ" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
+        </div>
+        <label class="check-row" for="rap-par-email"><input type="checkbox" id="rap-par-email"${rappelsEmailCoches() ? ' checked' : ''}${bloque}> ${trad('Recevoir les rappels par e-mail')}</label>
+        <div class="ui-aide">${trad('Laisse l\'adresse vide pour ne plus recevoir de rappel par e-mail. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est proposée.')}</div>
+        <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
+        <div><button type="button" class="ui-btn ui-btn-plein" id="rap-save"${bloque}>${picto('case')}<span>${trad('Enregistrer les préférences e-mail')}</span></button></div>
+        ${dispo ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-rappels-email.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
       </div>
-      <div class="callout">
-        <span class="card-ico">${picto('case')}</span>
-        <span>${trad('L\'e-mail est envoyé directement par le serveur KALEA : il part même si l\'application n\'est pas ouverte, sur le téléphone comme au poste d\'atelier.')}</span>
-      </div>
-      <label for="rap-email">${trad('Adresse de destination des alertes')}</label>
-      <input id="rap-email" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
-      <label class="check-row" for="rap-par-email"><input type="checkbox" id="rap-par-email"${rappelsEmailCoches() ? ' checked' : ''}${bloque}> ${trad('Recevoir les rappels par e-mail')}</label>
-      <div class="hint">${trad('Laisse l\'adresse vide pour ne plus recevoir de rappel par e-mail. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est proposée.')}</div>
-      <div class="hint" id="rap-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button type="button" class="primary" id="rap-save"${bloque}><span class="card-ico">${picto('case')}</span><span>${trad('Enregistrer les préférences e-mail')}</span></button>
-      </div>
-      ${dispo ? '' : `<div class="hint">${trad('Mise à jour indisponible : exécute')} <strong>migration-rappels-email.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
     </section>`;
 }
 
@@ -12904,7 +12914,7 @@ function blocReglagesRappelsHtml() {
 // jamais réclamée avant le clic explicite).
 function blocPushHtml() {
   if (!pushDisponible()) {
-    return `<p class="muted-text">${trad('Les notifications push nécessitent l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
+    return `<p class="ui-aide">${trad('Les notifications push nécessitent l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
   }
   const actif = !!monTokenPushConnu();
   return `
@@ -12915,7 +12925,7 @@ function blocPushHtml() {
       </span>
       <button type="button" class="switch${actif ? ' on' : ''}" id="acc-push" role="switch" aria-checked="${actif ? 'true' : 'false'}" aria-label="${trad('Recevoir les rappels d\'échéance par notification push')}"><span></span></button>
     </div>
-    <div class="hint" id="acc-push-msg" role="status" aria-live="polite"></div>`;
+    <div class="ui-aide" id="acc-push-msg" role="status" aria-live="polite"></div>`;
 }
 
 // Ciblage par rôle, réservé au gérant — même idiome que blocParametresTcoHtml
@@ -12940,36 +12950,30 @@ function blocCiblagePushHtml() {
     const reglage = roles[r.id] || null;
     const coche = !!reglage;
     return `
-      <div class="push-role-ligne">
-        <label class="check-row" for="push-role-${r.id}"><input type="checkbox" id="push-role-${r.id}" data-role="${r.id}"${coche ? ' checked' : ''}${bloque}> ${esc(r.label)}</label>
-        <div class="push-role-seuils">
-          <label class="push-role-champ">
-            <span>${trad('Jours avant (machines datées)')}</span>
-            <input type="number" min="0" inputmode="numeric" id="push-role-${r.id}-jours" value="${reglage && reglage.jours != null ? esc(reglage.jours) : ''}" placeholder="${FALLBACK_REMINDER_DAYS}"${bloque}>
-          </label>
-          <label class="push-role-champ">
-            <span>${trad('Avant l\'échéance du compteur (h ou km)')}</span>
-            <input type="number" min="0" inputmode="numeric" id="push-role-${r.id}-compteur" value="${reglage && reglage.compteur != null ? esc(reglage.compteur) : ''}" placeholder="${FALLBACK_REMINDER_HOURS}"${bloque}>
-          </label>
-        </div>
-      </div>`;
+        <div class="ui-groupe">
+          <label class="check-row" for="push-role-${r.id}"><input type="checkbox" id="push-role-${r.id}" data-role="${r.id}"${coche ? ' checked' : ''}${bloque}> <strong>${esc(r.label)}</strong></label>
+          <div class="ui-grille">
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="push-role-${r.id}-jours">${trad('Jours avant (machines datées)')}</label>
+              <input type="number" class="ui-champ" min="0" inputmode="numeric" id="push-role-${r.id}-jours" value="${reglage && reglage.jours != null ? esc(reglage.jours) : ''}" placeholder="${FALLBACK_REMINDER_DAYS}"${bloque}>
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="push-role-${r.id}-compteur">${trad('Avant l\'échéance du compteur (h ou km)')}</label>
+              <input type="number" class="ui-champ" min="0" inputmode="numeric" id="push-role-${r.id}-compteur" value="${reglage && reglage.compteur != null ? esc(reglage.compteur) : ''}" placeholder="${FALLBACK_REMINDER_HOURS}"${bloque}>
+            </div>
+          </div>
+        </div>`;
   };
   return `
-    <section class="card">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('cloche')}</span><span>${trad('Notifications push — qui est prévenu')}</span></h2>
-        <span class="spacer"></span>
-        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
-      </div>
-      <p class="muted-text">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai s\'ajoute à celui déjà réglé sur chaque plan de maintenance, il ne le remplace pas. Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
-      <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
-      <div class="push-roles-grille">
+    <section class="ui-section">
+      ${teteSectionKit('cloche', trad('Notifications push — qui est prévenu'), '', `<span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>`)}
+      <div class="ui-section-corps">
+        <p class="ui-aide">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai s\'ajoute à celui déjà réglé sur chaque plan de maintenance, il ne le remplace pas. Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
+        <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
         ${ROLES_CIBLE.map(ligneRole).join('')}
-      </div>
-      ${!dispo ? `<div class="hint">${trad('Mise à jour indisponible : exécute')} <strong>migration-push-notifications.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>` : (!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : '')}
-      <div class="hint" id="push-cible-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button type="button" class="primary" id="push-cible-save"${bloque}><span class="card-ico">${picto('case')}</span><span>${trad('Enregistrer le ciblage')}</span></button>
+        ${!dispo ? `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-push-notifications.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>` : (!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : '')}
+        <div class="ui-aide" id="push-cible-msg" role="status" aria-live="polite"></div>
+        <div><button type="button" class="ui-btn ui-btn-plein" id="push-cible-save"${bloque}>${picto('case')}<span>${trad('Enregistrer le ciblage')}</span></button></div>
       </div>
     </section>`;
 }
@@ -13040,14 +13044,11 @@ function wireCiblagePush(root) {
 function carteRappelsTelephoneHtml() {
   const disponible = rappelsDisponibles();
   return `
-    <section class="card">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Rappels sur ce téléphone & tablettes d\'atelier')}</span></h2>
-        <span class="spacer"></span>
-        <span class="pill ${disponible ? 'ok' : 'neutral'}">${disponible ? trad('Appareil local') : trad('Application requise')}</span>
+    <section class="ui-section">
+      ${teteSectionKit('telephone', trad('Rappels sur ce téléphone & tablettes d\'atelier'), trad('Notifications natives Android (Alarm Manager) : elles sont gérées directement par le terminal, sans dépendre de la couverture réseau ni d\'un compte cloud tiers.'), `<span class="ui-statut ${disponible ? 'is-ok' : ''}">${disponible ? trad('Appareil local') : trad('Application requise')}</span>`)}
+      <div class="ui-section-corps">
+        ${blocRappelsHtml()}
       </div>
-      <p class="muted-text">${trad('Notifications natives Android (Alarm Manager) : elles sont gérées directement par le terminal, sans dépendre de la couverture réseau ni d\'un compte cloud tiers.')}</p>
-      ${blocRappelsHtml()}
     </section>`;
 }
 
@@ -13056,19 +13057,18 @@ function carteRappelsTelephoneHtml() {
 // phrases qu'avant, réparties sur trois tuiles au lieu d'un paragraphe unique.
 function blocFonctionnementRappelsHtml() {
   const tuiles = [
-    { icone: 'filtre', accent: 'ambre', titre: trad('Anticipation mesurée'), texte: trad('KALEA envoie un e-mail avant chaque échéance, puis rien de plus le même jour : un rappel qui arrive au bon moment se lit, une série de messages finit par être ignorée.') },
-    { icone: 'reglages', accent: 'indigo', titre: trad('Délai réglable par machine'), texte: trad('Le délai se règle sur le plan de maintenance de chaque machine : 7 jours avant l\'échéance par défaut quand elle est datée, et la fenêtre de rappel du compteur pour un engin suivi en heures ou en kilomètres — ces machines-là n\'ont pas de date à annoncer.') },
-    { icone: 'wifi', accent: 'ok', titre: trad('Indépendance réseau'), texte: trad('L\'envoi est fait par le serveur : le rappel part même si l\'application n\'est pas ouverte. Sur le téléphone, l\'application Android programme en plus ses propres notifications, sans réseau ni compte tiers. Les notifications push suivent le même principe, avec en plus un délai d\'anticipation réglable par rôle.') },
+    { titre: trad('Anticipation mesurée'), texte: trad('KALEA envoie un e-mail avant chaque échéance, puis rien de plus le même jour : un rappel qui arrive au bon moment se lit, une série de messages finit par être ignorée.') },
+    { titre: trad('Délai réglable par machine'), texte: trad('Le délai se règle sur le plan de maintenance de chaque machine : 7 jours avant l\'échéance par défaut quand elle est datée, et la fenêtre de rappel du compteur pour un engin suivi en heures ou en kilomètres — ces machines-là n\'ont pas de date à annoncer.') },
+    { titre: trad('Indépendance réseau'), texte: trad('L\'envoi est fait par le serveur : le rappel part même si l\'application n\'est pas ouverte. Sur le téléphone, l\'application Android programme en plus ses propres notifications, sans réseau ni compte tiers. Les notifications push suivent le même principe, avec en plus un délai d\'anticipation réglable par rôle.') },
   ];
   return `
-    <section class="card">
-      <div class="card-head"><h2 class="card-title"><span class="card-ico">${picto('cloche')}</span><span>${trad('Comment ça fonctionne en détail')}</span></h2></div>
-      <div class="fonctionnement-grille">
+    <section class="ui-section">
+      ${teteSectionKit('cloche', trad('Comment ça fonctionne en détail'), '')}
+      <div class="ui-grille is-3">
         ${tuiles.map((t) => `
-        <div class="fonctionnement-tuile">
-          <span class="card-ico fonctionnement-ico-${t.accent}">${picto(t.icone)}</span>
-          <span class="fonctionnement-titre">${t.titre}</span>
-          <p class="muted-text">${t.texte}</p>
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${t.titre}</span>
+          <span class="ui-tuile-note">${t.texte}</span>
         </div>`).join('')}
       </div>
     </section>`;
@@ -13085,20 +13085,21 @@ function apercuRappelsHtml() {
   const parEmail = rappelsEmailActifs();
   const surTelephone = rappelsDisponibles();
   const parPush = !!monTokenPushConnu();
-  const tuile = (icone, accent, label, valeur, texte, idValeur) => `
-    <div class="rappel-tuile rappel-tuile-${accent}">
-      <span class="card-ico">${picto(icone)}</span>
-      <span class="rappel-tuile-label">${label}</span>
-      <span class="rappel-tuile-valeur"${idValeur ? ` id="${idValeur}"` : ''}>${valeur}</span>
-      <span class="rappel-tuile-texte">${texte}</span>
-    </div>`;
+  const tuile = (etat, label, valeur, texte, idValeur) => `
+        <div class="ui-tuile${etat ? ' is-ok' : ''}">
+          <span class="ui-tuile-etiquette">${label}</span>
+          <span class="ui-tuile-valeur"${idValeur ? ` id="${idValeur}"` : ''}>${valeur}</span>
+          <span class="ui-tuile-note">${texte}</span>
+        </div>`;
   return `
-    <div class="rappels-apercu">
-      ${tuile('mail', 'ambre', trad('Canal d\'alerte e-mail'), parEmail ? trad('Actif') : trad('Inactif'), trad('Avant chaque échéance datée'))}
-      ${tuile('telephone', 'indigo', trad('App mobile Android'), surTelephone ? trad('Actif') : trad('À installer'), trad('Service d\'arrière-plan · indépendant du réseau'), surTelephone ? 'rappel-tuile-file' : null)}
-      ${tuile('cloche', 'indigo', trad('Notifications push'), parPush ? trad('Actif sur ce téléphone') : trad('Inactif sur ce téléphone'), trad('Ciblage et délai réglables par rôle'))}
-      ${tuile('reglages', 'ok', trad('Anticipation d\'atelier'), tR('{n} jours', { n: FALLBACK_REMINDER_DAYS }), trad('Réglable individuellement sur chaque machine'))}
-    </div>`;
+    <section class="ui-section">
+      <div class="ui-grille is-3">
+        ${tuile(parEmail, trad('Canal d\'alerte e-mail'), parEmail ? trad('Actif') : trad('Inactif'), trad('Avant chaque échéance datée'))}
+        ${tuile(surTelephone, trad('App mobile Android'), surTelephone ? trad('Actif') : trad('À installer'), trad('Service d\'arrière-plan · indépendant du réseau'), surTelephone ? 'rappel-tuile-file' : null)}
+        ${tuile(parPush, trad('Notifications push'), parPush ? trad('Actif sur ce téléphone') : trad('Inactif sur ce téléphone'), trad('Ciblage et délai réglables par rôle'))}
+        ${tuile(false, trad('Anticipation d\'atelier'), tR('{n} jours', { n: FALLBACK_REMINDER_DAYS }), trad('Réglable individuellement sur chaque machine'))}
+      </div>
+    </section>`;
 }
 
 // Câblage du champ e-mail de rappels : partagé par la vue « Rappels » et la
@@ -13162,29 +13163,27 @@ function wireReglagesRappelsEmail(root) {
 }
 
 VIEWS.reminders = {
+  fondBlanc: true,
   title: trad('Rappels & Notifications d\'échéance'),
   subtitle: () => trad('Gestion des alertes préventives envoyées par le serveur, sur terminal mobile Android et par e-mail avant chaque seuil d\'entretien critique.'),
   render() {
     return `
-      <div class="agenda-toolbar">
-        <span class="agenda-eyebrow">${trad('Canaux d\'alerte & automatisations')}</span>
-      </div>
-      ${apercuRappelsHtml()}
-      <div class="dash-grid agenda-grid">
-        <div class="dash-main">
-          ${blocReglagesRappelsHtml()}
-          ${carteRappelsTelephoneHtml()}
-          ${blocFonctionnementRappelsHtml()}
+      <div class="ui-page">
+        ${apercuRappelsHtml()}
+        <div class="ui-colonnes">
+          <div class="ui-colonne">
+            ${blocReglagesRappelsHtml()}
+            <section class="ui-section">
+              ${teteSectionKit('telephone', trad('Notifications push (application mobile)'), '')}
+              <div class="ui-section-corps"><div class="ui-groupe">${blocPushHtml()}</div></div>
+            </section>
+            ${carteRappelsTelephoneHtml()}
+          </div>
+          <div class="ui-colonne">
+            ${blocCiblagePushHtml()}
+          </div>
         </div>
-        <div class="dash-side">
-          <section class="card">
-            <div class="card-head">
-              <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Notifications push (application mobile)')}</span></h2>
-            </div>
-            ${blocPushHtml()}
-          </section>
-          ${blocCiblagePushHtml()}
-        </div>
+        ${blocFonctionnementRappelsHtml()}
       </div>`;
   },
   mount() {
@@ -13738,21 +13737,19 @@ function ligneCatalogueTcoHtml(piece) {
     [piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' - '),
   ].filter(Boolean).join(' · ');
   return `
-    <div class="stock-row" data-piece-id="${esc(piece.id)}">
-      <div class="stock-row-gauche">
-        <div class="stock-row-icone">${picto('boite')}</div>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece.designation)}</span>${piece.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}</div>
-          <div class="stock-row-sub">${esc(refEtDelai)}</div>
-          ${piece.default_reorder_point != null ? `<div class="stock-row-sub">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</div>` : ''}
+    <div class="ui-ligne is-deux" data-piece-id="${esc(piece.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('boite')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(piece.designation)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${esc(refEtDelai)}</span>
+          ${piece.default_reorder_point != null ? `<span class="ui-ligne-sous">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
         </div>
       </div>
-      <div class="stock-row-droite">
-        <div class="stock-row-valeur"><span class="montant">${texteAvecSeparateurs(piece.unit_price)}</span><span class="unite">${esc(deviseCourte())}</span></div>
-        <div class="stock-row-actions">
-          <button type="button" data-piece-modifier="${esc(piece.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
-          <button type="button" class="is-danger" data-piece-retirer="${esc(piece.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
-        </div>
+      <div class="ui-ligne-action">
+        <div class="ui-chiffre is-droite"><span class="ui-chiffre-valeur">${texteAvecSeparateurs(piece.unit_price)}</span><span class="ui-ligne-sous">${esc(deviseCourte())}</span></div>
+        <button type="button" class="ui-btn ui-btn-icone" data-piece-modifier="${esc(piece.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+        <button type="button" class="ui-btn ui-btn-icone is-danger" data-piece-retirer="${esc(piece.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
       </div>
     </div>`;
 }
@@ -13767,73 +13764,65 @@ function ligneCatalogueTcoHtml(piece) {
 function blocCatalogueTcoHtml() {
   const pieces = UI.partsCatalog || [];
   return `
-    <section class="stock-section" id="tco-catalogue-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-indigo">${picto('boite')}</div>
-          <div>
-            <div class="stock-section-titre-row">
-              <h2 class="stock-section-titre">${trad('Catalogue de pièces')}</h2>
-              <span class="stock-section-badge is-indigo" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>
+    <section class="ui-section" id="tco-catalogue-section">
+      ${teteSectionKit('boite', trad('Catalogue de pièces'), trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.'),
+        `<span class="ui-tag" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span><button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>`)}
+      <div class="ui-section-corps">
+        <div class="ui-deux">
+          <div class="ui-section-corps">
+            <input id="tco-piece-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation…')}">
+            <div class="ui-liste is-defilant" id="tco-catalogue-liste">
+              ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="ui-aide">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
             </div>
-            <p class="stock-section-sub">${trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.')}</p>
+            <div class="ui-aide" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
           </div>
-        </div>
-        <button type="button" class="stock-btn-outline" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
-      </div>
-      <div class="stock-section-body">
-        <div class="stock-grid-2 is-catalogue">
-          <div>
-            <div class="stock-search" style="margin-bottom:14px;">
-              ${picto('recherche')}
-              <input id="tco-piece-filtre" placeholder="${trad('Rechercher par référence, désignation…')}">
-            </div>
-            <div class="stock-liste is-scroll" id="tco-catalogue-liste">
-              ${pieces.length ? pieces.map(ligneCatalogueTcoHtml).join('') : `<div class="hint">${trad('Aucune pièce enregistrée pour l\'instant.')}</div>`}
-            </div>
-            <div class="hint" id="tco-catalogue-msg" role="status" aria-live="polite"></div>
-          </div>
-          <div class="stock-form-panel">
-            <div class="stock-form-tete">${picto('plusCercle')}<span id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
-            <div class="stock-field-row">
-              <div>
+          <div class="ui-groupe">
+            <div class="ui-groupe-tete">${picto('plusCercle')}<span class="ui-groupe-titre" id="tco-piece-form-titre">${trad('Ajouter une pièce au catalogue')}</span></div>
+            <div class="ui-grille">
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-reference">${trad('Référence')}</label>
-                <input id="tco-piece-reference" placeholder="${trad('Réf (ex: FLT-0142)')}">
+                <input id="tco-piece-reference" class="ui-champ" placeholder="${trad('Réf (ex: FLT-0142)')}">
               </div>
-              <div class="stock-champ-unite">
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-prix">${trad('Prix unitaire')}</label>
-                <input id="tco-piece-prix" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
-                <span class="suffixe" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+                <div class="ui-champ-unite">
+                  <input id="tco-piece-prix" class="ui-champ" type="text" inputmode="decimal" placeholder="${trad('Prix unitaire')}">
+                  <span class="ui-unite" id="tco-piece-prix-unite">${esc(deviseCourte())}</span>
+                </div>
               </div>
             </div>
-            <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
-            <input id="tco-piece-designation" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
-            <div class="stock-field-row">
-              <div>
+            <div class="ui-champ-groupe">
+              <label class="sr-only" for="tco-piece-designation">${trad('Désignation')}</label>
+              <input id="tco-piece-designation" class="ui-champ" required placeholder="${trad('Désignation (ex: Filtre à huile moteur)')}">
+            </div>
+            <div class="ui-grille">
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-fournisseur">${trad('Fournisseur')}</label>
-                <input id="tco-piece-fournisseur" placeholder="${trad('Fournisseur (optionnel)')}">
+                <input id="tco-piece-fournisseur" class="ui-champ" placeholder="${trad('Fournisseur (optionnel)')}">
               </div>
-              <div class="stock-champ-unite">
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-delai">${trad('Délai moyen de disponibilité')}</label>
-                <input id="tco-piece-delai" type="text" inputmode="numeric" placeholder="${trad('Délai moyen')}">
-                <span class="suffixe">${trad('jours')}</span>
+                <div class="ui-champ-unite">
+                  <input id="tco-piece-delai" class="ui-champ" type="text" inputmode="numeric" placeholder="${trad('Délai moyen')}">
+                  <span class="ui-unite">${trad('jours')}</span>
+                </div>
               </div>
             </div>
             ${SCHEMA.hasStockPackaging || SCHEMA.hasStock ? `
-            <div class="stock-field-row">
+            <div class="ui-grille">
               ${SCHEMA.hasStockPackaging ? `
-              <div>
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-conditionnement">${trad('Conditionnement')}</label>
-                <input id="tco-piece-conditionnement" placeholder="${trad('Conditionnement (optionnel)')}">
+                <input id="tco-piece-conditionnement" class="ui-champ" placeholder="${trad('Conditionnement (optionnel)')}">
               </div>` : ''}
               ${SCHEMA.hasStock ? `
-              <div>
+              <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-seuil">${trad('Seuil de réapprovisionnement')}</label>
-                <input id="tco-piece-seuil" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
+                <input id="tco-piece-seuil" class="ui-champ" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
               </div>` : ''}
             </div>` : ''}
-            <button type="button" class="stock-cta" id="tco-piece-ajouter">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button>
-            <button type="button" class="stock-cta-annuler" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button>
+            <div><button type="button" class="ui-btn ui-btn-plein" id="tco-piece-ajouter">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button></div>
+            <div><button type="button" class="ui-btn ui-btn-pastille" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button></div>
           </div>
         </div>
       </div>
@@ -14187,7 +14176,7 @@ function cablerCatalogueTco(root) {
   // référence ET la désignation.
   root.querySelector('#tco-piece-filtre')?.addEventListener('input', (e) => {
     const terme = e.target.value.trim().toLowerCase();
-    root.querySelectorAll('#tco-catalogue-liste .tco-part-ligne').forEach((ligne) => {
+    root.querySelectorAll('#tco-catalogue-liste [data-piece-id]').forEach((ligne) => {
       ligne.style.display = ligne.textContent.toLowerCase().includes(terme) ? '' : 'none';
     });
   });
@@ -14942,11 +14931,8 @@ function formatDateHeureMouvement(iso) {
 // n'en est pas une.
 function stockEyebrowToolbarHtml() {
   return `
-    <div class="stock-eyebrow-row">
-      <span class="stock-eyebrow-pill">${picto('boite')}${trad('Gestion des pièces & logistique flotte')}</span>
-      <div>
-        <button type="button" class="stock-btn-outline" id="stock-pump-info">${picto('info')}<span>${trad('Principe de valorisation PUMP')}</span></button>
-      </div>
+    <div class="ui-barre is-droite">
+      <button type="button" class="ui-btn ui-btn-pastille" id="stock-pump-info">${picto('info')}<span>${trad('Principe de valorisation PUMP')}</span></button>
     </div>`;
 }
 function ouvrirExplicationPump() {
@@ -14983,40 +14969,26 @@ function stockKpiGridHtml() {
   const nbAlertes = UI.stockCounts?.seuilBas || 0;
   const nbMagasins = (UI.warehouses || []).filter((w) => w.active !== false).length;
   return `
-    <div class="stock-kpi-grid">
-      <div class="stock-kpi-card">
-        <div class="stock-kpi-head">
-          <span>${trad('Valeur totale du stock')}</span>
-          <div class="stock-kpi-icon is-blue">${picto('devise')}</div>
+    <section class="ui-section">
+      ${stockEyebrowToolbarHtml()}
+      <div class="ui-grille is-3">
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${trad('Valeur totale du stock')}</span>
+          <span class="ui-tuile-valeur">${gerant ? `${texteAvecSeparateurs(valeurTotale)}<small>${esc(deviseCourte())}</small>` : '—'}</span>
+          <span class="ui-tuile-note">${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</span>
         </div>
-        <div class="stock-kpi-value-row">
-          <div class="stock-kpi-value">${gerant
-            ? `${texteAvecSeparateurs(valeurTotale)} <span class="unite">${esc(deviseCourte())}</span>`
-            : '—'}</div>
-          <div class="stock-kpi-sub is-indigo"><span class="dot"></span>${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</div>
+        <div class="ui-tuile ${nbAlertes ? 'is-retard' : 'is-ok'}">
+          <span class="ui-tuile-etiquette">${trad('Références en alerte')}</span>
+          <span class="ui-tuile-valeur">${nbAlertes}</span>
+          <span class="ui-tuile-note">${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</span>
         </div>
-      </div>
-      <div class="stock-kpi-card">
-        <div class="stock-kpi-head">
-          <span>${trad('Références en alerte')}</span>
-          <div class="stock-kpi-icon is-amber">${picto('alerte')}</div>
-        </div>
-        <div class="stock-kpi-value-row">
-          <div class="stock-kpi-value">${nbAlertes}</div>
-          <div class="stock-kpi-sub${nbAlertes ? ' is-late' : ' is-ok'}"><span class="dot"></span>${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</div>
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${trad('Mouvements ce mois-ci')}</span>
+          <span class="ui-tuile-valeur" id="stock-kpi-mouvements">…</span>
+          <span class="ui-tuile-note">${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</span>
         </div>
       </div>
-      <div class="stock-kpi-card">
-        <div class="stock-kpi-head">
-          <span>${trad('Mouvements ce mois-ci')}</span>
-          <div class="stock-kpi-icon is-indigo">${picto('calendrier')}</div>
-        </div>
-        <div class="stock-kpi-value-row">
-          <div class="stock-kpi-value" id="stock-kpi-mouvements">…</div>
-          <div class="stock-kpi-sub"><span class="dot"></span>${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</div>
-        </div>
-      </div>
-    </div>`;
+    </section>`;
 }
 
 // ── Magasins ── CRUD réservé au gérant (peutGererParametresStock), même
@@ -15028,70 +15000,59 @@ function stockKpiGridHtml() {
 function ligneMagasinHtml(w) {
   const gerant = peutGererParametresStock();
   return `
-    <div class="stock-row" data-magasin-id="${esc(w.id)}">
-      <div class="stock-row-gauche">
-        <div class="stock-row-icone" style="background:rgba(222,122,22,.08);color:var(--late);">${picto(w.kind === 'mobile' ? 'vehicule' : 'batiment')}</div>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(w.name)}</span>${w.active === false ? `<span class="stock-tag">${trad('Inactif')}</span>` : ''}</div>
-          <div class="stock-row-sub">${w.kind === 'mobile' ? trad('Magasin mobile') : trad('Magasin central')}${w.note ? ' · ' + esc(w.note) : ''}</div>
+    <div class="ui-ligne is-deux" data-magasin-id="${esc(w.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone is-ambre">${picto(w.kind === 'mobile' ? 'vehicule' : 'batiment')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(w.name)}${w.active === false ? `<span class="ui-tag">${trad('Inactif')}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${w.kind === 'mobile' ? trad('Magasin mobile') : trad('Magasin central')}${w.note ? ' · ' + esc(w.note) : ''}</span>
         </div>
       </div>
       ${gerant ? `
-      <div class="stock-row-actions">
-        <button type="button" data-magasin-modifier="${esc(w.id)}" title="${esc(trad('Modifier'))}" aria-label="${esc(tR('Modifier {nom}', { nom: w.name }))}">${picto('crayon')}</button>
-        <button type="button" class="is-danger" data-magasin-retirer="${esc(w.id)}" title="${esc(trad('Supprimer'))}" aria-label="${esc(tR('Supprimer {nom}', { nom: w.name }))}">${picto('corbeille')}</button>
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-icone" data-magasin-modifier="${esc(w.id)}" title="${esc(trad('Modifier'))}" aria-label="${esc(tR('Modifier {nom}', { nom: w.name }))}">${picto('crayon')}</button>
+        <button type="button" class="ui-btn ui-btn-icone is-danger" data-magasin-retirer="${esc(w.id)}" title="${esc(trad('Supprimer'))}" aria-label="${esc(tR('Supprimer {nom}', { nom: w.name }))}">${picto('corbeille')}</button>
       </div>` : ''}
     </div>`;
 }
 function blocMagasinsStockHtml() {
   const magasins = UI.warehouses || [];
   const gerant = peutGererParametresStock();
-  const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="hint">${trad('Aucun magasin pour l\'instant — crée le magasin central pour commencer.')}</div>`;
+  const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="ui-aide">${trad('Aucun magasin pour l\'instant — crée le magasin central pour commencer.')}</div>`;
   return `
-    <section class="stock-section" id="stock-magasins-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-blue">${picto('batiment')}</div>
-          <div>
-            <div class="stock-section-titre-row">
-              <h2 class="stock-section-titre">${trad('Magasins')}</h2>
-              <span class="stock-section-badge is-blue">${tR('{n} magasin(s)', { n: magasins.length })}</span>
-            </div>
-            <p class="stock-section-sub">${trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.')}</p>
+    <section class="ui-section" id="stock-magasins-section">
+      ${teteSectionKit('batiment', trad('Magasins'), trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.'),
+        `<span class="ui-tag">${tR('{n} magasin(s)', { n: magasins.length })}</span>`)}
+      <div class="ui-section-corps">
+        ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant.')}</div>`}
+        <div class="ui-liste" id="stock-magasins-liste">${liste}</div>
+        ${gerant ? `
+        <div class="ui-groupe">
+          <div class="ui-groupe-tete">${picto('plusCercle')}<span class="ui-groupe-titre" id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
+          <div class="ui-champ-groupe">
+            <label class="sr-only" for="stock-magasin-nom">${trad('Nom')}</label>
+            <input id="stock-magasin-nom" class="ui-champ" required placeholder="${trad('Nom (ex : Magasin central, Fourgon Paul…)')}">
           </div>
-        </div>
-      </div>
-      <div class="stock-section-body">
-      ${gerant ? `
-      <div class="stock-grid-2 is-magasins">
-        <div class="stock-liste" id="stock-magasins-liste">${liste}</div>
-        <div class="stock-form-panel">
-          <div class="stock-form-tete">${picto('plusCercle')}<span id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
-          <label class="sr-only" for="stock-magasin-nom">${trad('Nom')}</label>
-          <input id="stock-magasin-nom" required placeholder="${trad('Nom (ex : Magasin central, Fourgon Paul…)')}">
-          <div class="stock-field-row">
-            <div>
+          <div class="ui-grille">
+            <div class="ui-champ-groupe">
               <label class="sr-only" for="stock-magasin-kind">${trad('Type')}</label>
-              <div class="stock-select-wrap">
-                <select id="stock-magasin-kind">
+              <div class="ui-select-wrap">
+                <select id="stock-magasin-kind" class="ui-champ">
                   <option value="central">${trad('Magasin central')}</option>
                   <option value="mobile">${trad('Magasin mobile (fourgon)')}</option>
                 </select>
                 ${picto('chevronBas')}
               </div>
             </div>
-            <div>
+            <div class="ui-champ-groupe">
               <label class="sr-only" for="stock-magasin-note">${trad('Note')}</label>
-              <input id="stock-magasin-note" placeholder="${trad('Note (optionnel)')}">
+              <input id="stock-magasin-note" class="ui-champ" placeholder="${trad('Note (optionnel)')}">
             </div>
           </div>
-          <button type="button" class="stock-cta" id="stock-magasin-ajouter">${picto('plusCercle')}<span>${trad('Ajouter le magasin')}</span></button>
-          <button type="button" class="stock-cta-annuler" id="stock-magasin-annuler" hidden>${trad('Annuler la modification')}</button>
-          <div class="hint" id="stock-magasin-msg" role="status" aria-live="polite"></div>
-        </div>
-      </div>` : `
-      <div class="hint">${trad('Réservé au gérant.')}</div>
-      <div class="stock-liste" style="margin-top:10px;">${liste}</div>`}
+          <div><button type="button" class="ui-btn ui-btn-plein" id="stock-magasin-ajouter">${picto('plusCercle')}<span>${trad('Ajouter le magasin')}</span></button></div>
+          <div><button type="button" class="ui-btn ui-btn-pastille" id="stock-magasin-annuler" hidden>${trad('Annuler la modification')}</button></div>
+          <div class="ui-aide" id="stock-magasin-msg" role="status" aria-live="polite"></div>
+        </div>` : ''}
       </div>
     </section>`;
 }
@@ -15106,53 +15067,41 @@ function ligneInventaireStockHtml(it) {
   const seuil = it.reorder_point ?? piece?.default_reorder_point ?? null;
   const enAlerte = seuil != null && Number(it.quantity) <= Number(seuil);
   return `
-    <div class="stock-row">
-      <div class="stock-row-gauche">
-        <div class="stock-row-icone">${picto('boite')}</div>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece ? piece.designation : designationPiece(it.part_id))}</span>${piece?.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="stock-tag is-alert">${trad('Seuil bas')}</span>` : ''}</div>
-          <div class="stock-row-sub">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</div>
+    <div class="ui-ligne is-deux${enAlerte ? ' is-retard' : ''}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('boite')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}${piece?.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="ui-statut is-retard">${trad('Seuil bas')}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</span>
         </div>
       </div>
-      <div class="stock-row-valeur">
-        <span class="montant">${texteAvecSeparateurs(it.quantity)}</span>
-        ${gerant ? `<span class="unite">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
+      <div class="ui-ligne-action">
+        <div class="ui-chiffre is-droite">
+          <span class="ui-chiffre-valeur">${texteAvecSeparateurs(it.quantity)}</span>
+          ${gerant ? `<span class="ui-ligne-sous">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
+        </div>
       </div>
     </div>`;
 }
 function blocInventaireStockHtml() {
   const magasins = UI.warehouses || [];
   return `
-    <section class="stock-section" id="stock-inventaire-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-ok">${picto('boite')}</div>
-          <div>
-            <div class="stock-section-titre-row">
-              <h2 class="stock-section-titre">${trad('Inventaire')}</h2>
-              <span class="stock-section-badge is-ok" id="stock-inventaire-badge"></span>
-            </div>
-            <p class="stock-section-sub">${trad('Quantités physiques en stock par référence et valorisation unitaire')}</p>
-          </div>
-        </div>
-        <button type="button" class="stock-btn-outline" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
-      </div>
-      <div class="stock-section-body">
-        <div class="stock-field-row" style="grid-template-columns:2fr 1fr;margin-bottom:16px;">
-          <div class="stock-search">
-            ${picto('recherche')}
-            <input id="stock-inventaire-filtre" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
-          </div>
-          <div class="stock-select-wrap">
-            <select id="stock-inventaire-magasin">
+    <section class="ui-section" id="stock-inventaire-section">
+      ${teteSectionKit('boite', trad('Inventaire'), trad('Quantités physiques en stock par référence et valorisation unitaire'),
+        `<span class="ui-tag" id="stock-inventaire-badge"></span><button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
+      <div class="ui-section-corps">
+        <div class="ui-barre">
+          <input id="stock-inventaire-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
+          <div class="ui-select-wrap">
+            <select id="stock-inventaire-magasin" class="ui-champ">
               <option value="">${trad('Tous les magasins')}</option>
               ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
             </select>
             ${picto('chevronBas')}
           </div>
         </div>
-        <div class="stock-liste is-scroll" id="stock-inventaire-liste"></div>
-        <div class="hint" id="stock-inventaire-vide"></div>
+        <div class="ui-liste is-defilant" id="stock-inventaire-liste"></div>
+        <div class="ui-aide" id="stock-inventaire-vide"></div>
       </div>
     </section>`;
 }
@@ -15163,44 +15112,33 @@ function blocInventaireStockHtml() {
 // mouvement » réservé à peutGererMouvementsStock() (gérant+mécanicien).
 function ligneMouvementStockHtml(m) {
   const badge = badgeTypeMouvement(m.type);
+  const classeStatut = { ok: 'is-ok', alert: 'is-retard', soon: 'is-bientot' }[badge.classe] || '';
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(m.part_id));
   const lieu = m.type === 'transfert'
     ? `${nomMagasin(m.warehouse_id)} → ${nomMagasin(m.destination_warehouse_id)}`
     : nomMagasin(m.warehouse_id);
   const negatif = m.type === 'sortie' || (m.type === 'ajustement' && Number(m.quantity) < 0);
   return `
-    <div class="stock-row">
-      <div class="stock-row-gauche">
-        <span class="stock-badge-mouvement is-${badge.classe}">${badge.texte}</span>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(piece ? piece.designation : designationPiece(m.part_id))}</span>${piece?.packaging ? `<span class="stock-tag">${esc(piece.packaging)}</span>` : ''}</div>
-          <div class="stock-row-sub">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</div>
+    <div class="ui-ligne is-deux">
+      <div class="ui-ligne-id">
+        <span class="ui-statut ${classeStatut}">${badge.texte}</span>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(piece ? piece.designation : designationPiece(m.part_id))}${piece?.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${esc(lieu)} · ${formatDateHeureMouvement(m.performed_at)}${m.reason ? ' · ' + esc(m.reason) : ''}</span>
         </div>
       </div>
-      <div class="stock-mouvement-valeur is-${badge.classe}">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</div>
+      <div class="ui-ligne-action"><span class="ui-chiffre-valeur ${classeStatut}">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</span></div>
     </div>`;
 }
 function blocMouvementsStockHtml() {
   const peut = peutGererMouvementsStock();
   return `
-    <section class="stock-section" id="stock-mouvements-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-indigo">${picto('calendrier')}</div>
-          <div>
-            <h2 class="stock-section-titre">${trad('Mouvements')}</h2>
-            <p class="stock-section-sub" style="color:var(--primary-dark);font-weight:600;">${trad('Entrées, sorties, transferts et ajustements')}</p>
-          </div>
-        </div>
-        ${peut ? `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button type="button" class="stock-btn-outline" id="stock-mouvements-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>
-          <button type="button" class="stock-btn-outline" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>
-        </div>` : ''}
-      </div>
-      <div class="stock-section-body">
-        <div class="stock-liste is-scroll" id="stock-mouvements-liste"><div class="hint">${trad('Chargement…')}</div></div>
-        <button type="button" class="stock-cta" id="stock-mouvements-plus" hidden style="margin-top:14px;">${trad('Voir plus')}</button>
+    <section class="ui-section" id="stock-mouvements-section">
+      ${teteSectionKit('calendrier', trad('Mouvements'), trad('Entrées, sorties, transferts et ajustements'),
+        peut ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button><button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : '')}
+      <div class="ui-section-corps">
+        <div class="ui-liste is-defilant" id="stock-mouvements-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
+        <div class="ui-barre is-centre"><button type="button" class="ui-btn ui-btn-teinte" id="stock-mouvements-plus" hidden>${trad('Voir plus')}</button></div>
       </div>
     </section>`;
 }
@@ -15213,42 +15151,31 @@ function ligneKitHtml(kit) {
   const gerant = peutGererParametresStock();
   const nbLignes = lignesKit(kit.id).length;
   return `
-    <div class="stock-row" data-kit-id="${esc(kit.id)}">
-      <div class="stock-row-gauche">
-        <div class="stock-row-icone" style="background:rgba(222,122,22,.08);color:var(--late);">${picto('mallette')}</div>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(kit.name)}</span>${kit.active === false ? `<span class="stock-tag">${trad('Inactif')}</span>` : ''}</div>
-          <div class="stock-row-sub">${tR('{n} pièce(s)', { n: nbLignes })}${kit.note ? ' · ' + esc(kit.note) : ''}</div>
+    <div class="ui-ligne is-deux" data-kit-id="${esc(kit.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone is-ambre">${picto('mallette')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(kit.name)}${kit.active === false ? `<span class="ui-tag">${trad('Inactif')}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${tR('{n} pièce(s)', { n: nbLignes })}${kit.note ? ' · ' + esc(kit.note) : ''}</span>
         </div>
       </div>
       ${gerant ? `
-      <div class="stock-row-actions">
-        <button type="button" data-kit-modifier="${esc(kit.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
-        <button type="button" class="is-danger" data-kit-retirer="${esc(kit.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-icone" data-kit-modifier="${esc(kit.id)}" title="${esc(trad('Modifier'))}">${picto('crayon')}</button>
+        <button type="button" class="ui-btn ui-btn-icone is-danger" data-kit-retirer="${esc(kit.id)}" title="${esc(trad('Supprimer'))}">${picto('corbeille')}</button>
       </div>` : ''}
     </div>`;
 }
 function blocKitsEntretienStockHtml() {
   const kits = UI.maintenanceKits || [];
   const peut = peutGererParametresStock();
-  const liste = kits.length ? kits.map(ligneKitHtml).join('') : `<div class="hint">${trad('Aucun kit pour l\'instant — un kit regroupe les pièces nécessaires à une étape d\'entretien.')}</div>`;
+  const liste = kits.length ? kits.map(ligneKitHtml).join('') : `<div class="ui-aide">${trad('Aucun kit pour l\'instant — un kit regroupe les pièces nécessaires à une étape d\'entretien.')}</div>`;
   return `
-    <section class="stock-section" id="stock-kits-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-amber">${picto('mallette')}</div>
-          <div>
-            <div class="stock-section-titre-row">
-              <h2 class="stock-section-titre">${trad('Kits d\'entretien')}</h2>
-              <span class="stock-section-badge is-amber">${tR('{n} kit(s)', { n: kits.length })}</span>
-            </div>
-            <p class="stock-section-sub">${trad('Un kit regroupe les pièces nécessaires à une étape d\'entretien — à relier depuis la fiche d\'une machine pour anticiper les besoins.')}</p>
-          </div>
-        </div>
-        ${peut ? `<button type="button" class="stock-btn-outline" id="stock-kit-nouveau">${picto('plusCercle')}<span>${trad('Nouveau kit')}</span></button>` : ''}
-      </div>
-      <div class="stock-section-body">
-        <div class="stock-liste is-scroll" id="stock-kits-liste">${liste}</div>
+    <section class="ui-section" id="stock-kits-section">
+      ${teteSectionKit('mallette', trad('Kits d\'entretien'), trad('Un kit regroupe les pièces nécessaires à une étape d\'entretien — à relier depuis la fiche d\'une machine pour anticiper les besoins.'),
+        `<span class="ui-tag">${tR('{n} kit(s)', { n: kits.length })}</span>${peut ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-kit-nouveau">${picto('plusCercle')}<span>${trad('Nouveau kit')}</span></button>` : ''}`)}
+      <div class="ui-section-corps">
+        <div class="ui-liste is-defilant" id="stock-kits-liste">${liste}</div>
       </div>
     </section>`;
 }
@@ -15406,18 +15333,21 @@ function ligneBesoinRisqueHtml(produit) {
   const texteEtat = couv.commanderAvantLe
     ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) })
     : libelleCouverturePiece(couv.state);
+  const classeEtat = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[couv.state] || '';
   return `
-    <div class="stock-row">
-      <div class="stock-row-gauche">
-        <div class="stock-row-icone">${picto('boite')}</div>
-        <div class="stock-row-corps">
-          <div class="stock-row-titre-ligne"><span class="stock-row-titre">${esc(produit.label)}</span><span class="badge ${badgeClass(couv.state)}">${esc(texteEtat)}</span></div>
-          <div class="stock-row-sub">${produit.kitNom ? esc(produit.kitNom) : ''}${produit.tacheLabel ? ' · ' + esc(produit.tacheLabel) : ''}</div>
+    <div class="ui-ligne is-deux ${classeEtat}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('boite')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(produit.label)}<span class="ui-statut ${classeEtat}">${esc(texteEtat)}</span></span>
+          <span class="ui-ligne-sous">${produit.kitNom ? esc(produit.kitNom) : ''}${produit.tacheLabel ? ' · ' + esc(produit.tacheLabel) : ''}</span>
         </div>
       </div>
-      <div class="stock-row-valeur">
-        <span class="montant">${texteAvecSeparateurs(couv.stockDisponible)}/${texteAvecSeparateurs(couv.besoin)}</span>
-        <span class="unite">${trad('dispo/besoin')}</span>
+      <div class="ui-ligne-action">
+        <div class="ui-chiffre is-droite">
+          <span class="ui-chiffre-valeur">${texteAvecSeparateurs(couv.stockDisponible)}/${texteAvecSeparateurs(couv.besoin)}</span>
+          <span class="ui-ligne-sous">${trad('dispo/besoin')}</span>
+        </div>
       </div>
     </div>`;
 }
@@ -15429,22 +15359,12 @@ function blocBesoinsRisqueStockHtml() {
     .filter((p) => p.stockCouverture && p.stockCouverture.solde < 0)
     .sort((a, b) => (ordreGravite[a.stockCouverture.state] ?? 9) - (ordreGravite[b.stockCouverture.state] ?? 9));
   return `
-    <section class="stock-section" id="stock-besoins-risque-section">
-      <div class="stock-section-head">
-        <div class="stock-section-head-gauche">
-          <div class="stock-section-icon is-amber">${picto('alerte')}</div>
-          <div>
-            <div class="stock-section-titre-row">
-              <h2 class="stock-section-titre">${trad('Besoins à risque')}</h2>
-              <span class="stock-section-badge is-amber">${tR('{n} pièce(s)', { n: aRisque.length })}</span>
-            </div>
-            <p class="stock-section-sub">${tR('Pièces reliées à un kit dont le stock ne couvrira pas les entretiens des {n} prochains jours.', { n: horizon })}</p>
-          </div>
-        </div>
-      </div>
-      <div class="stock-section-body">
-        <div class="stock-liste is-scroll">
-          ${aRisque.length ? aRisque.map(ligneBesoinRisqueHtml).join('') : `<div class="hint">${trad('Aucune pièce à risque pour l\'instant.')}</div>`}
+    <section class="ui-section" id="stock-besoins-risque-section">
+      ${teteSectionKit('alerte', trad('Besoins à risque'), tR('Pièces reliées à un kit dont le stock ne couvrira pas les entretiens des {n} prochains jours.', { n: horizon }),
+        `<span class="ui-tag">${tR('{n} pièce(s)', { n: aRisque.length })}</span>`)}
+      <div class="ui-section-corps">
+        <div class="ui-liste is-defilant">
+          ${aRisque.length ? aRisque.map(ligneBesoinRisqueHtml).join('') : `<div class="ui-aide">${trad('Aucune pièce à risque pour l\'instant.')}</div>`}
         </div>
       </div>
     </section>`;
@@ -15909,24 +15829,25 @@ function ouvrirImportMouvementsStock() {
 }
 
 VIEWS.stock = {
+  fondBlanc: true,
   title: trad('Stocks & SAV'),
   subtitle: () => trad('Magasins, mouvements et valorisation du stock'),
   render() {
     return `
-      <div class="vue-stock">
-        ${stockEyebrowToolbarHtml()}
+      <div class="ui-page">
         ${stockKpiGridHtml()}
-        ${blocMagasinsStockHtml()}
-        ${blocCatalogueTcoHtml()}
-        <div class="stock-grid-2 is-inventaire-mouvements">
-          ${blocInventaireStockHtml()}
-          ${blocMouvementsStockHtml()}
+        <div class="ui-colonnes">
+          <div class="ui-colonne">
+            ${blocMagasinsStockHtml()}
+            ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}
+            ${SCHEMA.hasKits ? blocBesoinsRisqueStockHtml() : ''}
+          </div>
+          <div class="ui-colonne">
+            ${blocInventaireStockHtml()}
+            ${blocMouvementsStockHtml()}
+          </div>
         </div>
-        ${SCHEMA.hasKits ? `
-        <div class="stock-grid-2 is-kits-risques">
-          ${blocKitsEntretienStockHtml()}
-          ${blocBesoinsRisqueStockHtml()}
-        </div>` : ''}
+        ${blocCatalogueTcoHtml()}
       </div>`;
   },
   mount() {
@@ -16116,7 +16037,7 @@ VIEWS.stock = {
       const visibles = mouvementsCharges.slice(0, limiteMouvements);
       liste.innerHTML = visibles.length
         ? visibles.map(ligneMouvementStockHtml).join('')
-        : `<div class="hint">${trad('Aucun mouvement enregistré pour l\'instant.')}</div>`;
+        : `<div class="ui-aide">${trad('Aucun mouvement enregistré pour l\'instant.')}</div>`;
       const plus = root.querySelector('#stock-mouvements-plus');
       if (plus) plus.hidden = limiteMouvements >= mouvementsCharges.length;
     };
@@ -16143,7 +16064,7 @@ VIEWS.stock = {
         }
       } catch (err) {
         const liste = root.querySelector('#stock-mouvements-liste');
-        if (liste) liste.innerHTML = `<div class="hint">${trad('Erreur de chargement :')} ${esc(err.message)}</div>`;
+        if (liste) liste.innerHTML = `<div class="ui-aide">${trad('Erreur de chargement :')} ${esc(err.message)}</div>`;
       }
     })();
     root.querySelector('#stock-mouvements-plus')?.addEventListener('click', () => {
