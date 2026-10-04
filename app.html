@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-mOMy3VlJa3QNEaIhU3x6RK1/t7V5kRvSzXjFui7/Zb8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Hg5h00i5K+S6xwF4pcBgqTTVSfYq8PPlTcBKFsHrMPs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -21965,9 +21965,11 @@ function openLogInterventionModal(machine, tache) {
       const montant = nombreDepuisTexte(coutChamp?.value);
       if (!montant || montant <= 0) return;
       montantHorsPieces += montant;
-      recalcTotalPieces();
+      // Les deux champs sont vidés AVANT le recalcul : le total du bas (« Valider… ») additionne
+      // main d'œuvre + pièces, il compterait sinon le montant deux fois (une fois dans chaque).
       if (coutChamp) coutChamp.value = '';
       if (heuresChamp) heuresChamp.value = '';
+      recalcTotalPieces();
     });
 
     // Lecture d'une facture par photo : propose un montant, ne l'enregistre
