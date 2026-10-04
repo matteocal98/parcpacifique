@@ -303,3 +303,10 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
 
 /* Zone de dépôt dans une section : un seul repère en pointillés (la zone intérieure), pas de double cadre */
 .ui-section .dropzone{border:none;}
+
+/* Cartes de même hauteur dans une grille à deux colonnes : la plus haute donne la hauteur,
+   le contenu se répartit (identité en haut, champ en bas) */
+.ui-deux.is-egal{align-items:stretch;grid-auto-rows:1fr;}
+.ui-deux.is-egal > .ui-liste{display:flex;flex-direction:column;}
+.ui-deux.is-egal > .ui-liste > .ui-ligne{flex:1 1 auto;align-content:space-between;}
+.ui-tag:empty{display:none;}
