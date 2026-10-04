@@ -41,16 +41,21 @@ faire AVANT de dire "c'est fait".
       SON rôle, pas un gris générique par défaut.
 - [ ] Le statut (retard/bientôt/à jour) se lit par un accent localisé (liseré,
       point, badge), jamais en recolorant tout le bloc.
-- [ ] **Règle « champs et listes » (référence : menu Stock, `.stock-liste` /
-      `.stock-row` / `.stock-form-panel`)** : les champs de saisie et les lignes
-      de liste sont en BLANC (`var(--surface)`). Quand ce qui est derrière eux est
-      déjà blanc (une carte blanche), c'est leur CONTENEUR qu'on teinte avec
-      `var(--surface-soft)` (= `rgba(14,19,51,.04)`, la seule valeur de contraste de
-      la charte) : une zone teintée portant des lignes blanches (bordure 1px
-      `var(--line)`, rayon `--r-md`). Un formulaire posé sur une carte blanche va dans
-      un panneau `.stock-form-panel` (`rgba(14,19,51,.015)` + bordure) et ses champs
-      y sont blancs. Un champ DANS une ligne blanche garde le fond par défaut des
-      champs (`--surface-soft`). Jamais un bloc teinté dans un parent de même teinte.
+- [ ] **Règle « flottant partout » (décidée avec l'utilisateur le 2026-10-04 ;
+      référence : Parc Machines, Plan d'entretien)** : AUCUNE grande carte blanche
+      qui contient d'autres choses. Le titre d'un bloc, ses champs et ses lignes
+      reposent DIRECTEMENT sur le fond de page teinté. Les éléments sont blancs avec
+      `var(--shadow-soft)` et sans bordure : champs de saisie, pastilles de filtre,
+      lignes de liste, cartes de machine/de manuel, zones de dépôt. Une barre de
+      filtres n'est donc PAS un bloc blanc : c'est un champ de recherche blanc +
+      des puces blanches posées sur le fond. Un champ placé DANS un élément déjà
+      blanc (une ligne de liste) garde le fond par défaut des champs
+      (`--surface-soft` = `rgba(14,19,51,.04)`, la seule teinte de contraste). Les
+      fenêtres (modales) ont leur propre fond teinté et des champs blancs. Exceptions
+      acceptées : les cartes qui sont elles-mêmes UN élément (carte de chiffre clé,
+      alerte, machine). Au 2026-10-04 les menus Machines, Plan d'entretien et
+      Télémétrie suivent la règle ; restent à convertir : Mon compte, Rappels,
+      Coûts & TCO, Stock & SAV, Tableau de bord, Agenda.
 
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —

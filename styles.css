@@ -7303,9 +7303,9 @@
   .tele-badge{display:inline-block;align-self:flex-start;margin-top:6px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--ok-bg);color:var(--ok-ink);}
   .tele-badge.is-attente{background:var(--surface-soft);color:var(--ink-2);}
   .tele-badge.is-silence{background:var(--late-bg);color:var(--late);}
-  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);}
-  /* Zone teintée (--surface-soft = rgba(14,19,51,.04)) qui porte les lignes blanches : même règle que .stock-liste. */
-  .tele-carte #acc-tele-liste:has(.tele-source-ligne),.tele-carte #acc-tele-machines:has(.tele-ligne){display:flex;flex-direction:column;gap:10px;background:var(--surface-soft);border-radius:var(--r-card);padding:10px;}
+  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:13px 14px;border:none;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+  /* Style flottant (charte) : les lignes sont des cartes blanches posées directement sur le fond de page. */
+  .tele-carte #acc-tele-liste:has(.tele-source-ligne),.tele-carte #acc-tele-machines:has(.tele-ligne){display:flex;flex-direction:column;gap:10px;}
   .tele-carte .tele-source-ligne{grid-template-columns:minmax(0,1fr);}
   .tele-carte .tele-ligne{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;}
   .tele-carte .tele-ligne .tele-nom{grid-column:1/-1;}
@@ -7321,3 +7321,13 @@
     .tele-carte .tele-ligne,.tele-carte .tele-creation-ligne{grid-template-columns:1fr;}
     .tele-carte .tele-source-ligne{grid-template-columns:1fr;}
   }
+
+  /* ═══ TÉLÉMÉTRIE — style flottant (charte, 2026-10-04) ═══
+     Aucune grande carte blanche : le titre de chaque bloc, ses champs et ses lignes reposent
+     directement sur le fond de page. Les éléments (champs du haut, lignes, bloc du jeton)
+     sont blancs avec l'ombre légère ; un champ DANS une ligne blanche garde le gris par défaut. */
+  .vue-telemetrie > section.card{background:none;box-shadow:none;padding:0;border-radius:0;}
+  .vue-telemetrie .tele-carte-zone{box-shadow:var(--shadow-soft);}
+  .tele-carte .tele-creation input,.tele-carte .tele-creation select,
+  .tele-carte .tele-aemp input,.tele-carte .tele-aemp select{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  .tele-carte .tele-jeton{background:var(--surface);box-shadow:var(--shadow-soft);}
