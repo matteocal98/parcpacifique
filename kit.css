@@ -36,18 +36,12 @@
    ============================================================================ */
 
 /* Couleur de fond d'un bloc de section (choisie par l'utilisateur le 2026-10-04 : un orange doux, plus contrasté
-   que l'ancien gris) = --late (#DE7A16) à 14 % d'opacité SUR BLANC, soit #FAECDE. Écrite en couleur pleine : le fond
-   de page n'étant plus blanc, une version transparente changerait de teinte en se mélangeant à lui.
-   Pour la changer partout : cette seule ligne.
-   --fond-page : fond principal de l'application (choisi le 2026-10-05) = rgba(14,19,51,.08) ; --fond-page-plein est
-   son équivalent opaque sur blanc, pour les éléments fixes qui ne doivent pas laisser voir ce qui défile dessous. */
-:root{--fond-bloc:#FAECDE;--fond-modale:#F2F4F8;--fond-page:rgba(14,19,51,.08);--fond-page-plein:#ECECEF;}
+   que l'ancien gris) = --late (#DE7A16) à 14 % d'opacité. Pour la changer partout : cette seule ligne. */
+:root{--fond-bloc:rgba(222,122,22,.14);--fond-modale:#F2F4F8;}
 
-/* Fond principal de l'application : posé par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc —
-   le nom date de l'époque où la page était blanche) */
-body.fond-blanc{--bg:var(--fond-page);}
-body.fond-blanc .main{background:transparent;}
-body.fond-blanc::before{background:var(--fond-page-plein);}
+/* Page blanche : posée par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc) */
+body.fond-blanc{--bg:var(--surface);}
+body.fond-blanc .main{background:var(--surface);}
 
 /* ── 1. Section : un bloc teinté (titre + contenu) posé sur la page blanche ──────── */
 .ui-section{display:flex;flex-direction:column;gap:14px;margin:0 0 20px;padding:20px;border-radius:var(--r-card);background:var(--fond-bloc);}
