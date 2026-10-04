@@ -270,7 +270,9 @@
   a:hover{color:var(--primary-dark);text-decoration:underline;}
 
   /* Chiffres techniques : Space Grotesk + tabular nums (spec README) */
-  .num,.stat-card .num,.counter,.ref-table .counter{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;}
+  .num,
+  .counter,
+  .ref-table .counter{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;}
 
   /* ------------------------------------------------------------
      Coquille : sidebar (desktop) / barre d'onglets (mobile)
@@ -552,7 +554,7 @@
      une règle générale sur « .card-title svg » l'aurait écrasé à sa place. */
   .card-ico{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--ink-2);}
   .card-ico svg{display:block;width:18px;height:18px;}
-  .card-title-sm{font-size:15px;font-weight:700;}
+  
   .card-head .spacer{margin-left:auto;}
   .muted-text{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0;}
 
@@ -563,22 +565,7 @@
      porte la teinte d'état (décorative, 8 px), le CHIFFRE reste à l'encre —
      l'ambre en texte sur blanc donne 3,04:1 et l'indigo 4,47:1 : sous la barre,
      ils ne portent jamais de texte (DESIGN.md §6.3, audit §3.1). */
-  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-  .stat-card{
-    background:var(--surface);border-radius:14px;padding:16px;
-    box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:4px;
-  }
-  .stat-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .stat-point{width:8px;height:8px;border-radius:999px;flex-shrink:0;}
-  .stat-point.late{background:var(--late);}
-  .stat-point.soon{background:var(--soon);}
-  .stat-point.ok{background:var(--ok);}
-  .stat-point.primary{background:var(--primary-dark);}
-  .stat-card .num{font-size:31px;font-weight:700;line-height:1;}
-  .stat-card .num.late{color:var(--late-ink);}
-  .stat-card .num.soon{color:var(--soon-ink);}
-  .stat-card .num.ok{color:var(--ok-ink);}
-  .stat-card .num.primary{color:var(--primary-dark);}
+
   /* ★ LOT 8 — LE CHIFFRE PORTE LA COULEUR DE SON ÉTAT, ET LA TUILE RESTE
      BLANCHE. Le lot 6 avait mis la couleur dans un VOILE DE FOND (le client :
      « les tuiles ont le fond coloré, mais ce que je souhaite c'est la police de
@@ -586,32 +573,16 @@
      fond blanc, à 31 px, où la barre WCAG est 3:1 : ambre 3,04 · bleu roi 4,75 ·
      olive 3,07 · encre 18,11. La turquoise (2,49) et le cyan (2,55) échouent
      même à 3:1 : aucun des deux ne peut écrire ici. */
-  .stat-card .num.etat-late{color:var(--late);}
-  .stat-card .num.etat-soon{color:#236FE0;}
-  .stat-card .num.etat-ok{color:#8B9B37;}
-  .stat-card .num.etat-manuels{color:var(--ink);}
+
   /* Le mot de la maquette, sous le chiffre (« intervention », « à planifier »,
      « machines », « indexés ») : petit texte, donc à l'encre — 18,11 sur blanc. */
-  .stat-card .stat-mot{font-size:12px;font-weight:600;color:var(--ink-2);}
+  
   /* Reprise Stitch « Tableau de bord » — la phrase complète sous le chiffre
      (« 0 intervention en retard »), en plus du mot court déjà là. */
-  .stat-card .stat-sub{display:block;font-size:11px;font-weight:500;color:var(--ink-2);margin-top:2px;}
+  
   /* La vignette d'icône teintée du 4ᵉ bloc, et la pastille d'état de la
      maquette. Sur téléphone la pastille s'efface au profit des mots : deux
      pastilles de plus sur 390 px ne se liraient pas. */
-  .stat-card .stat-ico{
-    width:22px;height:22px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-    background:var(--primary-tint);color:var(--primary-dark);
-  }
-  .stat-card .stat-ico svg{width:14px;height:14px;}
-  .stat-card .stat-etat{display:none;font-weight:800;font-size:12px;}
-  .stat-card.tuile-late .stat-etat{color:var(--late);}
-  .stat-card.tuile-soon .stat-etat{color:#236FE0;}
-  .stat-card.tuile-ok .stat-etat{color:#8B9B37;}
-  .stat-card.tuile-primary .stat-etat{color:var(--ink);}
-  @media (min-width:900px){ .stat-card .stat-etat{display:inline-flex;} }
-  .stat-card .lbl{font-size:12px;line-height:1.4;font-weight:600;color:var(--ink-2);}
-  @media (min-width:900px){ .stat-grid{grid-template-columns:repeat(4,1fr);gap:14px;} }
 
   /* Le bandeau du haut : UN BLOC PAR TÂCHE EN RETARD.
      Règle de disposition demandée : les blocs vont par paires, et un bloc seul
@@ -627,7 +598,7 @@
   .priorities > .priority:last-child:nth-child(odd){flex-basis:100%;}
   /* Bloc au niveau du PLAN (aucune tâche n'est en retard) : la mention le dit
      sans détour, et ne nomme aucune tâche. */
-  .priority-mention{font-size:13px;line-height:1.45;color:rgba(255,255,255,.78);}
+  
   @media (max-width:720px){
     .priorities > .priority{flex-basis:100%;}
   }
@@ -646,21 +617,11 @@
   }
   /* Lueur décorative du mockup (dégradé signature-fr en coin, flouté) — pure
      décoration, jamais un signal, placée derrière le contenu (z-index). */
-  .priority-glow{position:absolute;right:-40px;bottom:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(36,181,168,.35),transparent 70%);pointer-events:none;}
-  .priority-icone{position:relative;flex:0 0 auto;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-  .priority-icone svg{width:28px;height:28px;}
-  .priority-texte{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-  .priority-eyebrow-pill{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:var(--primary-dark);padding:3px 10px;border-radius:var(--r-pill);}
-  .priority-nom{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.01em;color:#fff;}
-  .priority-id{font-size:12px;color:rgba(255,255,255,.7);font-family:'Space Grotesk',sans-serif;}
-  .priority-phrase{margin:2px 0 0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.92);}
-  .priority-phrase strong{color:#fff;font-weight:700;}
-  .priority-corps{display:flex;gap:14px;position:relative;}
-  .priority-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+
   .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--sur-primaire);}
   /* Le genre d'engin, en légende : c'est le mot que le client a saisi dans la
      catégorie de la machine (« PELLE HYDRAULIQUE »), jamais une marque. */
-  .priority-genre{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--dark-ink);}
+  
   /* Une pastille PLEINE ne porte un texte que si le contraste MESURÉ atteint
      4,5:1. Sur l'ambre, le blanc donne 3,04:1 et l'encre 5,95:1 → l'encre.
      Sur l'indigo, le blanc donne 4,47:1 et l'encre 4,05:1 : les DEUX sont sous
@@ -682,40 +643,19 @@
      passe en 15 px dans l'encart — comme la maquette. */
   .priority h2{margin:0;font-size:15px;font-weight:700;line-height:1.15;}
   .priority .machine-name{font-size:25px;font-weight:800;line-height:1.15;color:#fff;}
-  .priority-tache{
-    display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;
-    background:rgba(255,255,255,.08);
-  }
-  .priority-tache-echeance{font-size:12px;line-height:1.4;color:var(--dark-ink);}
-  .priority-compteur{display:flex;align-items:baseline;gap:8px;}
-  .priority-compteur .val{
-    font-family:'Space Grotesk',sans-serif;font-size:31px;font-weight:700;line-height:1;
-    font-variant-numeric:tabular-nums;color:var(--ok);
-  }
-  .priority-compteur .depassement{font-size:12px;font-weight:700;color:var(--late);}
-  .priority-stats{display:flex;gap:20px;padding-top:12px;border-top:1px solid rgba(255,255,255,.22);}
-  .priority-stats .stat{display:flex;flex-direction:column;gap:4px;}
-  .priority-stats .val{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
-  .priority-stats .key{font-size:12px;line-height:1.4;font-weight:600;color:var(--sur-primaire);}
-  .priority-actions{display:flex;gap:8px;}
+
   /* La hauteur de commande commune (44 px) : le bouton de la carte prioritaire
      était le plus court de l'application, sur l'action la plus fréquente. */
-  .priority-actions button{
-    flex:1;font-size:13.5px;font-weight:700;padding:12px 0;border-radius:12px;cursor:pointer;
-  }
+  
   /* Reprise Stitch « Tableau de bord » — les icônes picto() de ces boutons
      (ajuste/flecheDroite) n'ont pas de taille par défaut, contrairement aux
      anciens SVG à width/height codés en dur qu'elles remplacent : sans cette
      règle elles gonflent au rendu SVG par défaut du navigateur (déjà vu
      plusieurs fois cette session, voir keeva-tco-feature). */
-  .priority-actions button svg{width:18px;height:18px;flex:0 0 auto;}
-  .priority-actions .do{background:#fff;color:var(--primary-dark);border:none;}
-  .priority-actions .see{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}
+
   @media (min-width:900px){
     .priority{flex-direction:row;align-items:center;gap:28px;flex-wrap:wrap;}
-    .priority .priority-body{flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px;}
-    .priority-stats{border-top:none;padding-top:0;}
-    .priority-actions{flex:0 0 auto;min-width:260px;}
+
   }
 
   /* Liste des échéances */
@@ -785,29 +725,14 @@
      Chaque produit porte la COULEUR DE SA FAMILLE sur un TRAIT de 3 px à gauche :
      la teinte ne porte jamais le texte (le nom du produit est écrit à l'encre,
      plus de 16:1 sur le voile), et la famille se lit d'un coup d'œil. */
-  .prep-apercu{display:flex;flex-direction:column;gap:8px;}
-  .prep-ligne{
-    display:flex;flex-direction:column;gap:2px;
-    border-left:3px solid var(--line-3);border-radius:0 var(--r-chip) var(--r-chip) 0;
-    background:var(--surface-soft);padding:8px 12px;
-  }
-  .prep-ligne.famille-filtres{border-left-color:var(--cyan);}
-  .prep-ligne.famille-huiles{border-left-color:var(--late);}
+
   /* L'olive n'est pas un jeton de la feuille : sa teinte s'écrit en clair, comme
      dans signal/design-dashboard.patch. La palette ne s'agrandit pas pour
      autant — #8B9B37 est l'une des douze. */
-  .prep-ligne.famille-graisses{border-left-color:#8B9B37;}
-  .prep-ligne.famille-liquides{border-left-color:var(--primary);}
-  .prep-ligne.famille-usure{border-left-color:var(--primary-line);}
-  .prep-ligne.famille-autres{border-left-color:var(--line-3);}
-  .prep-ligne-nom{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--ink);}
-  .prep-ligne-machine{font-size:12px;font-weight:700;line-height:1.4;color:var(--ink-3);}
+
   /* Le total : une pastille d'état, donc du TEXTE À L'ENCRE sur son voile — le
      cyan sur blanc écrit 2,55:1, et n'écrit pas. */
-  .prep-ligne-total{
-    font-size:11px;font-weight:800;color:var(--ok-ink);background:var(--ok-bg);
-    border-radius:var(--r-pill);padding:2px 8px;align-self:flex-start;
-  }
+  
   .alert-bar{width:4px;height:38px;border-radius:4px;flex-shrink:0;}
   .alert-bar.late{background:var(--late);}
   .alert-bar.soon{background:var(--soon);}
@@ -849,34 +774,12 @@
      long se replie au lieu de pousser la ligne. Ces trois-là n'avaient pas
      d'ellipse, mais rien ne les empêchait de déborder sur un mot insécable. */
   .machine .m-main .name{overflow-wrap:anywhere;}
-  .prep-ligne-nom, .prep-ligne-machine{overflow-wrap:anywhere;}
 
   /* Reprise Stitch « Tableau de bord » — familles regroupées (icône + badge
      « N machines ») au lieu de lignes de produits isolées. Réutilise les
      classes .prep-ligne-nom/-machine/-total (mêmes tailles/couleurs) mais
      réagence .prep-ligne en ligne unique dans ce contexte précis, sans
      toucher au .prep-ligne EMPILÉ de l'écran Préparation complet. */
-  .prep-groupes-liste{display:flex;flex-direction:column;gap:10px;}
-  .prep-famille{background:var(--surface-soft);border:1px solid var(--line-2);border-radius:var(--r-md);padding:12px 14px;}
-  .prep-famille-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
-  .prep-famille-gauche{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--ink);}
-  .prep-famille-icone{flex:0 0 auto;width:26px;height:26px;border-radius:var(--r-chip);display:flex;align-items:center;justify-content:center;}
-  .prep-famille-icone svg{width:15px;height:15px;}
-  .prep-famille-icone.is-roi{background:rgba(35,111,224,.12);color:var(--bleu-roi);}
-  .prep-famille-icone.is-amber{background:var(--late-bg);color:var(--late);}
-  .prep-famille-icone.is-ok{background:var(--ok-bg);color:var(--ok);}
-  .prep-famille-icone.is-indigo{background:var(--soon-bg);color:var(--soon);}
-  .prep-famille-badge{font-size:10.5px;font-weight:800;text-transform:uppercase;padding:2px 8px;border-radius:var(--r-pill);background:var(--line-2);color:var(--ink-2);white-space:nowrap;}
-  .prep-famille .prep-ligne{flex-direction:row;align-items:baseline;flex-wrap:wrap;gap:6px;border-left:none;background:none;padding:6px 0 0;border-top:1px solid var(--line-2);border-radius:0;}
-  .prep-famille .prep-ligne-puce{width:6px;height:6px;border-radius:50%;background:var(--dark-ink);flex:0 0 auto;align-self:center;}
-  .prep-famille .prep-ligne-machine{color:var(--dark-ink);font-weight:500;}
-  .prep-famille .prep-ligne-total{margin-left:auto;}
-  .prep-pied{margin-top:6px;padding-top:12px;border-top:1px solid var(--line-2);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;}
-  .prep-pied-note{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dark-ink);}
-  .prep-pied-note svg{width:14px;height:14px;color:var(--ok);}
-  .prep-pied-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .prep-copier-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--ink);color:#fff;font-weight:700;font-size:16px;font-family:inherit;cursor:pointer;}
-  .prep-copier-btn svg{width:16px;height:16px;}
 
   /* Reprise Stitch « Precision Field Matrix » — bloc Agenda « Préparation des
      pièces et consommables » en liste COMPLÈTE (toutes les familles, tous les
@@ -890,35 +793,14 @@
      (row-gap ET column-gap), jamais plus dans le margin-top de chaque
      famille : un margin-top individuel n'aurait aligné que la 1ʳᵉ colonne
      (:first-child), pas la 2ᵉ, sur la première ligne de la grille. */
-  .prep-detail-groupes-grid{display:grid;grid-template-columns:1fr;row-gap:14px;column-gap:16px;}
-  @media (min-width:900px){ .prep-detail-groupes-grid{grid-template-columns:1fr 1fr;} }
-  .prep-detail-groupe{border-radius:var(--r-lg);background:var(--surface-soft);padding:14px 14px 10px;min-width:0;}
-  .prep-detail-groupe-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
-  .prep-detail-groupe-gauche{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .prep-detail-groupe-nom{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--ink);}
-  .prep-detail-groupe-corps{display:flex;flex-direction:column;gap:8px;}
-  .prep-detail-produit{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:var(--r-md);background:var(--surface);box-shadow:0 1px 2px rgba(14,19,51,.06);}
+
   /* Case cochée : fond plein bleu roi KALEA (--bleu-roi = #236FE0), coche
      blanche épaisse, carré 22×22 à coins adoucis — un vrai pictogramme
      « inclus dans cette liste », jamais un <input> qui ne changerait rien au
      clic (voir le commentaire de produitHtml() dans preparationHtml()). */
-  .prep-detail-produit .prep-case{flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:var(--bleu-roi);border:1px solid rgba(14,19,51,.18);display:flex;align-items:center;justify-content:center;margin-top:1px;}
-  .prep-detail-produit .prep-case svg{width:14px;height:14px;color:#fff;stroke-width:3;}
-  .prep-detail-produit-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
-  .prep-detail-produit-tete{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .prep-detail-produit-nom{font-size:14px;font-weight:700;color:var(--ink);}
-  .prep-detail-produit-spec{font-size:11.5px;font-weight:600;color:var(--ink-3);background:var(--surface-soft);padding:2px 7px;border-radius:6px;}
-  .prep-detail-produit-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-  .prep-detail-tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--surface-soft);padding:2px 8px;border-radius:6px;}
-  .prep-detail-produit-total{flex:0 0 auto;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;padding-top:1px;}
-  @media (max-width:480px){
-    .prep-detail-produit{flex-wrap:wrap;}
-    .prep-detail-produit-total{margin-left:28px;}
-  }
 
   /* ★ LOT 4 — LA LIGNE COMPACTE DU BLOC « PIÈCES & CONSOMMABLES ». */
-  .pieces-legende{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);}
-  .pieces-tete{display:flex;flex-direction:column;gap:4px;min-width:0;}
+
   /* ★ LOT 4 — LA LIGNE DU SERVICE D'ARRIÈRE-PLAN.
      Le point est un APLAT, pas une animation : le produit ne reçoit aucune
      donnée en direct, un point qui pulse annoncerait un temps réel qui n'existe
@@ -928,18 +810,12 @@
   .service-point.is-actif{background:var(--ok);}
 
   /* Bloc analyse du carnet */
-  .chip-icon{
-    width:30px;height:30px;border-radius:9px;background:var(--primary-tint);color:var(--primary-dark);
-    font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  }
+  
   .pill{font-size:11px;font-weight:700;padding:4px 8px;border-radius:var(--r-pill);}
   .pill.ok{color:var(--ok-ink);background:var(--ok-bg);}
   .pill.soon{color:var(--soon-ink);background:var(--soon-bg);}
   .pill.late{color:var(--late-ink);background:var(--late-bg);}
   .pill.neutral{color:var(--ink-2);background:var(--surface-soft);}
-  .ai-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;}
-  .ai-row span:first-child{color:var(--ink);font-weight:600;}
-  .ai-row span:last-child{color:var(--ink-2);}
 
   /* Zone de dépôt PDF */
   .dropzone{
@@ -970,40 +846,25 @@
      L'ancien bloc `.machine`/`.m-*` reste déclaré plus bas (mort, plus
      référencé par machineCardHtml) — pas retiré pour limiter le risque
      sur cette passe, à nettoyer plus tard si utile. */
-  .parc-toolbar{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
-  .parc-toolbar-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
-  .parc-toolbar-titre-ligne{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
   /* Machines masque .head-title (règle plus bas) et affiche ce titre-ci à la
      place : même spec que .head-title h1 pour rester uniforme entre pages
      (26px/700 avant, signalé par l'utilisateur comme différent des autres). */
-  .parc-toolbar-titre-ligne h1{font-family:'Space Grotesk',sans-serif;font-size:31px;line-height:38px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);margin:0;}
-  .parc-count-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink-2);font-size:12px;font-weight:600;}
-  .parc-count-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
-  .parc-toolbar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .parc-export-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
-  .parc-export-btn:hover{background:var(--surface-soft);}
-  .parc-export-btn svg{width:18px;height:18px;flex:0 0 auto;}
 
-  .parc-filtres{background:none;padding:0;box-shadow:none;display:flex;flex-direction:column;gap:12px;}
-  @media (min-width:1100px){.parc-filtres{flex-direction:row;align-items:center;justify-content:space-between;gap:14px;}}
   .parc-recherche{position:relative;flex:1;min-width:240px;}
   .parc-recherche svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--dark-ink);pointer-events:none;}
   .parc-recherche input{width:100%;height:44px;padding:0 16px 0 42px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:14px;font-family:inherit;}
   .parc-recherche input:focus{background:#fff;outline:2px solid var(--primary-dark);outline-offset:0;}
-  .parc-pills-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  
   .parc-pill{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink-2);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;}
   .parc-pill.is-active{background:var(--ink);color:#fff;}
   .parc-pill .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
   .parc-pill .compte{padding:1px 6px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;background:var(--surface-soft);color:var(--ink);}
   .parc-pill.is-active .compte{background:rgba(255,255,255,.2);color:#fff;}
-  .parc-tri{display:flex;align-items:center;gap:8px;}
-  
-  .parc-tri label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dark-ink);white-space:nowrap;}
-  .parc-tri select{height:40px;padding:0 30px 0 12px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13.5px;font-weight:600;appearance:none;cursor:pointer;font-family:inherit;}
+
   /* Même habillage pour le bouton "maison" (habillerSelect) : les règles
      ci-dessus ciblent la balise <select>, qui ne matche plus une fois le
      rendu remplacé par un <button class="champ-select">. */
-  .parc-tri .champ-select{height:40px;width:auto;padding:0 12px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13.5px;font-weight:600;}
 
   .mstrip-liste{display:flex;flex-direction:column;gap:12px;}
   .mstrip{position:relative;background:var(--surface);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;}
@@ -1203,12 +1064,6 @@
   .mstrip-badge.soon .dot{background:var(--primary);}
   .mstrip-badge.ok .dot{background:var(--ok);}
 
-  .parc-resume{margin-top:20px;padding:16px 20px;background:var(--surface);box-shadow:var(--shadow-soft);border-radius:var(--r-lg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;}
-  .parc-resume-gauche{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);}
-  .parc-resume-gauche svg{width:18px;height:18px;color:var(--primary-dark);flex:0 0 auto;}
-  .parc-resume-droite{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);}
-  .parc-resume-valeur{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;color:var(--ok-ink);}
-
   /* ------------------------------------------------------------
      Vue Parc : cartes machine (compat. avec le JS existant)
      ------------------------------------------------------------ */
@@ -1374,12 +1229,11 @@
   @media (max-width:899px){
     /* Le repli : on retire le contexte, on garde le geste. */
     .machine.is-replie .m-titre .meta,
-    .machine.is-replie .machine-alerte,
-    .machine.is-replie .machine-photo-cadre,
-    .machine.is-replie .machine-carnet-lien,
-    .machine.is-replie .machine-jauge,
-    .machine.is-replie .machine-tache,
-    .machine.is-replie .compteur-lire{display:none;}
+  .machine.is-replie .machine-alerte,
+  .machine.is-replie .machine-photo-cadre,
+  .machine.is-replie .machine-carnet-lien,
+  .machine.is-replie .machine-jauge,
+  .machine.is-replie .machine-tache{display:none;}
   }
   .m-main .name{font-size:17px;font-weight:700;}
   .m-main .meta{color:var(--ink-2);font-size:14px;margin-top:4px;line-height:1.5;}
@@ -1414,8 +1268,7 @@
   .btn-row-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
   .btn-row-action svg{display:block;width:18px;height:18px;flex:0 0 auto;}
   .btn-principal svg{width:20px;height:20px;}
-  .compteur-photo{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-  .compteur-photo svg{display:block;width:18px;height:18px;flex:0 0 auto;}
+
   /* ★ LOT 7 — LES DEUX COLONNES DE LA CARTE.
      À droite : l'ÉTAT OPÉRATIONNEL et ce qui se FAIT. Les quatre actions sont
      empilées, l'action principale pleine largeur en 44 px (la cible tactile du
@@ -1533,7 +1386,7 @@
     border:2px solid var(--ink);border-radius:12px;background:var(--surface-soft);
   }
   .compteur-bureau .compteur-saisie{flex:1 1 auto;}
-  .compteur-bureau .compteur-lire{margin-top:0;}
+  
   .compteur-saisie{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;}
   .compteur-champ{
     font-size:22px;font-weight:800;line-height:1.1;width:6.5em;min-width:0;padding:8px 10px;
@@ -1792,7 +1645,6 @@
     margin:14px 0 2px;padding-top:12px;border-top:1px solid var(--line-2);
   }
   .agenda-month:first-child{margin-top:0;padding-top:0;border-top:none;}
-  .agenda-month-compte{font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-2);white-space:nowrap;}
 
   /* ------------------------------------------------------------
      Modales et formulaires (classes partagées avec le JS existant)
@@ -4283,9 +4135,7 @@
     border:1.5px dashed var(--line);border-radius:var(--r-card);padding:34px 20px;text-align:center;
     color:var(--ink-2);font-size:15px;background:var(--surface);
   }
-  .empty-soft{
-    padding:18px 0;text-align:center;color:var(--ink-2);font-size:14px;
-  }
+  
   .loading{color:var(--ink-2);font-size:15px;padding:70px 0;text-align:center;}
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -4367,7 +4217,6 @@
   /* Grille du tableau de bord */
   #view-root{display:flex;flex-direction:column;gap:20px;}
   .dash-grid{display:flex;flex-direction:column;gap:20px;}
-  .dash-side{display:flex;flex-direction:column;gap:20px;}
 
   /* Aides d'affichage responsive */
   .mobile-only{display:flex;}
@@ -4386,12 +4235,9 @@
      donc toucher que ce qu'il nomme, et il gagne le conflit d'égalité par
      l'ORDRE, comme le fait déjà la règle des cadres. Rien ici ne fait écrire une
      teinte décorative, et aucune valeur ne sort de l'échelle. */
-  .dash-main{display:flex;flex-direction:column;gap:20px;min-width:0;}
-  @media (min-width:900px){ .dash-main{gap:24px;} }
 
   /* Les cartes du tableau de bord respirent ENTRE elles et se resserrent EN
      elles : le rembourrage passe de 18 px à 16 px, l'écart interne de 12 à 8. */
-  .dash-main > .card, .dash-side > .card{padding:16px 20px;gap:8px;}
 
   /* border-style/border-color retirés le 29 sept. 2026 (même décision que
      la règle des cadres, voir plus bas) : cette règle ne posait QUE le
@@ -4402,23 +4248,18 @@
      cohérent avec .card partout ailleurs. */
   .dash-preparation{border:none;}
   .dash-preparation .card-head{gap:8px;align-items:flex-start;}
-  .dash-preparation .pieces-legende{font-size:11px;font-weight:700;letter-spacing:.1em;}
+  
   .dash-preparation .card-title{font-size:15px;}
   .dash-preparation .muted-text{font-size:12px;line-height:1.45;}
 
   /* « Tout voir » et « Voir la liste » : des commandes secondaires, plus petites
      que le titre qu'elles accompagnent — jamais moins de 12 px, parce que c'est
      du texte, et qu'il se lit dehors. */
-  .dash-main .card-head .link-inline, .dash-side .card-head .link-inline{font-size:12px;}
 
   /* La ligne d'échéance : plus courte et plus dense, sans toucher en rien à sa
      barre d'état ni à la pastille qui porte le délai. */
-  .dash-main .alert-row{padding:12px 0;gap:12px;}
-  .dash-main .alert-title{font-size:13.5px;}
-  .dash-main .alert-sub, .dash-main .alert-due{font-size:12px;}
 
   /* La tuile : la légende reste petite, c'est le CHIFFRE qui porte la lecture. */
-  .dash-main .stat-card .lbl{font-size:12px;line-height:1.35;}
 
   /* ★ LOT 6 — LA COULEUR DES QUATRE TUILES, SUR LE FOND ET LA PASTILLE.
      La maquette donne à chaque tuile la teinte de son état. On ne peut pas la
@@ -4427,8 +4268,7 @@
      14 % et la pastille déjà colorée. L'encre sur ces voiles dépasse 16:1.
      Les tuiles prennent aussi du CORPS : un peu plus de rembourrage, et un
      chiffre plus grand — c'est un tableau de bord, on y lit des nombres. */
-  .dash-main .stat-card{padding:16px;gap:8px;}
-  .dash-main .stat-card .num{font-size:31px;}
+
   /* ★ LOT 8 — LES VOILES DE FOND DU LOT 6 SONT RETIRÉS. La maquette a les
      tuiles BLANCHES : c'est le chiffre qui porte la couleur de l'état (voir la
      règle ci-dessus, avec la barre de 3:1 du grand texte). Le voile ne servait
@@ -4437,31 +4277,19 @@
   /* ★ LOT 8 — LE MOT DE LA MAQUETTE À CÔTÉ DU CHIFFRE. Le chiffre et son mot
      partagent une ligne de base, comme dans la maquette (« 1 intervention ») ;
      le mot s'incline vers le bas de la tuile. */
-  .dash-main .stat-card .num-ligne{display:flex;align-items:baseline;gap:6px;}
-  .dash-main .stat-card .stat-mot{margin-left:auto;text-align:right;}
 
   /* ★ LOT 6 — DU CORPS DANS LES CARTES DU TABLEAU DE BORD.
      Le titre de carte passe au barreau du sous-titre (17 px) : les blocs se
      lisent enfin comme des blocs, au lieu de se confondre avec leur contenu. */
-  .dash-main .card-title, .dash-side .card-title{font-size:17px;}
 
   /* ★ LOT 6 — LA LIGNE D'ÉCHÉANCE PORTE SA COULEUR D'ÉTAT, À DROITE AUSSI.
      Le trait de gauche existait ; la pastille de délai passe de 11 à 12 px, dans
      sa teinte d'état (texte à l'encre), et le signe du dépli reste discret. */
-  .dash-main .alert-row .pill{font-size:12px;}
-  .dash-main .alert-row{gap:12px;}
-  .dash-main .alert-detail .badge{font-size:12px;align-self:flex-start;}
 
   /* Les blocs de la colonne latérale : le même rembourrage que la colonne
      principale, et des pastilles à la taille du reste de l'écran. */
-  .dash-side .dropzone{padding:16px 20px;gap:8px;}
-  .dash-side .badge, .dash-side .pill{font-size:11px;}
 
   /* Carte prioritaire : corps empilé (mobile) puis en ligne (desktop) */
-  .priority .priority-body{display:flex;flex-direction:column;gap:8px;}
-  @media (min-width:900px){
-    .priority .priority-body{flex:1;min-width:220px;}
-  }
 
   .manual-row{flex-wrap:wrap;}
   .manual-row .mr-main{min-width:140px;}
@@ -4472,16 +4300,6 @@
   .toolbar{display:flex;flex-direction:column;gap:10px;}
   .toolbar-top{display:flex;flex-direction:column;gap:10px;}
   .toolbar-bottom{display:flex;flex-direction:column;gap:10px;}
-  .search-wrap{position:relative;display:flex;align-items:center;}
-  .search-wrap .search-icon{
-    position:absolute;left:14px;font-size:17px;color:var(--ink-3);pointer-events:none;
-  }
-  .search-wrap input[type=search]{
-    padding-left:38px;background:var(--surface);border:1.5px solid var(--line);
-    min-height:46px;
-  }
-  .search-wrap input[type=search]:focus{border-color:var(--primary);}
-  .search-wrap input[type=search]::-webkit-search-cancel-button{cursor:pointer;}
 
   /* ★ LOT 7 — L'EN-TÊTE DE L'ÉCRAN PARC : LA RECHERCHE ET « AJOUTER UNE MACHINE »
      SUR LA MÊME LIGNE, SANS QU'ILS S'ÉCRASENT. La recherche prend la place
@@ -4489,13 +4307,11 @@
      son libellé ne se replie jamais. C'est la disposition de la maquette, et elle
      vaut à toutes les largeurs — c'est l'écran de travail du parc. */
   .toolbar-parc .toolbar-top{flex-direction:row;align-items:center;gap:8px;}
-  .toolbar-parc .search-wrap{flex:1 1 auto;min-width:140px;}
-  .toolbar-parc .search-wrap input[type=search]{min-width:0;}
+
   .toolbar-parc .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:46px;}
   /* Même règle, pour le nouveau bandeau .parc-toolbar-actions (reprise
      Stitch « Parc Machines ») — .toolbar-parc n'existe plus dans son
      balisage, cette règle-ci ne l'aurait donc jamais visé. */
-  .parc-toolbar-actions .fleet-ajouter{flex:0 0 auto;white-space:nowrap;min-height:44px;font-size:14px;padding:0 14px;}
 
   /* ★ LOT 7 — LA COULEUR DES FILTRES DE L'ÉTAT. Quatre pastilles à compteur :
      chacune porte sa teinte d'état (un point) et son compteur sur un voile, la
@@ -4504,29 +4320,20 @@
   .chip{white-space:nowrap;}
   .chip .chip-count{white-space:nowrap;}
   .chip-mot{display:inline-flex;align-items:center;gap:6px;}
-  .chips-picto{display:inline-flex;align-items:center;margin-right:4px;color:var(--ink-2);flex:0 0 auto;}
-  .chips-picto svg{display:block;width:13px;height:13px;}
+
   .chip-mot::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--ink-3);flex:0 0 auto;}
-  .chip-late .chip-mot::before{background:var(--late);}
-  .chip-soon .chip-mot::before{background:var(--soon);}
-  .chip-ok .chip-mot::before{background:var(--ok);}
+
   .chip .chip-count{
     display:inline-flex;align-items:center;justify-content:center;
     min-width:20px;padding:0 5px;border-radius:var(--r-pill);
     background:var(--surface-soft);color:var(--ink);opacity:1;
   }
-  .chip-late .chip-count{background:var(--late-bg);}
-  .chip-soon .chip-count{background:var(--soon-bg);}
-  .chip-ok .chip-count{background:var(--ok-bg);}
-  .chip-late:hover{border-color:var(--late);}
-  .chip-soon:hover{border-color:var(--soon);}
-  .chip-ok:hover{border-color:var(--ok);}
+
   .chip.is-active .chip-count{background:rgba(255,255,255,.22);color:#fff;}
 
   .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
   /* Préparation des entretiens : ce qu'il faut se procurer, et pour quand. */
-  .prep-horizon{display:flex;gap:6px;margin-left:auto;}
-  .prep-horizon .chip{min-height:32px;padding:5px 12px;font-size:12.5px;}
+
   .prep-produit{padding:12px 0;border-top:1px solid var(--line-2);}
   .prep-produit:first-child{border-top:none;padding-top:4px;}
   .prep-nom{font-size:14.5px;font-weight:700;line-height:1.4;}
@@ -4665,7 +4472,7 @@
     .toast-host{bottom:24px;}
     .toolbar{gap:12px;}
     .toolbar-top{flex-direction:row;align-items:center;gap:12px;}
-    .toolbar-top .search-wrap{flex:1;min-width:220px;}
+    
     .toolbar-top .btn-primary{flex:0 0 auto;}
     .toolbar-bottom{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;}
     .chips{overflow:visible;}
@@ -4765,22 +4572,7 @@
   .alert-etat.ok{background:rgba(36,181,168,.14);}
   /* Canaux de rappels : un mini-bloc teinté par canal, une seule police pour les trois */
   .canal{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;margin-top:8px;}
-  .canal-tel{background:rgba(14,19,51,.06);}
-  .canal-mail{background:rgba(35,111,224,.10);}
-  .canal-msg{background:rgba(139,155,55,.16);}
-  .canal-ico{
-    display:flex;align-items:center;justify-content:center;flex:none;
-    width:40px;height:40px;border-radius:11px;color:#fff;
-  }
-  .canal-ico svg{display:block;width:18px;height:18px;}
-  .canal-tel .canal-ico{background:var(--ink);}
-  .canal-mail .canal-ico{background:#236FE0;}
-  .canal-msg .canal-ico{background:var(--olive);}
-  .canal-delai .canal-ico{background:var(--primary-dark);}
-  .canal-delai{background:rgba(99,102,241,.1);}
-  .canal-texte{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-  .canal-titre{font-size:14.5px;font-weight:700;line-height:1.25;color:var(--ink);}
-  .canal-sous{font-size:12.5px;font-weight:500;line-height:1.3;color:var(--ink-2);}
+
   .canal .badge{
     flex:none;margin:0;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
     border-radius:var(--r-pill);
@@ -4795,9 +4587,7 @@
   }
   .seg-btn:hover{color:var(--ink);}
   .seg-btn.is-active{background:var(--ink);color:#fff;font-weight:800;}
-  .prep-pied{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);}
-  .priority-ico{display:none;}
-  .priority-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+
   /* Bloc « Déposer un manuel PDF » réduit d'au moins moitié en hauteur
      (signalé par l'utilisateur, trop haut) : dz-zone passait de ~220px de
      min-height + 36px de padding vertical à un icône compact et un contenu
@@ -4876,83 +4666,23 @@
     .dash-head .dash-ajouter + .dash-compte{margin-left:4px;}
 
     /* Bandeau prioritaire : violet Signature EN pour un retard, nuit sinon */
-    .priority.priority-retard{
-      background:var(--primary-dark);border-radius:var(--r-card);padding:20px 24px;
-      box-shadow:0 8px 24px rgba(91,82,223,.28);gap:20px;
-    }
-    .priority-ico{
-      display:flex;align-items:center;justify-content:center;flex:none;
-      width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.18);color:#fff;
-    }
-    .priority-retard .priority-compteur .val,
-    .priority-retard .priority-compteur .depassement{color:#fff;}
-    .priority-retard .priority-genre{color:rgba(255,255,255,.82);}
-    .priority-retard .priority-tache-echeance{color:rgba(255,255,255,.82);}
-    .priority-retard .priority-actions{display:flex;gap:10px;}
-    .priority-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:12px;}
-    .priority-retard .priority-actions .do{background:#fff;color:var(--primary-dark);}
-    .priority-retard .priority-actions .see{background:rgba(255,255,255,.14);border:none;color:#fff;}
 
     /* Tuiles de statistiques : blanches, icône teintée, pastille d'état */
-    .stat-grid .stat-card{
-      background:var(--surface);border-radius:var(--r-card);
-      box-shadow:var(--shadow-soft);padding:18px 20px;display:flex;flex-direction:column;gap:16px;
-    }
-    .stat-grid .stat-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-    .stat-grid .stat-card .lbl{font-size:14px;font-weight:600;color:var(--ink-2);}
-    .stat-grid .stat-ico{
-      display:flex;align-items:center;justify-content:center;flex:none;
-      width:36px;height:36px;border-radius:10px;
-    }
-    .stat-grid .stat-ico svg{width:18px;height:18px;}
-    .stat-grid .ico-late{background:rgba(222,122,22,.14);color:var(--late);}
-    .stat-grid .ico-soon{background:rgba(99,102,241,.14);color:var(--soon);}
-    .stat-grid .ico-ok{background:rgba(36,181,168,.14);color:var(--ok);}
-    .stat-grid .ico-manuels{background:rgba(35,111,224,.14);color:#236FE0;}
-    .stat-grid .num-ligne{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
-    .stat-grid .stat-card .num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
-    .stat-grid .stat-card .num.etat-late{color:var(--late);}
-    .stat-grid .stat-card .num.etat-soon{color:var(--ink);}
-    .stat-grid .stat-card .num.etat-ok{color:var(--ok);}
-    .stat-grid .stat-card .num.etat-manuels{color:#236FE0;}
-    .stat-grid .stat-card .stat-etat{
-      display:inline-flex;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-      padding:4px 10px;border-radius:var(--r-pill);color:var(--ink);background:var(--surface-soft);margin-bottom:2px;
-    }
-    .stat-grid .tuile-late .stat-etat{background:rgba(222,122,22,.14);}
-    .stat-grid .tuile-soon .stat-etat{background:rgba(99,102,241,.14);}
-    .stat-grid .tuile-ok .stat-etat{background:rgba(36,181,168,.14);}
-    .stat-grid .tuile-primary .stat-etat{background:rgba(35,111,224,.14);}
 
     /* Cartes en carte-mère : ombre seule, jamais de contour (voir la Charte
        KALEA, principe 3 — .dash-grid est partagé par Tableau de bord, Agenda,
        Rappels, Mon compte, Coûts & TCO : ce retrait de bordure profite aux
        cinq écrans d'un coup). */
-    .dash-grid .card,
-    .dash-side .dropzone{
+    .dash-grid .card{
       background:var(--surface);border-radius:var(--r-card);
       box-shadow:var(--shadow-soft);
     }
-    .dash-grid .card-title,.dash-grid .card-title-sm{font-size:19px;font-weight:800;display:inline-flex;align-items:center;gap:10px;}
+    .dash-grid .card-title{font-size:19px;font-weight:800;display:inline-flex;align-items:center;gap:10px;}
 
     /* Lignes d'échéance : nom + état sur la première ligne, délai et « + » à droite */
-    .dash-main .alert-row{padding:16px 0;gap:14px;}
-    .dash-main .alert-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-    .dash-main .alert-title{font-size:16px;font-weight:700;}
-    .dash-main .alert-row > .pill{
-      background:none;padding:0;font-family:'Space Grotesk',sans-serif;
-      font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
-    }
-    .dash-main .alert-plus{
-      display:inline-flex;align-items:center;justify-content:center;flex:none;
-      width:32px;height:32px;border-radius:9px;background:var(--surface-soft);color:var(--ink);font-weight:700;
-    }
 
-    .dash-side .dropzone:hover,.dash-side .dropzone.is-over{background:var(--surface);border-color:var(--line);}
     .barre-mobile{display:none;}
-    .priority-outil{display:none;}
-    .priority-boite{display:contents;}
-    .stat-grid .stat-mot{display:none;}
+
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
@@ -5006,83 +4736,24 @@
        sombre en dessous de 900px). */
     .priority{position:relative;background:var(--primary-dark);border-radius:var(--r-card);padding:18px;}
     .priorities{margin-bottom:0;}
-    .priority-outil{
-      position:absolute;top:16px;right:16px;display:flex;align-items:center;justify-content:center;
-      width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);color:var(--ok-accent);
-    }
-    .priority-retard .priority-top{padding-right:56px;justify-content:flex-start;gap:10px;flex-wrap:wrap;}
-    .priority-boite{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:14px;border-radius:14px;background:rgba(255,255,255,.08);
-    }
-    .priority-boite .priority-tache{padding:0;background:none;flex:1;min-width:0;}
-    .priority-boite .priority-compteur{flex-direction:column;align-items:flex-end;gap:4px;}
-    .priority-boite .priority-compteur .val{font-size:30px;color:var(--ok-accent);}
-    .priority-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .priority-actions button{min-height:48px;border-radius:12px;}
-    .priority-actions .do{background:var(--primary-dark);color:#fff;box-shadow:0 4px 14px rgba(91,82,223,.4);font-size:16px;}
-    .priority-actions .see{background:rgba(255,255,255,.12);border:none;color:#fff;}
 
     /* Tuiles : blanches, filet doux, libellé en petites capitales */
-    .stat-grid .stat-card{
-      background:var(--surface);border-radius:var(--r-card);
-      box-shadow:var(--shadow-soft);padding:16px;display:flex;flex-direction:column;gap:10px;
-    }
-    .stat-grid .stat-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-    .stat-grid .stat-card .lbl{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);}
-    .stat-grid .stat-ico{display:flex;align-items:center;justify-content:center;flex:none;}
-    .stat-grid .ico-late,.stat-grid .ico-soon,.stat-grid .ico-ok{width:10px;height:10px;border-radius:50%;}
-    .stat-grid .ico-late svg,.stat-grid .ico-soon svg,.stat-grid .ico-ok svg{display:none;}
-    .stat-grid .ico-late{background:var(--late);}
-    .stat-grid .ico-soon{background:var(--soon);}
-    .stat-grid .ico-ok{background:var(--ok);}
-    .stat-grid .ico-manuels{color:var(--ink-2);}
-    .stat-grid .ico-manuels svg{width:18px;height:18px;}
-    .stat-grid .num-ligne{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
-    .stat-grid .stat-card .num{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
-    .stat-grid .stat-card .num.etat-late{color:var(--late);}
-    .stat-grid .stat-card .num.etat-soon{color:var(--soon);}
-    .stat-grid .stat-card .num.etat-ok{color:var(--ok);}
-    .stat-grid .stat-card .num.etat-manuels{color:var(--ink);}
-    .stat-grid .stat-card .stat-mot{font-size:12px;font-weight:600;color:var(--ink-2);text-align:right;margin:0;}
-    .stat-grid .stat-etat{display:none;}
 
     /* Cartes : ombre seule, jamais de contour (voir plus haut, même retrait
        qu'à la largeur bureau). */
-    .dash-grid .card,
-    .dash-side .dropzone{
+    .dash-grid .card{
       background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow-soft);
     }
 
     /* Échéances : un bloc teinté par machine, une seule pastille à droite */
-    .dash-main .alert-list{gap:10px;}
-    .dash-main .alert-row{
-      padding:12px 12px 12px 0;gap:12px;border:none;border-radius:12px;overflow:hidden;
-      background:rgba(14,19,51,.04);
-    }
-    .dash-main .alert-bar{align-self:stretch;height:auto;width:4px;border-radius:0;}
-    .dash-main .alert-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-    .dash-main .alert-title{font-size:15px;font-weight:700;}
+
     .alert-etat{display:none;}
-    .dash-main .alert-plus{
-      display:inline-flex;align-items:center;justify-content:center;flex:none;
-      width:28px;height:28px;border-radius:8px;background:var(--surface);color:var(--ink);font-weight:700;
-    }
 
     /* Préparation : carte teintée, période, gros bouton « Voir la liste » */
     .dash-grid .card.dash-preparation{background:rgba(222,122,22,.07);}
-    .prep-pied{border-top:none;padding-top:0;}
-    .prep-pied .link-inline{
-      display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
-      border-radius:12px;background:var(--ink);color:#fff;font-size:16px;font-weight:700;font-family:inherit;
-    }
-    .prep-pied .link-inline:hover{color:#fff;text-decoration:none;background:var(--dark);}
 
     /* Carte du manuel analysé : légende, phrase, bouton plein indigo */
-    .card.mobile-only .chip-icon{
-      display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
-      border-radius:10px;background:rgba(99,102,241,.14);color:var(--primary-dark);
-    }
+    
     #ai-cta.link-inline{
       display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;
       border-radius:12px;background:var(--primary-dark);color:#fff;font-size:16px;font-weight:700;font-family:inherit;
@@ -5091,12 +4762,11 @@
     #ai-cta.link-inline:hover{color:#fff;text-decoration:none;}
 
     /* Titres de cartes : icône et texte alignés */
-    .dash-grid .card-title,.dash-grid .card-title-sm{display:inline-flex;align-items:center;gap:10px;font-size:18px;font-weight:800;}
+    .dash-grid .card-title{display:inline-flex;align-items:center;gap:10px;font-size:18px;font-weight:800;}
 
     /* Le dépôt par glisser-déposer n'a pas de sens sur un téléphone (la maquette
        Android ne le montre pas) : le dépôt reste possible par la carte du manuel
        et par l'onglet « Manuels ». */
-    .dash-side .dropzone{display:none;}
 
     /* Barre d'onglets : icônes plus lisibles, bouton « + » rond et surélevé */
     .tab .tab-icon{font-size:22px;}
@@ -5149,7 +4819,6 @@
     .fleet-ajouter .fa-long{display:none;}
     .fleet-ajouter .fa-court{display:inline;}
     .toolbar-parc .fleet-ajouter{padding:0 16px;}
-    .toolbar-parc .search-wrap input[type=search]{font-size:15px;}
 
     /* Tri compact, à droite */
     .sort-wrap{align-self:flex-end;}
@@ -5209,10 +4878,7 @@
   @media (min-width:900px){
     /* Barre de travail */
     .toolbar-parc .toolbar-top{gap:12px;}
-    .toolbar-parc .search-wrap input[type=search]{
-      min-height:44px;border:2px solid rgba(14,19,51,.2);border-radius:12px;background:var(--surface);
-    }
-    .toolbar-parc .search-wrap input[type=search]:focus{border-color:var(--ink);}
+
     .fleet-pill{
       display:inline-flex;align-items:center;gap:8px;flex:none;white-space:nowrap;
       padding:6px 12px;border-radius:var(--r-pill);background:rgba(99,102,241,.1);
@@ -5232,14 +4898,10 @@
       background:var(--surface);border:2px solid rgba(14,19,51,.15);
     }
     .chip:not(.is-active):hover{border-color:var(--ink-3);}
-    .chip-late:not(.is-active):hover{border-color:var(--late);}
-    .chip-soon:not(.is-active):hover{border-color:var(--soon);}
-    .chip-ok:not(.is-active):hover{border-color:var(--ok);}
+
     .chip.is-active{background:var(--ink);border-color:var(--ink);}
     .chip .chip-count{padding:1px 7px;border-radius:var(--r-pill);opacity:1;background:rgba(14,19,51,.08);color:var(--ink);}
-    .chip-late .chip-count{background:rgba(222,122,22,.15);}
-    .chip-soon .chip-count{background:rgba(99,102,241,.15);}
-    .chip-ok .chip-count{background:rgba(36,181,168,.15);}
+
     .chip.is-active .chip-count{background:rgba(255,255,255,.2);color:#fff;}
 
     /* Tri : libellé visible */
@@ -5355,72 +5017,28 @@
   /* Plus de carte-mère « Carnets d'entretien » (voir .manuel-carte plus bas) :
      un en-tête nu, comme le titre de .parc-toolbar-tete sur Machines, pas un
      .card-head sur fond blanc. */
-  .manuels-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
-  .manuels-titre{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin:0;}
-  .manuels-resume{font-size:12.5px;font-weight:700;color:var(--ink-2);white-space:nowrap;}
+
   /* Même langage que .parc-filtres (Parc Machines) : une barre blanche
      flottante, portée par l'ombre, pas un filet à l'intérieur d'une carte. */
-  .manuels-barre{
-    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
-    background:none;padding:0;margin-bottom:16px;
-  }
-  .manuels-recherche{flex:0 1 260px;min-width:160px;}
-  .manuels-recherche input[type=search]{
-    padding-left:38px;min-height:38px;background:var(--surface);border:none;box-shadow:var(--shadow-soft);font-size:13.5px;
-  }
-  .manuels-grille{display:flex;flex-direction:column;gap:12px;}
+
   /* Même langage que .mstrip (Parc Machines) : pas de carte-mère blanche qui
      enveloppe la liste (la page « reprend le design de Machines », signalé
      par l'utilisateur) — chaque .manuel-carte flotte directement sur le fond
      de page, blanche et portée par l'ombre plutôt que par un contour. */
-  .manuel-carte{
-    display:flex;gap:14px;padding:14px;border-radius:var(--r-lg);
-    background:var(--surface);box-shadow:var(--shadow-soft);
-  }
-  .manuel-vignette{
-    flex:0 0 auto;width:72px;height:64px;border-radius:10px;overflow:hidden;
-    background:rgba(99,102,241,.08);display:flex;align-items:center;justify-content:center;
-  }
-  .manuel-vignette img{width:100%;height:100%;object-fit:cover;}
-  .manuel-vignette-ico{display:flex;color:var(--primary-dark);}
-  .manuel-vignette-ico svg{width:26px;height:26px;}
-  .manuel-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
-  .manuel-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-  .manuel-nom{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+
   /* Référence machine et boutons sur la même ligne, signalé par l'utilisateur
      (ex. « STIHL FS250 · MOTOCULTURE » à côté de « Voir le plan »/« Déposer ») —
      .manuel-actions pousse à droite via margin-left:auto, .manuel-meta prend
      le reste de la place ; wrap sur mobile plutôt que de comprimer. */
-  .manuel-ligne{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;}
-  .manuel-meta{flex:1 1 auto;min-width:0;font-size:12.5px;color:var(--ink-2);}
-  .manuel-fichier{
-    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;
-    background:var(--surface-soft);font-size:12.5px;color:var(--ink-2);
-  }
-  .manuel-fichier svg{flex:0 0 auto;width:16px;height:16px;color:var(--primary-dark);}
-  .manuel-fichier.is-vide{color:var(--ink-3);font-style:italic;}
-  .manuel-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto;}
+
   /* Contour noir (border:2px solid var(--ink)) retiré, signalé par
      l'utilisateur : même langage que .mstrip-btn-icone (Parc Machines),
      un fond teinté sans bordure épaisse plutôt qu'un cadre encre. */
-  .manuel-actions .btn-row-action{
-    display:inline-flex;align-items:center;gap:8px;white-space:nowrap;height:40px;
-    background:var(--surface-soft);border:none;color:var(--ink);padding:0 14px;font-size:13px;font-weight:700;font-family:inherit;
-    border-radius:var(--r-md);
-  }
-  .manuel-actions .btn-row-action:hover{background:var(--line-2);}
+
   /* 16px, pas 13 : boutons noirs/pleins uniformisés à 16px partout dans
      l'app (avis esthétique de l'utilisateur, "pas de tailles différentes
      sur la même page"), même quand ils voisinent des boutons gris à 13px
      de la même famille .btn-row-action. */
-  .manuel-actions .btn-principal{background:var(--primary-dark);color:#fff;font-size:16px;height:44px;}
-  .manuel-actions .btn-principal:hover{background:var(--dark);}
-
-  @media (min-width:900px){
-    .manuel-carte{align-items:center;}
-    .manuel-vignette{width:88px;height:76px;}
-    .manuels-grille{gap:10px;}
-  }
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ AGENDA — maquette Stitch « WEB agenda et préparation des produits ».
@@ -5433,16 +5051,7 @@
      de charge en heures, pas de total en euros, pas de catégorie réglementaire
      (« VGP ») — rien de tout cela n'existe dans le produit.
      ══════════════════════════════════════════════════════════════════════════ */
-  .agenda-toolbar{
-    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;
-  }
-  .agenda-eyebrow{
-    font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
-  }
-  .agenda-toolbar-actions{display:flex;flex-wrap:wrap;gap:8px;}
-  .agenda-toolbar-actions button{
-    flex:0 0 auto;min-height:40px;padding:0 14px;font-size:13px;display:inline-flex;align-items:center;gap:8px;
-  }
+
   #prep-copier,#bon-copier,#bon-partager{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
 
   /* Bannière « ACTION REQUISE » : liseret et pastille dans le MÊME orange
@@ -5521,7 +5130,6 @@
     font-family:'Space Grotesk',ui-monospace,monospace;font-size:12px;line-height:1.6;
     white-space:pre-wrap;overflow-x:auto;max-height:340px;overflow-y:auto;
   }
-  .bon-commande-compte{margin-top:10px;font-weight:600;}
 
   /* Chronologie : une carte par échéance, un bouton d'action à droite (bureau)
      ou en pied (téléphone) — jamais les deux pastilles d'état à la fois. */
@@ -5532,31 +5140,18 @@
        sur blanc ne se distinguait que par une bordure de 1px. */
     background:var(--surface-soft);border:1px solid var(--line);margin-top:10px;cursor:pointer;
   }
-  .agenda-chronologie .chrono-carte:first-of-type{margin-top:0;}
-  .chrono-bar{flex:0 0 4px;align-self:stretch;border-radius:4px;background:var(--ink-3);}
-  .chrono-carte.is-late .chrono-bar{background:var(--late);}
-  .chrono-carte.is-soon .chrono-bar{background:var(--soon);}
-  .chrono-carte.is-ok .chrono-bar{background:var(--ok);}
+
   /* En retard : la carte entière se teinte, comme la maquette — les autres
      états gardent le blanc, la couleur reste réservée à ce qui est urgent. */
   .chrono-carte.is-late{background:var(--late-bg);border-color:rgba(222,122,22,.35);}
-  .chrono-corps{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-  .chrono-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .chrono-nom{font-weight:700;font-size:14.5px;}
-  .chrono-meta{font-size:12px;color:var(--ink-2);}
-  .chrono-tache{font-size:13px;font-weight:600;color:var(--ink);}
-  .chrono-echeance{font-size:12px;color:var(--ink-2);}
-  .chrono-cta{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-size:12.5px;}
 
   @media (max-width:640px){
     .chrono-carte{flex-wrap:wrap;}
-    .chrono-corps{flex-basis:100%;}
-    .chrono-cta{flex:1 1 auto;justify-content:center;min-height:40px;}
+
   }
   /* Reprise Stitch « Tableau de bord » : chronologieCarteHtml réutilisée hors
      de l'Agenda (dans #echeances-zone) — même reset de marge sur la 1ʳᵉ carte. */
   #echeances-zone .chrono-carte:first-of-type{margin-top:0;}
-  .echeances-compte{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ AGENDA — reprise « grille mensuelle » (round 2). Toolbar (vues Mois/
@@ -5568,14 +5163,10 @@
   .agenda-outils{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 16px;}
   .agenda-vues{flex:0 0 auto;}
   .agenda-nav{display:flex;align-items:center;gap:4px;flex:0 0 auto;}
-  .agenda-nav-btn{width:36px;height:36px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-2);cursor:pointer;padding:0;}
-  .agenda-nav-btn svg{width:18px;height:18px;}
-  .agenda-nav-btn.is-prev svg{transform:rotate(90deg);}
-  .agenda-nav-btn.is-next svg{transform:rotate(-90deg);}
+
   .agenda-nav-label{min-width:140px;text-align:center;font-weight:700;font-size:14.5px;font-family:'Space Grotesk',sans-serif;}
-  .agenda-nav-today{height:36px;padding:0 12px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;}
+  
   .agenda-pills{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;}
-  .agenda-pills-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-right:2px;}
 
   /* minmax(0,1fr), pas 1fr seul : une piste 1fr garde un minimum "auto" (la
      largeur max-content de son contenu) — un badge ou un nom de machine qui
@@ -5650,9 +5241,7 @@
      avec Rappels/TCO, qui gardent le ratio φ (1.618fr/1fr) par défaut de
      .dash-grid (voir le même principe déjà appliqué à .tco-parametres-grid
      plus bas dans ce fichier). */
-  .vue-agenda .agenda-grid{grid-template-columns:1fr;}
 
-  .agenda-pieces-bloc{display:flex;flex-direction:column;}
   .agenda-pieces-detail-toggle{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;font-weight:700;align-self:flex-start;}
   .agenda-pieces-detail-toggle[aria-expanded="true"] .prep-groupes-chevron svg{transform:rotate(180deg);}
   .agenda-pieces-detail{display:flex;flex-direction:column;gap:16px;margin-top:12px;}
@@ -5828,27 +5417,6 @@
   /* Trois tuiles verticales de résumé : icône teintée, libellé en petites
      capitales, grande valeur, phrase, et un filet de couleur en pied — la
      même carte que la maquette, sans jamais de taux inventé. */
-  .rappels-apercu{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:4px;}
-  .rappel-tuile{
-    position:relative;overflow:hidden;flex:1 1 220px;display:flex;flex-direction:column;gap:6px;
-    padding:16px 16px 18px;border:1.5px solid var(--line);border-radius:var(--r-card);
-    background:var(--surface);box-shadow:var(--shadow-soft);
-  }
-  .rappel-tuile::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--line-2);}
-  .rappel-tuile .card-ico{width:32px;height:32px;border-radius:9px;}
-  .rappel-tuile-ambre .card-ico{background:rgba(222,122,22,.14);color:var(--late);}
-  .rappel-tuile-ambre::after{background:var(--late);}
-  .rappel-tuile-indigo .card-ico{background:rgba(99,102,241,.14);color:var(--primary-dark);}
-  .rappel-tuile-indigo::after{background:var(--primary-dark);}
-  .rappel-tuile-ok .card-ico{background:rgba(36,181,168,.14);color:var(--ok);}
-  .rappel-tuile-ok::after{background:var(--ok);}
-  .rappel-tuile-label{
-    margin-top:4px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
-  }
-  .rappel-tuile-valeur{
-    font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:800;line-height:1.2;color:var(--ink);
-  }
-  .rappel-tuile-texte{font-size:12px;color:var(--ink-2);line-height:1.4;}
 
   /* Icône « pleine » de carte : le badge sombre de la maquette (enveloppe,
      téléphone, bulle de message), plutôt que l'icône simplement teintée. */
@@ -5880,17 +5448,6 @@
   /* File d'attente locale : un en-tête avec le compte réel, puis une ligne
      par notification déjà programmée — titre, phrase, et sa date ou
      « IMMÉDIAT » quand l'heure est déjà passée. */
-  .rappel-file-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;}
-  .rappel-file-titre-section{
-    font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);
-  }
-  .rappel-file-ligne{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-2);}
-  .rappel-file-ligne:first-child{border-top:none;}
-  .rappel-file-ligne .card-ico{color:var(--ink-3);}
-  .rappel-file-ligne.is-immediat .card-ico{color:var(--late);}
-  .rappel-file-texte{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
-  .rappel-file-titre{font-size:13px;font-weight:700;color:var(--ink);}
-  .rappel-file-corps{font-size:12px;color:var(--ink-2);}
 
   /* Ciblage des rappels push par rôle (blocCiblagePushHtml) : une ligne par
      rôle, case à cocher + 2 seuils numériques (jours / compteur), activés
@@ -5903,11 +5460,7 @@
      même endroit sur chaque carte de rôle, sur ordinateur comme sur
      tablette ; une seule colonne seulement en dessous de 480px (téléphone
      étroit, où 2 colonnes deviendraient trop serrées). */
-  .push-roles-grille{display:flex;flex-direction:column;gap:12px;margin-top:10px;}
-  .push-role-ligne{padding:10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-soft);}
-  .push-role-seuils{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
-  @media (max-width:480px){.push-role-seuils{grid-template-columns:1fr;}}
-  .push-role-champ{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink-2);min-width:0;}
+
   /* Les deux libellés d'une même ligne n'ont pas la même longueur (« Jours
      avant... » tient sur 1 ligne, « Avant l'échéance du compteur... » sur 2)
      — sans hauteur réservée identique, le second libellé poussait SON champ
@@ -5916,21 +5469,6 @@
      réservée pour 2 lignes dans les deux colonnes, texte ancré en bas :
      les deux champs de saisie démarrent maintenant toujours à la même
      hauteur, que leur libellé tienne sur 1 ligne ou 2. */
-  .push-role-champ span:first-child{display:flex;align-items:flex-end;min-height:2.6em;line-height:1.3;}
-  .push-role-champ input{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13px;color:var(--ink);width:100%;box-sizing:border-box;}
-
-  .fonctionnement-grille{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:6px;
-  }
-  .fonctionnement-tuile{display:flex;flex-direction:column;gap:8px;}
-  .fonctionnement-tuile .card-ico{
-    display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;
-  }
-  .fonctionnement-ico-ambre{background:rgba(222,122,22,.14);color:var(--late);}
-  .fonctionnement-ico-indigo{background:rgba(99,102,241,.14);color:var(--primary-dark);}
-  .fonctionnement-ico-ok{background:rgba(36,181,168,.14);color:var(--ok);}
-  .fonctionnement-titre{font-size:14px;font-weight:700;}
-  .fonctionnement-tuile .muted-text{font-size:12.5px;line-height:1.55;}
 
   /* ══════════════════════════════════════════════════════════════════════════
      ★ MON COMPTE (maquette Stitch « WEB mon compte » / « mobile mon compte »)
@@ -6495,10 +6033,6 @@
      ══════════════════════════════════════════════════════════════════════════ */
   /* .page-head[data-view="tco"] h1 retiré : désormais identique à la règle
      commune .head-title h1 (uniformisation des titres de page). */
-  .vue-couts-tco input:not([type=checkbox]):not(.ui-champ),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
-  .vue-couts-tco input:not([type=checkbox]):not(.ui-champ):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
-  .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
-  .vue-couts-tco button.secondary:hover{background:var(--primary-tint-2);}
 
 @keyframes tco-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
@@ -6515,8 +6049,7 @@
      texte (motif déjà utilisé ailleurs, ex. .plan-toolbar-btn) collait donc
      au texte sans espace. Ce fut le cas ici — corrigé en scope, sans
      toucher la règle générale utilisée par des dizaines d'autres boutons. */
-  .vue-couts-tco .modal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
-  .vue-couts-tco .modal-actions button svg{width:20px;height:20px;flex:0 0 auto;}
+
   /* Même piège, même correctif : sans taille explicite, le SVG (viewBox
      seul, sans width/height) s'affiche à sa taille de remplacement par
      défaut — énorme — au lieu de l'icône 18px attendue à côté du texte
@@ -6544,8 +6077,7 @@
      .dash-grid autour : sans gap ici, ils se touchaient (contrairement aux
      autres pages, où c'est #view-root/.dash-grid qui espace). Même valeur
      que #view-root/.dash-grid ([app.html:2401](app.html)), mobile puis bureau. */
-  .vue-couts-tco{display:flex;flex-direction:column;gap:20px;}
-  @media (min-width:900px){ .vue-couts-tco{gap:24px;} }
+
   .vue-stock{display:flex;flex-direction:column;gap:20px;}
   /* ── Reprise Stitch « Stocks & SAV » (2026-09-28) — reprise à l'octet
      près du HTML fourni par l'utilisateur. Mêmes règles que toutes les
@@ -6570,87 +6102,17 @@
      de l'écran — la coquille réelle (sidebar, pageHeadHtml) existe déjà,
      et une télémétrie inventée est explicitement exclue de ce produit
      depuis le début du chantier (voir keeva-redesign-project). */
-  .stock-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px;}
-  .stock-eyebrow-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:rgba(91,82,223,.08);border:1px solid rgba(91,82,223,.14);color:var(--primary-dark);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
-  .stock-eyebrow-pill svg{width:13px;height:13px;flex:0 0 auto;}
+
   .stock-btn-outline{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:13px;font-weight:700;box-shadow:0 1px 2px rgba(14,19,51,.04);transition:border-color .15s,color .15s;}
   .stock-btn-outline:hover{border-color:rgba(91,82,223,.4);color:var(--primary-dark);}
   .stock-btn-outline svg{width:16px;height:16px;flex:0 0 auto;color:var(--primary-dark);}
 
-  .stock-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  @media (max-width:900px){.stock-kpi-grid{grid-template-columns:1fr 1fr;}}
-  @media (max-width:600px){.stock-kpi-grid{grid-template-columns:1fr;}}
-  .stock-kpi-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;box-shadow:0 4px 20px -2px rgba(14,19,51,.04),0 2px 6px -1px rgba(14,19,51,.02);display:flex;flex-direction:column;justify-content:space-between;transition:box-shadow .15s;}
-  .stock-kpi-card:hover{box-shadow:0 10px 25px -4px rgba(14,19,51,.08),0 4px 10px -2px rgba(14,19,51,.03);}
-  .stock-kpi-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--ink-2);letter-spacing:.06em;text-transform:uppercase;}
-  .stock-kpi-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-  .stock-kpi-icon svg{width:16px;height:16px;}
-  .stock-kpi-icon.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);}
-  .stock-kpi-icon.is-amber{background:rgba(222,122,22,.08);color:var(--late);}
-  .stock-kpi-icon.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);}
-  .stock-kpi-value-row{margin-top:6px;}
-  .stock-kpi-value{font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:1.15;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .stock-kpi-value .unite{font-size:15px;font-weight:500;color:var(--ink-4);}
-  .stock-kpi-sub{font-size:11.5px;color:var(--ink-2);margin-top:4px;display:flex;align-items:center;gap:6px;font-weight:500;}
-  .stock-kpi-sub .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--bleu-roi);}
-  .stock-kpi-sub.is-ok{color:var(--ok);font-weight:600;}
-  .stock-kpi-sub.is-ok .dot{background:var(--ok);}
-  .stock-kpi-sub.is-late .dot{background:var(--late);}
-  .stock-kpi-sub.is-indigo .dot{background:var(--primary-dark);}
-
-  .stock-section{background:var(--surface);border-radius:var(--r-card);border:1px solid var(--line);box-shadow:0 4px 20px -2px rgba(14,19,51,.04),0 2px 6px -1px rgba(14,19,51,.02);overflow:hidden;}
-  .stock-section-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;}
-  .stock-section-head-gauche{display:flex;align-items:center;gap:13px;}
-  .stock-section-icon{width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-  .stock-section-icon svg{width:20px;height:20px;}
-  .stock-section-icon.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);}
-  .stock-section-icon.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);}
-  .stock-section-icon.is-ok{background:rgba(36,181,168,.1);color:var(--ok);}
-  .stock-section-icon.is-amber{background:rgba(222,122,22,.08);color:var(--late);}
-  .stock-section-titre-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .stock-section-titre{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
-  .stock-section-badge{padding:2px 10px;border-radius:var(--r-pill);font-size:11.5px;font-weight:700;border:1px solid transparent;}
-  .stock-section-badge.is-blue{background:rgba(35,111,224,.08);color:var(--bleu-roi);border-color:rgba(35,111,224,.15);}
-  .stock-section-badge.is-indigo{background:rgba(91,82,223,.08);color:var(--primary-dark);border-color:rgba(91,82,223,.15);}
-  .stock-section-badge.is-ok{background:rgba(36,181,168,.1);color:var(--ok);border-color:rgba(36,181,168,.18);}
-  .stock-section-badge.is-amber{background:rgba(222,122,22,.1);color:var(--late);border-color:rgba(222,122,22,.18);}
-  .stock-section-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
-  .stock-section-body{padding:24px;}
-  .stock-section-body.is-tight{padding-top:8px;}
-
-  .stock-grid-2{display:grid;grid-template-columns:1fr;gap:24px;}
-  @media (min-width:960px){.stock-grid-2{grid-template-columns:1fr 1fr;}}
-  @media (min-width:960px){.stock-grid-2.is-magasins{grid-template-columns:1fr 1fr;}}
-  @media (min-width:960px){.stock-grid-2.is-catalogue{grid-template-columns:7fr 5fr;}}
-
-  .stock-liste{display:flex;flex-direction:column;gap:10px;background:var(--surface-soft);border-radius:var(--r-card);padding:10px;}
-  .stock-liste.is-scroll{max-height:360px;overflow-y:auto;padding-right:8px;}
-  .stock-row{padding:13px 14px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .15s,background .15s;}
-  .stock-row:hover{border-color:rgba(91,82,223,.3);background:rgba(91,82,223,.02);}
-  .stock-row-gauche{display:flex;align-items:center;gap:13px;min-width:0;}
-  .stock-row-icone{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(222,122,22,.08);color:var(--late);}
-  .stock-row-icone svg{width:18px;height:18px;}
-  .stock-row-corps{min-width:0;}
-  .stock-row-titre-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .stock-row-titre{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:var(--ink);}
-  .stock-row-sub{font-size:12px;color:var(--ink-2);margin-top:1px;}
-  .stock-row-droite{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
-  .stock-row-valeur{text-align:right;flex:0 0 auto;}
-  .stock-row-valeur .montant{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink);}
-  .stock-row-valeur .unite{font-size:11.5px;color:var(--ink-4);margin-left:3px;font-weight:500;}
   .stock-row-actions{display:flex;align-items:center;gap:2px;}
   .stock-row-actions button{padding:7px;border:none;background:transparent;color:var(--ink-4);border-radius:8px;cursor:pointer;transition:color .15s,background .15s;}
   .stock-row-actions button:hover{background:var(--surface-soft);color:var(--primary-dark);}
   .stock-row-actions button.is-danger:hover{color:var(--late);}
   .stock-row-actions button svg{width:15px;height:15px;display:block;}
 
-  .stock-tag{display:inline-flex;padding:1px 8px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-2);font-size:10.5px;font-weight:700;}
-  .stock-tag.is-alert{background:rgba(222,122,22,.1);color:var(--late);}
-
-  .stock-form-panel{background:rgba(14,19,51,.015);border:1px solid var(--line);border-radius:var(--r-card);padding:18px;display:flex;flex-direction:column;gap:12px;}
-  .stock-form-tete{display:flex;align-items:center;gap:8px;}
-  .stock-form-tete svg{width:15px;height:15px;color:var(--primary-dark);}
-  .stock-form-tete span{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink);}
   .stock-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   /* Bug de largeur signalé par l'utilisateur (capture à l'appui) : une
      désignation de pièce longue forçait le bouton .champ-select à dépasser
@@ -6677,45 +6139,7 @@
   .stock-mouvement-modal #mvt-destination,.stock-mouvement-modal #mvt-quantite,
   .stock-mouvement-modal #mvt-cout,.stock-mouvement-modal #mvt-machine,
   .stock-mouvement-modal #mvt-intervention,.stock-mouvement-modal #mvt-motif{background:var(--surface);}
-  .stock-form-panel input, .stock-form-panel select{width:100%;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 13px;color:var(--ink);transition:border-color .15s,box-shadow .15s;}
-  .stock-form-panel input::placeholder{color:var(--ink-4);}
-  .stock-form-panel input:focus, .stock-form-panel select:focus{outline:none;border-color:var(--primary-dark);box-shadow:0 0 0 3px rgba(91,82,223,.12);}
-  .stock-champ-unite{position:relative;}
-  .stock-champ-unite input{padding-right:34px;}
-  .stock-champ-unite .suffixe{position:absolute;top:0;bottom:0;right:12px;display:flex;align-items:center;font-size:11px;font-weight:600;color:var(--ink-4);pointer-events:none;}
-  .stock-select-wrap{position:relative;}
-  .stock-select-wrap select{appearance:none;padding-right:32px;font-weight:600;}
-  .stock-select-wrap svg{position:absolute;top:0;bottom:0;right:11px;margin:auto;width:14px;height:14px;color:var(--ink-4);pointer-events:none;}
 
-  .stock-cta{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--r-md);background:var(--ink);color:#fff;font-size:16px;font-weight:700;font-family:inherit;border:none;cursor:pointer;box-shadow:0 4px 14px 0 rgba(14,19,51,.25);transition:background .15s,transform .1s;}
-  .stock-cta:hover{background:var(--primary-dark);}
-  .stock-cta:active{transform:scale(.99);}
-  .stock-cta svg{width:16px;height:16px;flex:0 0 auto;}
-  .stock-cta[disabled]{opacity:.6;cursor:default;}
-  .stock-cta-annuler{width:100%;text-align:center;padding:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);background:none;border:none;cursor:pointer;}
-  .stock-cta-annuler:hover{color:var(--primary-dark);}
-
-  .stock-search{position:relative;}
-  .stock-search svg{position:absolute;top:0;bottom:0;left:13px;margin:auto;width:16px;height:16px;color:var(--ink-4);pointer-events:none;}
-  .stock-search input{width:100%;font-size:13.5px;padding:10px 14px 10px 38px;background:rgba(14,19,51,.015);border:1px solid var(--line);border-radius:var(--r-md);color:var(--ink);}
-  .stock-search input::placeholder{color:var(--ink-4);}
-  .stock-search input:focus{outline:none;border-color:var(--primary-dark);background:var(--surface);}
-
-  .stock-badge-mouvement{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto;border:1px solid transparent;}
-  .stock-badge-mouvement.is-ok{background:rgba(36,181,168,.1);color:var(--ok);border-color:rgba(36,181,168,.2);}
-  .stock-badge-mouvement.is-alert{background:rgba(222,122,22,.1);color:var(--late);border-color:rgba(222,122,22,.2);}
-  .stock-badge-mouvement.is-soon{background:rgba(35,111,224,.08);color:var(--bleu-roi);border-color:rgba(35,111,224,.16);}
-  .stock-badge-mouvement.is-neutral{background:rgba(91,82,223,.08);color:var(--primary-dark);border-color:rgba(91,82,223,.16);}
-  .stock-mouvement-valeur{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;}
-  .stock-mouvement-valeur.is-ok{color:var(--ok);}
-  .stock-mouvement-valeur.is-alert{color:var(--late);}
-  .stock-mouvement-valeur.is-soon{color:var(--bleu-roi);}
-  .stock-mouvement-valeur.is-neutral{color:var(--primary-dark);}
-  @media (max-width:640px){
-    .stock-row{flex-wrap:wrap;}
-    .stock-section-head{padding:18px;}
-    .stock-section-body{padding:18px;}
-  }
   @media (min-width:900px){ .vue-stock{gap:24px;} }
   /* La section « Classement TCO du parc » est pleine largeur, hors de
      .dash-grid : elle n'hérite donc pas du filet doux que .dash-grid .card
@@ -6786,39 +6210,10 @@
 /* Reprise Stitch « Tableau de bord » — widget TCO enrichi (voir
      keeva-tco-feature) */
   .card-ico.is-roi{width:36px;height:36px;border-radius:var(--r-md);background:rgba(35,111,224,.14);color:var(--bleu-roi);}
-  .tco-dash-pill{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:var(--r-pill);background:var(--ok-bg);color:var(--ok);}
-  .tco-dash-sous{font-size:11px;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;}
-  .tco-dash-metriques{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .tco-dash-metrique{display:flex;flex-direction:column;justify-content:space-between;gap:4px;padding:12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);}
-  .tco-dash-metrique .label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-dash-metrique .valeur-ligne .valeur{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
-  .tco-dash-tendance{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;}
-  .tco-dash-tendance svg{width:13px;height:13px;}
-  .tco-dash-tendance.ok{color:var(--ok);}
-  .tco-dash-tendance.soon{color:var(--soon);}
-  .tco-dash-tendance.late{color:var(--late);}
-  .tco-dash-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
-  .tco-dash-dot.ok{background:var(--ok);}
-  .tco-dash-dot.late{background:var(--late);}
-  .tco-dash-repartition{padding:12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);display:flex;flex-direction:column;gap:8px;}
-  .tco-dash-repartition-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .tco-dash-repartition-titre{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);}
-  .tco-dash-repartition-total{font-size:10.5px;font-weight:700;color:var(--dark-ink);font-family:'Space Grotesk',sans-serif;}
+
   .tco-dash-legende{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:10.5px;font-weight:600;color:var(--ink-2);}
   .tco-dash-legende span{display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tco-dash-legende .rond{width:8px;height:8px;border-radius:2px;flex:0 0 auto;}
-  .tco-dash-spotlight{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-soft);border:1px solid var(--line-2);}
-  .tco-dash-spotlight-gauche{display:flex;align-items:center;gap:9px;min-width:0;}
-  .tco-dash-spotlight-icone{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-chip);background:rgba(91,82,223,.12);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;}
-  .tco-dash-spotlight-icone svg{width:17px;height:17px;}
-  .tco-dash-spotlight .nom{display:block;font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .tco-dash-spotlight .sous{display:block;font-size:11px;color:var(--dark-ink);}
-  .tco-dash-note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid var(--line-2);font-size:11px;color:var(--dark-ink);}
-  .tco-dash-note .gauche{display:inline-flex;align-items:center;gap:6px;}
-  .tco-dash-note .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
-  .tco-dash-note .dot.ok{background:var(--ok);}
-  .tco-dash-note .dot.late{background:var(--late);}
-  .tco-dash-note .droite{font-family:'Space Grotesk',sans-serif;font-weight:600;}
 
   /* Classement TCO du parc — reprise Stitch (phase 3, re-skin) */
 
@@ -6929,70 +6324,10 @@
   .tele-popup-actions button:hover{background:rgba(99,102,241,.28);}
   .tele-popup-actions button.is-actif{background:var(--soon);color:#fff;}
   #tele-carte-msg .link-inline{margin-left:8px;}
-  .tele-carte .tele-localiser{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;cursor:pointer;}
-  .tele-carte .tele-localiser input{width:auto;margin:0;}
-  .tele-carte .tele-localiser input:disabled{cursor:not-allowed;}
+
   /* ═══ TÉLÉMÉTRIE — compteur automatique ═══ */
-  .tele-carte [hidden]{display:none !important;}
-  .tele-carte .tele-aemp{display:grid;gap:8px;margin-top:10px;}
-  .tele-carte .tele-aemp > div{display:grid;gap:8px;}
-  .tele-carte .tele-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;}
-  .tele-carte .btn-row-action{background:rgba(99,102,241,.1);border-color:transparent;color:var(--ink);}
-  .tele-carte .btn-row-action:hover:not(:disabled){background:rgba(99,102,241,.18);border-color:transparent;color:var(--ink);}
-  .tele-carte .btn-row-action:disabled{opacity:.45;cursor:not-allowed;}
-  .tele-carte .tele-creation-ligne button.primary{flex:0 0 auto;padding:12px 18px;}
-  .tele-carte .tele-erreur{color:var(--late-ink);}
+
   .tele-badge{display:inline-block;align-self:flex-start;margin-top:6px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--ok-bg);color:var(--ok-ink);}
   .tele-badge.is-attente{background:var(--surface-soft);color:var(--ink-2);}
   .tele-badge.is-silence{background:var(--late-bg);color:var(--late);}
-  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:13px 14px;border:none;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
-  /* Style flottant (charte) : les lignes sont des cartes blanches posées directement sur le fond de page. */
-  .tele-carte #acc-tele-liste:has(.tele-source-ligne),.tele-carte #acc-tele-machines:has(.tele-ligne){display:flex;flex-direction:column;gap:10px;}
-  .tele-carte .tele-source-ligne{grid-template-columns:minmax(0,1fr);}
-  .tele-carte .tele-ligne{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;}
-  .tele-carte .tele-ligne .tele-nom{grid-column:1/-1;}
-  .tele-carte .tele-nom{font-weight:700;font-size:14px;min-width:0;overflow-wrap:anywhere;}
-  .tele-carte .tele-sous{display:block;font-weight:500;font-size:12px;color:var(--ink-2);margin-top:2px;}
-  .tele-carte .tele-creation-ligne{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;}
-  .tele-carte .tele-creation-ligne input{grid-column:1/-1;}
-  .tele-carte .tele-jeton{margin:12px 0;padding:14px;border-radius:12px;background:var(--surface-soft);}
-  .tele-carte .tele-code{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
-  .tele-carte .tele-code-label{font-size:12px;font-weight:700;color:var(--ink-2);min-width:96px;}
-  .tele-carte .tele-code code{font-size:12px;overflow-wrap:anywhere;flex:1 1 220px;}
-  @media (max-width:720px){
-    .tele-carte .tele-ligne,.tele-carte .tele-creation-ligne{grid-template-columns:1fr;}
-    .tele-carte .tele-source-ligne{grid-template-columns:1fr;}
-  }
 
-  /* ═══ TÉLÉMÉTRIE — style flottant (charte, 2026-10-04) ═══
-     Aucune grande carte blanche : le titre de chaque bloc, ses champs et ses lignes reposent
-     directement sur le fond de page. Les éléments (champs du haut, lignes, bloc du jeton)
-     sont blancs avec l'ombre légère ; un champ DANS une ligne blanche garde le gris par défaut. */
-  .vue-telemetrie > section.card{background:none;box-shadow:none;padding:0;border-radius:0;}
-  .vue-telemetrie .tele-carte-zone{box-shadow:var(--shadow-soft);}
-  .tele-carte .tele-creation input,.tele-carte .tele-creation select,
-  .tele-carte .tele-aemp input,.tele-carte .tele-aemp select{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  .tele-carte .tele-jeton{background:var(--surface);box-shadow:var(--shadow-soft);}
-
-  /* ═══ CHARTE « FLOTTANT PARTOUT » — Rappels, Coûts & TCO, Stock & SAV, Tableau de bord, Agenda ═══
-     Même modèle que Mon compte et le Parc Machines : pas de grande carte blanche, les blocs
-     reposent sur le fond de page. Éléments = blancs + ombre légère, sans bordure ; champ DANS
-     un élément blanc = --surface-soft (rgba(14,19,51,.04)). Le calendrier de l'Agenda est UN
-     élément (un widget) : il reste une carte blanche. */
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section):not(.agenda-calendrier){background:none;box-shadow:none;border:none;padding:0 0 14px;border-radius:0;}
-  /* Champs posés sur le fond : blancs, ombre légère, sans bordure */
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input,select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
-  /* Éléments blancs (anciens sous-blocs teintés avec bordure) */
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  :is(#view-root[data-view="stock"]) .stock-row{border:none;box-shadow:var(--shadow-soft);}
-  :is(#view-root[data-view="stock"]) .stock-row:hover{border:none;box-shadow:0 4px 16px rgba(14,19,51,.1);background:var(--surface);}
-  :is(#view-root[data-view="stock"]) :is(.stock-liste,.stock-form-panel){background:none;border:none;padding:0;box-shadow:none;}
-  /* Champ DANS un élément blanc : teinte par défaut des champs */
-  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
-  /* Dans un groupe blanc, les lignes de produit passent en teinte (blanc sur blanc sinon) */
-  #view-root[data-view="agenda"] .prep-detail-produit,#view-root[data-view="dashboard"] .prep-detail-produit{background:var(--surface-soft);box-shadow:none;border:none;}
-  /* Stock & SAV : la section n'est plus un cadre (bordure, entête séparée par un filet, corps rembourré) */
-  #view-root[data-view="stock"] section.stock-section{border:none;overflow:visible;}
-  #view-root[data-view="stock"] .stock-section-head{padding:0 0 12px;border-bottom:none;}
-  #view-root[data-view="stock"] .stock-section-body,#view-root[data-view="stock"] .stock-section-body.is-tight{padding:0;}

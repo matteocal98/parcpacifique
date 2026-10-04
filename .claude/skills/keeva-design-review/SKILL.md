@@ -67,8 +67,7 @@ faire AVANT de dire "c'est fait".
       dans `charte.html`. UN NOUVEL ÉCRAN SE CONSTRUIT AVEC CES CLASSES, sans CSS propre.
       Migrer un menu = remplacer ses classes par celles du kit, retirer son ancien CSS
       de styles.css, et accrocher le JavaScript à des attributs `data-*` (pas aux classes
-      de style). Déjà migrés : Coûts & TCO (sauf le catalogue de pièces, à migrer avec Stock & SAV) et Mon compte. Chiffres alignés, choix unique et liste déroulante : voir charte.html.
-
+      de style). Tous les menus sont migrés (2026-10-04) : Tableau de bord, Machines, Plan d'entretien, Agenda, Rappels, Coûts & TCO, Stock & SAV, Télémétrie, Mon compte. Toute nouvelle page se construit avec kit.css + teteSectionKit() ; les modales gardent leur habillage propre. 
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —
       chaque bloc logique flotte indépendamment sur le fond de page (motif Machines/

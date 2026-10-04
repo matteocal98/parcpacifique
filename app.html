@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-C+fPYIRWYuPnG4Mxk4ydH4IQsOCdpzkzpXOMZ1JFYN4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ju0NmxJcIZoBDjrHqEdmNHKkLNsArSizchZE38Vu7PQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -10639,7 +10639,7 @@ function chipHtml(status, label, count) {
 function parcPillHtml(status, label, count, teinte) {
   const active = fleetFilters().status === status;
   const couleurDot = teinte === 'late' ? 'var(--late)' : teinte === 'soon' ? 'var(--primary)' : teinte === 'ok' ? 'var(--ok)' : 'var(--dark-ink)';
-  return `<button type="button" class="ui-puce parc-pill${active ? ' is-actif' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="ui-point ${classeEtatKit(teinte)}"></span><span>${esc(label)}</span><span class="ui-compte">${count}</span></button>`;
+  return `<button type="button" class="ui-puce parc-pill${active ? ' is-actif' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}">${teinte ? `<span class="ui-point ${classeEtatKit(teinte)}"></span>` : ''}<span>${esc(label)}</span><span class="ui-compte">${count}</span></button>`;
 }
 
 function fleetListHtml() {
