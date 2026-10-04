@@ -6275,7 +6275,9 @@
 
   /* ═══ TÉLÉMÉTRIE — carte GPS ═══ */
   .tele-carte-gps{margin-bottom:16px;}
-  .tele-carte-zone{position:relative;z-index:0;isolation:isolate;height:clamp(480px,74vh,920px);border-radius:var(--r-card);overflow:hidden;background:var(--surface-soft);margin-top:12px;}
+  .tele-carte-zone{position:relative;z-index:0;isolation:isolate;height:clamp(480px,74vh,920px);border-radius:var(--r-card);overflow:hidden;background:var(--surface-soft);margin:12px auto 0;width:92%;}
+  .tele-carte-indice{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:1000;padding:8px 14px;border-radius:var(--r-pill);background:rgba(14,19,51,.82);color:#fff;font-size:12.5px;font-weight:700;pointer-events:none;opacity:0;transition:opacity .2s ease;}
+  .tele-carte-indice.is-visible{opacity:1;}
   .tele-carte-note{margin-top:10px;}
   .tele-carte-zone:focus,.tele-carte-zone:focus-visible,.tele-carte-zone .leaflet-container:focus{outline:none;}
   .tele-marker{background:none;border:none;}
