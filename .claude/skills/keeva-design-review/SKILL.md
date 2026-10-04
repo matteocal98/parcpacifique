@@ -59,6 +59,14 @@ faire AVANT de dire "c'est fait".
       styles.css (blocs « CHARTE FLOTTANT PARTOUT »), ciblé par
       `#view-root[data-view="…"]`. Tout NOUVEAU menu doit être ajouté à ces listes.
 
+      ★ LE KIT (2026-10-04) : les composants vivent dans `kit.css` (préfixe `ui-` :
+      ui-section, ui-tuile, ui-liste/ui-ligne, ui-champ, ui-btn-plein/pastille/teinte,
+      ui-puce, ui-encadre, ui-statut, ui-grille, ui-barre) et sont montrés avec leur code
+      dans `charte.html`. UN NOUVEL ÉCRAN SE CONSTRUIT AVEC CES CLASSES, sans CSS propre.
+      Migrer un menu = remplacer ses classes par celles du kit, retirer son ancien CSS
+      de styles.css, et accrocher le JavaScript à des attributs `data-*` (pas aux classes
+      de style). Déjà migré : les seuils cibles du TCO.
+
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —
       chaque bloc logique flotte indépendamment sur le fond de page (motif Machines/

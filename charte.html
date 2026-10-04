@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Charte d'interface — KALEA</title>
+<link rel="icon" type="image/png" sizes="64x64" href="icones/favicon-64.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="kit.css">
+<style>
+  /* Mise en page de CETTE page seulement (démonstration) : tout le reste vient du kit. */
+  .charte{max-width:1040px;margin:0 auto;padding:28px 18px 80px;}
+  .charte h1{margin:0 0 6px;font-family:'Space Grotesk',sans-serif;font-size:31px;font-weight:800;letter-spacing:-.02em;}
+  .charte-intro{margin:0 0 28px;font-size:15px;line-height:1.6;color:var(--ink-2);max-width:760px;}
+  .charte-regles{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:regle;}
+  .charte-regles li{counter-increment:regle;position:relative;padding:14px 16px 14px 56px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);font-size:14px;line-height:1.55;}
+  .charte-regles li::before{content:counter(regle);position:absolute;left:14px;top:12px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .charte-demo{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:var(--r-lg);border:2px dashed var(--line-3);}
+  .charte-demo-bloc{display:flex;flex-direction:column;gap:6px;}
+  .charte-legende{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+  .charte-code{margin:0;padding:14px 16px;border-radius:var(--r-md);background:var(--dark);color:#E2E8F0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;overflow:auto;white-space:pre;}
+  .charte-teintes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .charte-teinte{padding:10px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);font-size:12px;}
+  .charte-pastille{height:44px;border-radius:var(--r-chip);margin-bottom:8px;border:1px solid var(--line-2);}
+  .charte-teinte code{display:block;font-size:11.5px;color:var(--ink-3);word-break:break-all;}
+  .charte-deux{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+  .charte-ko,.charte-ok{padding:14px;border-radius:var(--r-lg);}
+  .charte-ko{outline:2px solid var(--late);} .charte-ok{outline:2px solid var(--ok);}
+  .charte-verdict{display:block;margin-bottom:10px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;}
+  .charte-mere{padding:18px;border-radius:var(--r-card);background:var(--surface);box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:12px;}
+  .charte-mere .ui-champ{background:var(--surface-soft);box-shadow:none;}
+</style>
+</head>
+<body>
+<main class="charte">
+  <h1>Charte d'interface KALEA</h1>
+  <p class="charte-intro">Cette page est la référence unique de l'interface : chaque composant du kit (<code>kit.css</code>) y est montré une fois, avec le code à copier. Un écran se construit en assemblant ces composants — il n'a plus de style à lui. Toute nouvelle maquette (Stitch ou autre) est reconstruite avec eux.</p>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.3 19 6v6c0 4.6-3 8.2-7 9.2-4-1-7-4.6-7-9.2V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Les 6 règles</h2><p class="ui-section-sous">Validées le 2026-10-04. Si un écran les enfreint, c'est l'écran qui a tort.</p></div>
+    </div>
+    <ol class="charte-regles">
+      <li><strong>Fond.</strong> La page est teintée ; les éléments (tuile, ligne, champ, bouton secondaire, puce) sont blancs avec l'ombre légère, sans bordure. Jamais de grande carte-mère qui contient d'autres blocs.</li>
+      <li><strong>Titres de section.</strong> Toujours icône + titre + sous-titre, posés sur le fond, avec un grand espace entre deux sections et aucun filet.</li>
+      <li><strong>Une ligne peut contenir un champ.</strong> Posé sur le fond, le champ est blanc ; dans un élément blanc (une ligne), il prend la teinte <code>--surface-soft</code> (<code>rgba(14,19,51,.04)</code>).</li>
+      <li><strong>Alignement.</strong> Les éléments d'une même liste ou grille ont les mêmes colonnes et la même hauteur.</li>
+      <li><strong>Statut.</strong> Un liseré ou un point de couleur, jamais un fond coloré.</li>
+      <li><strong>Boutons.</strong> Un seul bouton plein par section au maximum ; les autres actions sont des pastilles blanches ou teintées.</li>
+    </ol>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Fonds et couleurs</h2><p class="ui-section-sous">Toutes les couleurs viennent des variables de <code>styles.css</code> — aucune valeur en dur.</p></div>
+    </div>
+    <div class="charte-teintes">
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--surface-soft)"></div><strong>Fond de page</strong><code>--bg = --surface-soft<br>rgba(14,19,51,.04)</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--surface)"></div><strong>Élément</strong><code>--surface #FFFFFF</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--ink)"></div><strong>Encre / bouton plein</strong><code>--ink #0E1333</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--primary-dark)"></div><strong>Action (indigo)</strong><code>--primary-dark #5B52DF</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--late)"></div><strong>En retard</strong><code>--late #DE7A16</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--soon)"></div><strong>Bientôt</strong><code>--soon #6366F1</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--ok)"></div><strong>À jour</strong><code>--ok #24B5A8</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--bleu-roi)"></div><strong>Information</strong><code>--bleu-roi #236FE0</code></div>
+    </div>
+    <p class="ui-section-sous">Rayons : <code>--r-md 12px</code> (lignes, champs, boutons), <code>--r-lg / --r-card 16px</code> (tuiles), <code>--r-pill 20px</code> (puces, étiquettes). Ombre : <code>--shadow-soft</code> partout. Titres : Space Grotesk ; texte : la police de l'application.</p>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Section et tuiles</h2><p class="ui-section-sous"><code>.ui-section</code> pose un titre sur le fond ; <code>.ui-tuile</code> montre un chiffre clé. Le statut se lit par le liseré.</p></div>
+    </div>
+    <div class="charte-demo">
+      <div class="ui-grille is-3">
+        <div class="ui-tuile"><span class="ui-tuile-etiquette">Neutre</span><span class="ui-tuile-valeur">3 605 €<small>/an</small></span><span class="ui-tuile-note">Ratio moyen sain</span></div>
+        <div class="ui-tuile is-bientot"><span class="ui-tuile-etiquette">Bientôt</span><span class="ui-tuile-valeur">2</span><span class="ui-tuile-note">À planifier</span></div>
+        <div class="ui-tuile is-retard"><span class="ui-tuile-etiquette">En retard</span><span class="ui-tuile-valeur">1</span><span class="ui-tuile-note">Une machine dépasse son seuil</span></div>
+      </div>
+    </div>
+    <pre class="charte-code">&lt;section class="ui-section"&gt;
+  &lt;div class="ui-section-tete"&gt;
+    &lt;div class="ui-section-icone"&gt;…svg…&lt;/div&gt;
+    &lt;div class="ui-section-titres"&gt;
+      &lt;span class="ui-section-sur-titre"&gt;Optionnel&lt;/span&gt;
+      &lt;h2 class="ui-section-titre"&gt;Titre&lt;/h2&gt;
+      &lt;p class="ui-section-sous"&gt;Sous-titre&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="ui-section-acces"&gt;…boutons à droite…&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ui-section-corps"&gt;
+    &lt;div class="ui-grille is-3"&gt;
+      &lt;div class="ui-tuile is-retard"&gt;
+        &lt;span class="ui-tuile-etiquette"&gt;En retard&lt;/span&gt;
+        &lt;span class="ui-tuile-valeur"&gt;1&lt;small&gt;unité&lt;/small&gt;&lt;/span&gt;
+        &lt;span class="ui-tuile-note"&gt;Note&lt;/span&gt;
+      &lt;/div&gt;   &lt;!-- is-bientot | is-retard | is-ok | rien --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Liste et ligne</h2><p class="ui-section-sous"><code>.ui-liste</code> contient des <code>.ui-ligne</code> identiques. Étroite : trois bandes empilées ; large (≥ 640 px de colonne) : trois colonnes alignées. Le champ d'une ligne est teinté (règle 3).</p></div>
+    </div>
+    <div class="charte-demo">
+      <div class="ui-liste">
+        <div class="ui-ligne">
+          <div class="ui-ligne-id"><div class="ui-ligne-icone">⚙</div><div class="ui-ligne-textes"><span class="ui-ligne-nom">Débroussailleuse</span><span class="ui-ligne-sous">1 machine suivie</span></div></div>
+          <div class="ui-ligne-info"><span class="ui-tag">Moy. actuelle 422 €</span><div class="ui-puces"><button type="button" class="ui-btn ui-btn-teinte">= moyenne</button><button type="button" class="ui-btn ui-btn-teinte">+10 % au-dessus</button></div></div>
+          <div class="ui-ligne-action"><div class="ui-champ-unite"><input class="ui-champ" value="22" aria-label="Seuil"><span class="ui-unite">€/h</span></div></div>
+        </div>
+        <div class="ui-ligne is-retard">
+          <div class="ui-ligne-id"><div class="ui-ligne-icone is-ambre">⚙</div><div class="ui-ligne-textes"><span class="ui-ligne-nom">Pelleteuse (ligne en retard)</span><span class="ui-ligne-sous">Statut = liseré, pas de fond</span></div></div>
+          <div class="ui-ligne-info"><span class="ui-statut is-retard">En retard</span></div>
+          <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-teinte">Voir</button></div>
+        </div>
+      </div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-liste"&gt;
+  &lt;div class="ui-ligne"&gt;                       &lt;!-- + is-retard | is-bientot | is-ok --&gt;
+    &lt;div class="ui-ligne-id"&gt;
+      &lt;div class="ui-ligne-icone"&gt;…svg…&lt;/div&gt;
+      &lt;div class="ui-ligne-textes"&gt;
+        &lt;span class="ui-ligne-nom"&gt;Nom&lt;/span&gt;&lt;span class="ui-ligne-sous"&gt;Détail&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="ui-ligne-info"&gt;…tag, statut, puces…&lt;/div&gt;
+    &lt;div class="ui-ligne-action"&gt;…champ ou bouton teinté…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Champs</h2><p class="ui-section-sous">Blanc posé sur le fond ; teinté dans un élément blanc. Étiquette au-dessus, aide en dessous.</p></div>
+    </div>
+    <div class="charte-deux">
+      <div class="charte-demo">
+        <span class="charte-legende">Sur le fond → blanc</span>
+        <div class="ui-champ-groupe"><label class="ui-etiquette" for="d1">Raison sociale</label><input id="d1" class="ui-champ" value="SCA Lakshmi"><span class="ui-aide">Texte d'aide discret</span></div>
+        <div class="ui-champ-groupe"><label class="ui-etiquette" for="d2">Taux horaire</label><div class="ui-champ-unite"><input id="d2" class="ui-champ" value="11,73"><span class="ui-unite">€/h</span></div></div>
+      </div>
+      <div class="charte-demo">
+        <span class="charte-legende">Dans une ligne blanche → teinté</span>
+        <div class="ui-liste"><div class="ui-ligne is-deux"><div class="ui-ligne-textes"><span class="ui-ligne-nom">Mini pelle</span><span class="ui-ligne-sous">Identifiant du boîtier</span></div><div class="ui-ligne-action"><input class="ui-champ" value="XYZ" aria-label="Identifiant" style="min-width:140px"></div></div></div>
+      </div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-champ-groupe"&gt;
+  &lt;label class="ui-etiquette" for="x"&gt;Libellé&lt;/label&gt;
+  &lt;input id="x" class="ui-champ"&gt;                 &lt;!-- aussi select / textarea --&gt;
+  &lt;span class="ui-aide"&gt;Aide&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="ui-champ-unite"&gt;&lt;input class="ui-champ"&gt;&lt;span class="ui-unite"&gt;€/h&lt;/span&gt;&lt;/div&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="3"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Boutons : trois formats</h2><p class="ui-section-sous">Un seul bouton plein par section au maximum.</p></div>
+    </div>
+    <div class="charte-demo">
+      <div class="charte-demo-bloc"><span class="charte-legende">Plein — action principale (16 px / 700)</span><div><button type="button" class="ui-btn ui-btn-plein">Enregistrer les modifications</button></div></div>
+      <div class="charte-demo-bloc"><span class="charte-legende">Pastille blanche — action secondaire (13 px / 700)</span><div class="ui-puces"><button type="button" class="ui-btn ui-btn-pastille">Exporter (CSV)</button><button type="button" class="ui-btn ui-btn-pastille">Gérer mon abonnement</button><button type="button" class="ui-btn ui-btn-icone" aria-label="Aide">?</button></div></div>
+      <div class="charte-demo-bloc"><span class="charte-legende">Teintée — action de ligne (13 px / 700)</span><div class="ui-puces"><button type="button" class="ui-btn ui-btn-teinte">Tester</button><button type="button" class="ui-btn ui-btn-teinte">Relier mes machines</button><button type="button" class="ui-btn ui-btn-teinte is-danger">Révoquer</button></div></div>
+    </div>
+    <pre class="charte-code">&lt;button class="ui-btn ui-btn-plein"&gt;…&lt;/button&gt;       &lt;!-- .is-bloc = pleine largeur (téléphone) --&gt;
+&lt;button class="ui-btn ui-btn-pastille"&gt;…&lt;/button&gt;
+&lt;button class="ui-btn ui-btn-teinte"&gt;…&lt;/button&gt;      &lt;!-- + is-danger --&gt;
+&lt;button class="ui-btn ui-btn-icone"&gt;…svg…&lt;/button&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h17l-6.6 7.6v6.4l-3.8-2.2v-4.2z"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Barre de filtres, puces et encadrés</h2><p class="ui-section-sous">Une barre n'est pas un bloc blanc : un champ blanc et des puces blanches posés sur le fond.</p></div>
+    </div>
+    <div class="charte-demo">
+      <div class="ui-barre"><input class="ui-champ" placeholder="Rechercher un nom, une marque, un n° de série…" aria-label="Recherche">
+        <div class="ui-puces"><button type="button" class="ui-puce is-actif">Toutes <span class="ui-compte">6</span></button><button type="button" class="ui-puce"><span class="ui-point is-retard"></span>En retard <span class="ui-compte">2</span></button><button type="button" class="ui-puce"><span class="ui-point is-bientot"></span>Bientôt <span class="ui-compte">1</span></button><button type="button" class="ui-puce"><span class="ui-point is-ok"></span>À jour <span class="ui-compte">3</span></button></div>
+      </div>
+      <div><div class="ui-segment"><button type="button" class="is-actif">Depuis la mise en service</button><button type="button">12 derniers mois</button><button type="button">Année en cours</button></div></div>
+      <div class="ui-encadre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6h.01"/></svg><div><span class="ui-encadre-titre">Information</span><p>Liseré bleu : une explication neutre.</p></div></div>
+      <div class="ui-encadre is-conseil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5h6"/><path d="M12 3a6 6 0 0 0-3.4 10.9c.5.35.7.9.7 1.5v.6h5.4v-.6c0-.6.2-1.15.7-1.5A6 6 0 0 0 12 3z"/></svg><div><span class="ui-encadre-titre">Conseil</span><p>Liseré indigo : une suggestion.</p></div></div>
+      <div class="ui-encadre is-attention"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5"/><path d="M12 17.4h.01"/></svg><div><span class="ui-encadre-titre">Attention</span><p>Liseré orange : une conséquence à connaître avant d'agir.</p></div></div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-barre"&gt;
+  &lt;input class="ui-champ" placeholder="Rechercher…"&gt;
+  &lt;div class="ui-puces"&gt;&lt;button class="ui-puce is-actif"&gt;Toutes &lt;span class="ui-compte"&gt;6&lt;/span&gt;&lt;/button&gt;
+    &lt;button class="ui-puce"&gt;&lt;span class="ui-point is-retard"&gt;&lt;/span&gt;En retard&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="ui-encadre [is-conseil | is-attention]"&gt;&lt;svg/&gt;&lt;div&gt;&lt;span class="ui-encadre-titre"&gt;Titre&lt;/span&gt;&lt;p&gt;Texte&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;span class="ui-statut is-retard"&gt;En retard&lt;/span&gt;   &lt;!-- is-bientot | is-ok --&gt;
+&lt;span class="ui-tag"&gt;Moy. actuelle 422 €&lt;/span&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Ce qu'on ne fait plus</h2><p class="ui-section-sous">Les deux défauts rencontrés pendant la migration.</p></div>
+    </div>
+    <div class="charte-deux">
+      <div class="charte-ko">
+        <span class="charte-verdict" style="color:var(--late)">À éviter — grande carte-mère</span>
+        <div class="charte-mere"><strong>Paramètres</strong><div class="ui-champ-groupe"><label class="ui-etiquette">Nom</label><input class="ui-champ" value="Un champ gris dans une grande carte blanche"></div><div><button type="button" class="ui-btn ui-btn-plein">Enregistrer</button></div></div>
+      </div>
+      <div class="charte-ok">
+        <span class="charte-verdict" style="color:var(--ok)">Correct — flottant</span>
+        <div class="ui-section" style="margin:0"><div class="ui-section-tete"><div class="ui-section-titres"><h3 class="ui-section-titre" style="font-size:17px">Paramètres</h3></div></div><div class="ui-champ-groupe"><label class="ui-etiquette">Nom</label><input class="ui-champ" value="Un champ blanc posé sur le fond"></div><div><button type="button" class="ui-btn ui-btn-plein">Enregistrer</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="ui-section-sous">Fichiers : <code>kit.css</code> (composants) · <code>styles.css</code> (variables et écrans pas encore migrés). Migrés vers le kit : seuils cibles du TCO. À migrer, menu par menu avec validation : Mon compte, Rappels, Coûts &amp; TCO (reste), Stock &amp; SAV, Tableau de bord, Agenda.</p>
+</main>
+</body>
+</html>

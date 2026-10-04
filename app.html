@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xRMBxlreG0Oq54mBn2qDIEewDEHlmmsz6Ac+J8OliN0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-6vMFz0r3ZFb7lgSvR1UZns4eroaMV3+Mat1RWAm+Byg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -55,6 +55,7 @@
 <!-- pdf.js n'est plus chargé ici : il ne sert qu'à extraire la 1ère page d'un carnet PDF
      et représente ~350 Ko. Il est chargé à la demande (voir loadPdfLib). -->
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="kit.css">
 </head>
 <body>
 
@@ -13408,48 +13409,52 @@ function blocSeuilsCategorieTcoHtml() {
   if (!categories.length) return '';
   const TEINTES = ['is-roi', 'is-ok', 'is-amber', 'is-indigo'];
   return `
-    <section class="card">
-      <div class="tco-card-tete">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-lg is-ok">${picto('curseurs')}</div>
+    <section class="ui-section">
+      <div class="ui-section-tete">
+        <div class="ui-section-icone">${picto('curseurs')}</div>
+        <div class="ui-section-titres">
+          <span class="ui-section-sur-titre">${trad('Paramétrage de rentabilité')}</span>
+          <h2 class="ui-section-titre">${trad('Seuils cibles de coût horaire')}</h2>
+          <p class="ui-section-sous">${trad('Par catégorie de machine — utilisé pour l\'écart affiché dans le classement TCO')}</p>
+        </div>
+      </div>
+      <div class="ui-section-corps">
+        <div class="ui-encadre is-conseil">
+          ${picto('ampoule')}
           <div>
-            <span class="tco-eyebrow-pill">${trad('Paramétrage de rentabilité')}</span>
-            <h2 class="tco-card-titre" style="margin-top:4px;">${trad('Seuils cibles de coût horaire')}</h2>
-            <div class="tco-card-soustitre">${trad('Par catégorie de machine — utilisé pour l\'écart affiché dans le classement TCO')}</div>
+            <span class="ui-encadre-titre">${trad('Comment fixer un seuil cohérent ?')}</span>
+            <p>${trad('C\'est le coût horaire au-delà duquel une machine de cette catégorie est signalée comme trop chère à l\'usage (classement TCO, tableau de bord). Vise un chiffre légèrement AU-DESSUS de ta moyenne actuelle plutôt qu\'égal à elle — sinon la moitié de ta flotte serait signalée en permanence. Les boutons sous chaque catégorie proposent un point de départ calculé sur tes propres machines.')}</p>
           </div>
         </div>
-      </div>
-      <div class="tco-tip-carte" style="margin:12px 0;">
-        <div class="tco-tip-icone">${picto('ampoule')}</div>
-        <div>
-          <div class="tco-tip-titre">${trad('Comment fixer un seuil cohérent ?')}</div>
-          <p class="tco-tip-texte">${trad('C\'est le coût horaire au-delà duquel une machine de cette catégorie est signalée comme trop chère à l\'usage (classement TCO, tableau de bord). Vise un chiffre légèrement AU-DESSUS de ta moyenne actuelle plutôt qu\'égal à elle — sinon la moitié de ta flotte serait signalée en permanence. Les boutons sous chaque catégorie proposent un point de départ calculé sur tes propres machines.')}</p>
-        </div>
-      </div>
-      ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
-      <div class="tco-seuils-liste">
-        ${categories.map((cat, i) => {
-          const nbMachines = (UI.machines || []).filter((m) => m.category?.id === cat.id).length;
-          return `
-          <div class="tco-seuil-carte" data-categorie-id="${esc(cat.id)}">
-            <div class="tco-seuil-carte-tete">
-              <div class="tco-seuil-icone ${TEINTES[i % TEINTES.length]}">${picto(iconeCategorieMachine(cat.name))}</div>
-              <div>
-                <span class="tco-seuil-nom">${esc(cat.name)}</span>
-                <span class="tco-seuil-sous">${tR('{n} machine(s) suivie(s)', { n: nbMachines })}</span>
+        ${!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : ''}
+        <div class="ui-liste">
+          ${categories.map((cat, i) => {
+            const nbMachines = (UI.machines || []).filter((m) => m.category?.id === cat.id).length;
+            return `
+            <div class="ui-ligne" data-seuil-ligne data-categorie-id="${esc(cat.id)}">
+              <div class="ui-ligne-id">
+                <div class="ui-ligne-icone ${TEINTES[i % TEINTES.length]}">${picto(iconeCategorieMachine(cat.name))}</div>
+                <div class="ui-ligne-textes">
+                  <span class="ui-ligne-nom">${esc(cat.name)}</span>
+                  <span class="ui-ligne-sous">${tR('{n} machine(s) suivie(s)', { n: nbMachines })}</span>
+                </div>
               </div>
-              <span class="tco-seuil-moyenne-tag" data-seuil-moyenne-categorie="${esc(cat.id)}"></span>
-            </div>
-            <div class="tco-seuil-raccourcis" data-seuil-raccourcis-categorie="${esc(cat.id)}" hidden></div>
-            <div class="tco-champ-unite">
-              <input type="text" inputmode="decimal" class="tco-seuil-input" value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
-              <span class="tco-unite-tag">${deviseCourte()}/h</span>
-            </div>
-          </div>`;
-        }).join('')}
+              <div class="ui-ligne-info">
+                <span class="ui-tag" data-seuil-moyenne-categorie="${esc(cat.id)}"></span>
+                <div class="ui-puces tco-seuil-raccourcis" data-seuil-raccourcis-categorie="${esc(cat.id)}" hidden></div>
+              </div>
+              <div class="ui-ligne-action">
+                <div class="ui-champ-unite">
+                  <input type="text" inputmode="decimal" class="ui-champ" data-seuil-input value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
+                  <span class="ui-unite">${deviseCourte()}/h</span>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="ui-aide" id="tco-seuils-msg" role="status" aria-live="polite"></div>
+        <div><button type="button" class="ui-btn ui-btn-plein" id="tco-save-seuils"${bloque}>${picto('coche')}<span>${trad('Enregistrer les seuils')}</span></button></div>
       </div>
-      <div class="hint" id="tco-seuils-msg" role="status" aria-live="polite"></div>
-      <button type="button" class="tco-clst-export-btn is-primaire" id="tco-save-seuils"${bloque}>${picto('coche')}<span>${trad('Enregistrer les seuils')}</span></button>
     </section>`;
 }
 // Donut RÉEL (phase 2) — remplace l'illustration « MODÈLE KALEA » statique
@@ -14440,8 +14445,8 @@ VIEWS.tco = {
           // pas quel montant taper à la main (voir la carte d'astuce
           // ci-dessus). Réservé au gérant : si le champ est verrouillé pour
           // ce rôle, inutile de proposer un raccourci qui ne servirait à rien.
-          const carte = tag.closest('.tco-seuil-carte');
-          const input = carte?.querySelector('.tco-seuil-input');
+          const carte = tag.closest('[data-seuil-ligne]');
+          const input = carte?.querySelector('[data-seuil-input]');
           const raccourcis = carte?.querySelector('[data-seuil-raccourcis-categorie]');
           if (!input || !raccourcis || input.disabled) return;
           const propositions = [
@@ -14449,9 +14454,9 @@ VIEWS.tco = {
             { label: trad('+10 % au-dessus'), valeur: moyenne * 1.1 },
           ];
           raccourcis.innerHTML = propositions.map((p, i) =>
-            `<button type="button" class="tco-seuil-raccourci-btn" data-raccourci="${i}">${esc(p.label)}</button>`).join('');
+            `<button type="button" class="ui-btn ui-btn-teinte" data-raccourci="${i}">${esc(p.label)}</button>`).join('');
           raccourcis.hidden = false;
-          raccourcis.querySelectorAll('.tco-seuil-raccourci-btn').forEach((btn, i) => {
+          raccourcis.querySelectorAll('button[data-raccourci]').forEach((btn, i) => {
             btn.addEventListener('click', () => {
               input.value = texteAvecSeparateurs(Math.round(propositions[i].valeur));
               input.focus();
@@ -14783,7 +14788,7 @@ VIEWS.tco = {
     ['#tco-taux-horaire', '#tco-assurance', '#tco-stockage'].forEach((sel) => {
       activerSeparateurMilliers(root.querySelector(sel));
     });
-    root.querySelectorAll('.tco-seuil-input').forEach((input) => activerSeparateurMilliers(input));
+    root.querySelectorAll('[data-seuil-input]').forEach((input) => activerSeparateurMilliers(input));
 
     // Catalogue de pièces : déplacé dans Stocks & SAV pour une société
     // Enterprise (voir render() ci-dessus) — reste ici, câblé normalement,
@@ -14877,10 +14882,10 @@ VIEWS.tco = {
       const btn = e.currentTarget;
       const label = btn.querySelector('span');
       const msg = root.querySelector('#tco-seuils-msg');
-      const lignes = [...root.querySelectorAll('.tco-seuil-carte')];
+      const lignes = [...root.querySelectorAll('[data-seuil-ligne]')];
       const modifiees = lignes.map((ligne) => {
         const id = ligne.dataset.categorieId;
-        const valeur = nombreDepuisTexte(ligne.querySelector('.tco-seuil-input').value);
+        const valeur = nombreDepuisTexte(ligne.querySelector('[data-seuil-input]').value);
         const categorie = (UI.categories || []).find((c) => c.id === id);
         return { id, valeur, changed: categorie && categorie.target_hourly_cost !== valeur };
       }).filter((l) => l.changed);
