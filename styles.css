@@ -3050,6 +3050,13 @@
     transition:background .15s ease;
   }
   .log-item-carte:hover{background:var(--line);}
+  /* État de la tâche : le même code couleur que les badges (orange = en retard,
+     indigo = bientôt). Placé AVANT la règle « cochée » : coché = traité = vert, qui gagne
+     (spécificité plus forte avec :has). */
+  .log-item-carte.is-late:not(:has(input:checked)){background:rgba(222,122,22,.2);box-shadow:inset 4px 0 0 var(--late);}
+  .log-item-carte.is-soon:not(:has(input:checked)){background:rgba(99,102,241,.3);box-shadow:inset 4px 0 0 var(--soon);}
+  .log-item-carte.is-late:not(:has(input:checked)):hover{background:rgba(222,122,22,.3);}
+  .log-item-carte.is-soon:not(:has(input:checked)):hover{background:rgba(99,102,241,.38);}
   .log-item-carte:has(input:checked),.log-item-carte.is-checked{background:var(--ok-bg);}
   .log-item-carte input{position:absolute;opacity:0;width:0;height:0;}
   .log-item-check{width:20px;height:20px;border-radius:6px;background:var(--surface-container-highest,var(--line));display:flex;align-items:center;justify-content:center;color:transparent;flex:0 0 auto;margin-top:1px;transition:all .15s;}

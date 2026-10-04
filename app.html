@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dwwOh6+qU52buFbAxo8aGUyDKFTrtRh9SKVmEKPtygs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Z0kJcAGSBjF+kZkHTKyiuk3MPVU/8CHgUgYOnG1XdU4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -21071,8 +21071,18 @@ function openLogInterventionModal(machine, tache) {
               <div class="checklist log-checklist" id="log-checklist">
                 ${itemsRiches.map((it) => {
                   const prefixe = PREFIXE_SPEC_CATEGORIE[categorieProduit(it.label)] || PREFIXE_SPEC_CATEGORIE.autres;
+                  // L'état de CETTE tâche (le même calcul que partout ailleurs) teinte
+                  // sa carte : orange si elle est en retard, indigo si elle approche.
+                  // Seulement quand le plan détaille réellement ses tâches : un simple
+                  // libellé n'a ni échéance ni état à montrer. Une tâche cochée repasse
+                  // en vert (« traitée ») : la teinte d'état ne parle que de ce qui reste à faire.
+                  let etatTache = null;
+                  if (planItems.length) {
+                    try { etatTache = infoTache(it, machine.plan, machine); } catch (err) { etatTache = null; }
+                  }
+                  const teinte = etatTache && (etatTache.state === 'late' || etatTache.state === 'soon') ? etatTache.state : '';
                   return `
-                  <label class="log-item-carte">
+                  <label class="log-item-carte${teinte ? ' is-' + teinte : ''}"${teinte ? ` title="${esc(etatTache.label || etatTache.short || '')}"` : ''}>
                     <input type="checkbox" value="${esc(it.label)}"${it.label === tache ? ' checked' : ''}>
                     <span class="log-item-check">${picto('coche')}</span>
                     <span class="${it.frequency ? 'log-item-colonnes' : 'log-item-corps-pleine'}">
