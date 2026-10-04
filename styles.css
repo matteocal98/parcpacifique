@@ -7251,6 +7251,24 @@
     #qr-impression .qr-impression-id{font-size:13px;color:#555;}
   }
 
+  /* ═══ TÉLÉMÉTRIE — carte GPS ═══ */
+  .tele-carte-gps{margin-bottom:16px;}
+  .tele-carte-zone{position:relative;z-index:0;isolation:isolate;height:clamp(360px,60vh,720px);border-radius:var(--r-card);overflow:hidden;background:var(--surface-soft);margin-top:12px;}
+  .tele-carte-note{margin-top:10px;}
+  .tele-marker{background:none;border:none;}
+  .tele-marker-pt{display:block;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 6px rgba(14,19,51,.45);background:var(--ok);}
+  .tele-marker-pt.is-late{background:var(--late);}
+  .tele-marker-pt.is-soon{background:var(--soon);}
+  .tele-popup{display:flex;flex-direction:column;gap:3px;min-width:170px;font-family:inherit;}
+  .tele-popup strong{font-size:14px;color:var(--ink);}
+  .tele-popup-sous{font-size:12px;color:var(--ink-2);}
+  .tele-popup-titre{margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);}
+  .tele-popup-actions{display:flex;gap:6px;margin-top:4px;}
+  .tele-popup-actions button{flex:1;font-size:12px;font-weight:700;padding:6px 8px;border-radius:8px;border:none;background:var(--soon-bg);color:var(--ink);cursor:pointer;font-family:inherit;}
+  .tele-popup-actions button:hover{background:rgba(99,102,241,.28);}
+  .tele-carte .tele-localiser{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;cursor:pointer;}
+  .tele-carte .tele-localiser input{width:auto;margin:0;}
+  .tele-carte .tele-localiser input:disabled{cursor:not-allowed;}
   /* ═══ TÉLÉMÉTRIE — compteur automatique ═══ */
   .tele-carte [hidden]{display:none !important;}
   .tele-carte .tele-aemp{display:grid;gap:8px;margin-top:10px;padding:14px;border-radius:12px;background:var(--surface-soft);}

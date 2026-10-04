@@ -63,7 +63,7 @@
 
     <section class="fr" lang="fr">
       <h1>Politique de confidentialité</h1>
-      <div class="updated">Dernière mise à jour : 17 septembre 2026</div>
+      <div class="updated">Dernière mise à jour : 4 octobre 2026</div>
 
       <h2>1. Responsable du traitement</h2>
       <div class="box">
@@ -76,7 +76,8 @@
       <p>Dans le cadre de l'utilisation de l'application KALEA (ci-après « le Service »), les données suivantes sont collectées :</p>
       <ul>
         <li><strong>Données de compte :</strong> adresse email, mot de passe conservé sous forme d'empreinte (hachage bcrypt : le mot de passe n'est jamais enregistré en clair et ne peut pas être reconstitué à partir de l'empreinte), société de rattachement ;</li>
-        <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines.</li>
+        <li><strong>Données professionnelles saisies par l'utilisateur :</strong> informations sur le matériel suivi (nom, marque, modèle, numéro de série), plans de maintenance, historique des interventions, documents joints (carnets d'entretien au format PDF) et photos des machines ;</li>
+        <li><strong>Données de télémétrie (option de l'offre Enterprise) :</strong> relevés de compteur (heures, kilomètres) transmis par un boîtier ou lus chez le constructeur de l'engin avec les identifiants API que l'utilisateur a lui-même fournis (conservés chiffrés) et, <u>uniquement pour les machines sur lesquelles le gérant a coché « Localiser »</u>, la position géographique de la machine.</li>
       </ul>
 
       <h2>3. Finalités du traitement</h2>
@@ -84,8 +85,10 @@
       <ul>
         <li>permettre l'authentification et l'accès sécurisé au Service ;</li>
         <li>assurer le suivi de maintenance du parc matériel de l'entreprise utilisatrice ;</li>
-        <li>générer des rappels et alertes d'échéance d'entretien.</li>
+        <li>générer des rappels et alertes d'échéance d'entretien ;</li>
+        <li>mettre à jour automatiquement les compteurs des machines reliées à un boîtier ou à un compte constructeur et, si le gérant l'a activé machine par machine, afficher leur position sur une carte.</li>
       </ul>
+      <p><strong>Localisation.</strong> La position concerne des machines, pas des personnes, et n'est jamais collectée sans que le gérant ait coché « Localiser » sur la machine concernée. L'entreprise cliente décide de cet usage et reste responsable de son emploi à l'égard de ses salariés : lorsqu'un engin ou un véhicule est conduit par un salarié, elle doit l'en informer et n'utiliser la localisation qu'à des fins professionnelles (jamais pour suivre des trajets privés ou le trajet domicile-travail). Décocher « Localiser » supprime immédiatement la position et l'historique de la machine.</p>
 
       <h2>4. Base légale</h2>
       <p>Le traitement repose sur l'exécution du service demandé par l'utilisateur (base contractuelle) et, le cas échéant, sur l'intérêt légitime de l'éditeur à assurer le bon fonctionnement et la sécurité du Service.</p>
@@ -97,7 +100,9 @@
         <li><strong>GitHub, Inc.</strong> — hébergement de l'interface de l'application ;</li>
         <li><strong>Resend</strong> — envoi des e-mails du Service (codes de connexion, réinitialisation de mot de passe, rappels d'échéance) ;</li>
         <li><strong>Stripe</strong> — traitement des paiements des offres payantes. Les données de carte bancaire ne transitent pas par KALEA et n'y sont pas conservées : elles sont saisies et conservées par Stripe ;</li>
-        <li><strong>Google (API Gemini)</strong> — analyse des carnets d'entretien déposés et recherche automatique de photos de machines.</li>
+        <li><strong>Google (API Gemini)</strong> — analyse des carnets d'entretien déposés et recherche automatique de photos de machines ;</li>
+        <li><strong>Flespi</strong> — réception des données des boîtiers de télémétrie, uniquement si l'entreprise cliente choisit cette option ;</li>
+        <li><strong>OpenStreetMap</strong> (fondation OpenStreetMap) — fond de la carte des machines : pour l'afficher, votre navigateur interroge ses serveurs de tuiles, qui voient alors votre adresse IP et la zone consultée (jamais la position précise des machines).</li>
       </ul>
       <p>Ces prestataires n'utilisent pas les données à des fins autres que l'exécution du Service. Aucune donnée n'est vendue ni partagée à des fins commerciales avec des tiers.</p>
       <p>Certaines fonctionnalités ponctuelles (recherche automatique d'une photo de machine, analyse d'un carnet d'entretien par intelligence artificielle) transmettent une requête à des prestataires tiers spécialisés — Google (API Gemini) pour l'analyse. Cette requête contient la description de la machine, le contenu du carnet d'entretien déposé et, le cas échéant, la photo de la machine. Elle a pour seule finalité de fournir la fonctionnalité demandée par l'utilisateur au moment où il l'active ; ces prestataires n'utilisent pas les données à d'autres fins.</p>
@@ -105,6 +110,7 @@
 
       <h2>6. Durée de conservation</h2>
       <p>Les données de compte et les données métier sont conservées pendant toute la durée d'utilisation du Service, puis supprimées dans un délai de 30 jours suivant la demande de suppression ou la clôture du compte. La marche à suivre figure sur la page <a href="./suppression-compte.html">Suppression de compte</a> : elle indique ce qui est effacé, ce qui est conservé (les factures liées à un abonnement payant, dix ans, obligation comptable) et le délai appliqué. Les journaux d'envoi des rappels sont conservés 12 mois. Les documents joints et les photos sont supprimés avec la machine concernée ou avec le compte. La copie locale enregistrée sur l'appareil pour la consultation hors connexion est conservée 7 jours au maximum et effacée à la déconnexion.</p>
+      <p>Les positions : la dernière position connue et l'historique des trajets sont conservés <strong>60 jours au plus</strong>, puis supprimés automatiquement ; la désactivation de « Localiser » les supprime immédiatement. Les relevés de compteur suivent la durée générale ci-dessus.</p>
       <p>Les rappels par e-mail envoient le nom de la machine et sa prochaine échéance à l'adresse configurée dans l'application. Cette adresse peut être modifiée et les rappels désactivés à tout moment depuis la rubrique « Mon compte ».</p>
 
       <h2>7. Droits des utilisateurs</h2>
@@ -122,7 +128,7 @@
 
     <section class="en" lang="en">
       <h1>Privacy policy</h1>
-      <div class="updated">Last updated: 17 September 2026</div>
+      <div class="updated">Last updated: 4 October 2026</div>
 
       <h2>1. Data controller</h2>
       <div class="box">
@@ -135,7 +141,8 @@
       <p>When using the KALEA application (the “Service”), the following data is collected:</p>
       <ul>
         <li><strong>Account data:</strong> email address, password kept as a hash (bcrypt hashing: the password is never stored in clear text and cannot be recovered from the hash), company the account is linked to;</li>
-        <li><strong>Professional data entered by the user:</strong> information about the equipment tracked (name, brand, model, serial number), maintenance plans, service history, attached documents (service manuals in PDF format) and machine photos.</li>
+        <li><strong>Professional data entered by the user:</strong> information about the equipment tracked (name, brand, model, serial number), maintenance plans, service history, attached documents (service manuals in PDF format) and machine photos;</li>
+        <li><strong>Telemetry data (Enterprise plan option):</strong> counter readings (hours, kilometres) sent by a tracker or read from the machine's manufacturer using the API credentials the user has supplied (stored encrypted) and, <u>only for machines on which the manager has ticked “Track location”</u>, the machine's geographic position.</li>
       </ul>
 
       <h2>3. Purposes of the processing</h2>
@@ -143,8 +150,10 @@
       <ul>
         <li>enable authentication and secure access to the Service;</li>
         <li>ensure maintenance tracking of the customer company's equipment fleet;</li>
-        <li>generate maintenance due-date reminders and alerts.</li>
+        <li>generate maintenance due-date reminders and alerts;</li>
+        <li>automatically update the counters of machines linked to a tracker or a manufacturer account and, where the manager has enabled it machine by machine, show their position on a map.</li>
       </ul>
+      <p><strong>Location.</strong> The position concerns machines, not people, and is never collected unless the manager has ticked “Track location” on the machine concerned. The customer company decides on this use and remains responsible for it towards its employees: when a machine or vehicle is driven by an employee, it must inform them and use location for professional purposes only (never to follow private journeys or the commute). Unticking “Track location” immediately deletes the machine's position and history.</p>
 
       <h2>4. Legal basis</h2>
       <p>The processing is based on the performance of the service requested by the user (contractual basis) and, where applicable, on the legitimate interest of the publisher in ensuring the proper functioning and security of the Service.</p>
@@ -156,7 +165,9 @@
         <li><strong>GitHub, Inc.</strong> — hosting of the application interface;</li>
         <li><strong>Resend</strong> — sending the Service's emails (sign-in codes, password resets, due-date reminders);</li>
         <li><strong>Stripe</strong> — processing payments for the paid plans. Card details do not pass through KALEA and are not stored by it: they are entered and kept by Stripe;</li>
-        <li><strong>Google (Gemini API)</strong> — analysis of uploaded service manuals and automatic search for machine photos.</li>
+        <li><strong>Google (Gemini API)</strong> — analysis of uploaded service manuals and automatic search for machine photos;</li>
+        <li><strong>Flespi</strong> — receiving data from telemetry trackers, only if the customer company chooses this option;</li>
+        <li><strong>OpenStreetMap</strong> (OpenStreetMap Foundation) — background of the machine map: to display it, your browser contacts its tile servers, which then see your IP address and the area viewed (never the machines' precise positions).</li>
       </ul>
       <p>These providers do not use the data for any purpose other than providing the Service. No data is sold or shared for commercial purposes with third parties.</p>
       <p>Certain occasional features (automatic search for a machine photo, analysis of a service manual by artificial intelligence) send a request to specialised third-party providers — Google (Gemini API) for the analysis. That request contains the description of the machine, the content of the uploaded service manual and, where applicable, the machine photo. Its sole purpose is to provide the feature requested by the user at the moment they activate it; these providers do not use the data for any other purpose.</p>
@@ -164,6 +175,7 @@
 
       <h2>6. Retention period</h2>
       <p>Account data and business data are kept for as long as the Service is used, then deleted within 30 days of a deletion request or of the account being closed. The procedure is set out on the <a href="./suppression-compte.html">Account deletion</a> page: it states what is erased, what is kept (invoices relating to a paid subscription, ten years, an accounting obligation) and how long it takes. Reminder delivery logs are kept for 12 months. Attached documents and photos are deleted together with the machine concerned or with the account. The local copy stored on the device for offline viewing is kept for a maximum of 7 days and erased on sign-out.</p>
+      <p>Positions: the last known position and the route history are kept for <strong>60 days at most</strong>, then deleted automatically; unticking “Track location” deletes them immediately. Counter readings follow the general period above.</p>
       <p>Email reminders send the machine name and its next due date to the address configured in the application. That address can be changed and reminders can be disabled at any time from the “My account” section.</p>
 
       <h2>7. User rights</h2>
