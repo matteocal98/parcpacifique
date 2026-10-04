@@ -7358,15 +7358,35 @@
   :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input,select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
   /* Éléments blancs (anciens sous-blocs teintés avec bordure) */
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-seuil-carte,.tco-callout.is-info,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-callout.is-info,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="stock"]) .stock-row{border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="stock"]) .stock-row:hover{border:none;box-shadow:0 4px 16px rgba(14,19,51,.1);background:var(--surface);}
   :is(#view-root[data-view="stock"]) :is(.stock-liste,.stock-form-panel){background:none;border:none;padding:0;box-shadow:none;}
   /* Champ DANS un élément blanc : teinte par défaut des champs */
-  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-seuil-carte,.tco-callout,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select,.tco-champ-unite){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
+  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-callout,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select,.tco-champ-unite){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
   /* Dans un groupe blanc, les lignes de produit passent en teinte (blanc sur blanc sinon) */
   #view-root[data-view="agenda"] .prep-detail-produit,#view-root[data-view="dashboard"] .prep-detail-produit{background:var(--surface-soft);box-shadow:none;border:none;}
   /* Stock & SAV : la section n'est plus un cadre (bordure, entête séparée par un filet, corps rembourré) */
   #view-root[data-view="stock"] section.stock-section{border:none;overflow:visible;}
   #view-root[data-view="stock"] .stock-section-head{padding:0 0 12px;border-bottom:none;}
   #view-root[data-view="stock"] .stock-section-body,#view-root[data-view="stock"] .stock-section-body.is-tight{padding:0;}
+
+  /* ═══ Coûts & TCO — passe 2 (2026-10-04) : même langage partout ═══
+     · tuiles de chiffres : TOUTES blanches avec ombre ; l'alerte se lit par un liseré orange, pas par un fond coloré ;
+     · barre d'outils et liste : plus de zone teintée ;
+     · boutons secondaires : pastilles blanches comme « Exporter (CSV) » du Parc ; seuls les boutons d'enregistrement restent pleins ;
+     · cartes d'info : blanches avec un liseré de couleur (bleu = info, orange = attention) ;
+     · seuils par catégorie : lignes à plat (le champ repose sur le fond, jamais dans un bloc blanc). */
+  #view-root[data-view="tco"] .tco-clst-kpi-carte{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  #view-root[data-view="tco"] .tco-clst-kpi-carte.is-alerte{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
+  #view-root[data-view="tco"] .tco-clst-toolbar{background:none;padding:0;}
+  #view-root[data-view="tco"] .alert-list{background:none;padding:0;gap:12px;}
+  #view-root[data-view="tco"] .tco-clst-carte{border:none;box-shadow:var(--shadow-soft);}
+  #view-root[data-view="tco"] :is(.tco-btn-outil,.tco-clst-export-btn:not(.is-primaire),.tco-btn-aide){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  #view-root[data-view="tco"] .tco-callout.is-info{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--bleu-roi);}
+  #view-root[data-view="tco"] .tco-callout.is-warn{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
+  #view-root[data-view="tco"] .tco-callout.is-warn p{color:var(--ink);}
+  #view-root[data-view="tco"] .tco-tip-carte{background:var(--surface);box-shadow:var(--shadow-soft),inset 4px 0 0 var(--primary-dark);}
+  #view-root[data-view="tco"] .tco-seuil-carte{background:none;box-shadow:none;border:none;border-radius:0;padding:14px 0;border-bottom:1px solid var(--line);}
+  #view-root[data-view="tco"] .tco-seuil-carte:last-child{border-bottom:none;}
+  #view-root[data-view="tco"] .tco-seuil-carte .tco-champ-unite{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
