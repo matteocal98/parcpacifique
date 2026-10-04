@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-6vMFz0r3ZFb7lgSvR1UZns4eroaMV3+Mat1RWAm+Byg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-buc+kXX+t8a4CjSu5Yvw12z2XsWxzxO2O5kTBoLYunI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13258,15 +13258,8 @@ VIEWS.reminders = {
 // voir le câblage dans mount().
 function tcoEyebrowToolbarHtml() {
   return `
-    <div class="tco-eyebrow-row">
-      <div class="tco-eyebrow-gauche">
-        <span class="tco-eyebrow-pill"><span class="dot"></span>${trad('Configuration TCO & Matériel')}</span>
-        <span class="tco-eyebrow-sep">•</span>
-        <span class="tco-eyebrow-texte">${trad('Gestion de flotte & Exploitation')}</span>
-      </div>
-      <div class="tco-toolbar-actions">
-        <button type="button" class="tco-btn-outil" id="tco-rapport-pdf" disabled title="${esc(trad('Chargement des données du parc…'))}">${picto('export')}<span>${trad('Rapport TCO (PDF)')}</span></button>
-      </div>
+    <div class="ui-barre is-droite">
+      <button type="button" class="ui-btn ui-btn-pastille" id="tco-rapport-pdf" disabled title="${esc(trad('Chargement des données du parc…'))}">${picto('export')}<span>${trad('Rapport TCO (PDF)')}</span></button>
     </div>`;
 }
 // KPI : uniquement des valeurs réelles — la tuile « TCO moyen flotte » du
@@ -13277,111 +13270,82 @@ function tcoKpiGridHtml() {
   const zone = c.currency === 'XPF' ? trad('Calédonie, Polynésie, Wallis') : trad('Europe');
   const tauxActif = c.labor_hourly_rate != null;
   return `
-    <div class="tco-kpi-grid">
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Devise d\'exploitation')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur" id="tco-kpi-devise-valeur">${esc(c.currency || 'EUR')}</span></div>
-          <div class="tco-kpi-sub" id="tco-kpi-devise-zone">${esc(zone)}</div>
+    <section class="ui-section">
+      <div class="ui-grille is-3">
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${trad('Devise d\'exploitation')}</span>
+          <span class="ui-tuile-valeur" id="tco-kpi-devise-valeur">${esc(c.currency || 'EUR')}</span>
+          <span class="ui-tuile-note" id="tco-kpi-devise-zone">${esc(zone)}</span>
         </div>
-        <div class="tco-kpi-icone is-fr">${picto('devise')}</div>
-      </div>
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Taux main d\'œuvre')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${tauxActif ? texteAvecSeparateurs(c.labor_hourly_rate) : '—'}</span><span class="tco-kpi-unite" id="tco-kpi-taux-unite">${deviseCourte()}/h</span></div>
-          <div class="tco-kpi-sub${tauxActif ? ' is-ok' : ''}">${tauxActif ? picto('coche') + trad('Barème actif') : trad('Non renseigné')}</div>
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${trad('Taux main d\'œuvre')}</span>
+          <span class="ui-tuile-valeur">${tauxActif ? texteAvecSeparateurs(c.labor_hourly_rate) : '—'}<small id="tco-kpi-taux-unite">${deviseCourte()}/h</small></span>
+          <span class="ui-tuile-note">${tauxActif ? trad('Barème actif') : trad('Non renseigné')}</span>
         </div>
-        <div class="tco-kpi-icone is-roi">${picto('entretien')}</div>
-      </div>
-      <div class="tco-kpi-tile">
-        <div>
-          <div class="tco-kpi-eyebrow">${trad('Catalogue pièces')}</div>
-          <div class="tco-kpi-valeur-ligne"><span class="tco-kpi-valeur">${(UI.partsCatalog || []).length}</span><span class="tco-kpi-unite">${trad('référence(s)')}</span></div>
+        <div class="ui-tuile">
+          <span class="ui-tuile-etiquette">${trad('Catalogue pièces')}</span>
+          <span class="ui-tuile-valeur">${(UI.partsCatalog || []).length}<small>${trad('référence(s)')}</small></span>
         </div>
-        <div class="tco-kpi-icone is-indigo">${picto('boite')}</div>
       </div>
-    </div>`;
+    </section>`;
 }
 function blocParametresTcoHtml() {
   const c = UI.company || {};
   const gerant = UI.role === 'gerant';
   const bloque = gerant ? '' : ' disabled';
   const dv = c.currency === 'XPF' ? 'XPF' : '€';
+  const champ = (id, libelle, valeur, unite, uniteId, note) => `
+          <div class="ui-champ-groupe">
+            <label class="ui-etiquette" for="${id}">${libelle}</label>
+            <div class="ui-champ-unite">
+              <input id="${id}" class="ui-champ" type="text" inputmode="decimal" value="${valeur != null ? esc(valeur) : ''}"${bloque}>
+              <span class="ui-unite" id="${uniteId}">${esc(unite)}</span>
+            </div>
+            <span class="ui-aide">${note}</span>
+          </div>`;
   return `
-    <section class="card">
-      <div class="tco-card-tete">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-roi">${picto('reglages')}</div>
-          <div>
-            <h2 class="tco-card-titre">${trad('Paramètres TCO & Barèmes suggérés')}</h2>
-            <div class="tco-card-soustitre">${trad('Règles de calcul prédictif des coûts d\'intervention')}</div>
+    <section class="ui-section">
+      <div class="ui-section-tete">
+        <div class="ui-section-icone">${picto('reglages')}</div>
+        <div class="ui-section-titres">
+          <h2 class="ui-section-titre">${trad('Paramètres TCO & Barèmes suggérés')}</h2>
+          <p class="ui-section-sous">${trad('Règles de calcul prédictif des coûts d\'intervention')}</p>
+        </div>
+      </div>
+      <div class="ui-section-corps">
+        <div class="ui-encadre">
+          ${picto('info')}
+          <p><strong>${trad('Règle de calcul :')}</strong> ${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs')} <strong>${trad('SUGGÉRÉES')}</strong> ${trad('lors de l\'ajout d\'un coût d\'exploitation — ils ne sont jamais appliqués sans confirmation manuelle.')}</p>
+        </div>
+        ${!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : ''}
+        <div class="ui-champ-groupe">
+          <span class="ui-etiquette">${trad('Devise principale de la flotte')}</span>
+          <div class="ui-puces" id="tco-devise-cards">
+            <label class="ui-puce${c.currency === 'XPF' ? ' is-actif' : ''}" data-devise-carte="XPF">
+              <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
+              <span>${trad('Franc Pacifique')}</span><span class="ui-compte">XPF</span>
+            </label>
+            <label class="ui-puce${c.currency !== 'XPF' ? ' is-actif' : ''}" data-devise-carte="EUR">
+              <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
+              <span>${trad('Euro')}</span><span class="ui-compte">EUR €</span>
+            </label>
           </div>
         </div>
-        <button type="button" class="tco-btn-aide" title="${esc(trad('Informations complémentaires'))}">${picto('aideCercle')}</button>
-      </div>
-      <div class="tco-callout is-info">
-        ${picto('info')}
-        <p><strong>${trad('Règle de calcul :')}</strong> ${trad('Le taux horaire sert à pré-calculer le coût de main d\'œuvre sur un entretien. Les barèmes ci-dessous sont de simples valeurs')} <strong>${trad('SUGGÉRÉES')}</strong> ${trad('lors de l\'ajout d\'un coût d\'exploitation — ils ne sont jamais appliqués sans confirmation manuelle.')}</p>
-      </div>
-      ${!gerant ? `<div class="hint">${trad('Réservé au gérant.')}</div>` : ''}
-      <div>
-        <label class="tco-champ-label" style="margin-bottom:6px;">
-          <span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Devise principale de la flotte')}</span>
-          <span class="tag">${trad('MONNAIE DE REPORTING')}</span>
-        </label>
-        <div class="tco-devise-grid" id="tco-devise-cards">
-          <label class="tco-devise-carte${c.currency === 'XPF' ? ' is-selected' : ''}" data-devise-carte="XPF">
-            <input type="radio" name="tco-devise" value="XPF" ${c.currency === 'XPF' ? 'checked' : ''}${bloque}>
-            <span class="tco-devise-coche">${picto('coche')}</span>
-            <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Franc Pacifique')}</span><span class="tco-devise-code">XPF</span></span>
-            ${c.currency === 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
-          </label>
-          <label class="tco-devise-carte${c.currency !== 'XPF' ? ' is-selected' : ''}" data-devise-carte="EUR">
-            <input type="radio" name="tco-devise" value="EUR" ${c.currency !== 'XPF' ? 'checked' : ''}${bloque}>
-            <span class="tco-devise-coche">${picto('coche')}</span>
-            <span style="display:flex;align-items:center;gap:8px;"><span class="tco-devise-nom">${trad('Euro')}</span><span class="tco-devise-code">EUR €</span></span>
-            ${c.currency !== 'XPF' ? `<span class="tco-devise-actif">${trad('Actif')}</span>` : ''}
-          </label>
+        <div class="ui-encadre is-attention">
+          ${picto('alerte')}
+          <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise convertit automatiquement TOUS les montants déjà enregistrés, au taux fixe 1 € = 119,3317 XPF, au moment où vous cliquez sur « Enregistrer les paramètres » ci-dessous.')}</p>
         </div>
-      </div>
-      <div class="tco-callout is-warn">
-        ${picto('alerte')}
-        <p>${trad('S\'applique à tous les montants TCO (scorecard, catalogue, coûts). Changer de devise convertit automatiquement TOUS les montants déjà enregistrés, au taux fixe 1 € = 119,3317 XPF, au moment où vous cliquez sur « Enregistrer les paramètres » ci-dessous.')}</p>
-      </div>
-      <div class="tco-callout is-warn" id="tco-devise-avertissement" hidden>
-        ${picto('alerte')}
-        <p><strong>${trad('Devise sélectionnée non enregistrée.')}</strong> ${trad('Les montants affichés restent dans l\'ancienne devise tant que vous n\'avez pas cliqué sur « Enregistrer les paramètres » ci-dessous (pas « Enregistrer les seuils », qui ne change jamais la devise) — la conversion se fait en une seule fois, pour toutes les données à la fois.')}</p>
-      </div>
-      <div class="field-row" style="grid-template-columns:repeat(3,1fr);">
-        <div>
-          <label class="tco-champ-label" for="tco-taux-horaire"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Taux horaire MO')}</span><span class="tag" id="tco-taux-horaire-tag">${esc(dv)} / ${trad('HEURE')}</span></label>
-          <div class="tco-champ-unite">
-            <input id="tco-taux-horaire" type="text" inputmode="decimal" value="${c.labor_hourly_rate != null ? esc(c.labor_hourly_rate) : ''}"${bloque}>
-            <span class="tco-unite-tag" id="tco-taux-horaire-unite">${esc(dv)}/h</span>
-          </div>
-          <div class="tco-champ-note">${trad('Coût moyen atelier')}</div>
+        <div class="ui-encadre is-attention" id="tco-devise-avertissement" hidden>
+          ${picto('alerte')}
+          <p><strong>${trad('Devise sélectionnée non enregistrée.')}</strong> ${trad('Les montants affichés restent dans l\'ancienne devise tant que vous n\'avez pas cliqué sur « Enregistrer les paramètres » ci-dessous (pas « Enregistrer les seuils », qui ne change jamais la devise) — la conversion se fait en une seule fois, pour toutes les données à la fois.')}</p>
         </div>
-        <div>
-          <label class="tco-champ-label" for="tco-assurance"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Assurance annuelle')}</span><span class="tag">${trad('SUGGÉRÉ')}</span></label>
-          <div class="tco-champ-unite">
-            <input id="tco-assurance" type="text" inputmode="decimal" value="${c.default_insurance_yearly != null ? esc(c.default_insurance_yearly) : ''}"${bloque}>
-            <span class="tco-unite-tag" id="tco-assurance-unite">${esc(dv)}/an</span>
-          </div>
-          <div class="tco-champ-note">${trad('Primes RC & machine')}</div>
+        <div class="ui-grille is-3">
+          ${champ('tco-taux-horaire', trad('Taux horaire MO'), c.labor_hourly_rate, dv + '/h', 'tco-taux-horaire-unite', trad('Coût moyen atelier'))}
+          ${champ('tco-assurance', trad('Assurance annuelle'), c.default_insurance_yearly, dv + '/an', 'tco-assurance-unite', trad('Primes RC & machine'))}
+          ${champ('tco-stockage', trad('Stockage annuel'), c.default_storage_yearly, dv + '/an', 'tco-stockage-unite', trad('Hangar, parc fermé'))}
         </div>
-        <div>
-          <label class="tco-champ-label" for="tco-stockage"><span style="font-size:13.5px;font-weight:600;color:var(--ink);">${trad('Stockage annuel')}</span><span class="tag">${trad('SUGGÉRÉ')}</span></label>
-          <div class="tco-champ-unite">
-            <input id="tco-stockage" type="text" inputmode="decimal" value="${c.default_storage_yearly != null ? esc(c.default_storage_yearly) : ''}"${bloque}>
-            <span class="tco-unite-tag" id="tco-stockage-unite">${esc(dv)}/an</span>
-          </div>
-          <div class="tco-champ-note">${trad('Hangar, parc fermé')}</div>
-        </div>
-      </div>
-      <div class="hint" id="tco-parametres-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button type="button" class="primary" id="tco-save-parametres"${bloque}>${picto('disquette')}<span>${trad('Enregistrer les paramètres')}</span></button>
+        <div class="ui-aide" id="tco-parametres-msg" role="status" aria-live="polite"></div>
+        <div><button type="button" class="ui-btn ui-btn-plein" id="tco-save-parametres"${bloque}>${picto('disquette')}<span>${trad('Enregistrer les paramètres')}</span></button></div>
       </div>
     </section>`;
 }
@@ -13503,13 +13467,14 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
   const periodeRepliee = !!periodeInfo && !periodeInfo.decision;
   const base = decisionAffichee ? decisionAffichee.base : null;
   const etat = decisionAffichee ? etatTco(decisionAffichee.ratio, base) : 'ok';
+  const classeEtat = { ok: 'is-ok', soon: 'is-bientot', late: 'is-retard' }[etat];
   const libelles = TCO_ETAT_LABEL[base] || TCO_ETAT_LABEL.achat;
   // La base du ratio est TOUJOURS affichée à côté du chiffre : « 62 % de la
   // dépréciation » et « 41 % du prix d'achat » ne mesurent pas la même
   // chose, jamais le pourcentage seul.
   const ratioTexte = decisionAffichee
     ? tR('{n} % {base}', { n: Math.round(decisionAffichee.ratio * 100), base: base === 'amortissement' ? trad('de la dépréciation') : trad('du prix d\'achat') })
-    : '—';
+    : '';
   const uniteCourte = counterShort(counterUnitOf(machine));
   const photo = safeUrl(machine.image_url);
   const heures = machineCounter(machine);
@@ -13521,51 +13486,39 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
   // seuil réellement défini pour CETTE catégorie précise.
   const seuil = machine.category?.target_hourly_cost;
   const ecart = (seuil != null && tco.coutParUnite != null) ? tco.coutParUnite - Number(seuil) : null;
-  // Tendance affichée à côté du coût horaire (mockup « Optimal » + flèche)
-  // : reformulation du MÊME état ok/soon/late, jamais un jugement séparé.
-  const TENDANCE = {
-    ok: { texte: trad('Optimal'), fleche: 'flecheBas' },
-    soon: { texte: trad('À surveiller'), fleche: null },
-    late: { texte: trad('Dérive'), fleche: 'flecheHaut' },
-  };
-  const tendance = TENDANCE[etat];
+  // Tendance affichée à côté du coût horaire : reformulation du MÊME état
+  // ok/soon/late, jamais un jugement séparé.
+  const TENDANCE = { ok: trad('Optimal'), soon: trad('À surveiller'), late: trad('Dérive') };
+  const sousTitre = [
+    machine.category?.name ? esc(machine.category.name) : '',
+    heures != null ? tR('{n} {unite} cumulé(e)s', { n: esc(heures), unite: uniteCourte }) : '',
+    machine.service_date ? tR('Mise en service : {date}', { date: esc(machine.service_date) }) : '',
+    pctPieces != null ? tR('Pièces {n}%', { n: pctPieces }) : '',
+    periodeRepliee ? trad('(basé sur tout l\'historique)') : '',
+  ].filter(Boolean).join(' · ');
   return `
-    <div class="tco-clst-carte" data-machine="${esc(machine.id)}">
-      <span class="tco-clst-carte-accent ${etat}"></span>
-      <div class="tco-clst-carte-corps">
-        <div class="tco-clst-carte-identite">
-          <div class="tco-clst-carte-photo${photo ? '' : ' tco-clst-carte-photo-vide'}">
-            ${photo ? `<img src="${esc(photo)}" alt="${esc(machine.name)}" loading="lazy">` : picto('boite')}
-            <span class="tco-clst-carte-dot ${etat}"></span>
-          </div>
-          <div class="tco-clst-carte-texte">
-            <div class="tco-clst-carte-tete">
-              <span class="tco-clst-carte-nom">${esc(machine.name)}</span>
-              <span class="tco-clst-badge-ratio ${etat}">${picto('camembert')}<span>${ratioTexte}</span></span>
-              ${machine.category?.name ? `<span class="tco-clst-badge-categorie">${esc(machine.category.name)}</span>` : ''}
-            </div>
-            <div class="tco-clst-carte-meta">
-              ${heures != null ? `<span class="is-fort">${picto('bientot')}<span>${tR('{n} {unite} cumulé(e)s', { n: esc(heures), unite: uniteCourte })}</span></span>` : ''}
-              ${machine.service_date ? `<span class="tco-clst-sep">•</span><span>${picto('calendrier')}<span>${tR('Mise en service : {date}', { date: esc(machine.service_date) })}</span></span>` : ''}
-              ${pctPieces != null ? `<span class="tco-clst-sep">•</span><span class="tco-clst-meta-pieces">${tR('Pièces {n}%', { n: pctPieces })}</span>` : ''}
-              ${periodeRepliee ? `<span class="tco-clst-sep">•</span><span class="tco-clst-note">${trad('(basé sur tout l\'historique)')}</span>` : ''}
-            </div>
-          </div>
+    <div class="ui-ligne ${classeEtat}" data-machine="${esc(machine.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${photo ? `<img src="${esc(photo)}" alt="${esc(machine.name)}" loading="lazy">` : picto('boite')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(machine.name)}</span>
+          <span class="ui-ligne-sous">${sousTitre}</span>
         </div>
-        <div class="tco-clst-carte-chiffres">
-          <div class="tco-clst-carte-stat">
-            <span class="label">${libelleMontant}</span>
-            <div class="valeur-ligne"><span class="valeur">${formatMontant(montantPrincipal)}</span></div>
-          </div>
-          <span class="tco-clst-carte-divider"></span>
-          <div class="tco-clst-carte-stat">
-            <span class="label">${trad('Coût horaire')}${periodeInfo ? ` · ${trad('depuis l\'achat')}` : ''}</span>
-            <div class="valeur-ligne"><span class="valeur is-roi">${tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '—'}</span></div>
-            ${decisionAffichee ? `<span class="tco-clst-tendance ${etat}">${tendance.fleche ? picto(tendance.fleche) : ''}<span>${tendance.texte}</span></span>` : ''}
-            ${ecart != null ? `<span class="pill ${ecart > 0 ? 'late' : 'ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
-          </div>
-          <div class="tco-clst-carte-statut ${etat}" title="${esc(libelles[etat]())}">${pictoEtat(etat)}</div>
+      </div>
+      <div class="ui-chiffres">
+        <div class="ui-chiffre">
+          <span class="ui-chiffre-etiquette">${libelleMontant}</span>
+          <span class="ui-chiffre-valeur">${formatMontant(montantPrincipal)}</span>
         </div>
+        <div class="ui-chiffre">
+          <span class="ui-chiffre-etiquette">${trad('Coût horaire')}${periodeInfo ? ` · ${trad('depuis l\'achat')}` : ''}</span>
+          <span class="ui-chiffre-valeur">${tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite)}/${uniteCourte}` : '—'}</span>
+        </div>
+      </div>
+      <div class="ui-ligne-action is-etiquettes">
+        ${decisionAffichee ? `<span class="ui-statut ${classeEtat}" title="${esc(libelles[etat]())}">${TENDANCE[etat]}</span>` : ''}
+        ${ratioTexte ? `<span class="ui-tag">${ratioTexte}</span>` : ''}
+        ${ecart != null ? `<span class="ui-statut ${ecart > 0 ? 'is-retard' : 'is-ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
       </div>
     </div>`;
 }
@@ -13632,21 +13585,18 @@ function exporterClassementTcoCsv(flotte) {
 // actionnable, les réglages sont secondaires.
 function tcoClassementFlotteHtml() {
   return `
-    <section class="card" id="tco-classement-section">
-      <div class="tco-card-tete">
-        <div class="tco-card-tete-gauche">
-          <div class="tco-card-icone-carre is-lg is-gradient-roi">${picto('graphique')}</div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span class="tco-eyebrow-pill is-roi"><span class="dot"></span>${trad('Analyse de flotte')}</span>
-              <span class="tco-clst-live">${trad('• Temps réel')}</span>
-            </div>
-            <h2 class="tco-card-titre" style="margin-top:4px;">${trad('Classement TCO du parc')}</h2>
-            <div class="tco-card-soustitre">${trad('Comparaison analytique des machines, de la moins rentable à la plus optimisée')}</div>
-          </div>
+    <section class="ui-section" id="tco-classement-section">
+      <div class="ui-section-tete">
+        <div class="ui-section-icone">${picto('graphique')}</div>
+        <div class="ui-section-titres">
+          <span class="ui-section-sur-titre">${trad('Analyse de flotte')}</span>
+          <h2 class="ui-section-titre">${trad('Classement TCO du parc')}</h2>
+          <p class="ui-section-sous">${trad('Comparaison analytique des machines, de la moins rentable à la plus optimisée')}</p>
         </div>
       </div>
-      <div class="value" style="color:var(--ink-soft);">${trad('Chargement…')}</div>
+      <div class="ui-section-corps" id="tco-classement-corps">
+        <div class="ui-aide" data-chargement>${trad('Chargement…')}</div>
+      </div>
     </section>`;
 }
 // Carte « Suivi TCO » du tableau de bord principal (phase 2, demandée
@@ -14199,13 +14149,15 @@ function ouvrirImportCatalogue() {
 // prix proposé, quantité décimale acceptée).
 function tcoTipCarteHtml() {
   return `
-    <div class="tco-tip-carte">
-      <div class="tco-tip-icone">${picto('ampoule')}</div>
-      <div>
-        <div class="tco-tip-titre">${trad('Astuce Gestionnaire')}</div>
-        <p class="tco-tip-texte">${trad('Les pièces enregistrées ici sont proposées automatiquement dans « Enregistrer un entretien » : sélectionner une pièce remplit son prix, et la quantité accepte les décimales (0,5 pour un demi-bidon, par exemple).')}</p>
+    <section class="ui-section">
+      <div class="ui-encadre is-conseil">
+        ${picto('ampoule')}
+        <div>
+          <span class="ui-encadre-titre">${trad('Astuce Gestionnaire')}</span>
+          <p>${trad('Les pièces enregistrées ici sont proposées automatiquement dans « Enregistrer un entretien » : sélectionner une pièce remplit son prix, et la quantité accepte les décimales (0,5 pour un demi-bidon, par exemple).')}</p>
+        </div>
       </div>
-    </div>`;
+    </section>`;
 }
 // Câblage du bloc « Catalogue de pièces » (recherche, ajout/édition/
 // suppression, import CSV) — extrait pour être appelé aussi bien depuis
@@ -14370,15 +14322,9 @@ VIEWS.tco = {
         ${tcoEyebrowToolbarHtml()}
         ${tcoKpiGridHtml()}
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
-        <div class="dash-grid agenda-grid tco-parametres-grid">
-          <div class="dash-main">
-            ${blocParametresTcoHtml()}
-          </div>
-          <div class="dash-side">
-            ${blocSeuilsCategorieTcoHtml()}
-            ${tcoTipCarteHtml()}
-          </div>
-        </div>
+        ${blocParametresTcoHtml()}
+        ${blocSeuilsCategorieTcoHtml()}
+        ${tcoTipCarteHtml()}
         ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
       </div>`;
   },
@@ -14400,7 +14346,8 @@ VIEWS.tco = {
       (async () => {
         const section = root.querySelector('#tco-classement-section');
         if (!section) return;
-        const valueEl = section.querySelector('.value');
+        const valueEl = section.querySelector('[data-chargement]');
+        const corps = section.querySelector('#tco-classement-corps');
         const machineIds = (UI.machines || []).map((m) => m.id);
         const TCO_CLASSEMENT_PAGE_SIZE = 10;
         let flotte = null;
@@ -14540,13 +14487,13 @@ VIEWS.tco = {
 
           dynamique.innerHTML = `
             ${repartition ? `
-            <div class="tco-donut-bloc">
+            <div class="ui-tuile tco-donut-bloc">
               <div class="tco-donut-bloc-tete">
                 <div class="tco-donut-bloc-titre">
                   <h3>${trad('Répartition des charges du parc')}</h3>
                   <p>${trad('Ventilation par nature de dépense enregistrée sur la flotte')}</p>
                 </div>
-                <span class="tco-donut-total-badge">${tR('{montant} cumulés', { montant: formatMontant(repartition.total) })}</span>
+                <span class="ui-tag">${tR('{montant} cumulés', { montant: formatMontant(repartition.total) })}</span>
               </div>
               <div class="tco-donut-corps">
                 ${donutTcoSvgHtml(repartition, 128, centreDonut)}
@@ -14572,14 +14519,14 @@ VIEWS.tco = {
                   </div>
                 </div>
               </div>
-            </div>` : `<div class="hint">${trad('Aucune dépense enregistrée sur cette période.')}</div>`}
+            </div>` : `<div class="ui-aide">${trad('Aucune dépense enregistrée sur cette période.')}</div>`}
             ${lignes.length ? `
-            <div class="alert-list">${lignesAffichees.map(({ machine, tco, decision, ventilation, periodeInfo }) => ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo)).join('')}</div>
-            ${reste > 0 ? `<button type="button" class="btn-tint" id="tco-classement-plus" style="align-self:center;">${tR('Afficher {n} machine(s) de plus', { n: Math.min(reste, TCO_CLASSEMENT_PAGE_SIZE) })}</button>` : ''}
-            ` : `<div class="hint">${trad('Aucune machine dans cette catégorie.')}</div>`}
+            <div class="ui-liste">${lignesAffichees.map(({ machine, tco, decision, ventilation, periodeInfo }) => ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo)).join('')}</div>
+            ${reste > 0 ? `<div class="ui-barre is-centre"><button type="button" class="ui-btn ui-btn-teinte" id="tco-classement-plus">${tR('Afficher {n} machine(s) de plus', { n: Math.min(reste, TCO_CLASSEMENT_PAGE_SIZE) })}</button></div>` : ''}
+            ` : `<div class="ui-aide">${trad('Aucune machine dans cette catégorie.')}</div>`}
           `;
           wireAlertRows(dynamique);
-          dynamique.querySelectorAll('.tco-clst-carte[data-machine]').forEach((carte) => {
+          dynamique.querySelectorAll('.ui-ligne[data-machine]').forEach((carte) => {
             carte.setAttribute('tabindex', '0');
             carte.setAttribute('role', 'button');
             carte.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); carte.click(); } });
@@ -14596,70 +14543,53 @@ VIEWS.tco = {
         // Factorisée (tendanceRatioMoyenFlotte) : réutilisée telle quelle par
         // le widget TCO du tableau de bord, jamais deux libellés divergents.
         const tendanceRatio = tendanceRatioMoyenFlotte(flotte);
-        const alerteEtat = flotte.nbAlertes > 0 ? 'late' : 'ok';
 
-        section.insertAdjacentHTML('beforeend', `
-          <div class="tco-clst-kpi-grid">
-            <div class="tco-clst-kpi-carte">
-              <div class="tco-clst-kpi-tete">
-                <span class="label">${trad('TCO Moyen Annualisé')}</span>
-                <div class="tco-clst-kpi-icone is-roi">${picto('argent')}</div>
-              </div>
-              <div class="valeur-ligne"><span class="valeur">${formatMontant(flotte.coutAnnuelMoyen)}</span></div>
-              <div class="tco-clst-kpi-sub ${tendanceRatio.etat}">${picto(tendanceRatio.icone)}<span>${tendanceRatio.label}</span></div>
+        const classeEtatUi = (e) => ({ ok: 'is-ok', soon: 'is-bientot', late: 'is-retard' }[e] || '');
+
+        corps.insertAdjacentHTML('beforeend', `
+          <div class="ui-grille is-3">
+            <div class="ui-tuile">
+              <span class="ui-tuile-etiquette">${trad('TCO Moyen Annualisé')}</span>
+              <span class="ui-tuile-valeur">${formatMontant(flotte.coutAnnuelMoyen)}</span>
+              <span class="ui-tuile-note"><span class="ui-point ${classeEtatUi(tendanceRatio.etat)}"></span>${tendanceRatio.label}</span>
             </div>
-            <div class="tco-clst-kpi-carte">
-              <div class="tco-clst-kpi-tete">
-                <span class="label">${trad('Machines Suivies')}</span>
-                <div class="tco-clst-kpi-icone is-ok">${picto('parcMachine')}</div>
-              </div>
-              <div class="valeur-ligne"><span class="valeur">${flotte.lignes.length}</span><span class="unite">${tR('/ {n} machines totales', { n: (UI.machines || []).length })}</span></div>
-              <div class="tco-clst-kpi-sub"><span class="rond"></span><span>${tR('{n} actif(s) calculé(s) avec données d\'achat', { n: flotte.lignes.length })}</span></div>
+            <div class="ui-tuile">
+              <span class="ui-tuile-etiquette">${trad('Machines Suivies')}</span>
+              <span class="ui-tuile-valeur">${flotte.lignes.length}<small>${tR('/ {n} machines totales', { n: (UI.machines || []).length })}</small></span>
+              <span class="ui-tuile-note">${tR('{n} actif(s) calculé(s) avec données d\'achat', { n: flotte.lignes.length })}</span>
             </div>
-            <div class="tco-clst-kpi-carte${flotte.nbAlertes ? ' is-alerte' : ''}">
-              <div class="tco-clst-kpi-tete">
-                <span class="label">${trad('En Alerte')}</span>
-                <div class="tco-clst-kpi-icone ${alerteEtat}">${picto(flotte.nbAlertes ? 'alerte' : 'ajuste')}</div>
-              </div>
-              <div class="valeur-ligne"><span class="valeur ${alerteEtat}">${flotte.nbAlertes}</span></div>
-              <div class="tco-clst-kpi-sub ${alerteEtat}">${picto(flotte.nbAlertes ? 'alerte' : 'coche')}<span>${flotte.nbAlertes ? tR('{n} machine(s) dépassent leur seuil', { n: flotte.nbAlertes }) : trad('Sous les seuils opérationnels')}</span></div>
+            <div class="ui-tuile ${flotte.nbAlertes ? 'is-retard' : 'is-ok'}">
+              <span class="ui-tuile-etiquette">${trad('En Alerte')}</span>
+              <span class="ui-tuile-valeur">${flotte.nbAlertes}</span>
+              <span class="ui-tuile-note">${flotte.nbAlertes ? tR('{n} machine(s) dépassent leur seuil', { n: flotte.nbAlertes }) : trad('Sous les seuils opérationnels')}</span>
             </div>
           </div>
-          <div class="tco-clst-toolbar">
-            <div class="tco-filtre-periode" id="tco-filtre-periode" role="group" aria-label="${esc(trad('Période'))}">
-              <button type="button" class="tco-filtre-btn is-active" data-periode="total">${picto('bientot')}<span>${trad('Depuis mise en service')}</span></button>
-              <button type="button" class="tco-filtre-btn" data-periode="12m"><span>${trad('12 derniers mois')}</span></button>
-              <button type="button" class="tco-filtre-btn" data-periode="annee"><span>${trad('Année en cours')}</span></button>
+          <div class="ui-barre">
+            <div class="ui-segment" id="tco-filtre-periode" role="group" aria-label="${esc(trad('Période'))}">
+              <button type="button" class="is-actif" data-periode="total">${trad('Depuis mise en service')}</button>
+              <button type="button" data-periode="12m">${trad('12 derniers mois')}</button>
+              <button type="button" data-periode="annee">${trad('Année en cours')}</button>
             </div>
-            <div class="tco-clst-selects">
-              ${categoriesPresentes.length ? `
-              <div class="tco-clst-select-wrap">
-                ${picto('filtre')}
-                <select id="tco-filtre-categorie">
-                  <option value="toutes">${trad('Toutes catégories')}</option>
-                  ${categoriesPresentes.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
-                </select>
-                ${picto('chevron')}
-              </div>` : ''}
-              <div class="tco-clst-select-wrap">
-                ${picto('trier')}
-                <select id="tco-filtre-tri">
-                  <option value="ratio">${trad('Ratio de dépréciation')}</option>
-                  <option value="tcoTotal">${trad('Coût total décroissant')}</option>
-                  <option value="coutHoraire">${trad('Coût horaire décroissant')}</option>
-                  <option value="heures">${trad('Heures moteur')}</option>
-                </select>
-                ${picto('chevron')}
-              </div>
-            </div>
+            ${categoriesPresentes.length ? `
+            <select id="tco-filtre-categorie" class="ui-selecteur">
+              <option value="toutes">${trad('Toutes catégories')}</option>
+              ${categoriesPresentes.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+            </select>` : ''}
+            <select id="tco-filtre-tri" class="ui-selecteur">
+              <option value="ratio">${trad('Ratio de dépréciation')}</option>
+              <option value="tcoTotal">${trad('Coût total décroissant')}</option>
+              <option value="coutHoraire">${trad('Coût horaire décroissant')}</option>
+              <option value="heures">${trad('Heures moteur')}</option>
+            </select>
           </div>
-          <div id="tco-classement-dynamique"></div>
+          <div class="ui-section-corps" id="tco-classement-dynamique"></div>
           ${flotte.exclues.length ? `
-          <div class="tco-clst-banniere">
-            <div class="gauche">${picto('info')}<p><strong>${tR('{n} machine(s) sans prix d\'achat', { n: flotte.exclues.length })}</strong>, ${trad('non incluses dans ce classement analytique.')}</p></div>
-            <button type="button" class="tco-clst-banniere-btn" data-nav="machines"><span>${trad('Régulariser les prix')}</span>${picto('flecheDroite')}</button>
+          <div class="ui-encadre is-attention">
+            ${picto('info')}
+            <p><strong>${tR('{n} machine(s) sans prix d\'achat', { n: flotte.exclues.length })}</strong>, ${trad('non incluses dans ce classement analytique.')}</p>
+            <button type="button" class="ui-btn ui-btn-teinte" data-nav="machines"><span>${trad('Régulariser les prix')}</span></button>
           </div>` : ''}
-          <button type="button" class="tco-clst-export-btn" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+          <div><button type="button" class="ui-btn ui-btn-pastille" id="tco-export-classement">${picto('export')}<span>${trad('Exporter en CSV')}</span></button></div>
         `);
         dynamique = section.querySelector('#tco-classement-dynamique');
 
@@ -14667,7 +14597,7 @@ VIEWS.tco = {
           btn.addEventListener('click', () => {
             periode = btn.dataset.periode;
             limite = TCO_CLASSEMENT_PAGE_SIZE;
-            section.querySelectorAll('[data-periode]').forEach((b) => b.classList.toggle('is-active', b === btn));
+            section.querySelectorAll('[data-periode]').forEach((b) => b.classList.toggle('is-actif', b === btn));
             rendreDynamique();
           });
         });
@@ -14721,18 +14651,8 @@ VIEWS.tco = {
     // style — donc corrigé ici, pas reproduit à l'identique).
     const majDeviseCards = () => {
       const valeur = root.querySelector('input[name="tco-devise"]:checked')?.value || 'EUR';
-      root.querySelectorAll('.tco-devise-carte').forEach((carte) => {
-        const active = carte.dataset.deviseCarte === valeur;
-        carte.classList.toggle('is-selected', active);
-        let pastille = carte.querySelector('.tco-devise-actif');
-        if (active && !pastille) {
-          pastille = document.createElement('span');
-          pastille.className = 'tco-devise-actif';
-          pastille.textContent = trad('Actif');
-          carte.appendChild(pastille);
-        } else if (!active && pastille) {
-          pastille.remove();
-        }
+      root.querySelectorAll('[data-devise-carte]').forEach((carte) => {
+        carte.classList.toggle('is-actif', carte.dataset.deviseCarte === valeur);
       });
     };
     // Les libellés de champ/unité portent la devise EN TEXTE (« XPF/h », « € »)
@@ -14742,8 +14662,6 @@ VIEWS.tco = {
     const majLibellesDevise = () => {
       const codeDevise = root.querySelector('input[name="tco-devise"]:checked')?.value === 'XPF' ? 'XPF' : 'EUR';
       const devise = codeDevise === 'XPF' ? 'XPF' : '€';
-      const tag = root.querySelector('#tco-taux-horaire-tag');
-      if (tag) tag.textContent = `${devise} / ${trad('HEURE')}`;
       const paires = [['#tco-taux-horaire-unite', `${devise}/h`], ['#tco-assurance-unite', `${devise}/an`], ['#tco-stockage-unite', `${devise}/an`], ['#tco-piece-prix-unite', devise]];
       paires.forEach(([sel, texte]) => { const el = root.querySelector(sel); if (el) el.textContent = texte; });
       // La tuile KPI « Devise d'exploitation » (tout en haut) doit suivre le

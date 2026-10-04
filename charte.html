@@ -203,6 +203,41 @@
 
   <section class="ui-section">
     <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Lignes de chiffres, choix unique, liste déroulante</h2><p class="ui-section-sous">Ajoutés avec la migration de Coûts &amp; TCO (2026-10-04) : ligne cliquable avec chiffres alignés et statuts, puces à choix unique (devise), liste déroulante habillée.</p></div>
+    </div>
+    <div class="charte-demo">
+      <div class="ui-liste">
+        <div class="ui-ligne is-bientot" data-machine="demo">
+          <div class="ui-ligne-id"><div class="ui-ligne-icone">▣</div><div class="ui-ligne-textes"><span class="ui-ligne-nom">Husqvarna</span><span class="ui-ligne-sous">Débroussailleuse · 90 h cumulées</span></div></div>
+          <div class="ui-chiffres">
+            <div class="ui-chiffre"><span class="ui-chiffre-etiquette">TCO total</span><span class="ui-chiffre-valeur">11 000 €</span></div>
+            <div class="ui-chiffre"><span class="ui-chiffre-etiquette">Coût horaire</span><span class="ui-chiffre-valeur">122 €/h</span></div>
+          </div>
+          <div class="ui-ligne-action is-etiquettes"><span class="ui-statut is-bientot">À surveiller</span><span class="ui-tag">62 % de la dépréciation</span></div>
+        </div>
+      </div>
+      <div class="ui-puces" style="margin-top:14px">
+        <label class="ui-puce is-actif"><input type="radio" name="demo-devise" checked><span>Euro</span><span class="ui-compte">EUR €</span></label>
+        <label class="ui-puce"><input type="radio" name="demo-devise"><span>Franc Pacifique</span><span class="ui-compte">XPF</span></label>
+      </div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-ligne is-bientot" data-machine="…"&gt;       &lt;!-- cliquable : curseur + léger soulèvement --&gt;
+  &lt;div class="ui-ligne-id"&gt;…icône ou &lt;img&gt; dans .ui-ligne-icone + .ui-ligne-textes…&lt;/div&gt;
+  &lt;div class="ui-chiffres"&gt;                               &lt;!-- 2 colonnes égales : alignées d'une ligne à l'autre --&gt;
+    &lt;div class="ui-chiffre"&gt;&lt;span class="ui-chiffre-etiquette"&gt;TCO total&lt;/span&gt;&lt;span class="ui-chiffre-valeur"&gt;11 000 €&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="ui-ligne-action is-etiquettes"&gt;&lt;span class="ui-statut is-bientot"&gt;…&lt;/span&gt;&lt;span class="ui-tag"&gt;…&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- choix unique : la puce contient un radio caché, le code bascule .is-actif --&gt;
+&lt;label class="ui-puce is-actif"&gt;&lt;input type="radio" name="…"&gt;&lt;span&gt;Euro&lt;/span&gt;&lt;span class="ui-compte"&gt;EUR €&lt;/span&gt;&lt;/label&gt;
+
+&lt;!-- liste déroulante : un &lt;select class="ui-selecteur"&gt; + habillerSelect(select, titre) --&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
       <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
       <div class="ui-section-titres"><h2 class="ui-section-titre">Ce qu'on ne fait plus</h2><p class="ui-section-sous">Les deux défauts rencontrés pendant la migration.</p></div>
     </div>

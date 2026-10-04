@@ -6621,19 +6621,19 @@
      ══════════════════════════════════════════════════════════════════════════ */
   /* .page-head[data-view="tco"] h1 retiré : désormais identique à la règle
      commune .head-title h1 (uniformisation des titres de page). */
-  .vue-couts-tco input:not([type=checkbox]),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
-  .vue-couts-tco input:not([type=checkbox]):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
+  .vue-couts-tco input:not([type=checkbox]):not(.ui-champ),.vue-couts-tco select,.vue-couts-tco textarea{background:var(--primary-tint);}
+  .vue-couts-tco input:not([type=checkbox]):not(.ui-champ):focus,.vue-couts-tco select:focus,.vue-couts-tco textarea:focus{background:var(--surface);}
   .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-couts-tco button.secondary:hover{background:var(--primary-tint-2);}
 
-  .tco-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px;}
-  .tco-eyebrow-gauche{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .tco-eyebrow-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--r-pill);background:var(--ok-bg);color:var(--ok);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
-  .tco-eyebrow-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:tco-pulse 1.8s ease-in-out infinite;}
+  
+  
+  
+  
   @keyframes tco-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-  .tco-eyebrow-sep{color:var(--dark-ink);font-size:10.5px;}
-  .tco-eyebrow-texte{color:var(--ink-2);font-size:12px;font-weight:500;}
-  .tco-toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  
+  
+  
   .tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
   .tco-btn-outil svg{width:20px;height:20px;flex:0 0 auto;color:var(--bleu-roi);}
   .tco-btn-outil[disabled]{opacity:.5;cursor:not-allowed;}
@@ -6855,7 +6855,6 @@
      ([app.html:2965](app.html)/[app.html:3081](app.html)) et retombait sur
      le cadre d'encre 2px générique de TOUS les .card — plus dur, pas
      harmonieux avec le reste. Même valeur exacte que .dash-grid .card. */
-  #tco-classement-section{border:1.5px solid var(--line);}
   /* Même cas pour « Catalogue de pièces » depuis qu'elle est passée en
      pleine largeur hors .dash-grid (voir plus haut) — oublié à ce
      moment-là, corrigé ici avec la même règle exacte. */
@@ -6868,74 +6867,74 @@
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
   @media (max-width:640px){.tco-kpi-grid{grid-template-columns:1fr;}}
-  .tco-kpi-tile{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
-  .tco-kpi-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-kpi-valeur-ligne{display:flex;align-items:baseline;gap:5px;margin-top:2px;}
-  .tco-kpi-valeur{font-family:'Space Grotesk',sans-serif;font-size:28px;line-height:32px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .tco-kpi-unite{font-size:13.5px;font-weight:600;color:var(--ink-2);}
-  .tco-kpi-sub{font-size:12px;color:var(--dark-ink);margin-top:3px;display:flex;align-items:center;gap:3px;}
-  .tco-kpi-sub svg{width:14px;height:14px;}
-  .tco-kpi-sub.is-ok{color:var(--ok);}
-  .tco-kpi-sub.is-late{color:var(--late);}
-  .tco-kpi-icone{flex:0 0 auto;width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;}
-  .tco-kpi-icone svg{width:26px;height:26px;}
-  .tco-kpi-icone.is-fr{background:var(--ok-bg);color:var(--ok);}
-  .tco-kpi-icone.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
-  .tco-kpi-icone.is-indigo{background:var(--primary-tint);color:var(--primary);}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   .tco-card-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .tco-card-tete-gauche{display:flex;align-items:center;gap:10px;}
-  .tco-card-icone-carre{flex:0 0 auto;width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:var(--shadow-soft);}
-  .tco-card-icone-carre svg{width:22px;height:22px;}
-  .tco-card-icone-carre.is-roi{background:var(--bleu-roi);}
-  .tco-card-icone-carre.is-indigo{background:var(--primary);}
-  .tco-card-icone-carre.is-olive{background:var(--olive);}
-  .tco-card-titre{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:28px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);margin:0;}
-  .tco-card-soustitre{font-size:12px;color:var(--ink-2);margin-top:1px;}
-  .tco-btn-aide{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);border:none;background:var(--surface-soft);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .tco-btn-aide svg{width:20px;height:20px;}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  .tco-callout{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);}
+  
   /* Le [hidden] natif perdrait autrement face à display:flex ci-dessus
      (même spécificité, la règle d'auteur l'emporte sur la feuille UA) —
      utilisé par le bandeau d'avertissement devise non enregistrée. */
-  .tco-callout[hidden]{display:none;}
-  .tco-callout.is-info{background:var(--surface-soft);}
-  .tco-callout.is-warn{background:var(--voile-ambre);color:var(--late);}
-  .tco-callout svg{flex:0 0 auto;width:22px;height:22px;margin-top:1px;}
-  .tco-callout.is-info svg{color:var(--bleu-roi);}
-  .tco-callout p{margin:0;font-size:12px;line-height:1.5;color:var(--ink);}
-  .tco-callout.is-warn p{color:var(--late);}
-  .tco-callout p strong{color:var(--ink);font-weight:700;}
+  
+  
+  
+  
+  
+  
+  
+  
 
-  .tco-devise-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  @media (max-width:520px){.tco-devise-grid{grid-template-columns:1fr;}}
-  .tco-devise-carte{position:relative;display:flex;align-items:center;padding:14px;border-radius:var(--r-md);cursor:pointer;background:var(--surface);box-shadow:var(--shadow-soft);transition:background .15s;}
-  .tco-devise-carte.is-selected{background:var(--ok-bg);}
-  .tco-devise-carte input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
-  .tco-devise-coche{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface-soft);display:flex;align-items:center;justify-content:center;margin-right:12px;}
-  .tco-devise-carte.is-selected .tco-devise-coche{background:var(--ink);}
-  .tco-devise-coche svg{width:14px;height:14px;color:transparent;}
-  .tco-devise-carte.is-selected .tco-devise-coche svg{color:#fff;}
-  .tco-devise-nom{font-size:14px;line-height:20px;font-weight:600;color:var(--ink);}
-  .tco-devise-code{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink);}
-  .tco-devise-carte.is-selected .tco-devise-code{background:var(--ink);color:#fff;}
-  .tco-devise-zone{font-size:12px;color:var(--dark-ink);}
-  .tco-devise-actif{margin-left:auto;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ok);background:#fff;padding:2px 8px;border-radius:var(--r-pill);box-shadow:var(--shadow-soft);}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   .tco-champ-unite{position:relative;display:flex;align-items:center;}
   .tco-champ-unite input{width:100%;padding-right:64px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
   .tco-champ-unite .tco-unite-tag{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
-  .tco-champ-label{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-  .tco-champ-label .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--dark-ink);}
-  .tco-champ-note{font-size:12px;color:var(--dark-ink);}
+  
+  
+  
 
-  .tco-donut-carte{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);flex-wrap:wrap;}
-  .tco-donut-legende{display:grid;grid-template-columns:repeat(3,auto);gap:8px 14px;margin-top:6px;}
-  @media (max-width:520px){.tco-donut-legende{grid-template-columns:1fr;}}
-  .tco-donut-puce{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);}
-  .tco-donut-puce span.rond{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
-  .tco-donut-badge{font-size:10.5px;font-weight:700;color:var(--ok);background:var(--ok-bg);padding:2px 8px;border-radius:var(--r-pill);}
+  
+  
+  
+  
+  
+  
 
   .tco-recherche{position:relative;}
   .tco-recherche svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--dark-ink);}
@@ -6943,26 +6942,26 @@
 
   .tco-parts-liste{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px;}
   .tco-part-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-md);background:var(--surface-soft);}
-  .tco-part-gauche{display:flex;align-items:center;gap:10px;min-width:0;}
-  .tco-part-icone{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-chip);background:var(--voile-ambre);color:var(--late);display:flex;align-items:center;justify-content:center;}
-  .tco-part-icone svg{width:20px;height:20px;}
-  .tco-part-corps{min-width:0;display:flex;flex-direction:column;}
-  .tco-part-nom-ligne{display:flex;align-items:center;gap:6px;min-width:0;}
-  .tco-part-nom{font-size:15px;line-height:22px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .tco-part-ref{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .tco-part-droite{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
-  .tco-part-prix{text-align:right;}
-  .tco-part-prix .montant{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);display:block;}
-  .tco-part-prix .devise{font-size:10.5px;color:var(--ink-2);display:block;margin-top:-3px;}
-  .tco-part-actions{display:flex;gap:2px;}
-  .tco-part-btn{width:32px;height:32px;border-radius:var(--r-chip);border:none;background:transparent;color:var(--dark-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-  .tco-part-btn svg{width:18px;height:18px;}
-  .tco-part-btn:hover{background:var(--surface-soft);color:var(--ink);}
-  .tco-part-btn.is-danger:hover{background:var(--voile-ambre);color:var(--late);}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   .tco-quick-add{padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:10px;}
-  .tco-quick-add-tete{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink);}
-  .tco-quick-add-tete svg{width:18px;height:18px;}
+  
+  
   .tco-quick-add .field-row{grid-template-columns:1fr 1fr;}
   .tco-quick-add input{background:#fff;}
 
@@ -6973,11 +6972,11 @@
      dessous de 900px (le formulaire passe sous la liste, jamais côte à
      côte à l'étroit, et la largeur fixe ne s'applique pas — pleine largeur
      pour rester utilisable sur petit écran). */
-  .tco-catalogue-grid{display:flex;flex-direction:column;gap:16px;}
-  .tco-catalogue-colonne{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
+  
+  
   @media (min-width:900px){
-    .tco-catalogue-grid{flex-direction:row;align-items:flex-start;}
-    .tco-catalogue-colonne{width:700px;flex:0 0 700px;}
+    
+    
     .tco-quick-add{flex:1;min-width:0;}
   }
 
@@ -6990,24 +6989,21 @@
      sans lui, un track 1fr grandit selon le min-content de son contenu
      (ici les cartes de seuils) et casse le 50/50 ; ajouté ici, scopé au
      même titre plutôt que sur .dash-side partagée. */
-  @media (min-width:900px){
-    .tco-parametres-grid{grid-template-columns:1fr 1fr;}
-    .tco-parametres-grid > .dash-side{min-width:0;}
-  }
+  
 
-  .tco-tip-carte{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-container,var(--primary-tint));}
-  .tco-tip-icone{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:#fff;color:var(--bleu-roi);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);}
-  .tco-tip-icone svg{width:20px;height:20px;}
-  .tco-tip-titre{font-size:17px;font-weight:600;color:var(--ink);}
-  .tco-tip-texte{font-size:12px;color:var(--ink-2);margin-top:2px;line-height:1.5;}
+  
+  
+  
+  
+  
 
   /* Classement TCO du parc (phase 2) */
-  .tco-classement-resume{display:flex;flex-wrap:wrap;gap:20px;padding:4px 0 2px;}
-  .tco-classement-chiffre{display:flex;flex-direction:column;gap:2px;}
-  .tco-classement-chiffre .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-classement-chiffre .value{font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .tco-classement-chiffre .value.is-alerte{color:var(--late);}
-  .tco-carte-dashboard-corps{display:flex;align-items:center;gap:16px;}
+  
+  
+  
+  
+  
+  
 
   /* Reprise Stitch « Tableau de bord » — widget TCO enrichi (voir
      keeva-tco-feature) */
@@ -7047,57 +7043,57 @@
   .tco-dash-note .droite{font-family:'Space Grotesk',sans-serif;font-weight:600;}
 
   /* Classement TCO du parc — reprise Stitch (phase 3, re-skin) */
-  .tco-card-icone-carre.is-lg{width:52px;height:52px;border-radius:var(--r-lg);}
-  .tco-card-icone-carre.is-lg svg{width:26px;height:26px;}
-  .tco-card-icone-carre.is-gradient-roi{background:linear-gradient(135deg,var(--bleu-roi),var(--primary));}
-  .tco-eyebrow-pill.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
-  .tco-eyebrow-pill.is-roi .dot{background:var(--bleu-roi);}
-  .tco-clst-live{font-size:11px;color:var(--dark-ink);font-weight:500;}
+  
+  
+  
+  
+  
+  
 
-  .tco-clst-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px 0 2px;}
-  @media (max-width:760px){.tco-clst-kpi-grid{grid-template-columns:1fr;}}
-  .tco-clst-kpi-carte{padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
-  .tco-clst-kpi-carte.is-alerte{background:var(--late-bg);border-color:rgba(222,122,22,.25);}
-  .tco-clst-kpi-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
-  .tco-clst-kpi-tete .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-clst-kpi-icone{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-chip);display:flex;align-items:center;justify-content:center;}
-  .tco-clst-kpi-icone svg{width:17px;height:17px;}
-  .tco-clst-kpi-icone.is-roi{background:rgba(35,111,224,.1);color:var(--bleu-roi);}
-  .tco-clst-kpi-icone.is-ok,.tco-clst-kpi-icone.ok{background:var(--ok-bg);color:var(--ok);}
-  .tco-clst-kpi-icone.late{background:var(--late-bg);color:var(--late);}
-  .tco-clst-kpi-carte .valeur-ligne{display:flex;align-items:baseline;gap:6px;}
-  .tco-clst-kpi-carte .valeur{font-family:'Space Grotesk',sans-serif;font-size:26px;line-height:1.1;font-weight:700;color:var(--ink);letter-spacing:-0.01em;font-variant-numeric:tabular-nums;}
-  .tco-clst-kpi-carte .valeur.late{color:var(--late);}
-  .tco-clst-kpi-carte .unite{font-size:11.5px;color:var(--dark-ink);font-weight:500;}
-  .tco-clst-kpi-sub{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--ink-2);}
-  .tco-clst-kpi-sub svg{width:14px;height:14px;flex:0 0 auto;}
-  .tco-clst-kpi-sub .rond{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;}
-  .tco-clst-kpi-sub.ok{color:var(--ok);}
-  .tco-clst-kpi-sub.soon{color:var(--soon);}
-  .tco-clst-kpi-sub.late{color:var(--late);}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  .tco-clst-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-lg);background:var(--surface-soft);}
+  
   .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--line-2);padding:3px;gap:2px;}
-  .tco-filtre-btn{display:inline-flex;align-items:center;gap:6px;border:none;background:none;padding:8px 13px;border-radius:calc(var(--r-chip) - 3px);font-size:12px;font-weight:700;font-family:inherit;color:var(--ink-2);cursor:pointer;}
-  .tco-filtre-btn svg{width:15px;height:15px;}
-  .tco-filtre-btn.is-active{background:#fff;color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
-  .tco-clst-selects{display:flex;flex-wrap:wrap;gap:8px;}
-  .tco-clst-select-wrap{position:relative;display:flex;align-items:center;}
-  .tco-clst-select-wrap>svg:first-child{position:absolute;left:10px;width:16px;height:16px;color:var(--dark-ink);pointer-events:none;}
-  .tco-clst-select-wrap>svg:last-child{position:absolute;right:8px;width:16px;height:16px;color:var(--dark-ink);pointer-events:none;}
-  .tco-clst-select-wrap select{height:38px;padding:0 30px 0 32px;border-radius:var(--r-chip);border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer;}
+  
+  
+  
+  
+  
+  
+  
+  
   /* Même remarque qu'au-dessus (.parc-tri) : le bouton "maison" porte déjà
      son propre chevron, les deux pictos décoratifs positionnés en absolu
      (pensés pour habiller le <select> natif) sont donc masqués pour éviter
      un double chevron — le bouton garde sa propre taille/couleur assortie. */
-  .tco-clst-select-wrap:has(.champ-select) svg{display:none;}
-  .tco-clst-select-wrap .champ-select{height:38px;padding:0 13px;border-radius:var(--r-chip);border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--ink);}
+  
+  
 
   .tco-donut-bloc{padding:18px 20px;border-radius:var(--r-lg);background:var(--surface-soft);border:1px solid var(--line-2);}
   .tco-donut-bloc-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
   .tco-donut-bloc-titre h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin:0;}
   .tco-donut-bloc-titre p{font-size:12px;color:var(--ink-2);margin:2px 0 0;}
-  .tco-donut-total-badge{font-size:11.5px;font-weight:600;color:var(--ink-2);background:#fff;padding:5px 10px;border-radius:var(--r-chip);border:1px solid var(--line);white-space:nowrap;}
+  
   .tco-donut-corps{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
   .tco-donut-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;gap:1px;}
   .tco-donut-centre-eyebrow{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
@@ -7119,77 +7115,70 @@
      l'utilisateur ("mettre de l'espace entre les blocs et du background sur
      la liste des machines"). .alert-list garde son style filet ailleurs
      (.alert-row) : la règle ci-dessous est scopée à ce seul écran. */
-  #tco-classement-dynamique{display:flex;flex-direction:column;gap:16px;}
-  #tco-classement-section .alert-list{
-    gap:10px;background:var(--surface-soft);border-radius:var(--r-md);padding:10px;
-  }
-  .tco-clst-carte{position:relative;overflow:hidden;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);cursor:pointer;transition:box-shadow .15s,border-color .15s;}
-  .tco-clst-carte:hover{border-color:var(--bleu-roi);box-shadow:var(--shadow-soft);}
-  .tco-clst-carte:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
-  .tco-clst-carte-accent{position:absolute;left:0;top:0;bottom:0;width:5px;}
-  .tco-clst-carte-accent.ok{background:var(--ok);}
-  .tco-clst-carte-accent.soon{background:var(--soon);}
-  .tco-clst-carte-accent.late{background:var(--late);}
-  .tco-clst-carte-corps{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px 16px 22px;}
-  .tco-clst-carte-identite{display:flex;align-items:center;gap:14px;min-width:0;}
-  .tco-clst-carte-photo{position:relative;flex:0 0 auto;width:64px;height:64px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;}
-  .tco-clst-carte-photo img{width:100%;height:100%;object-fit:cover;}
-  .tco-clst-carte-photo-vide{color:var(--dark-ink);}
-  .tco-clst-carte-photo svg{width:26px;height:26px;flex:0 0 auto;}
-  .tco-clst-carte-dot{position:absolute;bottom:3px;right:3px;width:9px;height:9px;border-radius:50%;border:2px solid #fff;}
-  .tco-clst-carte-dot.ok{background:var(--ok);}
-  .tco-clst-carte-dot.soon{background:var(--soon);}
-  .tco-clst-carte-dot.late{background:var(--late);}
-  .tco-clst-carte-texte{min-width:0;}
-  .tco-clst-carte-tete{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
-  .tco-clst-carte-nom{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--ink);}
-  .tco-clst-badge-ratio{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--r-pill);}
-  .tco-clst-badge-ratio svg{width:13px;height:13px;}
-  .tco-clst-badge-ratio.ok{background:var(--ok-bg);color:var(--ok);}
-  .tco-clst-badge-ratio.soon{background:var(--soon-bg);color:var(--soon);}
-  .tco-clst-badge-ratio.late{background:var(--late-bg);color:var(--late);}
-  .tco-clst-badge-categorie{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-chip);background:var(--line-2);color:var(--ink-2);}
-  .tco-clst-carte-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:5px;font-size:12px;color:var(--ink-2);}
-  .tco-clst-carte-meta span{display:inline-flex;align-items:center;gap:4px;}
-  .tco-clst-carte-meta svg{width:14px;height:14px;flex:0 0 auto;color:var(--dark-ink);}
-  .tco-clst-carte-meta .is-fort{color:var(--ink);font-weight:600;}
-  .tco-clst-carte-meta .is-fort svg{color:var(--bleu-roi);}
-  .tco-clst-sep{color:var(--line-3);}
-  .tco-clst-meta-pieces{color:var(--bleu-roi);font-weight:600;}
-  .tco-clst-note{font-style:italic;}
-  .tco-clst-carte-chiffres{flex:0 0 auto;display:flex;align-items:center;gap:18px;}
-  .tco-clst-carte-stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-  .tco-clst-carte-stat .label{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--dark-ink);}
-  .tco-clst-carte-stat .valeur-ligne{display:flex;align-items:baseline;gap:4px;}
-  .tco-clst-carte-stat .valeur{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .tco-clst-carte-stat .valeur.is-roi{color:var(--bleu-roi);}
-  .tco-clst-carte-divider{width:1px;height:36px;background:var(--line);flex:0 0 auto;}
-  .tco-clst-tendance{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;}
-  .tco-clst-tendance svg{width:12px;height:12px;}
-  .tco-clst-tendance.ok{color:var(--ok);}
-  .tco-clst-tendance.soon{color:var(--soon);}
-  .tco-clst-tendance.late{color:var(--late);}
-  .tco-clst-carte-statut{flex:0 0 auto;width:42px;height:42px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);}
-  .tco-clst-carte-statut svg{width:20px;height:20px;}
-  .tco-clst-carte-statut.ok{background:var(--ok-bg);color:var(--ok);}
-  .tco-clst-carte-statut.soon{background:var(--soon-bg);color:var(--soon);}
-  .tco-clst-carte-statut.late{background:var(--late-bg);color:var(--late);}
-  @media (max-width:640px){
-    .tco-clst-carte-corps{padding:14px;}
-    .tco-clst-carte-chiffres{width:100%;justify-content:space-between;}
-  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  .tco-clst-banniere{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--late-bg);border:1px solid rgba(222,122,22,.25);}
-  .tco-clst-banniere .gauche{display:flex;align-items:center;gap:10px;}
-  .tco-clst-banniere .gauche svg{flex:0 0 auto;width:20px;height:20px;color:var(--late);background:rgba(222,122,22,.15);border-radius:var(--r-chip);padding:6px;box-sizing:content-box;}
-  .tco-clst-banniere p{font-size:12.5px;color:var(--ink);margin:0;}
-  .tco-clst-banniere-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:var(--r-chip);background:#fff;color:var(--late);font-weight:700;font-size:12px;border:1px solid rgba(222,122,22,.4);cursor:pointer;white-space:nowrap;}
-  .tco-clst-banniere-btn svg{width:15px;height:15px;}
+  
+  
+  
+  
+  
+  
 
-  .tco-clst-export-btn{width:100%;height:48px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);font-weight:700;font-size:13px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
-  .tco-clst-export-btn svg{width:18px;height:18px;color:var(--bleu-roi);}
-  .tco-clst-export-btn.is-primaire{background:var(--ink);color:#fff;border:none;font-size:16px;}
-  .tco-clst-export-btn.is-primaire svg{color:var(--ok);}
+  
+  
+  
+  
 
   /* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
   /* Colonne unique par défaut : depuis que ce bloc vit dans dash-side (la
@@ -7335,32 +7324,15 @@
   :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input,select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
   /* Éléments blancs (anciens sous-blocs teintés avec bordure) */
-  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-callout.is-info,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="stock"]) .stock-row{border:none;box-shadow:var(--shadow-soft);}
   :is(#view-root[data-view="stock"]) .stock-row:hover{border:none;box-shadow:0 4px 16px rgba(14,19,51,.1);background:var(--surface);}
   :is(#view-root[data-view="stock"]) :is(.stock-liste,.stock-form-panel){background:none;border:none;padding:0;box-shadow:none;}
   /* Champ DANS un élément blanc : teinte par défaut des champs */
-  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-callout,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select,.tco-champ-unite){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
+  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
   /* Dans un groupe blanc, les lignes de produit passent en teinte (blanc sur blanc sinon) */
   #view-root[data-view="agenda"] .prep-detail-produit,#view-root[data-view="dashboard"] .prep-detail-produit{background:var(--surface-soft);box-shadow:none;border:none;}
   /* Stock & SAV : la section n'est plus un cadre (bordure, entête séparée par un filet, corps rembourré) */
   #view-root[data-view="stock"] section.stock-section{border:none;overflow:visible;}
   #view-root[data-view="stock"] .stock-section-head{padding:0 0 12px;border-bottom:none;}
   #view-root[data-view="stock"] .stock-section-body,#view-root[data-view="stock"] .stock-section-body.is-tight{padding:0;}
-
-  /* ═══ Coûts & TCO — passe 2 (2026-10-04) : même langage partout ═══
-     · tuiles de chiffres : TOUTES blanches avec ombre ; l'alerte se lit par un liseré orange, pas par un fond coloré ;
-     · barre d'outils et liste : plus de zone teintée ;
-     · boutons secondaires : pastilles blanches comme « Exporter (CSV) » du Parc ; seuls les boutons d'enregistrement restent pleins ;
-     · cartes d'info : blanches avec un liseré de couleur (bleu = info, orange = attention) ;
-     · seuils par catégorie : lignes à plat (le champ repose sur le fond, jamais dans un bloc blanc). */
-  #view-root[data-view="tco"] .tco-clst-kpi-carte{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  #view-root[data-view="tco"] .tco-clst-kpi-carte.is-alerte{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
-  #view-root[data-view="tco"] .tco-clst-toolbar{background:none;padding:0;}
-  #view-root[data-view="tco"] .alert-list{background:none;padding:0;gap:12px;}
-  #view-root[data-view="tco"] .tco-clst-carte{border:none;box-shadow:var(--shadow-soft);}
-  #view-root[data-view="tco"] :is(.tco-btn-outil,.tco-clst-export-btn:not(.is-primaire),.tco-btn-aide){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  #view-root[data-view="tco"] .tco-callout.is-info{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--bleu-roi);}
-  #view-root[data-view="tco"] .tco-callout.is-warn{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
-  #view-root[data-view="tco"] .tco-callout.is-warn p{color:var(--ink);}
-  #view-root[data-view="tco"] .tco-tip-carte{background:var(--surface);box-shadow:var(--shadow-soft),inset 4px 0 0 var(--primary-dark);}

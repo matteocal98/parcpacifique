@@ -65,7 +65,7 @@ faire AVANT de dire "c'est fait".
       dans `charte.html`. UN NOUVEL ÉCRAN SE CONSTRUIT AVEC CES CLASSES, sans CSS propre.
       Migrer un menu = remplacer ses classes par celles du kit, retirer son ancien CSS
       de styles.css, et accrocher le JavaScript à des attributs `data-*` (pas aux classes
-      de style). Déjà migré : les seuils cibles du TCO.
+      de style). Déjà migré : tout le menu Coûts & TCO (sauf le catalogue de pièces, partagé avec Stock & SAV : à migrer avec Stock). Chiffres alignés, choix unique et liste déroulante : voir charte.html.
 
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —
