@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-LwOh+N5d3FEuvhxuGAblSTK8B5421FmwMM5sy7lYSoo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-F9mZIuTVMAhegt2YtQVWqpfyxTaVGzhmHvl0OXFiZMA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5577,8 +5577,8 @@ function vignetteMachineGps(m) {
     : `<span class="tele-vignette tele-vignette-vide">${picto('boite')}</span>`;
 }
 
-// Info-bulle au survol d'un repère : la photo et le nom, rien de plus (le détail est dans
-// la fenêtre du clic). Pas sur téléphone, où il n'y a pas de survol.
+// Info-bulle FIXE au-dessus de chaque repère : la photo et le nom, rien de plus (le détail est
+// dans la fenêtre du clic). Toujours affichée, sans survol ni clic — donc aussi sur téléphone.
 function contenuInfobulleGps(machineId) {
   const m = (UI.machines || []).find((x) => x.id === machineId);
   const div = document.createElement('div');
@@ -5626,16 +5626,23 @@ function majMarqueursGps(ajuster) {
       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
     });
     let mk = couchesGps.marqueurs.get(m.id);
-    if (mk) { mk.setLatLng([lat, lon]); mk.setIcon(icone); }
+    if (mk) {
+      mk.setLatLng([lat, lon]);
+      mk.setIcon(icone);
+      if (mk.getTooltip()) mk.setTooltipContent(contenuInfobulleGps(m.id));
+    }
     else {
       mk = L.marker([lat, lon], { icon: icone, title: m.name }).addTo(carteGps);
       mk.bindPopup(() => contenuPopupGps(m.id));
-      if (!L.Browser.mobile) {
-        mk.bindTooltip(() => contenuInfobulleGps(m.id), { direction: 'top', offset: [0, -14], opacity: 1, className: 'tele-infobulle' });
-        // La fenêtre du clic contient déjà la photo et le nom : pas d'info-bulle par-dessus.
-        mk.on('popupopen', () => mk.closeTooltip());
-        mk.on('tooltipopen', () => { if (mk.isPopupOpen()) mk.closeTooltip(); });
-      }
+      // permanent : toujours visible. interactive : un clic sur la bulle ouvre la fenêtre du
+      // repère, comme un clic sur le point.
+      mk.bindTooltip(() => contenuInfobulleGps(m.id), {
+        permanent: true, interactive: true, direction: 'top', offset: [0, -14], opacity: 1, className: 'tele-infobulle',
+      });
+      // La fenêtre du clic contient déjà la photo et le nom : la bulle s'efface pendant qu'elle
+      // est ouverte (sinon elle serait cachée derrière) et revient à sa fermeture.
+      mk.on('popupopen', () => mk.closeTooltip());
+      mk.on('popupclose', () => mk.openTooltip());
       couchesGps.marqueurs.set(m.id, mk);
     }
   });
