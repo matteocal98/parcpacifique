@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-F9mZIuTVMAhegt2YtQVWqpfyxTaVGzhmHvl0OXFiZMA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0SJtM3KRGC79Yt0PFHZUFb84pRtwZLPm0G7reuaMOts=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5641,7 +5641,14 @@ function majMarqueursGps(ajuster) {
       });
       // La fenêtre du clic contient déjà la photo et le nom : la bulle s'efface pendant qu'elle
       // est ouverte (sinon elle serait cachée derrière) et revient à sa fermeture.
-      mk.on('popupopen', () => mk.closeTooltip());
+      mk.on('popupopen', () => {
+        mk.closeTooltip();
+        // Le trajet s'affiche TOUT SEUL à l'ouverture de la fenêtre (24 h par défaut, ou la
+        // période déjà choisie pour cette machine) : sans bouton à deviner. La carte est recadrée
+        // sur tout le tracé, en laissant de la place en haut pour la fenêtre.
+        const choisi = etatCarteGps.trajet && etatCarteGps.trajet.machineId === m.id ? etatCarteGps.trajet.jours : 1;
+        afficherTrajetGps(m.id, choisi);
+      });
       mk.on('popupclose', () => mk.openTooltip());
       couchesGps.marqueurs.set(m.id, mk);
     }
@@ -5669,13 +5676,17 @@ function effacerTrajetGps(oublier) {
   if (oublier !== false) etatCarteGps.trajet = null;
 }
 
-async function afficherTrajetGps(machineId, jours) {
+async function afficherTrajetGps(machineId, jours, options) {
   if (!carteGpsVivante()) return;
+  const cadrer = !options || options.cadrer !== false;
   const L = window.L;
   const m = (UI.machines || []).find((x) => x.id === machineId);
   effacerTrajetGps(false);
   etatCarteGps.trajet = { machineId, jours };
   messageCarteGps(trad('Chargement du trajet…'));
+  document.querySelectorAll('.tele-popup-actions button[data-jours]').forEach((b) => {
+    b.classList.toggle('is-actif', Number(b.getAttribute('data-jours')) === jours);
+  });
   const depuis = new Date(Date.now() - jours * 86400000).toISOString();
   // Les 2 000 points les PLUS RÉCENTS de la période (tri décroissant puis retournement) :
   // sur 60 jours l'historique peut dépasser cette limite, et ce sont les derniers
@@ -5692,8 +5703,9 @@ async function afficherTrajetGps(machineId, jours) {
     L.circleMarker(pts[0], { radius: 6, color: '#fff', weight: 2, fillColor: '#24B5A8', fillOpacity: 1 }),
     L.circleMarker(pts[pts.length - 1], { radius: 6, color: '#fff', weight: 2, fillColor: '#DE7A16', fillOpacity: 1 }),
   ]).addTo(carteGps);
-  carteGps.closePopup();
-  carteGps.fitBounds(pts, { padding: [40, 40] });
+  // La fenêtre reste ouverte : elle porte les boutons de période. Le recadrage, lui, n'a lieu
+  // que sur un choix explicite de période.
+  if (cadrer) carteGps.fitBounds(pts, { paddingTopLeft: [40, 190], paddingBottomRight: [40, 40] });
   const msg = messageCarteGps(tR('Trajet de {machine} sur {periode} : {n} points.', {
     machine: m ? m.name : '', periode: jours === 1 ? trad('24 h') : tR('{n} jours', { n: jours }), n: pts.length,
   }));
