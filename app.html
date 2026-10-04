@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-GFSlFx1mN5NkRayRXA6zXHA3T9Yfephdi2U2ioI0EhY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Mo1tjTRm6ZqaVZ1+iJbO8RC2aPsF2f6l3fiBWHOpkhg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13351,11 +13351,11 @@ function blocSeuilsCategorieTcoHtml() {
           </div>
         </div>
         ${!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : ''}
-        <div class="ui-liste">
+        <div class="ui-deux">
           ${categories.map((cat, i) => {
             const nbMachines = (UI.machines || []).filter((m) => m.category?.id === cat.id).length;
             return `
-            <div class="ui-ligne" data-seuil-ligne data-categorie-id="${esc(cat.id)}">
+            <div class="ui-liste"><div class="ui-ligne" data-seuil-ligne data-categorie-id="${esc(cat.id)}">
               <div class="ui-ligne-id">
                 <div class="ui-ligne-icone ${TEINTES[i % TEINTES.length]}">${picto(iconeCategorieMachine(cat.name))}</div>
                 <div class="ui-ligne-textes">
@@ -13373,7 +13373,7 @@ function blocSeuilsCategorieTcoHtml() {
                   <span class="ui-unite">${deviseCourte()}/h</span>
                 </div>
               </div>
-            </div>`;
+            </div></div>`;
           }).join('')}
         </div>
         <div class="ui-aide" id="tco-seuils-msg" role="status" aria-live="polite"></div>
@@ -13712,6 +13712,7 @@ function blocCatalogueTcoHtml() {
       ${teteSectionKit('boite', trad('Catalogue de pièces'), trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.'),
         `<span class="ui-tag" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span><button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>`)}
       <div class="ui-section-corps">
+        ${tcoTipCarteHtml()}
         <div class="ui-deux">
           <div class="ui-section-corps">
             <input id="tco-piece-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation…')}">
@@ -14087,15 +14088,13 @@ function ouvrirImportCatalogue() {
 // prix proposé, quantité décimale acceptée).
 function tcoTipCarteHtml() {
   return `
-    <section class="ui-section">
       <div class="ui-encadre is-conseil">
         ${picto('ampoule')}
         <div>
           <span class="ui-encadre-titre">${trad('Astuce Gestionnaire')}</span>
           <p>${trad('Les pièces enregistrées ici sont proposées automatiquement dans « Enregistrer un entretien » : sélectionner une pièce remplit son prix, et la quantité accepte les décimales (0,5 pour un demi-bidon, par exemple).')}</p>
         </div>
-      </div>
-    </section>`;
+      </div>`;
 }
 // Câblage du bloc « Catalogue de pièces » (recherche, ajout/édition/
 // suppression, import CSV) — extrait pour être appelé aussi bien depuis
@@ -14260,10 +14259,8 @@ VIEWS.tco = {
       <div class="ui-page">
         ${tcoKpiGridHtml()}
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
-        <div class="ui-colonnes">
-          <div class="ui-colonne">${blocParametresTcoHtml()}${tcoTipCarteHtml()}</div>
-          <div class="ui-colonne">${blocSeuilsCategorieTcoHtml()}</div>
-        </div>
+        ${blocParametresTcoHtml()}
+        ${blocSeuilsCategorieTcoHtml()}
         ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
       </div>`;
   },
