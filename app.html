@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0SJtM3KRGC79Yt0PFHZUFb84pRtwZLPm0G7reuaMOts=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Xud5AAp5z73ezI3ZDAGtJaNwcPp8VQvP4sm1QEcBz18=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5769,7 +5769,7 @@ function telemetrieCarteHtml() {
               <option value="api">${trad('Autre système (API)')}</option>
               <option value="aemp">${trad('Compte constructeur (ISO 15143-3)')}</option>
             </select>
-            <button type="button" class="secondary" data-tele-creer>${trad('Créer la source')}</button>
+            <button type="button" class="primary" data-tele-creer>${trad('Créer la source')}</button>
           </div>
           <div class="tele-aemp" id="acc-tele-aemp" hidden>
             <p class="hint">${trad('KALEA lit les heures moteur de tes machines directement chez leur constructeur (Caterpillar, Volvo CE, John Deere…), avec les identifiants API que ton constructeur te fournit. Ils sont chiffrés et ne sont jamais réaffichés.')}</p>
@@ -5834,9 +5834,9 @@ async function preparerCarteTelemetrie(racine) {
           ${constructeur && s.last_error ? `<span class="tele-sous tele-erreur">${esc(tR('Dernière erreur : {erreur}', { erreur: s.last_error }))}</span>` : ''}
         </div>
         <div class="tele-actions">
-          ${constructeur ? `<button type="button" class="secondary" data-tele-tester="${esc(s.id)}">${trad('Tester')}</button>
-          <button type="button" class="secondary" data-tele-relier="${esc(s.id)}">${trad('Relier mes machines')}</button>` : ''}
-          <button type="button" class="secondary" data-tele-revoquer="${esc(s.id)}">${trad('Révoquer')}</button>
+          ${constructeur ? `<button type="button" class="btn-row-action" data-tele-tester="${esc(s.id)}">${trad('Tester')}</button>
+          <button type="button" class="btn-row-action" data-tele-relier="${esc(s.id)}">${trad('Relier mes machines')}</button>` : ''}
+          <button type="button" class="btn-row-action" data-tele-revoquer="${esc(s.id)}">${trad('Révoquer')}</button>
         </div>
       </div>`;
     }).join('') : `<p class="hint">${trad('Aucune source pour le moment. Crée-en une pour recevoir des relevés.')}</p>`;
@@ -5854,7 +5854,7 @@ async function preparerCarteTelemetrie(racine) {
         </div>
         <select class="tele-source" aria-label="${esc(tR('Source de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>${options(m.telemetry_source_id)}</select>
         <input class="tele-ref" maxlength="64" value="${esc(m.telemetry_ref || '')}" placeholder="${esc(trad('Identifiant du boîtier'))}" aria-label="${esc(tR('Identifiant du boîtier de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>
-        <button type="button" class="secondary" data-tele-enregistrer${sources.length ? '' : ' disabled'}>${trad('Enregistrer')}</button>
+        <button type="button" class="btn-row-action" data-tele-enregistrer${sources.length ? '' : ' disabled'}>${trad('Enregistrer')}</button>
       </div>`).join('') : `<p class="hint">${trad('Aucune machine.')}</p>`;
   }
 
