@@ -6141,20 +6141,6 @@
   .stock-mouvement-modal #mvt-intervention,.stock-mouvement-modal #mvt-motif{background:var(--surface);}
 
   @media (min-width:900px){ .vue-stock{gap:24px;} }
-  /* La section « Classement TCO du parc » est pleine largeur, hors de
-     .dash-grid : elle n'hérite donc pas du filet doux que .dash-grid .card
-     applique aux autres cartes de cette page et du tableau de bord
-     ([app.html:2965](app.html)/[app.html:3081](app.html)) et retombait sur
-     le cadre d'encre 2px générique de TOUS les .card — plus dur, pas
-     harmonieux avec le reste. Même valeur exacte que .dash-grid .card. */
-  /* Même cas pour « Catalogue de pièces » depuis qu'elle est passée en
-     pleine largeur hors .dash-grid (voir plus haut) — oublié à ce
-     moment-là, corrigé ici avec la même règle exacte. */
-  #tco-catalogue-section{border:1.5px solid var(--line);}
-  /* Même gotcha, mêmes sections pleine largeur hors .dash-grid, pour le
-     module Stock & SAV (Phase 1) — même règle exacte, appliquée dès
-     l'écriture cette fois plutôt qu'oubliée puis corrigée après coup. */
-  #stock-magasins-section, #stock-inventaire-section, #stock-mouvements-section{border:1.5px solid var(--line);}
 
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
