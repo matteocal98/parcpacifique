@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3YdsHQml5an1ytEZuzXvpI+Fhf4bxDmkBFFbizLvpic=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-haDCfoxMBE+7MCdKKhW8XTAciMEI2JpCJ5tmXlOVbmA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1715,12 +1715,21 @@ function separateursLocale(locale) {
 // DERNIER point rencontré est LE séparateur décimal (0 à 2 chiffres après,
 // en pratique) ; tout le reste (espace de toute nature, virgule/point
 // antérieurs) est un séparateur de milliers, ignoré.
+// EXCEPTION : exactement TROIS chiffres après le dernier séparateur, derrière une partie entière non nulle
+// (« 1,400 » en anglais, « 1.400 » au clavier), c'est un séparateur de milliers. Les montants n'ont jamais plus de
+// deux décimales, et lire « 1,400 » comme 1,4 divisait par mille tout montant affiché en anglais puis réenregistré.
+// « 0,125 » reste un décimal (partie entière nulle).
 function nombreDepuisTexte(texte) {
   if (texte == null || texte === '') return null;
   const s = String(texte).trim();
   if (s === '') return null;
   const negatif = s.charAt(0) === '-';
-  const dernierSep = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+  let dernierSep = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+  if (dernierSep !== -1) {
+    const avant = s.slice(0, dernierSep).replace(/[^0-9]/g, '');
+    const apres = s.slice(dernierSep + 1);
+    if (/^[0-9]{3}$/.test(apres) && /[1-9]/.test(avant)) dernierSep = -1;
+  }
   const partieEntiere = (dernierSep === -1 ? s : s.slice(0, dernierSep)).replace(/[^0-9]/g, '');
   const partieDecimale = (dernierSep === -1 ? '' : s.slice(dernierSep + 1)).replace(/[^0-9]/g, '');
   if (partieEntiere === '' && partieDecimale === '') return null;
