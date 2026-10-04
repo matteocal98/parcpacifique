@@ -28,7 +28,7 @@
   .charte-ko,.charte-ok{padding:14px;border-radius:var(--r-lg);}
   .charte-ko{outline:2px solid var(--late);} .charte-ok{outline:2px solid var(--ok);}
   .charte-verdict{display:block;margin-bottom:10px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;}
-  .charte-mere{padding:18px;border-radius:var(--r-card);background:var(--surface-soft);display:flex;flex-direction:column;gap:12px;}
+  .charte-mere{padding:18px;border-radius:var(--r-card);background:var(--fond-bloc);display:flex;flex-direction:column;gap:12px;}
   .charte-mere .ui-champ{background:var(--surface);}
   .charte-ko .charte-mere .charte-mere{background:var(--surface);}
 </style>
@@ -44,7 +44,7 @@
       <div class="ui-section-titres"><h2 class="ui-section-titre">Les 7 règles</h2><p class="ui-section-sous">Validées le 2026-10-04. Si un écran les enfreint, c'est l'écran qui a tort.</p></div>
     </div>
     <ol class="charte-regles">
-      <li><strong>Fond.</strong> La page est blanche ; chaque section est un bloc teinté (<code>--surface-soft</code> = <code>rgba(14,19,51,.04)</code>) dont les éléments (tuile, ligne, encadré, champ, bouton secondaire, puce) sont blancs. Aucune ombre, aucune bordure. Un seul niveau de bloc : jamais une section dans une section.</li>
+      <li><strong>Fond.</strong> La page est blanche ; chaque section est un bloc teinté (<code>--fond-bloc</code> = <code>rgba(222,122,22,.14)</code>, un orange doux) dont les éléments (tuile, ligne, encadré, champ, bouton secondaire, puce) sont blancs. Aucune ombre, aucune bordure. Un seul niveau de bloc : jamais une section dans une section.</li>
       <li><strong>Titres de section.</strong> Toujours icône + titre + sous-titre, en tête du bloc de la section, avec un espace entre deux sections et aucun filet.</li>
       <li><strong>L'inverse du parent.</strong> Un élément n'a jamais le même fond que ce qui le porte : posé dans la section teintée il est blanc ; posé dans un élément blanc (un champ, une unité, une étiquette dans une ligne, une tuile ou un encadré) il est teinté.</li>
       <li><strong>Alignement.</strong> Les éléments d'une même liste ou grille ont les mêmes colonnes et la même hauteur.</li>
@@ -61,7 +61,7 @@
     </div>
     <div class="charte-teintes">
       <div class="charte-teinte"><div class="charte-pastille" style="background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)"></div><strong>Page et éléments</strong><code>--surface #FFFFFF</code></div>
-      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--surface-soft)"></div><strong>Bloc de section</strong><code>--surface-soft<br>rgba(14,19,51,.04)</code></div>
+      <div class="charte-teinte"><div class="charte-pastille" style="background:var(--fond-bloc)"></div><strong>Bloc de section</strong><code>--fond-bloc<br>rgba(222,122,22,.14)</code></div>
       <div class="charte-teinte"><div class="charte-pastille" style="background:var(--ink)"></div><strong>Encre / bouton plein</strong><code>--ink #0E1333</code></div>
       <div class="charte-teinte"><div class="charte-pastille" style="background:var(--primary-dark)"></div><strong>Action (indigo)</strong><code>--primary-dark #5B52DF</code></div>
       <div class="charte-teinte"><div class="charte-pastille" style="background:var(--late)"></div><strong>En retard</strong><code>--late #DE7A16</code></div>

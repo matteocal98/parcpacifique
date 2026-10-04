@@ -11,8 +11,8 @@
    N'utilise QUE les variables de styles.css (:root) : aucune couleur en dur.
 
    LES 7 RÈGLES (validées avec l'utilisateur le 2026-10-04)
-   1. FOND. La page est BLANCHE. Chaque SECTION est un bloc teinté (--surface-soft =
-      rgba(14,19,51,.04)) ; ses ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
+   1. FOND. La page est BLANCHE. Chaque SECTION est un bloc teinté (--fond-bloc =
+      rgba(222,122,22,.14), un orange doux) ; ses ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
       secondaire, puce) sont BLANCS dedans. Aucune ombre, aucune bordure. Un seul
       niveau de bloc : jamais une section dans une section.
       (Règle révisée le 2026-10-04 : page blanche > section teintée > éléments blancs.)
@@ -35,12 +35,16 @@
       près la même hauteur.
    ============================================================================ */
 
+/* Couleur de fond d'un bloc de section (choisie par l'utilisateur le 2026-10-04 : un orange doux, plus contrasté
+   que l'ancien gris) = --late (#DE7A16) à 14 % d'opacité. Pour la changer partout : cette seule ligne. */
+:root{--fond-bloc:rgba(222,122,22,.14);}
+
 /* Page blanche : posée par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc) */
 body.fond-blanc{--bg:var(--surface);}
 body.fond-blanc .main{background:var(--surface);}
 
 /* ── 1. Section : un bloc teinté (titre + contenu) posé sur la page blanche ──────── */
-.ui-section{display:flex;flex-direction:column;gap:14px;margin:0 0 20px;padding:20px;border-radius:var(--r-card);background:var(--surface-soft);}
+.ui-section{display:flex;flex-direction:column;gap:14px;margin:0 0 20px;padding:20px;border-radius:var(--r-card);background:var(--fond-bloc);}
 @media (max-width:520px){.ui-section{padding:14px;}}
 .ui-section-tete{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .ui-section-icone{width:40px;height:40px;border-radius:var(--r-md);background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
