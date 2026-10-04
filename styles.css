@@ -1006,8 +1006,7 @@
   .parc-tri .champ-select{height:40px;width:auto;padding:0 12px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13.5px;font-weight:600;}
 
   .mstrip-liste{display:flex;flex-direction:column;gap:12px;}
-  .mstrip{position:relative;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s;}
-  .mstrip:hover{box-shadow:0 4px 16px rgba(14,19,51,.1);}
+  .mstrip{position:relative;background:var(--surface);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;}
   @media (min-width:1180px){.mstrip{flex-direction:row;align-items:stretch;}}
   .mstrip-accent{width:100%;height:5px;flex:0 0 auto;}
   @media (min-width:1180px){.mstrip-accent{width:6px;height:auto;}}
@@ -1028,7 +1027,7 @@
   @media (min-width:1180px){.mstrip-identite{width:auto;flex:1 1 260px;}}
   /* Fond blanc, pas var(--surface-soft) (teinté) : même correctif que
      #photo-preview (styles.css ~2171) et .fm2-o1-photo-box ci-dessous. */
-  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:#fff;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
   /* object-fit:contain, pas cover : une débroussailleuse (longue et
      étroite) recadrée en cover dans une vignette large finissait tronquée
      au seul manche, le reste (tête de coupe, moteur) hors cadre — signalé
@@ -1061,7 +1060,7 @@
      DANS ce bloc) : le cadre passe du gris au liseré indigo là aussi —
      voulu, ça uniformise avec la vue machine du site (même demande que ce
      chantier), pas un oubli. */
-  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--primary-tint);border:1px solid var(--primary-line);border-radius:12px;padding:8px 12px;width:100%;min-width:0;}
+  .mstrip-compteur-bloc{flex:0 0 auto;background:var(--surface-soft);border:none;border-radius:12px;padding:8px 12px;width:100%;min-width:0;}
   @media (min-width:1180px){.mstrip-compteur-bloc{width:auto;min-width:220px;}}
   /* .compteur (fiche machine) porte un cadre 2px solid var(--ink) + marge
      + fond propres, pensés pour le grand hero de la fiche — jamais
@@ -1162,7 +1161,7 @@
      phrase de secours utilisée quand un plan EXISTE mais n'a pas encore de
      pourcentage calculable (compteur non renseigné, etc. — cas différent,
      qui garde .mstrip-jauge-note tel quel). */
-  .mstrip-jauge-vide{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface-soft);border:1px dashed var(--line);border-radius:10px;height:100%;}
+  .mstrip-jauge-vide{display:flex;align-items:center;gap:8px;padding:10px;background:var(--surface-soft);border:none;border-radius:10px;height:100%;}
   .mstrip-jauge-vide .card-ico{flex:0 0 auto;color:var(--ink-3);}
   .mstrip-jauge-vide svg{width:18px;height:18px;}
   .mstrip-jauge-vide p{margin:0;}
@@ -1175,9 +1174,9 @@
      jamais sous sa largeur de contenu par défaut (min-width:auto) — sans
      ça, ce bouton + les 2 boutons icône à côté débordaient hors de la
      carte sur mobile (trouvé en testant à 375px). */
-  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:37px;padding:0 7px;border-radius:var(--r-md);border:none;background:var(--primary-dark);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
+  .mstrip-btn-principal{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:37px;padding:0 7px;border-radius:var(--r-md);border:none;background:var(--primary-tint);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit;overflow:hidden;text-overflow:ellipsis;}
   @media (max-width:480px){.mstrip-btn-principal{white-space:normal;text-align:center;line-height:1.25;height:auto;min-height:44px;padding:8px 12px;}}
-  .mstrip-btn-principal:hover{background:var(--dark);}
+  .mstrip-btn-principal:hover{background:var(--primary-tint-2);}
   .mstrip-btn-principal svg{width:17px;height:17px;flex:0 0 auto;}
   .mstrip-btn-icone{width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;}
   /* Le bouton carnet réutilise .view-manual (comportement réel existant,
@@ -1195,7 +1194,7 @@
      bouton réglages par une teinte indigo (même rôle que .compteur-carte-
      ajuster/.mstrip-jauge-delta.is-soon) — les deux étaient identiques
      (gris neutre) avant cette passe. */
-  .mstrip-btn-icone.view-manual{background:var(--primary-tint);border:1px solid var(--primary-line);color:var(--primary-dark);}
+  .mstrip-btn-icone.view-manual{background:var(--primary-tint);border:none;color:var(--primary-dark);}
   .mstrip-btn-icone.view-manual:hover{background:var(--primary-line);}
 
   .mstrip-badge{display:inline-flex;align-items:center;gap:5px;}
@@ -6227,7 +6226,7 @@
      haut : rétablit fond/padding/rayon annulés par .mstrip-compteur-bloc
      .compteur (ligne ~1041) — carte BLANCHE, distincte du fond gris clair
      de .mstrip-compteur-bloc, comme la maquette. */
-  .mstrip-compteur-bloc .compteur-carte{background:#fff;box-shadow:var(--shadow-soft);padding:12px;margin-top:0;border:none;border-radius:12px;}
+  .mstrip-compteur-bloc .compteur-carte{background:var(--surface);box-shadow:none;padding:12px;margin-top:0;border:none;border-radius:12px;}
 
   /* Le module de rouleaux : overlay plein écran, palette claire normale
      (ajouté à document.body, pas dans la carte sombre). */

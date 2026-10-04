@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ty2mi796ccJ3oMCwwSaO56usF9A7buuAFDdz/RM9D0k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-R+NdKRNWXa615L+y/EinCMCCe3j9jANPdr4wkEr11NU=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -10639,15 +10639,14 @@ function chipHtml(status, label, count) {
 function parcPillHtml(status, label, count, teinte) {
   const active = fleetFilters().status === status;
   const couleurDot = teinte === 'late' ? 'var(--late)' : teinte === 'soon' ? 'var(--primary)' : teinte === 'ok' ? 'var(--ok)' : 'var(--dark-ink)';
-  return `<button type="button" class="parc-pill${active ? ' is-active' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="dot" style="background:${couleurDot};"></span><span>${esc(label)}</span><span class="compte">${count}</span></button>`;
+  return `<button type="button" class="ui-puce parc-pill${active ? ' is-actif' : ''}" data-status="${status}" aria-pressed="${active ? 'true' : 'false'}"><span class="ui-point ${classeEtatKit(teinte)}"></span><span>${esc(label)}</span><span class="ui-compte">${count}</span></button>`;
 }
 
 function fleetListHtml() {
   const matches = fleetSorted(fleetMatches());
   if (!matches.length) {
-    return `<div class="empty">${trad('Aucune machine ne correspond à cette recherche.')}
-      <div style="margin-top:12px;"><button type="button" class="link-inline" id="fleet-reset">${trad('Réinitialiser les filtres')}</button></div>
-    </div>`;
+    return `<div class="ui-aide">${trad('Aucune machine ne correspond à cette recherche.')}</div>
+      <div><button type="button" class="ui-btn ui-btn-teinte" id="fleet-reset">${trad('Réinitialiser les filtres')}</button></div>`;
   }
   const limit = fleetFilters().limit;
   const shown = matches.slice(0, limit);
@@ -10726,7 +10725,7 @@ function refreshFleetList() {
     if (select) select.value = 'urgence';
     document.querySelectorAll('#view-root .parc-pill').forEach(c => {
       const active = c.dataset.status === 'all';
-      c.classList.toggle('is-active', active);
+      c.classList.toggle('is-actif', active);
       c.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     refreshFleetList();
@@ -10734,58 +10733,54 @@ function refreshFleetList() {
 }
 
 VIEWS.machines = {
+  fondBlanc: true,
   title: trad('Machines'),
   subtitle: () => `${UI.machines.length} machine${UI.machines.length > 1 ? 's' : ''} · ${UI.companyName}`,
   render() {
     if (!UI.machines.length) {
-      return `<div class="empty">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div></section></div>`;
     }
     const c = UI.counts;
     const f = fleetFilters();
     // Reprise Stitch « Parc Machines » (voir keeva-redesign-project) : même
     // logique de filtres/tri/recherche qu'avant (fleetFilters/chipHtml),
-    // seule la présentation change. Le badge « Sync télématique active » du
-    // mockup n'est pas repris (aucune télémétrie réelle dans l'app).
+    // seule la présentation change. Depuis la charte du 2026-10-04, la page est
+    // construite avec le kit (kit.css) : une section = un bloc teinté, les
+    // machines sont des lignes blanches posées dedans.
     return `
-      <div class="parc-toolbar">
-        <div class="parc-toolbar-tete">
-          <div class="parc-toolbar-titre-ligne">
-            <h1>${trad('Parc Machines')}</h1>
-            <span class="parc-count-pill"><span class="dot"></span>${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
+      <div class="ui-page">
+        <section class="ui-section">
+          ${teteSectionKit('parcMachine', trad('Parc Machines'), '',
+            `<span class="ui-tag">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
+            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>
+            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
+            <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>`)}
+          <div class="ui-section-corps">
+            <div class="ui-barre">
+              <input id="fleet-search" class="ui-champ" type="search" value="${esc(f.q)}"
+                     placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
+                     aria-label="${trad('Rechercher dans le parc')}">
+              <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
+              <select id="fleet-sort" class="ui-selecteur">
+                <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
+                <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
+                <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
+              </select>
+            </div>
+            <div class="ui-puces" role="group" aria-label="${trad('Filtrer par état')}">
+              ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
+              ${parcPillHtml('late', trad('En retard'), c.late, 'late')}
+              ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
+              ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
+            </div>
+            <div id="fleet-list" class="mstrip-liste"></div>
+            <div class="ui-tuile is-ok">
+              <span class="ui-tuile-etiquette">${trad('Disponibilité du parc :')}</span>
+              <span class="ui-tuile-valeur">${UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100}%</span>
+              <span class="ui-tuile-note">${trad('Part de la flotte sans entretien en retard')}</span>
+            </div>
           </div>
-          <div class="parc-toolbar-actions">
-            <button type="button" class="parc-export-btn" id="fleet-scanner">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>
-            <button type="button" class="parc-export-btn" id="fleet-export">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
-            <button type="button" class="btn-primary fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
-          </div>
-        </div>
-        <div class="parc-filtres">
-          <div class="parc-recherche">
-            ${picto('recherche')}
-            <input id="fleet-search" type="search" value="${esc(f.q)}"
-                   placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
-                   aria-label="${trad('Rechercher dans le parc')}">
-          </div>
-          <div class="parc-pills-ligne" role="group" aria-label="${trad('Filtrer par état')}">
-            ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
-            ${parcPillHtml('late', trad('En retard'), c.late, 'late')}
-            ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
-            ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
-          </div>
-          <div class="parc-tri">
-            <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
-            <select id="fleet-sort">
-              <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
-              <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
-              <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div id="fleet-list" class="mstrip-liste"></div>
-      <div class="parc-resume">
-        <div class="parc-resume-gauche">${picto('ajuste')}<span>${trad('Part de la flotte sans entretien en retard')}</span></div>
-        <div class="parc-resume-droite"><span>${trad('Disponibilité du parc :')}</span><span class="parc-resume-valeur">${UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100}%</span></div>
+        </section>
       </div>`;
   },
   mount() {
@@ -10823,7 +10818,7 @@ VIEWS.machines = {
       fleetFilters().limit = FLEET_PAGE_SIZE;
       root.querySelectorAll('.parc-pill').forEach(c => {
         const active = c === pill;
-        c.classList.toggle('is-active', active);
+        c.classList.toggle('is-actif', active);
         c.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
       refreshFleetList();
