@@ -12,7 +12,7 @@
 
    LES 7 RÈGLES (validées avec l'utilisateur le 2026-10-04)
    1. FOND. La page est BLANCHE. Chaque SECTION est un bloc teinté (--fond-bloc =
-      rgba(222,122,22,.14), un orange doux) ; ses ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
+      rgba(14,19,51,.08), un gris-bleu léger) ; ses ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
       secondaire, puce) sont BLANCS dedans. Aucune ombre, aucune bordure. Un seul
       niveau de bloc : jamais une section dans une section.
       (Règle révisée le 2026-10-04 : page blanche > section teintée > éléments blancs.)
@@ -35,9 +35,9 @@
       près la même hauteur.
    ============================================================================ */
 
-/* Couleur de fond d'un bloc de section (choisie par l'utilisateur le 2026-10-04 : un orange doux, plus contrasté
-   que l'ancien gris) = --late (#DE7A16) à 14 % d'opacité. Pour la changer partout : cette seule ligne. */
-:root{--fond-bloc:rgba(222,122,22,.14);--fond-modale:#F2F4F8;}
+/* Couleur de fond d'un bloc de section : rgba(14,19,51,.08), un gris-bleu léger (choisi par l'utilisateur le 2026-10-05,
+   à la place de l'orange doux du 2026-10-04). Pour la changer partout : cette seule ligne. */
+:root{--fond-bloc:rgba(14,19,51,.08);--fond-modale:#F2F4F8;}
 
 /* Page blanche : posée par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc) */
 body.fond-blanc{--bg:var(--surface);}
