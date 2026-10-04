@@ -239,6 +239,27 @@
 
   <section class="ui-section">
     <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Groupe de champs (formulaire)</h2><p class="ui-section-sous"><code>.ui-groupe</code> : un élément blanc qui rassemble plusieurs champs. Ses champs y sont teintés (règle 3). Sert aux formulaires, aux réglages avec interrupteur, aux zones dépliables (<code>&lt;details class="ui-groupe"&gt;</code>).</p></div>
+    </div>
+    <div class="ui-groupe">
+      <div class="ui-groupe-tete"><span class="ui-groupe-titre">Ajouter un membre direct</span><span class="ui-tag">Identifiant auto</span></div>
+      <div class="ui-grille">
+        <div class="ui-champ-groupe"><label class="ui-etiquette">Prénom</label><input class="ui-champ" placeholder="Jean"></div>
+        <div class="ui-champ-groupe"><label class="ui-etiquette">Nom</label><input class="ui-champ" placeholder="DUPONT"></div>
+      </div>
+      <span class="ui-aide">Un texte d'aide sous les champs.</span>
+      <div><button type="button" class="ui-btn ui-btn-plein">Créer le membre</button></div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-groupe"&gt;
+  &lt;div class="ui-groupe-tete"&gt;&lt;span class="ui-groupe-titre"&gt;Titre&lt;/span&gt;&lt;span class="ui-tag"&gt;repère&lt;/span&gt;&lt;/div&gt;
+  &lt;div class="ui-champ-groupe"&gt;&lt;label class="ui-etiquette"&gt;…&lt;/label&gt;&lt;input class="ui-champ"&gt;&lt;/div&gt;
+  &lt;div&gt;&lt;button class="ui-btn ui-btn-plein"&gt;…&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
       <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
       <div class="ui-section-titres"><h2 class="ui-section-titre">Ce qu'on ne fait plus</h2><p class="ui-section-sous">Le défaut à éviter : empiler les blocs. Pas d'ombre ni de bordure non plus.</p></div>
     </div>
@@ -254,7 +275,7 @@
     </div>
   </section>
 
-  <p class="ui-section-sous">Fichiers : <code>kit.css</code> (composants) · <code>styles.css</code> (variables et écrans pas encore migrés). Migré vers le kit : Coûts &amp; TCO (hors catalogue de pièces). À migrer, menu par menu avec validation : Mon compte, Rappels, Stock &amp; SAV (avec le catalogue), Tableau de bord, Agenda.</p>
+  <p class="ui-section-sous">Fichiers : <code>kit.css</code> (composants) · <code>styles.css</code> (variables et écrans pas encore migrés). Migrés vers le kit : Coûts &amp; TCO (hors catalogue de pièces), Mon compte. À migrer, menu par menu avec validation : Rappels, Stock &amp; SAV (avec le catalogue), Tableau de bord, Agenda.</p>
 </main>
 </body>
 </html>

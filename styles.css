@@ -5943,118 +5943,10 @@
      avatar, et la zone sensible teintée dans l'orange déjà réservé au
      destructif (--late) — le nuancier reste fermé, aucune couleur neuve.
      ══════════════════════════════════════════════════════════════════════════ */
-  .compte-formule{
-    margin-top:14px;padding:16px;border-radius:14px;background:var(--dark);color:#fff;
-    display:flex;align-items:center;flex-wrap:wrap;gap:12px;
-  }
-  .compte-formule-tete{display:flex;align-items:center;gap:10px;flex:1;min-width:180px;}
-  .compte-formule-tete .card-ico{color:#f5c451;}
-  .compte-formule-nom{font-weight:800;font-size:15px;}
-  /* Le .pill.ok générique (texte quasi noir sur fond teinté très translucide,
-     pensé pour un fond clair) devenait illisible ici : cette carte est TOUJOURS
-     sombre (background:var(--dark)) — signalé par l'utilisateur, capture à
-     l'appui. Vert vif dédié, contraste fort sur fond sombre. */
-  .compte-formule-tete .pill.ok{background:#22c55e;color:#052e16;}
-  .compte-formule-lien{color:#fff;text-decoration:underline;text-underline-offset:2px;}
-  .compte-formule-lien:hover{color:#fff;}
 
-  /* Sections empilées dans une même carte (ex. « Données locales & Sécurité ») :
-     même sous-bloc teinté que .compte-sous-bloc/.plan-field, plutôt qu'un
-     simple filet — l'utilisateur a signalé que certaines sections d'une
-     carte étaient encadrées d'un fond et d'autres non, dans la même carte. */
-  .compte-section{
-    margin-top:10px;padding:12px 14px;border-radius:var(--r-chip);
-    background:var(--surface-soft);border:1px solid var(--line-2);
-  }
-  .compte-section:first-child{margin-top:0;}
-  .compte-section .label{margin-bottom:8px;margin-top:0;}
+.tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:var(--surface);border-color:var(--line);}
 
-  /* Une ligne de membre : avatar rond teinté par rôle, cadre léger — remplace
-     la simple liste de paragraphes d'avant, sans rien retirer de son contenu. */
-  .membre-ligne{
-    display:flex;gap:12px;padding:14px;margin-top:10px;
-    border:1px solid var(--line);border-radius:12px;background:var(--surface);
-  }
-  .membre-ligne:first-child{margin-top:0;}
-  /* Un groupe de rôle (« Gérant », « Mécanicien »…) par bloc [data-groupe] : le
-     premier n'a rien au-dessus, les suivants doivent se détacher du dernier
-     membre du groupe précédent plutôt que de lui coller. */
-  #acc-equipe-liste [data-groupe] + [data-groupe]{margin-top:26px;}
-  .membre-corps{flex:1;min-width:0;}
-  .membre-tete{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
-  .avatar-gerant{background:var(--ink);}
-  .avatar-mecanicien{background:var(--primary-dark);}
-  .avatar-chauffeur{background:var(--ok);}
-
-  /* Zone sensible : le même orange que le reste de la charte pour le
-     destructif (--late), jamais un rouge nouveau. */
-  .compte-danger{border-color:rgba(222,122,22,.35);}
-  @media (min-width:900px){
-    .dash-side .compte-danger{border-color:rgba(222,122,22,.35) !important;}
-  }
-  .compte-danger .card-title,.compte-danger .muted-text{color:var(--late);}
-  .compte-danger .card-title .card-ico{color:var(--late);}
-  .btn-danger-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;margin-top:4px;border:2px solid var(--late);border-radius:10px;background:rgba(222,122,22,.08);color:var(--late);font-weight:700;font-size:16px;font-family:inherit;cursor:pointer;}
-  .btn-danger-outline .card-ico{color:var(--late);}
-  .btn-danger-outline:hover{background:rgba(222,122,22,.16);}
-  /* Même fond que .plan-field/.compte-section (--surface-soft) : un seul
-     langage de sous-bloc dans toute la page, demandé explicitement après
-     avoir vu tantôt un voile indigo, tantôt --surface-soft, tantôt rien. */
-  .compte-sous-bloc{margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--line-2);}
-  .compte-sous-bloc:first-child{margin-top:0;}
-  .compte-sous-bloc-tete{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .compte-sous-bloc-tete .card-ico{color:var(--primary-dark);}
-  .compte-sous-bloc-tete .label{margin:0;flex:1;}
-  .badge-auto{font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--primary-dark);background:rgba(91,82,223,.14);border-radius:999px;padding:3px 9px;text-transform:uppercase;white-space:nowrap;}
-  .tel-champ-compact .tel-pays{flex:0 0 92px;max-width:92px;background:var(--surface);border-color:var(--line);}
-
-  /* Toute la page « Mon compte » contrastée. Les CHAMPS ont le voile sur leur
-     sous-bloc (.plan-field/.compte-sous-bloc/.compte-section, tous alignés
-     sur --surface-soft désormais), le champ reste blanc pour ressortir dessus.
-     Les BOUTONS sont uniformément noirs (même .primary partout), à
-     l'exception explicite de « Supprimer mon compte » (.btn-danger-outline,
-     inchangé) — demandé après avoir vu certains boutons en encre et d'autres
-     en voile indigo (« Enregistrer les préférences e-mail », « Gérer mon
-     abonnement »). */
-  .vue-compte input:not([type=checkbox]),.vue-compte select,.vue-compte textarea{background:var(--surface);}
-  .vue-compte input:not([type=checkbox]):focus,.vue-compte select:focus,.vue-compte textarea:focus{background:var(--surface);}
-  /* « Activité principale » n'est pas un <select> visible : habillerSelect()
-     le masque et pose un <button class="champ-select"> à la place (même
-     mécanisme que le reste de l'app, pour éviter l'habillage natif Android
-     d'un <select> à options). La règle juste au-dessus ne cible que la
-     balise <select> (masquée) — le bouton, lui, restait sur le fond
-     --surface-soft générique et sur .champ-select:disabled{opacity:.6} :
-     c'est ce qui donnait encore un fond gris-bleu, pas le <select> lui-même. */
-  .vue-compte .champ-select{background:var(--surface);}
-  .vue-compte .champ-select:disabled{opacity:1;}
-  .vue-compte button.secondary{background:var(--ink);border-color:var(--ink);color:#fff;}
-  .vue-compte button.secondary:hover{background:var(--dark);border-color:var(--dark);}
-  .vue-compte .membre-ligne{background:var(--surface-soft);}
-
-  /* Actions de ligne d'équipe (« Générer un nouveau mot de passe », « Changer
-     le rôle », « Retirer ») : de simples liens texte ne se lisaient pas comme
-     des actions — boutons noirs compacts, même langage que le reste de la
-     page, alignés sur .membre-action-retirer pour Retirer (pas de rouge
-     séparé : seule « Supprimer mon compte » sort du noir uniforme). */
-  .membre-action-btn{
-    background:var(--ink);color:#fff;border:none;border-radius:var(--r-chip);
-    padding:10px 14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
-  }
-  .membre-action-btn:hover{background:var(--dark);}
-
-  /* Sous-bloc de champ des cartes « Société & Identité légale » et
-     « Identifiants & Connexion » : le voile de couleur (ex --primary-tint sur
-     le champ lui-même) se déplace sur ce sous-bloc, resserré par rapport à
-     l'espacement générique (15px) qui donnait trop d'air entre les champs. */
-  .vue-compte .plan-field{
-    background:var(--surface-soft);border:1px solid var(--line-2);border-radius:var(--r-chip);
-    padding:10px 12px;margin-top:0;margin-bottom:10px;
-  }
-  .vue-compte .plan-field:last-child{margin-bottom:0;}
-  .vue-compte .plan-field label,.vue-compte .plan-field .label{margin-top:0;margin-bottom:6px;}
-  .vue-compte .plan-field .value{font-weight:700;}
-
-  /* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
+/* Agenda : les boutons secondaires (barre d'outils, bon de commande) sur un
      léger voile de couleur plutôt qu'un blanc plat, comme sur « Mon compte ». */
   .vue-agenda button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-agenda button.secondary:hover{background:var(--primary-tint-2);}
@@ -6072,22 +5964,8 @@
      boutons « Joindre un fichier »/« Capture d'écran » (aucune colonne de
      pièce jointe sur support_ticket_messages, même constat que côté
      admin.html). */
-  .support-lance-btn{
-    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
-    background:var(--ink);color:#fff;border:2px solid rgba(91,82,223,.35);
-    padding:13px 18px;border-radius:var(--r-card);font-weight:700;font-size:16px;font-family:inherit;
-    cursor:pointer;box-shadow:0 10px 20px rgba(14,19,51,.20);transition:background .15s,border-color .15s;
-  }
-  .support-lance-btn:hover{background:#161D4C;border-color:var(--primary-dark);}
-  .support-lance-btn .card-ico{color:var(--cyan);}
-  .support-lance-pied{
-    margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2);
-    display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-3);
-  }
-  .support-lance-pied .card-ico{width:15px;height:15px;}
-  .support-lance-pied .card-ico svg{width:15px;height:15px;}
 
-  /* Modales 2 & 3 (liste des demandes, échange sur un ticket) — .support-modal
+/* Modales 2 & 3 (liste des demandes, échange sur un ticket) — .support-modal
      porte les mêmes réglages que .offres-modal/.log-modal : rien de neuf, la
      police par défaut de app.html (Figtree/Space Grotesk) est déjà celle de
      la maquette (Plus Jakarta Sans + Space Grotesk). */
@@ -6626,15 +6504,9 @@
   .vue-couts-tco button.secondary{background:var(--primary-tint);border-color:var(--primary-tint-2);color:var(--primary-dark);}
   .vue-couts-tco button.secondary:hover{background:var(--primary-tint-2);}
 
-  
-  
-  
-  
-  @keyframes tco-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-  
-  
-  
-  .tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
+@keyframes tco-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.tco-btn-outil{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 16px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
   .tco-btn-outil svg{width:20px;height:20px;flex:0 0 auto;color:var(--bleu-roi);}
   .tco-btn-outil[disabled]{opacity:.5;cursor:not-allowed;}
   /* Filet de sécurité : un <svg> de picto() sans taille explicite (aucune
@@ -6867,102 +6739,27 @@
   .tco-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   @media (max-width:900px){.tco-kpi-grid{grid-template-columns:1fr 1fr;}}
   @media (max-width:640px){.tco-kpi-grid{grid-template-columns:1fr;}}
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-  .tco-card-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+.tco-card-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 
-  
-  /* Le [hidden] natif perdrait autrement face à display:flex ci-dessus
+/* Le [hidden] natif perdrait autrement face à display:flex ci-dessus
      (même spécificité, la règle d'auteur l'emporte sur la feuille UA) —
      utilisé par le bandeau d'avertissement devise non enregistrée. */
-  
-  
-  
-  
-  
-  
-  
-  
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-  .tco-champ-unite{position:relative;display:flex;align-items:center;}
+.tco-champ-unite{position:relative;display:flex;align-items:center;}
   .tco-champ-unite input{width:100%;padding-right:64px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
   .tco-champ-unite .tco-unite-tag{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
-  
-  
-  
 
-  
-  
-  
-  
-  
-  
-
-  .tco-recherche{position:relative;}
+.tco-recherche{position:relative;}
   .tco-recherche svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--dark-ink);}
   .tco-recherche input{width:100%;height:40px;padding-left:36px;border-radius:var(--r-chip);}
 
   .tco-parts-liste{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px;}
   .tco-part-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:var(--r-md);background:var(--surface-soft);}
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-  .tco-quick-add{padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:10px;}
-  
-  
-  .tco-quick-add .field-row{grid-template-columns:1fr 1fr;}
+.tco-quick-add{padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;flex-direction:column;gap:10px;}
+
+.tco-quick-add .field-row{grid-template-columns:1fr 1fr;}
   .tco-quick-add input{background:#fff;}
 
   /* Catalogue de pièces élargi en pleine largeur (voir blocCatalogueTcoHtml)
@@ -6972,12 +6769,10 @@
      dessous de 900px (le formulaire passe sous la liste, jamais côte à
      côte à l'étroit, et la largeur fixe ne s'applique pas — pleine largeur
      pour rester utilisable sur petit écran). */
-  
-  
-  @media (min-width:900px){
-    
-    
-    .tco-quick-add{flex:1;min-width:0;}
+
+@media (min-width:900px){
+
+.tco-quick-add{flex:1;min-width:0;}
   }
 
   /* Paramètres TCO / Seuils cibles : répartition 50/50 demandée par
@@ -6989,23 +6784,10 @@
      sans lui, un track 1fr grandit selon le min-content de son contenu
      (ici les cartes de seuils) et casse le 50/50 ; ajouté ici, scopé au
      même titre plutôt que sur .dash-side partagée. */
-  
 
-  
-  
-  
-  
-  
+/* Classement TCO du parc (phase 2) */
 
-  /* Classement TCO du parc (phase 2) */
-  
-  
-  
-  
-  
-  
-
-  /* Reprise Stitch « Tableau de bord » — widget TCO enrichi (voir
+/* Reprise Stitch « Tableau de bord » — widget TCO enrichi (voir
      keeva-tco-feature) */
   .card-ico.is-roi{width:36px;height:36px;border-radius:var(--r-md);background:rgba(35,111,224,.14);color:var(--bleu-roi);}
   .tco-dash-pill{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:var(--r-pill);background:var(--ok-bg);color:var(--ok);}
@@ -7043,53 +6825,15 @@
   .tco-dash-note .droite{font-family:'Space Grotesk',sans-serif;font-weight:600;}
 
   /* Classement TCO du parc — reprise Stitch (phase 3, re-skin) */
-  
-  
-  
-  
-  
-  
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+.tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--line-2);padding:3px;gap:2px;}
 
-  
-  .tco-filtre-periode{display:inline-flex;border-radius:var(--r-chip);background:var(--line-2);padding:3px;gap:2px;}
-  
-  
-  
-  
-  
-  
-  
-  
-  /* Même remarque qu'au-dessus (.parc-tri) : le bouton "maison" porte déjà
+/* Même remarque qu'au-dessus (.parc-tri) : le bouton "maison" porte déjà
      son propre chevron, les deux pictos décoratifs positionnés en absolu
      (pensés pour habiller le <select> natif) sont donc masqués pour éviter
      un double chevron — le bouton garde sa propre taille/couleur assortie. */
-  
-  
 
-  .tco-donut-bloc{padding:18px 20px;}
+.tco-donut-bloc{padding:18px 20px;}
   .tco-donut-bloc-tete{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
   .tco-donut-bloc-titre h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin:0;}
   .tco-donut-bloc-titre p{font-size:12px;color:var(--ink-2);margin:2px 0 0;}
@@ -7115,72 +6859,8 @@
      l'utilisateur ("mettre de l'espace entre les blocs et du background sur
      la liste des machines"). .alert-list garde son style filet ailleurs
      (.alert-row) : la règle ci-dessous est scopée à ce seul écran. */
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-  
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-
-  /* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
+/* Seuils cibles par catégorie — reprise Stitch (phase 3, re-skin) */
   /* Colonne unique par défaut : depuis que ce bloc vit dans dash-side (la
      colonne étroite, ~38%) après avoir échangé de place avec le Catalogue
      de pièces (signalé par l'utilisateur — le catalogue a besoin de la
@@ -7297,22 +6977,6 @@
   .tele-carte .tele-creation input,.tele-carte .tele-creation select,
   .tele-carte .tele-aemp input,.tele-carte .tele-aemp select{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   .tele-carte .tele-jeton{background:var(--surface);box-shadow:var(--shadow-soft);}
-
-  /* ═══ CHARTE « FLOTTANT PARTOUT » (2026-10-04) — Mon compte ═══
-     Plus de grande carte blanche : le titre de chaque bloc, ses champs et ses lignes
-     reposent directement sur le fond de page. Les éléments (champs du haut, sous-blocs,
-     lignes de membre) sont blancs avec l'ombre légère ; un champ posé DANS un élément
-     blanc garde la teinte par défaut des champs (--surface-soft). Même modèle que le
-     Parc Machines. */
-  #view-root[data-view="account"] section.card{background:none;box-shadow:none;padding:0;border-radius:0;}
-  #view-root[data-view="account"] section.card + section.card{margin-top:8px;}
-  #view-root[data-view="account"] .plan-field{background:none;border:none;padding:0;}
-  #view-root[data-view="account"] .compte-section,
-  #view-root[data-view="account"] .compte-sous-bloc,
-  #view-root[data-view="account"] .membre-ligne{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
-  #view-root[data-view="account"] :is(.compte-section,.compte-sous-bloc,.membre-ligne) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface-soft);border:none;box-shadow:none;}
-  #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
 
   /* ═══ CHARTE « FLOTTANT PARTOUT » — Rappels, Coûts & TCO, Stock & SAV, Tableau de bord, Agenda ═══
      Même modèle que Mon compte et le Parc Machines : pas de grande carte blanche, les blocs

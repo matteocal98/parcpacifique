@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lbcOn9iv6Ji50C6aftv9ZcHSeT43JiSmJe/kgSxU02I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FEBR8MlgsNKEjOL8qztUKTAz6LKhonko3D5uVVoO5A0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1005,6 +1005,8 @@ function telephoneLisible(valeur) {
 
 // Champ téléphone réutilisable : sélecteur de pays + saisie masquée.
 function champTelephoneHtml(id, valeur, opts = {}) {
+  // opts.kit : habillage du kit d'interface (kit.css) pour les écrans migrés ; sans lui, le rendu historique.
+  const kit = !!opts.kit;
   const { pays, national } = parserTelephone(valeur);
   const desactive = opts.disabled ? ' disabled' : '';
   const requis = opts.required ? ' required' : '';
@@ -1022,16 +1024,16 @@ function champTelephoneHtml(id, valeur, opts = {}) {
   // Pacifique/France) : l'indicatif seul y reste identifiable.
   const etroit = opts.indicatifSeul ? ' tel-pays-etroit' : '';
   return `
-    <label for="${id}">${etiquette}</label>
+    <label${kit ? ' class="ui-etiquette"' : ''} for="${id}">${etiquette}</label>
     <div class="tel-champ${compact}">
-      <select id="${id}-pays" class="tel-pays${etroit}" aria-label="${trad('Pays de l\'indicatif')}"${desactive}>
+      <select id="${id}-pays" class="tel-pays${etroit}${kit ? ' ui-selecteur' : ''}" aria-label="${trad('Pays de l\'indicatif')}"${desactive}>
         ${PAYS_TEL.map((p) => `<option value="${esc(p.code)}"${p.code === pays.code ? ' selected' : ''}>${opts.indicatifSeul ? `+${esc(p.indicatif)}` : `${drapeauDe(p.code)} +${esc(p.indicatif)} — ${esc(p.nom)}`}</option>`).join('')}
       </select>
-      <input id="${id}" type="tel" inputmode="tel" autocomplete="tel-national"
+      <input id="${id}"${kit ? ' class="ui-champ"' : ''} type="tel" inputmode="tel" autocomplete="tel-national"
              value="${esc(formatNational(national, pays))}"
              placeholder="${esc(exempleNational(pays))}"${desactive}${requis}>
     </div>
-    ${opts.aide ? `<div class="hint">${esc(opts.aide)}</div>` : ''}`;
+    ${opts.aide ? `<div class="${kit ? 'ui-aide' : 'hint'}">${esc(opts.aide)}</div>` : ''}`;
 }
 
 // Modale « Pays de l'indicatif » (reprise Stitch, remplace ouvrirListeChoix()
@@ -8053,7 +8055,7 @@ async function preparerCarteBiometrie(root) {
     if (corps) {
       corps.innerHTML = `
         <label class="check-row" for="acc-verrou"><input type="checkbox" id="acc-verrou"${verrouille ? ' checked' : ''}> ${trad('Verrouiller l\'application')}</label>
-        <p class="hint">${trad('Le verrou ne demande rien au trousseau : il fonctionne même si ce téléphone refuse d\'enregistrer quoi que ce soit. L\'empreinte, le visage ou le code de l\'appareil sont demandés à chaque ouverture, et de nouveau après une minute en arrière-plan.')}</p>`;
+        <p class="ui-aide">${trad('Le verrou ne demande rien au trousseau : il fonctionne même si ce téléphone refuse d\'enregistrer quoi que ce soit. L\'empreinte, le visage ou le code de l\'appareil sont demandés à chaque ouverture, et de nouveau après une minute en arrière-plan.')}</p>`;
     }
     // 2. État de la RECONNEXION AUTOMATIQUE (option séparée).
     if (etatAcces) {
@@ -14847,18 +14849,16 @@ function sousBlocEmailRappelsHtml() {
   const bloque = dispo ? '' : ' disabled';
   const actif = rappelsEmailActifs();
   return `
-    <div class="compte-sous-bloc">
-      <div class="compte-sous-bloc-tete">
-        <span class="card-ico">${picto('mail')}</span>
-        <div class="label">${trad('E-mail de notification des rappels')}</div>
-        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
+    <div class="ui-groupe">
+      <div class="ui-groupe-tete">
+        ${picto('mail')}
+        <span class="ui-groupe-titre">${trad('E-mail de notification des rappels')}</span>
+        <span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
       </div>
-      <input id="rap-email" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
+      <input id="rap-email" class="ui-champ" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
       <label class="check-row" for="rap-par-email"><input type="checkbox" id="rap-par-email"${rappelsEmailCoches() ? ' checked' : ''}${bloque}> ${trad('Recevoir les rappels par e-mail')}</label>
-      <div class="hint" id="rap-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions" style="margin-top:10px;">
-        <button type="button" class="secondary" id="rap-save"${bloque}>${trad('Enregistrer les préférences e-mail')}</button>
-      </div>
+      <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
+      <div><button type="button" class="ui-btn ui-btn-pastille" id="rap-save"${bloque}>${trad('Enregistrer les préférences e-mail')}</button></div>
     </div>`;
 }
 
@@ -14868,11 +14868,11 @@ function sousBlocEmailRappelsHtml() {
 function sousBlocPushHtml() {
   const actif = !!monTokenPushConnu();
   return `
-    <div class="compte-sous-bloc">
-      <div class="compte-sous-bloc-tete">
-        <span class="card-ico">${picto('cloche')}</span>
-        <div class="label">${trad('Notification push sur ce téléphone')}</div>
-        <span class="pill ${actif ? 'ok' : 'neutral'}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
+    <div class="ui-groupe">
+      <div class="ui-groupe-tete">
+        ${picto('cloche')}
+        <span class="ui-groupe-titre">${trad('Notification push sur ce téléphone')}</span>
+        <span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>
       </div>
       ${blocPushHtml()}
     </div>`;
@@ -16183,6 +16183,7 @@ VIEWS.telemetrie = {
 };
 
 VIEWS.account = {
+  fondBlanc: true,
   title: trad('Mon compte'),
   subtitle: () => UI.company.name || UI.companyName || trad('Société'),
   render() {
@@ -16193,63 +16194,122 @@ VIEWS.account = {
     // chargement a déjà retenu : afficher « undefined » à un client qui paie
     // serait le pire des deux mondes.
     const plan = c.plan || UI.companyPlan || 'free';
+    // En-tête commun des sections : icône + titre + sous-titre (+ un repère à droite).
+    const tete = (icone, titre, sous, acces) => `
+        <div class="ui-section-tete">
+          <div class="ui-section-icone">${picto(icone)}</div>
+          <div class="ui-section-titres"><h2 class="ui-section-titre">${titre}</h2><p class="ui-section-sous">${sous}</p></div>
+          ${acces ? `<div class="ui-section-acces">${acces}</div>` : ''}
+        </div>`;
     return `
-      <div class="vue-compte">
-      <div class="agenda-toolbar">
-        <span class="agenda-eyebrow">${trad('Entreprise, équipe & sécurité')}</span>
-      </div>
-      <div class="dash-grid agenda-grid">
-        <div class="dash-main">
-
-      <section class="card">
-        <div class="card-head">
-          <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('batiment')}</span><span>${trad('Société & Identité légale')}</span></h2>
-          <span class="spacer"></span>
-          ${c.registrationNumber ? `<span class="pill ok">${trad('RIDET actif')}</span>` : ''}
-        </div>
-        <p class="muted-text">${trad('Renseignements légaux d\'exploitation et de facturation.')}</p>
-        <div class="plan-field">
-          <label for="acc-name">${trad('Raison sociale')}</label>
-          <input id="acc-name" required value="${esc(c.name || UI.companyName || '')}"${bloque}>
-        </div>
-        <div class="plan-field">
-          <label for="acc-activity">${trad('Activité principale')}</label>
-          <select id="acc-activity"${bloque}>
-            ${[...new Set([c.activity, ...SIGNUP_ACTIVITIES].filter(Boolean))]
-              .map((a) => `<option value="${esc(a)}"${a === c.activity ? ' selected' : ''}>${esc(a)}</option>`)
-              .join('')}
-          </select>
-        </div>
-        <div class="plan-field">
-          <label for="acc-reg">${trad('N° RCS / RIDET')}</label>
-          <input id="acc-reg" value="${esc(c.registrationNumber || '')}"${bloque}>
-        </div>
-        <div class="callout">
-          <span class="card-ico">${picto('case')}</span>
-          <span>${trad('Version KALEA déployée :')} <strong id="version-application" title="${esc(empreinteCourte())}">${esc(versionAffichee())}</strong> — ${trad('système à jour.')}</span>
-        </div>
-        <div class="hint" id="acc-societe-msg" role="status" aria-live="polite"></div>
-        <div class="modal-actions">
-          <button type="button" class="primary" id="acc-save-societe"${bloque}>${trad('Enregistrer les modifications')}</button>
-        </div>
-
-        <div class="compte-formule">
-          <div class="compte-formule-tete">
-            <span class="card-ico">${picto('reglages')}</span>
-            <span class="compte-formule-nom">${esc(libellePalier(plan))}</span>
-            <span class="pill ok">${trad('ACTIF')}</span>
+      <section class="ui-section">
+        ${tete('batiment', trad('Société & Identité légale'), trad('Renseignements légaux d\'exploitation et de facturation.'),
+          c.registrationNumber ? `<span class="ui-statut is-ok">${trad('RIDET actif')}</span>` : '')}
+        <div class="ui-section-corps">
+          <div class="ui-grille">
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-name">${trad('Raison sociale')}</label>
+              <input id="acc-name" class="ui-champ" required value="${esc(c.name || UI.companyName || '')}"${bloque}>
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-activity">${trad('Activité principale')}</label>
+              <select id="acc-activity" class="ui-selecteur is-plein"${bloque}>
+                ${[...new Set([c.activity, ...SIGNUP_ACTIVITIES].filter(Boolean))]
+                  .map((a) => `<option value="${esc(a)}"${a === c.activity ? ' selected' : ''}>${esc(a)}</option>`)
+                  .join('')}
+              </select>
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-reg">${trad('N° RCS / RIDET')}</label>
+              <input id="acc-reg" class="ui-champ" value="${esc(c.registrationNumber || '')}"${bloque}>
+            </div>
           </div>
-          <button type="button" class="link-inline compte-formule-lien" id="account-upgrade">${trad('Changer d\'offre')}</button>
-        </div>
-        ${PALIERS_PAYANTS.indexOf(plan) !== -1 ? `
-        <div class="plan-field">
-          <div class="label">${trad('Abonnement')}</div>
-          <p class="muted-text">${trad('Résilier (à la fin de la période déjà payée), changer de carte, télécharger les factures : tout se fait dans le portail de facturation.')}</p>
-          <div class="modal-actions" style="margin-top:10px;">
-            <button type="button" class="secondary" id="acc-portail"><span class="card-ico">${picto('export')}</span><span>${trad('Gérer mon abonnement')}</span></button>
+          <div class="ui-encadre">
+            ${picto('case')}
+            <p>${trad('Version KALEA déployée :')} <strong id="version-application" title="${esc(empreinteCourte())}">${esc(versionAffichee())}</strong> — ${trad('système à jour.')}</p>
           </div>
-          <div class="hint" id="acc-portail-msg" role="status" aria-live="polite"></div>
-        </div>` : ''}
+          <div class="ui-aide" id="acc-societe-msg" role="status" aria-live="polite"></div>
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-societe"${bloque}>${trad('Enregistrer les modifications')}</button></div>
+          <div class="ui-liste">
+          <div class="ui-ligne is-deux">
+            <div class="ui-ligne-id">
+              <div class="ui-ligne-icone">${picto('reglages')}</div>
+              <div class="ui-ligne-textes">
+                <span class="ui-ligne-nom">${esc(libellePalier(plan))}</span>
+                <span class="ui-ligne-sous"><span class="ui-statut is-ok">${trad('ACTIF')}</span></span>
+              </div>
+            </div>
+            <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="account-upgrade">${trad('Changer d\'offre')}</button></div>
+          </div>
+          ${PALIERS_PAYANTS.indexOf(plan) !== -1 ? `
+          <div class="ui-ligne is-deux">
+            <div class="ui-ligne-id">
+              <div class="ui-ligne-textes">
+                <span class="ui-ligne-nom">${trad('Abonnement')}</span>
+                <span class="ui-ligne-sous">${trad('Résilier (à la fin de la période déjà payée), changer de carte, télécharger les factures : tout se fait dans le portail de facturation.')}</span>
+                <span class="ui-aide" id="acc-portail-msg" role="status" aria-live="polite"></span>
+              </div>
+            </div>
+            <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="acc-portail">${picto('export')}<span>${trad('Gérer mon abonnement')}</span></button></div>
+          </div>` : ''}
+          </div>
+        </div>
+      </section>
+
+      <section class="ui-section">
+        ${tete('cadenas', trad('Identifiants & Connexion'), trad('Modification de l\'accès principal administrateur.'))}
+        <div class="ui-section-corps">
+          <div class="ui-champ-groupe">
+            <span class="ui-etiquette">${trad('E-mail de connexion actuel')}</span>
+            <div class="ui-valeur">${esc(UI.email || '—')}</div>
+          </div>
+          <div class="ui-grille">
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-email">${trad('Nouvel e-mail de connexion')}</label>
+              <input id="acc-email" class="ui-champ" type="email" autocomplete="email" placeholder="${trad('nouvelle@adresse.nc')}">
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-password">${trad('Confirmer par mot de passe actuel')}</label>
+              <div class="password-wrap">
+                <input id="acc-password" class="ui-champ" type="password" autocomplete="current-password">
+                <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+              </div>
+            </div>
+          </div>
+          <div class="ui-aide">${trad('Le changement est confirmé par email : la nouvelle adresse ne devient active qu\'après validation. Le mot de passe est demandé pour qu\'une session ouverte ne suffise pas à détourner le compte.')}</div>
+          <div class="ui-aide" id="acc-email-msg" role="status" aria-live="polite"></div>
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-email">${trad('Mettre à jour l\'e-mail')}</button></div>
+        </div>
+      </section>
+
+      <section class="ui-section">
+        ${tete('telephone', trad('Contact & Alertes'), trad('Coordonnées de contact de la société ; l\'adresse e-mail ci-dessous reçoit les rappels automatiques de maintenance.'))}
+        <div class="ui-section-corps">
+          <div class="ui-grille">
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-first">${trad('Prénom')}</label>
+              <input id="acc-first" class="ui-champ" value="${esc(companyFirstName(c))}"${bloque}>
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-last">${trad('Nom')}</label>
+              <input id="acc-last" class="ui-champ" value="${esc(companyLastName(c))}"${bloque}>
+            </div>
+          </div>
+          <div class="ui-champ-groupe">
+            ${champTelephoneHtml('acc-phone', c.phone || '', {
+              label: trad('Téléphone'),
+              disabled: !modifiable,
+              aide: trad('Coordonnée de contact de la société.'),
+              indicatifSeul: true,
+              kit: true,
+            })}
+          </div>
+          ${sousBlocEmailRappelsHtml()}
+          ${sousBlocPushHtml()}
+          <div class="ui-aide" id="acc-contact-msg" role="status" aria-live="polite"></div>
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer les coordonnées')}</button></div>
+          ${modifiable ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
+        </div>
       </section>
 
       <!-- ── ÉQUIPE ────────────────────────────────────────────────
@@ -16257,138 +16317,70 @@ VIEWS.account = {
            leurs droits sont EXACTEMENT ceux que le serveur applique
            (migration-roles-equipe.sql) : l'écran masque les actions interdites
            pour ne pas tenter l'utilisateur, mais c'est le SERVEUR qui refuse. -->
-      <section class="card" id="acc-equipe">
-        <div class="card-head">
-          <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('equipe')}</span><span>${trad('Gestion de l\'équipe')}</span></h2>
-          <span class="spacer"></span>
-          <span class="pill neutral" id="acc-equipe-compte"></span>
-        </div>
-        <p class="muted-text">${trad('Attribution des accès terrain et des autorisations d\'atelier.')}</p>
-        <div class="hint" id="acc-equipe-msg" role="status" aria-live="polite"></div>
-        <div id="acc-equipe-liste">${trad('Chargement de l\'équipe…')}</div>
-        <div id="acc-equipe-creation"></div>
-        <details id="acc-equipe-invitation-bloc">
-          <summary>${trad('Inviter par e-mail')}</summary>
-          <p class="hint">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un mécanicien d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
-          <div id="acc-equipe-invitation"></div>
-        </details>
-      </section>
-
-        </div>
-        <div class="dash-side">
-
-      <!-- Déplacé en tête de colonne de droite, au-dessus de « Contact &
-           Alertes » — l'identité de connexion est ce qu'on cherche en premier. -->
-      <section class="card">
-        <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('cadenas')}</span><span>${trad('Identifiants & Connexion')}</span></h2></div>
-        <p class="muted-text">${trad('Modification de l\'accès principal administrateur.')}</p>
-        <div class="plan-field">
-          <div class="label">${trad('E-mail de connexion actuel')}</div>
-          <div class="value">${esc(UI.email || '—')}</div>
-        </div>
-        <div class="plan-field">
-          <label for="acc-email">${trad('Nouvel e-mail de connexion')}</label>
-          <input id="acc-email" type="email" autocomplete="email" placeholder="${trad('nouvelle@adresse.nc')}">
-        </div>
-        <div class="plan-field">
-          <label for="acc-password">${trad('Confirmer par mot de passe actuel')}</label>
-          <div class="password-wrap">
-            <input id="acc-password" type="password" autocomplete="current-password">
-            <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
-          </div>
-        </div>
-        <div class="hint">${trad('Le changement est confirmé par email : la nouvelle adresse ne devient active qu\'après validation. Le mot de passe est demandé pour qu\'une session ouverte ne suffise pas à détourner le compte.')}</div>
-        <div class="hint" id="acc-email-msg" role="status" aria-live="polite"></div>
-        <div class="modal-actions">
-          <button type="button" class="primary" id="acc-save-email">${trad('Mettre à jour l\'e-mail')}</button>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('telephone')}</span><span>${trad('Contact & Alertes')}</span></h2></div>
-        <p class="muted-text">${trad('Coordonnées de contact de la société ; l\'adresse e-mail ci-dessous reçoit les rappels automatiques de maintenance.')}</p>
-        <div class="field-row">
-          <div>
-            <label for="acc-first">${trad('Prénom')}</label>
-            <input id="acc-first" value="${esc(companyFirstName(c))}"${bloque}>
-          </div>
-          <div>
-            <label for="acc-last">${trad('Nom')}</label>
-            <input id="acc-last" value="${esc(companyLastName(c))}"${bloque}>
-          </div>
-        </div>
-        ${champTelephoneHtml('acc-phone', c.phone || '', {
-          label: trad('Téléphone'),
-          disabled: !modifiable,
-          aide: trad('Coordonnée de contact de la société.'),
-          compact: true,
-        })}
-        ${sousBlocEmailRappelsHtml()}
-        ${sousBlocPushHtml()}
-        <div class="hint" id="acc-contact-msg" role="status" aria-live="polite"></div>
-        <div class="modal-actions">
-          <button type="button" class="primary" id="acc-save-contact"${bloque}>${trad('Enregistrer les coordonnées')}</button>
-        </div>
-        ${modifiable ? '' : `<div class="hint">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('bouclier')}</span><span>${trad('Données locales & Sécurité')}</span></h2></div>
-        <p class="muted-text">${trad('Mode hors-ligne chantier et langue de l\'interface.')}</p>
-        <div class="compte-sous-bloc">
-          <label class="check-row">
-            <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
-            ${trad('Garder une copie pour la consultation hors connexion')}
-          </label>
-          <div class="hint">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
-          <div class="hint" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
-        </div>
-
-        <div class="compte-section">
-          <div class="label">${trad('Langue de l\'interface')}</div>
-          ${basculeLangueHtml()}
-        </div>
-
-        ${dansApplication() ? `
-        <div class="compte-section">
-          <div class="label">${trad('Verrouillage et reconnexion')}</div>
-          <p class="muted-text" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
-          <div id="acc-bio-corps"></div>
-          <p class="muted-text" id="acc-acces-etat"></p>
-          <div id="acc-acces-corps"></div>
-          <div class="hint" id="acc-bio-msg" role="status" aria-live="polite"></div>
-          <details class="bio-detail">
-            <summary>${trad('Détail technique')}</summary>
-            <p class="hint" id="acc-bio-detail"></p>
+      <section class="ui-section" id="acc-equipe">
+        ${tete('equipe', trad('Gestion de l\'équipe'), trad('Attribution des accès terrain et des autorisations d\'atelier.'), '<span class="ui-tag" id="acc-equipe-compte"></span>')}
+        <div class="ui-section-corps">
+          <div class="ui-aide" id="acc-equipe-msg" role="status" aria-live="polite"></div>
+          <div id="acc-equipe-liste" class="ui-section-corps">${trad('Chargement de l\'équipe…')}</div>
+          <div id="acc-equipe-creation" class="ui-section-corps"></div>
+          <details id="acc-equipe-invitation-bloc" class="ui-groupe">
+            <summary>${trad('Inviter par e-mail')}</summary>
+            <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un mécanicien d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
+            <div id="acc-equipe-invitation" class="ui-section-corps"></div>
           </details>
-        </div>` : ''}
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h2 class="card-title"><span class="card-ico card-ico-plein">${picto('aideCercle')}</span><span>${trad('Support')}</span></h2></div>
-        <p class="muted-text">${trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.')}</p>
-        <button type="button" class="support-lance-btn" id="acc-support-ouvrir">
-          <span class="card-ico">${picto('message')}</span><span>${trad('Contacter le support')}</span>
-        </button>
-        <div class="support-lance-pied">
-          <span class="card-ico">${picto('cadenas')}</span><span>${trad('Données atelier sécurisées')}</span>
         </div>
       </section>
 
-      <section class="card compte-danger">
-        <div class="card-head"><h2 class="card-title"><span class="card-ico">${picto('alerte')}</span><span>${trad('Zone sensible')}</span></h2></div>
-        <p class="muted-text">${trad('Clôture d\'entreprise et suppression.')}</p>
-        <div class="callout is-late">
-          <span class="card-ico">${picto('alerte')}</span>
-          <span><strong>${trad('Action irréversible')}</strong><br>${trad('La suppression du compte est définitive : machines, plans d\'entretien, entretiens, relevés, photos, carnets, catégories et rappels sont effacés.')}</span>
+      <section class="ui-section">
+        ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
+        <div class="ui-section-corps">
+          <div class="ui-groupe">
+            <label class="check-row">
+              <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
+              ${trad('Garder une copie pour la consultation hors connexion')}
+            </label>
+            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
+            <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
+          </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
+            ${basculeLangueHtml()}
+          </div>
+          ${dansApplication() ? `
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
+            <p class="ui-aide" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
+            <div id="acc-bio-corps"></div>
+            <p class="ui-aide" id="acc-acces-etat"></p>
+            <div id="acc-acces-corps"></div>
+            <div class="ui-aide" id="acc-bio-msg" role="status" aria-live="polite"></div>
+            <details class="bio-detail">
+              <summary>${trad('Détail technique')}</summary>
+              <p class="ui-aide" id="acc-bio-detail"></p>
+            </details>
+          </div>` : ''}
         </div>
-        <button type="button" class="btn-danger-outline" id="acc-supprimer"><span class="card-ico">${picto('corbeille')}</span><span>${trad('Supprimer mon compte')}</span></button>
-        <div class="hint" id="acc-supprimer-msg" role="status" aria-live="polite"></div>
       </section>
 
+      <section class="ui-section">
+        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
+        <div class="ui-section-corps">
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
+          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
         </div>
-      </div>
-      </div>`;
+      </section>
+
+      <section class="ui-section">
+        ${tete('alerte', trad('Zone sensible'), trad('Clôture d\'entreprise et suppression.'))}
+        <div class="ui-section-corps">
+          <div class="ui-encadre is-attention">
+            ${picto('alerte')}
+            <p><strong>${trad('Action irréversible')}</strong><br>${trad('La suppression du compte est définitive : machines, plans d\'entretien, entretiens, relevés, photos, carnets, catégories et rappels sont effacés.')}</p>
+          </div>
+          <div><button type="button" class="ui-btn ui-btn-pastille is-danger" id="acc-supprimer">${picto('corbeille')}<span>${trad('Supprimer mon compte')}</span></button></div>
+          <div class="ui-aide" id="acc-supprimer-msg" role="status" aria-live="polite"></div>
+        </div>
+      </section>`;
   },
   mount() {
     const root = document.getElementById('view-root');
@@ -16438,7 +16430,7 @@ VIEWS.account = {
       const dire = (texte, estErreur) => {
         if (!annonce) return;
         annonce.textContent = texte;
-        annonce.className = estErreur ? 'hint is-late' : 'hint';
+        annonce.className = estErreur ? 'ui-aide is-late' : 'ui-aide';
       };
 
       // ★ L'ÉTAT SERVEUR EST RELU À CHAQUE OUVERTURE DE CETTE CARTE. Le rôle et
@@ -16493,7 +16485,7 @@ VIEWS.account = {
       //   le rôle FRAIS qui décide, jamais celui du démarrage.
       if (!peutGererEquipe()) {
         if (zoneInvitation) {
-          zoneInvitation.innerHTML = `<p class="hint">${trad('L\'équipe, ses accès et ses invitations ne sont visibles que du gérant.')}</p>`;
+          zoneInvitation.innerHTML = `<p class="ui-aide">${trad('L\'équipe, ses accès et ses invitations ne sont visibles que du gérant.')}</p>`;
         }
         // ⚠️ La zone de création est écrite PLUS BAS dans cette fonction : on la
         //    vide par le DOM, pas par une `const` déclarée après ce point — la
@@ -16511,7 +16503,7 @@ VIEWS.account = {
         const mesDroits = UI.role === 'gerant'
           ? trad('Tout, y compris l\'équipe et l\'abonnement')
           : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : trad('Les compteurs'));
-        liste.innerHTML = `<p class="hint">${tR('Ton rôle : {role}. {droits}', {
+        liste.innerHTML = `<p class="ui-aide">${tR('Ton rôle : {role}. {droits}', {
           role: esc(monLibelle),
           droits: esc(mesDroits),
         })}</p>`;
@@ -16612,34 +16604,34 @@ VIEWS.account = {
         const acces = estMembreCree(m) ? identiteDe(m) : String(m.email || trad('Invitation en attente'));
         const metier = String(m.metier || '').trim();
         const actions = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
-              <div class="modal-actions" style="margin-top:6px;">
-                <button type="button" class="membre-action-btn" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
-                <button type="button" class="membre-action-btn" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le rôle')}</button>
-                <button type="button" class="membre-action-btn" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>
-              </div>` : '';
+              <button type="button" class="ui-btn ui-btn-teinte" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
+              <button type="button" class="ui-btn ui-btn-teinte" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le rôle')}</button>
+              <button type="button" class="ui-btn ui-btn-teinte" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>` : '';
         // Personne n'a de bouton sur SA PROPRE ligne : on ne se rétrograde pas
         // soi-même, et le retrait de son propre compte est un autre sujet.
-        const motDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
-              <div class="hint">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</div>` : '';
+        const motDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `<span class="ui-ligne-sous">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</span>` : '';
         // Une couleur par rôle, reprise des teintes déjà en usage ailleurs sur
         // cet écran (encre pour le gérant, indigo pour le mécanicien, teal pour
         // le chauffeur) — aucune couleur nouvelle.
         const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : 'mecanicien');
         return `
-            <div class="membre-ligne" data-membre="${esc(m.id)}">
-              <span class="avatar avatar-${teinteRole}" aria-hidden="true">${esc(initialsFrom(titre))}</span>
-              <div class="membre-corps">
-              <div class="membre-tete">
-                <span class="value">${esc(titre)}</span>
-                ${m.est_moi ? `<span class="pill neutral">${trad('Toi')}</span>` : ''}
-                ${role ? `<span class="pill ${teinteRole === 'chauffeur' ? 'ok' : (teinteRole === 'mecanicien' ? 'soon' : 'neutral')}">${esc(roleDe(role))}</span>` : ''}
+            <div class="ui-ligne is-texte-long" data-membre="${esc(m.id)}">
+              <div class="ui-ligne-id">
+                <div class="ui-ligne-icone is-initiales is-${teinteRole}" aria-hidden="true">${esc(initialsFrom(titre))}</div>
+                <div class="ui-ligne-textes">
+                  <span class="ui-ligne-nom">${esc(titre)}</span>
+                  <span class="ui-ligne-sous">${trad('Ce qu\'il a le droit de faire :')} ${esc(droitsResumes(role))}</span>
+                  <span class="ui-ligne-sous">${trad('Login :')} ${esc(acces)}</span>
+                  ${metier ? `<span class="ui-ligne-sous">${trad('Métier :')} ${esc(metier)}</span>` : ''}
+                  ${estInvitation(m) ? `<span class="ui-ligne-sous">${trad('Invitation en attente : cette personne n\'a pas encore créé son compte.')}</span>` : ''}
+                  ${motDePasse}
+                </div>
               </div>
-              <div class="hint">${trad('Ce qu\'il a le droit de faire :')} ${esc(droitsResumes(role))}</div>
-              <div class="hint">${trad('Login :')} ${esc(acces)}</div>
-              ${metier ? `<div class="hint">${trad('Métier :')} ${esc(metier)}</div>` : ''}
-              ${estInvitation(m) ? `<div class="hint">${trad('Invitation en attente : cette personne n\'a pas encore créé son compte.')}</div>` : ''}
-              ${motDePasse}${actions}
+              <div class="ui-ligne-info">
+                ${m.est_moi ? `<span class="ui-tag">${trad('Toi')}</span>` : ''}
+                ${role ? `<span class="ui-tag">${esc(roleDe(role))}</span>` : ''}
               </div>
+              <div class="ui-ligne-action is-etiquettes">${actions}</div>
             </div>`;
       };
       const sections = ORDRE
@@ -16650,13 +16642,13 @@ VIEWS.account = {
             ? tR('Autre rôle ({n})', { n: duGroupe.length })
             : tR('{role} ({n})', { role: libelleDe(role), n: duGroupe.length });
           return `
-        <div data-groupe="${esc(role)}">
-          <div class="label">${esc(titre)}</div>
-          ${duGroupe.map(ligneMembre).join('')}
+        <div class="ui-champ-groupe" data-groupe="${esc(role)}">
+          <span class="ui-etiquette">${esc(titre)}</span>
+          <div class="ui-liste">${duGroupe.map(ligneMembre).join('')}</div>
         </div>`;
         })
         .join('');
-      liste.innerHTML = sections || `<p class="hint">${trad('Personne pour l\'instant : ajoute un membre ci-dessous, ou invite-le par e-mail.')}</p>`;
+      liste.innerHTML = sections || `<p class="ui-aide">${trad('Personne pour l\'instant : ajoute un membre ci-dessous, ou invite-le par e-mail.')}</p>`;
 
       // ★ LES BOUTONS SONT ÉCOUTÉS SUR LEUR ZONE, JAMAIS UN PAR UN.
       //
@@ -16729,40 +16721,50 @@ VIEWS.account = {
       const zoneCreation = racine.querySelector('#acc-equipe-creation');
       if (zoneCreation) {
         zoneCreation.innerHTML = peutGererEquipe() ? `
-          <div class="compte-sous-bloc">
-            <div class="compte-sous-bloc-tete">
-              <span class="card-ico">${picto('ajoutPersonne')}</span>
-              <div class="label">${trad('Ajouter un membre direct')}</div>
-              <span class="badge-auto">${trad('Identifiant auto')}</span>
+          <div class="ui-groupe">
+            <div class="ui-groupe-tete">
+              ${picto('ajoutPersonne')}
+              <span class="ui-groupe-titre">${trad('Ajouter un membre direct')}</span>
+              <span class="ui-tag">${trad('Identifiant auto')}</span>
             </div>
-            <p class="hint">${trad('Pour un mécanicien ou un chauffeur qui n\'a pas d\'e-mail : indique son prénom et son nom, le serveur crée son accès et te donne son login et son mot de passe.')}</p>
-            <label for="acc-membre-prenom">${trad('Prénom')}</label>
-            <input id="acc-membre-prenom" autocomplete="off" placeholder="${trad('Jean')}">
-            <label for="acc-membre-nom">${trad('Nom')}</label>
-            <input id="acc-membre-nom" class="majuscules" autocapitalize="characters" autocomplete="off" placeholder="${trad('DUPONT')}">
-            <div class="hint">${trad('Le nom de famille est écrit en MAJUSCULES sur la fiche. Le login, lui, reste en minuscules : c\'est un identifiant.')}</div>
-            <label for="acc-membre-metier">${trad('Métier (facultatif)')}</label>
-            <input id="acc-membre-metier" autocomplete="off" placeholder="${trad('Chef d\'atelier, soudeur, comptable…')}">
-            <div class="hint">${trad('Le métier est un libellé libre : il s\'affiche sur la fiche, et il ne change AUCUN droit.')}</div>
-            <label for="acc-membre-role">${trad('Ce qu\'il peut faire dans l\'application')}</label>
-            <select id="acc-membre-role" data-equipe-role-select>
-              <option value="mecanicien">${trad('Mécanicien')}</option>
-              <option value="chauffeur">${trad('Chauffeur')}</option>
-              <option value="autre">${trad('Autre')}</option>
-            </select>
+            <p class="ui-aide">${trad('Pour un mécanicien ou un chauffeur qui n\'a pas d\'e-mail : indique son prénom et son nom, le serveur crée son accès et te donne son login et son mot de passe.')}</p>
+            <div class="ui-grille">
+              <div class="ui-champ-groupe">
+                <label class="ui-etiquette" for="acc-membre-prenom">${trad('Prénom')}</label>
+                <input id="acc-membre-prenom" class="ui-champ" autocomplete="off" placeholder="${trad('Jean')}">
+              </div>
+              <div class="ui-champ-groupe">
+                <label class="ui-etiquette" for="acc-membre-nom">${trad('Nom')}</label>
+                <input id="acc-membre-nom" class="ui-champ majuscules" autocapitalize="characters" autocomplete="off" placeholder="${trad('DUPONT')}">
+              </div>
+            </div>
+            <div class="ui-aide">${trad('Le nom de famille est écrit en MAJUSCULES sur la fiche. Le login, lui, reste en minuscules : c\'est un identifiant.')}</div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-membre-metier">${trad('Métier (facultatif)')}</label>
+              <input id="acc-membre-metier" class="ui-champ" autocomplete="off" placeholder="${trad('Chef d\'atelier, soudeur, comptable…')}">
+              <span class="ui-aide">${trad('Le métier est un libellé libre : il s\'affiche sur la fiche, et il ne change AUCUN droit.')}</span>
+            </div>
+            <div class="ui-champ-groupe">
+              <label class="ui-etiquette" for="acc-membre-role">${trad('Ce qu\'il peut faire dans l\'application')}</label>
+              <select id="acc-membre-role" class="ui-selecteur is-plein" data-equipe-role-select>
+                <option value="mecanicien">${trad('Mécanicien')}</option>
+                <option value="chauffeur">${trad('Chauffeur')}</option>
+                <option value="autre">${trad('Autre')}</option>
+              </select>
+            </div>
             <div id="acc-membre-droits-autre" hidden>
-              <p class="hint">${trad('Un autre métier ? Dis seulement ce que la personne a le droit de faire : l\'application n\'a que ces deux niveaux de droits, et le métier se note juste au-dessus.')}</p>
-              <label for="acc-membre-droits-entretiens">
-                <input type="radio" name="acc-membre-droits" id="acc-membre-droits-entretiens" value="mecanicien"> ${trad('Peut saisir les entretiens et les compteurs')}
-              </label>
-              <label for="acc-membre-droits-compteurs">
-                <input type="radio" name="acc-membre-droits" id="acc-membre-droits-compteurs" value="chauffeur"> ${trad('Peut seulement consulter et saisir les compteurs')}
-              </label>
+              <p class="ui-aide">${trad('Un autre métier ? Dis seulement ce que la personne a le droit de faire : l\'application n\'a que ces deux niveaux de droits, et le métier se note juste au-dessus.')}</p>
+              <div class="ui-puces">
+                <label class="ui-puce is-long" for="acc-membre-droits-entretiens">
+                  <input type="radio" name="acc-membre-droits" id="acc-membre-droits-entretiens" value="mecanicien"><span>${trad('Peut saisir les entretiens et les compteurs')}</span>
+                </label>
+                <label class="ui-puce is-long" for="acc-membre-droits-compteurs">
+                  <input type="radio" name="acc-membre-droits" id="acc-membre-droits-compteurs" value="chauffeur"><span>${trad('Peut seulement consulter et saisir les compteurs')}</span>
+                </label>
+              </div>
             </div>
-            <div class="hint">${trad('Ce que le rôle permet : un mécanicien tient le parc et les entretiens, un chauffeur lit le parc, relève le compteur et prend la photo de sa machine. Ni l\'un ni l\'autre ne gère l\'équipe.')}</div>
-            <div class="modal-actions" style="margin-top:10px;">
-              <button type="button" class="primary" id="acc-membre-creer">${trad('Créer le membre')}</button>
-            </div>
+            <div class="ui-aide">${trad('Ce que le rôle permet : un mécanicien tient le parc et les entretiens, un chauffeur lit le parc, relève le compteur et prend la photo de sa machine. Ni l\'un ni l\'autre ne gère l\'équipe.')}</div>
+            <div><button type="button" class="ui-btn ui-btn-plein" id="acc-membre-creer">${trad('Créer le membre')}</button></div>
           </div>
           <div id="acc-membre-acces"></div>` : '';
       }
@@ -16777,26 +16779,30 @@ VIEWS.account = {
         // peut ne pas porter la zone de création) ; un écran sans cette zone doit
         // rester câblé de bout en bout, pas jeter.
         if (zoneCreation) zoneCreation.innerHTML = '';
-        zoneInvitation.innerHTML = `<p class="hint">${trad('Seul le gérant peut inviter quelqu\'un, changer un rôle ou retirer un membre.')}</p>`;
+        zoneInvitation.innerHTML = `<p class="ui-aide">${trad('Seul le gérant peut inviter quelqu\'un, changer un rôle ou retirer un membre.')}</p>`;
         return;
       }
 
       zoneInvitation.innerHTML = `
-        <div class="plan-field">
-          <div class="label">${trad('Inviter quelqu\'un par e-mail')}</div>
-          <p class="hint">${trad('Pour un chef d\'équipe, un comptable ou quelqu\'un qui a une adresse : la personne reçoit un lien et crée son compte elle-même.')}</p>
-          ${placesRestantes === 0 ? `<p class="hint">${tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe les occupe déjà. Passe à une offre supérieure pour inviter.', { plafond }) }</p>` : ''}
-          <label for="acc-invite-email">${trad('E-mail de la personne')}</label>
-          <input id="acc-invite-email" type="email" autocomplete="off">
-          <label for="acc-invite-role">${trad('Rôle')}</label>
-          <select id="acc-invite-role">
-            <option value="mecanicien">${trad('Mécanicien')}</option>
-            <option value="chauffeur">${trad('Chauffeur')}</option>
-          </select>
-          <div class="modal-actions" style="margin-top:10px;">
-            <button type="button" class="secondary" id="acc-invite-envoyer">${trad('Créer l\'invitation')}</button>
+        <div class="ui-champ-groupe">
+          <span class="ui-etiquette">${trad('Inviter quelqu\'un par e-mail')}</span>
+          <p class="ui-aide">${trad('Pour un chef d\'équipe, un comptable ou quelqu\'un qui a une adresse : la personne reçoit un lien et crée son compte elle-même.')}</p>
+          ${placesRestantes === 0 ? `<p class="ui-aide">${tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe les occupe déjà. Passe à une offre supérieure pour inviter.', { plafond }) }</p>` : ''}
+        </div>
+        <div class="ui-grille">
+          <div class="ui-champ-groupe">
+            <label class="ui-etiquette" for="acc-invite-email">${trad('E-mail de la personne')}</label>
+            <input id="acc-invite-email" class="ui-champ" type="email" autocomplete="off">
+          </div>
+          <div class="ui-champ-groupe">
+            <label class="ui-etiquette" for="acc-invite-role">${trad('Rôle')}</label>
+            <select id="acc-invite-role" class="ui-selecteur is-plein">
+              <option value="mecanicien">${trad('Mécanicien')}</option>
+              <option value="chauffeur">${trad('Chauffeur')}</option>
+            </select>
           </div>
         </div>
+        <div><button type="button" class="ui-btn ui-btn-pastille" id="acc-invite-envoyer">${trad('Créer l\'invitation')}</button></div>
         <div id="acc-invite-resultat"></div>`;
 
       // ── CRÉER LE MEMBRE : c'est le SERVEUR qui fabrique le login ───────────
@@ -16829,7 +16835,7 @@ VIEWS.account = {
         const zone = racine.querySelector('#acc-membre-acces');
         dire('');
         if (!prenom || !nom) { dire(trad('Indique le prénom ET le nom.'), true); return; }
-        if (zone) zone.innerHTML = `<p class="hint">${trad('Création du compte…')}</p>`;
+        if (zone) zone.innerHTML = `<p class="ui-aide">${trad('Création du compte…')}</p>`;
         try {
           const { data, error } = await sb.functions.invoke('creer-membre', {
             method: 'POST',
@@ -16878,7 +16884,7 @@ VIEWS.account = {
         const membre = bouton.getAttribute('data-pw-reset');
         const ligne = bouton.closest('[data-membre]');
         dire('');
-        if (ligne) ligne.innerHTML = `<p class="hint">${trad('Nouveau mot de passe…')}</p>`;
+        if (ligne) ligne.innerHTML = `<p class="ui-aide">${trad('Nouveau mot de passe…')}</p>`;
         try {
           const { data, error } = await sb.functions.invoke('creer-membre', {
             method: 'POST',
@@ -16904,7 +16910,7 @@ VIEWS.account = {
           // écrit qu'une fois, dans la zone ci-dessus.
           const ligneVive = racine.querySelector(`[data-membre="${membre}"]`);
           if (ligneVive) {
-            ligneVive.innerHTML = `<p class="hint">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessus.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
+            ligneVive.innerHTML = `<p class="ui-aide">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessus.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
           }
         } catch (err) {
           await preparerCarteEquipe(racine);
@@ -16929,19 +16935,21 @@ VIEWS.account = {
           motDePasse,
         });
         return `
-          <div class="plan-field">
-            <div class="label">${esc(titre || trad('Accès'))}</div>
-            <div class="hint">${trad('Identifiant de connexion')}</div>
-            <div class="value">${esc(login)}</div>
-            <div class="hint">${trad('Mot de passe')}</div>
-            <div class="password-wrap">
-              <input type="password" value="${esc(motDePasse)}" readonly aria-label="${trad('Mot de passe')}">
-              <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${esc(titre || trad('Accès'))}</span>
+            <div class="ui-champ-groupe">
+              <span class="ui-aide">${trad('Identifiant de connexion')}</span>
+              <div class="ui-valeur">${esc(login)}</div>
             </div>
-            <p class="hint">${trad('Note-les maintenant : le mot de passe ne sera plus affiché. Tu peux en générer un nouveau à tout moment.')}</p>
-            <div class="modal-actions" style="margin-top:8px;">
-              <button type="button" class="secondary" data-copier-access="${esc(texte)}">${trad('Copier le login et le mot de passe')}</button>
+            <div class="ui-champ-groupe">
+              <span class="ui-aide">${trad('Mot de passe')}</span>
+              <div class="password-wrap">
+                <input class="ui-champ" type="password" value="${esc(motDePasse)}" readonly aria-label="${trad('Mot de passe')}">
+                <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
+              </div>
             </div>
+            <p class="ui-aide">${trad('Note-les maintenant : le mot de passe ne sera plus affiché. Tu peux en générer un nouveau à tout moment.')}</p>
+            <div><button type="button" class="ui-btn ui-btn-pastille" data-copier-access="${esc(texte)}">${trad('Copier le login et le mot de passe')}</button></div>
           </div>`;
       }
 
@@ -16956,7 +16964,7 @@ VIEWS.account = {
         const role = racine.querySelector('#acc-invite-role')?.value || 'mecanicien';
         const resultat = racine.querySelector('#acc-invite-resultat');
         dire('');
-        if (resultat) resultat.innerHTML = `<p class="hint">${trad('Création de l\'invitation…')}</p>`;
+        if (resultat) resultat.innerHTML = `<p class="ui-aide">${trad('Création de l\'invitation…')}</p>`;
         try {
           const { data, error } = await sb.rpc('inviter_membre', { p_email: email, p_role: role });
           if (error) throw error;
@@ -16966,14 +16974,12 @@ VIEWS.account = {
           const sujet = tR('Invitation à rejoindre {societe} sur KALEA', { societe: UI.company?.name || UI.companyName || '' });
           if (resultat) {
             resultat.innerHTML = `
-              <div class="plan-field">
-                <div class="label">${trad('Lien à transmettre')}</div>
-                <div class="value" id="acc-invite-lien" style="word-break:break-all;font-size:13px;">${esc(lien)}</div>
-                <p class="hint">${tR('Valable jusqu\'au {date}. La personne crée son compte en le conservant : elle rejoindra la société automatiquement.', { date: esc(String((ligne && ligne.expire_le) || '').slice(0, 10)) })}</p>
-                <div class="modal-actions" style="margin-top:8px;">
-                  <a class="primary" id="acc-invite-mailto" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corpsInvitation(lien))}" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;">${trad('Envoyer l\'invitation par e-mail')}</a>
-                </div>
-              </div>`;
+              <div class="ui-champ-groupe">
+                <span class="ui-etiquette">${trad('Lien à transmettre')}</span>
+                <div class="ui-valeur" id="acc-invite-lien" style="word-break:break-all;font-size:13px;">${esc(lien)}</div>
+                <p class="ui-aide">${tR('Valable jusqu\'au {date}. La personne crée son compte en le conservant : elle rejoindra la société automatiquement.', { date: esc(String((ligne && ligne.expire_le) || '').slice(0, 10)) })}</p>
+              </div>
+              <div><a class="ui-btn ui-btn-pastille" id="acc-invite-mailto" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corpsInvitation(lien))}" style="text-decoration:none;">${trad('Envoyer l\'invitation par e-mail')}</a></div>`;
           }
           dire(trad('Invitation créée.'));
         } catch (err) {

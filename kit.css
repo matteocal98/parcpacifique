@@ -188,3 +188,43 @@ body.fond-blanc .main{background:var(--surface);}
 /* Un encadré peut finir par un bouton */
 .ui-encadre > .ui-btn{margin-left:auto;align-self:center;flex:0 0 auto;}
 .ui-tag svg{width:14px;height:14px;margin-right:5px;}
+
+/* ── 12. Groupe : un élément blanc qui rassemble plusieurs champs (ex. un formulaire) ──
+   Il est BLANC dans la section teintée ; ses champs y sont donc teintés (règle 3). */
+.ui-groupe{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:var(--r-md);background:var(--surface);}
+.ui-groupe-tete{display:flex;align-items:center;gap:10px;}
+.ui-groupe-tete > svg{width:20px;height:20px;flex:0 0 auto;color:var(--primary-dark);}
+.ui-groupe-titre{flex:1 1 auto;min-width:0;font-weight:700;font-size:14.5px;color:var(--ink);}
+.ui-groupe .ui-champ,.ui-groupe .champ-select.ui-selecteur{background:var(--surface-soft);}
+.ui-groupe .ui-champ:focus{background:var(--surface);}
+.ui-groupe .ui-unite,.ui-groupe .ui-compte{background:var(--surface);}
+.ui-groupe .ui-btn-pastille,.ui-groupe .ui-puce{background:var(--surface-soft);}
+details.ui-groupe > summary{cursor:pointer;font-weight:700;font-size:14.5px;color:var(--ink);}
+details.ui-groupe[open] > summary{margin-bottom:4px;}
+.ui-valeur{font-size:14.5px;font-weight:700;color:var(--ink);overflow-wrap:anywhere;}
+.ui-aide.is-late{color:var(--late);}
+.champ-select.ui-selecteur.is-plein{width:100%;min-width:0;justify-content:space-between;}
+.ui-btn-pastille.is-danger{color:var(--late);}
+/* Une puce dont le radio est coché se lit seule, sans code pour basculer .is-actif */
+.ui-puce:has(input:checked){background:var(--ink);color:#fff;}
+.ui-puce:has(input:checked) .ui-compte{background:rgba(255,255,255,.2);color:#fff;}
+.ui-puce.is-long{height:auto;min-height:40px;padding:10px 14px;}
+/* Pastille ronde avec les initiales d'une personne, une couleur par rôle */
+.ui-ligne-icone.is-initiales{font-size:13px;font-weight:800;color:#fff;}
+.ui-ligne-icone.is-gerant{background:var(--ink);}
+.ui-ligne-icone.is-mecanicien{background:var(--primary-dark);}
+.ui-ligne-icone.is-chauffeur{background:var(--ok);}
+/* Éléments historiques réutilisés tels quels dans un groupe (en attendant leur propre migration) */
+.ui-groupe .lang-switch{justify-content:flex-start;margin-bottom:0;}
+.ui-groupe .lang-btn{border:none;background:var(--surface-soft);border-radius:var(--r-md);color:var(--ink-2);}
+.ui-groupe .lang-btn.is-active{background:var(--ink);color:#fff;}
+.ui-groupe .tel-champ .champ-select.ui-selecteur{height:auto;min-height:44px;}
+.ui-section .tel-champ{display:flex;gap:8px;align-items:stretch;}
+.ui-section .tel-champ .ui-champ{flex:1 1 auto;}
+.ui-section .tel-champ .tel-pays{flex:0 0 98px;max-width:98px;min-width:0;width:auto;}
+.ui-section .check-row{min-height:44px;}
+.ui-section .password-wrap{position:relative;}
+/* Ligne à texte long (ex. un membre d'équipe : nom + plusieurs détails) : la première colonne prend la place */
+@container (min-width:640px){
+  .ui-ligne.is-texte-long{grid-template-columns:minmax(0,2.4fr) auto minmax(190px,1fr);}
+}
