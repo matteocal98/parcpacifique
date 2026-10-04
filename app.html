@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-buc+kXX+t8a4CjSu5Yvw12z2XsWxzxO2O5kTBoLYunI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MfDdo7AuSFVbom6+EiAeg477GanJTwzzR7WIn8CGbpo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9054,6 +9054,8 @@ function renderApp() {
   if (typeof tenterViderPhotosEnAttente === 'function') tenterViderPhotosEnAttente();
   UI.counts = machineCounts(UI.machines);
   const view = VIEWS[UI.view] || VIEWS.dashboard;
+  // Charte : les écrans migrés vers le kit (kit.css) reposent sur une page BLANCHE ; les autres gardent leur fond teinté.
+  document.body.classList.toggle('fond-blanc', !!view.fondBlanc);
   app.innerHTML = `
     <div class="shell">
       <aside class="sidebar">${sidebarHtml()}</aside>
@@ -14314,6 +14316,7 @@ function cablerCatalogueTco(root) {
 }
 
 VIEWS.tco = {
+  fondBlanc: true,
   title: trad('Paramètres TCO & Coûts d\'exploitation'),
   subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
   render() {

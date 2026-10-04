@@ -11,19 +11,25 @@
    N'utilise QUE les variables de styles.css (:root) : aucune couleur en dur.
 
    LES 6 RÈGLES (validées avec l'utilisateur le 2026-10-04)
-   1. FOND. La page est teintée ; les ÉLÉMENTS (tuile, ligne, champ, bouton
-      secondaire, puce) sont blancs avec l'ombre légère, SANS bordure.
-      Jamais de grande carte-mère qui contient d'autres blocs.
+   1. FOND. La page est BLANCHE ; les ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
+      secondaire, puce) portent la teinte --surface-soft (rgba(14,19,51,.04)),
+      SANS ombre et SANS bordure. Jamais de grande carte-mère qui contient d'autres
+      blocs. (Règle révisée le 2026-10-04 : avant, page teintée + éléments blancs.)
    2. TITRES DE SECTION. Toujours icône + titre + sous-titre, posés sur le fond,
       avec un grand espace entre deux sections et aucun filet.
-   3. UNE LIGNE PEUT CONTENIR UN CHAMP. Le champ y prend la teinte par défaut des
-      champs (--surface-soft = rgba(14,19,51,.04)) ; posé sur le fond, il est blanc.
+   3. L'INVERSE DU PARENT. Un élément n'a jamais le même fond que ce qui le porte :
+      posé sur la page blanche, il est teinté ; posé dans un bloc teinté (champ, étiquette,
+      unité dans une ligne, une tuile, un encadré), il est BLANC.
    4. ALIGNEMENT. Les éléments d'une même liste ou grille ont les mêmes colonnes
       et la même hauteur (.ui-ligne = une grille, .ui-grille = lignes de même hauteur).
    5. STATUT. Un liseré ou un point de couleur, JAMAIS un fond coloré.
    6. BOUTONS. Un seul bouton plein (.ui-btn-plein) par section au maximum ;
       les autres actions sont des pastilles blanches ou teintées.
    ============================================================================ */
+
+/* Page blanche : posée par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc) */
+body.fond-blanc{--bg:var(--surface);}
+body.fond-blanc .main{background:var(--surface);}
 
 /* ── 1. Section : le titre sur le fond, puis le contenu ────────────────────── */
 .ui-section{display:flex;flex-direction:column;gap:14px;margin:0 0 32px;}
@@ -38,15 +44,15 @@
 .ui-section-corps{display:flex;flex-direction:column;gap:12px;}
 
 /* ── 2. Tuile : un chiffre clé ─────────────────────────────────────────────── */
-.ui-tuile{position:relative;min-width:0;display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow-soft);}
+.ui-tuile{position:relative;min-width:0;display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:var(--r-lg);background:var(--surface-soft);}
 .ui-tuile-etiquette{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
 .ui-tuile-valeur{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--ink);}
 .ui-tuile-valeur small{margin-left:6px;font-size:12px;font-weight:500;color:var(--ink-3);}
 .ui-tuile-note{font-size:12.5px;line-height:1.4;color:var(--ink-2);}
 /* Statut = liseré sur le bord gauche (règle 5) */
-.ui-tuile.is-retard,.ui-ligne.is-retard{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
-.ui-tuile.is-bientot,.ui-ligne.is-bientot{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--soon);}
-.ui-tuile.is-ok,.ui-ligne.is-ok{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--ok);}
+.ui-tuile.is-retard,.ui-ligne.is-retard{box-shadow:inset 4px 0 0 var(--late);}
+.ui-tuile.is-bientot,.ui-ligne.is-bientot{box-shadow:inset 4px 0 0 var(--soon);}
+.ui-tuile.is-ok,.ui-ligne.is-ok{box-shadow:inset 4px 0 0 var(--ok);}
 
 /* ── 3. Liste et ligne ─────────────────────────────────────────────────────────
    .ui-liste est un « conteneur » : la ligne choisit sa disposition d'après la LARGEUR
@@ -54,7 +60,7 @@
    propre sur ordinateur). Étroit : trois bandes empilées, identiques d'une ligne à
    l'autre. Large : trois colonnes alignées. */
 .ui-liste{display:flex;flex-direction:column;gap:10px;container-type:inline-size;}
-.ui-ligne{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 18px;align-items:center;padding:14px 16px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+.ui-ligne{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 18px;align-items:center;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);}
 .ui-ligne-id{display:flex;align-items:center;gap:12px;min-width:0;}
 .ui-ligne-icone{width:40px;height:40px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--primary-tint);color:var(--primary-dark);}
 .ui-ligne-icone svg{width:20px;height:20px;}
@@ -75,19 +81,18 @@
 
 /* ── 4. Champs : blancs sur le fond, teintés DANS un élément blanc (règle 3) ──── */
 .ui-etiquette{display:block;margin:0 0 6px;font-size:13px;font-weight:700;color:var(--ink);}
-.ui-champ{width:100%;min-height:44px;padding:11px 14px;border:none;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);font-family:inherit;font-size:14.5px;color:var(--ink);transition:box-shadow .15s ease,background .15s ease;}
+.ui-champ{width:100%;min-height:44px;padding:11px 14px;border:none;border-radius:var(--r-md);background:var(--surface-soft);font-family:inherit;font-size:14.5px;color:var(--ink);transition:box-shadow .15s ease,background .15s ease;}
 .ui-champ::placeholder{color:var(--ink-4);}
-.ui-champ:focus{outline:none;box-shadow:0 0 0 3px var(--primary-tint-2);}
+.ui-champ:focus{outline:none;background:var(--surface);box-shadow:0 0 0 3px var(--primary-tint-2);}
 .ui-champ:disabled{opacity:.6;cursor:not-allowed;}
-.ui-ligne .ui-champ,.ui-tuile .ui-champ,.ui-encadre .ui-champ,.ui-champ.is-dans-element{background:var(--surface-soft);box-shadow:none;}
-.ui-ligne .ui-champ:focus,.ui-tuile .ui-champ:focus,.ui-encadre .ui-champ:focus,.ui-champ.is-dans-element:focus{background:var(--surface);box-shadow:0 0 0 3px var(--primary-tint-2);}
+.ui-ligne .ui-champ,.ui-tuile .ui-champ,.ui-encadre .ui-champ,.ui-champ.is-dans-element{background:var(--surface);}
 .ui-champ-groupe{display:flex;flex-direction:column;gap:4px;min-width:0;}
 .ui-aide{font-size:12px;line-height:1.4;color:var(--ink-3);}
 /* Champ avec unité à droite (€/h, h, km…) */
 .ui-champ-unite{position:relative;display:flex;align-items:center;min-width:0;}
 .ui-champ-unite .ui-champ{padding-right:68px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
-.ui-unite{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
-.ui-ligne .ui-unite,.ui-tuile .ui-unite{background:var(--surface);}
+.ui-unite{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
+.ui-ligne .ui-unite,.ui-tuile .ui-unite,.ui-encadre .ui-unite{background:var(--surface-soft);}
 
 /* ── 5. Boutons : trois formats, pas un de plus (règle 6) ───────────────────────── */
 .ui-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--r-md);font-family:inherit;font-weight:700;white-space:nowrap;cursor:pointer;transition:background .15s ease,box-shadow .15s ease,transform .1s ease;}
@@ -95,44 +100,45 @@
 .ui-btn:disabled,.ui-btn[disabled]{opacity:.5;cursor:not-allowed;}
 .ui-btn.is-bloc{width:100%;}
 /* Action principale de la section : 16 px / 700, UN seul par section */
-.ui-btn-plein{min-height:48px;padding:12px 22px;font-size:16px;background:var(--ink);color:#fff;box-shadow:var(--shadow-soft);}
+.ui-btn-plein{min-height:48px;padding:12px 22px;font-size:16px;background:var(--ink);color:#fff;}
 .ui-btn-plein:hover:not(:disabled){background:var(--dark);}
 .ui-btn-plein:active:not(:disabled){transform:scale(.98);}
 /* Action secondaire : pastille blanche 13 px / 700 (comme « Exporter (CSV) » du Parc) */
-.ui-btn-pastille{height:44px;padding:0 16px;font-size:13px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft);}
-.ui-btn-pastille:hover:not(:disabled){box-shadow:0 4px 14px rgba(14,19,51,.10);}
+.ui-btn-pastille{height:44px;padding:0 16px;font-size:13px;background:var(--surface-soft);color:var(--ink);}
+.ui-btn-pastille:hover:not(:disabled){background:rgba(14,19,51,.08);}
+.ui-ligne .ui-btn-pastille,.ui-tuile .ui-btn-pastille,.ui-encadre .ui-btn-pastille{background:var(--surface);}
 /* Action de ligne : compacte, teintée, 13 px / 700 */
 .ui-btn-teinte{padding:7px 13px;border-radius:var(--r-pill);font-size:13px;background:var(--primary-tint);color:var(--ink);}
 .ui-btn-teinte:hover:not(:disabled){background:rgba(99,102,241,.18);}
 .ui-btn-teinte.is-danger{background:var(--late-bg);}
 .ui-btn-teinte.is-danger:hover:not(:disabled){background:rgba(222,122,22,.24);}
-.ui-btn-icone{width:40px;height:40px;padding:0;border-radius:50%;background:var(--surface);color:var(--ink-2);box-shadow:var(--shadow-soft);}
+.ui-btn-icone{width:40px;height:40px;padding:0;border-radius:50%;background:var(--surface-soft);color:var(--ink-2);}
 
 /* ── 6. Puces de filtre et contrôle segmenté ─────────────────────────────────────── */
 .ui-puces{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
-.ui-puce{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border:none;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink-2);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;}
+.ui-puce{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border:none;border-radius:var(--r-md);background:var(--surface-soft);color:var(--ink-2);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;}
 .ui-puce.is-actif{background:var(--ink);color:#fff;}
 .ui-point{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:var(--ink-4);}
 .ui-point.is-retard{background:var(--late);} .ui-point.is-bientot{background:var(--soon);} .ui-point.is-ok{background:var(--ok);}
-.ui-compte{padding:1px 6px;border-radius:6px;background:var(--surface-soft);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink);}
+.ui-compte{padding:1px 6px;border-radius:6px;background:var(--surface);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--ink);}
 .ui-puce.is-actif .ui-compte{background:rgba(255,255,255,.2);color:#fff;}
 .ui-segment{display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-md);background:rgba(14,19,51,.08);}
 .ui-segment button{padding:8px 14px;border:none;border-radius:var(--r-chip);background:transparent;color:var(--ink-2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
-.ui-segment button.is-actif{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft);}
+.ui-segment button.is-actif{background:var(--surface);color:var(--ink);}
 
 /* ── 7. Encadré : une information, un conseil, une alerte ─────────────────────────── */
-.ui-encadre{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft),inset 4px 0 0 var(--bleu-roi);font-size:13.5px;line-height:1.5;color:var(--ink);}
+.ui-encadre{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface-soft);box-shadow:inset 4px 0 0 var(--bleu-roi);font-size:13.5px;line-height:1.5;color:var(--ink);}
 .ui-encadre svg{width:20px;height:20px;flex:0 0 auto;margin-top:1px;color:var(--bleu-roi);}
 .ui-encadre p{margin:0;}
 .ui-encadre-titre{display:block;margin-bottom:2px;font-weight:700;}
-.ui-encadre.is-conseil{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--primary-dark);}
+.ui-encadre.is-conseil{box-shadow:inset 4px 0 0 var(--primary-dark);}
 .ui-encadre.is-conseil svg{color:var(--primary-dark);}
-.ui-encadre.is-attention{box-shadow:var(--shadow-soft),inset 4px 0 0 var(--late);}
+.ui-encadre.is-attention{box-shadow:inset 4px 0 0 var(--late);}
 .ui-encadre.is-attention svg{color:var(--late);}
 
 /* ── 8. Étiquettes ───────────────────────────────────────────────────────────────── */
 .ui-tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:var(--r-pill);background:var(--surface-soft);font-size:12px;font-weight:700;color:var(--ink-2);white-space:nowrap;}
-.ui-ligne .ui-tag{background:var(--surface-soft);}
+.ui-ligne .ui-tag,.ui-tuile .ui-tag,.ui-encadre .ui-tag,.ui-ligne .ui-statut:not(.is-retard):not(.is-bientot):not(.is-ok){background:var(--surface);}
 .ui-statut{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--r-pill);background:var(--surface-soft);font-size:11.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);white-space:nowrap;}
 .ui-statut::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-4);}
 .ui-statut.is-retard{background:var(--late-bg);} .ui-statut.is-retard::before{background:var(--late);}
@@ -154,7 +160,7 @@
 /* Les attributs [hidden] l'emportent toujours, même sur un composant en flex/grid */
 [class^="ui-"][hidden],[class*=" ui-"][hidden]{display:none !important;}
 /* Liste déroulante habillée (habillerSelect) : une pastille blanche comme les autres boutons */
-.champ-select.ui-selecteur,select.ui-selecteur{width:auto;min-width:170px;height:44px;padding:0 14px;border:none;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13px;font-weight:700;}
+.champ-select.ui-selecteur,select.ui-selecteur{width:auto;min-width:170px;height:44px;padding:0 14px;border:none;border-radius:var(--r-md);background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:700;}
 .champ-select.ui-selecteur:focus{box-shadow:0 0 0 3px var(--primary-tint-2);}
 /* Une puce qui contient un bouton radio caché (choix unique, ex. la devise) */
 .ui-puce{position:relative;}
