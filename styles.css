@@ -6279,7 +6279,13 @@
   .tele-carte-note{margin-top:10px;}
   .tele-carte-zone:focus,.tele-carte-zone:focus-visible,.tele-carte-zone .leaflet-container:focus{outline:none;}
   .tele-marker{background:none;border:none;}
-  .tele-marker-pt{display:block;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 6px rgba(14,19,51,.45);background:var(--ok);}
+  .tele-marker-pt{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 6px rgba(14,19,51,.45);background:var(--ok);}
+  .tele-marker-pt:has(.tele-marker-nb){width:26px;height:26px;}
+  .tele-marker-nb{font-size:11px;font-weight:800;line-height:1;color:#fff;}
+  .tele-infobulle-groupe{display:flex;flex-direction:column;gap:6px;}
+  .tele-popup-groupe{display:flex;flex-direction:column;gap:10px;min-width:190px;}
+  .tele-popup-groupe .tele-popup + .tele-popup{padding-top:10px;border-top:1px solid var(--line-2);}
+  .tele-popup-groupe-titre{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);}
   .tele-marker-pt.is-late{background:var(--late);}
   .tele-marker-pt.is-soon{background:var(--soon);}
   .tele-vignette{display:block;width:48px;height:48px;border-radius:10px;object-fit:cover;background:var(--surface-soft);flex:0 0 auto;}
