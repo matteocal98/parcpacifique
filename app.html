@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-haDCfoxMBE+7MCdKKhW8XTAciMEI2JpCJ5tmXlOVbmA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hfVtu22XuTkUSB8oQEDqsX21z7FEtXo3sv0Y8OUriq8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5242,13 +5242,13 @@ function openSignupWizard() {
           <div>
             <label for="su-pays">${trad('Pays')} <span class="requis">*</span></label>
             <select id="su-pays">${optionsPaysSocieteHtml(state.country)}</select>
-            <div class="hint" id="su-devise-indice">${tR('Devise : {devise}', { devise: libelleDevise(deviseDuPays(state.country)) })}</div>
           </div>
           <div>
             <label for="su-reg" id="su-reg-etiquette">${libelleRegistre(state.country)}</label>
             <input id="su-reg" value="${esc(state.registrationNumber)}">
           </div>
         </div>
+        <div class="hint" id="su-devise-indice">${tR('Devise : {devise}', { devise: libelleDevise(deviseDuPays(state.country)) })}</div>
         <div class="field-row">
           <div>
             ${champTelephoneHtml('su-phone', state.phone, { labelHtml: `${esc(trad('Numéro de téléphone'))} <span class="requis">*</span>`, required: true, indicatifSeul: true })}
@@ -5296,6 +5296,7 @@ function openSignupWizard() {
     `);
 
     habillerSelect(overlay.querySelector('#su-activity'), trad('Activité'));
+    habillerSelect(overlay.querySelector('#su-pays'), trad('Pays'));
     overlay.querySelector('#su-cancel').addEventListener('click', () => overlay.remove());
     overlay.querySelector('#su-close-x').addEventListener('click', () => overlay.remove());
     overlay.querySelector('#su-goto-login').addEventListener('click', () => { overlay.remove(); renderLogin(); });
