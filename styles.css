@@ -984,26 +984,26 @@
   .parc-export-btn:hover{background:var(--surface-soft);}
   .parc-export-btn svg{width:18px;height:18px;flex:0 0 auto;}
 
-  .parc-filtres{background:var(--surface);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;gap:14px;}
-  @media (min-width:1100px){.parc-filtres{flex-direction:row;align-items:center;justify-content:space-between;}}
+  .parc-filtres{background:none;padding:0;box-shadow:none;display:flex;flex-direction:column;gap:12px;}
+  @media (min-width:1100px){.parc-filtres{flex-direction:row;align-items:center;justify-content:space-between;gap:14px;}}
   .parc-recherche{position:relative;flex:1;min-width:240px;}
   .parc-recherche svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--dark-ink);pointer-events:none;}
-  .parc-recherche input{width:100%;height:44px;padding:0 16px 0 42px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:14px;font-family:inherit;}
+  .parc-recherche input{width:100%;height:44px;padding:0 16px 0 42px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:14px;font-family:inherit;}
   .parc-recherche input:focus{background:#fff;outline:2px solid var(--primary-dark);outline-offset:0;}
   .parc-pills-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
-  .parc-pill{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink-2);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;}
+  .parc-pill{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink-2);font-weight:600;font-size:13.5px;cursor:pointer;font-family:inherit;}
   .parc-pill.is-active{background:var(--ink);color:#fff;}
   .parc-pill .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
-  .parc-pill .compte{padding:1px 6px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;background:var(--line);color:var(--ink);}
+  .parc-pill .compte{padding:1px 6px;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;background:var(--surface-soft);color:var(--ink);}
   .parc-pill.is-active .compte{background:rgba(255,255,255,.2);color:#fff;}
   .parc-tri{display:flex;align-items:center;gap:8px;}
-  @media (min-width:1100px){.parc-tri{padding-left:14px;border-left:1px solid var(--line);}}
+  
   .parc-tri label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--dark-ink);white-space:nowrap;}
-  .parc-tri select{height:40px;padding:0 30px 0 12px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13.5px;font-weight:600;appearance:none;cursor:pointer;font-family:inherit;}
+  .parc-tri select{height:40px;padding:0 30px 0 12px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13.5px;font-weight:600;appearance:none;cursor:pointer;font-family:inherit;}
   /* Même habillage pour le bouton "maison" (habillerSelect) : les règles
      ci-dessus ciblent la balise <select>, qui ne matche plus une fois le
      rendu remplacé par un <button class="champ-select">. */
-  .parc-tri .champ-select{height:40px;width:auto;padding:0 12px;border-radius:var(--r-md);border:none;background:var(--surface-soft);color:var(--ink);font-size:13.5px;font-weight:600;}
+  .parc-tri .champ-select{height:40px;width:auto;padding:0 12px;border-radius:var(--r-md);border:none;background:var(--surface);box-shadow:var(--shadow-soft);color:var(--ink);font-size:13.5px;font-weight:600;}
 
   .mstrip-liste{display:flex;flex-direction:column;gap:12px;}
   .mstrip{position:relative;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s;}
@@ -5363,12 +5363,11 @@
      flottante, portée par l'ombre, pas un filet à l'intérieur d'une carte. */
   .manuels-barre{
     display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
-    background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);
-    padding:14px 16px;margin-bottom:16px;
+    background:none;padding:0;margin-bottom:16px;
   }
   .manuels-recherche{flex:0 1 260px;min-width:160px;}
   .manuels-recherche input[type=search]{
-    padding-left:38px;min-height:38px;background:var(--surface-soft);border:1.5px solid var(--line);font-size:13.5px;
+    padding-left:38px;min-height:38px;background:var(--surface);border:none;box-shadow:var(--shadow-soft);font-size:13.5px;
   }
   .manuels-grille{display:flex;flex-direction:column;gap:12px;}
   /* Même langage que .mstrip (Parc Machines) : pas de carte-mère blanche qui
