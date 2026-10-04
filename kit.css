@@ -269,3 +269,13 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
 @container (min-width:880px){
   .ui-deux{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
+
+/* ── 15. Divers ──────────────────────────────────────────────────────────────────── */
+.ui-ligne-sous.is-late{color:var(--late);}
+.ui-case{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;cursor:pointer;}
+.ui-case input{width:auto;margin:0;}
+.ui-case input:disabled{cursor:not-allowed;}
+.ui-code{display:block;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-soft);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere;}
+.ui-ligne-info.is-champs{flex-wrap:nowrap;}
+.ui-ligne-info.is-champs > *{flex:1 1 0;min-width:0;}
+@media (max-width:520px){.ui-ligne-info.is-champs{flex-wrap:wrap;}.ui-ligne-info.is-champs > *{flex:1 1 100%;}}

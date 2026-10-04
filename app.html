@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ICc+V8qGGdqhw/enmjPDzRtN8ilMA0fjyNiiPVe1B78=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-HVoMEdLp2bniZknboK9eCYznoN9WvTRvcTzZrY/GXIo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5540,15 +5540,13 @@ function machinesLocalisees() {
 function carteGpsHtml() {
   if (!telemetrieActif() || !SCHEMA.hasGps || UI.role !== 'gerant') return '';
   return `
-    <section class="card tele-carte-gps" id="tele-carte-gps">
-      <div class="card-head">
-        <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('monde')}</span><span>${trad('Carte des machines')}</span></h2>
-        <span class="spacer"></span>
-        <span class="pill neutral" id="tele-carte-compte"></span>
+    <section class="ui-section tele-carte-gps" id="tele-carte-gps">
+      ${teteSectionKit('monde', trad('Carte des machines'), '', '<span class="ui-tag" id="tele-carte-compte"></span>')}
+      <div class="ui-section-corps">
+        <div class="tele-carte-zone" id="tele-carte-zone" role="application" aria-label="${esc(trad('Carte des machines localisées'))}"></div>
+        <div class="ui-aide" id="tele-carte-msg" role="status" aria-live="polite"></div>
+        <p class="ui-aide tele-carte-note">${trad('Seules les machines où « Localiser » est coché apparaissent ici. Leur position est conservée 60 jours puis supprimée ; la décocher supprime tout de suite la position et le trajet.')} <a href="./politique-confidentialite.html" target="_blank">${trad('Politique de confidentialité')}</a></p>
       </div>
-      <div class="tele-carte-zone" id="tele-carte-zone" role="application" aria-label="${esc(trad('Carte des machines localisées'))}"></div>
-      <div class="hint" id="tele-carte-msg" role="status" aria-live="polite"></div>
-      <p class="muted-text tele-carte-note">${trad('Seules les machines où « Localiser » est coché apparaissent ici. Leur position est conservée 60 jours puis supprimée ; la décocher supprime tout de suite la position et le trajet.')} <a href="./politique-confidentialite.html" target="_blank">${trad('Politique de confidentialité')}</a></p>
     </section>`;
 }
 
@@ -5567,7 +5565,7 @@ function messageCarteGps(texte, erreur) {
   const msg = document.getElementById('tele-carte-msg');
   if (!msg) return null;
   msg.textContent = texte || '';
-  msg.className = erreur ? 'hint is-late' : 'hint';
+  msg.className = erreur ? 'ui-aide is-late' : 'ui-aide';
   return msg;
 }
 
@@ -5715,7 +5713,7 @@ async function afficherTrajetGps(machineId, jours, options) {
   if (msg) {
     const effacer = document.createElement('button');
     effacer.type = 'button';
-    effacer.className = 'link-inline';
+    effacer.className = 'ui-btn ui-btn-teinte';
     effacer.textContent = ' ' + trad('Effacer le trajet');
     effacer.addEventListener('click', () => { effacerTrajetGps(); majMarqueursGps(); });
     msg.appendChild(effacer);
@@ -5753,59 +5751,78 @@ function telemetrieCarteHtml() {
            d'une source n'est montré qu'UNE fois (le serveur n'en garde que
            l'empreinte). L'écriture des relevés passe par la fonction serveur,
            jamais par cet écran. -->
-      <section class="card tele-carte" id="acc-telemetrie">
-        <div class="card-head">
-          <h2 class="card-title"><span class="card-ico card-ico-plein">${picto('compteur')}</span><span>${trad('Compteur automatique (télémétrie)')}</span></h2>
-          <span class="spacer"></span>
-          <span class="pill neutral" id="acc-tele-compte"></span>
-        </div>
-        <p class="muted-text">${trad('Un boîtier, un système tiers ou le compte de ton constructeur fournit les heures ou les kilomètres de tes engins : le compteur, les échéances et les rappels se mettent à jour tout seuls. C\'est optionnel — la saisie manuelle reste possible partout.')}</p>
-        <div class="hint" id="acc-tele-msg" role="status" aria-live="polite"></div>
-        <div id="acc-tele-liste">${trad('Chargement…')}</div>
-        <div id="acc-tele-jeton"></div>
-        <div class="plan-field tele-creation">
-          <label for="acc-tele-nom">${trad('Nouvelle source')}</label>
-          <div class="tele-creation-ligne">
-            <input id="acc-tele-nom" maxlength="80" placeholder="${esc(trad('Ex. : Boîtiers atelier'))}">
-            <select id="acc-tele-type" aria-label="${esc(trad('Type de source'))}">
-              <option value="flespi">${trad('Boîtiers via Flespi')}</option>
-              <option value="api">${trad('Autre système (API)')}</option>
-              <option value="aemp">${trad('Compte constructeur (ISO 15143-3)')}</option>
-            </select>
-            <button type="button" class="primary" data-tele-creer>${trad('Créer la source')}</button>
-          </div>
-          <div class="tele-aemp" id="acc-tele-aemp" hidden>
-            <p class="hint">${trad('KALEA lit les heures moteur de tes machines directement chez leur constructeur (Caterpillar, Volvo CE, John Deere…), avec les identifiants API que ton constructeur te fournit. Ils sont chiffrés et ne sont jamais réaffichés.')}</p>
-            <label for="acc-tele-aemp-url">${trad('Adresse de l\'API du constructeur')}</label>
-            <input id="acc-tele-aemp-url" type="url" maxlength="300" placeholder="https://" autocomplete="off">
-            <label for="acc-tele-aemp-auth">${trad('Mode de connexion')}</label>
-            <select id="acc-tele-aemp-auth">
-              <option value="basic">${trad('Identifiant + secret (Basic)')}</option>
-              <option value="oauth2">${trad('OAuth2 (identifiant + secret)')}</option>
-              <option value="bearer">${trad('Jeton d\'accès')}</option>
-            </select>
-            <div data-aemp-champ="oauth2" hidden>
-              <label for="acc-tele-aemp-token-url">${trad('Adresse de connexion OAuth2')}</label>
-              <input id="acc-tele-aemp-token-url" type="url" maxlength="300" placeholder="https://" autocomplete="off">
+      <div class="ui-colonnes" id="acc-telemetrie">
+        <div class="ui-colonne">
+          <section class="ui-section">
+            ${teteSectionKit('compteur', trad('Compteur automatique (télémétrie)'), '', '<span class="ui-tag" id="acc-tele-compte"></span>')}
+            <div class="ui-section-corps">
+              <p class="ui-aide">${trad('Un boîtier, un système tiers ou le compte de ton constructeur fournit les heures ou les kilomètres de tes engins : le compteur, les échéances et les rappels se mettent à jour tout seuls. C\'est optionnel — la saisie manuelle reste possible partout.')}</p>
+              <div class="ui-aide" id="acc-tele-msg" role="status" aria-live="polite"></div>
+              <div id="acc-tele-liste" class="ui-liste">${trad('Chargement…')}</div>
+              <div id="acc-tele-jeton"></div>
+              <div class="ui-groupe tele-creation">
+                <span class="ui-etiquette">${trad('Nouvelle source')}</span>
+                <div class="ui-grille">
+                  <input id="acc-tele-nom" class="ui-champ" maxlength="80" placeholder="${esc(trad('Ex. : Boîtiers atelier'))}">
+                  <div class="ui-select-wrap">
+                    <select id="acc-tele-type" class="ui-champ" aria-label="${esc(trad('Type de source'))}">
+                      <option value="flespi">${trad('Boîtiers via Flespi')}</option>
+                      <option value="api">${trad('Autre système (API)')}</option>
+                      <option value="aemp">${trad('Compte constructeur (ISO 15143-3)')}</option>
+                    </select>
+                    ${picto('chevronBas')}
+                  </div>
+                </div>
+                <div class="ui-section-corps" id="acc-tele-aemp" hidden>
+                  <p class="ui-aide">${trad('KALEA lit les heures moteur de tes machines directement chez leur constructeur (Caterpillar, Volvo CE, John Deere…), avec les identifiants API que ton constructeur te fournit. Ils sont chiffrés et ne sont jamais réaffichés.')}</p>
+                  <div class="ui-champ-groupe">
+                    <label class="ui-etiquette" for="acc-tele-aemp-url">${trad('Adresse de l\'API du constructeur')}</label>
+                    <input id="acc-tele-aemp-url" class="ui-champ" type="url" maxlength="300" placeholder="https://" autocomplete="off">
+                  </div>
+                  <div class="ui-champ-groupe">
+                    <label class="ui-etiquette" for="acc-tele-aemp-auth">${trad('Mode de connexion')}</label>
+                    <div class="ui-select-wrap">
+                      <select id="acc-tele-aemp-auth" class="ui-champ">
+                        <option value="basic">${trad('Identifiant + secret (Basic)')}</option>
+                        <option value="oauth2">${trad('OAuth2 (identifiant + secret)')}</option>
+                        <option value="bearer">${trad('Jeton d\'accès')}</option>
+                      </select>
+                      ${picto('chevronBas')}
+                    </div>
+                  </div>
+                  <div class="ui-champ-groupe" data-aemp-champ="oauth2" hidden>
+                    <label class="ui-etiquette" for="acc-tele-aemp-token-url">${trad('Adresse de connexion OAuth2')}</label>
+                    <input id="acc-tele-aemp-token-url" class="ui-champ" type="url" maxlength="300" placeholder="https://" autocomplete="off">
+                  </div>
+                  <div class="ui-grille" data-aemp-champ="basic oauth2">
+                    <div class="ui-champ-groupe">
+                      <label class="ui-etiquette" for="acc-tele-aemp-id">${trad('Identifiant')}</label>
+                      <input id="acc-tele-aemp-id" class="ui-champ" maxlength="500" autocomplete="off">
+                    </div>
+                    <div class="ui-champ-groupe">
+                      <label class="ui-etiquette" for="acc-tele-aemp-secret">${trad('Secret')}</label>
+                      <input id="acc-tele-aemp-secret" class="ui-champ" type="password" maxlength="500" autocomplete="new-password">
+                    </div>
+                  </div>
+                  <div class="ui-champ-groupe" data-aemp-champ="bearer" hidden>
+                    <label class="ui-etiquette" for="acc-tele-aemp-jeton">${trad('Jeton d\'accès')}</label>
+                    <input id="acc-tele-aemp-jeton" class="ui-champ" type="password" maxlength="2000" autocomplete="new-password">
+                  </div>
+                </div>
+                <div><button type="button" class="ui-btn ui-btn-plein" data-tele-creer>${trad('Créer la source')}</button></div>
+              </div>
             </div>
-            <div data-aemp-champ="basic oauth2">
-              <label for="acc-tele-aemp-id">${trad('Identifiant')}</label>
-              <input id="acc-tele-aemp-id" maxlength="500" autocomplete="off">
-              <label for="acc-tele-aemp-secret">${trad('Secret')}</label>
-              <input id="acc-tele-aemp-secret" type="password" maxlength="500" autocomplete="new-password">
-            </div>
-            <div data-aemp-champ="bearer" hidden>
-              <label for="acc-tele-aemp-jeton">${trad('Jeton d\'accès')}</label>
-              <input id="acc-tele-aemp-jeton" type="password" maxlength="2000" autocomplete="new-password">
-            </div>
-          </div>
+          </section>
         </div>
-        <div class="plan-field">
-          <div class="label">${trad('Machines reliées')}</div>
-          <p class="hint">${trad('Choisis la source et l\'identifiant du boîtier (IMEI, VIN…) pour chaque machine à suivre automatiquement. Sans source, la machine reste en saisie manuelle.')}</p>
-          <div id="acc-tele-machines"></div>
+        <div class="ui-colonne">
+          <section class="ui-section">
+            ${teteSectionKit('boite', trad('Machines reliées'), trad('Choisis la source et l\'identifiant du boîtier (IMEI, VIN…) pour chaque machine à suivre automatiquement. Sans source, la machine reste en saisie manuelle.'))}
+            <div class="ui-section-corps">
+              <div id="acc-tele-machines" class="ui-liste"></div>
+            </div>
+          </section>
         </div>
-      </section>`;
+      </div>`;
 }
 
 async function preparerCarteTelemetrie(racine) {
@@ -5818,7 +5835,7 @@ async function preparerCarteTelemetrie(racine) {
   const pastille = carte.querySelector('#acc-tele-compte');
   const dire = (texte, estErreur) => {
     msg.textContent = texte || '';
-    msg.className = estErreur ? 'hint is-late' : 'hint';
+    msg.className = estErreur ? 'ui-aide is-late' : 'ui-aide';
   };
   const adresse = `${SUPABASE_URL}/functions/v1/telemetrie-ingest`;
   let sources = [];
@@ -5831,34 +5848,36 @@ async function preparerCarteTelemetrie(racine) {
         ? `${trad('Compte constructeur')} · ${s.last_poll_at ? tR('dernière relève {quand}', { quand: ilYaSupport(s.last_poll_at) }) : trad('pas encore relevé')}`
         : `${s.kind === 'flespi' ? trad('Boîtiers via Flespi') : trad('Autre système (API)')} · ${trad('jeton')} …${esc(s.token_hint)} · ${s.last_seen_at ? tR('dernier signal {quand}', { quand: ilYaSupport(s.last_seen_at) }) : trad('aucun signal reçu')}`;
       return `
-      <div class="tele-source-ligne" data-source="${esc(s.id)}">
-        <div class="tele-nom">${esc(s.label)}
-          <span class="tele-sous">${detail}</span>
-          ${constructeur && s.last_error ? `<span class="tele-sous tele-erreur">${esc(tR('Dernière erreur : {erreur}', { erreur: s.last_error }))}</span>` : ''}
-        </div>
-        <div class="tele-actions">
-          ${constructeur ? `<button type="button" class="btn-row-action" data-tele-tester="${esc(s.id)}">${trad('Tester')}</button>
-          <button type="button" class="btn-row-action" data-tele-relier="${esc(s.id)}">${trad('Relier mes machines')}</button>` : ''}
-          <button type="button" class="btn-row-action" data-tele-revoquer="${esc(s.id)}">${trad('Révoquer')}</button>
+      <div class="ui-ligne is-deux" data-source="${esc(s.id)}">
+        <div class="ui-ligne-id"><div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(s.label)}</span>
+          <span class="ui-ligne-sous">${detail}</span>
+          ${constructeur && s.last_error ? `<span class="ui-ligne-sous is-late">${esc(tR('Dernière erreur : {erreur}', { erreur: s.last_error }))}</span>` : ''}
+        </div></div>
+        <div class="ui-ligne-action is-etiquettes">
+          ${constructeur ? `<button type="button" class="ui-btn ui-btn-teinte" data-tele-tester="${esc(s.id)}">${trad('Tester')}</button>
+          <button type="button" class="ui-btn ui-btn-teinte" data-tele-relier="${esc(s.id)}">${trad('Relier mes machines')}</button>` : ''}
+          <button type="button" class="ui-btn ui-btn-teinte is-danger" data-tele-revoquer="${esc(s.id)}">${trad('Révoquer')}</button>
         </div>
       </div>`;
-    }).join('') : `<p class="hint">${trad('Aucune source pour le moment. Crée-en une pour recevoir des relevés.')}</p>`;
+    }).join('') : `<p class="ui-aide">${trad('Aucune source pour le moment. Crée-en une pour recevoir des relevés.')}</p>`;
 
     const options = (choisie) => `<option value="">${trad('Saisie manuelle')}</option>` +
       sources.map((s) => `<option value="${esc(s.id)}"${s.id === choisie ? ' selected' : ''}>${esc(s.label)}</option>`).join('');
     zoneMachines.innerHTML = (UI.machines || []).length ? UI.machines.map((m) => `
-      <div class="tele-ligne" data-machine="${esc(m.id)}">
-        <div class="tele-nom">${esc(m.name)}
-          <span class="tele-sous">${m.counter_source === 'telemetry' ? (m.telemetry_last_at ? tR('Dernier relevé automatique : {quand}', { quand: ilYaSupport(m.telemetry_last_at) }) : trad('En attente du premier relevé')) : trad('Saisie manuelle')}</span>
-          ${SCHEMA.hasGps ? `<label class="tele-localiser"${m.counter_source === 'telemetry' ? '' : ` title="${esc(trad('Relie d\'abord la machine à un boîtier.'))}"`}>
+      <div class="ui-ligne" data-machine="${esc(m.id)}">
+        <div class="ui-ligne-id"><div class="ui-ligne-textes">
+        <span class="ui-ligne-nom">${esc(m.name)}</span>
+          <span class="ui-ligne-sous">${m.counter_source === 'telemetry' ? (m.telemetry_last_at ? tR('Dernier relevé automatique : {quand}', { quand: ilYaSupport(m.telemetry_last_at) }) : trad('En attente du premier relevé')) : trad('Saisie manuelle')}</span>
+          ${SCHEMA.hasGps ? `<label class="ui-case"${m.counter_source === 'telemetry' ? '' : ` title="${esc(trad('Relie d\'abord la machine à un boîtier.'))}"`}>
             <input type="checkbox" data-tele-localiser${m.position_enabled ? ' checked' : ''}${m.counter_source === 'telemetry' ? '' : ' disabled'}>
             <span>${trad('Localiser')}</span>${m.position_enabled && m.last_position_at ? ` <span class="tele-sous">· ${esc(tR('position {quand}', { quand: ilYaSupport(m.last_position_at) }))}</span>` : ''}
           </label>` : ''}
-        </div>
-        <select class="tele-source" aria-label="${esc(tR('Source de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>${options(m.telemetry_source_id)}</select>
-        <input class="tele-ref" maxlength="64" value="${esc(m.telemetry_ref || '')}" placeholder="${esc(trad('Identifiant du boîtier'))}" aria-label="${esc(tR('Identifiant du boîtier de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>
-        <button type="button" class="btn-row-action" data-tele-enregistrer${sources.length ? '' : ' disabled'}>${trad('Enregistrer')}</button>
-      </div>`).join('') : `<p class="hint">${trad('Aucune machine.')}</p>`;
+        </div></div>
+        <div class="ui-ligne-info is-champs"><div class="ui-select-wrap"><select class="ui-champ" data-tele-source aria-label="${esc(tR('Source de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>${options(m.telemetry_source_id)}</select>${picto('chevronBas')}</div>
+        <input class="ui-champ" data-tele-ref maxlength="64" value="${esc(m.telemetry_ref || '')}" placeholder="${esc(trad('Identifiant du boîtier'))}" aria-label="${esc(tR('Identifiant du boîtier de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}></div>
+        <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-teinte" data-tele-enregistrer${sources.length ? '' : ' disabled'}>${trad('Enregistrer')}</button></div>
+      </div>`).join('') : `<p class="ui-aide">${trad('Aucune machine.')}</p>`;
   }
 
   async function charger() {
@@ -5878,13 +5897,13 @@ async function preparerCarteTelemetrie(racine) {
       ? trad('Dans Flespi, crée un « HTTP stream » vers l\'adresse ci-dessous, avec l\'en-tête personnalisé x-kalea-token. L\'identifiant de la machine est l\'« ident » du boîtier (souvent son IMEI).')
       : trad('Envoie une requête POST en JSON à l\'adresse ci-dessous, avec l\'en-tête x-kalea-token. Chaque relevé : ref (identifiant du boîtier), counter (valeur), unit (hours ou km), at (date ISO).');
     zoneJeton.innerHTML = `
-      <div class="tele-jeton" role="status">
+      <div class="ui-groupe" role="status">
         <strong>${trad('Copie ce jeton maintenant : il ne sera plus jamais affiché.')}</strong>
-        <p class="hint">${consigne}</p>
-        <div class="tele-code"><span class="tele-code-label">${trad('Adresse')}</span><code>${esc(adresse)}</code>
-          <button type="button" class="link-inline" data-tele-copier="${esc(adresse)}">${trad('Copier')}</button></div>
-        <div class="tele-code"><span class="tele-code-label">x-kalea-token</span><code>${esc(jeton)}</code>
-          <button type="button" class="link-inline" data-tele-copier="${esc(jeton)}">${trad('Copier')}</button></div>
+        <p class="ui-aide">${consigne}</p>
+        <div class="ui-champ-groupe"><span class="ui-etiquette">${trad('Adresse')}</span><code class="ui-code">${esc(adresse)}</code>
+          <div><button type="button" class="ui-btn ui-btn-teinte" data-tele-copier="${esc(adresse)}">${trad('Copier')}</button></div></div>
+        <div class="ui-champ-groupe"><span class="ui-etiquette">x-kalea-token</span><code class="ui-code">${esc(jeton)}</code>
+          <div><button type="button" class="ui-btn ui-btn-teinte" data-tele-copier="${esc(jeton)}">${trad('Copier')}</button></div></div>
       </div>`;
   }
 
@@ -5954,9 +5973,9 @@ async function preparerCarteTelemetrie(racine) {
       if (!r || !r.ok) { dire(tR('Connexion impossible : {erreur}', { erreur: (r && r.erreur) || trad('Réponse inattendue du serveur.') }), true); return; }
       ['#acc-tele-nom', '#acc-tele-aemp-id', '#acc-tele-aemp-secret', '#acc-tele-aemp-jeton'].forEach((sel) => { carte.querySelector(sel).value = ''; });
       zoneJeton.innerHTML = `
-        <div class="tele-jeton" role="status">
+        <div class="ui-groupe" role="status">
           <strong>${tR('Connexion réussie : {n} machine(s) trouvée(s) chez le constructeur.', { n: r.total })}</strong>
-          <p class="hint">${trad('Étape suivante : « Relier mes machines » rapproche tes machines KALEA de celles du constructeur par numéro de série. Le compteur de chaque machine reconnue sera remplacé par celui du constructeur.')}</p>
+          <p class="ui-aide">${trad('Étape suivante : « Relier mes machines » rapproche tes machines KALEA de celles du constructeur par numéro de série. Le compteur de chaque machine reconnue sera remplacé par celui du constructeur.')}</p>
         </div>`;
       dire('');
       await charger();
@@ -6065,8 +6084,8 @@ async function preparerCarteTelemetrie(racine) {
       const ligne = cible.closest('[data-machine]');
       const machine = (UI.machines || []).find((m) => m.id === ligne.getAttribute('data-machine'));
       if (!machine) return;
-      const source = ligne.querySelector('.tele-source').value || null;
-      const ref = (ligne.querySelector('.tele-ref').value || '').trim() || null;
+      const source = ligne.querySelector('[data-tele-source]').value || null;
+      const ref = (ligne.querySelector('[data-tele-ref]').value || '').trim() || null;
       if (source && !ref) { dire(trad('Indique l\'identifiant du boîtier de cette machine.'), true); return; }
       const auto = !!(source && ref);
       // Un changement de boîtier repart de zéro : l'ancien décalage et l'ancien
@@ -6279,7 +6298,7 @@ async function afficherListeTickets(overlay, moi) {
     return;
   }
   if (!tickets || !tickets.length) {
-    zone.innerHTML = `<div class="hint">${trad('Aucune demande pour l\'instant.')}</div>`;
+    zone.innerHTML = `<div class="ui-aide">${trad('Aucune demande pour l\'instant.')}</div>`;
     return;
   }
   // Dernier message par ticket, en un seul aller-retour (jamais une requête
@@ -6381,7 +6400,7 @@ function ouvrirSelecteurMachine(actuelId, onConfirm) {
     </div>
     <div class="support-picker-liste" id="support-picker-liste"></div>
     <div class="support-picker-pied">
-      <span class="hint" id="support-picker-compte" style="margin:0;"></span>
+      <span class="ui-aide" id="support-picker-compte" style="margin:0;"></span>
       <div class="support-picker-pied-droite">
         <button type="button" class="secondary" id="support-picker-effacer">${trad('Effacer')}</button>
         <button type="button" class="primary" id="support-picker-confirmer">${trad('Confirmer la sélection')}</button>
@@ -6427,7 +6446,7 @@ function afficherNouveauTicket(overlay, moi) {
       <label for="support-message">${trad('Message')}</label>
       <textarea id="support-message" rows="4" required></textarea>
     </div>
-    <div class="hint" id="support-nouveau-msg" role="status" aria-live="polite"></div>
+    <div class="ui-aide" id="support-nouveau-msg" role="status" aria-live="polite"></div>
     <div class="modal-actions">
       <button type="button" class="primary" id="support-envoyer"><span class="card-ico">${picto('envoyer')}</span><span>${trad('Envoyer')}</span></button>
       <button type="button" class="secondary" id="support-annuler">${trad('Annuler')}</button>
@@ -6506,7 +6525,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
         <span class="support-compositeur-hint">${trad('Entrée pour envoyer, Maj+Entrée pour un saut de ligne')}</span>
       </div>
       <textarea id="support-reponse" rows="2"></textarea>
-      <div class="hint" id="support-fil-msg" role="status" aria-live="polite"></div>
+      <div class="ui-aide" id="support-fil-msg" role="status" aria-live="polite"></div>
       <div class="support-compositeur-actions">
         <button type="button" class="secondary" id="support-retour-bas">${trad('Retour')}</button>
         <button type="submit" class="primary" id="support-repondre"><span>${trad('Envoyer')}</span><span class="card-ico">${picto('envoyer')}</span></button>
@@ -6537,7 +6556,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
         <span class="support-bulle-auteur">${avatar}<span class="nom">${esc(auteur)}</span><span>· ${ilYaSupport(m2.created_at)}</span></span>
         <div class="support-bulle">${esc(m2.body)}</div>
       </div>`;
-    }).join('') || `<div class="hint">${trad('Aucun message.')}</div>`;
+    }).join('') || `<div class="ui-aide">${trad('Aucun message.')}</div>`;
     fil.scrollTop = fil.scrollHeight;
   }
 
@@ -6699,10 +6718,10 @@ function openUpgradeNotice(companyId, message) {
       // Pas de bouton ici : ce serait le MÊME portail générique que celui
       // déjà proposé sur la carte « Offre actuelle » — juste le texte
       // explicatif, pour ne pas le répéter deux fois.
-      return `<div class="hint">${esc(trad(correspondante.changement))}</div>`;
+      return `<div class="ui-aide">${esc(trad(correspondante.changement))}</div>`;
     }
     const lien = STRIPE_LIENS[correspondante.cle];
-    if (!lien) return `<div class="hint">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@kalea.pro.')}</div>`;
+    if (!lien) return `<div class="ui-aide">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@kalea.pro.')}</div>`;
     const url = lien + '?client_reference_id=' + encodeURIComponent(companyId);
     urlPaiement[correspondante.cle] = url;
     const classe = o.recommandee ? 'offre-bouton is-primaire' : 'offre-bouton is-accent';
@@ -6767,7 +6786,7 @@ function openUpgradeNotice(companyId, message) {
       </div>
       <div class="offres-grille">${cartes}</div>
       ${blocPlan}
-      <div class="hint" id="forfait-msg" role="status" aria-live="polite"></div>
+      <div class="ui-aide" id="forfait-msg" role="status" aria-live="polite"></div>
       <div class="offres-pied">
         <div class="offres-confiance">
           <span>${picto('paiement')}${trad('Paiement sécurisé')}</span>
@@ -7376,7 +7395,7 @@ function renderVerrouillage() {
       <div class="modal-actions">
         <button type="button" class="primary" id="verrou-bouton">${libelle}</button>
       </div>
-      <div class="hint" id="verrou-msg" role="status" aria-live="polite"></div>
+      <div class="ui-aide" id="verrou-msg" role="status" aria-live="polite"></div>
       <button type="button" class="link-inline" id="verrou-sortie">${trad('Se déconnecter et ressaisir mon mot de passe')}</button>
     </div>`;
   document.getElementById('verrou-bouton').addEventListener('click', () => tenterDeverrouillage());
@@ -7962,7 +7981,7 @@ async function preparerBiometrieConnexion() {
       if (inscrit) {
         await oublierAccesSansMotDePasse();
         zone.hidden = false;
-        zone.innerHTML = `<p class="hint">${trad('Le déverrouillage biométrique n\'est plus disponible sur ce téléphone : ressaisis ton mot de passe.')}</p>`;
+        zone.innerHTML = `<p class="ui-aide">${trad('Le déverrouillage biométrique n\'est plus disponible sur ce téléphone : ressaisis ton mot de passe.')}</p>`;
       }
       return;
     }
@@ -7971,9 +7990,9 @@ async function preparerBiometrieConnexion() {
     zone.innerHTML = `
       ${inscrit ? `<button type="button" class="secondary" id="bio-connexion">${txt.bouton}</button>` : ''}
       <label class="check-row" for="bio-activer"><input type="checkbox" id="bio-activer"${inscrit ? ' checked' : ''}> ${txt.case}</label>
-      ${txt.repli ? `<p class="hint">${txt.repli}</p>` : ''}
-      <p class="hint">${trad('Aucun mot de passe n\'est enregistré : KALEA garde un jeton de session, révocable dans « Mon compte ».')}</p>
-      <div class="hint" id="login-bio-msg" role="status" aria-live="polite"></div>`;
+      ${txt.repli ? `<p class="ui-aide">${txt.repli}</p>` : ''}
+      <p class="ui-aide">${trad('Aucun mot de passe n\'est enregistré : KALEA garde un jeton de session, révocable dans « Mon compte ».')}</p>
+      <div class="ui-aide" id="login-bio-msg" role="status" aria-live="polite"></div>`;
     const bouton = document.getElementById('bio-connexion');
     const msg = document.getElementById('login-bio-msg');
     const cochee = document.getElementById('bio-activer');
@@ -9518,7 +9537,7 @@ function remindersCardHtml() {
         </span>
         <span class="badge ${parPush ? 'ok' : 'neutral'}">${parPush ? trad('Actif') : trad('Inactif')}</span>
       </div>
-      <p class="hint">${parEmail ? trad('E-mail actif : le serveur envoie le rappel avant chaque échéance, même application fermée.') : trad('Aucun e-mail ne partira tant que l\'adresse et la case ne sont pas réglées dans Rappels.')}</p>
+      <p class="ui-aide">${parEmail ? trad('E-mail actif : le serveur envoie le rappel avant chaque échéance, même application fermée.') : trad('Aucun e-mail ne partira tant que l\'adresse et la case ne sont pas réglées dans Rappels.')}</p>
     </section>`;
 }
 
@@ -11027,7 +11046,7 @@ function machineCardHtml(m) {
               <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>
             </div>
             ${metaLigne || identifiant ? `<div class="mstrip-meta">${[metaLigne, identifiant ? `<span class="id">${esc(identifiant)}</span>` : null].filter(Boolean).join(' &bull; ')}</div>` : ''}
-            ${horsOffre ? `<div class="hint">${trad('Non couverte par ton offre')}</div>` : ''}
+            ${horsOffre ? `<div class="ui-aide">${trad('Non couverte par ton offre')}</div>` : ''}
             ${tache ? `
             <div class="mstrip-tache is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">
               ${info.state === 'late' ? picto('alerte') : (info.state === 'soon' ? picto('bientot') : pictoEtat('ok'))}
@@ -11593,7 +11612,7 @@ function preparationHtml() {
       ${rien
         ? `<p class="muted-text">${trad('Rien à prévoir sur cette période.')}</p>`
         : `${produits}${sansItems}`}
-      ${(liste.produits.length || liste.sansItems.length) ? `<div class="hint">${trad('Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.')}</div>` : ''}
+      ${(liste.produits.length || liste.sansItems.length) ? `<div class="ui-aide">${trad('Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.')}</div>` : ''}
     </section>`;
 }
 
@@ -14944,7 +14963,7 @@ function ouvrirExplicationPump() {
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pump-titre">
       <h2 id="pump-titre">${trad('Principe de valorisation PUMP')}</h2>
       <p class="sub">${trad('Prix Unitaire Moyen Pondéré — la méthode utilisée par ce module pour donner une valeur réelle à ton stock.')}</p>
-      <div class="hint" style="margin-top:10px;line-height:1.6;">
+      <div class="ui-aide" style="margin-top:10px;line-height:1.6;">
         <p>${trad('À chaque entrée de stock, le coût moyen d\'une référence est recalculé en pondérant l\'ancien stock par son ancien coût, et la quantité entrante par son coût d\'achat réel :')}</p>
         <p style="margin-top:8px;font-family:'Space Grotesk',monospace;background:var(--surface-soft);padding:10px 12px;border-radius:var(--r-md);">${trad('nouveau coût = (stock × ancien coût + entrée × prix d\'achat) / (stock + entrée)')}</p>
         <p style="margin-top:8px;">${trad('Une sortie ou un transfert ne modifie jamais ce coût moyen — seule une nouvelle entrée le fait évoluer. C\'est ce coût qui sert à calculer la valeur totale du stock (quantité × coût moyen) affichée en haut de cette page.')}</p>
@@ -15221,7 +15240,7 @@ function ouvrirEditionKit(kit) {
         </div>
         <button type="button" class="stock-btn-outline" id="kit-ligne-ajouter" style="margin-top:10px;">${picto('plusCercle')}<span>${trad('Ajouter une ligne')}</span></button>
       </div>
-      <div class="hint" id="kit-msg" role="status" aria-live="polite" style="margin-top:10px;"></div>
+      <div class="ui-aide" id="kit-msg" role="status" aria-live="polite" style="margin-top:10px;"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="kit-fermer">${trad('Fermer')}</button>
         <button type="button" class="primary" id="kit-enregistrer"><span>${trad('Enregistrer le kit')}</span></button>
@@ -15455,11 +15474,11 @@ function ouvrirNouveauMouvementModal() {
         <select id="mvt-intervention" disabled>
           <option value="">${trad('Choisir une machine d\'abord')}</option>
         </select>
-        <p class="hint">${trad('Si cette sortie a déjà été saisie via « Enregistrer une intervention », ne la lie pas ici aussi — le coût serait compté deux fois.')}</p>
+        <p class="ui-aide">${trad('Si cette sortie a déjà été saisie via « Enregistrer une intervention », ne la lie pas ici aussi — le coût serait compté deux fois.')}</p>
       </div>
       <label for="mvt-motif" style="margin-top:8px;display:block;">${trad('Motif / note (optionnel)')}</label>
       <input id="mvt-motif" placeholder="${trad('Ex : bon de livraison, casse, inventaire…')}">
-      <div class="hint" id="mvt-msg" role="status" aria-live="polite"></div>
+      <div class="ui-aide" id="mvt-msg" role="status" aria-live="polite"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="mvt-fermer">${trad('Fermer')}</button>
         <button type="button" class="primary" id="mvt-valider"><span>${trad('Enregistrer le mouvement')}</span></button>
@@ -15663,7 +15682,7 @@ function ouvrirImportMouvementsStock() {
             <option value="">${trad('Choisir un magasin…')}</option>
             ${optionsMagasins}
           </select>
-          <p class="hint">${trad('Toutes les lignes du fichier seront enregistrées comme des ENTRÉES dans ce magasin — une colonne « Magasin » séparée n\'est pas prise en charge.')}</p>
+          <p class="ui-aide">${trad('Toutes les lignes du fichier seront enregistrées comme des ENTRÉES dans ce magasin — une colonne « Magasin » séparée n\'est pas prise en charge.')}</p>
         </div>
 
         <div class="import-csv-section">
@@ -16082,18 +16101,16 @@ VIEWS.stock = {
 // l'offre Enterprise et au gérant ; la logique vit dans telemetrieCarteHtml() /
 // preparerCarteTelemetrie() (voir plus haut).
 VIEWS.telemetrie = {
+  fondBlanc: true,
   title: trad('Télémétrie'),
   subtitle: () => trad('Compteurs automatiques de tes machines'),
   render() {
     const carte = telemetrieCarteHtml();
     const blocCarte = carteGpsHtml();
     return `
-      <div class="vue-telemetrie">
-        <div class="agenda-toolbar">
-          <span class="agenda-eyebrow">${trad('Sources & machines reliées')}</span>
-        </div>
+      <div class="ui-page">
         ${blocCarte}
-        ${carte || `<section class="card"><p class="muted-text">${trad('La télémétrie est réservée au gérant, sur l\'offre Enterprise.')}</p></section>`}
+        ${carte || `<section class="ui-section"><p class="ui-aide">${trad('La télémétrie est réservée au gérant, sur l\'offre Enterprise.')}</p></section>`}
       </div>`;
   },
   mount() {
