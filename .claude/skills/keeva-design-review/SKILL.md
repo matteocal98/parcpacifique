@@ -41,6 +41,16 @@ faire AVANT de dire "c'est fait".
       SON rôle, pas un gris générique par défaut.
 - [ ] Le statut (retard/bientôt/à jour) se lit par un accent localisé (liseré,
       point, badge), jamais en recolorant tout le bloc.
+- [ ] **Règle « champs et listes » (référence : menu Stock, `.stock-liste` /
+      `.stock-row` / `.stock-form-panel`)** : les champs de saisie et les lignes
+      de liste sont en BLANC (`var(--surface)`). Quand ce qui est derrière eux est
+      déjà blanc (une carte blanche), c'est leur CONTENEUR qu'on teinte avec
+      `var(--surface-soft)` (= `rgba(14,19,51,.04)`, la seule valeur de contraste de
+      la charte) : une zone teintée portant des lignes blanches (bordure 1px
+      `var(--line)`, rayon `--r-md`). Un formulaire posé sur une carte blanche va dans
+      un panneau `.stock-form-panel` (`rgba(14,19,51,.015)` + bordure) et ses champs
+      y sont blancs. Un champ DANS une ligne blanche garde le fond par défaut des
+      champs (`--surface-soft`). Jamais un bloc teinté dans un parent de même teinte.
 
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —

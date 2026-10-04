@@ -7293,7 +7293,7 @@
   .tele-carte .tele-localiser input:disabled{cursor:not-allowed;}
   /* ═══ TÉLÉMÉTRIE — compteur automatique ═══ */
   .tele-carte [hidden]{display:none !important;}
-  .tele-carte .tele-aemp{display:grid;gap:8px;margin-top:10px;padding:14px;border-radius:12px;background:var(--surface-soft);}
+  .tele-carte .tele-aemp{display:grid;gap:8px;margin-top:10px;}
   .tele-carte .tele-aemp > div{display:grid;gap:8px;}
   .tele-carte .tele-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;}
   .tele-carte .btn-row-action{background:rgba(99,102,241,.1);border-color:transparent;color:var(--ink);}
@@ -7304,7 +7304,9 @@
   .tele-badge{display:inline-block;align-self:flex-start;margin-top:6px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--ok-bg);color:var(--ok-ink);}
   .tele-badge.is-attente{background:var(--surface-soft);color:var(--ink-2);}
   .tele-badge.is-silence{background:var(--late-bg);color:var(--late);}
-  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line);}
+  .tele-carte .tele-source-ligne,.tele-carte .tele-ligne{display:grid;gap:8px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);}
+  /* Zone teintée (--surface-soft = rgba(14,19,51,.04)) qui porte les lignes blanches : même règle que .stock-liste. */
+  .tele-carte #acc-tele-liste:has(.tele-source-ligne),.tele-carte #acc-tele-machines:has(.tele-ligne){display:flex;flex-direction:column;gap:10px;background:var(--surface-soft);border-radius:var(--r-card);padding:10px;}
   .tele-carte .tele-source-ligne{grid-template-columns:minmax(0,1fr);}
   .tele-carte .tele-ligne{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;}
   .tele-carte .tele-ligne .tele-nom{grid-column:1/-1;}
