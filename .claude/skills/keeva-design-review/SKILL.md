@@ -32,6 +32,7 @@ faire AVANT de dire "c'est fait".
 
 **1. Fond et contraste**
 - [ ] **RÈGLE RÉVISÉE LE 2026-10-04 (écrans migrés vers kit.css, ex. Coûts & TCO) : page BLANCHE > chaque SECTION est un bloc teinté `--surface-soft` > ses éléments (tuile, ligne, encadré, champ, pastille, puce) sont BLANCS ; un champ/étiquette/unité posé DANS un élément blanc est teinté (l'inverse du parent). Aucune ombre, aucune bordure, jamais une section dans une section. Les écrans pas encore migrés suivent les lignes ci-dessous jusqu'à leur migration ; le fond blanc s'active par `fondBlanc: true` dans la définition de la vue.**
+- [ ] **RÈGLE 7 « LARGEUR » (2026-10-04, écrans migrés) : sur grand écran, les sections se rangent en DEUX COLONNES (`.ui-page` > `.ui-colonnes` > `.ui-colonne`, seuil 880 px de contenu) pour limiter le défilement et les champs/boutons à rallonge ; les sections au contenu large (classement, journal) restent pleine largeur, hors des colonnes ; répartir pour que les deux colonnes aient à peu près la même hauteur.**
 - [ ] Le fond de PAGE est teinté (`var(--surface-soft)`), jamais blanc pur.
 - [ ] Chaque bloc qui doit se détacher est blanc (`var(--surface)`) avec une ombre
       (`box-shadow: var(--shadow-soft)`) — jamais de `border` sur un bloc/une carte

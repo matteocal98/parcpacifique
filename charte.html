@@ -41,7 +41,7 @@
   <section class="ui-section">
     <div class="ui-section-tete">
       <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.3 19 6v6c0 4.6-3 8.2-7 9.2-4-1-7-4.6-7-9.2V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <div class="ui-section-titres"><h2 class="ui-section-titre">Les 6 règles</h2><p class="ui-section-sous">Validées le 2026-10-04. Si un écran les enfreint, c'est l'écran qui a tort.</p></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Les 7 règles</h2><p class="ui-section-sous">Validées le 2026-10-04. Si un écran les enfreint, c'est l'écran qui a tort.</p></div>
     </div>
     <ol class="charte-regles">
       <li><strong>Fond.</strong> La page est blanche ; chaque section est un bloc teinté (<code>--surface-soft</code> = <code>rgba(14,19,51,.04)</code>) dont les éléments (tuile, ligne, encadré, champ, bouton secondaire, puce) sont blancs. Aucune ombre, aucune bordure. Un seul niveau de bloc : jamais une section dans une section.</li>
@@ -50,6 +50,7 @@
       <li><strong>Alignement.</strong> Les éléments d'une même liste ou grille ont les mêmes colonnes et la même hauteur.</li>
       <li><strong>Statut.</strong> Un liseré ou un point de couleur, jamais un fond coloré.</li>
       <li><strong>Boutons.</strong> Un seul bouton plein par section au maximum ; les autres actions sont des pastilles ou des puces.</li>
+      <li><strong>Largeur.</strong> Sur grand écran, les sections se rangent en deux colonnes (<code>.ui-colonnes</code> &gt; <code>.ui-colonne</code>) : moins de défilement, pas de champs ni de boutons à rallonge. Elles s'empilent quand la place manque (≥ 880 px de contenu pour deux colonnes). Une section au contenu large (liste à colonnes, classement, journal) reste pleine largeur, hors des colonnes. On répartit les sections pour que les deux colonnes aient à peu près la même hauteur.</li>
     </ol>
   </section>
 
@@ -255,6 +256,20 @@
   &lt;div class="ui-groupe-tete"&gt;&lt;span class="ui-groupe-titre"&gt;Titre&lt;/span&gt;&lt;span class="ui-tag"&gt;repère&lt;/span&gt;&lt;/div&gt;
   &lt;div class="ui-champ-groupe"&gt;&lt;label class="ui-etiquette"&gt;…&lt;/label&gt;&lt;input class="ui-champ"&gt;&lt;/div&gt;
   &lt;div&gt;&lt;button class="ui-btn ui-btn-plein"&gt;…&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+  </section>
+
+  <section class="ui-section">
+    <div class="ui-section-tete">
+      <div class="ui-section-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/></svg></div>
+      <div class="ui-section-titres"><h2 class="ui-section-titre">Page en deux colonnes</h2><p class="ui-section-sous">Règle 7. <code>.ui-page</code> est le conteneur de la page ; <code>.ui-colonnes</code> pose deux <code>.ui-colonne</code> côte à côte dès que le contenu fait 880 px, une seule colonne en dessous. Les sections pleine largeur se placent avant ou après, hors des colonnes.</p></div>
+    </div>
+    <pre class="charte-code">&lt;div class="ui-page"&gt;
+  &lt;section class="ui-section"&gt;…&lt;/section&gt;                 &lt;!-- pleine largeur : tuiles, classement --&gt;
+  &lt;div class="ui-colonnes"&gt;
+    &lt;div class="ui-colonne"&gt;&lt;section class="ui-section"&gt;…&lt;/section&gt;&lt;section class="ui-section"&gt;…&lt;/section&gt;&lt;/div&gt;
+    &lt;div class="ui-colonne"&gt;&lt;section class="ui-section"&gt;…&lt;/section&gt;&lt;/div&gt;
+  &lt;/div&gt;
 &lt;/div&gt;</pre>
   </section>
 

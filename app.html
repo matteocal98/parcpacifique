@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FEBR8MlgsNKEjOL8qztUKTAz6LKhonko3D5uVVoO5A0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-GWb089zqvqmmLY8WAfWGEt96yaR47kFRGU0mKoB0U1A=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -14324,12 +14324,13 @@ VIEWS.tco = {
   subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
   render() {
     return `
-      <div class="vue-couts-tco">
+      <div class="ui-page">
         ${tcoKpiGridHtml()}
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
-        ${blocParametresTcoHtml()}
-        ${blocSeuilsCategorieTcoHtml()}
-        ${tcoTipCarteHtml()}
+        <div class="ui-colonnes">
+          <div class="ui-colonne">${blocParametresTcoHtml()}${tcoTipCarteHtml()}</div>
+          <div class="ui-colonne">${blocSeuilsCategorieTcoHtml()}</div>
+        </div>
         ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
       </div>`;
   },
@@ -16202,11 +16203,12 @@ VIEWS.account = {
           ${acces ? `<div class="ui-section-acces">${acces}</div>` : ''}
         </div>`;
     return `
+      <div class="ui-page"><div class="ui-colonnes"><div class="ui-colonne">
       <section class="ui-section">
         ${tete('batiment', trad('Société & Identité légale'), trad('Renseignements légaux d\'exploitation et de facturation.'),
           c.registrationNumber ? `<span class="ui-statut is-ok">${trad('RIDET actif')}</span>` : '')}
         <div class="ui-section-corps">
-          <div class="ui-grille">
+          <div class="ui-grille is-3">
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-name">${trad('Raison sociale')}</label>
               <input id="acc-name" class="ui-champ" required value="${esc(c.name || UI.companyName || '')}"${bloque}>
@@ -16312,6 +16314,16 @@ VIEWS.account = {
         </div>
       </section>
 
+      <section class="ui-section">
+        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
+        <div class="ui-section-corps">
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
+          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
+        </div>
+      </section>
+      </div>
+      <div class="ui-colonne">
+
       <!-- ── ÉQUIPE ────────────────────────────────────────────────
            Qui peut quoi, et ce que l'écran a le droit de proposer. Les rôles et
            leurs droits sont EXACTEMENT ceux que le serveur applique
@@ -16362,13 +16374,6 @@ VIEWS.account = {
         </div>
       </section>
 
-      <section class="ui-section">
-        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
-        <div class="ui-section-corps">
-          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
-          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
-        </div>
-      </section>
 
       <section class="ui-section">
         ${tete('alerte', trad('Zone sensible'), trad('Clôture d\'entreprise et suppression.'))}
@@ -16380,7 +16385,8 @@ VIEWS.account = {
           <div><button type="button" class="ui-btn ui-btn-pastille is-danger" id="acc-supprimer">${picto('corbeille')}<span>${trad('Supprimer mon compte')}</span></button></div>
           <div class="ui-aide" id="acc-supprimer-msg" role="status" aria-live="polite"></div>
         </div>
-      </section>`;
+      </section>
+      </div></div></div>`;
   },
   mount() {
     const root = document.getElementById('view-root');

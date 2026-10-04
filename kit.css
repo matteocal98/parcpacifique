@@ -10,7 +10,7 @@
    écrans disparaissent peu à peu, menu par menu, au fil des migrations.
    N'utilise QUE les variables de styles.css (:root) : aucune couleur en dur.
 
-   LES 6 RÈGLES (validées avec l'utilisateur le 2026-10-04)
+   LES 7 RÈGLES (validées avec l'utilisateur le 2026-10-04)
    1. FOND. La page est BLANCHE. Chaque SECTION est un bloc teinté (--surface-soft =
       rgba(14,19,51,.04)) ; ses ÉLÉMENTS (tuile, ligne, encadré, champ, bouton
       secondaire, puce) sont BLANCS dedans. Aucune ombre, aucune bordure. Un seul
@@ -26,6 +26,13 @@
    5. STATUT. Un liseré ou un point de couleur, JAMAIS un fond coloré.
    6. BOUTONS. Un seul bouton plein (.ui-btn-plein) par section au maximum ;
       les autres actions sont des pastilles ou des puces.
+   7. LARGEUR. Sur grand écran, les sections se rangent en DEUX COLONNES
+      (.ui-colonnes > .ui-colonne) pour limiter le défilement et éviter les champs
+      et boutons « à rallonge ». Elles s'empilent en une colonne quand la place manque
+      (container query sur .ui-page, seuil 880 px). Une section dont le contenu est
+      large (liste de lignes à colonnes, classement, journal) reste PLEINE LARGEUR,
+      hors des colonnes. On répartit les sections pour que les deux colonnes aient à peu
+      près la même hauteur.
    ============================================================================ */
 
 /* Page blanche : posée par renderApp sur le <body> pour les écrans migrés (VIEWS.x.fondBlanc) */
@@ -149,8 +156,7 @@ body.fond-blanc .main{background:var(--surface);}
 
 /* ── 9. Grille : des éléments de MÊME hauteur ───────────────────────────────────────── */
 .ui-grille{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:stretch;}
-.ui-grille.is-3{grid-template-columns:repeat(3,minmax(0,1fr));}
-@media (max-width:760px){.ui-grille.is-3{grid-template-columns:minmax(0,1fr);}}
+.ui-grille.is-3{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
 
 /* ── 10. Barre d'outils : des éléments posés sur le fond, jamais un bloc blanc ────── */
 .ui-barre{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
@@ -227,4 +233,18 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
 /* Ligne à texte long (ex. un membre d'équipe : nom + plusieurs détails) : la première colonne prend la place */
 @container (min-width:640px){
   .ui-ligne.is-texte-long{grid-template-columns:minmax(0,2.4fr) auto minmax(190px,1fr);}
+}
+
+/* ── 13. Page en deux colonnes (règle 7) ──────────────────────────────────────────
+   .ui-page est un conteneur : la mise en colonnes dépend de LA LARGEUR DU CONTENU, pas de l'écran. */
+.ui-page{container-type:inline-size;}
+.ui-colonnes{display:grid;grid-template-columns:minmax(0,1fr);gap:0 20px;align-items:start;}
+.ui-colonne{display:flex;flex-direction:column;min-width:0;}
+@container (min-width:880px){
+  .ui-colonnes{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+/* Une ligne à deux zones (texte | action) se met côte à côte dès que la colonne le permet */
+@container (min-width:420px){
+  .ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto;}
+  .ui-ligne.is-deux .ui-ligne-action{justify-content:flex-end;}
 }
