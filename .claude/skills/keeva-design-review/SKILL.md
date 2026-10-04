@@ -53,9 +53,11 @@ faire AVANT de dire "c'est fait".
       (`--surface-soft` = `rgba(14,19,51,.04)`, la seule teinte de contraste). Les
       fenêtres (modales) ont leur propre fond teinté et des champs blancs. Exceptions
       acceptées : les cartes qui sont elles-mêmes UN élément (carte de chiffre clé,
-      alerte, machine). Au 2026-10-04 les menus Machines, Plan d'entretien et
-      Télémétrie suivent la règle ; restent à convertir : Mon compte, Rappels,
-      Coûts & TCO, Stock & SAV, Tableau de bord, Agenda.
+      alerte, machine). Au 2026-10-04 TOUS les menus suivent la règle (Machines,
+      Plan d'entretien, Télémétrie, Mon compte, Rappels, Coûts & TCO, Stock & SAV,
+      Tableau de bord, Agenda) ; le CSS correspondant est regroupé en fin de
+      styles.css (blocs « CHARTE FLOTTANT PARTOUT »), ciblé par
+      `#view-root[data-view="…"]`. Tout NOUVEAU menu doit être ajouté à ces listes.
 
 **2. Structure de page**
 - [ ] Pas de grande carte-mère blanche qui enveloppe toolbar + filtres + liste —

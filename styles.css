@@ -6912,7 +6912,7 @@
   @media (max-width:520px){.tco-devise-grid{grid-template-columns:1fr;}}
   .tco-devise-carte{position:relative;display:flex;align-items:center;padding:14px;border-radius:var(--r-md);cursor:pointer;background:var(--surface);box-shadow:var(--shadow-soft);transition:background .15s;}
   .tco-devise-carte.is-selected{background:var(--ok-bg);}
-  .tco-devise-carte input{position:absolute;opacity:0;pointer-events:none;}
+  .tco-devise-carte input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
   .tco-devise-coche{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface-soft);display:flex;align-items:center;justify-content:center;margin-right:12px;}
   .tco-devise-carte.is-selected .tco-devise-coche{background:var(--ink);}
   .tco-devise-coche svg{width:14px;height:14px;color:transparent;}
@@ -7347,3 +7347,26 @@
   #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   #view-root[data-view="account"] :is(.compte-section,.compte-sous-bloc,.membre-ligne) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface-soft);border:none;box-shadow:none;}
   #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
+
+  /* ═══ CHARTE « FLOTTANT PARTOUT » — Rappels, Coûts & TCO, Stock & SAV, Tableau de bord, Agenda ═══
+     Même modèle que Mon compte et le Parc Machines : pas de grande carte blanche, les blocs
+     reposent sur le fond de page. Éléments = blancs + ombre légère, sans bordure ; champ DANS
+     un élément blanc = --surface-soft (rgba(14,19,51,.04)). Le calendrier de l'Agenda est UN
+     élément (un widget) : il reste une carte blanche. */
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section):not(.agenda-calendrier){background:none;box-shadow:none;border:none;padding:0 0 14px;border-radius:0;}
+  /* Champs posés sur le fond : blancs, ombre légère, sans bordure */
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(section.card,section.stock-section) :is(input,select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
+  /* Éléments blancs (anciens sous-blocs teintés avec bordure) */
+  :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-seuil-carte,.tco-callout.is-info,.prep-detail-groupe,.prep-famille,.chrono-carte.is-soon,.chrono-carte.is-unknown){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  :is(#view-root[data-view="stock"]) .stock-row{border:none;box-shadow:var(--shadow-soft);}
+  :is(#view-root[data-view="stock"]) .stock-row:hover{border:none;box-shadow:0 4px 16px rgba(14,19,51,.1);background:var(--surface);}
+  :is(#view-root[data-view="stock"]) :is(.stock-liste,.stock-form-panel){background:none;border:none;padding:0;box-shadow:none;}
+  /* Champ DANS un élément blanc : teinte par défaut des champs */
+  html body :is(#view-root[data-view="reminders"],#view-root[data-view="tco"],#view-root[data-view="stock"],#view-root[data-view="dashboard"],#view-root[data-view="agenda"]) :is(.push-role-ligne,.tco-seuil-carte,.tco-callout,.prep-detail-groupe,.prep-famille,.chrono-carte,.stock-row,.agenda-calendrier) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,.champ-select,.tco-champ-unite){background:var(--surface-soft);box-shadow:none;border-color:transparent;}
+  /* Dans un groupe blanc, les lignes de produit passent en teinte (blanc sur blanc sinon) */
+  #view-root[data-view="agenda"] .prep-detail-produit,#view-root[data-view="dashboard"] .prep-detail-produit{background:var(--surface-soft);box-shadow:none;border:none;}
+  /* Stock & SAV : la section n'est plus un cadre (bordure, entête séparée par un filet, corps rembourré) */
+  #view-root[data-view="stock"] section.stock-section{border:none;overflow:visible;}
+  #view-root[data-view="stock"] .stock-section-head{padding:0 0 12px;border-bottom:none;}
+  #view-root[data-view="stock"] .stock-section-body,#view-root[data-view="stock"] .stock-section-body.is-tight{padding:0;}
