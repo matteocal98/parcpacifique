@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rBObCSKci8Pg2UTJPB/tI8Q3dTBBT/nCdRrEcPZY4GI=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-3yUUwIPO4Uykpvk8Kt1Z5tQBHbRx4UTO2beuvf0URDo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5825,37 +5825,72 @@ function contenuPopupGps(machineId) {
   return div;
 }
 
+// Plusieurs machines au MÊME endroit (même chantier, même dépôt) : leurs repères se superposeraient et
+// l'un cacherait l'autre. On les écarte en petit cercle autour du point commun, d'un décalage FIXE en
+// pixels (le même à tous les zooms), et chaque bulle photo + nom s'ouvre vers l'extérieur.
+// Le décalage est purement visuel : les positions enregistrées ne changent pas.
+function dispositionGps(idMachine, groupes) {
+  const groupe = [...groupes.values()].find((ids) => ids.includes(idMachine)) || [idMachine];
+  if (groupe.length < 2) return { dx: 0, dy: 0, direction: 'top', offset: [0, -14] };
+  const n = groupe.length;
+  const rang = groupe.indexOf(idMachine);
+  // Deux machines : à gauche et à droite ; trois ou plus : réparties en cercle, la première en haut.
+  const angle = n === 2 ? (rang === 0 ? Math.PI : 0) : (-Math.PI / 2 + (2 * Math.PI * rang) / n);
+  const rayon = n === 2 ? 22 : 30;
+  const dx = Math.round(Math.cos(angle) * rayon);
+  const dy = Math.round(Math.sin(angle) * rayon);
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  if (cos > 0.5) return { dx, dy, direction: 'right', offset: [14, 0] };
+  if (cos < -0.5) return { dx, dy, direction: 'left', offset: [-14, 0] };
+  return sin < 0 ? { dx, dy, direction: 'top', offset: [0, -14] } : { dx, dy, direction: 'bottom', offset: [0, 14] };
+}
+
 function majMarqueursGps(ajuster) {
   if (!carteGpsVivante()) return;
   const L = window.L;
   const vus = new Set();
   const points = [];
+  const groupes = new Map();
+  machinesLocalisees().forEach((m) => {
+    const cle = `${Number(m.last_lat).toFixed(4)},${Number(m.last_lon).toFixed(4)}`;
+    if (!groupes.has(cle)) groupes.set(cle, []);
+    groupes.get(cle).push(m.id);
+  });
+  groupes.forEach((ids) => ids.sort());
   machinesLocalisees().forEach((m) => {
     const lat = Number(m.last_lat);
     const lon = Number(m.last_lon);
     vus.add(m.id);
     points.push([lat, lon]);
+    const disp = dispositionGps(m.id, groupes);
     let etat = 'ok';
     try { etat = infoMachine(m).state; } catch (err) { /* état inconnu : repère neutre */ }
     const icone = L.divIcon({
       className: 'tele-marker',
       html: `<span class="tele-marker-pt is-${etat === 'late' || etat === 'soon' ? etat : 'ok'}"></span>`,
-      iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
+      iconSize: [24, 24], iconAnchor: [12 - disp.dx, 12 - disp.dy], popupAnchor: [disp.dx, disp.dy - 12], tooltipAnchor: [disp.dx, disp.dy],
     });
+    const lierInfobulle = (marqueur) => {
+      marqueur.bindTooltip(() => contenuInfobulleGps(m.id), {
+        permanent: true, interactive: true, direction: disp.direction, offset: disp.offset, opacity: 1, className: 'tele-infobulle',
+      });
+      marqueur._directionInfobulle = disp.direction;
+    };
     let mk = couchesGps.marqueurs.get(m.id);
     if (mk) {
       mk.setLatLng([lat, lon]);
       mk.setIcon(icone);
-      if (mk.getTooltip()) mk.setTooltipContent(contenuInfobulleGps(m.id));
+      // Le groupe a changé (une machine arrive au même endroit, ou en part) : la bulle s'ouvre dans l'autre sens.
+      if (mk._directionInfobulle !== disp.direction) { mk.unbindTooltip(); lierInfobulle(mk); }
+      else if (mk.getTooltip()) mk.setTooltipContent(contenuInfobulleGps(m.id));
     }
     else {
       mk = L.marker([lat, lon], { icon: icone, title: m.name }).addTo(carteGps);
       mk.bindPopup(() => contenuPopupGps(m.id));
       // permanent : toujours visible. interactive : un clic sur la bulle ouvre la fenêtre du
       // repère, comme un clic sur le point.
-      mk.bindTooltip(() => contenuInfobulleGps(m.id), {
-        permanent: true, interactive: true, direction: 'top', offset: [0, -14], opacity: 1, className: 'tele-infobulle',
-      });
+      lierInfobulle(mk);
       // La fenêtre du clic contient déjà la photo et le nom : la bulle s'efface pendant qu'elle
       // est ouverte (sinon elle serait cachée derrière) et revient à sa fermeture.
       mk.on('popupopen', () => {
