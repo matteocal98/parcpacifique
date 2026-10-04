@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ju0NmxJcIZoBDjrHqEdmNHKkLNsArSizchZE38Vu7PQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-GFSlFx1mN5NkRayRXA6zXHA3T9Yfephdi2U2ioI0EhY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11879,7 +11879,7 @@ function preparationCompleteAgendaHtml() {
           ${PREPARATION_HORIZON.map((j) => `<button type="button" class="${j === jours ? 'is-actif' : ''}" data-horizon="${j}" aria-pressed="${j === jours}">${esc(tR('{n} j', { n: j }))}</button>`).join('')}
         </div>`)}
       <div class="ui-section-corps">
-        ${groupesHtml}${sansItemsHtml}
+        <div class="ui-deux">${groupesHtml}${sansItemsHtml}</div>
         <div class="ui-barre">
           <span class="ui-aide">${trad('Généré automatiquement d\'après les manuels constructeurs')}</span>
           <div class="ui-section-acces"><button type="button" class="ui-btn ui-btn-pastille" id="prep-copier">${picto('copier')}<span>${trad('Copier la liste commande')}</span></button></div>
@@ -12803,9 +12803,8 @@ VIEWS.agenda = {
         </section>`;
     return `
       <div class="ui-page">
-        ${piecesHtml
-          ? `<div class="ui-colonnes"><div class="ui-colonne">${calendrier}</div><div class="ui-colonne">${piecesHtml}</div></div>`
-          : calendrier}
+        ${calendrier}
+        ${piecesHtml}
       </div>`;
   },
   mount() {
