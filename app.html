@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Xud5AAp5z73ezI3ZDAGtJaNwcPp8VQvP4sm1QEcBz18=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xRMBxlreG0Oq54mBn2qDIEewDEHlmmsz6Ac+J8OliN0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9062,7 +9062,7 @@ function renderApp() {
           <div class="view">
             ${bandeauHorsLigneHtml()}
             <div class="page-head" data-view="${esc(UI.view)}">${pageHeadHtml()}</div>
-            <main id="view-root">${view.render()}</main>
+            <main id="view-root" data-view="${esc(UI.view)}">${view.render()}</main>
           </div>
           <div class="legal-footer">
             <a href="./mentions-legales.html" target="_blank">${trad('Mentions légales')}</a> ·

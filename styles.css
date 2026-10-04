@@ -7331,3 +7331,19 @@
   .tele-carte .tele-creation input,.tele-carte .tele-creation select,
   .tele-carte .tele-aemp input,.tele-carte .tele-aemp select{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
   .tele-carte .tele-jeton{background:var(--surface);box-shadow:var(--shadow-soft);}
+
+  /* ═══ CHARTE « FLOTTANT PARTOUT » (2026-10-04) — Mon compte ═══
+     Plus de grande carte blanche : le titre de chaque bloc, ses champs et ses lignes
+     reposent directement sur le fond de page. Les éléments (champs du haut, sous-blocs,
+     lignes de membre) sont blancs avec l'ombre légère ; un champ posé DANS un élément
+     blanc garde la teinte par défaut des champs (--surface-soft). Même modèle que le
+     Parc Machines. */
+  #view-root[data-view="account"] section.card{background:none;box-shadow:none;padding:0;border-radius:0;}
+  #view-root[data-view="account"] section.card + section.card{margin-top:8px;}
+  #view-root[data-view="account"] .plan-field{background:none;border:none;padding:0;}
+  #view-root[data-view="account"] .compte-section,
+  #view-root[data-view="account"] .compte-sous-bloc,
+  #view-root[data-view="account"] .membre-ligne{background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface);border:none;box-shadow:var(--shadow-soft);}
+  #view-root[data-view="account"] :is(.compte-section,.compte-sous-bloc,.membre-ligne) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select){background:var(--surface-soft);border:none;box-shadow:none;}
+  #view-root[data-view="account"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.champ-select):focus{box-shadow:0 0 0 3px var(--primary-tint);}
