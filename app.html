@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bcn0sYO5vQ16MowBBQkW3Tk0/3SQv+OPKyAGCu/f5l0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-LwOh+N5d3FEuvhxuGAblSTK8B5421FmwMM5sy7lYSoo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5568,13 +5568,32 @@ function messageCarteGps(texte, erreur) {
   return msg;
 }
 
+// La photo de la machine (celle de la carte du Parc) ; à défaut, le pictogramme d'une caisse.
+// safeUrl() est la même garde que partout ailleurs : jamais une adresse non vérifiée dans un src.
+function vignetteMachineGps(m) {
+  const photo = safeUrl(m.image_url);
+  return photo
+    ? `<img class="tele-vignette" src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">`
+    : `<span class="tele-vignette tele-vignette-vide">${picto('boite')}</span>`;
+}
+
+// Info-bulle au survol d'un repère : la photo et le nom, rien de plus (le détail est dans
+// la fenêtre du clic). Pas sur téléphone, où il n'y a pas de survol.
+function contenuInfobulleGps(machineId) {
+  const m = (UI.machines || []).find((x) => x.id === machineId);
+  const div = document.createElement('div');
+  div.className = 'tele-infobulle-contenu';
+  if (m) div.innerHTML = `${vignetteMachineGps(m)}<strong>${esc(m.name)}</strong>`;
+  return div;
+}
+
 function contenuPopupGps(machineId) {
   const m = (UI.machines || []).find((x) => x.id === machineId);
   const div = document.createElement('div');
   div.className = 'tele-popup';
   if (!m) return div;
   div.innerHTML = `
-    <strong>${esc(m.name)}</strong>
+    <span class="tele-popup-entete">${vignetteMachineGps(m)}<strong>${esc(m.name)}</strong></span>
     <span class="tele-popup-sous">${esc(tR('Position {quand}', { quand: m.last_position_at ? ilYaSupport(m.last_position_at) : '—' }))}</span>
     <span class="tele-popup-sous">${esc(formatCounter(machineCounter(m), counterUnitOf(m)))}</span>
     <span class="tele-popup-titre">${trad('Afficher le trajet')}</span>
@@ -5611,6 +5630,12 @@ function majMarqueursGps(ajuster) {
     else {
       mk = L.marker([lat, lon], { icon: icone, title: m.name }).addTo(carteGps);
       mk.bindPopup(() => contenuPopupGps(m.id));
+      if (!L.Browser.mobile) {
+        mk.bindTooltip(() => contenuInfobulleGps(m.id), { direction: 'top', offset: [0, -14], opacity: 1, className: 'tele-infobulle' });
+        // La fenêtre du clic contient déjà la photo et le nom : pas d'info-bulle par-dessus.
+        mk.on('popupopen', () => mk.closeTooltip());
+        mk.on('tooltipopen', () => { if (mk.isPopupOpen()) mk.closeTooltip(); });
+      }
       couchesGps.marqueurs.set(m.id, mk);
     }
   });
