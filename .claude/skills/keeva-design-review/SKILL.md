@@ -53,7 +53,8 @@ faire AVANT de dire "c'est fait".
       des puces blanches posées sur le fond. Un champ placé DANS un élément déjà
       blanc (une ligne de liste) garde le fond par défaut des champs
       (`--surface-soft` = `rgba(14,19,51,.04)`, la seule teinte de contraste). Les
-      fenêtres (modales) ont TOUTES le fond #F2F4F8 (`--fond-modale`, posé une fois sur `.modal`) ; dessus, champs, lignes de liste, onglets et boutons secondaires sont BLANCS (règle de repli en fin de styles.css, à faible spécificité). Une nouvelle modale n'a rien à déclarer pour son fond. Exceptions
+      fenêtres (modales) ont TOUTES le fond #F2F4F8 (`--fond-modale`, posé une fois sur `.modal`) ; dessus, champs, lignes de liste, onglets et boutons secondaires sont BLANCS (règle de repli en fin de styles.css, à faible spécificité). Une nouvelle modale n'a rien à déclarer pour son fond.
+      RÈGLE 8 (2026-10-04) : tout champ de saisie (input, select, textarea, bouton qui remplace un select) = fond BLANC obligatoire + bordure noire 2 px, partout, y compris dans un bloc blanc ; posé en `!important` dans kit.css §18, ne jamais le contourner. Exceptions
       acceptées : les cartes qui sont elles-mêmes UN élément (carte de chiffre clé,
       alerte, machine). Au 2026-10-04 TOUS les menus suivent la règle (Machines,
       Plan d'entretien, Télémétrie, Mon compte, Rappels, Coûts & TCO, Stock & SAV,

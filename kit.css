@@ -316,3 +316,17 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
 .ui-ligne-calcul summary{cursor:pointer;font-weight:700;color:var(--ink);}
 .ui-ligne-calcul p{margin:6px 0 0;}
 .ui-ligne-calcul ul{margin:6px 0 0;padding-left:18px;}
+
+/* ══ 18. CHAMPS DE SAISIE — règle 8 ═══════════════════════════════════════
+   TOUT champ où l'on saisit ou choisit (texte, nombre, date, liste, zone de texte, et le bouton qui
+   remplace une liste native) : fond BLANC obligatoire + bordure noire de 2 px, partout (pages, blocs
+   teintés, modales). !important voulu : c'est une règle de charte sans exception, qu'aucun style de
+   modale ou de bloc ne doit pouvoir défaire. Cases à cocher, boutons radio et envoi de fichier ne sont
+   pas concernés. */
+input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]):not([type=button]):not([type=submit]):not([type=color]),
+select:not([data-x]),
+textarea:not([data-x]),
+.champ-select:not([data-x]){
+  background:var(--surface) !important;
+  border:2px solid var(--ink) !important;
+}
