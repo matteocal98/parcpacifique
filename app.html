@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-MfDdo7AuSFVbom6+EiAeg477GanJTwzzR7WIn8CGbpo=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-lbcOn9iv6Ji50C6aftv9ZcHSeT43JiSmJe/kgSxU02I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13273,6 +13273,7 @@ function tcoKpiGridHtml() {
   const tauxActif = c.labor_hourly_rate != null;
   return `
     <section class="ui-section">
+      ${tcoEyebrowToolbarHtml()}
       <div class="ui-grille is-3">
         <div class="ui-tuile">
           <span class="ui-tuile-etiquette">${trad('Devise d\'exploitation')}</span>
@@ -14322,7 +14323,6 @@ VIEWS.tco = {
   render() {
     return `
       <div class="vue-couts-tco">
-        ${tcoEyebrowToolbarHtml()}
         ${tcoKpiGridHtml()}
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
         ${blocParametresTcoHtml()}

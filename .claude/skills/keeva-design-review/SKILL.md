@@ -31,7 +31,7 @@ faire AVANT de dire "c'est fait".
 ## Checklist à parcourir avant de répondre "c'est fait"
 
 **1. Fond et contraste**
-- [ ] **RÈGLE RÉVISÉE LE 2026-10-04 (écrans migrés vers kit.css, ex. Coûts & TCO) : page BLANCHE, éléments (tuile, ligne, encadré, champ, pastille, puce) teintés `--surface-soft` SANS ombre ; un champ/étiquette/unité posé DANS un bloc teinté est blanc (l'inverse du parent). Les écrans pas encore migrés suivent les lignes ci-dessous (page teintée, blocs blancs) jusqu'à leur migration ; le fond blanc s'active par `fondBlanc: true` dans la définition de la vue.**
+- [ ] **RÈGLE RÉVISÉE LE 2026-10-04 (écrans migrés vers kit.css, ex. Coûts & TCO) : page BLANCHE > chaque SECTION est un bloc teinté `--surface-soft` > ses éléments (tuile, ligne, encadré, champ, pastille, puce) sont BLANCS ; un champ/étiquette/unité posé DANS un élément blanc est teinté (l'inverse du parent). Aucune ombre, aucune bordure, jamais une section dans une section. Les écrans pas encore migrés suivent les lignes ci-dessous jusqu'à leur migration ; le fond blanc s'active par `fondBlanc: true` dans la définition de la vue.**
 - [ ] Le fond de PAGE est teinté (`var(--surface-soft)`), jamais blanc pur.
 - [ ] Chaque bloc qui doit se détacher est blanc (`var(--surface)`) avec une ombre
       (`box-shadow: var(--shadow-soft)`) — jamais de `border` sur un bloc/une carte
