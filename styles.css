@@ -6352,3 +6352,7 @@ html:not(.icones-pretes) .material-symbols-outlined{visibility:hidden;display:in
    s'efface : la carte est déjà la modale, avec son propre fond. Sans ça, le fond #F2F4F8 de la coque
    dessine un cadre gris autour de la carte. */
 .modal:has(> .pplan-modal){background:transparent;border:none;box-shadow:none;padding:0;}
+
+/* Assistant « Ajouter une machine » : le fond des BLOCS de section (01 à 05), un bleu très pâle translucide, passe au gris
+   translucide choisi par l'utilisateur, rgba(0,0,0,.1) (2026-10-07). Les pastilles et icônes gardent leur teinte. */
+.machine-modal-add .bg-surface-container-low\/70{background-color:rgba(0,0,0,.1);}

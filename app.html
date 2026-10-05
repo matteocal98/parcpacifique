@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YHHLmpj8oc7frroH3kD7UL2h58YspLEBXSH5c7Tbe8c=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/1sxAaS8ilU0WP/4qz+vQkKKCvmdTJNS1NGzsnpe7Z4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -19577,7 +19577,9 @@ function openAddWizard(companyId, categories) {
     const mode = state.trackingMode;
     const unit = COUNTER_UNITS[counterUnitFromMode(mode)];
     const isCounter = mode !== 'days';
-    const query = encodeURIComponent(`${designation(state.brand, state.model, state.name)} manuel entretien filetype:pdf`);
+    // Le lien « Chercher le manuel sur le web » est recalculé AU CLIC (voir adresseRechercheManuel) : à ce stade le
+    // formulaire vient d'être dessiné, la marque et le modèle ne sont pas encore saisis.
+    const query = encodeURIComponent('manuel entretien filetype:pdf');
     // Pas shell() ici : elle enveloppe déjà dans <div class="modal"> (480px,
     // la modale générique de l'app) — cette page porte son PROPRE conteneur
     // Tailwind compilé (w-full max-w-4xl…), un second wrapper l'aurait
@@ -19740,7 +19742,7 @@ function openAddWizard(companyId, categories) {
                 <span>${trad('Demander l\'établissement de mon plan — 29 €')}</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
             </div>
-            <div class="text-xs text-slate-500"><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher le manuel du fabricant sur le web →')}</a></div>
+            <div class="text-xs text-slate-500"><a id="lien-manuel-web" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher le manuel du fabricant sur le web →')}</a></div>
           </div>
         </section>
 
@@ -19935,6 +19937,20 @@ function openAddWizard(companyId, categories) {
     // un `state` resté aux valeurs par défaut du formulaire — nom, catégorie,
     // marque… jamais lus — d'où des machines créées sans aucune donnée,
     // signalé par l'utilisateur avec capture à l'appui.
+    // L'adresse de la recherche du manuel, d'après ce qui est SAISI maintenant : « Peugeot 208 2026 manuel entretien
+    // filetype:pdf » plutôt que le « manuel entretien » tout court qui partait avant, sans véhicule.
+    function adresseRechercheManuel() {
+      const champ = (sel) => (overlay.querySelector(sel)?.value || '').trim();
+      const vehicule = designation(champ('#f-brand'), champ('#f-model'), champ('#f-name'));
+      const termes = [vehicule, champ('#f-year'), 'manuel entretien', 'filetype:pdf'].filter(Boolean).join(' ');
+      return 'https://www.google.com/search?q=' + encodeURIComponent(termes);
+    }
+    // Mis à jour dès qu'on s'en approche (survol, focus, appui) : le clic, le clic du milieu et l'appui long suivent
+    // tous l'adresse à jour.
+    const lienManuelWeb = overlay.querySelector('#lien-manuel-web');
+    if (lienManuelWeb) {
+      ['pointerdown', 'mouseenter', 'focus', 'touchstart'].forEach((ev) => lienManuelWeb.addEventListener(ev, () => { lienManuelWeb.href = adresseRechercheManuel(); }, { passive: true }));
+    }
     function lireFormulaireDansState() {
       state.name = majuscules(overlay.querySelector('#f-name').value);
       state.category = majuscules(overlay.querySelector('#f-category').value);
