@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/3ID3JrvZpyiV0SHFNGkI9J8qYKvTCWGkYMMgkLCj3k=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-zW4nMiS5aAiW+KRkfGQUsfAbKYDXh18OLoh27NPwe5Q=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -876,12 +876,53 @@
       <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px]" data-slot="tickets"></span>
     </td>
     <td class="px-space-md py-space-sm text-right">
-      <button class="btn-connecter-en-tant-que inline-flex items-center justify-center gap-space-xs h-11 px-4 rounded bg-surface-container hover:bg-primary-container hover:text-on-primary text-on-surface transition-all font-label-md text-label-md shadow-sm" type="button" title="Se connecter en tant que le gérant">
-        <span class="material-symbols-outlined text-[18px]">login</span><span>Se connecter en tant que</span>
-      </button>
+      <div class="inline-flex items-center justify-end gap-space-xs">
+        <button class="btn-connecter-en-tant-que inline-flex items-center justify-center gap-space-xs h-11 px-4 rounded bg-surface-container hover:bg-primary-container hover:text-on-primary text-on-surface transition-all font-label-md text-label-md shadow-sm" type="button" title="Se connecter en tant que le gérant">
+          <span class="material-symbols-outlined text-[18px]">login</span><span>Se connecter en tant que</span>
+        </button>
+        <button class="btn-supprimer-societe inline-flex items-center justify-center h-11 w-11 rounded bg-surface-container hover:bg-error-container text-error transition-colors" type="button" title="Supprimer cette société" aria-label="Supprimer cette société">
+          <span class="material-symbols-outlined text-[20px]">delete</span>
+        </button>
+      </div>
     </td>
   </tr>
 </template>
+
+<!-- ═══════════════ MODALE : suppression d'une société ═══════════════
+     Destructif et IRRÉVERSIBLE : le nom de la société doit être retapé. Tout passe par l'Edge Function
+     admin-supprimer-societe (is_staff relu côté serveur, abonnement résilié avant, données supprimées en une
+     transaction). -->
+<div id="suppression-overlay" class="hidden fixed inset-0 z-[200] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
+    <div class="p-space-lg flex items-center gap-space-sm bg-error-container">
+      <span class="p-2 rounded bg-error text-on-error material-symbols-outlined text-[20px]">delete_forever</span>
+      <div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">Supprimer cette société</h3>
+        <p id="suppression-sous-titre" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+      </div>
+    </div>
+    <div class="p-space-lg flex flex-col gap-space-md">
+      <p id="suppression-detail" class="font-body-sm text-body-sm text-on-surface"></p>
+      <ul class="font-body-sm text-body-sm text-on-surface-variant list-disc pl-5 flex flex-col gap-1">
+        <li>Tout est supprimé <strong>définitivement</strong> : machines, plans, entretiens, pièces, stock, télémétrie, tickets, fichiers et comptes de connexion de tous les membres.</li>
+        <li>L'abonnement Stripe éventuel est résilié <strong>avant</strong>. S'il ne peut pas l'être, rien n'est supprimé.</li>
+        <li>Une société qui contient un compte du personnel KALEA est refusée.</li>
+        <li>L'opération est inscrite dans le journal d'audit.</li>
+      </ul>
+      <div class="flex flex-col gap-1">
+        <label for="suppression-confirmation" class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Pour confirmer, retape le nom exact de la société :</label>
+        <input id="suppression-confirmation" type="text" autocomplete="off" class="h-11 px-3 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-code-sm text-code-sm font-bold focus:outline-none focus:border-error">
+      </div>
+      <div id="suppression-msg" class="hidden font-label-sm text-label-sm"></div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+        <button id="suppression-annuler" type="button" class="min-h-[44px] px-space-md rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">Annuler</button>
+        <button id="suppression-valider" type="button" disabled class="min-h-[44px] px-space-lg rounded bg-error text-on-error hover:opacity-90 font-label-md text-label-md shadow-sm transition-all flex items-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-[18px]">delete_forever</span><span>Supprimer définitivement</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════ MODALE : correction (compteur / barème) ═══════════════
      Outillage d'écriture du superviseur — une seule modale réutilisée pour
@@ -1085,6 +1126,7 @@ function rendreTableauClients() {
     const btn = noeud.querySelector('.btn-connecter-en-tant-que');
     if (!o.gerant_login) { btn.disabled = true; btn.classList.add('opacity-40', 'cursor-not-allowed'); }
     else btn.addEventListener('click', () => connecterEnTantQue(o));
+    noeud.querySelector('.btn-supprimer-societe')?.addEventListener('click', () => ouvrirSuppressionSociete(o));
     corps.appendChild(noeud);
   });
 }
@@ -1949,6 +1991,62 @@ function rendreTableauStock() {
     });
   });
 }
+
+// ── Suppression d'une société (ménage des comptes de test) ──────────────
+// Même règle de comparaison que le serveur (admin-supprimer-societe) : sans accents, sans casse, espaces
+// réduits. Le serveur REVÉRIFIE : ce contrôle-ci ne sert qu'à n'activer le bouton qu'au bon moment.
+let SUPPRESSION_CONTEXTE = null;
+const normaliserNomSociete = (t) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+function ouvrirSuppressionSociete(societe) {
+  SUPPRESSION_CONTEXTE = societe;
+  el('suppression-sous-titre').textContent = societe.nom;
+  el('suppression-detail').textContent = `${societe.nom} — offre ${societe.plan || '—'}, ${societe.nb_machines} machine(s), gérant : ${societe.gerant_nom || societe.gerant_login || 'aucun'}.`;
+  el('suppression-confirmation').value = '';
+  el('suppression-valider').disabled = true;
+  el('suppression-msg').classList.add('hidden');
+  el('suppression-overlay').classList.remove('hidden');
+  el('suppression-confirmation').focus();
+}
+
+el('suppression-confirmation')?.addEventListener('input', () => {
+  const ok = SUPPRESSION_CONTEXTE && normaliserNomSociete(el('suppression-confirmation').value) === normaliserNomSociete(SUPPRESSION_CONTEXTE.nom) && SUPPRESSION_CONTEXTE.nom.trim() !== '';
+  el('suppression-valider').disabled = !ok;
+});
+el('suppression-annuler')?.addEventListener('click', () => { el('suppression-overlay').classList.add('hidden'); SUPPRESSION_CONTEXTE = null; });
+
+el('suppression-valider')?.addEventListener('click', async () => {
+  if (!SUPPRESSION_CONTEXTE) return;
+  const societe = SUPPRESSION_CONTEXTE;
+  const bouton = el('suppression-valider');
+  const msg = el('suppression-msg');
+  const annoncer = (texte, erreur) => { msg.textContent = texte; msg.className = 'font-label-sm text-label-sm ' + (erreur ? 'text-error' : 'text-on-surface'); };
+  bouton.disabled = true;
+  annoncer('Suppression en cours…', false);
+  const { data: { session } } = await sb.auth.getSession();
+  let reponse, resultat;
+  try {
+    reponse = await fetch(`${SUPABASE_URL}/functions/v1/admin-supprimer-societe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_KEY },
+      body: JSON.stringify({ company_id: societe.company_id, confirmation: el('suppression-confirmation').value }),
+    });
+    resultat = await reponse.json();
+  } catch (e) {
+    annoncer('Échec réseau : ' + e.message + ' — vérifie la liste avant de réessayer.', true);
+    bouton.disabled = false;
+    return;
+  }
+  if (!reponse.ok) {
+    annoncer(resultat.error || 'Erreur.', true);
+    bouton.disabled = false;
+    return;
+  }
+  annoncer(`Supprimée : ${resultat.machines} machine(s), ${resultat.entretiens} entretien(s), ${resultat.comptes_supprimes} compte(s) de connexion, ${resultat.fichiers} fichier(s).`, false);
+  SUPPRESSION_CONTEXTE = null;
+  await chargerSocietes();
+  setTimeout(() => el('suppression-overlay').classList.add('hidden'), 2200);
+});
 
 // ── Outillage d'écriture : correction de compteur / barème horaire ──────
 let CORRECTION_CONTEXTE = null;
