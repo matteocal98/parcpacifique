@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-hfVtu22XuTkUSB8oQEDqsX21z7FEtXo3sv0Y8OUriq8=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EPxs/7ZZ7HO3LXAPBzCQ56JF4yehi9SpWRWgx4KIgk4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1452,26 +1452,6 @@ function designation(brand, model, secours = '') {
   return parts.length ? parts.join(' ') : (secours || '');
 }
 
-// Requête envoyée à la recherche de photo, et TYPE de matériel.
-//
-// Deux défauts faisaient échouer la recherche sur un véhicule :
-//   • la consigne parlait de « fiche produit d'une machine professionnelle » :
-//     pour une voiture ou un camion, elle ne décrit pas ce qu'on cherche ;
-//   • le mot « Véhicule » ajouté à la requête ne désigne rien de précis pour un
-//     moteur de recherche, alors qu'il mange la place de la marque et du modèle.
-// On transmet donc le type à la fonction, qui adapte sa consigne, et on retire
-// la catégorie quand elle se réduit à « véhicule ».
-function requetePhoto({ brand, model, name, category, kind, annee }) {
-  const motCategorie = /^v[ée]hicule/i.test(category || '') ? '' : (category || '');
-  const anneeTexte = annee ? String(annee) : '';
-  return {
-    // L'ANNÉE vient juste après la marque et le modèle : c'est ce qui distingue
-    // deux millésimes du même nom, et donc deux photos différentes.
-    query: [designation(brand, model, name), anneeTexte, motCategorie].filter(Boolean).join(' ').trim(),
-    kind: kind === TYPE_VEHICULE ? 'vehicule' : 'machine',
-    annee: anneeTexte,
-  };
-}
 // Chaîne affichée : brand_model reste la référence, avec repli sur les colonnes
 // séparées si elle n'est pas renseignée.
 function machineBrandModel(m) {
@@ -4234,109 +4214,11 @@ function ouvrirRapportTcoModal(contexte) {
   });
 }
 
-// ── RECHERCHE D'IMAGE : BORNÉE, ANNONCÉE, ET REMPLAÇABLE ──────────────
-//
-// POURQUOI TOUT CECI EXISTE. Constat d'usage réel : sur un camion benne ISUZU,
-// la recherche d'image ne ramenait soit rien, soit une photo inadaptée — et
-// l'utilisateur insistait, puisque rien ne l'arrêtait. Trois décisions :
-//
-//   1. QUATRE ESSAIS PAR MACHINE, PAS PLUS. Au-delà, on arrête au lieu de
-//      s'acharner : chaque essai consomme du quota, et le cinquième n'a aucune
-//      raison de mieux marcher que les quatre premiers.
-//   2. LE COÛT EST ANNONCÉ. Le décompte vient du SERVEUR (consume_ai_quota) :
-//      on n'invente aucun chiffre, on relit celui qu'il renvoie — le même
-//      mécanisme que les analyses de carnet.
-//   3. LA PHOTO DU CLIENT GAGNE. « Choisir une photo » / « Prendre une photo »
-//      sont là dès le départ, pas seulement après un échec : c'est ce qui évite
-//      de se retrouver avec une photo inadaptée.
-const RECHERCHES_IMAGE_MAX = 4;
-const CLE_RECHERCHES_IMAGE = 'keeva.recherches-image.v1';
-const CLE_QUOTA_IMAGES = 'keeva-recherches-image-restantes';
 // Les fiches de l'API qui ne sont pas disponibles hors connexion : une photo
 // choisie pendant une coupure est gardée sur l'appareil, puis envoyée.
+// (La recherche automatique de photo sur le web a été retirée le 2026-10-05 : trop chère pour des résultats
+//  trop incertains. La photo vient du client — galerie, appareil photo — ou de la première page du carnet.)
 const CLE_PHOTOS_ATTENTE = 'keeva.photos-en-attente.v1';
-
-// MÊMES CHIFFRES QUE LA BASE (migration-plafonds-usages.sql : 10 / 10 / 30 /
-// 5 000 recherches de photo par mois, offre par offre). Ils ne servent qu'à
-// AFFICHER avant le premier appel ; ensuite, c'est le décompte renvoyé par le
-// serveur qui fait foi. eco / pro / paid restent à 500 et unlimited à 5 000 :
-// offres vendues avant, grandfathering.
-const QUOTAS_IMAGES = {
-  free: 10, starter: 10, business: 30, enterprise: 5000,
-  eco: 500, pro: 500, paid: 500, unlimited: 5000,
-};
-
-function etatQuotaImages() {
-  const plan = (typeof UI !== 'undefined' && UI.companyPlan) || 'free';
-  const plafond = QUOTAS_IMAGES[plan] || QUOTAS_IMAGES.free;
-  let restant = null;
-  try {
-    const brut = JSON.parse(localStorage.getItem(CLE_QUOTA_IMAGES) || 'null');
-    if (brut && brut.plan === plan && Number.isFinite(Number(brut.restant))) {
-      restant = Math.max(0, Math.min(plafond, Number(brut.restant)));
-    }
-  } catch (err) { restant = null; }
-  return { plan, plafond, restant, offre: OFFRES_LIBELLES[plan] || OFFRES_LIBELLES.free };
-}
-
-// Ce que la recherche d'image a coûté, tel que le SERVEUR le renvoie.
-function retenirQuotaImages(reponse) {
-  try {
-    const etat = etatQuotaImages();
-    const plafond = Number(reponse && reponse.quota_plafond) || etat.plafond;
-    if (!Number.isFinite(Number(reponse && reponse.quota_restant))) return;
-    localStorage.setItem(CLE_QUOTA_IMAGES, JSON.stringify({
-      plan: etat.plan, plafond, restant: Math.max(0, Number(reponse.quota_restant)), maj: Date.now(),
-    }));
-  } catch (err) { /* stockage indisponible : on n'affiche pas le décompte */ }
-}
-
-// La phrase du quota, employée partout où l'on parle de recherche d'image.
-function phraseQuotaImages() {
-  const q = etatQuotaImages();
-  return q.restant == null
-    ? tR('Votre offre {offre} comprend {plafond} recherches d\'image par mois.', { offre: q.offre, plafond: q.plafond })
-    : tR('Votre offre {offre} comprend {plafond} recherches d\'image par mois. Il vous en reste {restant}.', { offre: q.offre, plafond: q.plafond, restant: q.restant });
-}
-// Même quota, en badge court (« 10 recherches restantes ») — pour la case à
-// cocher « Chercher automatiquement une photo sur le web » de l'assistant,
-// posée à côté d'un plafond mensuel réel plutôt qu'à côté d'une phrase.
-function badgeQuotaImages() {
-  const q = etatQuotaImages();
-  return q.restant == null
-    ? tR('{plafond} recherches / mois', { plafond: q.plafond })
-    : tR('{restant} recherche(s) restante(s)', { restant: q.restant });
-}
-
-// Le compteur d'essais, PAR MACHINE (et par création en cours). Il survit au
-// rechargement : sans cela, quatre clics puis un rafraîchissement remettaient le
-// compteur à zéro, et la borne ne bornait rien.
-function cleRechercheImage(machineId, secours) {
-  return machineId ? String(machineId) : ('nouvelle:' + String(secours || '').toLowerCase());
-}
-function compteurRecherchesImage() {
-  try {
-    const brut = JSON.parse(localStorage.getItem(CLE_RECHERCHES_IMAGE) || '{}');
-    return (brut && typeof brut === 'object' && !Array.isArray(brut)) ? brut : {};
-  } catch (err) { return {}; }
-}
-function recherchesImageDe(cle) {
-  const n = Number(compteurRecherchesImage()[cle]);
-  return Number.isFinite(n) && n > 0 ? n : 0;
-}
-function noterRechercheImage(cle) {
-  try {
-    const compteur = compteurRecherchesImage();
-    compteur[cle] = recherchesImageDe(cle) + 1;
-    localStorage.setItem(CLE_RECHERCHES_IMAGE, JSON.stringify(compteur));
-  } catch (err) { /* sans stockage, la borne ne vaut que pour la session */ }
-}
-function restantRecherchesImage(cle) {
-  return Math.max(0, RECHERCHES_IMAGE_MAX - recherchesImageDe(cle));
-}
-function rechercheImageAutorisee(cle) {
-  return restantRecherchesImage(cle) > 0;
-}
 
 // ── LA PHOTO CHOISIE PAR LE CLIENT ────────────────────────────────────
 // Deux boutons, et pas un seul : « Choisir une photo » ouvre la galerie ou le
@@ -4388,11 +4270,8 @@ function brancherPhotoManuelle(overlay, options = {}) {
       overlay._newImageUrl = null;
       if (options.surState) {
         options.surState.pendingPhotoBlob = reduite.blob;
-        options.surState.searchPhoto = false;
         options.surState.photoManuelleUrl = reduite.url;
       }
-      const caseRecherche = overlay.querySelector('#f-search-photo');
-      if (caseRecherche) caseRecherche.checked = false;
       const zone = overlay.querySelector(apercu);
       if (zone) zone.innerHTML = `<img class="machine-photo" src="${reduite.url}" alt="">`;
       poserStatut(tR('Photo choisie : {largeur} px, {poids} Ko (au lieu de {origine} Ko). Elle remplacera la photo actuelle à l\'enregistrement.', {
@@ -5566,7 +5445,6 @@ const OFFRE_GRILLE = [
     utilisateurs: trad('1 utilisateur'),
     prix: trad('0 €'),
     analyses: trad('10 analyses de carnet'),
-    photos: trad('10 recherches de photo'),
     lectures: trad('30 lectures de compteur'),
     inclus: trad('consultation, rappels e-mail et notifications'),
     recommandee: false,
@@ -5578,7 +5456,6 @@ const OFFRE_GRILLE = [
     utilisateurs: trad('1 utilisateur'),
     prix: trad('12 €/mois'),
     analyses: trad('20 analyses de carnet'),
-    photos: trad('10 recherches de photo'),
     lectures: trad('200 lectures de compteur'),
     inclus: trad('export CSV'),
     recommandee: false,
@@ -5590,7 +5467,6 @@ const OFFRE_GRILLE = [
     utilisateurs: trad('3 utilisateurs'),
     prix: trad('39 €/mois'),
     analyses: trad('30 analyses de carnet'),
-    photos: trad('30 recherches de photo'),
     lectures: trad('500 lectures de compteur'),
     inclus: trad('multi-utilisateurs (3), QR codes, préparation groupée, module Coûts & TCO'),
     recommandee: true,
@@ -5602,7 +5478,6 @@ const OFFRE_GRILLE = [
     utilisateurs: trad('rôles d\'équipe'),
     prix: trad('49 €/mois + 1 €/machine au-delà de 20'),
     analyses: trad('5 000 analyses de carnet'),
-    photos: trad('5 000 recherches de photo'),
     lectures: trad('2 000 lectures de compteur'),
     inclus: trad('support dédié, module Stocks & SAV'),
     recommandee: false,
@@ -6476,7 +6351,7 @@ function corpsContactOffre(offre, companyId) {
     '',
     trad('Offre :') + ' ' + trad(offre.offre) + ' — ' + trad(offre.prix),
     trad('Parc et utilisateurs :') + ' ' + trad(offre.machines) + ', ' + trad(offre.utilisateurs),
-    trad('Compris :') + ' ' + trad(offre.analyses) + ', ' + trad(offre.photos) + ', ' + trad(offre.lectures),
+    trad('Compris :') + ' ' + trad(offre.analyses) + ', ' + trad(offre.lectures),
     '',
     trad('Société :') + ' ' + (companyId || '—'),
   ].join('\n');
@@ -6959,7 +6834,7 @@ function openUpgradeNotice(companyId, message) {
   // Les TROIS enveloppes IA, désormais une ligne compacte plutôt qu'une
   // liste à puces — même valeurs OFFRE_GRILLE, juste moins mises en avant.
   function ligneQuotasIA(o) {
-    return [o.analyses, o.photos, o.lectures].map((ligne) => trad(ligne)).join(' · ');
+    return [o.analyses, o.lectures].map((ligne) => trad(ligne)).join(' · ');
   }
 
   // « Business / Flotte » → { nom:'BUSINESS', tag:'Flotte' } ; « Gratuit » →
@@ -19585,9 +19460,6 @@ function openAddWizard(companyId, categories) {
     // n'est pas activé, ni proposé par l'analyse ni choisi à la main.
     secondaryUnit: null, secondaryValue: null, secondaryIntervalCounter: 100, secondaryReminderCounter: 10,
     secondaryIntervalDays: FALLBACK_INTERVAL_DAYS, secondaryReminderDays: FALLBACK_REMINDER_DAYS,
-    // Recherche d'une photo sur le web : desactivee par defaut, car elle
-    // consomme un credit et n'a de sens que sans carnet PDF a scanner.
-    searchPhoto: false,
     model: '',
     // TCO, facultatif (voir tcoActif()) : strict minimum à la création,
     // le reste (revente estimée, durée de vie) se règle plus tard sur la
@@ -19621,25 +19493,6 @@ function openAddWizard(companyId, categories) {
     overlay.querySelectorAll(`input[name=${nomGroupe}]`).forEach((radio) => {
       radio.closest('.mform-card')?.classList.toggle('is-selected', radio.checked);
     });
-  }
-  // Utilisée à deux endroits (mode de suivi, suivi simplifié), QUE le carnet
-  // ait déjà donné une photo ou non : le client garde la main pour préférer
-  // une recherche web à la première page du carnet. Le quota RÉEL (plafond
-  // mensuel de l'offre, ou crédit déjà entamé) est en pastille — jamais un
-  // chiffre inventé.
-  function blocRecherchePhotoWeb() {
-    const remplaceCarnet = !!state.pendingPhotoBlob;
-    return `
-      <label class="mform-photo-web" for="f-search-photo">
-        <input type="checkbox" id="f-search-photo" ${state.searchPhoto ? 'checked' : ''}>
-        <span class="mform-photo-web-corps">
-          <span>${trad('Chercher automatiquement une photo sur le web')}</span>
-          <span class="badge ok" id="quota-images">${esc(badgeQuotaImages())}</span>
-        </span>
-      </label>
-      <div class="hint">${remplaceCarnet
-        ? trad('Une photo a déjà été extraite de la première page du carnet (aperçu ci-dessus). Cocher cette case la remplacera par une recherche sur le web.')
-        : trad('Sans carnet, c\'est le seul moyen d\'avoir une photo. Dès qu\'un carnet est fourni, c\'est sa première page qui sert — sauf si tu coches cette case.')}</div>`;
   }
   // La croix ferme depuis N'IMPORTE QUEL écran : posée une fois ici plutôt que
   // recâblée à chaque `shell()`, en écoutant la zone (comme les boutons de
@@ -19986,7 +19839,6 @@ function openAddWizard(companyId, categories) {
                 <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                   <button type="button" id="pick-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_library</span><span>${trad('Choisir une photo')}</span></button>
                   <button type="button" id="shoot-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">photo_camera</span><span>${trad('Prendre une photo')}</span></button>
-                  <button type="button" id="fetch-photo-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-lowest hover:bg-white text-on-surface text-xs font-bold shadow-subtle transition-colors"><span class="material-symbols-outlined text-base text-primary">search</span><span>${trad('Chercher sur le web')}</span></button>
                 </div>
                 <input id="f-machine-photo" type="file" accept="image/*" hidden>
                 <input id="f-machine-photo-camera" type="file" accept="image/*" capture="environment" hidden>
@@ -20256,23 +20108,6 @@ function openAddWizard(companyId, categories) {
     if (photoPreview && state.pendingPhotoBlob && !photoPreview.querySelector('img')) {
       photoPreview.innerHTML = `<img class="machine-photo" src="${URL.createObjectURL(state.pendingPhotoBlob)}" alt="">`;
     }
-    // Pas de machine créée à ce stade : impossible de chercher une photo en
-    // direct (le quota/la recherche, voir openMachineModal#fetch-photo-btn,
-    // s'appuie sur un id de machine réel). On diffère donc à l'enregistrement,
-    // comme le faisait déjà l'ancien assistant (case à cocher devenue bouton).
-    const fetchBtn = overlay.querySelector('#fetch-photo-btn');
-    const photoStatus = overlay.querySelector('#photo-status');
-    if (fetchBtn) {
-      fetchBtn.addEventListener('click', () => {
-        state.searchPhoto = true;
-        state.pendingPhotoBlob = null;
-        if (photoPreview) {
-          photoPreview.innerHTML = `<span class="material-symbols-outlined text-4xl mb-1 text-primary">travel_explore</span><span class="text-[10px] font-bold uppercase tracking-wider text-primary text-center px-2">${esc(trad('Recherche automatique'))}</span>`;
-        }
-        if (photoStatus) photoStatus.textContent = trad('Une photo sera recherchée automatiquement à l\'enregistrement.');
-      });
-    }
-
     // ── Envoi ────────────────────────────────────────────────────────
     overlay.querySelector('#step-form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -20500,25 +20335,6 @@ function openAddWizard(companyId, categories) {
         if (state.pendingPhotoBlob) {
           const url = await uploadMachinePhoto(companyId, machine.id, state.pendingPhotoBlob);
           await sb.from('machines').update({ image_url: url }).eq('id', machine.id);
-        } else if (state.searchPhoto) {
-          // ★ QUATRE ESSAIS AU PLUS, et le quota est relu sur la réponse du
-          //   serveur : c'est lui qui sait ce qu'il reste, pas nous.
-          // Uniquement sur demande explicite : l'appel consomme un credit et
-          // n'a d'interet que si le carnet PDF n'a pas fourni de photo.
-          const cle = cleRechercheImage(machine.id, `${state.brand} ${state.model} ${state.name}`);
-          if (rechercheImageAutorisee(cle)) {
-            const demande = requetePhoto({
-              brand: state.brand, model: state.model, name: state.name,
-              category: state.category, kind: state.kind, annee: state.annee,
-            });
-            noterRechercheImage(cle);
-            const { data: imgData, error: imgErr } = await sb.functions.invoke('fetch-machine-image', { body: demande });
-            retenirQuotaImages(imgData);
-            if (imgErr) console.warn('Recherche de photo :', await functionErrorMessage(imgErr));
-            else if (imgData?.imageUrl) await sb.from('machines').update({ image_url: imgData.imageUrl }).eq('id', machine.id);
-          } else {
-            console.warn(trad('Recherche d\'image non tentée : les quatre essais de cette machine sont utilisés.'));
-          }
         }
       } catch (imgErr) { console.warn('Photo de la machine :', imgErr); }
 
@@ -24129,7 +23945,6 @@ function openMachineModal(companyId, categories, existing) {
               <div class="flex flex-wrap items-center gap-space-sm">
                 <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-space-xs hover:bg-surface-container-high transition-colors shadow-sm" type="button" id="pick-photo-btn"><span class="material-symbols-outlined text-[18px]">folder_open</span>${trad('Choisir une photo')}</button>
                 <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-space-xs hover:bg-surface-container-high transition-colors shadow-sm" type="button" id="shoot-photo-btn"><span class="material-symbols-outlined text-[18px]">photo_camera</span>${trad('Prendre une photo')}</button>
-                <button class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-space-xs hover:bg-surface-container-high transition-colors shadow-sm" type="button" id="fetch-photo-btn"><span class="material-symbols-outlined text-[18px]">travel_explore</span>${trad('Chercher une photo sur le web')}</button>
               </div>
               <p class="hint mform-quota" id="photo-manuelle-statut"></p>
             </div>
@@ -24544,75 +24359,7 @@ function openMachineModal(companyId, categories, existing) {
     });
   }
 
-  brancherPhotoManuelle(overlay, { apercu: '#photo-preview', machineId: existing.id, messageInitial: phraseQuotaImages() });
-  overlay.querySelector('#fetch-photo-btn').addEventListener('click', async (e) => {
-    const btn = e.target;
-    const statusEl = overlay.querySelector('#photo-status');
-    const clePhoto = cleRechercheImage(existing.id, '');
-    // ★ LA BORNE EST ICI, AVANT TOUT APPEL : le cinquième clic n'appelle pas la
-    //   fonction. Au-delà de quatre essais, insister ne trouve pas mieux — et
-    //   chaque essai consomme du quota.
-    if (!rechercheImageAutorisee(clePhoto)) {
-      statusEl.textContent = tR('Les {max} recherches d\'image de cette machine sont utilisées. Choisis une photo toi-même : « Choisir une photo » ou « Prendre une photo ».', { max: RECHERCHES_IMAGE_MAX });
-      return;
-    }
-    const name = overlay.querySelector('#f-name').value.trim();
-    const brand = overlay.querySelector('#f-brand').value.trim();
-    const model = overlay.querySelector('#f-model').value.trim();
-    const category = overlay.querySelector('#f-category').value.trim();
-    const champKind = overlay.querySelector('input[name=kind]:checked');
-    btn.disabled = true;
-    statusEl.textContent = trad('Recherche en cours…');
-    try {
-      // L'ANNÉE EST LUE ICI, dans le formulaire. Se fier à la variable du
-      // gestionnaire d'enregistrement ne pouvait pas marcher : elle n'existe pas
-      // dans cette fonction, et l'erreur était avalée par la fonction async —
-      // le bouton ne faisait donc plus RIEN. Construire la requête DANS le try
-      // garantit qu'une erreur éventuelle s'affiche au lieu de rester muette.
-      const champAnnee = overlay.querySelector('#f-year');
-      const demande = requetePhoto({
-        brand, model, name, category,
-        annee: champAnnee ? champAnnee.value.trim() : '',
-        kind: champKind ? champKind.value : machineKind(existing),
-      });
-      noterRechercheImage(clePhoto);
-      const { data, error } = await sb.functions.invoke('fetch-machine-image', { body: demande });
-      // Le décompte du serveur est retenu AVANT de juger la réponse : même un
-      // refus dit où en est le quota.
-      retenirQuotaImages(data);
-      if (error) throw new Error(await functionErrorMessage(error, trad('recherche de photo impossible')));
-      if (data?.error) throw new Error(data.error);
-      const foundUrl = safeUrl(data.imageUrl);
-      if (!foundUrl) throw new Error(trad('URL de photo invalide'));
-      overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${esc(foundUrl)}" alt="${esc(name)}">`;
-      overlay._newImageUrl = foundUrl;
-      overlay._pendingPhotoBlob = null;
-      // La fonction DIT si la photo a ete confirmee sur fond uni clair (visuel
-      // catalogue) ou si c'est un simple secours, faute de mieux : dans ce cas
-      // l'utilisateur doit le savoir avant d'enregistrer, au lieu de croire
-      // qu'il regarde le visuel du fabricant.
-      // ★ JAMAIS UNE PHOTO DOUTEUSE PRÉSENTÉE COMME LE VISUEL DU FABRICANT. Le
-      //   repli « illustration » reste — mais il est dit DEUX fois : sur l'aperçu
-      //   (une étiquette visible) et dans le message, avec le moyen de faire
-      //   mieux tout de suite.
-      statusEl.textContent = data.illustration
-        ? tR('Illustration trouvée sur le web — PAS le visuel catalogue : à vérifier. {quota} Tu peux aussi choisir ta propre photo ci-dessus.', { quota: phraseQuotaImages() })
-        : tR('Photo trouvée sur le web — elle sera enregistrée avec la fiche. {quota}', { quota: phraseQuotaImages() });
-      const apercuPhoto = overlay.querySelector('#photo-preview');
-      const dejaEtiquete = apercuPhoto ? apercuPhoto.querySelector('.photo-illustration') : null;
-      if (apercuPhoto && data.illustration && !dejaEtiquete) {
-        apercuPhoto.insertAdjacentHTML('beforeend',
-          `<div class="photo-illustration">${trad('Illustration — à vérifier')}</div>`);
-      } else if (apercuPhoto && !data.illustration && dejaEtiquete) {
-        dejaEtiquete.remove();
-      }
-      btn.textContent = tR('Chercher une autre photo sur le web ({reste} essai(s))', { reste: restantRecherchesImage(clePhoto) });
-    } catch (err) {
-      statusEl.textContent = tR('Aucune photo trouvée ({erreur}).', { erreur: err.message });
-    }
-    btn.disabled = false;
-  });
-
+  brancherPhotoManuelle(overlay, { apercu: '#photo-preview', machineId: existing.id });
   // PHOTOS DU CARNET : le client a le carnet sous la main, pas toujours le PDF.
   const apresCarnetPhotos = (resultat) => {
     overlay._aiItems = resultat.items;
@@ -24659,10 +24406,9 @@ function openMachineModal(companyId, categories, existing) {
         const previewUrl = URL.createObjectURL(blob);
         overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${previewUrl}" alt="${esc(existing.name)}">`;
         overlay.querySelector('#photo-status').textContent = trad('Photo extraite de la 1ère page du carnet — elle sera enregistrée avec la fiche.');
-        overlay.querySelector('#fetch-photo-btn').textContent = trad('Chercher plutôt sur le web');
       }).catch(err => {
         console.error('Extraction photo (1ère page du PDF) échouée :', err);
-        overlay.querySelector('#photo-status').textContent = tR('Extraction de la photo impossible ({erreur}). Tu peux essayer « Chercher sur le web ».', { erreur: (err?.message || err) });
+        overlay.querySelector('#photo-status').textContent = tR('Extraction de la photo impossible ({erreur}).', { erreur: (err?.message || err) });
       });
     }
   };
