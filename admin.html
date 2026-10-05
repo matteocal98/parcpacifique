@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-u4OGdPOHw0clno3h53aLUNQSHJHYF+K0MM2SkiCttyQ=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-A1VA5sgRV+ASEMsw/mNJlHcTn9lvinvfJicPlo7LMK4=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -750,7 +750,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
           <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
             <div class="flex items-center justify-between text-on-surface-variant">
               <span class="font-label-sm text-label-sm uppercase tracking-wider">Appels à Gemini</span>
@@ -779,12 +779,21 @@
             </div>
             <span id="ia-kpi-echecs" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
           </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Coût estimé</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">payments</span>
+            </div>
+            <span id="ia-kpi-cout" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+            <span id="ia-kpi-cout-note" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+          </div>
         </div>
 
         <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
           <div class="p-space-lg">
             <h2 class="font-headline-md text-headline-md text-on-surface">Par fonctionnalité et par étape</h2>
             <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Une recherche de photo enchaîne plusieurs appels (recherche, vérification du fond) : chaque étape est comptée à part. Un « token » est l'unité de facturation du fournisseur.</p>
+            <p id="ia-note-cout" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></p>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left font-body-sm text-body-sm">
@@ -799,6 +808,7 @@
                   <th class="py-3 px-space-md text-right">Total</th>
                   <th class="py-3 px-space-md text-right">Moy. / appel</th>
                   <th class="py-3 px-space-md text-center">Recherches web</th>
+                  <th class="py-3 px-space-md text-right">Coût estimé</th>
                 </tr>
               </thead>
               <tbody id="ia-corps-fonctions" class="divide-y divide-surface-container-low"></tbody>
@@ -825,6 +835,8 @@
                   <th class="py-3 px-space-md text-right">Tokens</th>
                   <th class="py-3 px-space-md text-center">Recherches web</th>
                   <th class="py-3 px-space-md text-center">Échecs</th>
+                  <th class="py-3 px-space-md text-right">Coût estimé</th>
+                  <th class="py-3 px-space-md">Plafond du mois</th>
                   <th class="py-3 px-space-md">Dernier appel</th>
                 </tr>
               </thead>
@@ -1721,6 +1733,33 @@ const IA_ETAPES = {
   lecture: 'Lecture du compteur',
 };
 const nbFr = (n) => (n == null ? '—' : Number(n).toLocaleString('fr-FR'));
+const usd = (n) => (n == null ? '—' : Number(n).toLocaleString('fr-FR', { style: 'currency', currency: 'USD', minimumFractionDigits: n < 1 ? 3 : 2, maximumFractionDigits: n < 1 ? 3 : 2 }));
+
+// Tarifs du fournisseur et plafonds par offre : lus dans la base (tables ai_tarifs / ai_garde_fou, migration
+// ia-garde-fou.sql) pour qu'il n'y ait qu'UNE source de vérité, partagée avec le garde-fou des fonctions serveur.
+// Valeurs de repli (identiques à la migration) tant que la migration n'est pas passée.
+let IA_TARIFS = { entree_par_million: 0.25, sortie_par_million: 1.5, recherche_par_mille: 14, recherches_gratuites_par_mois: 5000 };
+let IA_PLAFONDS = new Map();
+let IA_GARDE_FOU_INSTALLE = false;
+
+async function chargerTarifsIa() {
+  const [tarifs, plafonds] = await Promise.all([
+    sb.from('ai_tarifs').select('cle, valeur'),
+    sb.from('ai_garde_fou').select('plan, plafond_usd'),
+  ]);
+  IA_GARDE_FOU_INSTALLE = !tarifs.error && !plafonds.error;
+  if (!tarifs.error && tarifs.data?.length) tarifs.data.forEach((t) => { IA_TARIFS[t.cle] = Number(t.valeur); });
+  IA_PLAFONDS = new Map((!plafonds.error ? plafonds.data || [] : []).map((p) => [p.plan, Number(p.plafond_usd)]));
+}
+
+// Coût estimé d'un lot de lignes du journal. Les tokens d'outil (résultats de recherche injectés) se facturent
+// comme de l'entrée ; la réflexion comme de la sortie. Les recherches web sont comptées au tarif plein.
+function coutIa(l) {
+  const entree = (Number(l.tokens_entree) || 0) + (Number(l.tokens_outil) || 0);
+  const sortie = (Number(l.tokens_sortie) || 0) + (Number(l.tokens_reflexion) || 0);
+  return (entree * IA_TARIFS.entree_par_million + sortie * IA_TARIFS.sortie_par_million) / 1e6
+    + (Number(l.recherches_web) || 0) * IA_TARIFS.recherche_par_mille / 1000;
+}
 
 function initialiserMoisIa() {
   const select = el('ia-mois');
@@ -1737,6 +1776,7 @@ function initialiserMoisIa() {
 
 async function chargerIa() {
   initialiserMoisIa();
+  await chargerTarifsIa();
   const [annee, mois] = (el('ia-mois').value || '').split('-').map(Number);
   const debut = new Date(annee, mois - 1, 1);
   const fin = new Date(annee, mois, 1);
@@ -1747,7 +1787,7 @@ async function chargerIa() {
   const lignes = [];
   for (let page = 0; page < 40; page++) {
     const { data, error } = await sb.from('ai_token_log')
-      .select('cree_le, company_id, feature, etape, modele, tokens_entree, tokens_sortie, tokens_reflexion, tokens_total, recherches_web, ok')
+      .select('cree_le, company_id, feature, etape, modele, tokens_entree, tokens_sortie, tokens_reflexion, tokens_outil, tokens_total, recherches_web, ok')
       .gte('cree_le', debut.toISOString()).lt('cree_le', fin.toISOString())
       .order('cree_le', { ascending: false })
       .range(page * 1000, page * 1000 + 999);
@@ -1758,7 +1798,7 @@ async function chargerIa() {
       el('ia-corps-societes').innerHTML = '';
       vide.textContent = 'Lecture impossible : ' + (error.message || error) + ' (la migration ia-journal-tokens.sql est-elle passée ?)';
       vide.classList.remove('hidden');
-      ['ia-kpi-appels', 'ia-kpi-tokens', 'ia-kpi-recherches', 'ia-kpi-echecs'].forEach((id) => { el(id).textContent = '—'; });
+      ['ia-kpi-appels', 'ia-kpi-tokens', 'ia-kpi-recherches', 'ia-kpi-echecs', 'ia-kpi-cout'].forEach((id) => { el(id).textContent = '—'; });
       return;
     }
     lignes.push(...(data || []));
@@ -1771,6 +1811,13 @@ async function chargerIa() {
   el('ia-kpi-tokens').textContent = nbFr(somme('tokens_total'));
   el('ia-kpi-recherches').textContent = nbFr(somme('recherches_web'));
   el('ia-kpi-echecs').textContent = nbFr(lignes.filter((l) => !l.ok).length);
+  const coutTotal = lignes.reduce((a, l) => a + coutIa(l), 0);
+  const recherchesTotal = somme('recherches_web');
+  const franchise = Math.min(recherchesTotal, IA_TARIFS.recherches_gratuites_par_mois) * IA_TARIFS.recherche_par_mille / 1000;
+  el('ia-kpi-cout').textContent = usd(coutTotal);
+  el('ia-kpi-cout-note').textContent = franchise > 0 ? `≈ ${usd(Math.max(0, coutTotal - franchise))} après la franchise gratuite` : '';
+  el('ia-note-cout').textContent = 'Coût estimé en dollars, hors TVA, d\'après les tarifs enregistrés (' + usd(IA_TARIFS.entree_par_million) + ' le million de tokens en entrée, ' + usd(IA_TARIFS.sortie_par_million) + ' en sortie, ' + usd(IA_TARIFS.recherche_par_mille) + ' les 1 000 recherches web). Estimation prudente : toutes les recherches web sont comptées au tarif plein, alors que Google en offre ' + nbFr(IA_TARIFS.recherches_gratuites_par_mois) + ' par mois, partagées entre toutes les sociétés. Seul le mois en cours compte pour le plafond.'
+    + (IA_GARDE_FOU_INSTALLE ? '' : ' Le garde-fou n\'est pas encore installé (migration ia-garde-fou.sql) : aucun plafond n\'est appliqué.');
 
   if (!lignes.length) {
     vide.textContent = "Aucun appel enregistré sur ce mois. Le journal se remplit à partir du moment où les trois fonctions (analyse de carnet, recherche de photo, lecture de compteur) ont été republiées.";
@@ -1781,7 +1828,7 @@ async function chargerIa() {
   const groupes = new Map();
   lignes.forEach((l) => {
     const cle = l.feature + '|' + l.etape;
-    if (!groupes.has(cle)) groupes.set(cle, { feature: l.feature, etape: l.etape, appels: 0, entree: 0, sortie: 0, reflexion: 0, total: 0, avecTotal: 0, web: 0 });
+    if (!groupes.has(cle)) groupes.set(cle, { feature: l.feature, etape: l.etape, appels: 0, entree: 0, sortie: 0, reflexion: 0, total: 0, avecTotal: 0, web: 0, cout: 0 });
     const g = groupes.get(cle);
     g.appels++;
     g.entree += Number(l.tokens_entree) || 0;
@@ -1789,6 +1836,7 @@ async function chargerIa() {
     g.reflexion += Number(l.tokens_reflexion) || 0;
     if (l.tokens_total != null) { g.total += Number(l.tokens_total) || 0; g.avecTotal++; }
     g.web += Number(l.recherches_web) || 0;
+    g.cout += coutIa(l);
   });
   const triees = [...groupes.values()].sort((a, b) => b.total - a.total || b.appels - a.appels);
   el('ia-corps-fonctions').innerHTML = triees.map((g) => `
@@ -1802,6 +1850,7 @@ async function chargerIa() {
       <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-primary">${nbFr(g.total)}</td>
       <td class="py-4 px-space-md text-right font-code-sm text-code-sm text-on-surface">${g.avecTotal ? nbFr(Math.round(g.total / g.avecTotal)) : '—'}</td>
       <td class="py-4 px-space-md text-center font-code-sm text-code-sm text-on-surface">${g.web ? nbFr(g.web) : '—'}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-on-surface">${usd(g.cout)}</td>
     </tr>`).join('');
 
   rendreIaSocietes();
@@ -1813,9 +1862,10 @@ function rendreIaSocietes() {
   const parSociete = new Map();
   IA_LIGNES.forEach((l) => {
     const cle = l.company_id || 'inconnue';
-    if (!parSociete.has(cle)) parSociete.set(cle, { id: cle, appels: 0, tokens: 0, web: 0, echecs: 0, dernier: null });
+    if (!parSociete.has(cle)) parSociete.set(cle, { id: cle, appels: 0, tokens: 0, web: 0, echecs: 0, cout: 0, dernier: null });
     const g = parSociete.get(cle);
     g.appels++;
+    g.cout += coutIa(l);
     g.tokens += Number(l.tokens_total) || 0;
     g.web += Number(l.recherches_web) || 0;
     if (!l.ok) g.echecs++;
@@ -1824,8 +1874,16 @@ function rendreIaSocietes() {
   const lignes = [...parSociete.values()]
     .map((g) => ({ ...g, nom: noms.get(g.id)?.nom || (g.id === 'inconnue' ? 'Société supprimée' : 'Société ' + String(g.id).slice(0, 8)), plan: noms.get(g.id)?.plan || '—' }))
     .filter((g) => !recherche || g.nom.toLowerCase().includes(recherche))
-    .sort((a, b) => b.tokens - a.tokens || b.appels - a.appels);
-  el('ia-corps-societes').innerHTML = lignes.map((g) => `
+    .map((g) => ({ ...g, plafond: IA_PLAFONDS.get(g.plan) ?? null }))
+    .sort((a, b) => b.cout - a.cout || b.tokens - a.tokens || b.appels - a.appels);
+  el('ia-corps-societes').innerHTML = lignes.map((g) => {
+    // Jauge du plafond : orange à partir de 70 %, rouge au plafond (les appels sont alors refusés par le serveur).
+    const part = g.plafond ? g.cout / g.plafond : null;
+    const couleur = part == null ? '' : part >= 1 ? 'bg-error-container text-error' : part >= 0.7 ? 'bg-secondary-fixed text-secondary' : 'bg-surface-container text-on-surface-variant';
+    const plafondHtml = g.plafond
+      ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold ${couleur}">${Math.round(part * 100)} % de ${usd(g.plafond)}${part >= 1 ? ' — bloqué' : ''}</span>`
+      : '<span class="text-on-surface-variant">Pas de plafond</span>';
+    return `
     <tr class="hover:bg-surface-container-low/40 transition-colors">
       <td class="py-4 px-space-md">
         <div class="flex items-center gap-space-sm">
@@ -1838,8 +1896,11 @@ function rendreIaSocietes() {
       <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-primary">${nbFr(g.tokens)}</td>
       <td class="py-4 px-space-md text-center font-code-sm text-code-sm text-on-surface">${g.web ? nbFr(g.web) : '—'}</td>
       <td class="py-4 px-space-md text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${g.echecs ? 'bg-error-container text-error' : 'bg-surface-container text-on-surface-variant'}">${g.echecs}</span></td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-on-surface">${usd(g.cout)}</td>
+      <td class="py-4 px-space-md">${plafondHtml}</td>
       <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${g.dernier ? echapper(ilYA(g.dernier)) : '—'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 let STOCK_LIGNES = [];
