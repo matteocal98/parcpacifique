@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-S6M0pTeQtIrVuyAN974GvnC1Bqe5purNlZy91a8245k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eRAW3E6JStG8frIoi4VUNYEkB0SYxiYnyJtjwMJ4OhM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9490,6 +9490,27 @@ function requestCloseOverlay(overlay) {
   const previous = meta && meta.previousFocus;
   if (previous && document.body.contains(previous) && typeof previous.focus === 'function') previous.focus();
 }
+
+// ★ UN GLISSÉ DEPUIS L'INTÉRIEUR D'UNE MODALE NE LA FERME PAS. Quand on appuie sur la souris DANS la modale (pour
+//   sélectionner un texte, régler un curseur…) et qu'on relâche À L'EXTÉRIEUR, le navigateur envoie quand même un
+//   « click », adressé au plus proche ancêtre commun des deux points : le fond sombre. Toutes nos modales se
+//   ferment sur « un clic dont la cible est le fond » : elles se fermaient donc à tort. On retient où l'appui a
+//   commencé, et on avale ce faux clic AVANT qu'il n'atteigne la modale (phase de capture, donc avant ses écouteurs).
+//   Un vrai clic sur le fond (appui ET relâchement sur le fond) passe normalement. Le sens inverse (appui sur le
+//   fond, relâchement dans la modale) est avalé aussi.
+let cibleAppuiSouris = null;
+let cibleRelacheSouris = null;
+document.addEventListener('mousedown', (e) => { cibleAppuiSouris = e.target; cibleRelacheSouris = null; }, true);
+document.addEventListener('mouseup', (e) => { cibleRelacheSouris = e.target; }, true);
+document.addEventListener('touchstart', (e) => { cibleAppuiSouris = e.target; cibleRelacheSouris = e.target; }, { capture: true, passive: true });
+document.addEventListener('click', (e) => {
+  const cible = e.target;
+  if (!cible || !cible.matches || !cible.matches('.overlay, [class*="-overlay"], [id$="-overlay"]')) return;
+  if ((cibleAppuiSouris && cibleAppuiSouris !== cible) || (cibleRelacheSouris && cibleRelacheSouris !== cible)) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  }
+}, true);
 
 // Un seul écouteur pour toutes les modales : Échap et piège à focus.
 document.addEventListener('keydown', (e) => {
