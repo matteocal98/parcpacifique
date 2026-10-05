@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-EPxs/7ZZ7HO3LXAPBzCQ56JF4yehi9SpWRWgx4KIgk4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-S6M0pTeQtIrVuyAN974GvnC1Bqe5purNlZy91a8245k=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -19990,8 +19990,13 @@ function openAddWizard(companyId, categories) {
       if (file) {
         brancherCarnetPdf(overlay, file, contexteCarnet(), apresCarnet,
           () => analyzeManualAndFill(overlay, file, state.trackingMode, { currentHours: state.currentHours, serviceDate: state.serviceDate }));
+        // LA PHOTO CHOISIE PAR LE CLIENT GAGNE TOUJOURS. La 1ère page du carnet ne sert que s'il n'a pas déjà
+        // choisi sa photo (galerie ou appareil photo) à l'étape précédente. Contrôle refait ICI, à l'arrivée du
+        // résultat : il a pu choisir une photo pendant que la page se préparait.
         renderPdfFirstPageAsBlob(file)
           .then(blob => {
+            const photoDuClient = state.pendingPhotoBlob && state.pendingPhotoBlob !== state._carnetPhotoBlob;
+            if (photoDuClient) return;
             state.pendingPhotoBlob = blob;
             state._carnetPhotoBlob = blob;
             const zone = overlay.querySelector('#photo-preview');
@@ -24345,6 +24350,7 @@ function openMachineModal(companyId, categories, existing) {
           try {
             const photoBlob = await renderPdfFirstPageAsBlob(blob);
             overlay._pendingPhotoBlob = photoBlob;
+            overlay._carnetPhotoBlob = photoBlob;
             const previewUrl = URL.createObjectURL(photoBlob);
             overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${previewUrl}" alt="${esc(existing.name)}">`;
             overlay.querySelector('#photo-status').textContent = trad('Photo extraite de la 1ère page du carnet — elle sera enregistrée avec la fiche.');
@@ -24402,7 +24408,11 @@ function openMachineModal(companyId, categories, existing) {
           if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse, existing);
         });
       renderPdfFirstPageAsBlob(file).then(blob => {
+        // La photo de la machine (déjà enregistrée) et celle choisie par le client gagnent sur la 1ère page du carnet.
+        const photoDuClient = overlay._pendingPhotoBlob && overlay._pendingPhotoBlob !== overlay._carnetPhotoBlob;
+        if (existing.image_url || photoDuClient) return;
         overlay._pendingPhotoBlob = blob;
+        overlay._carnetPhotoBlob = blob;
         const previewUrl = URL.createObjectURL(blob);
         overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${previewUrl}" alt="${esc(existing.name)}">`;
         overlay.querySelector('#photo-status').textContent = trad('Photo extraite de la 1ère page du carnet — elle sera enregistrée avec la fiche.');

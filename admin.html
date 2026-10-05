@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-A1VA5sgRV+ASEMsw/mNJlHcTn9lvinvfJicPlo7LMK4=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/3ID3JrvZpyiV0SHFNGkI9J8qYKvTCWGkYMMgkLCj3k=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -561,14 +561,6 @@
           </div>
           <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
             <div class="flex items-center justify-between mb-space-sm">
-              <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Recherches photo ce mois</span>
-              <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[18px]">image_search</span></div>
-            </div>
-            <span id="ocr-kpi-photos" class="font-telemetry-stat text-telemetry-stat text-on-surface">—</span>
-            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
-          </div>
-          <div class="p-space-lg rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
-            <div class="flex items-center justify-between mb-space-sm">
               <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Lectures compteur ce mois</span>
               <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[18px]">speed</span></div>
             </div>
@@ -607,7 +599,6 @@
                   <th class="px-space-md py-space-xs font-semibold text-center">Machines suivies</th>
                   <th class="px-space-md py-space-xs font-semibold text-center">Carnets indexés</th>
                   <th class="px-space-md py-space-xs font-semibold text-center">Analyses OCR (mois)</th>
-                  <th class="px-space-md py-space-xs font-semibold text-center">Recherches photo (mois)</th>
                   <th class="px-space-lg py-space-xs font-semibold text-center">Lectures compteur (mois)</th>
                 </tr>
               </thead>
@@ -1653,7 +1644,6 @@ async function chargerOcr() {
   OCR_LIGNES = (societes || []).filter((s) => s.nb_machines > 0);
 
   el('ocr-kpi-analyses').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.analyses_carnet || 0), 0);
-  el('ocr-kpi-photos').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.recherches_photo || 0), 0);
   el('ocr-kpi-lectures').textContent = OCR_LIGNES.reduce((a, s) => a + Number(s.lectures_compteur || 0), 0);
   const totalMachines = OCR_LIGNES.reduce((a, s) => a + Number(s.nb_machines || 0), 0);
   const totalManuels = OCR_LIGNES.reduce((a, s) => a + Number(s.nb_manuels || 0), 0);
@@ -1681,7 +1671,6 @@ function rendreTableauOcr() {
         </div>
       </td>
       <td class="px-space-md py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-on-surface">${s.analyses_carnet}</span></td>
-      <td class="px-space-md py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-on-surface">${s.recherches_photo}</span></td>
       <td class="px-space-lg py-space-sm text-center"><span class="font-telemetry-stat-compact text-telemetry-stat-compact text-primary font-bold">${s.lectures_compteur}</span></td>
     </tr>`).join('');
 }
