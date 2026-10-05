@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Qgh+Lgq5Jd03bP385jaTC3XtYnZTSsi6Gnl/b8YJY2I=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-u4OGdPOHw0clno3h53aLUNQSHJHYF+K0MM2SkiCttyQ=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -112,6 +112,9 @@
       </a>
       <a data-path="telemetrie" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">sensors</span><span class="font-label-md text-label-md">Télémétrie</span>
+      </a>
+      <a data-path="ia" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-label-md text-label-md">Consommation IA</span>
       </a>
     </nav>
   </div>
@@ -729,6 +732,108 @@
         </div>
       </section>
 
+      <!-- ═══════ VUE : Consommation de l'IA (tokens Gemini) ═══════ -->
+      <section id="vue-ia" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">monitoring</span><span>Supervision Cross-Entreprises</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Consommation de l'IA</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Ce que chaque appel à Gemini a réellement consommé (tokens et recherches web Google), par fonctionnalité et par organisation. Aucun contenu n'est enregistré : seulement des compteurs.</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <select id="ia-mois" class="h-11 px-space-sm rounded bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm"></select>
+            <button id="ia-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Appels à Gemini</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">bolt</span>
+            </div>
+            <span id="ia-kpi-appels" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Tokens consommés</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-secondary material-symbols-outlined text-[20px]">token</span>
+            </div>
+            <span id="ia-kpi-tokens" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Recherches web Google</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant material-symbols-outlined text-[20px]">travel_explore</span>
+            </div>
+            <span id="ia-kpi-recherches" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+          <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">Appels en échec</span>
+              <span class="p-1.5 rounded-lg bg-surface-container-low text-error material-symbols-outlined text-[20px]">error</span>
+            </div>
+            <span id="ia-kpi-echecs" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div class="p-space-lg">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Par fonctionnalité et par étape</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Une recherche de photo enchaîne plusieurs appels (recherche, vérification du fond) : chaque étape est comptée à part. Un « token » est l'unité de facturation du fournisseur.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-body-sm text-body-sm">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                  <th class="py-3 px-space-md">Fonctionnalité</th>
+                  <th class="py-3 px-space-md">Étape</th>
+                  <th class="py-3 px-space-md text-center">Appels</th>
+                  <th class="py-3 px-space-md text-right">Tokens entrée</th>
+                  <th class="py-3 px-space-md text-right">Tokens sortie</th>
+                  <th class="py-3 px-space-md text-right">Réflexion</th>
+                  <th class="py-3 px-space-md text-right">Total</th>
+                  <th class="py-3 px-space-md text-right">Moy. / appel</th>
+                  <th class="py-3 px-space-md text-center">Recherches web</th>
+                </tr>
+              </thead>
+              <tbody id="ia-corps-fonctions" class="divide-y divide-surface-container-low"></tbody>
+            </table>
+          </div>
+          <p id="ia-vide" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div class="p-space-lg flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+            <div>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Par organisation</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Classées par tokens consommés sur le mois choisi.</p>
+            </div>
+            <input id="ia-recherche" class="h-10 px-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant rounded" placeholder="Rechercher une organisation…">
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-body-sm text-body-sm">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                  <th class="py-3 px-space-md">Organisation</th>
+                  <th class="py-3 px-space-md">Offre</th>
+                  <th class="py-3 px-space-md text-center">Appels</th>
+                  <th class="py-3 px-space-md text-right">Tokens</th>
+                  <th class="py-3 px-space-md text-center">Recherches web</th>
+                  <th class="py-3 px-space-md text-center">Échecs</th>
+                  <th class="py-3 px-space-md">Dernier appel</th>
+                </tr>
+              </thead>
+              <tbody id="ia-corps-societes" class="divide-y divide-surface-container-low"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════ VUE : Bientôt disponible ═══════ -->
       <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
         <span class="material-symbols-outlined text-4xl text-on-surface-variant">construction</span>
@@ -874,6 +979,9 @@ async function demarrer() {
   el('ocr-recherche')?.addEventListener('input', () => rendreTableauOcr());
   el('stock-rafraichir')?.addEventListener('click', () => chargerStock());
   el('telemetrie-rafraichir')?.addEventListener('click', () => chargerTelemetrie());
+  el('ia-rafraichir')?.addEventListener('click', () => chargerIa());
+  el('ia-mois')?.addEventListener('change', () => chargerIa());
+  el('ia-recherche')?.addEventListener('input', () => rendreIaSocietes());
   el('stock-recherche')?.addEventListener('input', () => rendreTableauStock());
 
   sb.auth.onAuthStateChange((_event, session) => {
@@ -929,13 +1037,14 @@ async function verifierAccesEtCharger(userId) {
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
   if (chemin === 'ocr') chargerOcr();
   if (chemin === 'stock') chargerStock();
   if (chemin === 'telemetrie') chargerTelemetrie();
+  if (chemin === 'ia') chargerIa();
 }
 
 // ── Clients & Organisations ─────────────────────────────────────────────
@@ -1591,6 +1700,145 @@ async function chargerTelemetrie() {
       <td class="py-4 px-space-md text-center">
         <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${Number(t.releves_suspects_7j) > 0 ? 'bg-error-container text-error' : 'bg-surface-container-low text-on-surface-variant'}">${t.releves_suspects_7j}</span>
       </td>
+    </tr>`).join('');
+}
+
+// ── Consommation de l'IA ─────────────────────────────────────────────────
+// Lecture seule de la table ai_token_log (migration ia-journal-tokens.sql) : la sécurité par lignes de la
+// base ne laisse lire ce journal qu'au personnel (is_staff()). Chaque appel à Gemini y a écrit UNE ligne ;
+// on regroupe ici, dans le navigateur, sur le mois choisi.
+let IA_LIGNES = [];
+const IA_FONCTIONS = {
+  'extract-maintenance-plan': 'Analyse de carnet',
+  'fetch-machine-image': 'Recherche de photo',
+  'lire-compteur': 'Lecture de compteur',
+};
+const IA_ETAPES = {
+  analyse: 'Analyse du document',
+  recherche: 'Recherche web (générer)',
+  'recherche-interactions': 'Recherche web (interactions)',
+  'verif-fond': 'Vérification du fond blanc',
+  lecture: 'Lecture du compteur',
+};
+const nbFr = (n) => (n == null ? '—' : Number(n).toLocaleString('fr-FR'));
+
+function initialiserMoisIa() {
+  const select = el('ia-mois');
+  if (!select || select.options.length) return;
+  const maintenant = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(maintenant.getFullYear(), maintenant.getMonth() - i, 1);
+    const o = document.createElement('option');
+    o.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    o.textContent = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    select.appendChild(o);
+  }
+}
+
+async function chargerIa() {
+  initialiserMoisIa();
+  const [annee, mois] = (el('ia-mois').value || '').split('-').map(Number);
+  const debut = new Date(annee, mois - 1, 1);
+  const fin = new Date(annee, mois, 1);
+  const vide = el('ia-vide');
+  vide.classList.add('hidden');
+
+  // PostgREST renvoie au plus 1 000 lignes par requête : on pagine (plafond de sécurité : 40 000 lignes).
+  const lignes = [];
+  for (let page = 0; page < 40; page++) {
+    const { data, error } = await sb.from('ai_token_log')
+      .select('cree_le, company_id, feature, etape, modele, tokens_entree, tokens_sortie, tokens_reflexion, tokens_total, recherches_web, ok')
+      .gte('cree_le', debut.toISOString()).lt('cree_le', fin.toISOString())
+      .order('cree_le', { ascending: false })
+      .range(page * 1000, page * 1000 + 999);
+    if (error) {
+      console.error(error);
+      IA_LIGNES = [];
+      el('ia-corps-fonctions').innerHTML = '';
+      el('ia-corps-societes').innerHTML = '';
+      vide.textContent = 'Lecture impossible : ' + (error.message || error) + ' (la migration ia-journal-tokens.sql est-elle passée ?)';
+      vide.classList.remove('hidden');
+      ['ia-kpi-appels', 'ia-kpi-tokens', 'ia-kpi-recherches', 'ia-kpi-echecs'].forEach((id) => { el(id).textContent = '—'; });
+      return;
+    }
+    lignes.push(...(data || []));
+    if (!data || data.length < 1000) break;
+  }
+  IA_LIGNES = lignes;
+
+  const somme = (cle) => lignes.reduce((a, l) => a + (Number(l[cle]) || 0), 0);
+  el('ia-kpi-appels').textContent = nbFr(lignes.length);
+  el('ia-kpi-tokens').textContent = nbFr(somme('tokens_total'));
+  el('ia-kpi-recherches').textContent = nbFr(somme('recherches_web'));
+  el('ia-kpi-echecs').textContent = nbFr(lignes.filter((l) => !l.ok).length);
+
+  if (!lignes.length) {
+    vide.textContent = "Aucun appel enregistré sur ce mois. Le journal se remplit à partir du moment où les trois fonctions (analyse de carnet, recherche de photo, lecture de compteur) ont été republiées.";
+    vide.classList.remove('hidden');
+  }
+
+  // Par fonctionnalité + étape
+  const groupes = new Map();
+  lignes.forEach((l) => {
+    const cle = l.feature + '|' + l.etape;
+    if (!groupes.has(cle)) groupes.set(cle, { feature: l.feature, etape: l.etape, appels: 0, entree: 0, sortie: 0, reflexion: 0, total: 0, avecTotal: 0, web: 0 });
+    const g = groupes.get(cle);
+    g.appels++;
+    g.entree += Number(l.tokens_entree) || 0;
+    g.sortie += Number(l.tokens_sortie) || 0;
+    g.reflexion += Number(l.tokens_reflexion) || 0;
+    if (l.tokens_total != null) { g.total += Number(l.tokens_total) || 0; g.avecTotal++; }
+    g.web += Number(l.recherches_web) || 0;
+  });
+  const triees = [...groupes.values()].sort((a, b) => b.total - a.total || b.appels - a.appels);
+  el('ia-corps-fonctions').innerHTML = triees.map((g) => `
+    <tr class="hover:bg-surface-container-low/40 transition-colors">
+      <td class="py-4 px-space-md font-label-md text-label-md text-on-surface">${echapper(IA_FONCTIONS[g.feature] || g.feature)}</td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${echapper(IA_ETAPES[g.etape] || g.etape)}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${nbFr(g.appels)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm text-on-surface">${nbFr(g.entree)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm text-on-surface">${nbFr(g.sortie)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm text-on-surface-variant">${nbFr(g.reflexion)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-primary">${nbFr(g.total)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm text-on-surface">${g.avecTotal ? nbFr(Math.round(g.total / g.avecTotal)) : '—'}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm text-on-surface">${g.web ? nbFr(g.web) : '—'}</td>
+    </tr>`).join('');
+
+  rendreIaSocietes();
+}
+
+function rendreIaSocietes() {
+  const recherche = (el('ia-recherche')?.value || '').toLowerCase();
+  const noms = new Map(SOCIETES.map((o) => [o.company_id, o]));
+  const parSociete = new Map();
+  IA_LIGNES.forEach((l) => {
+    const cle = l.company_id || 'inconnue';
+    if (!parSociete.has(cle)) parSociete.set(cle, { id: cle, appels: 0, tokens: 0, web: 0, echecs: 0, dernier: null });
+    const g = parSociete.get(cle);
+    g.appels++;
+    g.tokens += Number(l.tokens_total) || 0;
+    g.web += Number(l.recherches_web) || 0;
+    if (!l.ok) g.echecs++;
+    if (!g.dernier || l.cree_le > g.dernier) g.dernier = l.cree_le;
+  });
+  const lignes = [...parSociete.values()]
+    .map((g) => ({ ...g, nom: noms.get(g.id)?.nom || (g.id === 'inconnue' ? 'Société supprimée' : 'Société ' + String(g.id).slice(0, 8)), plan: noms.get(g.id)?.plan || '—' }))
+    .filter((g) => !recherche || g.nom.toLowerCase().includes(recherche))
+    .sort((a, b) => b.tokens - a.tokens || b.appels - a.appels);
+  el('ia-corps-societes').innerHTML = lignes.map((g) => `
+    <tr class="hover:bg-surface-container-low/40 transition-colors">
+      <td class="py-4 px-space-md">
+        <div class="flex items-center gap-space-sm">
+          <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-headline-sm text-primary font-bold">${echapper(initiales(g.nom).slice(0, 1))}</div>
+          <span class="font-label-md text-label-md text-on-surface">${echapper(g.nom)}</span>
+        </div>
+      </td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${echapper(g.plan)}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm font-semibold text-on-surface">${nbFr(g.appels)}</td>
+      <td class="py-4 px-space-md text-right font-code-sm text-code-sm font-bold text-primary">${nbFr(g.tokens)}</td>
+      <td class="py-4 px-space-md text-center font-code-sm text-code-sm text-on-surface">${g.web ? nbFr(g.web) : '—'}</td>
+      <td class="py-4 px-space-md text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${g.echecs ? 'bg-error-container text-error' : 'bg-surface-container text-on-surface-variant'}">${g.echecs}</span></td>
+      <td class="py-4 px-space-md font-body-sm text-body-sm text-on-surface-variant">${g.dernier ? echapper(ilYA(g.dernier)) : '—'}</td>
     </tr>`).join('');
 }
 
