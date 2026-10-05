@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-eRAW3E6JStG8frIoi4VUNYEkB0SYxiYnyJtjwMJ4OhM=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-YHHLmpj8oc7frroH3kD7UL2h58YspLEBXSH5c7Tbe8c=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -16286,12 +16286,12 @@ VIEWS.account = {
           <div class="ui-grille">
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-email">${trad('Nouvel e-mail de connexion')}</label>
-              <input id="acc-email" class="ui-champ" type="email" autocomplete="email" placeholder="${trad('nouvelle@adresse.nc')}">
+              <input id="acc-email" class="ui-champ" type="email" autocomplete="off" name="nouvel-email-connexion" placeholder="${trad('nouvelle@adresse.nc')}">
             </div>
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-password">${trad('Confirmer par mot de passe actuel')}</label>
               <div class="password-wrap">
-                <input id="acc-password" class="ui-champ" type="password" autocomplete="current-password">
+                <input id="acc-password" class="ui-champ" type="password" autocomplete="off" name="mot-de-passe-actuel-confirmation">
                 <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
               </div>
             </div>
@@ -16428,6 +16428,19 @@ VIEWS.account = {
     root.querySelector('#acc-portail')?.addEventListener('click', () => ouvrirPortailAbonnement());
     root.querySelector('#acc-support-ouvrir')?.addEventListener('click', () => openSupportModal());
     habillerSelect(root.querySelector('#acc-activity'), trad('Activité principale'));
+    // ★ LE NAVIGATEUR NE DOIT PAS REMPLIR CES DEUX CHAMPS À LA PLACE DE L'UTILISATEUR. Chrome reconnaît « un champ
+    //   e-mail + un champ mot de passe » comme un formulaire de connexion et y recopie l'identifiant enregistré : le
+    //   « nouvel e-mail » apparaissait déjà rempli avec l'ADRESSE ACTUELLE d'un autre compte, à un clic d'un changement
+    //   d'adresse involontaire. Un champ en lecture seule n'est jamais rempli automatiquement : on le libère dès
+    //   que l'utilisateur le touche ou le sélectionne.
+    ['#acc-email', '#acc-password'].forEach((sel) => {
+      const champ = root.querySelector(sel);
+      if (!champ) return;
+      champ.readOnly = true;
+      const liberer = () => { champ.readOnly = false; };
+      champ.addEventListener('focus', liberer, { once: true });
+      champ.addEventListener('pointerdown', liberer, { once: true });
+    });
     habillerSelect(root.querySelector('#acc-pays'), trad('Pays'));
     habillerSelect(root.querySelector('#acc-devise'), trad('Devise'));
     brancherLibelleRegistre(root.querySelector('#acc-pays'), root.querySelector('#acc-reg-etiquette'));
