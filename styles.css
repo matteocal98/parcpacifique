@@ -6397,3 +6397,19 @@ html:not(.icones-pretes) .material-symbols-outlined{visibility:hidden;display:in
   .machine-modal-add > div footer button{padding-top:9px !important;padding-bottom:9px !important;}
   .machine-modal-add > div footer button[type=submit]{padding-left:14px !important;padding-right:14px !important;}
 }
+
+/* Bandeau du Parc : compteurs compacts (signalé sur téléphone, 2026-10-07 : « le compteur prend trop de place »).
+   - Suivi calendaire : « DATE DU JOUR … 7 octobre 2026 » sur UNE ligne, sans la phrase « rien à relever » (inutile ici).
+   - Second compteur : une ligne « 2nd compteur … 23 000 km ✎ », modifiable d'un tap (rouleaux), comme le premier. */
+.mstrip-compteur-bloc .compteur-jour{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 10px;}
+.mstrip-compteur-bloc .compteur-jour .compteur-titre{margin:0;}
+.mstrip-compteur-bloc .compteur-jour .compteur-note{display:none;}
+.mstrip-compteur-bloc .compteur-secondaire{margin-top:6px;padding-top:6px;border-top:1px solid var(--line-2);}
+.compteur2-ligne{display:flex;align-items:center;gap:8px;width:100%;min-height:32px;}
+button.compteur2-ligne{border:none;background:transparent;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
+.compteur2-lib{flex:1 1 auto;min-width:0;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--dark-ink);white-space:nowrap;}
+.compteur2-lib svg{width:13px;height:13px;flex:0 0 auto;}
+.compteur2-val{flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.compteur2-edit{flex:0 0 auto;width:28px;height:28px;border-radius:9px;background:var(--surface);color:var(--ink-2);display:flex;align-items:center;justify-content:center;}
+.compteur2-edit svg{width:14px;height:14px;}
+button.compteur2-ligne:active .compteur2-edit{background:var(--line-2);}
