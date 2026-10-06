@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-NiM3GI7r4SJVU2n9epUXQwjZLNX6AHW9wdETmpgBnww=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-u7Dcww9XuC8NTMUKThnA47YDoLuusLTRo7fZ8f65nhA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -25617,51 +25617,47 @@ async function boot(toastMessage) {
 
   app.innerHTML = `<div class="loading">${trad('Chargement des machines…')}</div>`;
 
-  // Colonnes prénom/nom du contact : présentes seulement après migration-compte.
-  // sonderColonne() reprend une fois sur une erreur RÉSEAU (pas sur une vraie
-  // absence de colonne) — voir sa note, trouvée en testant sur un vrai
-  // téléphone en 4G.
-  SCHEMA.hasContactNames = await sonderColonne('companies', 'contact_first_name');
-
-  // Colonnes de rappel : présentes seulement après migration-rappels-email.sql.
-  // La sonde évite de demander des colonnes absentes, et la cascade ci-dessous
-  // reste le filet : une base plus ancienne continue de fonctionner.
-  SCHEMA.hasReminders = await sonderColonne('companies', 'notification_email');
-
-  // Ciblage des rappels PUSH par rôle : présent seulement après
-  // migration-push-notifications.sql. Même discipline de sonde que les
-  // autres colonnes optionnelles.
-  SCHEMA.hasPushRoles = await sonderColonne('companies', 'reminders_push');
-  SCHEMA.hasCountry = await sonderColonne('companies', 'country');
-  SCHEMA.hasReferences = await sonderColonne('machine_type_references', 'cle');
-
-  // TCO : une seule sonde, côté société (labor_hourly_rate), suffit à savoir si
-  // TOUTE la migration TCO est en place — colonnes machines/interventions et
-  // tables parts_catalog/intervention_parts/operating_costs ont été ajoutées
-  // ensemble, jamais séparément (voir keeva-tco-feature).
-  SCHEMA.hasTco = await sonderColonne('companies', 'labor_hourly_rate');
-
-  // Stock & SAV (Phase 1) : une seule sonde, table warehouses — schéma et
-  // RPC (enregistrer_mouvement_stock) toujours ajoutés ensemble, même
-  // discipline qu'hasTco ci-dessus. Indépendant du palier d'offre
-  // (planCouvreStock()) : une société qui rétrograde après avoir eu la
-  // migration continue de VOIR ses données, seul le palier décide si le
-  // module reste ACCESSIBLE (voir navItemsVisibles()).
-  SCHEMA.hasStock = await sonderColonne('warehouses', 'id');
-  // Conditionnement du catalogue de pièces (« Boîte de 12 », « Bidon de
-  // 5L »…) : migration ajoutée APRÈS coup, séparément du reste du module
-  // Stock (demande de l'utilisateur une fois la Phase 1 déjà en place) —
-  // sonde dédiée, ne pas supposer sa présence sous SCHEMA.hasStock qui a
-  // pu être migré avant elle.
-  SCHEMA.hasStockPackaging = await sonderColonne('parts_catalog', 'packaging');
-  // Kits d'entretien (bundles de pièces réutilisables, reliables à une étape
-  // de plan) : migration séparée, sonde dédiée — même discipline que
-  // hasStockPackaging, ne jamais supposer sa présence sous SCHEMA.hasStock.
-  SCHEMA.hasKits = await sonderColonne('maintenance_kits', 'id');
-  // Télémétrie : une sonde sur les colonnes ajoutées à machines suffit (la
-  // migration les crée toutes ensemble). SCHEMA.*, jamais telemetrieActif() ici.
-  SCHEMA.hasTelemetry = await sonderColonne('machines', 'telemetry_ref, counter_source, telemetry_last_at');
-  SCHEMA.hasGps = await sonderColonne('machines', 'position_enabled, last_lat, last_lon, last_position_at');
+  // Sondes de schéma : colonnes/tables optionnelles, présentes seulement après leur migration.
+  // sonderColonne() reprend une fois sur une erreur RÉSEAU (pas sur une vraie absence de colonne) — voir sa note,
+  // trouvée en testant sur un vrai téléphone en 4G.
+  // ⚠️ Elles partent TOUTES ENSEMBLE (Promise.all) : lancées l'une après l'autre, ces 13 requêtes minuscules
+  //   s'additionnaient (≈ 0,5 s chacune sur un téléphone) et le démarrage dépassait 7 s — le panneau de diagnostic
+  //   de l'application Android s'affichait alors à chaque ouverture (signalé le 2026-10-07).
+  // SCHEMA.*, jamais tcoActif()/telemetrieActif() ici : UI.companyPlan n'est pas encore affecté à ce stade du boot
+  // (bug de l'ordre de démarrage du TCO, 1er oct. 2026). Même discipline pour Stock, kits et télémétrie :
+  //   - hasTco : une seule sonde (labor_hourly_rate) suffit, toute la migration TCO a été ajoutée ensemble ;
+  //   - hasStock : table warehouses (schéma et RPC ajoutés ensemble), indépendant du palier d'offre
+  //     (planCouvreStock()) — seul le palier décide si le module reste ACCESSIBLE (voir navItemsVisibles()) ;
+  //   - hasStockPackaging et hasKits : migrations ajoutées APRÈS coup, sonde dédiée chacune ;
+  //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
+  const [
+    aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
+    roleExiste,
+  ] = await Promise.all([
+    sonderColonne('companies', 'contact_first_name'),
+    sonderColonne('companies', 'notification_email'),
+    sonderColonne('companies', 'reminders_push'),
+    sonderColonne('companies', 'country'),
+    sonderColonne('machine_type_references', 'cle'),
+    sonderColonne('companies', 'labor_hourly_rate'),
+    sonderColonne('warehouses', 'id'),
+    sonderColonne('parts_catalog', 'packaging'),
+    sonderColonne('maintenance_kits', 'id'),
+    sonderColonne('machines', 'telemetry_ref, counter_source, telemetry_last_at'),
+    sonderColonne('machines', 'position_enabled, last_lat, last_lon, last_position_at'),
+    sonderColonne('profiles', 'role'),
+  ]);
+  SCHEMA.hasContactNames = aNomsContact;
+  SCHEMA.hasReminders = aRappels;
+  SCHEMA.hasPushRoles = aPushRoles;
+  SCHEMA.hasCountry = aPays;
+  SCHEMA.hasReferences = aReferences;
+  SCHEMA.hasTco = aTco;
+  SCHEMA.hasStock = aStock;
+  SCHEMA.hasStockPackaging = aConditionnement;
+  SCHEMA.hasKits = aKits;
+  SCHEMA.hasTelemetry = aTelemetrie;
+  SCHEMA.hasGps = aGps;
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -25709,7 +25705,6 @@ async function boot(toastMessage) {
   //   La colonne n'existe qu'après migration-roles-equipe : on la SONDE, comme les
   //   autres, pour ne pas casser une base plus ancienne. La sonde RÉUSSIT quand la
   //   colonne existe — c'est ce cas, et lui seul, qui l'ajoute au `select`.
-  const roleExiste = await sonderColonne('profiles', 'role');
   const colonnesProfil = roleExiste ? 'company_id, role' : 'company_id';
 
   let profile = null;
