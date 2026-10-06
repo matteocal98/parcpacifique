@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Lm2oXfzsBx2WanmIsDDei6Z1H/Rodp9QMHwStKH6+cQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uDgGzj6MNkhDskFZ+DwWIG1CJMOTqkS+s2QsBuEsbT0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -8700,6 +8700,26 @@ async function activerPush() {
   } catch (err) {
     return { erreur: (err && err.message) || trad('erreur inconnue') };
   }
+}
+
+// À CHAQUE OUVERTURE (compte connecté) : le jeton gardé sur le téléphone est ré-annoncé au serveur au nom du compte. Avant, il n'était
+// envoyé qu'une seule fois, à l'activation de l'interrupteur : si cet envoi échouait (session pas encore prête), ou si la ligne
+// disparaissait côté serveur (compte ou société recréés), le téléphone se croyait « actif » à vie alors que le serveur ne le connaissait
+// pas — aucun rappel ne partait, et le web affichait « À installer ». L'envoi est un « upsert » : sans doublon, et un jeton resté
+// attaché à un autre compte est réattribué. On redemande aussi le jeton courant à Firebase (il peut changer) ; l'écouteur
+// « registration » l'enverra.
+async function resynchroniserJetonPush() {
+  const plugin = pluginPush();
+  const token = monTokenPushConnu();
+  if (!plugin || !token) return;
+  try {
+    const { error } = await sb.rpc('enregistrer_mon_token_push', { p_token: token });
+    if (error) console.warn('Réannonce du jeton push :', error.message);
+  } catch (err) { /* hors connexion : à la prochaine ouverture */ }
+  try {
+    const etat = await plugin.checkPermissions();
+    if (etat && etat.receive === 'granted') await plugin.register();
+  } catch (err) { /* sans conséquence */ }
 }
 
 async function desactiverPush() {
@@ -25794,6 +25814,9 @@ async function boot(toastMessage) {
   // ★ TAP SUR UNE NOTIFICATION PUSH arrivé avant que UI.machines soit chargé
   //   (lancement à froid) : résolu ici, même emplacement que le lien QR.
   ouvrirFicheDepuisPushSiPresent();
+
+  // Le téléphone ré-annonce son jeton de notification au serveur (voir resynchroniserJetonPush) — sans bloquer l'ouverture.
+  resynchroniserJetonPush();
 
   // Reprogrammation des rappels à chaque ouverture, sans réclamer
   // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.
