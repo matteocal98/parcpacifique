@@ -888,7 +888,7 @@
   @media (min-width:1180px){.mstrip-identite{width:auto;flex:1 1 260px;}}
   /* Fond blanc, pas var(--surface-soft) (teinté) : même correctif que
      #photo-preview (styles.css ~2171) et .fm2-o1-photo-box ci-dessous. */
-  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:var(--surface-soft);flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .mstrip-photo{position:relative;width:84px;height:72px;border-radius:var(--r-md);overflow:hidden;background:#fff;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
   /* object-fit:contain, pas cover : une débroussailleuse (longue et
      étroite) recadrée en cover dans une vignette large finissait tronquée
      au seul manche, le reste (tête de coupe, moteur) hors cadre — signalé
@@ -896,6 +896,8 @@
      apparaître le fond teinté du cadre sur les côtés. */
   .mstrip-photo img{width:100%;height:100%;object-fit:contain;}
   .mstrip-photo-tag{position:absolute;bottom:3px;left:3px;right:3px;padding:2px 5px;border-radius:4px;background:rgba(14,19,51,.82);color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Sans photo, le picto garde un fond teinté : sur la carte blanche il ne se verrait plus. */
+  .mstrip-photo:has(.mstrip-photo-vide){background:var(--surface-soft);}
   .mstrip-photo-vide{color:var(--dark-ink);}
   .mstrip-photo-vide svg{width:26px;height:26px;}
   .mstrip-info{min-width:0;display:flex;flex-direction:column;gap:2px;}
@@ -6290,7 +6292,7 @@
   .tele-popup-groupe-titre{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);}
   .tele-marker-pt.is-late{background:var(--late);}
   .tele-marker-pt.is-soon{background:var(--soon);}
-  .tele-vignette{display:block;width:48px;height:48px;border-radius:10px;object-fit:cover;background:var(--surface-soft);flex:0 0 auto;}
+  .tele-vignette{display:block;width:48px;height:48px;border-radius:10px;object-fit:cover;background:#fff;flex:0 0 auto;}
   .tele-vignette-vide{display:flex;align-items:center;justify-content:center;color:var(--ink-2);}
   .tele-vignette-vide svg{width:24px;height:24px;}
   .leaflet-tooltip.tele-infobulle{padding:6px 10px 6px 6px;border:none;border-radius:14px;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(14,19,51,.28);}
