@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cQQZTwE/PVaBT0Wn8tZuhvz8lfYivAfT8Dj3UHNyn7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-BjZ4kye+EAfRwJeRX82YQ1axlXQoUfVleBI2ODQphAs=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -13246,8 +13246,8 @@ function apercuRappelsHtml() {
   const parEmail = rappelsEmailActifs();
   const surTelephone = rappelsDisponibles();
   const parPush = !!monTokenPushConnu();
-  const tuile = (etat, label, valeur, texte, idValeur) => `
-        <div class="ui-tuile${etat ? ' is-ok' : ''}">
+  const tuile = (etat, label, valeur, texte, idValeur, attr) => `
+        <div class="ui-tuile${etat ? ' is-ok' : ''}"${attr ? ' ' + attr : ''}>
           <span class="ui-tuile-etiquette">${label}</span>
           <span class="ui-tuile-valeur"${idValeur ? ` id="${idValeur}"` : ''}>${valeur}</span>
           <span class="ui-tuile-note">${texte}</span>
@@ -13255,7 +13255,7 @@ function apercuRappelsHtml() {
   return `
     <section class="ui-section">
       <div class="ui-grille is-3">
-        ${tuile(parEmail, trad('Canal d\'alerte e-mail'), parEmail ? trad('Actif') : trad('Inactif'), trad('Avant chaque échéance datée'))}
+        ${tuile(parEmail, trad('Canal d\'alerte e-mail'), parEmail ? trad('Actif') : trad('Inactif'), trad('Avant chaque échéance datée'), null, 'data-tuile="email"')}
         ${tuile(surTelephone, trad('App mobile Android'), surTelephone ? trad('Actif') : trad('À installer'), trad('Service d\'arrière-plan · indépendant du réseau'), surTelephone ? 'rappel-tuile-file' : null)}
         ${tuile(parPush, trad('Notifications push'), parPush ? trad('Actif sur ce téléphone') : trad('Inactif sur ce téléphone'), trad('Ciblage et délai réglables par droit d\'accès'))}
         ${tuile(false, trad('Anticipation d\'atelier'), tR('{n} jours', { n: FALLBACK_REMINDER_DAYS }), trad('Réglable individuellement sur chaque machine'))}
@@ -13267,6 +13267,24 @@ function apercuRappelsHtml() {
 // carte « Contact & Alertes » de « Mon compte » — les deux rendent EXACTEMENT
 // les mêmes id (#rap-email / #rap-par-email / #rap-save / #rap-msg), donc une
 // seule fonction suffit ; il ne peut jamais y en avoir deux montées ensemble.
+// Remet à jour les deux indicateurs de l'état du canal e-mail APRÈS un enregistrement : la pastille « Canal actif / inactif » du bloc
+// et la tuile « Canal d'alerte e-mail » en haut de la vue. Ils étaient dessinés une fois, à l'ouverture, et restaient figés.
+function majIndicateursRappelsEmail(root) {
+  const actif = rappelsEmailActifs();
+  const bouton = root && root.querySelector('#rap-save');
+  const bloc = bouton ? bouton.closest('.ui-groupe, .ui-section') : null;
+  const pastille = bloc ? bloc.querySelector('.ui-statut') : null;
+  if (pastille) {
+    pastille.classList.toggle('is-ok', actif);
+    pastille.textContent = actif ? trad('Canal actif') : trad('Canal inactif');
+  }
+  const tuile = document.querySelector('[data-tuile="email"]');
+  if (tuile) {
+    tuile.classList.toggle('is-ok', actif);
+    const valeur = tuile.querySelector('.ui-tuile-valeur');
+    if (valeur) valeur.textContent = actif ? trad('Actif') : trad('Inactif');
+  }
+}
 function wireReglagesRappelsEmail(root) {
   if (!root) return;
   const msg = root.querySelector('#rap-msg');
@@ -13303,6 +13321,7 @@ function wireReglagesRappelsEmail(root) {
 
       UI.company.notification_email = adresse || null;
       UI.company.reminders_email = parEmail;
+      majIndicateursRappelsEmail(root);
       if (msg) {
         msg.style.color = 'var(--ok)';
         if (!adresse) msg.textContent = trad('Aucune adresse enregistrée : aucun rappel par e-mail ne partira.');
