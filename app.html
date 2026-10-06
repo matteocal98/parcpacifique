@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-uDgGzj6MNkhDskFZ+DwWIG1CJMOTqkS+s2QsBuEsbT0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+jpJkGb68vyHTj9bEoUUKFXt15F0oMreG01e5GLcBUE=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -10103,10 +10103,21 @@ function machinesEnRetard() {
 // `data-priority-tache` porte la TÂCHE visée : deux blocs de la même machine
 // restent distincts, et « Marquer fait » coche d'avance la bonne ligne. Il reste
 // VIDE pour un bloc au niveau du plan — il n'y a aucune tâche à désigner.
+// Le relevé qui correspond au suivi dont parle `info` : le SECOND compteur quand l'échéance vient du second suivi, le principal sinon.
+// Avant, ces cartes affichaient toujours le compteur principal : une tâche en retard suivie par le second compteur (23 000 km) montrait
+// le relevé du principal resté à 1 650 km.
+function releveSuiviDe(machine, info) {
+  const surSecond = !!(info && info.secondaire) && !!counterUnit2Of(machine);
+  return surSecond
+    ? { valeur: machineCounter2(machine), unite: counterUnit2Of(machine), second: true }
+    : { valeur: machineCounter(machine), unite: counterUnitOf(machine), second: false };
+}
+
 function priorityTaskCardHtml(machine, item, info, planEntier) {
   const enCompteur = info.unit === 'hours' || info.unit === 'km';
+  const releve = releveSuiviDe(machine, info);
   const depart = enCompteur
-    ? formatCounter(machineCounter(machine), counterUnitOf(machine))
+    ? formatCounter(releve.valeur, releve.unite)
     : formatShortDate((item && item.due_at) || machine.plan?.next_due_at);
   const titre = planEntier
     ? tR('Échéance générale du plan dépassée de {valeur}', { valeur: info.short })
@@ -10170,8 +10181,9 @@ function priorityCardHtml(machine, info) {
   const tacheForte = `<strong>${esc(nextTaskLabel(machine))}</strong>`;
   let phrase;
   if (isCounterInfo) {
-    const nextDue = planNextDueCounter(machine.plan);
-    const current = machineCounter(machine);
+    const releve = releveSuiviDe(machine, info);
+    const nextDue = releve.second ? planNextDueCounter2(machine.plan) : planNextDueCounter(machine.plan);
+    const current = releve.valeur;
     phrase = tR('Tâche requise : {tache} · Échéance à {seuil} (Compteur relevé à {actuel} · {delai} {mot})', {
       tache: tacheForte,
       seuil: nextDue != null ? esc(formatCounter(nextDue, info.unit)) : '—',
