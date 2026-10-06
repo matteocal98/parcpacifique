@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-KBAOb+Mqiq633EyVmDbbmu/JOMTUJpPmvEWGZnH99Xg=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-h/uBo3DcftXqxcFvD79XAEAB1xlukwxTBUSAWA5HDLA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -9733,7 +9733,9 @@ function remindersCardHtml() {
         <div class="ui-liste">
           ${canal('telephone', trad('Sur le téléphone'), surTelephone ? trad('Service d\'arrière-plan actif') : trad('Application Android KALEA'), surTelephone, trad('Actif'), trad('À installer'))}
           ${canal('mail', trad('E-mail'), trad('Avant chaque échéance'), parEmail, trad('Actif'), trad('Inactif'))}
-          ${canal('cloche', trad('Notification push'), trad('Ciblage par droit d\'accès'), parPush, trad('Actif'), trad('Inactif'))}
+          ${pushDisponible()
+            ? canal('cloche', trad('Notification push'), trad('Ciblage par droit d\'accès'), parPush, trad('Actif'), trad('Inactif'))
+            : canal('cloche', trad('Notification push'), trad('Reçues sur l\'application Android'), !!(UI.company && UI.company.reminders_push), trad('Actif'), trad('Inactif'))}
         </div>
         <p class="ui-aide">${parEmail ? trad('E-mail actif : le serveur envoie le rappel avant chaque échéance, même application fermée.') : trad('Aucun e-mail ne partira tant que l\'adresse et la case ne sont pas réglées dans Rappels.')}</p>
       </div>
