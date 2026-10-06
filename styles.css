@@ -6374,3 +6374,26 @@ html:not(.icones-pretes) .material-symbols-outlined{visibility:hidden;display:in
 /* Assistant « Ajouter une machine » : le fond des BLOCS de section (01 à 05), un bleu très pâle translucide, passe au gris
    translucide choisi par l'utilisateur, rgba(0,0,0,.1) (2026-10-07). Les pastilles et icônes gardent leur teinte. */
 .machine-modal-add .bg-surface-container-low\/70{background-color:rgba(0,0,0,.1);}
+
+/* Assistant « Ajouter une machine » — trois défauts vus sur téléphone (2026-10-07) :
+   1. Le choix sélectionné (ex. « Dernier entretien ») n'avait AUCUN signe visible : le CSS compilé n'embarquait pas les
+      valeurs de départ de l'anneau Tailwind (--tw-ring-offset-width…), donc `ring-2` s'annulait. On les pose ici, et on
+      teinte aussi la carte choisie pour que la sélection se lise d'un coup d'œil.
+   2. La zone « Déposer un manuel PDF » débordait à droite sur un écran étroit (min-width fixe de 260 px).
+   3. En-tête trop imposant : avec le clavier ouvert, il restait presque rien pour les champs → en-tête compact sur téléphone. */
+.machine-modal-add *,.machine-modal-add ::before,.machine-modal-add ::after{
+  --tw-ring-inset:;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(0 101 145 / 0.5);
+  --tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;
+}
+.machine-modal-add label.ring-2.bg-surface-container-lowest{background-color:#e8f3f8;}
+.mform-carnet-zone{min-width:min(260px,100%);}
+@media (max-width:640px){
+  .machine-modal-add > div > header{padding:10px 14px !important;}
+  .machine-modal-add > div > header > div > div:first-child{width:32px !important;height:32px !important;}
+  .machine-modal-add > div > header h1{font-size:18px !important;line-height:1.2 !important;}
+  .machine-modal-add > div > header p{display:none !important;}
+  .machine-modal-add > div main{padding:14px !important;}
+  .machine-modal-add > div footer{padding:10px 14px !important;gap:10px;}
+  .machine-modal-add > div footer button{padding-top:9px !important;padding-bottom:9px !important;}
+  .machine-modal-add > div footer button[type=submit]{padding-left:14px !important;padding-right:14px !important;}
+}
