@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-jU62JEoycSgKHjfKuOn/yyBirJr8llGueitA3KJql1A=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-etg1TGbDi0nWsbJoZDPg+BXWNOxAgaUHMU4hjp8W8jY=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -1568,6 +1568,25 @@ function forcerMajuscules(input) {
     const haut = input.value.toUpperCase();
     if (haut === input.value) return;
     input.value = haut;
+    if (position != null) {
+      try { input.setSelectionRange(position, position); } catch (e) { /* type sans sélection */ }
+    }
+  });
+}
+
+// Première lettre en majuscule, le reste tel que saisi (« jean-pierre » → « Jean-pierre », « MARIE » reste « MARIE »).
+function premiereMajuscule(texte) {
+  const t = String(texte || '');
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+}
+// Même principe que forcerMajuscules, mais pour la seule première lettre (un prénom), curseur préservé.
+function forcerPremiereMajuscule(input) {
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const position = input.selectionStart;
+    const corrige = premiereMajuscule(input.value);
+    if (corrige === input.value) return;
+    input.value = corrige;
     if (position != null) {
       try { input.setSelectionRange(position, position); } catch (e) { /* type sans sélection */ }
     }
@@ -5172,7 +5191,7 @@ function openSignupWizard() {
         <div class="field-row">
           <div>
             <label for="su-contact-first">${trad('Prénom du contact')} <span class="requis">*</span></label>
-            <input id="su-contact-first" required value="${esc(state.contactFirstName)}">
+            <input id="su-contact-first" autocapitalize="words" required value="${esc(state.contactFirstName)}">
           </div>
           <div>
             <label for="su-contact-last" class="label-avec-note"><span>${trad('Nom du contact')} <span class="requis">*</span></span><span class="label-annotation">${trad('Majuscules')}</span></label>
@@ -5244,6 +5263,8 @@ function openSignupWizard() {
     // quel en base.
     forcerMajuscules(champNom);
     forcerMajuscules(overlay.querySelector('#su-contact-last'));
+    // Le prénom commence toujours par une majuscule (la valeur est corrigée, pas seulement l'affichage).
+    forcerPremiereMajuscule(overlay.querySelector('#su-contact-first'));
 
     // Le pays choisi décide du nom du numéro d'immatriculation (SIRET, RIDET, KvK…).
     brancherLibelleRegistre(overlay.querySelector('#su-pays'), overlay.querySelector('#su-reg-etiquette'));
@@ -5264,7 +5285,7 @@ function openSignupWizard() {
       state.country = overlay.querySelector('#su-pays').value || PAYS_DEFAUT_SOCIETE;
       const telSaisi = lireChampTelephone(overlay, 'su-phone');
       state.phone = telSaisi ? telSaisi.e164 : '';
-      state.contactFirstName = overlay.querySelector('#su-contact-first').value.trim();
+      state.contactFirstName = premiereMajuscule(overlay.querySelector('#su-contact-first').value.trim());
       state.contactLastName = overlay.querySelector('#su-contact-last').value.trim();
       state.contactName = contactFullName(state.contactFirstName, state.contactLastName);
       // Indépendant : pas de champ « Nom de la structure », le nom envoyé au
