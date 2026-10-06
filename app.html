@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ZD9xR+fPcMqPem2/VvH2h8LWbz7STNyra6tJPVDnw5I=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-+AraKUZARMh0iuzkpWSaf2tPAfE6vOna2yrwzEEpOaA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -19948,17 +19948,21 @@ function openAddWizard(companyId, categories) {
     // L'adresse de la recherche du manuel, d'après ce qui est SAISI maintenant : « Peugeot 208 2026 manuel entretien
     // filetype:pdf » plutôt que le « manuel entretien » tout court qui partait avant, sans véhicule.
     // Les termes dépendent du type d'unité : un ENGIN (heures) a son tableau d'entretien dans la notice d'utilisation
-    // (« operator's manual », en anglais chez presque tous les constructeurs) ; un VÉHICULE (km) l'a dans le carnet
-    // d'entretien — la notice d'une voiture ne donne que les contrôles de base (Peugeot 208 : testé le 2026-10-06).
+    // (« operator's manual », en anglais chez presque tous les constructeurs) ; un VÉHICULE (km) l'a dans le plan
+    // d'entretien — la notice d'une voiture (ex. « MY PEUGEOT 208 », 276 pages) ne donne que les contrôles de base et
+    // arrivait en tête des résultats. Pour un véhicule : expression EXACTE « plan d'entretien » (ce que portent les PDF
+    // des constructeurs) et PAS d'année, car ces documents sont classés par génération et par moteur (testé 2026-10-06).
     function adresseRechercheManuel(atelier) {
       const champ = (sel) => (overlay.querySelector(sel)?.value || '').trim();
       const vehicule = designation(champ('#f-brand'), champ('#f-model'), champ('#f-name'));
       const roulant = (overlay.querySelector('input[name="kind"]:checked')?.value || state.kind) === TYPE_VEHICULE;
-      const termesManuel = atelier ? 'service manual workshop manual'
-        : roulant ? (LANGUE === 'en' ? 'service schedule maintenance booklet' : "carnet d'entretien plan d'entretien")
-        : "operator's manual maintenance schedule";
-      const termes = [vehicule, champ('#f-year'), champ('#f-motorisation'), termesManuel, 'filetype:pdf'].filter(Boolean).join(' ');
-      return 'https://www.google.com/search?q=' + encodeURIComponent(termes);
+      // « PureTech 100 ch » : l'unité de puissance n'est jamais dans le titre des documents et fausse la recherche
+      const moteur = champ('#f-motorisation').replace(/\b(ch|cv|hp|chevaux)\b\.?/gi, '').replace(/\s+/g, ' ').trim();
+      let termes;
+      if (atelier) termes = [vehicule, moteur, champ('#f-year'), 'service manual workshop manual', 'filetype:pdf'];
+      else if (roulant) termes = [vehicule, moteur, LANGUE === 'en' ? '"service schedule"' : '"plan d\'entretien"', 'filetype:pdf'];
+      else termes = [vehicule, champ('#f-year'), "operator's manual maintenance schedule", 'filetype:pdf'];
+      return 'https://www.google.com/search?q=' + encodeURIComponent(termes.filter(Boolean).join(' '));
     }
     // Mis à jour dès qu'on s'en approche (survol, focus, appui) : le clic, le clic du milieu et l'appui long suivent
     // tous l'adresse à jour.
