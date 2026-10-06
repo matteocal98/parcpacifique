@@ -31,8 +31,8 @@
     // En-tête
     [`LECTURE AUTOMATIQUE DES MANUELS — DISPONIBLE`, `AUTOMATIC MANUAL READING — AVAILABLE`],
     [`LA JUSTE MESURE DE VOTRE PARC`, `THE RIGHT MEASURE OF YOUR FLEET`],
-    [`Le carnet d'entretien de votre flotte,`, `Your fleet's maintenance logbook,`],
-    [`lu par notre algorithme`, `read by our algorithm`],
+    [`Fini la saisie : vos manuels constructeur`, `No more data entry: your manufacturer manuals`],
+    [`génèrent automatiquement vos plans de maintenance`, `automatically generate your maintenance plans`],
     [`Importez vos manuels constructeur : KALEA en extrait les échéances et construit le plan de maintenance. Suivi par calendrier, heures ou kilomètres — puis la liste des pièces prête à envoyer à vos fournisseurs.`, `Import your manufacturer manuals: KALEA extracts the service intervals and builds the maintenance plan. Tracking by calendar, hours or kilometres — then the parts list, ready to send to your suppliers.`],
     [`Commencer gratuitement`, `Start for free`],
     [`Voir comment ça marche`, `See how it works`],
