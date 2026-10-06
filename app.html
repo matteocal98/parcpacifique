@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-u7Dcww9XuC8NTMUKThnA47YDoLuusLTRo7fZ8f65nhA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-mhDHEYbe1ORliF95XUw67TB57i/jIxzhFd6enKMOZy4=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -11189,8 +11189,8 @@ VIEWS.machines = {
         <section class="ui-section">
           ${teteSectionKit('parcMachine', trad('Parc Machines'), '',
             `<span class="ui-tag">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
-            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>
-            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
+            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>
+            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
             <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>`)}
           <div class="ui-section-corps">
             <div class="ui-barre">

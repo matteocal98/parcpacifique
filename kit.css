@@ -330,3 +330,34 @@ textarea:not([data-x]),
   background:var(--surface) !important;
   border:2px solid var(--ink) !important;
 }
+
+/* ── Petits écrans (téléphone) : en-têtes de section compacts, plus de débordement ───────────────────────────
+   Constat sur un vrai téléphone (2026-10-07) : sur Parc et Agenda, la 1re vue n'était qu'une pile de boutons pleine
+   largeur ; sur Agenda et Rappels, des boutons et le sélecteur de vue dépassaient du cadre. Le navigateur du téléphone
+   mesure ~320 px de large (pas 375) : c'est cette largeur qu'il faut tester. */
+@media (max-width:480px){
+  /* icône + titre sur UNE ligne (la base de 220 px forçait le titre à passer dessous), actions en dessous */
+  .ui-section-titres{flex:1 1 0;}
+  .ui-section-acces{margin-left:0;width:100%;gap:8px;}
+  .ui-section-acces > .ui-tag{flex:1 0 100%;}
+  .ui-section-acces > .ui-btn{flex:1 1 auto;}
+  .ui-btn-pastille{height:40px;padding:0 12px;}
+  .ui-btn-plein{min-height:44px;padding:10px 16px;}
+  /* Parc : Scanner et Exporter deviennent deux pastilles-icônes à côté d'« Ajouter » (une seule ligne au lieu de trois) */
+  #fleet-scanner,#fleet-export{flex:0 0 44px !important;width:44px;height:44px;padding:0;}
+  #fleet-scanner > span,#fleet-export > span{display:none;}
+  .fleet-ajouter{flex:1 1 0 !important;min-width:0;}
+  /* Un bouton plein dont le libellé est long passe à la ligne au lieu de déborder du cadre */
+  .ui-btn{white-space:normal;max-width:100%;text-align:center;line-height:1.25;}
+  /* barres d'outils : espacement serré, puces plus petites */
+  .ui-barre{gap:8px;}
+  .ui-puces{gap:6px;}
+  .ui-puce{height:36px;padding:0 10px;gap:6px;font-size:12.5px;}
+  /* Agenda : le sélecteur Mois / Semaine / Liste occupe la largeur du cadre sans la dépasser */
+  .ui-segment.agenda-vues{display:flex;width:100%;max-width:100%;flex:1 1 100%;}
+  .ui-segment.agenda-vues button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:12px;line-height:1.2;}
+  .agenda-nav{width:100%;flex:1 1 100%;gap:6px;}
+  .agenda-nav-label{flex:1 1 auto;min-width:0;}
+  .agenda-nav .ui-btn-icone{width:36px;height:36px;flex:0 0 36px;}
+  .agenda-nav .ui-btn-pastille{flex:0 0 auto;}
+}
