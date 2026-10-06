@@ -6407,9 +6407,10 @@ html:not(.icones-pretes) .material-symbols-outlined{visibility:hidden;display:in
 .mstrip-compteur-bloc .compteur-secondaire{margin-top:6px;padding-top:6px;border-top:1px solid var(--line-2);}
 .compteur2-ligne{display:flex;align-items:center;gap:8px;width:100%;min-height:32px;}
 button.compteur2-ligne{border:none;background:transparent;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
-.compteur2-lib{flex:1 1 auto;min-width:0;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--dark-ink);white-space:nowrap;}
-.compteur2-lib svg{width:13px;height:13px;flex:0 0 auto;}
-.compteur2-val{flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.compteur2-lib{flex:1 1 0;min-width:0;display:block;font-size:10.5px;font-weight:600;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;color:var(--dark-ink);overflow-wrap:anywhere;}
+/* pas d'icône devant le libellé : sur un écran étroit elle poussait le texte sous la valeur (signalé sur téléphone) */
+.compteur2-lib svg{display:none;}
+.compteur2-val{flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
 .compteur2-edit{flex:0 0 auto;width:28px;height:28px;border-radius:9px;background:var(--surface);color:var(--ink-2);display:flex;align-items:center;justify-content:center;}
 .compteur2-edit svg{width:14px;height:14px;}
 button.compteur2-ligne:active .compteur2-edit{background:var(--line-2);}
