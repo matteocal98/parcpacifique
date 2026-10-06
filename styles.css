@@ -3740,6 +3740,22 @@
   .offre-service-corps p{margin:4px 0 0;font-size:13px;color:var(--ink-2);}
   .offre-service .offre-bouton{width:auto;flex:0 0 auto;padding:10px 18px;}
 
+  /* Tableau « Ce que chaque classe apporte » (fenêtre des offres) : une ligne par fonction, une colonne par classe. La colonne de
+     l'offre actuelle est teintée. Sur téléphone il défile à l'horizontale, la première colonne restant visible. */
+  .offres-comparatif{margin:6px 0 18px;}
+  .offres-comparatif h3{font-size:16px;margin:0 0 10px;font-weight:700;}
+  .offres-comparatif-defile{overflow-x:auto;border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow-soft);-webkit-overflow-scrolling:touch;}
+  .offres-comparatif-table{width:100%;min-width:640px;border-collapse:collapse;font-size:13px;}
+  .offres-comparatif-table th,.offres-comparatif-table td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line-2);color:var(--ink);}
+  .offres-comparatif-table thead th{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2);background:var(--surface-soft);}
+  .offres-comparatif-table tbody th{text-align:left;font-weight:600;min-width:170px;position:sticky;left:0;background:var(--surface);}
+  .offres-comparatif-table tbody tr:last-child th,.offres-comparatif-table tbody tr:last-child td{border-bottom:0;}
+  .offres-comparatif-table .is-actuelle{background:var(--primary-tint);}
+  .offres-comparatif-table tbody th.is-actuelle{background:var(--surface);}
+  .offres-comparatif-table .coche{display:inline-flex;color:var(--ok);}
+  .offres-comparatif-table .coche svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .offres-comparatif-table .tiret{color:var(--ink-3);}
+
   /* Message de statut (#forfait-msg) — succès/échec du portail d'abonnement
      ou d'un paiement. Texte gris discret par défaut (.hint) : trop facile à
      manquer en bas d'une fenêtre déjà longue, confondu avec « rien ne s'est
