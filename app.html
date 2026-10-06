@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-m2bg+1hiEIxjXYdr1Wg88Dj75YavwpMKj58KwQqQqoQ=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-XEH4KmK22QWdmKld+E5uEOAGL/tMY3fYU/Gw8ukKVs0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -19941,20 +19941,25 @@ function openAddWizard(companyId, categories) {
     // signalé par l'utilisateur avec capture à l'appui.
     // L'adresse de la recherche du manuel, d'après ce qui est SAISI maintenant : « Peugeot 208 2026 manuel entretien
     // filetype:pdf » plutôt que le « manuel entretien » tout court qui partait avant, sans véhicule.
-    // Termes en ANGLAIS : les constructeurs publient presque tous leurs manuels sous « operator's manual » / « service
-    // manual » ; une recherche « manuel entretien » en français passe à côté.
-    function adresseRechercheManuel(termesManuel) {
+    // Les termes dépendent du type d'unité : un ENGIN (heures) a son tableau d'entretien dans la notice d'utilisation
+    // (« operator's manual », en anglais chez presque tous les constructeurs) ; un VÉHICULE (km) l'a dans le carnet
+    // d'entretien — la notice d'une voiture ne donne que les contrôles de base (Peugeot 208 : testé le 2026-10-06).
+    function adresseRechercheManuel(atelier) {
       const champ = (sel) => (overlay.querySelector(sel)?.value || '').trim();
       const vehicule = designation(champ('#f-brand'), champ('#f-model'), champ('#f-name'));
-      const termes = [vehicule, champ('#f-year'), termesManuel || "operator's manual maintenance schedule", 'filetype:pdf'].filter(Boolean).join(' ');
+      const roulant = (overlay.querySelector('input[name="kind"]:checked')?.value || state.kind) === TYPE_VEHICULE;
+      const termesManuel = atelier ? 'service manual workshop manual'
+        : roulant ? (LANGUE === 'en' ? 'service schedule maintenance booklet' : "carnet d'entretien plan d'entretien")
+        : "operator's manual maintenance schedule";
+      const termes = [vehicule, champ('#f-year'), termesManuel, 'filetype:pdf'].filter(Boolean).join(' ');
       return 'https://www.google.com/search?q=' + encodeURIComponent(termes);
     }
     // Mis à jour dès qu'on s'en approche (survol, focus, appui) : le clic, le clic du milieu et l'appui long suivent
     // tous l'adresse à jour.
-    [['#lien-manuel-web', null], ['#lien-manuel-atelier', 'service manual workshop manual']].forEach(([sel, termesManuel]) => {
+    [['#lien-manuel-web', false], ['#lien-manuel-atelier', true]].forEach(([sel, atelier]) => {
       const lien = overlay.querySelector(sel);
       if (!lien) return;
-      ['pointerdown', 'mouseenter', 'focus', 'touchstart'].forEach((ev) => lien.addEventListener(ev, () => { lien.href = adresseRechercheManuel(termesManuel); }, { passive: true }));
+      ['pointerdown', 'mouseenter', 'focus', 'touchstart'].forEach((ev) => lien.addEventListener(ev, () => { lien.href = adresseRechercheManuel(atelier); }, { passive: true }));
     });
     function lireFormulaireDansState() {
       state.name = majuscules(overlay.querySelector('#f-name').value);
