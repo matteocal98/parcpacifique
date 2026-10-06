@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-WJxcCkjTqAOHn0XeJ6ICbI2sqOoTqlaEL21iairkf5w=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-cQQZTwE/PVaBT0Wn8tZuhvz8lfYivAfT8Dj3UHNyn7s=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -24304,7 +24304,6 @@ function openMachineModal(companyId, categories, existing) {
             </div>
             <div class="flex items-center gap-space-sm">
               <button class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-space-xs hover:bg-surface-container-high transition-colors shadow-sm" type="button" id="modal-view-manual"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>${trad('Voir le carnet actuel (PDF)')}</button>
-              <button class="px-space-md py-2 rounded-lg bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold flex items-center gap-space-xs hover:bg-primary-fixed-dim transition-colors shadow-sm" type="button" id="modal-analyze-manual"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>${trad('Analyser ce carnet')}</button>
             </div>
           </div>` : ''}
           <div class="mmod-carnet-row">
@@ -24656,41 +24655,8 @@ function openMachineModal(companyId, categories, existing) {
     // courant — jetait ici même, et tout le câblage qui suit était perdu :
     // la photo, le champ du carnet, la caméra, et jusqu'à l'enregistrement.
     overlay.querySelector('#modal-view-manual')?.addEventListener('click', (e) => viewManual(existing.manual_url, e.target));
-    overlay.querySelector('#modal-analyze-manual')?.addEventListener('click', async (e) => {
-      const btn = e.target;
-      const original = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = trad('Téléchargement du carnet…');
-      const { data: blob, error } = await sb.storage.from('manuals').download(existing.manual_url);
-      if (error) {
-        overlay.querySelector('#f-analysis').textContent = trad('Impossible de récupérer le PDF existant :') + " " + error.message;
-      } else {
-        const resultatAnalyse = await analyzeManualAndFill(
-          overlay, blob,
-          aiModeFrom(overlay.querySelector('input[name=tm]:checked').value),
-          {
-            currentHours: parseFloat(overlay.querySelector('#f-current-hours')?.value) || machineCounter(existing) || null,
-            serviceDate: overlay.querySelector('#f-service-date')?.value || existing.service_date || null,
-          }
-        );
-        if (resultatAnalyse) presenterChoixPlanEditForm(overlay, resultatAnalyse, existing);
-        if (!existing.image_url && !overlay._pendingPhotoBlob) {
-          try {
-            const photoBlob = await renderPdfFirstPageAsBlob(blob);
-            overlay._pendingPhotoBlob = photoBlob;
-            overlay._carnetPhotoBlob = photoBlob;
-            const previewUrl = URL.createObjectURL(photoBlob);
-            overlay.querySelector('#photo-preview').innerHTML = `<img class="machine-photo" src="${previewUrl}" alt="${esc(existing.name)}">`;
-            overlay.querySelector('#photo-status').textContent = trad('Photo extraite de la 1ère page du carnet — elle sera enregistrée avec la fiche.');
-          } catch (photoErr) {
-            console.error('Extraction photo (1ère page du PDF) échouée :', photoErr);
-            overlay.querySelector('#photo-status').textContent = tR('Extraction de la photo impossible ({erreur}).', { erreur: (photoErr?.message || photoErr) });
-          }
-        }
-      }
-      btn.disabled = false;
-      btn.textContent = original;
-    });
+    // Pas de bouton « Analyser ce carnet » ici : chaque clic lançait une analyse payante (appel d'API). Pour refaire l'analyse,
+    // le client redépose le carnet dans la zone prévue, ce qui est un geste volontaire.
   }
 
   brancherPhotoManuelle(overlay, { apercu: '#photo-preview', machineId: existing.id });
