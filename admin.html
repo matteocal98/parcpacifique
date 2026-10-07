@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-zW4nMiS5aAiW+KRkfGQUsfAbKYDXh18OLoh27NPwe5Q=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Nx01/3JZK1ttp38SQ340k1P2+0Lw0a49s7tpF2RZLqU=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -880,6 +880,9 @@
         <button class="btn-connecter-en-tant-que inline-flex items-center justify-center gap-space-xs h-11 px-4 rounded bg-surface-container hover:bg-primary-container hover:text-on-primary text-on-surface transition-all font-label-md text-label-md shadow-sm" type="button" title="Se connecter en tant que le gérant">
           <span class="material-symbols-outlined text-[18px]">login</span><span>Se connecter en tant que</span>
         </button>
+        <button class="btn-changer-offre inline-flex items-center justify-center gap-space-xs h-11 px-4 rounded bg-surface-container hover:bg-primary-container hover:text-on-primary text-on-surface transition-all font-label-md text-label-md" type="button" title="Changer l'offre de cette société" aria-label="Changer l'offre de cette société">
+          <span class="material-symbols-outlined text-[18px]">sell</span><span>Offre</span>
+        </button>
         <button class="btn-supprimer-societe inline-flex items-center justify-center h-11 w-11 rounded bg-surface-container hover:bg-error-container text-error transition-colors" type="button" title="Supprimer cette société" aria-label="Supprimer cette société">
           <span class="material-symbols-outlined text-[20px]">delete</span>
         </button>
@@ -892,6 +895,42 @@
      Destructif et IRRÉVERSIBLE : le nom de la société doit être retapé. Tout passe par l'Edge Function
      admin-supprimer-societe (is_staff relu côté serveur, abonnement résilié avant, données supprimées en une
      transaction). -->
+<div id="offre-overlay" class="hidden fixed inset-0 z-[200] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
+    <div class="p-space-lg flex items-center gap-space-sm bg-primary-container">
+      <span class="p-2 rounded bg-primary text-on-primary material-symbols-outlined text-[20px]">sell</span>
+      <div>
+        <h3 class="font-headline-sm text-headline-sm text-on-primary">Changer l'offre</h3>
+        <p id="offre-sous-titre" class="font-body-sm text-body-sm text-on-primary/80"></p>
+      </div>
+    </div>
+    <div class="p-space-lg flex flex-col gap-space-md">
+      <p id="offre-detail" class="font-body-sm text-body-sm text-on-surface"></p>
+      <div class="flex flex-col gap-1">
+        <label for="offre-choix" class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Nouvelle offre</label>
+        <select id="offre-choix" class="h-11 px-3 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-label-md text-label-md focus:outline-none focus:border-primary">
+          <option value="free">Gratuit</option>
+          <option value="eco">Starter</option>
+          <option value="pro">Business</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="offre-note" class="font-label-sm text-label-sm text-on-surface-variant font-semibold">Note (facultatif, gardée dans le journal d'audit)</label>
+        <input id="offre-note" type="text" autocomplete="off" maxlength="200" placeholder="Ex. bon de commande n° 2026-114" class="h-11 px-3 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-body-sm text-body-sm focus:outline-none focus:border-primary">
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Ce changement n'agit <strong>pas</strong> sur Stripe : il sert aux institutions facturées sur facture. Un client qui paie par carte change d'offre depuis son portail de facturation. L'opération est inscrite dans le journal d'audit.</p>
+      <div id="offre-msg" class="hidden font-label-sm text-label-sm"></div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+        <button id="offre-annuler" type="button" class="min-h-[44px] px-space-md rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">Annuler</button>
+        <button id="offre-valider" type="button" class="min-h-[44px] px-space-lg rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md shadow-sm transition-all flex items-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-[18px]">check</span><span>Enregistrer l'offre</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="suppression-overlay" class="hidden fixed inset-0 z-[200] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md">
   <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
     <div class="p-space-lg flex items-center gap-space-sm bg-error-container">
@@ -1096,6 +1135,14 @@ async function chargerSocietes() {
   const { data, error } = await sb.rpc('admin_lister_societes');
   if (error) { console.error(error); return; }
   SOCIETES = data || [];
+  // Le type de structure (société, indépendant, institution) : lu à part, la colonne n'existe qu'après structure-societe.sql.
+  try {
+    const { data: types, error: errTypes } = await sb.from('companies').select('id, structure_type');
+    if (!errTypes && types) {
+      const parId = new Map(types.map((x) => [x.id, x.structure_type]));
+      SOCIETES.forEach((o) => { o.structure_type = parId.get(o.company_id) || 'company'; });
+    }
+  } catch (e) { /* colonne absente : on n'affiche simplement pas le type */ }
   const [{ count: nbMachines }, { count: nbInterventionsMois }] = await Promise.all([
     sb.from('machines').select('id', { count: 'exact', head: true }),
     sb.from('interventions').select('id', { count: 'exact', head: true }).gte('performed_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
@@ -1116,7 +1163,7 @@ function rendreTableauClients() {
     const noeud = tpl.content.cloneNode(true);
     noeud.querySelector('[data-slot="initiales"]').textContent = initiales(o.nom);
     noeud.querySelector('[data-slot="nom"]').textContent = o.nom;
-    noeud.querySelector('[data-slot="plan"]').textContent = `${o.plan || '—'} · ${o.devise || ''}`;
+    noeud.querySelector('[data-slot="plan"]').textContent = `${libelleOffre(o.plan)} · ${o.devise || ''}${o.structure_type === 'institution' ? ' · Institution (sur facture)' : ''}`;
     noeud.querySelector('[data-slot="gerant-nom"]').textContent = o.gerant_nom || o.gerant_login || '(aucun gérant)';
     noeud.querySelector('[data-slot="gerant-email"]').textContent = o.gerant_email || '';
     noeud.querySelector('[data-slot="machines"]').textContent = `${o.nb_machines} machine(s)`;
@@ -1126,6 +1173,7 @@ function rendreTableauClients() {
     const btn = noeud.querySelector('.btn-connecter-en-tant-que');
     if (!o.gerant_login) { btn.disabled = true; btn.classList.add('opacity-40', 'cursor-not-allowed'); }
     else btn.addEventListener('click', () => connecterEnTantQue(o));
+    noeud.querySelector('.btn-changer-offre')?.addEventListener('click', () => ouvrirChangementOffre(o));
     noeud.querySelector('.btn-supprimer-societe')?.addEventListener('click', () => ouvrirSuppressionSociete(o));
     corps.appendChild(noeud);
   });
@@ -1997,6 +2045,48 @@ function rendreTableauStock() {
 // réduits. Le serveur REVÉRIFIE : ce contrôle-ci ne sert qu'à n'activer le bouton qu'au bon moment.
 let SUPPRESSION_CONTEXTE = null;
 const normaliserNomSociete = (t) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+// ── Changer l'offre d'une société (institutions facturées sur facture) ──────────────
+const LIBELLES_OFFRE = { free: 'Gratuit', eco: 'Starter', starter: 'Starter', pro: 'Business', business: 'Business', enterprise: 'Enterprise', paid: 'Enterprise' };
+function libelleOffre(plan) { return LIBELLES_OFFRE[plan] || plan || '—'; }
+const TYPES_STRUCTURE = { company: 'Société', individual: 'Indépendant / patenté', institution: 'Institution' };
+let OFFRE_CONTEXTE = null;
+
+function ouvrirChangementOffre(societe) {
+  OFFRE_CONTEXTE = societe;
+  el('offre-sous-titre').textContent = societe.nom;
+  el('offre-detail').textContent = `Offre actuelle : ${libelleOffre(societe.plan)} — type : ${TYPES_STRUCTURE[societe.structure_type] || 'Société'}${societe.structure_type === 'institution' ? ' (facturation mensuelle sur facture)' : ''} — ${societe.nb_machines} machine(s).`;
+  const choix = el('offre-choix');
+  const cle = ['free', 'eco', 'pro', 'enterprise'].includes(societe.plan) ? societe.plan : ({ starter: 'eco', business: 'pro', paid: 'enterprise' }[societe.plan] || 'free');
+  choix.value = cle;
+  el('offre-note').value = '';
+  el('offre-msg').classList.add('hidden');
+  el('offre-valider').disabled = false;
+  el('offre-overlay').classList.remove('hidden');
+}
+el('offre-annuler')?.addEventListener('click', () => { el('offre-overlay').classList.add('hidden'); OFFRE_CONTEXTE = null; });
+el('offre-valider')?.addEventListener('click', async () => {
+  if (!OFFRE_CONTEXTE) return;
+  const societe = OFFRE_CONTEXTE;
+  const msg = el('offre-msg');
+  const annoncer = (texte, erreur) => { msg.textContent = texte; msg.className = 'font-label-sm text-label-sm ' + (erreur ? 'text-error' : 'text-on-surface'); };
+  const plan = el('offre-choix').value;
+  if (plan === societe.plan) { annoncer('C\'est déjà l\'offre de cette société.', true); return; }
+  el('offre-valider').disabled = true;
+  annoncer('Enregistrement…', false);
+  const { data, error } = await sb.rpc('admin_changer_offre', { p_company: societe.company_id, p_plan: plan, p_note: el('offre-note').value.trim() || null });
+  if (error) {
+    annoncer(/admin_changer_offre/.test(error.message || '') && /does not exist|Could not find/i.test(error.message || '')
+      ? 'La fonction admin_changer_offre n\'existe pas encore : le SQL admin-changer-offre.sql doit d\'abord être exécuté.'
+      : 'Échec : ' + error.message, true);
+    el('offre-valider').disabled = false;
+    return;
+  }
+  annoncer(`Offre de ${societe.nom} : ${libelleOffre(data && data.avant)} → ${libelleOffre(plan)}.`, false);
+  OFFRE_CONTEXTE = null;
+  await chargerSocietes();
+  setTimeout(() => el('offre-overlay').classList.add('hidden'), 1800);
+});
 
 function ouvrirSuppressionSociete(societe) {
   SUPPRESSION_CONTEXTE = societe;
