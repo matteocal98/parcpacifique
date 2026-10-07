@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-a8so5fRyxuDVXCaDLNqdS/JZUatGwW7sdVEL2dRt1No=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-aWFfbo7NaAFK29xuSkThsSVKKYjJoMlGYhmCDuPC/nA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5275,6 +5275,24 @@ function openSignupWizard() {
 
     wireChampTelephone(overlay, 'su-phone');
 
+    // L'INDICATIF SUIT LE PAYS CHOISI (France par défaut → +33), tant que la personne ne l'a pas réglé elle-même :
+    // dès qu'elle touche à l'indicatif, il ne bouge plus. Un pays sans indicatif dans la liste laisse l'indicatif tel quel.
+    let indicatifChoisiAMain = false;
+    let alignement = false;
+    const selectIndicatif = overlay.querySelector('#su-phone-pays');
+    selectIndicatif?.addEventListener('change', () => { if (!alignement) indicatifChoisiAMain = true; });
+    const alignerIndicatifSurPays = (codePays) => {
+      const p = PAYS_TEL.find((x) => x.code === codePays);
+      if (!p || !selectIndicatif || selectIndicatif.value === p.code) return;
+      alignement = true;
+      selectIndicatif.value = p.code;
+      const libelle = overlay.querySelector('#su-phone-pays-bouton span');
+      if (libelle) libelle.textContent = '+' + p.indicatif;
+      overlay.querySelector('#su-phone')?.dispatchEvent(new Event('input')); // redécoupe les chiffres déjà saisis, sans prendre le focus
+      alignement = false;
+    };
+    alignerIndicatifSurPays(state.country);
+
     // Le nom de la structure et le nom de famille se saisissent en majuscules,
     // comme la marque et le modèle d'une machine : forcerMajuscules transforme
     // la VALEUR, pas seulement l'affichage — sinon « de niro » resterait tel
@@ -5288,6 +5306,7 @@ function openSignupWizard() {
     brancherLibelleRegistre(overlay.querySelector('#su-pays'), overlay.querySelector('#su-reg-etiquette'));
     overlay.querySelector('#su-pays')?.addEventListener('change', (e) => {
       state.country = e.target.value;
+      if (!indicatifChoisiAMain) alignerIndicatifSurPays(state.country);
       const indice = overlay.querySelector('#su-devise-indice');
       if (indice) indice.textContent = tR('Devise : {devise}', { devise: libelleDevise(deviseDuPays(state.country)) });
     });
