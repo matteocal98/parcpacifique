@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AsYCorg5fSWjZ7CmM1b4zmqHOP6ps3nTTBnfHwXWEto=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-sYGdp5U/Ov0SAFSGKJkd+KycO8ZUHvDxq3o70PMYN+0=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -4755,6 +4755,7 @@ function renderSocieteManquante(user, motif) {
             p_contact_first_name: morceaux[0],
             p_contact_last_name: morceaux.slice(1).join(' '),
           });
+          await enregistrerNomDuProfil(plein);
         }
       }
       boot(trad('Société créée'));
@@ -5117,6 +5118,18 @@ function afficherBlocInvitation(code) {
   });
 }
 
+// Le nom de la personne connectée est AUSSI écrit sur sa fiche (profiles.full_name) : c'est lui que la console
+// d'administration affiche pour le gérant. Fonction update_my_full_name (migration nom-profil-gerant.sql) ; tant qu'elle
+// n'existe pas, on n'écrit rien et on ne bloque rien.
+async function enregistrerNomDuProfil(nomComplet) {
+  const nom = String(nomComplet || '').trim();
+  if (!nom) return;
+  try {
+    const { error } = await sb.rpc('update_my_full_name', { p_full_name: nom });
+    if (error && !fonctionAbsente(error)) console.warn('Nom du profil non enregistré :', error.message);
+  } catch (err) { console.warn('Nom du profil non enregistré :', err && err.message); }
+}
+
 function openSignupWizard() {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -5462,6 +5475,7 @@ function openSignupWizard() {
           ...(colonnesContact.contact_first_name ? { p_contact_first_name: colonnesContact.contact_first_name } : {}),
           ...(colonnesContact.contact_last_name ? { p_contact_last_name: colonnesContact.contact_last_name } : {}),
         });
+        await enregistrerNomDuProfil(state.contactName);
         // Le type de structure (société, indépendant, institution) : fonction dédiée, tolérée absente tant que la
         // migration structure-societe.sql n'est pas passée. « société » est la valeur par défaut en base : rien à écrire.
         if (state.structureType !== 'company') {
@@ -17685,6 +17699,7 @@ VIEWS.account = {
         });
         if (error) throw error;
 
+        enregistrerNomDuProfil(contactFullName(prenom, nom, ''));
         UI.company.phone = telephone;
         UI.company.contact_first_name = prenom || null;
         UI.company.contact_last_name = nom || null;
