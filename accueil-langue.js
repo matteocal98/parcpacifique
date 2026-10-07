@@ -159,6 +159,8 @@
     [`Grands Parcs & BTP`, `Large Fleets & Construction`],
     [`Enterprise`, `Enterprise`],
     [`Grand Compte`, `Key Account`],
+    [`Une mairie ou une institution peut-elle être facturée sur facture ?`, `Can a town hall or institution be invoiced?`],
+    [`Oui. À la création du compte, choisissez le type « Institution » (mairie, province, établissement public…). Au lieu du paiement par carte, vous demandez depuis l'application une facturation mensuelle sur facture, et nous activons l'offre choisie. Les tarifs sont ceux de la grille ci-dessus.`, `Yes. When creating the account, choose the “Institution” type (town hall, province, public body…). Instead of paying by card, you request monthly invoicing from the app, and we activate the plan you chose. Prices are those of the grid above.`],
     [`Simulateur`, `Simulator`],
     [`Combien ça coûte pour votre parc ?`, `What would it cost for your fleet?`],
     [`Indiquez votre nombre de machines : nous calculons l'offre la moins chère qui répond à votre besoin.`, `Enter your number of machines: we work out the cheapest plan that meets your needs.`],
