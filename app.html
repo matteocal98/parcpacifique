@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-pwHxwSYW4ya1QcowM5aIFvUW51fivuMCjTlJVzzY5Ps=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-a8so5fRyxuDVXCaDLNqdS/JZUatGwW7sdVEL2dRt1No=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -5166,7 +5166,7 @@ function openSignupWizard() {
         <div class="field-row">
           <div id="su-name-groupe"${state.structureType === 'individual' ? ' hidden' : ''}>
             <label for="su-name" class="label-avec-note"><span>${trad('Nom de la structure')} <span class="requis">*</span></span><span class="label-annotation">${trad('Majuscules')}</span></label>
-            <input id="su-name" class="majuscules" autocapitalize="characters"${state.structureType === 'individual' ? '' : ' required'} value="${esc(state.name)}">
+            <input id="su-name" class="majuscules" autocomplete="off" autocapitalize="characters"${state.structureType === 'individual' ? '' : ' required'} value="${esc(state.name)}">
           </div>
           <div>
             <label for="su-activity">${trad('Activité')} <span class="requis">*</span></label>
@@ -5183,7 +5183,7 @@ function openSignupWizard() {
           </div>
           <div>
             <label for="su-reg" id="su-reg-etiquette">${libelleRegistre(state.country)}</label>
-            <input id="su-reg" value="${esc(state.registrationNumber)}">
+            <input id="su-reg" autocomplete="off" value="${esc(state.registrationNumber)}">
           </div>
         </div>
         <div class="hint" id="su-devise-indice">${tR('Devise : {devise}', { devise: libelleDevise(deviseDuPays(state.country)) })}</div>
@@ -5197,23 +5197,23 @@ function openSignupWizard() {
         <div class="field-row">
           <div>
             <label for="su-contact-first">${trad('Prénom du contact')} <span class="requis">*</span></label>
-            <input id="su-contact-first" autocapitalize="words" required value="${esc(state.contactFirstName)}">
+            <input id="su-contact-first" autocomplete="given-name" autocapitalize="words" required value="${esc(state.contactFirstName)}">
           </div>
           <div>
             <label for="su-contact-last" class="label-avec-note"><span>${trad('Nom du contact')} <span class="requis">*</span></span><span class="label-annotation">${trad('Majuscules')}</span></label>
-            <input id="su-contact-last" class="majuscules" autocapitalize="characters" required value="${esc(state.contactLastName)}">
+            <input id="su-contact-last" class="majuscules" autocomplete="family-name" autocapitalize="characters" required value="${esc(state.contactLastName)}">
           </div>
         </div>
 
         <div class="field-row">
           <div>
             <label for="su-email">${trad('Email de connexion')} <span class="requis">*</span></label>
-            <input id="su-email" type="email" required value="${esc(state.email)}">
+            <input id="su-email" type="email" autocomplete="username" required value="${esc(state.email)}">
           </div>
           <div>
             <label for="su-password" class="label-avec-note"><span>${trad('Mot de passe')} <span class="requis">*</span></span><span class="label-annotation">${trad('Min. 6 car.')}</span></label>
             <div class="password-wrap">
-              <input id="su-password" type="password" required minlength="6">
+              <input id="su-password" type="password" autocomplete="new-password" required minlength="6">
               <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
             </div>
           </div>
