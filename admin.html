@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Nx01/3JZK1ttp38SQ340k1P2+0Lw0a49s7tpF2RZLqU=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-L+Px2abOjePopw+Ns+bJINoVOHbt3FcxDv2qUfJhEdM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -115,6 +115,10 @@
       </a>
       <a data-path="ia" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-label-md text-label-md">Consommation IA</span>
+      </a>
+      <a data-path="infra" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">dns</span><span class="font-label-md text-label-md">Infrastructure</span>
+        <span id="infra-pastille" class="hidden ml-auto w-2.5 h-2.5 rounded-full bg-error" aria-hidden="true"></span>
       </a>
     </nav>
   </div>
@@ -724,6 +728,41 @@
       </section>
 
       <!-- ═══════ VUE : Consommation de l'IA (tokens Gemini) ═══════ -->
+      <section id="vue-infra" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">dns</span><span>Consommation Supabase</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Infrastructure</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">Où en est la consommation par rapport aux plafonds du plan gratuit de Supabase. Supabase ne prévient qu'après un dépassement : ici, tu vois arriver le plafond (orange dès 70 %, rouge dès 90 %).</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <button id="infra-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="infra-alerte" class="hidden rounded-xl p-space-md font-body-sm text-body-sm"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md" id="infra-jauges"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-md">
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md">
+            <h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-sm">Les tables les plus lourdes</h2>
+            <ul id="infra-tables" class="flex flex-col divide-y divide-surface-container-low font-body-sm text-body-sm"></ul>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-xs">
+            <h2 class="font-headline-sm text-headline-sm text-on-surface">Ce qui n'est pas mesuré ici</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Le <strong>trafic sortant (Egress, 5 Go/mois)</strong> et les <strong>journaux</strong> ne sont pas lisibles depuis la base : ils se lisent dans le tableau de bord Supabase (Organisation → Usage). C'est l'Egress qui atteindrait son plafond le plus vite avec beaucoup de clients et de photos de machines.</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Le nombre d'utilisateurs actifs est une <strong>estimation</strong> (connexions sur 30 jours) : Supabase compte légèrement différemment.</p>
+            <a href="https://supabase.com/dashboard/project/tiayvmnodsbygmuemeuy" target="_blank" rel="noopener" class="self-start mt-space-xs min-h-[44px] px-space-md rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md inline-flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">open_in_new</span><span>Ouvrir le tableau de bord Supabase</span></a>
+          </div>
+        </div>
+        <p id="infra-msg" class="hidden font-label-sm text-label-sm text-error"></p>
+      </section>
+
       <section id="vue-ia" class="hidden flex flex-col gap-space-lg">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
           <div>
@@ -1116,11 +1155,12 @@ async function verifierAccesEtCharger(userId) {
   el('staff-nom').textContent = profil.full_name || profil.login;
   await Promise.all([chargerSocietes(), chargerTickets()]);
   allerA('clients');
+  chargerInfra(true); // silencieux : ne sert qu'à allumer la pastille du menu si un plafond approche
 }
 
 function allerA(chemin) {
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : chemin === 'infra' ? 'vue-infra' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
@@ -1128,7 +1168,98 @@ function allerA(chemin) {
   if (chemin === 'stock') chargerStock();
   if (chemin === 'telemetrie') chargerTelemetrie();
   if (chemin === 'ia') chargerIa();
+  if (chemin === 'infra') chargerInfra();
 }
+
+// ── Infrastructure : consommation Supabase face aux plafonds du plan gratuit ─────────────────
+// ⚠ Plafonds du plan GRATUIT (vus dans le tableau de bord Supabase). À mettre à jour si le projet passe en offre Pro.
+const PLAFONDS_SUPABASE = {
+  db: { nom: 'Taille de la base', icone: 'database', octets: 500 * 1024 * 1024 },
+  stockage: { nom: 'Stockage de fichiers', icone: 'folder', octets: 1024 * 1024 * 1024 },
+  utilisateurs: { nom: 'Utilisateurs actifs (30 j, estimation)', icone: 'group', nombre: 50000 },
+};
+function octetsLisibles(n) {
+  const v = Number(n) || 0;
+  if (v >= 1024 * 1024 * 1024) return (v / (1024 * 1024 * 1024)).toFixed(2).replace('.', ',') + ' Go';
+  if (v >= 1024 * 1024) return (v / (1024 * 1024)).toFixed(1).replace('.', ',') + ' Mo';
+  if (v >= 1024) return Math.round(v / 1024) + ' Ko';
+  return v + ' o';
+}
+function niveauConso(part) { return part >= 0.9 ? 'rouge' : part >= 0.7 ? 'orange' : 'vert'; }
+const COULEURS_CONSO = {
+  vert: { barre: 'bg-primary', texte: 'text-on-surface' },
+  orange: { barre: 'bg-[#E08A2E]', texte: 'text-[#9A5A0A]' },
+  rouge: { barre: 'bg-error', texte: 'text-error' },
+};
+async function chargerInfra(silencieux) {
+  const msg = el('infra-msg');
+  if (msg) msg.classList.add('hidden');
+  const { data, error } = await sb.rpc('admin_usage_supabase');
+  if (error) {
+    if (!silencieux && msg) {
+      msg.textContent = /does not exist|Could not find/i.test(error.message || '')
+        ? 'La fonction admin_usage_supabase n\'existe pas encore : le SQL admin-usage-supabase.sql doit d\'abord être exécuté.'
+        : 'Échec : ' + error.message;
+      msg.classList.remove('hidden');
+    }
+    return;
+  }
+  const jauges = [
+    { cle: 'db', valeur: Number(data.db_octets), plafond: PLAFONDS_SUPABASE.db.octets, texte: octetsLisibles(data.db_octets) + ' / ' + octetsLisibles(PLAFONDS_SUPABASE.db.octets) },
+    { cle: 'stockage', valeur: Number(data.stockage_octets), plafond: PLAFONDS_SUPABASE.stockage.octets, texte: octetsLisibles(data.stockage_octets) + ' / ' + octetsLisibles(PLAFONDS_SUPABASE.stockage.octets) + ' — ' + (data.nb_fichiers || 0) + ' fichier(s)' },
+    { cle: 'utilisateurs', valeur: Number(data.utilisateurs_actifs_30j), plafond: PLAFONDS_SUPABASE.utilisateurs.nombre, texte: Number(data.utilisateurs_actifs_30j).toLocaleString('fr-FR') + ' / ' + PLAFONDS_SUPABASE.utilisateurs.nombre.toLocaleString('fr-FR') + ' — ' + Number(data.utilisateurs_total).toLocaleString('fr-FR') + ' compte(s) au total' },
+  ];
+  const pire = { niveau: 'vert', nom: '', part: 0 };
+  const ordre = { vert: 0, orange: 1, rouge: 2 };
+  const conteneur = el('infra-jauges');
+  if (conteneur) conteneur.innerHTML = '';
+  jauges.forEach((j) => {
+    const part = j.plafond ? j.valeur / j.plafond : 0;
+    const niveau = niveauConso(part);
+    const info = PLAFONDS_SUPABASE[j.cle];
+    if (ordre[niveau] > ordre[pire.niveau] || (niveau === pire.niveau && part > pire.part)) { pire.niveau = niveau; pire.nom = info.nom; pire.part = part; }
+    if (!conteneur) return;
+    const c = COULEURS_CONSO[niveau];
+    const carte = document.createElement('div');
+    carte.className = 'bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm';
+    carte.innerHTML = '<div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider"></span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]"></span></div>'
+      + '<span class="font-headline-md text-headline-md ' + c.texte + '" data-pct></span>'
+      + '<div class="h-2.5 rounded-full bg-surface-container overflow-hidden"><div class="h-full rounded-full ' + c.barre + '" data-barre></div></div>'
+      + '<span class="font-body-sm text-body-sm text-on-surface-variant" data-detail></span>';
+    carte.querySelector('span.uppercase').textContent = info.nom;
+    carte.querySelector('.material-symbols-outlined').textContent = info.icone;
+    carte.querySelector('[data-pct]').textContent = (part * 100 < 1 && part > 0 ? '< 1' : Math.round(part * 100)) + ' %';
+    carte.querySelector('[data-barre]').style.width = Math.max(1, Math.min(100, part * 100)) + '%';
+    carte.querySelector('[data-detail]').textContent = j.texte;
+    conteneur.appendChild(carte);
+  });
+  const alerte = el('infra-alerte');
+  if (alerte) {
+    if (pire.niveau === 'vert') alerte.classList.add('hidden');
+    else {
+      alerte.className = 'rounded-xl p-space-md font-body-sm text-body-sm ' + (pire.niveau === 'rouge' ? 'bg-error-container text-on-surface' : 'bg-[#FFF3E0] text-[#7A4A08]');
+      alerte.textContent = (pire.niveau === 'rouge' ? 'Plafond presque atteint : ' : 'À surveiller : ') + pire.nom + ' à ' + Math.round(pire.part * 100) + ' % du plan gratuit. Passer en offre Pro de Supabase évite toute restriction.';
+    }
+  }
+  const pastille = el('infra-pastille');
+  if (pastille) {
+    pastille.classList.toggle('hidden', pire.niveau === 'vert');
+    pastille.className = 'ml-auto w-2.5 h-2.5 rounded-full ' + (pire.niveau === 'orange' ? 'bg-[#E08A2E]' : 'bg-error') + (pire.niveau === 'vert' ? ' hidden' : '');
+  }
+  const liste = el('infra-tables');
+  if (liste) {
+    liste.innerHTML = '';
+    (data.tables || []).forEach((tb) => {
+      const li = document.createElement('li');
+      li.className = 'flex items-center justify-between py-2';
+      const nom = document.createElement('span'); nom.className = 'font-code-sm text-code-sm text-on-surface'; nom.textContent = tb.nom;
+      const taille = document.createElement('span'); taille.className = 'text-on-surface-variant'; taille.textContent = octetsLisibles(tb.octets);
+      li.append(nom, taille);
+      liste.appendChild(li);
+    });
+  }
+}
+el('infra-rafraichir')?.addEventListener('click', () => chargerInfra());
 
 // ── Clients & Organisations ─────────────────────────────────────────────
 async function chargerSocietes() {
