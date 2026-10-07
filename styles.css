@@ -6400,3 +6400,9 @@ button.compteur2-ligne{border:none;background:transparent;padding:0;font:inherit
 .compteur2-edit{flex:0 0 auto;width:28px;height:28px;border-radius:9px;background:var(--surface);color:var(--ink-2);display:flex;align-items:center;justify-content:center;}
 .compteur2-edit svg{width:14px;height:14px;}
 button.compteur2-ligne:active .compteur2-edit{background:var(--line-2);}
+
+/* Écran de connexion DANS L'APPLICATION (téléphone) : plus de « décroché » en haut (signalé le 2026-10-07). La carte arrondie
+   posée sur un fond gris laissait une bande grise et deux coins arrondis sous la barre d'état ; l'application EST déjà tout
+   l'écran, donc la page est d'un seul blanc, sans marge ni arrondi autour de la carte. */
+body:has(.login-box.dans-app){background:var(--surface);}
+.login-box.dans-app{margin-top:0;border-radius:0;}
