@@ -311,20 +311,6 @@
     position:absolute;top:6px;right:8px;border:none;background:transparent;
     font-size:18px;line-height:1;cursor:pointer;color:var(--ink-2);padding:6px;
   }
-  /* NOUVELLE VERSION PUBLIÉE : bandeau DISCRET, jamais automatique. Un
-     rechargement qui arrive pendant qu'on saisit un compteur ferait perdre la
-     saisie ; c'est donc le gérant qui décide, et il peut aussi fermer l'avis. */
-  .depassement-version{
-    position:fixed;left:12px;right:12px;bottom:12px;z-index:9998;
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    background:var(--surface);border:1px solid var(--line);color:var(--ink);
-    border-radius:var(--r-md);padding:10px 12px;font-size:13px;line-height:1.4;
-    box-shadow:0 10px 30px rgba(13,20,36,.18);
-  }
-  .depassement-version .fermer{
-    margin-left:auto;border:none;background:transparent;font-size:18px;line-height:1;
-    cursor:pointer;color:var(--ink-2);padding:4px 6px;
-  }
   .offline-banner{
     display:flex;flex-wrap:wrap;align-items:center;gap:8px;
     background:var(--soon-bg);color:var(--soon-ink);

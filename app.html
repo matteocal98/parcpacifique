@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-aWFfbo7NaAFK29xuSkThsSVKKYjJoMlGYhmCDuPC/nA=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-AsYCorg5fSWjZ7CmM1b4zmqHOP6ps3nTTBnfHwXWEto=' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -796,9 +796,15 @@ if (typeof window !== 'undefined' && window.Capacitor) demanderVersionDuPaquet()
 // correction était livrée.
 //
 // La page récupère donc `version.json`, un fichier JAMAIS mis en cache, qui porte
-// l'empreinte du script publié. Si elle diffère de celle qui tourne, un bandeau
-// discret propose de recharger. RIEN d'automatique : on ne recharge jamais sous
-// les doigts de quelqu'un qui est en train de saisir un compteur.
+// l'empreinte du script publié. Si elle diffère de celle qui tourne, la page se
+// RECHARGE TOUTE SEULE — mais seulement dans les premières secondes qui suivent
+// l'ouverture, et jamais si quelqu'un est en train de saisir quelque chose ou si
+// une fenêtre est ouverte : on ne recharge jamais sous les doigts de quelqu'un.
+// Il n'y a plus de bandeau « Une nouvelle version est disponible » (retiré le
+// 2026-10-07 : il revenait à chaque publication et agaçait plus qu'il n'aidait).
+// Un seul rechargement par version publiée (sessionStorage) : si le cache du
+// navigateur sert encore l'ancienne page après ce rechargement, on reste
+// silencieux au lieu de boucler.
 function empreintePage() {
   const meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
   const trouve = meta ? /'sha256-([A-Za-z0-9+/=]+)'/.exec(meta.getAttribute('content') || '') : null;
@@ -811,11 +817,6 @@ function empreintePage() {
 function empreinteCourte() {
   const empreinte = empreintePage();
   return empreinte ? empreinte.slice(0, 8) : trad('inconnue');
-}
-
-function retirerAvisVersion() {
-  const avis = document.getElementById('depassement-version');
-  if (avis) avis.remove();
 }
 
 async function verifierVersionPubliee() {
@@ -837,19 +838,18 @@ async function verifierVersionPubliee() {
       : '';
     // Rien à dire si la version publiée est illisible, ou si c'est la nôtre.
     if (!publieeEmpreinte || !ici || publieeEmpreinte === ici) return;
-    if (document.getElementById('depassement-version')) return;
-    const bloc = document.createElement('div');
-    bloc.className = 'depassement-version';
-    bloc.id = 'depassement-version';
-    bloc.setAttribute('role', 'status');
-    bloc.innerHTML = `<span>${trad('Une nouvelle version est disponible.')}</span>`
-      + `<button type="button" class="secondary" id="depassement-recharger">${trad('Recharger')}</button>`
-      + `<button type="button" class="fermer" aria-label="${esc(trad('Fermer'))}">×</button>`;
-    document.body.appendChild(bloc);
-    const recharger = document.getElementById('depassement-recharger');
-    if (recharger) recharger.addEventListener('click', () => location.reload());
-    const fermer = bloc.querySelector('.fermer');
-    if (fermer) fermer.addEventListener('click', retirerAvisVersion);
+    // Trop tard, saisie en cours ou fenêtre ouverte : on ne touche à rien (pas de bandeau non plus).
+    const actif = document.activeElement;
+    const enSaisie = !!actif && /^(INPUT|TEXTAREA|SELECT)$/.test(actif.tagName);
+    const tropTard = typeof performance !== 'undefined' && performance.now() > 8000;
+    if (tropTard || enSaisie || document.querySelector('.overlay')) return;
+    // Une seule tentative par version publiée ; sans sessionStorage on ne risque pas une boucle.
+    const cle = 'kalea.rechargement-auto';
+    try {
+      if (sessionStorage.getItem(cle) === publieeEmpreinte) return;
+      sessionStorage.setItem(cle, publieeEmpreinte);
+    } catch (err) { return; }
+    location.reload();
   } catch (err) {
     // Hors connexion, ou `version.json` absent : c'est un CONFORT, pas une
     // fonction. On ne dit rien, et surtout on n'affiche pas d'erreur globale.
