@@ -92,6 +92,13 @@
     [`Suivez, puis commandez`, `Track, then order`],
     [`Vous relevez le compteur quand vous voulez : le tableau d'échéances se met à jour, les rappels partent avant la date, et la liste de pièces se regroupe par famille.`, `Take a counter reading whenever you like: the schedule updates, reminders go out ahead of the date, and the parts list is grouped by family.`],
 
+    // KALEA en action (vidéos)
+    [`KALEA EN ACTION`, `KALEA IN ACTION`],
+    [`Voyez KALEA fonctionner, en quelques minutes`, `See KALEA at work, in a few minutes`],
+    [`Un témoignage de gérant et des démonstrations courtes, pas à pas.`, `A manager's story and short step-by-step demos.`],
+    [`Toutes nos vidéos sur la chaîne YouTube KALEA`, `All our videos on the KALEA YouTube channel`],
+    [`— la vidéo ne se charge qu'au clic (aucun cookie publicitaire).`, `— the video only loads when you click (no advertising cookies).`],
+
     // Vos données
     [`VOS DONNÉES`, `YOUR DATA`],
     [`Quatre engagements, vérifiables dans le produit`, `Four commitments, verifiable in the product`],
