@@ -140,7 +140,6 @@
       else detail = remplir(t.detail, { base: montant(o.base, lg), inc: o.incluses, sup: reco.supplement, s: reco.supplement > 1 ? 's' : '', extra: montant(o.extra, lg), total: montant(reco.prix, lg) });
       var lien, libelle;
       if (o.cle === 'free') { lien = LIEN_INSCRIPTION; libelle = t.commencer; }
-      else if (o.cle === 'enterprise') { lien = MAIL_ENT; libelle = t.contacter; }
       else { lien = LIEN_INSCRIPTION; libelle = remplir(t.choisir, { nom: nom }); }
       blocReco =
         '<div class="rounded-2xl bg-[#0E1333] text-white p-6 sm:p-8">' +

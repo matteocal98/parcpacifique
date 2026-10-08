@@ -156,6 +156,8 @@
     [`Module Coûts & TCO complet`, `Full Costs & TCO module`],
     [`30 analyses · 30 photos · 500 lectures`, `30 analyses · 30 photos · 500 readings`],
     [`Choisir l'offre Business`, `Choose the Business plan`],
+    [`Choisir l'offre Enterprise`, `Choose the Enterprise plan`],
+    [`Choisir Enterprise`, `Choose Enterprise`],
     [`Grands Parcs & BTP`, `Large Fleets & Construction`],
     [`Enterprise`, `Enterprise`],
     [`Grand Compte`, `Key Account`],
