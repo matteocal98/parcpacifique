@@ -20,11 +20,28 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-K/bHUiFmLk3cRkj3Ha+xudFtowwd9CJXqtEveaHL8no=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-2bTFYalbZzK4LwIJUs6ArmDvizv+4tol6l6iYiQxYmQ=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
+/* Téléphone et tablette (< 1024 px) : le menu latéral devient un tiroir qu'on ouvre avec le bouton ☰, l'en-tête et le contenu
+   prennent toute la largeur. Sur ordinateur, rien ne change. */
+#menu-bouton{display:none}
+#menu-fond{display:none}
+@media (max-width:1023px){
+  #menu-bouton{display:flex}
+  #console>aside{transform:translateX(-100%);transition:transform .2s ease;width:min(18rem,85vw);overflow-y:auto}
+  #console.menu-ouvert>aside{transform:none;box-shadow:0 0 40px rgba(0,0,0,.45)}
+  #console.menu-ouvert #menu-fond{display:block;position:fixed;inset:0;z-index:45;background:rgba(20,25,57,.45)}
+  #console>.pl-72{padding-left:0}
+  #console>div>header{left:0!important;padding-left:.5rem;padding-right:.75rem;gap:.5rem}
+  #console main{padding:1rem .75rem}
+  #console h1.text-headline-lg{font-size:1.5rem!important;line-height:2rem!important}
+  #console aside.sticky{position:static}
+}
+</style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}[hidden]{display:none!important;}</style>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -73,6 +90,7 @@
 
 <!-- ═══════════════════════════ CONSOLE ═══════════════════════════ -->
 <div id="console" class="hidden">
+<div id="menu-fond" aria-hidden="true"></div>
 <aside class="fixed left-0 top-0 h-full w-72 bg-inverse-surface z-50 flex flex-col justify-between p-space-md select-none">
   <div class="flex flex-col gap-space-md">
     <div class="flex items-center justify-between px-space-xs py-space-sm">
@@ -133,6 +151,7 @@
 <div class="pl-72">
   <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between">
     <div class="flex items-center gap-space-sm flex-1 max-w-xl">
+      <button id="menu-bouton" type="button" aria-label="Ouvrir le menu" class="shrink-0 items-center justify-center w-11 h-11 rounded text-on-surface hover:bg-surface-container-high"><span class="material-symbols-outlined">menu</span></button>
       <div class="relative w-full">
         <span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
         <input id="recherche-clients" class="w-full h-11 pl-10 pr-space-sm bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant/70 rounded focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Rechercher un compte client..." type="text"/>
@@ -147,7 +166,7 @@
         <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
       </div>
       <button id="bouton-deconnexion" type="button" class="flex items-center gap-space-xs min-h-[44px] px-space-sm py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md text-label-md">
-        <span class="material-symbols-outlined text-[18px]">logout</span><span>Quitter</span>
+        <span class="material-symbols-outlined text-[18px]">logout</span><span class="hidden sm:inline">Quitter</span>
       </button>
     </div>
   </header>
@@ -1080,6 +1099,8 @@ async function demarrer() {
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   el('form-connexion').addEventListener('submit', gererConnexion);
+  el('menu-bouton')?.addEventListener('click', () => el('console').classList.toggle('menu-ouvert'));
+  el('menu-fond')?.addEventListener('click', () => el('console').classList.remove('menu-ouvert'));
   el('bouton-deconnexion').addEventListener('click', async () => { await retirerNotificationsAdmin(); sb.auth.signOut(); });
   el('refuse-deconnexion').addEventListener('click', () => sb.auth.signOut());
   document.querySelectorAll('.nav-lien').forEach((a) => a.addEventListener('click', (ev) => {
@@ -1208,6 +1229,7 @@ async function retirerNotificationsAdmin() {
 }
 
 function allerA(chemin) {
+  el('console').classList.remove('menu-ouvert'); // téléphone : le tiroir se referme après le choix
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
   const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : chemin === 'infra' ? 'vue-infra' : 'vue-bientot';
   el(cible).classList.remove('hidden');
@@ -1470,6 +1492,7 @@ async function ouvrirTicket(ticketId) {
   const t = TICKETS.find((x) => x.id === ticketId);
   const panneau = el('panneau-ticket');
   panneau.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Chargement…</p>';
+  if (window.innerWidth < 1024) panneau.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
     .select('id, body, created_at, author_id, profiles(full_name, login, is_staff)')
