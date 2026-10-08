@@ -1,0 +1,53 @@
+# Rattrapage quotidien des machines supplémentaires facturées — déclencheur planifié (une fois par jour).
+#
+# CE QUE ÇA FAIT : appelle la fonction `stripe-sync-machines` avec {"all": true} : elle recalcule, pour CHAQUE société
+# qui a un abonnement Stripe, le nombre de machines facturées en plus de son offre, et corrige l'abonnement s'il
+# s'écarte de la réalité. C'est le FILET DE SÉCURITÉ : l'application et le webhook déclenchent déjà un recalcul à chaque
+# ajout / suppression de machine et à chaque changement d'offre ; cette tâche rattrape ce qu'un onglet fermé, une coupure
+# ou un import auraient laissé de côté. Idempotente : si tout est juste, rien n'est écrit chez Stripe.
+#
+# HEURE : 14 h 17 UTC = 01 h 17 en Nouvelle-Calédonie (la nuit, loin de la coupure de 15 h 30 de l'utilisateur).
+#
+# MÊME CHOIX QUE recap-hebdo.yml et telemetrie-releve.yml : le jeton vit dans les secrets GitHub, jamais dans la base ;
+# l'historique des exécutions est le contrôle (un échec est visible et GitHub prévient par e-mail).
+#
+# CE QU'IL FAUT AVOIR POSÉ (une fois) :
+#   1. secret de dépôt  SYNC_MACHINES_TOKEN              = chaîne aléatoire de 32+ caractères
+#   2. secret de fonction Supabase SYNC_MACHINES_TOKEN   = LA MÊME valeur
+#   3. la fonction déployée avec --no-verify-jwt
+#
+# À SAVOIR : GitHub peut retarder une tâche planifiée de quelques minutes, et désactive celles d'un dépôt PUBLIC resté
+# 60 jours sans activité (l'onglet Actions le dit). Un décalage ou un jour manqué est sans conséquence : le suivant rattrape.
+
+name: Machines supplémentaires (rattrapage)
+
+on:
+  schedule:
+    - cron: '17 14 * * *'
+  workflow_dispatch:      # et à la main, pour éprouver sans attendre
+
+jobs:
+  rattrapage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recalculer les machines en plus
+        env:
+          SYNC_MACHINES_TOKEN: ${{ secrets.SYNC_MACHINES_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SYNC_MACHINES_TOKEN:-}" ]; then
+            echo "::error::le secret SYNC_MACHINES_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' --max-time 150 \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/stripe-sync-machines" \
+            -H "x-kalea-sync: ${SYNC_MACHINES_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d '{"all": true}')
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::le rattrapage des machines supplémentaires a échoué (HTTP $code)"
+            exit 1
+          fi
