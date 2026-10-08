@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-qBGzRcB1AHw2XNfzfzW99GptpwiT0PWH9ymfSKDJvRk=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-49urqM9MkJTD8xQWiiQ0CmHztlbVqXCW0Ltcb8QqLiQ=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -1080,6 +1080,7 @@ async function demarrer() {
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   el('form-connexion').addEventListener('submit', gererConnexion);
+  window.addEventListener('popstate', () => allerA('clients', true));
   el('menu-bouton')?.addEventListener('click', () => el('console').classList.toggle('menu-ouvert'));
   el('menu-fond')?.addEventListener('click', () => el('console').classList.remove('menu-ouvert'));
   el('bouton-deconnexion').addEventListener('click', async () => { await retirerNotificationsAdmin(); sb.auth.signOut(); });
@@ -1209,7 +1210,16 @@ async function retirerNotificationsAdmin() {
   } catch (_) { /* sans conséquence : le jeton sera purgé quand il sera mort */ }
 }
 
-function allerA(chemin) {
+// Retour (bouton ou geste « retour » d'Android) : depuis n'importe quel menu, on revient à l'écran principal (« clients »)
+// au lieu de quitter l'application. Un menu ouvert = UNE entrée dans l'historique du navigateur ; passer d'un menu à un autre
+// la remplace, donc un seul « retour » suffit toujours. Depuis l'écran principal, « retour » quitte l'application comme avant.
+function allerA(chemin, depuisHistorique = false) {
+  if (!depuisHistorique) {
+    const surUnMenu = !!(history.state && history.state.kalea);
+    if (chemin !== 'clients' && !surUnMenu) history.pushState({ kalea: chemin }, '');
+    else if (chemin !== 'clients') history.replaceState({ kalea: chemin }, '');
+    else if (surUnMenu) history.back(); // retour à l'écran principal par le menu : on retire l'entrée devenue inutile
+  }
   el('console').classList.remove('menu-ouvert'); // téléphone : le tiroir se referme après le choix
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
   const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : chemin === 'infra' ? 'vue-infra' : 'vue-bientot';
