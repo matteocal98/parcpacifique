@@ -79,6 +79,8 @@
       #comparatif-offres > div { max-width: 1300px; margin: 0 auto; padding: 0; }
       #comparatif-offres tr { break-inside: avoid; }
       #comparatif-offres [onclick], #comparatif-offres a[download], #comparatif-offres tfoot { display: none !important; }
+      #comparatif-offres #simulateur { display: none !important; }
+      #comparatif-offres > div > div { display: block !important; }
     }
   </style>
 </head>
@@ -1015,22 +1017,29 @@
 </section>
 
 <!-- ================= SIMULATEUR D'ABONNEMENT (simulateur-tarifs.js) ================= -->
-<section class="bg-white pb-10 scroll-mt-20" id="simulateur">
-<div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="rounded-3xl bg-[#f8f9ff] border border-slate-200/80 p-5 sm:p-8">
-<div class="text-center max-w-2xl mx-auto mb-6">
+
+
+<!-- ================= TABLEAU COMPARATIF : CE QUE CHAQUE CLASSE APPORTE (maquette Stitch) ================= -->
+<!-- ================= SIMULATEUR + TABLEAU COMPARATIF : côte à côte sur grand écran (colonne simulateur à gauche, tableau à droite) ================= -->
+<section class="bg-[#f8f9ff] py-10" id="comparatif-offres">
+<div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col xl:flex-row gap-8 xl:gap-8 items-start">
+<aside id="simulateur" class="w-full max-w-3xl mx-auto xl:mx-0 xl:w-[380px] xl:shrink-0 xl:sticky xl:top-24 scroll-mt-20">
+<div class="rounded-3xl bg-white border border-slate-200/80 shadow-lg p-5 sm:p-6">
+<div class="text-center mb-5">
 <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase mb-3 bg-[#5B52DF]/10 text-[#5B52DF] border border-[#5B52DF]/20">Simulateur</span>
-<h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-ink font-display">Combien ça coûte pour votre parc ?</h3>
-<p class="mt-2 text-sm sm:text-base text-slate-600">Indiquez votre nombre de machines : nous calculons l'offre la moins chère qui répond à votre besoin.</p>
+<h3 class="text-xl sm:text-2xl font-extrabold tracking-tight text-brand-ink font-display">Combien ça coûte pour votre parc ?</h3>
+<p class="mt-2 text-sm text-slate-600">Indiquez votre nombre de machines : nous calculons l'offre la moins chère qui répond à votre besoin.</p>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-<div class="space-y-5">
+<div id="sim-resultat" data-sans-traduction aria-live="polite"></div>
+
+<div class="mt-5 pt-5 border-t border-slate-200 space-y-5">
 <div>
 <label for="sim-machines-n" class="block text-sm font-bold text-brand-ink mb-2">Nombre de machines ou de véhicules</label>
 <div class="flex items-center gap-4">
-<input id="sim-machines" type="range" min="1" max="160" step="1" value="12" class="flex-1 h-2 accent-[#5B52DF]" aria-label="Nombre de machines ou de véhicules">
-<input id="sim-machines-n" type="number" inputmode="numeric" min="1" max="9999" value="12" class="w-24 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-lg font-extrabold text-brand-ink focus:outline-none focus:ring-2 focus:ring-[#5B52DF]">
+<input id="sim-machines" type="range" min="1" max="160" step="1" value="12" class="flex-1 min-w-0 h-2 accent-[#5B52DF]" aria-label="Nombre de machines ou de véhicules">
+<input id="sim-machines-n" type="number" inputmode="numeric" min="1" max="9999" value="12" class="w-20 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-lg font-extrabold text-brand-ink focus:outline-none focus:ring-2 focus:ring-[#5B52DF]">
 </div>
 </div>
 <div>
@@ -1052,19 +1061,10 @@
 </div>
 </div>
 
-<div id="sim-resultat" data-sans-traduction aria-live="polite"></div>
-</div>
-
 <p class="mt-5 text-center text-xs text-slate-500">Simulation indicative, prix mensuels toutes taxes comprises, sans engagement : les conditions font foi dans les CGU.</p>
 </div>
-</div>
-</section>
-
-<!-- ================= TABLEAU COMPARATIF : CE QUE CHAQUE CLASSE APPORTE (maquette Stitch) ================= -->
-<section class="bg-[#f8f9ff] py-10" id="comparatif-offres">
-<div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"><div class="flex flex-col w-full items-center justify-start py-4">
-<!-- Container principal centré -->
-<div class="w-full max-w-7xl flex flex-col items-center">
+</aside>
+<div class="w-full min-w-0 flex-1 flex flex-col items-center" id="tableau-comparatif">
 <!-- En-tête de section -->
 <div class="flex flex-col items-center text-center max-w-3xl mb-10">
 <!-- Badge de section -->
@@ -1097,61 +1097,61 @@
 <!-- Conteneur Tableau / Grille Responsive -->
 <div class="w-full bg-white rounded-2xl shadow-xl overflow-hidden">
 <div class="w-full overflow-x-auto">
-<table class="w-full min-w-[900px] border-collapse text-left">
+<table class="w-full min-w-[760px] border-collapse text-left">
 <!-- Colonnes / En-têtes -->
 <thead>
 <tr class="bg-[#eff4ff] text-[#0b1c30] align-bottom">
-<th class="w-[28%] p-6 text-left" scope="col">
+<th class="w-[28%] p-3 text-left" scope="col">
 <span class="text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74] block mb-1"><span class="fr">Architecture d'offre</span></span>
 <span class="text-lg font-semibold text-[#0b1c30]"><span class="fr">Capacités &amp; Services</span></span>
 </th>
 <!-- GRATUIT -->
-<th class="w-[14%] p-6 text-center" scope="col">
+<th class="w-[14%] p-3 text-center" scope="col">
 <div class="flex flex-col items-center">
 <span class="text-sm font-semibold tracking-[0.01em] font-bold text-[#585e74] uppercase tracking-wide"><span class="fr">Gratuit</span></span>
 <div class="mt-2 flex items-baseline justify-center">
-<span class="text-4xl leading-[44px] font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">0 €</span></span>
+<span class="text-2xl leading-8 font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">0 €</span></span>
 <span class="text-xs font-semibold tracking-[0.02em] text-[#585e74] ml-1"><span class="fr">/mois</span></span>
 </div>
 <span class="text-xs text-[#585e74] mt-1"><span class="fr">Pour débuter</span></span>
 </div>
 </th>
 <!-- STARTER -->
-<th class="w-[14%] p-6 text-center" scope="col">
+<th class="w-[14%] p-3 text-center" scope="col">
 <div class="flex flex-col items-center">
 <span class="text-sm font-semibold tracking-[0.01em] font-bold text-[#585e74] uppercase tracking-wide"><span class="fr">Starter</span></span>
 <div class="mt-2 flex items-baseline justify-center">
-<span class="text-4xl leading-[44px] font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">12 €</span></span>
+<span class="text-2xl leading-8 font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">12 €</span></span>
 <span class="text-xs font-semibold tracking-[0.02em] text-[#585e74] ml-1"><span class="fr">/mois</span></span>
 </div>
 <span class="text-xs text-[#585e74] mt-1"><span class="fr">Artisans &amp; PME</span></span>
 </div>
 </th>
 <!-- BUSINESS (Mise en avant) -->
-<th class="w-[16%] p-6 text-center relative bg-[#dce9ff] rounded-t-xl" scope="col">
-<div class="mx-auto w-fit mb-1 whitespace-nowrap bg-[#0ea5e9] text-white text-[11px] font-bold tracking-[0.04em] px-4 py-0.5 rounded-full shadow-md uppercase tracking-wider"> <span class="fr">Flotte / Recommandé</span></div>
+<th class="w-[16%] p-3 text-center relative bg-[#dce9ff] rounded-t-xl" scope="col">
+<div class="mx-auto w-fit mb-1 whitespace-nowrap bg-[#0ea5e9] text-white text-[10px] font-bold tracking-[0.04em] px-2 py-0.5 rounded-full shadow-md uppercase tracking-wider"> <span class="fr">Flotte / Recommandé</span></div>
 <div class="flex flex-col items-center pt-2">
 <span class="text-sm font-semibold tracking-[0.01em] font-bold text-[#006591] uppercase tracking-wide"><span class="fr">Business</span></span>
 <div class="mt-2 flex items-baseline justify-center">
-<span class="text-4xl leading-[44px] font-bold tracking-tight text-[#006591] font-bold"><span class="fr">39 €</span></span>
+<span class="text-2xl leading-8 font-bold tracking-tight text-[#006591] font-bold"><span class="fr">39 €</span></span>
 <span class="text-xs font-semibold tracking-[0.02em] text-[#006591] ml-1"><span class="fr">/mois</span></span>
 </div>
 <span class="text-xs text-[#006591] font-semibold mt-1"><span class="fr">Gestion active de parc</span></span>
 </div>
 </th>
 <!-- ENTERPRISE -->
-<th class="w-[14%] p-6 text-center" scope="col">
+<th class="w-[14%] p-3 text-center" scope="col">
 <div class="flex flex-col items-center">
 <span class="text-sm font-semibold tracking-[0.01em] font-bold text-[#585e74] uppercase tracking-wide"><span class="fr">Enterprise</span></span>
 <div class="mt-2 flex items-baseline justify-center">
-<span class="text-4xl leading-[44px] font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">79 €</span></span>
+<span class="text-2xl leading-8 font-bold tracking-tight text-[#0b1c30] font-bold"><span class="fr">79 €</span></span>
 <span class="text-xs font-semibold tracking-[0.02em] text-[#585e74] ml-1"><span class="fr">/mois</span></span>
 </div>
 <span class="text-xs text-[#585e74] mt-1"><span class="fr">Flottes industrielles</span></span>
 </div>
 </th>
 <!-- GRAND COMPTE -->
-<th class="w-[14%] p-6 text-center" scope="col">
+<th class="w-[14%] p-3 text-center" scope="col">
 <div class="flex flex-col items-center">
 <span class="text-sm font-semibold tracking-[0.01em] font-bold text-[#585e74] uppercase tracking-wide"><span class="fr">Grand Compte</span></span>
 <div class="mt-2 flex items-baseline justify-center">
@@ -1166,169 +1166,169 @@
 <tbody class="text-sm text-[#0b1c30]">
 <!-- SECTION : CAPACITÉS & UTILISATEURS -->
 <tr class="bg-[#e5eeff]">
-<td class="px-6 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Capacité &amp; Dimensionnement</span></td>
+<td class="px-3 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Capacité &amp; Dimensionnement</span></td>
 </tr>
 <!-- Prix par mois -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Prix par mois</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#0b1c30]"><span class="fr">0 €</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#0b1c30]"><span class="fr">12 €</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">39 €</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#0b1c30]"><span class="fr">79 €</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#0b1c30]"><span class="fr">Sur devis</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Prix par mois</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#0b1c30]"><span class="fr">0 €</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#0b1c30]"><span class="fr">12 €</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">39 €</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#0b1c30]"><span class="fr">79 €</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#0b1c30]"><span class="fr">Sur devis</span></td>
 </tr>
 <!-- Machines incluses -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Machines incluses</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">2</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">5</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#006591] bg-[#dce9ff]/40"><span class="fr">20</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">40</span></td>
-<td class="px-4 py-4 text-center text-[#585e74]"><span class="fr">plus de 150</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Machines incluses</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">2</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">5</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#006591] bg-[#dce9ff]/40"><span class="fr">20</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">40</span></td>
+<td class="px-2 py-3 text-center text-[#585e74]"><span class="fr">plus de 150</span></td>
 </tr>
 <!-- Machines en plus -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Machines en plus</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">+ 2 €</span><span class="text-[#585e74] text-xs block"><span class="fr">(jusqu'à 10)</span></span></td>
-<td class="px-4 py-4 text-center text-[#006591] font-semibold bg-[#dce9ff]/40"><span class="fr">+ 1,50 €</span><span class="text-[#006591]/70 text-xs block"><span class="fr">(jusqu'à 40)</span></span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">+ 1 €</span><span class="text-[#585e74] text-xs block"><span class="fr">(jusqu'à 150)</span></span></td>
-<td class="px-4 py-4 text-center text-[#585e74]"><span class="fr">tarif dégressif</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Machines en plus</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">+ 2 €</span><span class="text-[#585e74] text-xs block"><span class="fr">(jusqu'à 10)</span></span></td>
+<td class="px-2 py-3 text-center text-[#006591] font-semibold bg-[#dce9ff]/40"><span class="fr">+ 1,50 €</span><span class="text-[#006591]/70 text-xs block"><span class="fr">(jusqu'à 40)</span></span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">+ 1 €</span><span class="text-[#585e74] text-xs block"><span class="fr">(jusqu'à 150)</span></span></td>
+<td class="px-2 py-3 text-center text-[#585e74]"><span class="fr">tarif dégressif</span></td>
 </tr>
 <!-- Utilisateurs -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Utilisateurs</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">1</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">1</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#006591] bg-[#dce9ff]/40"><span class="fr">3</span></td>
-<td class="px-4 py-4 text-center text-[#0b1c30]"><span class="fr">rôles d'équipe</span></td>
-<td class="px-4 py-4 text-center text-[#585e74]"><span class="fr">sur mesure</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Utilisateurs</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">1</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">1</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#006591] bg-[#dce9ff]/40"><span class="fr">3</span></td>
+<td class="px-2 py-3 text-center text-[#0b1c30]"><span class="fr">rôles d'équipe</span></td>
+<td class="px-2 py-3 text-center text-[#585e74]"><span class="fr">sur mesure</span></td>
 </tr>
 <!-- SECTION : FONCTIONNALITÉS ESSENTIELLES & TCO -->
 <tr class="bg-[#e5eeff]">
-<td class="px-6 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Pilotage, Alertes &amp; Intelligence Matériel</span></td>
+<td class="px-3 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Pilotage, Alertes &amp; Intelligence Matériel</span></td>
 </tr>
 <!-- Consultation, rappels e-mail et notifications -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Consultation, rappels e-mail et notifications</span></td>
-<td class="px-4 py-4 text-center">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Consultation, rappels e-mail et notifications</span></td>
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center bg-[#dce9ff]/40">
+<td class="px-2 py-3 text-center bg-[#dce9ff]/40">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- Export CSV -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Export CSV</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Export CSV</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center bg-[#dce9ff]/40">
+<td class="px-2 py-3 text-center bg-[#dce9ff]/40">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- QR codes, préparation groupée, Coûts & TCO -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">QR codes, préparation groupée, Coûts &amp; TCO</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center bg-[#dce9ff]/40">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">QR codes, préparation groupée, Coûts &amp; TCO</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center bg-[#dce9ff]/40">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- Stocks & SAV, support dédié -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Stocks &amp; SAV, support dédié</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Stocks &amp; SAV, support dédié</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- Télémétrie (connexion et suivi) -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Télémétrie (connexion et suivi)</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Télémétrie (connexion et suivi)</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
-<td class="px-4 py-4 text-center">
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- Intégrations sur mesure, accompagnement, contrat annuel -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Intégrations sur mesure, accompagnement, contrat annuel</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
-<td class="px-4 py-4 text-center">
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Intégrations sur mesure, accompagnement, contrat annuel</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base bg-[#dce9ff]/40"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center text-[#585e74] text-base"><span class="fr">—</span></td>
+<td class="px-2 py-3 text-center">
 <svg class="text-[#0ea5e9] inline-block shrink-0 w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6"/></svg>
 </td>
 </tr>
 <!-- SECTION : QUOTAS DE TRAITEMENT IA & SCAN -->
 <tr class="bg-[#e5eeff]">
-<td class="px-6 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Traitement de Documents &amp; Capteurs</span></td>
+<td class="px-3 py-2 text-[11px] font-bold tracking-[0.04em] uppercase tracking-wider text-[#585e74]" colspan="6"> <span class="fr">Traitement de Documents &amp; Capteurs</span></td>
 </tr>
 <!-- Analyses de carnet par mois -->
 <tr class="hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Analyses de carnet par mois</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">10</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">20</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">30</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">5 000</span></td>
-<td class="px-4 py-4 text-center text-[#585e74]"><span class="fr">Sur devis</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Analyses de carnet par mois</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">10</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">20</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">30</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">5 000</span></td>
+<td class="px-2 py-3 text-center text-[#585e74]"><span class="fr">Sur devis</span></td>
 </tr>
 <!-- Lectures de compteur par mois -->
 <tr class="bg-white hover:bg-[#eff4ff] transition-colors">
-<td class="px-6 py-4 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Lectures de compteur par mois</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">30</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">200</span></td>
-<td class="px-4 py-4 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">500</span></td>
-<td class="px-4 py-4 text-center font-semibold text-[#0b1c30]"><span class="fr">2 000</span></td>
-<td class="px-4 py-4 text-center text-[#585e74]"><span class="fr">Sur devis</span></td>
+<td class="px-3 py-3 text-xs font-semibold tracking-[0.02em] text-[#0b1c30]"> <span class="fr">Lectures de compteur par mois</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">30</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">200</span></td>
+<td class="px-2 py-3 text-center font-bold text-[#006591] bg-[#dce9ff]/40"><span class="fr">500</span></td>
+<td class="px-2 py-3 text-center font-semibold text-[#0b1c30]"><span class="fr">2 000</span></td>
+<td class="px-2 py-3 text-center text-[#585e74]"><span class="fr">Sur devis</span></td>
 </tr>
 </tbody>
 <!-- Ligne des boutons d'actions rapides -->
 <tfoot>
 <tr class="bg-[#eff4ff] align-middle">
-<td class="p-6 text-xs font-semibold tracking-[0.02em] text-[#585e74]"> <span class="fr">Action immédiate</span></td>
+<td class="p-3 text-xs font-semibold tracking-[0.02em] text-[#585e74]"> <span class="fr">Action immédiate</span></td>
 <!-- Gratuit CTA -->
-<td class="p-4 text-center">
+<td class="p-2 text-center">
 <a class="w-full py-2.5 px-3 rounded-lg bg-white text-[#0b1c30] text-xs font-semibold tracking-[0.02em] shadow-sm hover:bg-[#e5eeff] transition-colors block" href="./app.html?inscription=1"> <span class="fr">Commencer</span></a>
 </td>
 <!-- Starter CTA -->
-<td class="p-4 text-center">
+<td class="p-2 text-center">
 <a class="w-full py-2.5 px-3 rounded-lg bg-white text-[#0b1c30] text-xs font-semibold tracking-[0.02em] shadow-sm hover:bg-[#e5eeff] transition-colors block" href="./app.html?inscription=1"> <span class="fr">Choisir Starter</span></a>
 </td>
 <!-- Business CTA (Accentué) -->
@@ -1336,16 +1336,19 @@
 <a class="w-full py-3 px-3 rounded-lg bg-[#0ea5e9] text-white text-xs font-semibold tracking-[0.02em] shadow-md hover:opacity-95 transform active:scale-95 transition-all block" href="./app.html?inscription=1"> <span class="fr">Choisir Business</span></a>
 </td>
 <!-- Enterprise CTA -->
-<td class="p-4 text-center">
+<td class="p-2 text-center">
 <a class="w-full py-2.5 px-3 rounded-lg bg-[#213145] text-[#eaf1ff] text-xs font-semibold tracking-[0.02em] shadow-sm hover:opacity-90 transition-opacity block" href="./app.html?inscription=1"> <span class="fr">Choisir Enterprise</span></a>
 </td>
 <!-- Grand Compte CTA -->
-<td class="p-4 text-center">
+<td class="p-2 text-center">
 <a class="w-full py-2.5 px-3 rounded-lg bg-white text-[#006591] text-xs font-semibold tracking-[0.02em] shadow-sm hover:bg-[#e5eeff] transition-colors block" href="mailto:support@kalea.pro?subject=Offre%20Grand%20compte%20%E2%80%94%20demande%20de%20devis"> <span class="fr">Sur devis</span></a>
 </td>
 </tr>
 </tfoot>
 </table>
+</div>
+</div>
+
 </div>
 </div>
 <!-- Note d'assistance et contact -->
@@ -1367,7 +1370,7 @@
 </div>
 </div>
 </div>
-</div></div>
+</div>
 </section>
 
 <!-- END: PricingSection -->
