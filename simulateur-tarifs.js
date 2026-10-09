@@ -135,11 +135,11 @@
       else detail = remplir(t.detail, { base: montant(o.base, lg), inc: o.incluses, sup: reco.supplement, s: reco.supplement > 1 ? 's' : '', extra: montant(o.extra, lg), total: montant(reco.prix, lg) });
       blocReco =
         '<div class="rounded-2xl bg-[#0E1333] text-white p-6 sm:p-8">' +
-        '<p class="text-[13px] sm:text-sm text-white/80 leading-relaxed">' + detail + '</p>' +
+        '<p class="text-[13px] sm:text-sm text-white/80 leading-relaxed min-h-[3.25em]">' + detail + '</p>' +
         '<p class="mt-2 text-xs text-white/60">' + t.pasCher + '</p>' +
-        '<div class="mt-6 pt-5 border-t border-white/15">' +
+        '<div class="mt-3 pt-3 border-t border-white/15">' +
         '<div class="text-xs font-bold tracking-wider uppercase text-white/70 mb-2">' + t.recommandee + '</div>' +
-        '<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">' +
+        '<div class="flex flex-col gap-y-1">' +
         '<span class="text-3xl sm:text-4xl font-extrabold font-display">' + echapper(nom) + '</span>' +
         '<span class="text-3xl sm:text-4xl font-extrabold font-display text-[#7DD3FC]">' + montant(reco.prix, lg) + '<span class="text-base font-semibold text-white/70"> ' + t.mois + '</span></span>' +
         '</div></div></div>';
