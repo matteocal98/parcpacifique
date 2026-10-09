@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-OG0sgps5HFqEI+JBPxxHT/CgIPMS3HKilH6hncklwqM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-b4g39FDxM5TLnNv9dH9vGbHB6JpInIydqghGcGBYcak=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -46,6 +46,8 @@
 /* Téléphone (< 768 px) : le répertoire des clients passe de tableau à CARTES (une par société), au lieu d'un tableau à faire
    défiler sur le côté. Les boutons gardent leur texte sur une ligne et peuvent passer à la ligne entre eux. */
 .btn-connecter-en-tant-que,.btn-changer-offre{white-space:nowrap}
+/* survol seulement avec une vraie souris : sur téléphone, il restait collé après un toucher et teintait la carte */
+@media (hover:hover){.carte-ticket:hover{background:#f4f2ff}}
 .ticket-nouveau{background:#c9dcff!important;box-shadow:inset 5px 0 0 #2671e2,0 1px 3px rgba(20,25,57,.14)}
 @media (max-width:767px){
   .table-clients{display:block}
@@ -1457,16 +1459,16 @@ function rendreListeTickets() {
     const carte = document.createElement('div');
     // Ticket pas encore pris en charge (statut « ouvert ») : fond bleu clair pour le repérer d'un coup d'œil.
     // Il redevient blanc dès qu'on répond ou qu'on change son statut (« en cours », « résolu »).
-    const fondCarte = t.status === 'ouvert' ? 'ticket-nouveau' : 'bg-surface-container-lowest hover:bg-surface-container-low/50';
+    const fondCarte = t.status === 'ouvert' ? 'ticket-nouveau' : 'bg-surface-container-lowest carte-ticket';
     carte.className = fondCarte + ' p-space-md rounded-xl shadow-sm cursor-pointer transition-all flex flex-col gap-space-xs';
     carte.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-space-sm">
-          <span class="w-2.5 h-2.5 rounded-full ${couleurPriorite[t.priority] || 'bg-outline-variant'}"></span>
-          <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">${echapper(t.companies?.name)}</span>
-          <span class="px-space-xs py-0.5 rounded text-on-surface-variant bg-surface-container font-code-sm text-code-sm uppercase">${libellePriorite[t.priority] || t.priority}</span>
+      <div class="flex items-start justify-between gap-space-sm">
+        <div class="flex flex-wrap items-center gap-x-space-sm gap-y-1 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0 ${couleurPriorite[t.priority] || 'bg-outline-variant'}"></span>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-semibold break-words min-w-0">${echapper(t.companies?.name)}</span>
+          <span class="px-space-xs py-0.5 rounded text-on-surface-variant bg-surface-container font-code-sm text-code-sm uppercase whitespace-nowrap">${libellePriorite[t.priority] || t.priority}</span>
         </div>
-        <span class="font-body-sm text-body-sm text-on-surface-variant">${ilYA(t.created_at)}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap shrink-0 pt-1">${ilYA(t.created_at)}</span>
       </div>
       <div class="font-label-md text-label-md text-on-surface font-semibold">${echapper(t.subject)}</div>
       <div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
