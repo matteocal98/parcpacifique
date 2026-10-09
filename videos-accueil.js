@@ -21,9 +21,9 @@
   var VIDEOS = [
     { cle: 'pub-gerant', fr: null, en: null,
       titre: { fr: "Plus jamais de chantier à l'arrêt", en: 'No more stopped job sites' } },
-    { cle: 'creer-un-compte', fr: '_IQxOjrFtGQ', en: 'YulRg_u4uV4',
+    { cle: 'creer-un-compte', fr: null /* _IQxOjrFtGQ : encore privée (2026-10-09), à remettre quand elle sera publique */, en: 'YulRg_u4uV4',
       titre: { fr: 'Créer son compte en 1 minute', en: 'Create your account in 1 minute' } },
-    { cle: 'enregistrer-une-machine', fr: 'SZ6NosEhJ1M', en: '3AkB5HeQSos',
+    { cle: 'enregistrer-une-machine', fr: null /* SZ6NosEhJ1M : encore privée (2026-10-09), à remettre quand elle sera publique */, en: '3AkB5HeQSos',
       titre: { fr: "Ajouter une machine et son plan d'entretien", en: 'Add a machine and its maintenance plan' } },
     { cle: 'intervention', fr: 'Y6zv1zTR0ts', en: '_IgtVKW0nq4',
       titre: { fr: 'Noter une intervention en quelques secondes', en: 'Log a service job in seconds' } },
