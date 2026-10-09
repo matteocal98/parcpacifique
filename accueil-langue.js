@@ -38,7 +38,6 @@
     [`Voir comment ça marche`, `See how it works`],
     [`€/mois`, `/month`],
     [`Live`, `Live`],
-    [`Survoler pour zoomer`, `Hover to zoom`],
     [`Vue d'ensemble en temps réel`, `Real-time overview`],
     [`Tableau de bord : alertes d'entretien, pièces consolidées et TCO`, `Dashboard: maintenance alerts, consolidated parts and TCO`],
 
@@ -64,7 +63,6 @@
     [`Échéances heures & mois`, `Hour & month intervals`],
     [`Plans validés en 1 clic`, `Plans validated in 1 click`],
     [`PDF OCR`, `PDF OCR`],
-    [`Zoom`, `Zoom`],
     [`Suivi Précis`, `Precise tracking`],
     [`Double suivi intelligent (Compteur horaire + Calendrier)`, `Smart dual tracking (hour meter + calendar)`],
     [`Chaque machine possède son propre cycle. La première échéance atteinte (horaire ou date calendaire) déclenche l'alerte proactive et prépare la check-list d'intervention.`, `Each machine has its own cycle. The first interval reached (hours or calendar date) triggers the proactive alert and prepares the service checklist.`],
