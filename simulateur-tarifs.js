@@ -165,11 +165,11 @@
       } else {
         corps = '<div class="text-lg font-extrabold ' + (choisie ? 'text-[#006591]' : 'text-[#0E1333]') + '">' + montant(l.prix, lg) + '<span class="text-xs font-semibold text-slate-500">' + t.mois + '</span></div>';
       }
-      return '<div class="rounded-xl border p-3 ' + (choisie ? 'border-[#006591] bg-[#eaf4f9] ring-2 ring-[#006591]' : 'border-slate-200 bg-white') + '">' +
+      return '<div class="rounded-xl p-3 text-center flex flex-col items-center justify-center ' + (choisie ? 'bg-[#dcecf5]' : 'bg-[#f3f5fb]') + '">' +
         '<div class="text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">' + echapper(l.offre.nom[lg]) + '</div>' + corps + '</div>';
     }).join('');
 
-    zone.innerHTML = blocReco + '<div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">' + puces + '</div>';
+    zone.innerHTML = blocReco + '<div class="mt-4 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-2 gap-3">' + puces + '</div>';
   }
 
   function brancher() {
