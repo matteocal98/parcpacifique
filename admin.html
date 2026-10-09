@@ -48,6 +48,11 @@
 .btn-connecter-en-tant-que,.btn-changer-offre{white-space:nowrap}
 /* survol seulement avec une vraie souris : sur téléphone, il restait collé après un toucher et teintait la carte */
 @media (hover:hover){.carte-ticket:hover{background:#f4f2ff}}
+/* Filtres des tickets (Tous / Ouverts / En cours / Résolus) : toujours sur UNE seule ligne sur téléphone */
+@media (max-width:767px){
+  #onglets-tickets{flex-wrap:nowrap!important;gap:.125rem!important}
+  #onglets-tickets .onglet-ticket{flex:1 1 0;min-width:0;white-space:nowrap;text-align:center;padding-left:.25rem!important;padding-right:.25rem!important}
+}
 .ticket-nouveau{background:#c9dcff!important;box-shadow:inset 5px 0 0 #2671e2,0 1px 3px rgba(20,25,57,.14)}
 @media (max-width:767px){
   .table-clients{display:block}
