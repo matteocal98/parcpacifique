@@ -43,6 +43,22 @@
   #console h1.text-headline-lg{font-size:1.5rem!important;line-height:2rem!important}
   #console aside.sticky{position:static}
 }
+/* Téléphone (< 768 px) : le répertoire des clients passe de tableau à CARTES (une par société), au lieu d'un tableau à faire
+   défiler sur le côté. Les boutons gardent leur texte sur une ligne et peuvent passer à la ligne entre eux. */
+.btn-connecter-en-tant-que,.btn-changer-offre{white-space:nowrap}
+@media (max-width:767px){
+  .table-clients,.table-clients tbody{display:block}
+  .table-clients thead{display:none}
+  .table-clients tbody tr{display:flex;flex-direction:column;gap:.6rem;height:auto;padding:.9rem .75rem;border-top:1px solid rgba(20,25,57,.08)}
+  .table-clients tbody td{display:block;padding:0!important;text-align:left!important}
+  .table-clients tbody td:nth-child(3),.table-clients tbody td:nth-child(4){display:flex;align-items:center;gap:.5rem}
+  .table-clients tbody td:nth-child(3)::before{content:"Parc suivi :";color:#464554;font-size:.8125rem}
+  .table-clients tbody td:nth-child(4)::before{content:"Tickets ouverts :";color:#464554;font-size:.8125rem}
+  .table-clients tbody td:nth-child(5)>div{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:.5rem}
+  .table-clients tbody td:nth-child(5) button{flex:0 0 auto}
+  /* un bouton à hauteur fixe (h-11) coupait son texte quand il passait à la ligne */
+  #console button.h-11{height:auto;min-height:2.75rem}
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}[hidden]{display:none!important;}</style>
@@ -250,7 +266,7 @@
             </div>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="table-clients w-full text-left border-collapse">
               <thead>
                 <tr class="bg-surface-container-high/60 h-10">
                   <th class="px-space-md font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Organisation / Forfait</th>
