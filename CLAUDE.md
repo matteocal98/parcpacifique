@@ -32,7 +32,8 @@
 - Ne jamais committer de clés ou de secrets (clés Supabase, etc.) : ils vont dans `.env` ou dans les secrets Supabase, jamais en dur dans le code.
 
 ## Commandes utiles
-- `node outils/maj-empreinte-csp.mjs [fichier.html]` — à lancer après TOUTE modification du `<script>` inline de `app.html` ou `admin.html` (jamais pour du CSS seul), sinon la CSP bloque le chargement de la page.
+- `node outils/maj-empreinte-csp.mjs [fichier.html]` — à lancer après TOUTE modification du `<script>` inline de `app.html` ou `admin.html`, OU d'un fichier `.js` de l'application (jamais pour du CSS seul), sinon la CSP bloque le chargement de la page. Pour `app.html` il met aussi à jour les `?v=` des fichiers `.js`, la balise `kalea-empreinte` et `version.json` (plus de copie manuelle). `--verifier` contrôle sans modifier.
+- Traductions anglaises de l'application : `traductions-en.js` (constante `TEXTES`), chargé avant le script d'`app.html` — plus dans `app.html`.
 - Déploiement d'une fonction serveur (depuis le dépôt `kalea-serveur`) :
   `npx supabase functions deploy <nom-de-la-fonction> --project-ref tiayvmnodsbygmuemeuy`
   (nécessite un token de compte `sbp_...`, généré sur supabase.com/dashboard/account/tokens — jamais la clé publique du projet).
