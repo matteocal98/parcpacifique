@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-b4g39FDxM5TLnNv9dH9vGbHB6JpInIydqghGcGBYcak=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-I7LkpJqXGMpp4FN9qXZn2X8V44+fiVkQCy8x+IpehpM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -1583,7 +1583,7 @@ async function ouvrirTicket(ticketId) {
     </section>
     <section class="${carte} overflow-hidden">
       <h3 class="font-display font-bold text-encre px-space-md py-3 border-b border-outline-variant/60">Conversation</h3>
-      <div id="fil-messages" class="flex flex-col gap-space-md max-h-[480px] overflow-y-auto p-space-md bg-[#eceefb]"></div>
+      <div id="fil-messages" class="flex flex-col gap-space-md max-h-[480px] overflow-y-auto p-space-md bg-white"></div>
     </section>
     <form id="form-reponse" class="${carte} p-space-md flex flex-col gap-space-sm">
       <span class="${etiquette}">Ta réponse</span>
@@ -1613,7 +1613,7 @@ async function ouvrirTicket(ticketId) {
     const auteur = deMoi ? 'Toi' : (estStaffAutre ? 'Support KALEA' : (msg.profiles?.full_name || msg.profiles?.login || '?'));
     const ligne = document.createElement('div');
     ligne.className = deMoi ? 'flex items-end justify-end gap-2' : 'flex items-end gap-2';
-    const avatar = deMoi ? '' : `<div class="w-6 h-6 rounded-full ${estStaffAutre ? 'bg-encre' : 'bg-surface-container-high'} text-on-primary flex items-center justify-center font-display font-bold text-[9px] shrink-0 mb-4">${echapper(estStaffAutre ? 'KV' : initiales(auteur))}</div>`;
+    const avatar = deMoi ? '' : `<div class="w-6 h-6 rounded-full ${estStaffAutre ? 'bg-encre' : 'bg-[#4DBBBF]'} text-on-primary flex items-center justify-center font-display font-bold text-[9px] shrink-0 mb-4">${echapper(estStaffAutre ? 'KV' : initiales(auteur))}</div>`;
     const bulle = `
       <div class="flex flex-col ${deMoi ? 'items-end' : 'items-start'} gap-1 max-w-[85%]">
         <div class="flex items-center gap-1.5 text-xs text-ardoise ${deMoi ? 'mr-1' : 'ml-1'}">
@@ -1621,7 +1621,7 @@ async function ouvrirTicket(ticketId) {
         </div>
         <div class="${deMoi
           ? 'bg-gradient-to-br from-signature-en to-[#4c42d6] text-white rounded-tr-xs'
-          : 'bg-surface-card border border-outline-variant/90 text-on-surface rounded-tl-xs'} px-4 py-3 rounded-2xl shadow-sm text-[14.5px] leading-relaxed">${echapper(msg.body)}</div>
+          : 'bg-gradient-to-br from-[#4DBBBF] to-[#2F9FA5] text-white rounded-tl-xs'} px-4 py-3 rounded-2xl shadow-sm text-[14.5px] leading-relaxed">${echapper(msg.body)}</div>
       </div>`;
     ligne.innerHTML = deMoi ? bulle : (avatar + bulle);
     fil.appendChild(ligne);
