@@ -64,8 +64,6 @@
       gcTitre: 'Offre Grand compte',
       gcTexte: 'Au-delà de 150 machines, nous établissons un devis sur mesure (tarif dégressif, intégrations, accompagnement, contrat annuel).',
       gcBouton: 'Demander un devis',
-      commencer: 'Commencer gratuitement',
-      choisir: 'Commencer avec {nom}',
       contacter: 'Contacter l\'équipe',
       aucune: 'Aucune offre ne couvre cette combinaison : écrivez-nous, nous trouverons une solution.',
       pasCher: 'Prix toutes taxes comprises, sans engagement.',
@@ -80,8 +78,6 @@
       gcTitre: 'Key Account plan',
       gcTexte: 'Beyond 150 machines, we draw up a tailored quote (sliding-scale pricing, integrations, onboarding, annual contract).',
       gcBouton: 'Request a quote',
-      commencer: 'Start for free',
-      choisir: 'Start with {nom}',
       contacter: 'Contact the team',
       aucune: 'No plan covers this combination: write to us and we will find a solution.',
       pasCher: 'Prices include all taxes, no commitment.',
@@ -89,7 +85,6 @@
   };
   var MAIL_ENT = 'mailto:support@kalea.pro?subject=Offre%20Enterprise%20%E2%80%94%20demande%20d%27informations';
   var MAIL_GC = 'mailto:support@kalea.pro?subject=Offre%20Grand%20compte%20%E2%80%94%20demande%20de%20devis';
-  var LIEN_INSCRIPTION = './app.html?inscription=1';
 
   function langue() { return document.documentElement.lang === 'en' ? 'en' : 'fr'; }
   function montant(v, lg) {
@@ -138,20 +133,16 @@
       if (o.cle === 'free') detail = remplir(t.gratuitJusqua, { n: o.max });
       else if (reco.supplement === 0) detail = remplir(t.inclus, { base: montant(o.base, lg), inc: o.incluses });
       else detail = remplir(t.detail, { base: montant(o.base, lg), inc: o.incluses, sup: reco.supplement, s: reco.supplement > 1 ? 's' : '', extra: montant(o.extra, lg), total: montant(reco.prix, lg) });
-      var lien, libelle;
-      if (o.cle === 'free') { lien = LIEN_INSCRIPTION; libelle = t.commencer; }
-      else { lien = LIEN_INSCRIPTION; libelle = remplir(t.choisir, { nom: nom }); }
       blocReco =
         '<div class="rounded-2xl bg-[#0E1333] text-white p-6 sm:p-8">' +
+        '<p class="text-sm sm:text-base text-white/80 leading-relaxed">' + detail + '</p>' +
+        '<p class="mt-2 text-xs text-white/60">' + t.pasCher + '</p>' +
+        '<div class="mt-6 pt-5 border-t border-white/15">' +
         '<div class="text-xs font-bold tracking-wider uppercase text-white/70 mb-2">' + t.recommandee + '</div>' +
         '<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">' +
         '<span class="text-3xl sm:text-4xl font-extrabold font-display">' + echapper(nom) + '</span>' +
         '<span class="text-3xl sm:text-4xl font-extrabold font-display text-[#7DD3FC]">' + montant(reco.prix, lg) + '<span class="text-base font-semibold text-white/70"> ' + t.mois + '</span></span>' +
-        '</div>' +
-        '<p class="mt-3 text-sm sm:text-base text-white/80 leading-relaxed">' + detail + '</p>' +
-        '<div class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">' +
-        '<a href="' + lien + '" class="inline-flex items-center justify-center rounded-xl bg-white text-[#0E1333] font-bold px-5 py-3 text-sm hover:bg-slate-100 transition-colors">' + echapper(libelle) + '</a>' +
-        '<span class="text-xs text-white/60">' + t.pasCher + '</span></div></div>';
+        '</div></div></div>';
     }
 
     // ── Les 4 offres côte à côte ──
