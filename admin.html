@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rVRMi4pAGnLitRe7ip146XGpX6p3R7QealCeatVe/iM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-OG0sgps5HFqEI+JBPxxHT/CgIPMS3HKilH6hncklwqM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -342,9 +342,9 @@
             <p id="tickets-vide" class="hidden font-body-sm text-body-sm text-on-surface-variant text-center py-6">Aucun ticket pour ce filtre.</p>
           </div>
 
-          <aside class="lg:col-span-5 flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden sticky top-20">
-            <div id="panneau-ticket" class="flex flex-col gap-space-md p-space-md">
-              <p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Sélectionne un ticket pour voir le fil et répondre.</p>
+          <aside class="lg:col-span-5 flex flex-col sticky top-20">
+            <div id="panneau-ticket" class="flex flex-col gap-space-md">
+              <p class="bg-surface-container-lowest rounded-xl shadow-sm font-body-sm text-body-sm text-on-surface-variant text-center p-space-lg">Sélectionne un ticket pour voir le fil et répondre.</p>
             </div>
           </aside>
         </div>
@@ -1506,7 +1506,7 @@ async function ouvrirTicket(ticketId) {
   TICKET_OUVERT = ticketId;
   const t = TICKETS.find((x) => x.id === ticketId);
   const panneau = el('panneau-ticket');
-  panneau.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant text-center py-6">Chargement…</p>';
+  panneau.innerHTML = '<p class="bg-surface-container-lowest rounded-xl shadow-sm font-body-sm text-body-sm text-on-surface-variant text-center p-space-lg">Chargement…</p>';
   if (window.innerWidth < 1024) panneau.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
@@ -1517,68 +1517,74 @@ async function ouvrirTicket(ticketId) {
 
   const statut = COULEUR_STATUT_TICKET[t?.status] || COULEUR_STATUT_TICKET.ouvert;
   const m = t?.machines;
-  // Barre d'équipement : seulement si un VRAI machine_id est rattaché au
-  // ticket (pas systématique — beaucoup de demandes ne concernent aucune
-  // machine précise, ex. facturation, accès compte).
-  const barreEquipement = m ? `
-    <div class="bg-gradient-to-r from-surface-container-low via-surface-light to-surface-container-low px-space-md py-2.5 border-b border-outline-variant/60 flex items-center justify-between text-xs text-on-surface-variant flex-wrap gap-2">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-ardoise text-[17px]">precision_manufacturing</span>
-        <span>Machine rattachée :</span>
-        <span class="font-display font-bold text-encre bg-surface-card px-2 py-0.5 rounded border border-outline-variant shadow-2xs">${echapper(m.name)}</span>
-        ${m.brand || m.model ? `<span class="text-ardoise">${echapper([m.brand, m.model].filter(Boolean).join(' '))}</span>` : ''}
-        ${(m.plate || m.serial_number) ? `<span class="text-ardoise font-mono hidden md:inline">(${echapper(m.plate || `S/N: ${m.serial_number}`)})</span>` : ''}
-      </div>
-      <div class="flex items-center gap-4 text-ardoise">
-        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">schedule</span>Ouvert ${ilYA(t?.created_at)}</span>
-        ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KALEA assigné</span>` : ''}
-      </div>
-    </div>` : `
-    <div class="px-space-md py-2 border-b border-outline-variant/60 flex items-center gap-4 text-xs text-ardoise">
-      <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">schedule</span>Ouvert ${ilYA(t?.created_at)}</span>
-      ${t?.assigned_to ? `<span class="flex items-center gap-1 text-signature-fr font-medium"><span class="material-symbols-outlined text-[15px]">verified_user</span>Support KALEA assigné</span>` : ''}
-    </div>`;
+  // Mise en page : QUATRE blocs blancs séparés sur le fond général (identité du ticket, informations, conversation,
+  // réponse), lisibles aussi sur téléphone. Les identifiants ticket-statut, fil-messages, form-reponse et reponse-texte
+  // sont utilisés plus bas : ne pas les changer.
+  const carte = 'bg-surface-container-lowest rounded-xl shadow-sm';
+  const etiquette = 'text-xs uppercase tracking-wider font-semibold text-ardoise';
+  const ligneInfo = (icone, libelle, valeur) => `
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined text-[20px] text-ardoise mt-0.5 shrink-0">${icone}</span>
+        <div class="flex flex-col min-w-0">
+          <span class="${etiquette}">${libelle}</span>
+          <span class="text-[15px] font-medium text-encre break-words">${valeur}</span>
+        </div>
+      </div>`;
+  const machineTexte = m
+    ? [echapper(m.name), (() => { const bm = [m.brand, m.model].filter(Boolean).join(' '); return bm && !String(m.name || '').toLowerCase().includes(bm.toLowerCase()) ? echapper(bm) : ''; })(), (m.plate || m.serial_number) ? echapper(m.plate || `S/N : ${m.serial_number}`) : ''].filter(Boolean).join(' · ')
+    : '';
+  const createur = t?.created_by_profile?.full_name || t?.created_by_profile?.login || '';
+  const infos = [
+    createur ? ligneInfo('person', 'Créé par', echapper(createur)) : '',
+    ligneInfo('schedule', 'Ouvert', ilYA(t?.created_at)),
+    m ? ligneInfo('precision_manufacturing', 'Machine rattachée', machineTexte) : '',
+    ligneInfo(t?.assigned_to ? 'verified_user' : 'person_off', 'Prise en charge', t?.assigned_to ? 'Support KALEA assigné' : 'Pas encore assigné'),
+  ].join('');
 
   panneau.innerHTML = `
-    <div class="flex flex-col -m-space-md mb-0 bg-surface-card">
-      <header class="p-space-md flex items-start justify-between gap-space-sm">
-        <div class="flex items-start gap-3">
-          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-signature-en/10 to-signature-fr/10 border border-signature-en/20 flex items-center justify-center text-signature-en shrink-0 shadow-sm">
-            <span class="material-symbols-outlined text-[22px]">corporate_fare</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-display font-bold text-encre">${echapper(t?.companies?.name)}</span>
-              <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-surface-container text-ardoise">${refTicket(t?.id)}</span>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statut.fond} ${statut.texte}">
-                <span class="w-1.5 h-1.5 rounded-full ${statut.point}"></span>${statut.libelle}
-              </span>
-            </div>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-xs font-semibold uppercase tracking-wider text-ardoise">Demande :</span>
-              <h2 class="text-sm font-display font-bold text-encre">${echapper(t?.subject)}</h2>
-            </div>
+    <section class="${carte} p-space-md flex flex-col gap-space-md">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-signature-en/10 to-signature-fr/10 border border-signature-en/20 flex items-center justify-center text-signature-en shrink-0">
+          <span class="material-symbols-outlined text-[24px]">corporate_fare</span>
+        </div>
+        <div class="min-w-0">
+          <div class="font-display font-bold text-lg text-encre break-words leading-tight">${echapper(t?.companies?.name)}</div>
+          <div class="flex flex-wrap items-center gap-2 mt-1.5">
+            <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-surface-container text-ardoise">${refTicket(t?.id)}</span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statut.fond} ${statut.texte}">
+              <span class="w-1.5 h-1.5 rounded-full ${statut.point}"></span>${statut.libelle}
+            </span>
           </div>
         </div>
-        <select id="ticket-statut" class="h-9 bg-surface-container text-on-surface font-label-sm text-label-sm px-space-sm rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-signature-en shadow-sm shrink-0">
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="${etiquette}">Demande</span>
+        <h2 class="text-lg font-display font-bold text-encre break-words leading-snug">${echapper(t?.subject)}</h2>
+      </div>
+      <label class="flex flex-col gap-1">
+        <span class="${etiquette}">Statut du ticket</span>
+        <select id="ticket-statut" class="h-11 w-full bg-surface-container text-on-surface font-label-md text-label-md px-space-sm rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-signature-en">
           <option value="ouvert" ${t?.status === 'ouvert' ? 'selected' : ''}>Ouvert</option>
           <option value="en_cours" ${t?.status === 'en_cours' ? 'selected' : ''}>En cours</option>
           <option value="resolu" ${t?.status === 'resolu' ? 'selected' : ''}>Résolu</option>
         </select>
-      </header>
-      ${barreEquipement}
-    </div>
-    <div id="fil-messages" class="flex flex-col gap-space-md max-h-[420px] overflow-y-auto py-space-md bg-surface-light -mx-space-md px-space-md"></div>
-    <form id="form-reponse" class="flex flex-col gap-space-xs bg-surface-card -m-space-md mt-0 p-space-md border-t border-outline-variant/60">
-      <div class="relative flex items-end bg-surface-container-low rounded-2xl border border-outline-variant/80 focus-within:border-signature-en focus-within:bg-surface-card focus-within:ring-2 focus-within:ring-signature-en/15 transition-all">
-        <textarea id="reponse-texte" rows="3" placeholder="Écris ta réponse…" class="w-full bg-transparent px-4 py-3 font-body text-sm text-on-surface placeholder:text-ardoise focus:outline-none resize-none"></textarea>
-        <div class="p-2 shrink-0">
-          <button type="submit" class="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-xl bg-gradient-to-r from-signature-en to-[#4c42d6] text-on-primary text-sm font-semibold hover:shadow-md active:scale-[0.98] transition-all">
-            <span class="material-symbols-outlined text-[18px]">send</span><span>Envoyer</span>
-          </button>
-        </div>
-      </div>
-      <span class="text-[11px] text-ardoise px-1">Entrée pour envoyer, Maj + Entrée pour un saut de ligne</span>
+      </label>
+    </section>
+    <section class="${carte} p-space-md flex flex-col gap-space-md">
+      <h3 class="font-display font-bold text-encre">Informations</h3>
+      ${infos}
+    </section>
+    <section class="${carte} overflow-hidden">
+      <h3 class="font-display font-bold text-encre px-space-md py-3 border-b border-outline-variant/60">Conversation</h3>
+      <div id="fil-messages" class="flex flex-col gap-space-md max-h-[480px] overflow-y-auto p-space-md bg-[#eceefb]"></div>
+    </section>
+    <form id="form-reponse" class="${carte} p-space-md flex flex-col gap-space-sm">
+      <span class="${etiquette}">Ta réponse</span>
+      <textarea id="reponse-texte" rows="4" placeholder="Écris ta réponse…" class="w-full bg-surface-card rounded-xl border border-outline-variant px-4 py-3 font-body text-[15px] text-on-surface placeholder:text-ardoise focus:outline-none focus:border-signature-en focus:ring-2 focus:ring-signature-en/20 resize-none"></textarea>
+      <button type="submit" class="inline-flex items-center justify-center gap-2 h-12 w-full rounded-xl bg-gradient-to-r from-signature-en to-[#4c42d6] text-on-primary text-base font-semibold hover:shadow-md active:scale-[0.99] transition-all">
+        <span class="material-symbols-outlined text-[20px]">send</span><span>Envoyer</span>
+      </button>
+      <span class="hidden lg:block text-[11px] text-ardoise">Entrée pour envoyer, Maj + Entrée pour un saut de ligne</span>
     </form>`;
 
   const fil = panneau.querySelector('#fil-messages');
