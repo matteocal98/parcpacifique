@@ -787,3 +787,11 @@ textarea:not([data-x]),
   .ui-puces .ui-puce{font-size:10.5px;padding:0 4px;gap:2px;}
   .ui-puces .ui-puce .ui-compte{padding:0 4px;font-size:9.5px;}
 }
+@media (max-width:560px){
+  /* TCO : les 3 champs de paramètres alignés (libellé sur 2 lignes réservées, champ toujours à la même hauteur) */
+  .ui-grille.is-3:has(#tco-taux-horaire){align-items:start;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{min-height:2.3em;display:flex;align-items:flex-end;}
+  /* gros boutons pleins : police réduite (14 px) et centrés dans la largeur de leur bloc */
+  .ui-btn-plein{font-size:14px;min-height:40px;padding:8px 14px;}
+  div:not([class]) > .ui-btn-plein,.ui-section-corps > .ui-btn-plein{display:flex;width:fit-content;max-width:100%;margin-left:auto;margin-right:auto;}
+}
