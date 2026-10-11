@@ -1335,6 +1335,14 @@ function compacterAidesTelephone(racine) {
       if (f.matches('a')) { lien = f; break; }
       if (f.matches(SELECTEUR_TITRE_AIDE_TELEPHONE)) titre = f;
     }
+    // deux explications consécutives dans le même bloc (« i », texte, « i », texte) : une seule pastille ouvre les deux
+    const precedent2 = el.previousElementSibling;
+    const ligneAvant = precedent2 && precedent2.classList.contains('info-bulle-texte') ? precedent2.previousElementSibling : null;
+    const boutonAvant = ligneAvant && ligneAvant.classList.contains('ui-info-ligne') ? ligneAvant.querySelector('.ui-info-btn') : null;
+    if (boutonAvant) {
+      boutonAvant._cible = [].concat(boutonAvant._cible || [], el);
+      return;
+    }
     if (lien) lien.after(bouton);
     else if (titre) titre.appendChild(bouton);
     else {

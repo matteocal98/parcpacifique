@@ -1128,3 +1128,42 @@ textarea:not([data-x]),
   .log-modal #log-couts-section .field-row > .log-mo-ajouter-zone{align-self:flex-end;}
   .log-modal .log-bento-btn .log-bento-titre{display:inline;}
 }
+
+/* ── Paysage (téléphone) : « Modifier une machine » — champs plus étroits et plus nombreux par ligne (demande du 2026-10-11) ── */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-edit form > div:first-of-type{gap:8px !important;}
+  .machine-modal-edit form section{gap:6px !important;}
+  /* section 01 : tous les champs dans UNE grille souple (les sous-grilles d'origine sont dissoutes) */
+  .machine-modal-edit form section:nth-of-type(1){display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:6px 8px !important;align-items:end;}
+  .machine-modal-edit form section:nth-of-type(1) > div.grid{display:contents;}
+  .machine-modal-edit form section:nth-of-type(1) > *:not(.grid){grid-column:1 / -1;}
+  .machine-modal-edit form section:nth-of-type(1) > div.grid > *{grid-column:auto;}
+  .machine-modal-edit form section:nth-of-type(1) > div.grid > #f-kind-cards{grid-column:1 / -1;}
+  .machine-modal-edit form section:nth-of-type(1) > div:has(> label > #f-name),.machine-modal-edit form section:nth-of-type(1) > div.grid:has(#f-name){display:contents;}
+  /* blocs « grid » restants : colonnes étroites et nombreuses */
+  .machine-modal-edit .grid.md:grid-cols-2:not(#f-kind-cards),.machine-modal-edit .grid.md:grid-cols-3:not(#f-kind-cards),.machine-modal-edit .grid.md:grid-cols-5{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:6px 8px;}
+  .machine-modal-edit input:not([type=checkbox]):not([type=radio]),.machine-modal-edit .champ-select{height:32px !important;min-height:0 !important;font-size:13px;}
+  .machine-modal-edit label.font-label-md{font-size:11px;line-height:1.2;}
+  /* photo : vignette à gauche, boutons à droite */
+  .machine-modal-edit #photo-preview{width:130px;height:84px;flex:0 0 auto;}
+  .machine-modal-edit #photo-preview + div{flex:1 1 0;}
+  .machine-modal-edit section:has(#photo-preview) > div{flex-direction:row !important;align-items:center !important;gap:12px;}
+  /* espaces vides : lignes « i » repliées, textes d'aide serrés, hint sans marge */
+  .machine-modal-edit .ui-info-ligne{min-height:0;height:auto;margin:0;}
+  .machine-modal-edit .hint{margin:0;font-size:11px;}
+  .machine-modal-edit .p-space-md{padding:8px;gap:6px !important;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* « Modifier une machine » section 01 : grille à 12 colonnes, chaque champ occupe 3 colonnes = 4 champs par ligne */
+  .machine-modal-edit form section:nth-of-type(1){grid-template-columns:repeat(12,minmax(0,1fr));}
+  .machine-modal-edit form section:nth-of-type(1) > div.grid > :not(#f-kind-cards){grid-column:span 3;}
+  .machine-modal-edit form section:nth-of-type(1) > :has(> #f-kind-cards){order:-1;grid-column:1 / -1;}
+  .machine-modal-edit form section:nth-of-type(1) > div.grid:has(#f-kind-cards){display:contents;}
+  .machine-modal-edit form section:nth-of-type(1) > .ui-info-ligne{order:5;}
+  .machine-modal-edit form section:nth-of-type(1) > div.p-space-md{order:6;}
+  .machine-modal-edit form section:nth-of-type(1) > div:first-child{order:-3;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-edit .champ-select{padding-top:0 !important;padding-bottom:0 !important;box-sizing:border-box;align-items:center;}
+  .machine-modal-edit input:not([type=checkbox]):not([type=radio]){padding-top:0 !important;padding-bottom:0 !important;box-sizing:border-box;}
+}
