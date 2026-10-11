@@ -1285,6 +1285,26 @@ const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {
   if (!window.matchMedia || !window.matchMedia('(max-width:700px)').matches) return;
+  // Encadré d'information d'une fenêtre « Créer un compte » (offres et tarifs, très long) : titre court + pastille « i ».
+  (racine || document).querySelectorAll('.signup-modal .callout').forEach((cadre) => {
+    if (cadre.dataset.infoBulle) return;
+    const texte = cadre.querySelector(':scope > span:not(.card-ico)');
+    if (!texte || (texte.textContent || '').trim().length < 80) return;
+    cadre.dataset.infoBulle = '1';
+    texte.classList.add('info-bulle-texte');
+    const titre = document.createElement('strong');
+    titre.className = 'callout-titre-tel';
+    titre.textContent = trad('Offres et tarifs');
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'ui-info-btn';
+    bouton.textContent = 'i';
+    bouton.setAttribute('aria-label', trad("Afficher l'explication"));
+    bouton.setAttribute('aria-expanded', 'false');
+    bouton._cible = texte;
+    texte.before(titre);
+    titre.after(bouton);
+  });
   // Mon compte › « Verrouillage et reconnexion » : les deux phrases d'état (ids fixes, mises à jour par le code) vont dans la
   // pastille de la case à cocher qui les suit ; l'élément reste en place, seul son affichage est replié.
   ['acc-bio-etat', 'acc-acces-etat'].forEach((id) => {

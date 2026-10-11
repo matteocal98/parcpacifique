@@ -1349,3 +1349,47 @@ textarea:not([data-x]),
   .fm2-o1-side .fm2-intervalle-o1{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 20px;align-items:center;}
   .fm2-o1-side .fm2-intervalle-o1 > :is(.fm2-piste-o1,.fm2-pied-o1){grid-column:1 / -1;}
 }
+
+/* ── « Créer un compte » (téléphone) : encadré des tarifs replié, types de structure sur une ligne, champs en grille ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .signup-modal .callout{flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 10px;}
+  .signup-modal .callout .callout-titre-tel{font-size:13px;}
+  .signup-modal .callout .info-bulle-texte.is-ouvert{flex:1 1 100%;margin:2px 0 0;padding:0;box-shadow:none;background:none;font-size:12px;line-height:1.4;}
+  #su-type-cards{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px !important;}
+  #su-type-cards > label{padding:8px 6px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  #signup-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px;align-items:start;}
+  #signup-form > *{grid-column:1 / -1;}
+  #signup-form > .field-row{display:contents;}
+  #signup-form > .field-row > div{grid-column:auto;min-width:0;}
+  #signup-form > .field-row > div:only-child{grid-column:1 / -1;}
+  #signup-form .mform-card{padding:8px;}
+}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  #su-type-cards{display:grid !important;}
+  #su-type-cards > label{flex:none !important;min-width:0;width:auto !important;flex-direction:column;align-items:center;text-align:center;gap:4px;}
+  #su-type-cards .mform-card-corps,#su-type-cards .mform-card-titre{text-align:center;font-size:12px;line-height:1.2;}
+  #signup-form .field-row{gap:8px;}
+}
+
+/* ── Paysage (téléphone) : dernières fenêtres — rapport TCO, pièces d'une tâche, choix du plan proposé, indicatif, support, import CSV ── */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* rapport TCO : champ e-mail et boutons sur une même ligne */
+  .rapport-tco-modal .modal .modal-actions{flex-wrap:nowrap;gap:8px;}
+  .rapport-tco-modal .modal .modal-actions > button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15;padding:6px 8px;font-size:12px;}
+  /* pièces associées à une tâche : kit et pièce seule côte à côte */
+  .kit-tache-modal .modal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;align-items:start;}
+  .kit-tache-modal .modal > h2,.kit-tache-modal .modal > .modal-actions,.kit-tache-modal .modal > .sub,.kit-tache-modal .modal > [role=status],.kit-tache-modal .modal > .ui-aide,.kit-tache-modal .modal > p{grid-column:1 / -1;}
+  /* choix du plan proposé : trois choix sur une ligne */
+  .pplan-choix{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px !important;margin-top:8px !important;}
+  .pplan-choix-item{padding:8px 10px !important;min-width:0;}
+  .pplan-choix-item p{font-size:11px;line-height:1.25;margin:2px 0 0;}
+  .pplan-choix-fleche{display:none;}
+  /* indicatif, support, import CSV : en-têtes et marges réduits */
+  .indicatif-modal .modal{padding:10px 14px;}
+  .support-modal .modal{padding:10px 14px;}
+  .support-modal .modal .sub{margin:0 0 6px;}
+  .import-csv-modal{max-width:640px;}
+  .import-csv-modal [class*="entete"],.import-csv-modal [class*="head"]{padding-top:8px;padding-bottom:6px;}
+}
