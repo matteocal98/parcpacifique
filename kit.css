@@ -695,3 +695,27 @@ textarea:not([data-x]),
   .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{font-size:11px;padding:0 2px;line-height:1.1;}
   .ui-ligne-action.is-etiquettes:has(> .ui-btn){gap:4px;}
 }
+
+/* ── Téléphone : menu Rappels (retour du vrai téléphone, 2026-10-11) ───────────────────────────────────────── */
+@media (max-width:560px){
+  /* cases à cocher et paragraphes d'aide : moins de marges verticales dans tous les blocs */
+  .check-row{margin:6px 0 2px;gap:8px;}
+  .ui-aide{margin:4px 0;}
+  .ui-etiquette{margin-bottom:3px;}
+  /* indicateurs du haut : étiquette, valeur et note réduites */
+  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile{padding:8px 9px;gap:2px;}
+  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-etiquette{font-size:9px;letter-spacing:.04em;}
+  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-valeur{font-size:15px;line-height:1.15;}
+  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-note{font-size:10px;line-height:1.25;}
+  /* les 3 droits (Gérant / Droit de gestion / Droit de saisie) sur une même ligne */
+  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe) > *{grid-column:1 / -1;}
+  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe) > .ui-groupe{grid-column:auto;padding:8px 6px;gap:6px;}
+  .ui-groupe:has(> .check-row + .ui-grille) > .check-row{margin:0;font-size:11px;font-weight:700;align-items:flex-start;gap:5px;line-height:1.2;}
+  .ui-groupe:has(> .check-row + .ui-grille) > .ui-grille{grid-template-columns:minmax(0,1fr);gap:4px;}
+  .ui-groupe:has(> .check-row + .ui-grille) .ui-etiquette{font-size:9.5px;line-height:1.15;}
+  .ui-groupe:has(> .check-row + .ui-grille) .ui-champ{min-height:34px;padding:4px 6px;font-size:13px;}
+  /* « Comment ça fonctionne » : les blocs d'explication l'un sous l'autre, pleine largeur */
+  .ui-grille.is-3:has(> .ui-tuile > .ui-tuile-etiquette + .ui-tuile-note){grid-template-columns:minmax(0,1fr);}
+  .ui-grille.is-3:has(> .ui-tuile > .ui-tuile-etiquette + .ui-tuile-note) > .ui-tuile{grid-column:auto;padding:9px 11px;}
+}
