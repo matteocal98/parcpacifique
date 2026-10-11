@@ -1316,3 +1316,21 @@ textarea:not([data-x]),
   .compteur-rouleaux-pied{padding:6px 14px;}
   .compteur-rouleaux-valider{min-height:40px;padding:6px 16px;}
 }
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .compteur-rouleaux-loupe{width:62px;height:62px;}
+  .compteur-rouleaux-loupe-valeur{font-size:18px;}
+  .compteur-rouleaux-loupe-mot{font-size:6.5px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* « Déposer un manuel » et écrans « Plan proposé » (pplan-*) : en-tête fin, champs côte à côte */
+  .pplan-modal{max-width:680px;}
+  .pplan-modal.is-large{max-width:680px;}
+  .pplan-head{padding:8px 14px 6px;gap:8px;}
+  .pplan-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;padding:8px 14px;align-items:start;}
+  .pplan-body > .pplan-note,.pplan-body > :not(.pplan-champ){grid-column:1 / -1;}
+  .pplan-champ{gap:4px;}
+  .pplan-dropzone{padding:8px;}
+  .pplan-note{padding:6px 10px;}
+  .pplan-foot{padding:6px 14px;gap:8px;flex-wrap:nowrap;}
+  .pplan-foot > button{padding:7px 14px;}
+}
