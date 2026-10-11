@@ -882,3 +882,7 @@ textarea:not([data-x]),
   .login-box.dans-app .login-actions{margin-top:clamp(8px,1.6vh,14px);}
   .login-box.dans-app .legal-footer{margin-top:clamp(6px,1.2vh,12px);padding-bottom:calc(8px + var(--safe-bottom,0px));}
 }
+@media (max-width:560px){
+  /* pastille « i » dans un libellé : plus petite (18 px) pour ne jamais recouvrir le texte du libellé */
+  label .ui-info-btn,.ui-etiquette .ui-info-btn{position:static;top:auto;width:18px;height:18px;font-size:11px;margin:-3px 0 -3px 5px;vertical-align:middle;}
+}
