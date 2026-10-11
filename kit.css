@@ -677,3 +677,8 @@ textarea:not([data-x]),
 @media (max-width:560px){
   .machine-modal-add #photo-preview + div > .flex > button{white-space:nowrap;font-size:11px;padding:7px 4px;}
 }
+@media (max-width:560px){
+  /* le texte des boutons photo peut passer sur 2 lignes (police agrandie du téléphone) au lieu de déborder */
+  .machine-modal-add #photo-preview + div{min-width:0;}
+  .machine-modal-add #photo-preview + div > .flex > button{white-space:normal;text-align:center;line-height:1.15;overflow:hidden;}
+}
