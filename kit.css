@@ -1419,3 +1419,11 @@ textarea:not([data-x]),
   .pe-pied > .pe-confirmer,.jm-pied > button:first-child{flex:1 1 0 !important;}
   .pe-pied > .pe-fermer,.jm-pied > button:last-child:not(:first-child){flex:0 0 auto !important;min-width:96px;padding:0 18px;}
 }
+
+/* ── Téléphone : TOUS les boutons pleins ont la même police (14 px) — « Enregistrer l'entretien » (Agenda) et les boutons .primary
+   des petites fenêtres étaient restés à 16 px, plus gros que le reste ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .overlay .modal button.primary,.overlay .modal .modal-actions > button.primary{font-size:14px;}
+  /* « Enregistrer l'entretien » (carte en retard) : bouton plein → 14 px ; « Voir » / « Planifier » (teinte) gardent leur taille */
+  .jm-carte.is-late .jm-carte-cta{font-size:14px;}
+}
