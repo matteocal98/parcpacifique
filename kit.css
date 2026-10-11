@@ -1107,3 +1107,24 @@ textarea:not([data-x]),
   .fm2-grid .fm2-o2-ligne1{grid-column:2;grid-row:1;}
   .fm2-grid .fm2-o2-ligne2,.fm2-grid .fm2-o2-ligne3{grid-column:1 / -1;}
 }
+
+/* ── Fenêtre d'intervention : champs alignés sur leur haut, pièces et scans sur UNE ligne (demande du 2026-10-11) ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* les champs d'une même rangée partent du même haut, quelle que soit la hauteur de leur aide en dessous */
+  .log-modal .field-row{align-items:flex-start;}
+  .log-modal .field-row > div{align-self:flex-start;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .log-modal .log-bento-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .log-modal .log-bento-btn{min-width:0;padding:6px 8px;gap:6px;}
+  .log-modal .log-bento-btn .log-bento-icone{width:26px;height:26px;flex:0 0 auto;}
+  .log-modal .log-bento-titre{font-size:12px;line-height:1.15;white-space:normal;}
+  .log-modal .log-bento-badge{font-size:9px;padding:1px 5px;}
+  /* « Ajouter » (main d'œuvre) à côté des deux champs, sur la même ligne */
+  .log-modal #log-couts-section .field-row{flex-wrap:nowrap;align-items:flex-end;}
+  .log-modal #log-couts-section .field-row > .log-mo-ajouter-zone{flex:0 0 auto;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .log-modal #log-couts-section .field-row > .log-mo-ajouter-zone{align-self:flex-end;}
+  .log-modal .log-bento-btn .log-bento-titre{display:inline;}
+}
