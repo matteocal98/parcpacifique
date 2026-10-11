@@ -134,6 +134,27 @@ function repereAmortissementCategorie(categorieId) {
   if (!lignes.length) return null;
   return { lignes, unite, ignorees, moyenne: lignes.reduce((t, l) => t + l.parUnite, 0) / lignes.length };
 }
+// Quand aucune machine d'une catégorie ne permet de calculer le repère d'amortissement, on dit POURQUOI (jamais un silence) :
+// on prend la machine à qui il manque le moins d'informations et on liste ce qui lui manque.
+function repereIndisponibleTexte(categorieId) {
+  const machines = (UI.machines || []).filter((m) => m.category && m.category.id === categorieId);
+  if (!machines.length) return '';
+  let meilleur = null;
+  machines.forEach((m) => {
+    const achat = Number(m.purchase_price);
+    const vie = Number(m.expected_lifespan_counter);
+    const u = counterUnitOf(m);
+    const revente = Number(m.estimated_resale_value) || 0;
+    const manque = [];
+    if (!(achat > 0)) manque.push(trad("prix d'achat"));
+    if (!(vie > 0)) manque.push(trad('durée de vie'));
+    if (u !== 'hours' && u !== 'km') manque.push(trad('compteur en heures ou km'));
+    if (achat > 0 && achat <= revente) manque.push(trad("revente estimée inférieure au prix d'achat"));
+    if (!meilleur || manque.length < meilleur.length) meilleur = manque;
+  });
+  if (!meilleur || !meilleur.length) return '';
+  return tR("Repère d'amortissement indisponible : {manque} à renseigner dans la fiche de la machine.", { manque: meilleur.join(', ') });
+}
 // Seuils cibles de coût horaire, PAR CATÉGORIE (phase 3, §5) — pas un
 // seuil unique pour toute la flotte : un parc hétérogène (mini-pelle vs
 // débroussailleuse) n'a pas le même coût horaire "normal", un seul chiffre
@@ -198,6 +219,7 @@ function blocSeuilsCategorieTcoHtml() {
               </div>
               <div class="ui-ligne-info">
                 <span class="ui-tag" data-seuil-moyenne-categorie="${esc(cat.id)}"></span>
+                ${repere ? '' : (() => { const t = repereIndisponibleTexte(cat.id); return t ? `<span class="ui-ligne-sous ui-repere-indispo">${esc(t)}</span>` : ''; })()}
                 <div class="ui-puces tco-seuil-raccourcis" data-seuil-raccourcis-categorie="${esc(cat.id)}" hidden></div>
                 ${repere ? `
                 <span class="ui-tag">${tR('Amortissement indicatif : {m}/{unite}', { m: formatMontantFin(repere.moyenne), unite: counterShort(repere.unite) })}</span>
