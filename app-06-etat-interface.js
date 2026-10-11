@@ -1271,9 +1271,10 @@ const SELECTEUR_AIDES_TELEPHONE = [
   '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
   '.overlay .hint',
   '.ui-aide',
+  '.machine-modal-add div.text-xs > span.block',
   '.ui-encadre:not(:has(.ui-encadre-titre))'
 ].join(',');
-const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.block.uppercase,.pplan-head-ligne,strong,.ui-section-acces:not(:has(.ui-btn))';
+const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.text-xs.font-bold,.block.uppercase,.pplan-head-ligne,strong,.ui-section-acces:not(:has(.ui-btn))';
 const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {
@@ -1302,10 +1303,13 @@ function compacterAidesTelephone(racine) {
     // toute petite ligne au-dessus du texte
     bouton._cible = el;
     let titre = null;
+    let lien = null;
     for (let f = el.previousElementSibling, n = 0; f && n < 6 && !titre; f = f.previousElementSibling, n++) {
+      if (f.matches('a')) { lien = f; break; }
       if (f.matches(SELECTEUR_TITRE_AIDE_TELEPHONE)) titre = f;
     }
-    if (titre) titre.appendChild(bouton);
+    if (lien) lien.after(bouton);
+    else if (titre) titre.appendChild(bouton);
     else {
       const ligne = document.createElement('div');
       ligne.className = 'ui-info-ligne';

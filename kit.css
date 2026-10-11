@@ -646,3 +646,34 @@ textarea:not([data-x]),
   .tco-donut-details{flex:1 1 0;min-width:0;}
   .tco-donut-legende-grille{grid-template-columns:minmax(0,1fr);}
 }
+
+/* ── Téléphone : assistant « Ajouter une machine », 3e passe (retour du vrai téléphone, 2026-10-11) ───────────── */
+@media (max-width:560px){
+  /* type de machine : 2 petits blocs centrés, sans pictogramme ni pastille (le texte ne dépasse plus) */
+  .machine-modal-add #f-kind-cards{gap:6px;}
+  .machine-modal-add #f-kind-cards > label{flex-direction:column;align-items:center;text-align:center;padding:8px 6px;min-width:0;}
+  .machine-modal-add #f-kind-cards [data-ring-ico],.machine-modal-add #f-kind-cards [data-ring-check]{display:none;}
+  .machine-modal-add #f-kind-cards > label > div.flex-1{min-width:0;width:100%;}
+  .machine-modal-add #f-kind-cards .text-sm{font-size:12.5px;line-height:1.2;}
+  .machine-modal-add #f-kind-cards .text-xs{font-size:10.5px;line-height:1.2;margin-top:2px;}
+  /* champs côte à côte : les zones de saisie s'alignent en bas même si un libellé passe sur 2 lignes */
+  .machine-modal-add .grid.grid-cols-1.sm:grid-cols-2,.machine-modal-add .grid.grid-cols-2{align-items:end;}
+  .machine-modal-add label.block{font-size:10px;letter-spacing:.03em;}
+  /* N° de série et compteur sur une même ligne */
+  .machine-modal-add div:has(> #hours-field){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;align-items:end;}
+  .machine-modal-add div:has(> #hours-field) > *{grid-column:1 / -1;}
+  .machine-modal-add div:has(> #hours-field) > #hours-field,.machine-modal-add div:has(> #hours-field) > div:has(> #f-serial){grid-column:auto;}
+  /* photo : vignette à gauche, texte et boutons à droite, boutons sur une ligne */
+  .machine-modal-add #photo-preview{width:60px;height:60px;}
+  .machine-modal-add #photo-preview .material-symbols-outlined{font-size:24px;margin:0;}
+  .machine-modal-add #photo-preview span.text-[10px]{display:none;}
+  .machine-modal-add #photo-preview + div{text-align:left;}
+  .machine-modal-add .flex.flex-col.items-center:has(> #photo-preview){flex-direction:row;align-items:flex-start;gap:10px;}
+  .machine-modal-add #photo-preview + div > .flex{flex-wrap:nowrap;justify-content:flex-start;gap:6px;padding-top:0;}
+  .machine-modal-add #photo-preview + div > .flex > button{flex:1 1 0;min-width:0;padding:7px 6px;font-size:11.5px;gap:4px;justify-content:center;}
+  .machine-modal-add #photo-preview + div > .flex > button .material-symbols-outlined{display:none;}
+  .machine-modal-add #photo-preview + div{gap:6px;}
+}
+@media (max-width:560px){
+  .machine-modal-add #photo-preview + div > .flex > button{white-space:nowrap;font-size:11px;padding:7px 4px;}
+}
