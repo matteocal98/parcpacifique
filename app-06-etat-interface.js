@@ -1358,3 +1358,46 @@ document.addEventListener('click', (ev) => {
   if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
   entete.parentElement.classList.toggle('is-ouvert');
 });
+
+// ── Téléphone en mode paysage : le bandeau du haut et la barre d'onglets s'effacent après quelques secondes ──────────
+// Demande du 2026-10-11 : en paysage l'écran est bas, les deux bandeaux mangent presque la moitié de la lecture.
+// Ils disparaissent après 3 s sans toucher, et dès qu'on fait défiler vers le bas ; ils reviennent quand on remonte
+// d'un geste, ou en touchant le bord haut / le bord bas de l'écran. Uniquement en paysage bas (≤ 520 px de haut,
+// < 900 px de large) : en portrait et sur ordinateur, rien ne change.
+(function barresAutoMasqueesPaysage() {
+  if (!window.matchMedia) return;
+  const mq = window.matchMedia('(orientation:landscape) and (max-height:520px) and (max-width:899px)');
+  const DELAI = 3000;
+  let minuteur = null;
+  let dernierY = 0;
+  const masquer = () => {
+    if (!mq.matches || document.querySelector('.overlay')) return;
+    document.body.classList.add('barres-masquees');
+  };
+  const armer = () => {
+    clearTimeout(minuteur);
+    if (!mq.matches) { document.body.classList.remove('barres-masquees'); return; }
+    minuteur = setTimeout(masquer, DELAI);
+  };
+  const montrer = () => {
+    document.body.classList.remove('barres-masquees');
+    armer();
+  };
+  window.addEventListener('scroll', () => {
+    if (!mq.matches) return;
+    const y = window.scrollY || 0;
+    if (y > dernierY + 6) masquer();
+    else if (y < dernierY - 6) montrer();
+    dernierY = y;
+  }, { passive: true });
+  // un appui près du bord haut ou du bord bas ramène les bandeaux
+  document.addEventListener('pointerdown', (ev) => {
+    if (!mq.matches) return;
+    const bord = 44;
+    if (ev.clientY <= bord || ev.clientY >= window.innerHeight - bord) montrer();
+    else armer();
+  }, true);
+  const changement = () => { document.body.classList.remove('barres-masquees'); armer(); };
+  if (mq.addEventListener) mq.addEventListener('change', changement); else if (mq.addListener) mq.addListener(changement);
+  if (document.body) armer(); else document.addEventListener('DOMContentLoaded', armer);
+})();

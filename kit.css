@@ -816,3 +816,19 @@ textarea:not([data-x]),
   .overlay .modal-actions{justify-content:center;margin-top:10px;}
   .overlay .modal-actions > button.secondary,.overlay .modal-actions > #close-plan{font-size:13px;font-weight:700;height:36px;min-height:0;padding:0 18px;line-height:1;border-radius:var(--r-md);}
 }
+
+/* ── Téléphone en paysage bas : bandeaux compacts, flottants, qui s'effacent (voir barresAutoMasqueesPaysage) ──── */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .barre-mobile{position:fixed;left:0;right:0;top:var(--safe-top);padding:3px 14px;gap:8px;z-index:20;transition:transform .25s ease;}
+  .bm-logo,.bm-logo svg{width:26px;height:26px;}
+  .bm-nom{font-size:14px;}
+  .bm-page{font-size:10px;}
+  .bm-compte{width:30px;height:30px;}
+  .content{padding-top:44px;padding-bottom:60px;}
+  .tabbar{padding:2px 6px calc(2px + var(--safe-bottom));transition:transform .25s ease;}
+  .tab{min-height:34px;padding:2px 0;flex-direction:row;justify-content:center;gap:6px;}
+  .tab-fab{flex:0 0 46px;}
+  .tab-fab span{width:36px;height:36px;border-radius:12px;font-size:18px;}
+  body.barres-masquees .barre-mobile{transform:translateY(-115%);}
+  body.barres-masquees .tabbar{transform:translateY(115%);}
+}
