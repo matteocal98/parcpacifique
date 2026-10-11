@@ -1881,6 +1881,12 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
 // « Sortir du stock » (intervention) : disponible pour le gérant et le mécanicien, quand le module Stock est actif.
 // Une ligne cochée n'est PAS écrite à la main dans intervention_parts : c'est la fonction serveur de sortie de stock
 // qui l'enregistre (au coût moyen PUMP) et ajoute son coût à l'intervention — sinon le coût serait compté deux fois.
+// Libellé du bouton d'enregistrement d'une intervention : sur téléphone (≤ 560 px) simplement « Valider », le total des
+// coûts s'affiche en dessous ; sur écran large, le libellé complet explicatif.
+function libelleValidationIntervention() {
+  if (window.matchMedia && window.matchMedia('(max-width:560px)').matches) return trad('Valider');
+  return tcoActif() ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention');
+}
 function sortieStockPossible() {
   return SCHEMA.hasStock && planCouvreStock() && peutGererMouvementsStock();
 }
@@ -2501,7 +2507,7 @@ function openLogInterventionModal(machine, tache) {
 
         <div class="log-footer2">
           <button type="button" class="secondary" id="cancel-log">${trad('Annuler')}</button>
-          <button type="submit" class="primary" id="log-submit-btn">${picto('ajuste')}<span><span id="log-submit-verbe">${tcoActif() ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention')}</span>${tcoActif() ? ` (<span id="log-total-badge">0 ${deviseCourte()}</span>)` : ''}</span></button>
+          <button type="submit" class="primary" id="log-submit-btn">${picto('ajuste')}<span><span id="log-submit-verbe">${libelleValidationIntervention()}</span>${tcoActif() ? ` <span class="log-submit-total">(<span id="log-total-badge">0 ${deviseCourte()}</span>)</span>` : ''}</span></button>
         </div>
       </form>
     </div>
@@ -2860,7 +2866,7 @@ function openLogInterventionModal(machine, tache) {
     e.preventDefault();
     const submitBtn = overlay.querySelector('#log-submit-btn');
     const submitVerbeEl = overlay.querySelector('#log-submit-verbe');
-    const verbeRepos = tcoActif() ? trad('Valider et intégrer au TCO') : trad('Enregistrer l\'intervention');
+    const verbeRepos = libelleValidationIntervention();
     const errorEl = overlay.querySelector('#log-error');
     submitBtn.disabled = true;
     if (submitVerbeEl) submitVerbeEl.textContent = trad('Enregistrement…');

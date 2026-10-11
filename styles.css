@@ -6535,3 +6535,10 @@ body:has(.login-box.dans-app){background:var(--surface);}
   .log-modal .log-piece-ligne .log-piece-qte{grid-column:1;}
   .log-modal .log-piece-ligne .log-piece-prix{grid-column:2;}
 }
+
+/* téléphone compact — bouton Valider (demande du 2026-10-11) : « Valider » puis le total en dessous */
+@media (max-width:560px){
+  .log-modal .log-footer2 button{padding:8px 16px;min-height:0;height:auto;}
+  .log-modal #log-submit-btn > span{display:flex;flex-direction:column;align-items:center;line-height:1.2;}
+  .log-modal .log-submit-total{font-size:12.5px;font-weight:600;opacity:.9;}
+}
