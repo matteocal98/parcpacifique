@@ -1878,6 +1878,44 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
 // Une ligne de pièce dans « Enregistrer un entretien » : sélection dans le
 // catalogue (le prix se propose, reste modifiable — une remise ponctuelle ou
 // une pièce hors catalogue ne doit pas être bloquée), quantité, sous-total.
+// « Sortir du stock » (intervention) : disponible pour le gérant et le mécanicien, quand le module Stock est actif.
+// Une ligne cochée n'est PAS écrite à la main dans intervention_parts : c'est la fonction serveur de sortie de stock
+// qui l'enregistre (au coût moyen PUMP) et ajoute son coût à l'intervention — sinon le coût serait compté deux fois.
+function sortieStockPossible() {
+  return SCHEMA.hasStock && planCouvreStock() && peutGererMouvementsStock();
+}
+// Remplit le bloc « Sortir du stock » d'une ligne selon la pièce choisie : magasins où elle est LIBÉRÉE et en quantité > 0.
+// magasinPrefere : magasin à sélectionner (QR scanné) ; cocher : coche la case d'office (scan).
+function majStockLigneLog(ligne, magasinPrefere, cocher) {
+  const bloc = ligne?.querySelector('.log-piece-stock');
+  if (!bloc) return;
+  const partId = ligne.querySelector('.log-piece-select')?.value;
+  const caseSortie = bloc.querySelector('.log-piece-sortie');
+  const sel = bloc.querySelector('.log-piece-magasin');
+  const info = bloc.querySelector('.log-piece-stock-info');
+  if (!partId) { bloc.hidden = true; caseSortie.checked = false; return; }
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ' ' + libelleUniteMesure(piece.unit_of_measure) : '';
+  const dispo = (UI.stockItems || []).filter((it) => String(it.part_id) === String(partId) && Number(it.quantity) > 0 && statutLigneStock(it) === 'libere');
+  bloc.hidden = false;
+  if (!dispo.length) {
+    sel.innerHTML = '';
+    sel.hidden = true;
+    caseSortie.checked = false;
+    caseSortie.disabled = true;
+    info.textContent = trad('Aucun stock disponible pour cette pièce.');
+    return;
+  }
+  caseSortie.disabled = false;
+  sel.hidden = false;
+  info.textContent = '';
+  const avant = sel.value;
+  sel.innerHTML = dispo.map((it) => `<option value="${esc(it.warehouse_id)}">${esc(nomMagasin(it.warehouse_id))} (${esc(texteAvecSeparateurs(it.quantity))}${esc(unite)})</option>`).join('');
+  const voulu = magasinPrefere || avant;
+  if (voulu && dispo.some((it) => String(it.warehouse_id) === String(voulu))) sel.value = voulu;
+  if (cocher) caseSortie.checked = true;
+}
+
 function ligneLogPieceHtml(idx) {
   const options = (UI.partsCatalog || []).map((p) =>
     `<option value="${esc(p.id)}" data-prix="${Number(p.unit_price) || 0}">${esc(p.designation)}${p.reference ? ' — ' + esc(p.reference) : ''}</option>`
@@ -1891,6 +1929,11 @@ function ligneLogPieceHtml(idx) {
       <input type="number" class="log-piece-qte" min="0" step="0.01" value="1" aria-label="${esc(trad('Quantité'))}" title="${esc(trad('Quantité'))}">
       <input type="text" inputmode="decimal" class="log-piece-prix" value="0" aria-label="${esc(tR('Prix unitaire ({devise})', { devise: deviseCourte() }))}" title="${esc(tR('Prix unitaire ({devise})', { devise: deviseCourte() }))}">
       <button type="button" class="log-piece-retirer" aria-label="${esc(trad('Retirer cette pièce'))}" title="${esc(trad('Retirer cette pièce'))}">${picto('corbeille')}</button>
+      ${sortieStockPossible() ? `<div class="log-piece-stock" hidden>
+        <label class="ui-case"><input type="checkbox" class="log-piece-sortie"> <span>${trad('Sortir du stock')}</span></label>
+        <select class="log-piece-magasin" aria-label="${esc(trad('Magasin'))}"></select>
+        <span class="log-piece-stock-info"></span>
+      </div>` : ''}
     </div>`;
 }
 
@@ -2700,6 +2743,7 @@ function openLogInterventionModal(machine, tache) {
             sel.value = String(piece.id);
             sel.dispatchEvent(new Event('change', { bubbles: true }));
             if (typeof sel.__majBouton === 'function') sel.__majBouton();
+            majStockLigneLog(nouvelle, lue.warehouseId, true);
           }
           recalcTotalPieces();
           showToast(tR('Pièce ajoutée : {nom}', { nom: piece.designation }));
@@ -2715,6 +2759,7 @@ function openLogInterventionModal(machine, tache) {
         // Le prix du catalogue se PROPOSE dans la ligne — il reste un champ
         // normal, modifiable ensuite (remise, prix négocié ce jour-là…).
         if (prixChamp && option && option.dataset.prix !== undefined) prixChamp.value = texteAvecSeparateurs(option.dataset.prix);
+        majStockLigneLog(ligne, null, false);
       }
       recalcTotalPieces();
     });
@@ -2890,12 +2935,43 @@ function openLogInterventionModal(machine, tache) {
             designation: ligne.querySelector('.log-piece-select')?.selectedOptions[0]?.textContent || '',
             quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 0,
             unitPrice: nombreDepuisTexte(ligne.querySelector('.log-piece-prix')?.value) || 0,
+            sortie: !!(ligne.querySelector('.log-piece-sortie')?.checked && !ligne.querySelector('.log-piece-sortie')?.disabled),
+            magasinId: ligne.querySelector('.log-piece-magasin')?.value || null,
           }))
           // Une ligne sans pièce choisie (option vide encore sélectionnée)
           // n'est pas une pièce utilisée : `partId` est vide tant que rien
           // n'a été choisi, c'est le seul signal fiable ici.
           .filter((l) => l.partId && l.quantity > 0)
       : [];
+
+    // ── « Sortir du stock » : vérification AVANT d'écrire quoi que ce soit ──
+    const lignesSortie = pieceLignes.filter((l) => l.sortie);
+    const lignesLibres = pieceLignes.filter((l) => !l.sortie);
+    const refuserSortie = (texte) => {
+      errorEl.textContent = texte;
+      submitBtn.disabled = false;
+      if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
+    };
+    if (lignesSortie.length) {
+      const besoin = new Map();
+      for (const l of lignesSortie) {
+        if (!l.magasinId) { refuserSortie(tR('Choisis le magasin pour « {nom} ».', { nom: designationPiece(l.partId) })); return; }
+        const cle = `${l.partId}|${l.magasinId}`;
+        besoin.set(cle, (besoin.get(cle) || 0) + l.quantity);
+      }
+      for (const [cle, qteVoulue] of besoin) {
+        const [partId, magasinId] = cle.split('|');
+        const ligneStock = (UI.stockItems || []).find((it) => String(it.part_id) === partId && String(it.warehouse_id) === magasinId);
+        const disponible = ligneStock && statutLigneStock(ligneStock) === 'libere' ? Number(ligneStock.quantity) : 0;
+        if (qteVoulue > disponible) {
+          refuserSortie(tR('Stock insuffisant pour « {nom} » dans {magasin} (disponible : {n}).', { nom: designationPiece(partId), magasin: nomMagasin(magasinId), n: texteAvecSeparateurs(disponible) }));
+          return;
+        }
+      }
+    }
+    // Le coût des lignes sorties du stock sera ajouté par la fonction de stock (au PUMP) : on le retire du total saisi.
+    const coutSortiesSaisi = lignesSortie.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
+    const partsCostEnregistre = (partsCost != null && lignesSortie.length) ? Math.max(0, partsCost - coutSortiesSaisi) : partsCost;
 
     // Nouvel organe tapé via « Autre… » : enregistré dans le référentiel de
     // la société AVANT l'intervention, pour qu'il réapparaisse pour toute
@@ -2925,15 +3001,15 @@ function openLogInterventionModal(machine, tache) {
         items_done: checkedItems.length ? checkedItems : null,
         performed_by: operateur,
         ...(avecTypes ? { kind: kindActif, component: componentVal, severity: severiteVal } : {}),
-        ...(tcoActif() ? { parts_cost: partsCost, labor_cost: laborCost, labor_hours: laborHours } : {}),
+        ...(tcoActif() ? { parts_cost: partsCostEnregistre, labor_cost: laborCost, labor_hours: laborHours } : {}),
       }).select('id').single();
       if (logErr) throw logErr;
 
-      if (tcoActif() && pieceLignes.length && intervention?.id) {
+      if (tcoActif() && lignesLibres.length && intervention?.id) {
         // Détail des pièces : jamais bloquant pour l'enregistrement de
         // l'intervention elle-même — une erreur ici est signalée, pas fatale.
         const { error: piecesErr } = await sb.from('intervention_parts').insert(
-          pieceLignes.map((l) => ({
+          lignesLibres.map((l) => ({
             intervention_id: intervention.id,
             part_id: l.partId,
             designation: l.designation,
@@ -2942,6 +3018,31 @@ function openLogInterventionModal(machine, tache) {
           }))
         );
         if (piecesErr) console.warn('Détail des pièces non enregistré :', piecesErr.message);
+      }
+
+      // Sorties de stock liées à l'intervention : la fonction serveur écrit la ligne de pièce ET ajoute son coût (PUMP).
+      // Une sortie refusée (stock épuisé entre-temps…) ne fait JAMAIS perdre la pièce : elle est remise dans
+      // l'intervention à son prix saisi, et l'utilisateur est prévenu de la faire à la main dans Stock.
+      let sortiesRefusees = 0;
+      if (lignesSortie.length && intervention?.id) {
+        const echouees = [];
+        for (const l of lignesSortie) {
+          const { error: sortieErr } = await sb.rpc('enregistrer_mouvement_stock', {
+            p_type: 'sortie', p_part_id: l.partId, p_warehouse_id: l.magasinId, p_destination_warehouse_id: null,
+            p_quantity: l.quantity, p_unit_cost: null, p_intervention_id: intervention.id,
+            p_reason: tR('Intervention sur {machine}', { machine: machine.name }),
+          });
+          if (sortieErr) { echouees.push(l); console.warn('Sortie de stock refusée :', sortieErr.message); }
+        }
+        sortiesRefusees = echouees.length;
+        if (echouees.length) {
+          await sb.from('intervention_parts').insert(echouees.map((l) => ({
+            intervention_id: intervention.id, part_id: l.partId, designation: l.designation, quantity: l.quantity, unit_price: l.unitPrice,
+          })));
+          const { data: courant } = await sb.from('interventions').select('parts_cost').eq('id', intervention.id).single();
+          const supplement = echouees.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
+          await sb.from('interventions').update({ parts_cost: (Number(courant?.parts_cost) || 0) + supplement }).eq('id', intervention.id);
+        }
       }
 
       if (isCounter && hoursValue != null) {
@@ -2996,7 +3097,10 @@ function openLogInterventionModal(machine, tache) {
       }
 
       overlay.remove();
-      boot(kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré'));
+      const messageEnregistre = kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré');
+      boot(sortiesRefusees
+        ? messageEnregistre + ' — ' + tR('{n} sortie(s) de stock refusée(s) : à enregistrer à la main dans Stock.', { n: sortiesRefusees })
+        : messageEnregistre);
     } catch (err) {
       errorEl.textContent = trad('Erreur :') + " " + err.message;
       submitBtn.disabled = false;

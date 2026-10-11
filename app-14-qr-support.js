@@ -90,7 +90,7 @@ async function ouvrirQrMachine(machine) {
     const qrcodeLib = await loadQrCodeLib();
     // L'URL de CETTE page, jamais un domaine recopié à la main : marche donc
     // aussi bien en production (keeva.work) qu'en test local.
-    const urlBase = window.location.origin + window.location.pathname;
+    const urlBase = urlBaseApp(); // adresse publique si on imprime depuis l'appli Android (voir urlBaseApp)
     const urlQr = `${urlBase}?qr=${encodeURIComponent(machine.id)}`;
     // Correction d'erreur maximale ('H') : une étiquette imprimée en atelier
     // s'use, se salit, se plie — c'est elle qui tolère le mieux ces défauts.
