@@ -362,3 +362,102 @@ textarea:not([data-x]),
   .agenda-nav .ui-btn-icone{width:36px;height:36px;flex:0 0 36px;}
   .agenda-nav .ui-btn-pastille{flex:0 0 auto;}
 }
+
+/* ── Téléphone : compaction générale (demande du 2026-10-11) ───────────────────────────────────────────────────
+   Objectif : gagner de la hauteur de défilement sur TOUS les menus, en restant lisible (texte courant ≥ 12 px,
+   zones tactiles ≥ 36 px). Seules les marges, paddings, hauteurs et tailles de titres changent ; la hiérarchie
+   des 3 niveaux de boutons (plein / compact / puce) et la règle 8 (champs blancs à bordure 2 px) restent intactes. */
+@media (max-width:560px){
+  /* en-tête collant du téléphone et zone de contenu */
+  .barre-mobile{padding:6px 14px;gap:10px;}
+  .bm-logo,.bm-logo svg{width:32px;height:32px;}
+  .bm-nom{font-size:16px;}
+  .bm-compte{width:38px;height:38px;}
+  .content{padding:10px 14px 96px;}
+  .head-title h1{font-size:26px;line-height:32px;}
+  /* blocs */
+  .ui-section{padding:12px;gap:10px;margin:0 0 12px;}
+  .ui-section-tete{gap:10px;}
+  .ui-section-icone{width:32px;height:32px;}
+  .ui-section-titre{font-size:17px;line-height:1.2;}
+  .ui-section-sous{font-size:12.5px;line-height:1.35;margin-top:1px;}
+  .ui-section-corps{gap:10px;}
+  .ui-tuile{padding:11px 12px;gap:3px;}
+  .ui-tuile-valeur{font-size:22px;}
+  .ui-tuile-note{font-size:12px;line-height:1.3;}
+  .ui-ligne{padding:9px 12px;gap:6px 12px;}
+  .ui-ligne-id{gap:10px;}
+  .ui-ligne-icone{width:32px;height:32px;}
+  .ui-ligne-nom{font-size:14px;}
+  .ui-groupe{padding:12px;gap:10px;}
+  .ui-encadre{padding:10px 12px;gap:10px;font-size:13px;line-height:1.4;}
+  /* champs et boutons */
+  .ui-champ{min-height:40px;padding:8px 12px;font-size:14px;}
+  .ui-champ-groupe{gap:3px;}
+  .ui-btn-plein{min-height:42px;padding:9px 16px;}
+  .ui-btn-pastille{height:36px;padding:0 12px;}
+  .ui-btn-icone{width:36px;height:36px;}
+  .ui-puce{height:32px;padding:0 10px;font-size:12.5px;}
+}
+@media (max-width:560px){
+  /* ligne à deux zones dont l'action n'est faite que d'icônes (modifier / supprimer) : à droite du texte, pas dessous */
+  .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-btn-icone):not(:has(> .ui-ligne-action > :not(.ui-btn-icone))){grid-template-columns:minmax(0,1fr) auto;}
+  .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-btn-icone):not(:has(> .ui-ligne-action > :not(.ui-btn-icone))) .ui-ligne-action{justify-content:flex-end;}
+  .ui-grille,.ui-grille.is-3{gap:8px;}
+}
+@media (max-width:560px){
+  /* bandeaux-compteurs (« 2 magasin(s) », « 4 échéance(s) prioritaire(s) »…) : moins hauts */
+  .ui-section-acces > .ui-tag{padding:2px 10px;}
+  /* tableau de bord : carte de salut et cartes */
+  .page-head[data-view="dashboard"] .greeting-row{padding:10px 12px;gap:12px;}
+  .page-head[data-view="dashboard"] .greeting-row .avatar{width:44px;height:44px;border-radius:12px;font-size:17px;}
+  .page-head[data-view="dashboard"] .greeting .hello{font-size:21px;}
+  .page-head[data-view="dashboard"] .greeting .count{font-size:13px;margin-top:0;}
+  .priority{padding:12px;}
+  .dash-grid .card-title{font-size:17px;}
+}
+@media (max-width:560px){
+  /* cartes machine (Parc) : photo plus petite, blocs compteur et boutons resserrés */
+  .mstrip-corps{padding:10px 12px;gap:8px;}
+  .mstrip-identite{gap:10px;}
+  .mstrip-photo{width:68px;}
+  .mstrip-photo img{width:68px;height:56px;object-fit:cover;}
+  .mstrip-compteur-bloc{padding:2px 0;}
+  .mstrip-compteur-bloc .compteur-strip{padding:9px 10px;gap:6px;}
+  .mstrip-actions{gap:6px;}
+  .mstrip-actions .mstrip-btn-principal{min-height:40px;padding:6px 12px;}
+  .mstrip-actions .mstrip-btn-icone{width:40px;height:40px;}
+}
+@media (max-width:560px){
+  /* « Bonjour … / N machines / avatar » répété en tête de chaque menu : déjà dans la barre du haut (nom du menu + compte).
+     Seul le tableau de bord garde sa carte de salut. */
+  .page-head:not([data-view="dashboard"]){display:none;}
+}
+@media (max-width:560px){
+  /* modales : moins de marge autour et à l'intérieur, titres et textes d'aide resserrés */
+  .overlay{padding:calc(10px + var(--safe-top)) 8px calc(10px + var(--safe-bottom));}
+  .modal{padding:14px;}
+  .modal h2{font-size:19px;margin-bottom:3px;}
+  .modal .sub{font-size:13.5px;line-height:1.4;margin:0 0 12px;}
+  .modal-actions{margin-top:14px;gap:8px;}
+}
+@media (max-width:560px){
+  /* « Ajouter une machine » : cartes et écarts resserrés (classes utilitaires du kit Tailwind local) */
+  .machine-modal-add main{padding:10px 12px;}
+  .machine-modal-add .p-5{padding:12px;}
+  .machine-modal-add .p-4{padding:10px;}
+  .machine-modal-add .mt-5{margin-top:12px;}
+  .machine-modal-add .mt-7{margin-top:16px;}
+  .machine-modal-add .mt-4{margin-top:10px;}
+  .machine-modal-add .gap-4{gap:10px;}
+  .machine-modal-add .gap-5{gap:12px;}
+  .machine-modal-add :is(.space-y-4 > :not([hidden]) ~ :not([hidden])){margin-top:10px;}
+}
+@media (max-width:560px){
+  /* Télémétrie : carte moins haute (elle prenait 74 % de l'écran) et pleine largeur */
+  .tele-carte-zone{height:clamp(320px,52vh,480px);width:100%;margin-top:2px;}
+}
+@media (max-width:560px){
+  /* choix de type de mouvement de stock : 2 × 2 au lieu de quatre lignes empilées */
+  .modal .field-row:has(> label > input[type="radio"]){display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px 10px !important;}
+}
