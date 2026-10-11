@@ -1029,3 +1029,43 @@ textarea:not([data-x]),
   .ui-ligne.is-deux:has(> .ui-ligne-action.is-etiquettes) > .ui-ligne-action{justify-content:stretch;width:100%;}
   .ui-ligne-nom{overflow-wrap:break-word;word-break:normal;}
 }
+
+/* ── Téléphone : Agenda (filtres + mois/aujourd'hui) — demande du 2026-10-11 ───────────────────────────────────
+   Ordre : [vues Mois/Semaine/Liste] [filtres d'état] sur une ligne (paysage) ou l'un sous l'autre (portrait), puis le
+   choix du mois et « Aujourd'hui » collés juste AU-DESSUS des dates. */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .vue-agenda > .ui-section-corps{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;}
+  .vue-agenda .agenda-outils{display:contents;}
+  .vue-agenda .agenda-pills{order:1;flex-wrap:nowrap;overflow-x:auto;}
+  .vue-agenda .agenda-vues{order:2;}
+  .vue-agenda .agenda-nav{order:3;justify-content:center;}
+  .vue-agenda .agenda-calendrier{order:4;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .vue-agenda > .ui-section-corps{grid-template-columns:auto minmax(0,1fr);}
+  .vue-agenda .agenda-vues{order:1;grid-column:1;width:auto;flex:0 0 auto;}
+  .vue-agenda .agenda-pills{order:2;grid-column:2;justify-content:flex-end;}
+  .vue-agenda .agenda-nav{grid-column:1 / -1;width:auto;flex:0 0 auto;}
+  .vue-agenda .agenda-calendrier{grid-column:1 / -1;}
+
+  /* Rappels : « Rappels sur le téléphone » (et le bloc push mobile) sur toute la largeur */
+  .ui-colonnes:has(#rap-save){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
+  .ui-colonnes:has(#rap-save) > .ui-colonne{display:contents;}
+  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(1){order:1;}
+  .ui-colonnes:has(#rap-save) > .ui-colonne:nth-child(2) > .ui-section{order:2;}
+  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(2){order:3;grid-column:1 / -1;}
+  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(3){order:4;grid-column:1 / -1;}
+
+  /* Télémétrie : « Compteur automatique » sur toute la largeur, « Machines reliées » dessous, 2 machines par ligne */
+  #acc-telemetrie{grid-template-columns:minmax(0,1fr);}
+  #acc-telemetrie .ui-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
+  #acc-telemetrie .ui-liste > .ui-ligne{height:100%;}
+}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* seuils TCO : toutes les cartes à la même largeur (la carte remplit sa colonne), contenu empilé de la même façon */
+  .ui-deux.is-egal > .ui-liste{width:100%;}
+  .ui-deux.is-egal > .ui-liste > .ui-ligne{width:100%;box-sizing:border-box;align-content:start;}
+  .ui-deux.is-egal .ui-ligne-info{flex-direction:column;align-items:stretch;gap:4px;}
+  .ui-deux.is-egal .ui-ligne-info > .ui-tag{align-self:flex-start;}
+  .ui-deux.is-egal .ui-ligne-action{width:100%;}
+}
