@@ -708,9 +708,9 @@ textarea:not([data-x]),
   .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-valeur{font-size:15px;line-height:1.15;}
   .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-note{font-size:10px;line-height:1.25;}
   /* les 3 droits (Gérant / Droit de gestion / Droit de saisie) sur une même ligne */
-  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
-  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe) > *{grid-column:1 / -1;}
-  .ui-section-corps:has(> .ui-groupe + .ui-groupe + .ui-groupe) > .ui-groupe{grid-column:auto;padding:8px 6px;gap:6px;}
+  .ui-section-corps:has(#push-cible-save):has(> .ui-groupe + .ui-groupe + .ui-groupe){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ui-section-corps:has(#push-cible-save):has(> .ui-groupe + .ui-groupe + .ui-groupe) > *{grid-column:1 / -1;}
+  .ui-section-corps:has(#push-cible-save):has(> .ui-groupe + .ui-groupe + .ui-groupe) > .ui-groupe{grid-column:auto;padding:8px 6px;gap:6px;}
   .ui-groupe:has(> .check-row + .ui-grille) > .check-row{margin:0;font-size:11px;font-weight:700;align-items:flex-start;gap:5px;line-height:1.2;}
   .ui-groupe:has(> .check-row + .ui-grille) > .ui-grille{grid-template-columns:minmax(0,1fr);gap:4px;}
   .ui-groupe:has(> .check-row + .ui-grille) .ui-etiquette{font-size:9.5px;line-height:1.15;}
