@@ -6491,3 +6491,29 @@ body:has(.login-box.dans-app){background:var(--surface);}
   .log-modal .hint{font-size:11.5px;margin:2px 0 4px;}
   .log-modal .log-bloc-cout .log-elements-tete{margin-bottom:8px;}
 }
+
+/* téléphone compact — lignes de pièces (demande du 2026-10-11 : « compacter ces blocs produits ») */
+@media (max-width:560px){
+  /* une ligne de pièce = 2 niveaux : [icône | pièce | corbeille] puis [quantité | prix] ; le choix du magasin
+     n'apparaît que si « Sortir du stock » est coché */
+  .log-modal .log-pieces-liste{gap:6px;margin-top:6px;}
+  .log-modal .log-piece-ligne{display:grid;grid-template-columns:26px 58px 1fr 26px;align-items:center;gap:6px;padding:8px;}
+  .log-modal .log-piece-icone{grid-column:1;grid-row:1;width:24px;height:24px;}
+  .log-modal .log-piece-ligne .champ-select{grid-column:2 / span 2;grid-row:1;width:100%;min-width:0;height:36px;min-height:36px;padding:0 10px;font-size:14px;}
+  .log-modal .log-piece-retirer{grid-column:4;grid-row:1;width:26px;height:26px;}
+  .log-modal .log-piece-ligne .log-piece-qte{grid-column:2;grid-row:2;width:100%;height:36px;font-size:14px;}
+  .log-modal .log-piece-ligne .log-piece-prix{grid-column:3;grid-row:2;width:120px;justify-self:start;height:36px;font-size:14px;}
+  .log-modal .log-piece-stock{grid-column:1 / -1;grid-row:3;flex-wrap:nowrap;padding:0;gap:8px;}
+  .log-modal .log-piece-stock .ui-case{font-size:12.5px;white-space:nowrap;}
+  .log-modal .log-piece-stock .log-piece-magasin{flex:1 1 0;min-width:0;min-height:34px;padding:4px 8px;font-size:13px;}
+  .log-modal .log-piece-stock:not(:has(.log-piece-sortie:checked)) .log-piece-magasin{display:none;}
+  .log-modal .log-piece-stock-info{font-size:11.5px;}
+  /* boutons d'ajout : une seule ligne chacun (le sous-titre est masqué, le titre suffit) */
+  .log-modal .log-bento-btn{padding:7px 12px;}
+  .log-modal .log-bento-sub{display:none;}
+  .log-modal .log-bento-badge{white-space:nowrap;}
+  /* total : libellé à gauche (peut passer sur 2 lignes), champ de largeur fixe à droite */
+  .log-modal .log-pieces-total-ligne{flex-wrap:nowrap;align-items:center;}
+  .log-modal .log-pieces-total-ligne label{flex:1 1 0;min-width:0;}
+  .log-modal #log-pieces-total{flex:0 0 auto;width:104px;padding:7px 10px;}
+}
