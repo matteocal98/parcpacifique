@@ -2496,14 +2496,7 @@ function openLogInterventionModal(machine, tache) {
         </div>
         <div class="hint" id="log-error"></div>
 
-        ${planItems.length && machine.plan ? `
-        <div class="log-info-box" id="log-info-echeance">
-          <span class="card-ico">${picto('etincelle')}</span>
-          <div>
-            <div class="log-info-titre">${trad('Calcul automatique du plan d\'entretien')}</div>
-            <p id="log-preview-texte"></p>
-          </div>
-        </div>` : ''}
+        ${planItems.length && machine.plan ? `<p id="log-preview-texte" hidden></p>` : ''}
       </div>
 
         <div class="log-footer2">
@@ -2620,6 +2613,8 @@ function openLogInterventionModal(machine, tache) {
   // VRAIE prévision, calculée par la même fonction pure que l'enregistrement
   // (tachesApresEntretien) — jamais un nombre deviné à l'écran. Ne s'applique
   // qu'à l'onglet Entretien planifié (seul à porter une checklist).
+  // Texte court « prochaine alerte … », annoncé dans le message de confirmation à l'enregistrement (plus d'encadré fixe).
+  let derniereEcheanceTexte = null;
   const majApercu = () => {
     if (kindActif !== 'entretien') return;
     overlay.querySelectorAll('.log-item-carte').forEach((carte) => {
@@ -2633,6 +2628,7 @@ function openLogInterventionModal(machine, tache) {
     const toutCocherBtn = overlay.querySelector('#log-tout-cocher');
     if (toutCocherBtn) toutCocherBtn.textContent = checkedNow === items.length && items.length > 0 ? trad('Tout décocher') : trad('Tout cocher');
 
+    derniereEcheanceTexte = null;
     const previewEl = overlay.querySelector('#log-preview-texte');
     if (!previewEl) return;
     const checkedItems = Array.from(overlay.querySelectorAll('.log-checklist input:checked')).map(c => c.value);
@@ -2658,6 +2654,9 @@ function openLogInterventionModal(machine, tache) {
     previewEl.textContent = isCounter
       ? tR('L\'enregistrement met à jour le plan pour une prochaine alerte à {valeur}.', { valeur: formatCounter(echeance, unit) })
       : tR('L\'enregistrement met à jour le plan pour une prochaine alerte le {valeur}.', { valeur: formatShortDate(echeance) });
+    derniereEcheanceTexte = isCounter
+      ? tR('prochaine alerte à {valeur}', { valeur: formatCounter(echeance, unit) })
+      : tR('prochaine alerte le {valeur}', { valeur: formatShortDate(echeance) });
   };
   overlay.querySelectorAll('.log-checklist input').forEach((c) => c.addEventListener('change', majApercu));
   overlay.querySelector('#log-date')?.addEventListener('input', majApercu);
@@ -3097,7 +3096,8 @@ function openLogInterventionModal(machine, tache) {
       }
 
       overlay.remove();
-      const messageEnregistre = kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré');
+      const messageEnregistre = (kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré'))
+        + (kindActif === 'entretien' && derniereEcheanceTexte ? ' — ' + derniereEcheanceTexte : '');
       boot(sortiesRefusees
         ? messageEnregistre + ' — ' + tR('{n} sortie(s) de stock refusée(s) : à enregistrer à la main dans Stock.', { n: sortiesRefusees })
         : messageEnregistre);

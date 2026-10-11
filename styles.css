@@ -6517,3 +6517,21 @@ body:has(.login-box.dans-app){background:var(--surface);}
   .log-modal .log-pieces-total-ligne label{flex:1 1 0;min-width:0;}
   .log-modal #log-pieces-total{flex:0 0 auto;width:104px;padding:7px 10px;}
 }
+
+/* téléphone compact — main d'œuvre et bloc produit (demande du 2026-10-11) */
+@media (max-width:560px){
+  /* heures et coût de main d'œuvre sur UNE ligne ; le bouton « Ajouter » passe dessous */
+  .log-modal #log-couts-section .field-row{flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:8px;}
+  .log-modal #log-couts-section .field-row > div{width:auto;flex:1 1 0;min-width:0;}
+  .log-modal #log-couts-section .field-row > .log-mo-ajouter-zone{flex:0 0 100%;}
+  .log-modal .log-mo-ajouter{height:36px;padding:0 14px;font-size:14px;}
+  .log-modal .log-cout-champ-icone input{padding-right:46px;}
+  /* bloc produit : plus d'icône à gauche, le bloc colle au bord, la corbeille reste dans le bloc */
+  .log-modal #log-couts-section{padding-left:8px;padding-right:8px;}
+  .log-modal .log-piece-icone{display:none;}
+  .log-modal .log-piece-ligne{grid-template-columns:58px 1fr 26px;padding:6px;}
+  .log-modal .log-piece-ligne .champ-select{grid-column:1 / span 2;}
+  .log-modal .log-piece-retirer{grid-column:3;}
+  .log-modal .log-piece-ligne .log-piece-qte{grid-column:1;}
+  .log-modal .log-piece-ligne .log-piece-prix{grid-column:2;}
+}
