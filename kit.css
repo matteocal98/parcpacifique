@@ -461,3 +461,188 @@ textarea:not([data-x]),
   /* choix de type de mouvement de stock : 2 × 2 au lieu de quatre lignes empilées */
   .modal .field-row:has(> label > input[type="radio"]){display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px 10px !important;}
 }
+
+/* ── Téléphone : compaction, 2e passe (demande du 2026-10-11, après essai sur le vrai téléphone) ──────────────────
+   Règles : compteurs plus petits ; choix multiples en 3 petits blocs côte à côte ; filtres sur UNE ligne ;
+   boutons d'action d'une même carte sur UNE ligne ; longs textes d'aide repliés derrière une pastille « i »
+   (voir compacterAidesTelephone dans app-06-etat-interface.js). */
+@media (max-width:560px){
+  /* compteurs : valeur 30 → 22 px, libellés et badges resserrés */
+  .compteur-carte{gap:4px;}
+  .compteur-carte-tap{gap:3px;min-height:0;}
+  .compteur-carte-mot{font-size:10px;}
+  .compteur-carte-ajuster{padding:3px 8px;font-size:11.5px;}
+  .compteur-carte-ligne{gap:6px;}
+  .compteur-carte-valeur{font-size:22px;}
+  .compteur-carte-unite{font-size:12px;}
+  .compteur-carte-badge{font-size:10px;padding:3px 8px;}
+  .compteur-carte-piste{height:5px;}
+  .compteur-carte-echeance{font-size:11px;}
+  .compteur2-ligne{padding:5px 8px;gap:6px;}
+  .compteur2-lib{font-size:11px;}
+  .compteur2-val{font-size:15px;}
+  /* filtres : une seule ligne (défilement latéral si vraiment trop étroit) */
+  .ui-puces{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:5px;}
+  .ui-puces::-webkit-scrollbar{display:none;}
+  .ui-puce{flex:0 0 auto;padding:0 8px;gap:4px;font-size:12px;height:30px;}
+  .ui-puce > span:last-child:not(:first-child){font-size:11px;}
+  /* cartes à plusieurs boutons (Voir le plan / Ouvrir le PDF / Remplacer) : une ligne, trois blocs égaux */
+  .ui-ligne-action.is-etiquettes:has(> .ui-btn){flex-wrap:nowrap;gap:6px;width:100%;}
+  .ui-ligne-action.is-etiquettes:not(:has(> .ui-btn)){flex-wrap:wrap;gap:4px;justify-content:flex-start;}
+  .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{flex:1 1 0;min-width:0;height:34px;padding:0 4px;white-space:nowrap;text-align:center;font-size:12.5px;}
+  .ui-ligne-action.is-etiquettes:has(> .ui-btn) > * svg{display:none;}
+  /* choix multiples de l'assistant « Ajouter une machine » : 3 petits blocs par ligne */
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-3 > label{padding:8px 6px;text-align:center;}
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-3 > label > div:first-of-type{font-size:12.5px;line-height:1.2;}
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-3 > label > div + div{font-size:10px;line-height:1.2;margin-top:2px;}
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  /* pastille « i » et texte d'aide replié */
+  .ui-info-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin:-4px 0 -4px 6px;padding:0;border:none;border-radius:50%;background:var(--primary-tint);color:var(--ink);font:700 12px/1 'Space Grotesk',sans-serif;vertical-align:middle;cursor:pointer;flex:0 0 auto;}
+  .ui-info-btn.is-ouvert{background:var(--ink);color:#fff;}
+  .ui-info-ligne{display:flex;justify-content:flex-end;margin:0;}
+  .info-bulle-texte:not(.is-ouvert){display:none !important;}
+  .info-bulle-texte.is-ouvert{margin-top:6px;padding:8px 10px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
+}
+@media (min-width:561px){.ui-info-btn,.ui-info-ligne{display:none;}}
+
+@media (max-width:560px){
+  /* zones de dépôt de PDF : compactes, sans la ligne « format accepté » */
+  .dropzone{padding:10px;gap:6px;}
+  .dropzone .dz-title{font-size:15px;}
+  .dropzone .dz-zone{padding:8px 10px;gap:10px;}
+  .dropzone .dz-icon{width:30px;height:30px;}
+  .dropzone .dz-formats{display:none;}
+  .dropzone .dz-glisser{font-size:13px;}
+}
+@media (max-width:560px){
+  /* filtres : 4 pastilles tiennent sur 308 px */
+  .ui-puces{gap:4px;}
+  .ui-puce{padding:0 6px;gap:3px;font-size:11.5px;height:30px;}
+  .ui-puce .ui-compte{min-width:0;padding:0 5px;font-size:10.5px;line-height:16px;height:16px;}
+  /* carte machine : bouton principal sur une ligne, suivi calendaire et 2e compteur plus compacts */
+  .mstrip-actions .mstrip-btn-principal{padding:6px 8px;gap:5px;}
+  .mstrip-actions .mstrip-btn-icone{width:36px;height:36px;}
+  .mstrip-compteur-bloc .compteur-jour{flex-wrap:nowrap;align-items:center;}
+  .mstrip-compteur-bloc .compteur-jour-valeur{font-size:13.5px;}
+  .mstrip-compteur-bloc .compteur-titre{font-size:10px;}
+  .compteur2-ligne{min-height:26px;}
+  .compteur2-edit{width:24px;height:24px;}
+}
+@media (max-width:560px){
+  .ui-puces{gap:3px;}
+  .ui-puce{padding:0 5px;gap:3px;font-size:11px;}
+}
+@media (max-width:560px){
+  /* grilles de tuiles chiffrées : toujours 2 par ligne */
+  .ui-grille:has(> .ui-tuile){grid-template-columns:repeat(2,minmax(0,1fr));}
+  .ui-grille > .ui-tuile:last-child:nth-child(odd){grid-column:1 / -1;}
+}
+@media (max-width:560px){
+  /* ligne texte + chiffre seul (ex. « 0/2 dispo/besoin ») : le chiffre à droite du texte, pas dessous */
+  .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-chiffre:only-child){grid-template-columns:minmax(0,1fr) auto;}
+  .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-chiffre:only-child) .ui-ligne-action{justify-content:flex-end;}
+}
+@media (max-width:560px){
+  /* lignes dont l'action n'est faite que d'icônes et/ou d'un chiffre : texte à gauche, action à droite */
+  .ui-ligne.is-deux:has(> .ui-ligne-action):not(.is-etiquettes):not(:has(> .ui-ligne-action > :not(.ui-btn-icone):not(.ui-chiffre):not(.ui-chiffre-valeur))){grid-template-columns:minmax(0,1fr) auto;}
+  .ui-ligne.is-deux:has(> .ui-ligne-action):not(:has(> .ui-ligne-action > :not(.ui-btn-icone):not(.ui-chiffre):not(.ui-chiffre-valeur))) > .ui-ligne-action{justify-content:flex-end;}
+  /* le libellé d'état d'une ligne passe à la ligne au lieu de déborder */
+  .ui-ligne-nom .ui-statut{display:inline-block;white-space:normal;max-width:100%;}
+  /* barre d'actions de 3 boutons ou plus : une seule ligne, blocs égaux, sans pictogramme */
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)){width:100%;gap:6px;}
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{flex:1 1 0;min-width:0;padding:0 6px;font-size:12.5px;white-space:nowrap;}
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn svg{display:none;}
+}
+@media (max-width:560px){
+  .ui-ligne-nom .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;}
+}
+@media (max-width:560px){
+  /* étiquettes et statuts d'une ligne : petits, côte à côte */
+  .ui-ligne-sous:has(.ui-tag,.ui-statut){display:flex;flex-wrap:wrap;gap:3px 4px;align-items:center;}
+  .ui-ligne-sous .ui-tag,.ui-ligne-sous .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;margin:0;}
+  .ui-ligne-nom .ui-tag{font-size:9.5px;padding:1px 7px;margin-left:4px;}
+}
+
+/* ── Téléphone : fenêtre « Modifier une machine » (espacements en jetons space-* du kit compilé) ─────────────── */
+@media (max-width:560px){
+  .machine-modal-edit .modal{max-height:94vh;}
+  .machine-modal-edit .px-space-xl{padding-left:12px;padding-right:12px;}
+  .machine-modal-edit .pt-space-lg{padding-top:12px;}
+  .machine-modal-edit .pb-space-md{padding-bottom:6px;}
+  .machine-modal-edit .py-space-md{padding-top:8px;padding-bottom:8px;}
+  .machine-modal-edit .gap-space-xl{gap:12px;}
+  .machine-modal-edit .gap-space-md{gap:8px;}
+  .machine-modal-edit .gap-space-sm{gap:6px;}
+  .machine-modal-edit .p-space-md{padding:10px;}
+  .machine-modal-edit .text-headline-lg{font-size:19px;line-height:24px;}
+  .machine-modal-edit .grid.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .machine-modal-edit .grid.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  /* cartes de choix : 2 ou 3 petits blocs par ligne, sans pictogramme ni pastille */
+  .machine-modal-edit .mform-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .machine-modal-edit .mform-cards:has(.mform-card:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr));}
+  .machine-modal-edit .mform-card{padding:8px 6px;gap:2px;flex-direction:column;align-items:center;text-align:center;border-radius:10px;}
+  .machine-modal-edit .mform-card-ico,.machine-modal-edit .mform-check-off,.machine-modal-edit .mform-check-on{display:none !important;}
+  .machine-modal-edit .mform-card-corps{align-items:center;}
+  .machine-modal-edit .mform-card-titre{font-size:12px;line-height:1.2;}
+  .machine-modal-edit .mform-card-texte{font-size:10px;line-height:1.2;}
+}
+@media (max-width:560px){
+  .machine-modal-edit .py-3{padding-top:8px;padding-bottom:8px;}
+  .machine-modal-edit form > div:last-child button{white-space:nowrap;font-size:13px;}
+}
+
+/* ── Téléphone : fiche machine / plan d'entretien (classes fm-* et fm2-*) ──────────────────────────────────── */
+@media (max-width:560px){
+  .plan-fil-ariane{margin-bottom:8px;gap:4px;font-size:12px;}
+  .plan-fil-retour{font-size:12px;}
+  /* barre d'actions : 2 colonnes, l'action principale sur toute la largeur */
+  .fm-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .fm-toolbar .fm-btn{padding:6px 4px;font-size:12px;gap:4px;justify-content:center;text-align:center;white-space:normal;min-height:36px;}
+  .fm-toolbar .fm-btn-primary{grid-column:1 / -1;min-height:40px;font-size:13px;}
+  /* cartes */
+  .fm-card{padding:12px;}
+  .fm-card-head{gap:6px;}
+  .fm-card-title{font-size:16px;}
+  .fm-kpi-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .fm-kpi-card{padding:9px 10px;}
+  .fm-kpi-value .num{font-size:18px;}
+  /* en-tête de la machine : photo basse, blocs resserrés */
+  .fm2-hero{padding:12px;}
+  .fm2-grid{gap:10px;}
+  .fm2-o2-photo,.fm2-o2-photo-box{height:130px;}
+  .fm2-o2-photo-box img{height:118px;object-fit:contain;}
+  .fm2-o2-main{gap:10px;}
+  .fm2-o2-ligne1{padding-bottom:8px;gap:8px;}
+  .fm2-compteur-entete-o2{padding:6px 10px;gap:12px;}
+  .fm2-o2-intervalles{gap:8px;}
+  .fm2-o2-ligne3{gap:6px;}
+  .fm2-mini-carte-o2{padding:8px 10px;}
+}
+@media (max-width:560px){
+  /* fiche machine : cartes « tâche » en 2 colonnes (libellé | valeur) au lieu d'une pile verticale */
+  .taches-cartes{gap:8px;}
+  .tache-carte{padding:8px 10px;}
+  .tache-titre{font-size:13.5px;margin-bottom:4px;}
+  .tache-ligne{display:grid;grid-template-columns:76px minmax(0,1fr);gap:0 8px;margin-bottom:3px;align-items:baseline;}
+  .tache-libelle{font-size:9.5px;letter-spacing:.04em;}
+  .tache-valeur{font-size:12.5px;line-height:1.35;}
+}
+@media (max-width:560px){
+  /* fenêtres « Plan proposé » (pplan-*) : en-tête, corps et pied resserrés, boutons du pied côte à côte */
+  .pplan-head{padding:12px 14px 10px;gap:8px;}
+  .pplan-body{padding:12px 14px;gap:12px;}
+  .pplan-foot{padding:10px 14px;gap:8px;flex-wrap:nowrap;}
+  .pplan-foot > button{flex:1 1 0;min-width:0;justify-content:center;}
+  .pplan-dropzone{padding:10px;}
+  .pplan-note{padding:8px 10px;}
+}
+@media (max-width:560px){
+  /* Coûts : graphique en anneau à gauche, légende à droite */
+  .tco-donut-bloc-tete{margin-bottom:8px;}
+  .tco-donut-corps{display:flex;flex-direction:row;align-items:center;gap:10px;}
+  .tco-donut-corps > div:first-child{flex:0 0 96px;width:96px;height:96px;}
+  .tco-donut-corps > div:first-child svg{width:96px;height:96px;}
+  .tco-donut-details{flex:1 1 0;min-width:0;}
+  .tco-donut-legende-grille{grid-template-columns:minmax(0,1fr);}
+}

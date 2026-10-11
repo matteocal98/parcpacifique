@@ -1256,3 +1256,88 @@ function monterAlertes(root) {
     });
   });
 }
+
+// ── Téléphone : longs textes d'aide repliés derrière une pastille « i » ────────────────────────────────────────
+// Demande du 2026-10-11 : sur smartphone, un bloc qui contient beaucoup de texte explicatif ne garde que son titre et
+// son action ; l'explication s'ouvre au toucher de la pastille. Cela ne s'applique qu'aux textes purement
+// explicatifs (pas d'identifiant, pas de lien, pas de bouton, pas de zone d'état) d'au moins ~60 caractères.
+// Le masquage lui-même est fait en CSS, uniquement sous 560 px : sur ordinateur rien ne change.
+const SELECTEUR_AIDES_TELEPHONE = [
+  '.ui-section-sous',
+  '.dropzone .dz-help',
+  '.modal .sub',
+  '.machine-modal-add p.text-xs',
+  '.machine-modal-add div.text-xs.text-slate-500',
+  '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
+  '.overlay .hint',
+  '.ui-aide',
+  '.ui-encadre:not(:has(.ui-encadre-titre))'
+].join(',');
+const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.block.uppercase,.pplan-head-ligne,strong,.ui-section-acces:not(:has(.ui-btn))';
+const SEUIL_AIDE_TELEPHONE = 60;
+
+function compacterAidesTelephone(racine) {
+  if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
+  (racine || document).querySelectorAll(SELECTEUR_AIDES_TELEPHONE).forEach((el) => {
+    if (el.dataset.infoBulle) return;
+    if (el.id || el.getAttribute('role') || el.getAttribute('aria-live')) return;
+    if (el.querySelector('a,button,input,select,textarea')) return;
+    const texte = (el.textContent || '').trim();
+    if (texte.length < SEUIL_AIDE_TELEPHONE) return;
+    // un avertissement (retard, erreur) ne se replie jamais
+    if (el.matches('.is-late,.is-retard,.is-erreur,.is-alerte,.err,.error')) return;
+    // aides et encadrés : seuls les vrais paragraphes (≥ 80 caractères) sont repliés
+    if (el.matches('.ui-aide,.ui-encadre') && texte.length < 80) return;
+    // un texte seul dans son bloc : replié, il laisserait un cadre vide
+    if (el.parentElement && el.parentElement.children.length === 1) return;
+    el.dataset.infoBulle = '1';
+    el.classList.add('info-bulle-texte');
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'ui-info-btn';
+    bouton.textContent = 'i';
+    bouton.setAttribute('aria-label', trad('Afficher l\'explication'));
+    bouton.setAttribute('aria-expanded', 'false');
+    // la pastille se range à côté du titre/libellé qui précède (au plus 6 frères en arrière) ; à défaut, sur une
+    // toute petite ligne au-dessus du texte
+    bouton._cible = el;
+    let titre = null;
+    for (let f = el.previousElementSibling, n = 0; f && n < 6 && !titre; f = f.previousElementSibling, n++) {
+      if (f.matches(SELECTEUR_TITRE_AIDE_TELEPHONE)) titre = f;
+    }
+    if (titre) titre.appendChild(bouton);
+    else {
+      const ligne = document.createElement('div');
+      ligne.className = 'ui-info-ligne';
+      ligne.appendChild(bouton);
+      el.before(ligne);
+    }
+  });
+}
+
+document.addEventListener('click', (ev) => {
+  const bouton = ev.target.closest && ev.target.closest('.ui-info-btn');
+  if (!bouton) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  const cible = bouton._cible;
+  if (!cible) return;
+  const ouvert = cible.classList.toggle('is-ouvert');
+  bouton.classList.toggle('is-ouvert', ouvert);
+  bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+}, true);
+
+(function surveillerAidesTelephone() {
+  if (typeof MutationObserver === 'undefined') return;
+  let planifie = false;
+  const lancer = () => {
+    if (planifie) return;
+    planifie = true;
+    requestAnimationFrame(() => { planifie = false; try { compacterAidesTelephone(); } catch (err) { /* purement cosmétique */ } });
+  };
+  const brancher = () => {
+    new MutationObserver(lancer).observe(document.body, { childList: true, subtree: true });
+    lancer();
+  };
+  if (document.body) brancher(); else document.addEventListener('DOMContentLoaded', brancher);
+})();
