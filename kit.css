@@ -657,7 +657,7 @@ textarea:not([data-x]),
   .machine-modal-add #f-kind-cards .text-sm{font-size:12.5px;line-height:1.2;}
   .machine-modal-add #f-kind-cards .text-xs{font-size:10.5px;line-height:1.2;margin-top:2px;}
   /* champs côte à côte : les zones de saisie s'alignent en bas même si un libellé passe sur 2 lignes */
-  .machine-modal-add .grid.grid-cols-1.sm:grid-cols-2,.machine-modal-add .grid.grid-cols-2{align-items:end;}
+  .machine-modal-add .grid.grid-cols-1.sm\:grid-cols-2,.machine-modal-add .grid.grid-cols-2{align-items:end;}
   .machine-modal-add label.block{font-size:10px;letter-spacing:.03em;}
   /* N° de série et compteur sur une même ligne */
   .machine-modal-add div:has(> #hours-field){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;align-items:end;}
@@ -666,7 +666,7 @@ textarea:not([data-x]),
   /* photo : vignette à gauche, texte et boutons à droite, boutons sur une ligne */
   .machine-modal-add #photo-preview{width:60px;height:60px;}
   .machine-modal-add #photo-preview .material-symbols-outlined{font-size:24px;margin:0;}
-  .machine-modal-add #photo-preview span.text-[10px]{display:none;}
+  .machine-modal-add #photo-preview span.text-\[10px\]{display:none;}
   .machine-modal-add #photo-preview + div{text-align:left;}
   .machine-modal-add .flex.flex-col.items-center:has(> #photo-preview){flex-direction:row;align-items:flex-start;gap:10px;}
   .machine-modal-add #photo-preview + div > .flex{flex-wrap:nowrap;justify-content:flex-start;gap:6px;padding-top:0;}
@@ -685,7 +685,7 @@ textarea:not([data-x]),
 @media (max-width:700px){
   /* bloc photo : vignette plus petite (plus de place pour le texte) et boutons en police réduite */
   .machine-modal-add #photo-preview{width:48px;height:48px;}
-  .machine-modal-add #photo-preview span.text-[10px]{display:none;}
+  .machine-modal-add #photo-preview span.text-\[10px\]{display:none;}
   .machine-modal-add .flex.flex-col.items-center:has(> #photo-preview){gap:8px;}
   .machine-modal-add #photo-preview + div > .flex{gap:4px;}
   .machine-modal-add #photo-preview + div > .flex > button{font-size:10.5px;padding:6px 3px;}
@@ -970,7 +970,7 @@ textarea:not([data-x]),
 
 /* ── Paysage (téléphone) : fenêtres — en-tête et pied fins pour laisser la hauteur au contenu (262 px d'écran seulement) ── */
 @media (orientation:landscape) and (max-height:520px) and (max-width:899px){
-  .machine-modal-add .max-h-[92vh]{max-height:calc(100dvh - 8px);}
+  .machine-modal-add .max-h-\[92vh\]{max-height:calc(100dvh - 8px);}
   .machine-modal-add header,.machine-modal-add footer{padding:4px 12px !important;min-height:0;}
   .machine-modal-add header .w-10{width:28px !important;height:28px !important;}
   .machine-modal-add header h1{font-size:15px !important;line-height:20px !important;}
@@ -1141,7 +1141,7 @@ textarea:not([data-x]),
   .machine-modal-edit form section:nth-of-type(1) > div.grid > #f-kind-cards{grid-column:1 / -1;}
   .machine-modal-edit form section:nth-of-type(1) > div:has(> label > #f-name),.machine-modal-edit form section:nth-of-type(1) > div.grid:has(#f-name){display:contents;}
   /* blocs « grid » restants : colonnes étroites et nombreuses */
-  .machine-modal-edit .grid.md:grid-cols-2:not(#f-kind-cards),.machine-modal-edit .grid.md:grid-cols-3:not(#f-kind-cards),.machine-modal-edit .grid.md:grid-cols-5{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:6px 8px;}
+  .machine-modal-edit .grid.md\:grid-cols-2:not(#f-kind-cards),.machine-modal-edit .grid.md\:grid-cols-3:not(#f-kind-cards),.machine-modal-edit .grid.md\:grid-cols-5{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:6px 8px;}
   .machine-modal-edit input:not([type=checkbox]):not([type=radio]),.machine-modal-edit .champ-select{height:32px !important;min-height:0 !important;font-size:13px;}
   .machine-modal-edit label.font-label-md{font-size:11px;line-height:1.2;}
   /* photo : vignette à gauche, boutons à droite */
@@ -1166,4 +1166,20 @@ textarea:not([data-x]),
 @media (orientation:landscape) and (max-height:520px) and (max-width:899px){
   .machine-modal-edit .champ-select{padding-top:0 !important;padding-bottom:0 !important;box-sizing:border-box;align-items:center;}
   .machine-modal-edit input:not([type=checkbox]):not([type=radio]){padding-top:0 !important;padding-bottom:0 !important;box-sizing:border-box;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* « Acquisition & TCO » : les 5 champs (prix, date d'achat, revente, durée de vie, amortissement) sur UNE ligne */
+  .machine-modal-edit .grid.md\:grid-cols-5:not(#f-kind-cards):not(#zz){grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+  .machine-modal-edit .grid.md\:grid-cols-5 > *{grid-column:auto !important;min-width:0;}
+  .machine-modal-edit .grid.md\:grid-cols-5 label{font-size:10px;line-height:1.15;min-height:2.3em;display:flex;align-items:flex-end;}
+  .machine-modal-edit .grid.md\:grid-cols-5 :is(input,.champ-select){padding-left:8px !important;padding-right:6px !important;font-size:12px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-edit .hint{line-height:1.3;}
+  .machine-modal-edit .hint .ui-btn{height:26px;min-height:0;padding:0 10px;font-size:11px;margin-left:6px;vertical-align:middle;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* « Ajouter une machine » : champs d'une même ligne alignés sur leur haut, libellés à hauteur égale */
+  .machine-modal-add main .grid{align-items:start !important;}
+  .machine-modal-add main .grid > div > label.block{min-height:2.3em;display:flex;align-items:flex-end;}
 }
