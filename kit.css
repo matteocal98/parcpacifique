@@ -1084,3 +1084,19 @@ textarea:not([data-x]),
   .taches-cartes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
   #history-section .ref-table tbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
 }
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* intervalles de révision : 2 blocs sur la même ligne ; s'il n'y en a qu'un, il prend toute la largeur */
+  .fm2-o2-intervalles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;align-items:stretch;}
+  .fm2-o2-intervalles > *{height:100%;box-sizing:border-box;}
+  /* tâches et historique : cartes d'une même ligne à la même hauteur, même si leur contenu diffère */
+  .taches-cartes,#history-section .ref-table tbody{align-items:stretch;}
+  .taches-cartes > .tache-carte,#history-section .ref-table tbody > tr{height:100%;box-sizing:border-box;}
+  .fm2-o2-ligne3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch;}
+  .fm2-o2-ligne3 > *{height:100%;box-sizing:border-box;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .fm2-grid{grid-template-columns:130px minmax(0,1fr);}
+  .fm2-o2-intervalles > *{padding:8px 10px;}
+  .fm2-o2-intervalles *{font-size:11.5px;}
+  .fm2-o2-intervalles [class*="titre"],.fm2-o2-intervalles strong{font-size:12.5px;}
+}
