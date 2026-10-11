@@ -1224,3 +1224,35 @@ textarea:not([data-x]),
   .log-modal .log-bento-titre{display:block;font-size:11px;line-height:1.2;white-space:normal;overflow-wrap:break-word;}
   .log-modal .log-bento-badge{display:inline-block;font-size:8.5px;padding:1px 5px;margin-top:2px;}
 }
+
+/* ── Fenêtre d'intervention (téléphone) : éléments traités en fond BLANC avec liseré d'échéance, 2 par ligne ; pas de badge « OCR IA » ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .log-modal .log-bento-badge{display:none;}
+  .log-modal .log-checklist{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px;align-items:stretch;}
+  .log-modal .log-item-carte{background:var(--surface);}
+  .log-modal .log-item-carte:hover{background:var(--surface);}
+  .log-modal .log-item-carte.is-late:not(:has(input:checked)),.log-modal .log-item-carte.is-late:not(:has(input:checked)):hover{background:var(--surface);box-shadow:inset 4px 0 0 var(--late);}
+  .log-modal .log-item-carte.is-soon:not(:has(input:checked)),.log-modal .log-item-carte.is-soon:not(:has(input:checked)):hover{background:var(--surface);box-shadow:inset 4px 0 0 var(--soon);}
+  .log-modal .log-item-carte:has(input:checked){background:var(--ok-bg);}
+  /* les pastilles internes (cycle, spécification) sont blanches : sur fond blanc elles passent en teinte de conteneur */
+  .log-modal .log-item-carte:not(:has(input:checked)) .log-item-cycle,.log-modal .log-item-carte:not(:has(input:checked)) .log-item-spec{background:rgba(14,19,51,.05);}
+  .log-modal .log-item-carte{padding:7px 8px;gap:6px;min-width:0;}
+  .log-modal .log-item-colonnes,.log-modal .log-item-titre-ligne{min-width:0;}
+  .log-modal .log-item-titre{font-size:12.5px;overflow-wrap:anywhere;}
+  .log-modal .log-item-cycle,.log-modal .log-item-spec{font-size:10.5px;padding:3px 6px;text-align:left;}
+}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* cartes d'éléments : rien ne dépasse — le texte et les pastilles passent à la ligne dans la carte */
+  .log-modal .log-item-carte{overflow:hidden;align-items:flex-start;}
+  .log-modal .log-item-colonnes{flex:1 1 0;min-width:0;max-width:100%;display:flex;flex-direction:column;gap:3px;}
+  .log-modal .log-item-titre-ligne{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;max-width:100%;}
+  .log-modal .log-item-cycle,.log-modal .log-item-spec{display:block;box-sizing:border-box;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;}
+  .log-modal .log-item-check{flex:0 0 18px;width:18px;height:18px;margin-top:1px;}
+}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* la case à cocher passe AU-DESSUS du texte (le texte garde toute la largeur de la carte) ; les mots ne se coupent plus au milieu */
+  .log-modal .log-item-carte{flex-direction:column;gap:4px;padding:6px 7px;}
+  .log-modal .log-item-colonnes{width:100%;}
+  .log-modal .log-item-cycle,.log-modal .log-item-spec{overflow-wrap:break-word;font-size:10px;padding:2px 5px;}
+  .log-modal .log-item-titre{font-size:12px;overflow-wrap:break-word;}
+}
