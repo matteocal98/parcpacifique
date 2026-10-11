@@ -6542,3 +6542,23 @@ body:has(.login-box.dans-app){background:var(--surface);}
   .log-modal #log-submit-btn > span{display:flex;flex-direction:column;align-items:center;line-height:1.2;}
   .log-modal .log-submit-total{font-size:12.5px;font-weight:600;opacity:.9;}
 }
+
+/* Fenêtre d'impression d'étiquettes : deux blocs côte à côte dès que la place le permet (Format | Étiqueter, nombres, recherche | magasin) */
+.etiquettes-modal.export-modal{width:min(760px,94vw);}
+.etiquettes-haut{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;align-items:start;}
+.etiquettes-nombres{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px;}
+.etiquettes-nombres > div{flex:1 1 0;min-width:140px;}
+.etiquettes-nombres > [hidden]{display:none;}
+.etiquettes-modal .etiquettes-nombres input[type=number]{max-width:none;width:100%;}
+.etiquettes-filtres{display:flex;gap:10px;align-items:stretch;}
+.etiquettes-filtres > .ui-champ{flex:1 1 0;min-width:0;}
+.etiquettes-filtres > .ui-select-wrap{flex:0 0 40%;min-width:0;}
+.etiquettes-filtres > .ui-select-wrap[hidden]{display:none;}
+.etiquettes-liste{max-height:240px;}
+@media (max-width:560px){
+  .etiquettes-haut{grid-template-columns:minmax(0,1fr);}
+  .etiquettes-nombres{flex-wrap:nowrap;gap:8px;}
+  .etiquettes-nombres > div{min-width:0;}
+  .etiquettes-filtres{gap:6px;}
+  .etiquettes-filtres > .ui-select-wrap{flex-basis:44%;}
+}

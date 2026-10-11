@@ -2632,9 +2632,18 @@ function ouvrirModaleEtiquettes(options = {}) {
   overlay.innerHTML = `
     <div class="modal export-modal etiquettes-modal" role="dialog" aria-modal="true" aria-labelledby="etiquettes-titre">
       <h2 id="etiquettes-titre">${trad('Imprimer des étiquettes')}</h2>
-      <div class="ui-champ-groupe">
-        <strong>${trad('Format')}</strong>
-        ${Object.entries(FORMATS_ETIQUETTE).map(([cleFormat, f], i) => `<label class="ui-case"><input type="radio" name="etiquettes-format" value="${cleFormat}" ${i === 0 ? 'checked' : ''}> ${esc(trad(f.libelle))}</label>`).join('')}
+      <div class="etiquettes-haut">
+        <div class="ui-champ-groupe">
+          <strong>${trad('Format')}</strong>
+          ${Object.entries(FORMATS_ETIQUETTE).map(([cleFormat, f], i) => `<label class="ui-case"><input type="radio" name="etiquettes-format" value="${cleFormat}" ${i === 0 ? 'checked' : ''}> ${esc(trad(f.libelle))}</label>`).join('')}
+        </div>
+        <div class="ui-champ-groupe">
+          <strong>${trad('Étiqueter')}</strong>
+          <label class="ui-case"><input type="radio" name="etiquettes-source" value="stock" ${source === 'stock' ? 'checked' : ''}> ${trad('Des lignes de stock (article × magasin × emplacement)')}</label>
+          <label class="ui-case"><input type="radio" name="etiquettes-source" value="catalogue" ${source === 'catalogue' ? 'checked' : ''}> ${trad('Des références du catalogue — même celles qui ne sont plus en stock')}</label>
+        </div>
+      </div>
+      <div class="etiquettes-nombres">
         <div id="etiquettes-debut-bloc">
           <label for="etiquettes-debut">${trad('Commencer à l\'étiquette n°')}</label>
           <input id="etiquettes-debut" class="ui-champ" type="number" min="1" max="24" value="1" inputmode="numeric">
@@ -2645,19 +2654,16 @@ function ouvrirModaleEtiquettes(options = {}) {
         </div>
       </div>
       <div class="ui-champ-groupe">
-        <strong>${trad('Étiqueter')}</strong>
-        <label class="ui-case"><input type="radio" name="etiquettes-source" value="stock" ${source === 'stock' ? 'checked' : ''}> ${trad('Des lignes de stock (article × magasin × emplacement)')}</label>
-        <label class="ui-case"><input type="radio" name="etiquettes-source" value="catalogue" ${source === 'catalogue' ? 'checked' : ''}> ${trad('Des références du catalogue — même celles qui ne sont plus en stock')}</label>
-      </div>
-      <div class="ui-champ-groupe">
         <strong id="etiquettes-titre-liste"></strong>
-        <input id="etiquettes-recherche" class="ui-champ" placeholder="${trad('Rechercher par désignation, référence, EAN…')}">
-        <div class="ui-select-wrap" id="etiquettes-magasin-bloc">
-          <select id="etiquettes-magasin" class="ui-champ">
-            <option value="">${trad('Tous les magasins')}</option>
-            ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
-          </select>
-          ${picto('chevronBas')}
+        <div class="etiquettes-filtres">
+          <input id="etiquettes-recherche" class="ui-champ" placeholder="${trad('Rechercher par désignation, référence, EAN…')}">
+          <div class="ui-select-wrap" id="etiquettes-magasin-bloc">
+            <select id="etiquettes-magasin" class="ui-champ">
+              <option value="">${trad('Tous les magasins')}</option>
+              ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
+            </select>
+            ${picto('chevronBas')}
+          </div>
         </div>
         <label class="ui-case"><input type="checkbox" id="etiquettes-tout"> <span id="etiquettes-compte"></span></label>
         <div class="etiquettes-liste" id="etiquettes-liste"></div>
