@@ -1022,3 +1022,10 @@ textarea:not([data-x]),
   .fm-toolbar{grid-template-columns:repeat(4,minmax(0,1fr));}
   .fm-toolbar .fm-btn-primary{grid-column:auto;}
 }
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* cartes à plusieurs boutons (Plan, Équipe, TCO…) : texte au-dessus, boutons en dessous — jamais côte à côte
+     (en paysage la colonne est « assez large » pour le conteneur, mais pas pour trois boutons + du texte) */
+  .ui-ligne.is-deux:has(> .ui-ligne-action.is-etiquettes){grid-template-columns:minmax(0,1fr);}
+  .ui-ligne.is-deux:has(> .ui-ligne-action.is-etiquettes) > .ui-ligne-action{justify-content:stretch;width:100%;}
+  .ui-ligne-nom{overflow-wrap:break-word;word-break:normal;}
+}
