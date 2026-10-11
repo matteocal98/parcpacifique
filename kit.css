@@ -804,3 +804,10 @@ textarea:not([data-x]),
   /* barres de 3 boutons (Inventaire : Étiquettes / Emplacement / Exporter en CSV) : le texte ne dépasse plus */
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{font-size:11px;white-space:normal;line-height:1.1;padding:4px 3px;height:auto;min-height:34px;overflow:hidden;text-align:center;}
 }
+@media (max-width:560px){
+  /* fiche machine : cartes repliables (fermées par défaut), chevron à droite de l'en-tête */
+  .fm-card-repliable > .fm-card-head{cursor:pointer;position:relative;padding-right:26px;}
+  .fm-card-repliable > .fm-card-head::after{content:"";position:absolute;right:6px;top:8px;width:8px;height:8px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg);transition:transform .15s ease;}
+  .fm-card-repliable.is-ouvert > .fm-card-head::after{transform:rotate(-135deg);top:12px;}
+  .fm-card-repliable:not(.is-ouvert) > :not(.fm-card-head){display:none;}
+}

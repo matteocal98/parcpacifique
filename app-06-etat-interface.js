@@ -1349,3 +1349,12 @@ document.addEventListener('click', (ev) => {
   };
   if (document.body) brancher(); else document.addEventListener('DOMContentLoaded', brancher);
 })();
+
+// Fiche machine (téléphone) : les cartes « Points d'attention » et « Coûts d'exploitation » se déplient au toucher de leur en-tête
+// (le masquage est fait en CSS sous 560 px ; sur ordinateur la classe n'a aucun effet).
+document.addEventListener('click', (ev) => {
+  const entete = ev.target.closest && ev.target.closest('.fm-card-repliable > .fm-card-head');
+  if (!entete || ev.target.closest('button,a,input,select')) return;
+  if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
+  entete.parentElement.classList.toggle('is-ouvert');
+});

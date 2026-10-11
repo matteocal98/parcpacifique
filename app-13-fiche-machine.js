@@ -1209,7 +1209,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
           </section>
         ` : ''}
         ${machine.plan.notes ? `
-          <section class="fm-card">
+          <section class="fm-card fm-card-repliable">
             <div class="fm-card-head">
               <div class="fm-card-title-row">
                 <span class="fm-card-ico is-warn">${picto('alerte')}</span>
@@ -1222,7 +1222,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
       ` : `<section class="fm-card"><div class="fm-card-sub">${trad('Aucun plan de maintenance défini pour cette machine.')}</div></section>`}
 
       ${tcoActif() ? `
-      <section class="fm-card" id="operating-costs-section">
+      <section class="fm-card fm-card-repliable" id="operating-costs-section">
         <div class="fm-card-head">
           <div class="fm-card-title-row">
             <h3 class="fm-card-title">${trad('Coûts d\'exploitation')}</h3>
