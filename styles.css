@@ -6439,3 +6439,55 @@ body:has(.login-box.dans-app){background:var(--surface);}
 /* Ligne de pièce : le choix de la pièce garde une largeur lisible (les champs quantité/prix passent à la ligne si besoin) */
 .log-piece-ligne .champ-select{flex:1 1 150px;min-width:0;}
 .log-piece-stock .log-piece-magasin{height:auto;min-height:38px;padding:6px 10px;line-height:1.3;}
+
+/* ══ FENÊTRE D'INTERVENTION — VERSION TÉLÉPHONE COMPACTE (2026-10-11) ══════════════════════════════════════════
+   Constat sur un vrai téléphone : la fenêtre « Enregistrer une intervention » faisait ~4 écrans de haut, on perdait
+   le haut en défilant, et le total des pièces débordait de son bloc. Sur écran étroit : marges et polices réduites,
+   types d'intervention côte à côte, boutons d'ajout de pièce en lignes compactes, total qui passe à la ligne.
+   Rien ne change au-dessus de 560 px (ordinateur, tablette). */
+@media (max-width:560px){
+  .log-modal .log-body2{padding:0 12px 14px;gap:10px;}
+  .log-modal .log-bloc{padding:10px 12px;}
+  .log-modal h2{font-size:20px;line-height:26px;}
+  .log-modal .log-section-titre{font-size:16px;line-height:22px;}
+  .log-modal label{font-size:12.5px;}
+  .log-modal .log-pieces-label,
+  .log-modal .log-modal .log-pieces-label{margin-top:14px;}
+  /* 1. type d'intervention : trois tuiles côte à côte (la description détaillée est masquée) */
+  .log-modal .log-type-grid{grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;}
+  .log-modal .log-type-carte{padding:8px 4px;gap:4px;align-items:center;text-align:center;}
+  .log-modal .log-type-tete{justify-content:center;}
+  .log-modal .log-type-dot{display:none;}
+  .log-modal .log-type-icone{width:30px;height:30px;}
+  .log-modal .log-type-icone svg{width:17px;height:17px;}
+  .log-modal .log-type-titre{font-size:12px;line-height:1.2;text-align:center;}
+  .log-modal .log-type-texte{display:none;}
+  /* pièces : boutons d'ajout en lignes compactes au lieu de grandes tuiles */
+  .log-modal .log-bento-grid{gap:8px;}
+  .log-modal .log-bento-btn{height:auto;min-height:0;flex-direction:row;justify-content:flex-start;text-align:left;padding:8px 12px;gap:10px;}
+  .log-modal .log-bento-icone{width:34px;height:34px;flex:0 0 auto;}
+  .log-modal .log-bento-icone svg{width:18px;height:18px;}
+  .log-modal .log-bento-titre{font-size:14px;}
+  .log-modal .log-bento-sub{font-size:11px;}
+  /* total des pièces : le libellé et le champ passent à la ligne plutôt que de déborder */
+  .log-modal .log-pieces-total-ligne{flex-wrap:wrap;gap:6px 10px;padding:8px 0 0;}
+  .log-modal .log-pieces-total-ligne label{flex:1 1 140px;min-width:0;}
+  .log-modal #log-pieces-total{max-width:100%;min-width:0;font-size:18px;}
+  .log-modal .log-pieces-total-ligne .montant{font-size:18px;}
+  /* bas de fenêtre */
+  .log-modal .log-info-box{padding:10px 12px;gap:10px;}
+  .log-modal .log-info-box .card-ico{width:26px;height:26px;}
+  .log-modal .log-footer2{padding:10px 12px;gap:8px;}
+}
+
+/* téléphone compact — checklist et indications (suite du bloc ci-dessus) */
+@media (max-width:560px){
+  .log-modal .log-bloc-elements{padding:10px 12px;}
+  .log-modal .log-elements-tete{margin-bottom:8px;gap:6px;}
+  .log-modal .log-checklist{gap:6px;}
+  .log-modal .log-item-carte{padding:7px 10px;gap:8px;}
+  .log-modal .log-item-titre{font-size:13.5px;line-height:1.25;}
+  .log-modal .log-section-soustitre{font-size:11.5px;}
+  .log-modal .hint{font-size:11.5px;margin:2px 0 4px;}
+  .log-modal .log-bloc-cout .log-elements-tete{margin-bottom:8px;}
+}
