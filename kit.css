@@ -800,3 +800,7 @@ textarea:not([data-x]),
   .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{justify-content:center;text-align:center;}
   .ui-grille.is-3:has(#tco-taux-horaire) .ui-aide{display:block;text-align:center;}
 }
+@media (max-width:560px){
+  /* barres de 3 boutons (Inventaire : Étiquettes / Emplacement / Exporter en CSV) : le texte ne dépasse plus */
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{font-size:11px;white-space:normal;line-height:1.1;padding:4px 3px;height:auto;min-height:34px;overflow:hidden;text-align:center;}
+}
