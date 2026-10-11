@@ -335,7 +335,7 @@ function listePreparation(machines, jours, maintenant) {
 function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
   const stockDisponible = (UI.stockItems || [])
-    .filter((it) => String(it.part_id) === String(partId))
+    .filter((it) => String(it.part_id) === String(partId) && statutLigneStock(it) === 'libere')
     .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
   const solde = stockDisponible - besoinTotal;
   let commanderAvantLe = null;

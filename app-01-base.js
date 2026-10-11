@@ -621,7 +621,29 @@ const SCHEMA = { hasCounter: false, hasBrandModel: false, hasContactNames: false
 function colonnesCatalogueePiece() {
   return 'id, reference, designation, unit_price, supplier_name, avg_lead_time_days'
     + (SCHEMA.hasStock ? ', default_reorder_point' : '')
-    + (SCHEMA.hasStockPackaging ? ', packaging' : '');
+    + (SCHEMA.hasStockPackaging ? ', packaging' : '')
+    + (SCHEMA.hasStockChamps ? ', ean, unit_of_measure' : '');
+}
+// Colonnes en plus sur stock_items (emplacement, statut) — même principe : un seul endroit pour les 3 lectures.
+function colonnesLigneStockEnPlus() {
+  return SCHEMA.hasStockChamps ? ', location, status' : '';
+}
+
+// Unités de mesure et statuts de stock : listes FERMÉES (contraintes check en base) — les codes ne se traduisent
+// jamais, seuls les libellés passent par trad() au moment de l'affichage.
+const UNITES_MESURE = [
+  ['piece', 'Pièce'], ['paire', 'Paire'], ['jeu', 'Jeu'], ['lot', 'Lot'],
+  ['boite', 'Boîte'], ['litre', 'Litre'], ['metre', 'Mètre'], ['kg', 'Kilogramme'],
+];
+function libelleUniteMesure(code) {
+  const u = UNITES_MESURE.find(([c]) => c === code);
+  return trad(u ? u[1] : 'Pièce');
+}
+const STATUTS_STOCK = [['libere', 'Libéré'], ['quarantaine', 'Quarantaine'], ['rebut', 'Rebut']];
+function statutLigneStock(it) { return (it && it.status) || 'libere'; }
+function libelleStatutStock(code) {
+  const s = STATUTS_STOCK.find(([c]) => c === code);
+  return trad(s ? s[1] : 'Libéré');
 }
 
 // SECOND COMPTEUR, optionnel : machines.counter_value_2 + counter_unit_2, et
@@ -659,6 +681,11 @@ SCHEMA.hasReferences = false;
 // n'a pas trouvé les colonnes, et aucun bloc TCO ne s'affiche ni ne s'écrit
 // alors — comportement d'avant inchangé pour qui n'a pas encore la migration.
 SCHEMA.hasTco = false;
+
+// Stock avancé (kalea-serveur/migrations/stock-champs-etiquettes.sql) : parts_catalog.ean + unit_of_measure ET
+// stock_items.location + status. Faux tant que la sonde n'a pas trouvé les 4 colonnes : rien de ce qui en dépend
+// ne s'affiche ni ne s'écrit alors (comportement d'avant inchangé).
+SCHEMA.hasStockChamps = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

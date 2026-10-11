@@ -640,6 +640,7 @@ async function chargerCarteTcoDashboard(root) {
 function ligneCatalogueTcoHtml(piece) {
   const refEtDelai = [
     piece.reference || trad('Sans référence'),
+    piece.ean ? `EAN ${piece.ean}` : '',
     [piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' - '),
   ].filter(Boolean).join(' · ');
   return `
@@ -647,7 +648,7 @@ function ligneCatalogueTcoHtml(piece) {
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone">${picto('boite')}</div>
         <div class="ui-ligne-textes">
-          <span class="ui-ligne-nom">${esc(piece.designation)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}</span>
+          <span class="ui-ligne-nom">${esc(piece.designation)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? `<span class="ui-tag">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
           <span class="ui-ligne-sous">${esc(refEtDelai)}</span>
           ${piece.default_reorder_point != null ? `<span class="ui-ligne-sous">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
         </div>
@@ -728,6 +729,22 @@ function blocCatalogueTcoHtml() {
                 <input id="tco-piece-seuil" class="ui-champ" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
               </div>` : ''}
             </div>` : ''}
+            ${SCHEMA.hasStockChamps ? `
+            <div class="ui-grille">
+              <div class="ui-champ-groupe">
+                <label class="sr-only" for="tco-piece-ean">${trad('Code-barres EAN')}</label>
+                <input id="tco-piece-ean" class="ui-champ" inputmode="numeric" maxlength="64" placeholder="${trad('Code-barres EAN (optionnel)')}">
+              </div>
+              <div class="ui-champ-groupe">
+                <label class="sr-only" for="tco-piece-unite">${trad('Unité de mesure')}</label>
+                <div class="ui-select-wrap">
+                  <select id="tco-piece-unite" class="ui-champ">
+                    ${UNITES_MESURE.map(([code]) => `<option value="${code}">${esc(libelleUniteMesure(code))}</option>`).join('')}
+                  </select>
+                  ${picto('chevronBas')}
+                </div>
+              </div>
+            </div>` : ''}
             <div><button type="button" class="ui-btn ui-btn-plein" id="tco-piece-ajouter">${picto('plusCercle')}<span>${trad('Ajouter au catalogue')}</span></button></div>
             <div><button type="button" class="ui-btn ui-btn-pastille" id="tco-piece-annuler" hidden>${trad('Annuler la modification')}</button></div>
           </div>
@@ -751,6 +768,7 @@ function enteteCsvPieces() {
   const entete = ['Référence', 'Désignation', 'Prix unitaire', 'Fournisseur', 'Délai moyen (jours)'];
   if (SCHEMA.hasStockPackaging) entete.push('Conditionnement');
   if (SCHEMA.hasStock) entete.push('Seuil de réapprovisionnement');
+  if (SCHEMA.hasStockChamps) entete.push('EAN', 'Unité de mesure');
   return entete;
 }
 
@@ -790,8 +808,12 @@ function analyserCsvCatalogue(texte) {
   if (!lignesBrutes.length) return { lignes: [], erreurs: [trad('Fichier vide.')] };
   const entete = analyserLigneCsv(lignesBrutes[0]).map((c) => c.trim());
   const enteteAttendu = enteteCsvPieces();
-  const enteteOk = entete.length === enteteAttendu.length
-    && entete.every((c, i) => c.toLowerCase() === enteteAttendu[i].toLowerCase());
+  // Un fichier de l'ANCIEN modèle (sans les colonnes EAN / Unité de mesure) reste accepté tel quel.
+  const enteteAncien = SCHEMA.hasStockChamps ? enteteAttendu.slice(0, -2) : enteteAttendu;
+  const memeEntete = (attendu) => entete.length === attendu.length
+    && entete.every((c, i) => c.toLowerCase() === attendu[i].toLowerCase());
+  const avecChamps = SCHEMA.hasStockChamps && memeEntete(enteteAttendu);
+  const enteteOk = avecChamps || memeEntete(enteteAncien);
   if (!enteteOk) {
     return {
       lignes: [],
@@ -831,6 +853,19 @@ function analyserCsvCatalogue(texte) {
       const seuil = seuilTexte ? nombreDepuisTexte(seuilTexte) : null;
       ligne.default_reorder_point = seuil != null ? seuil : null;
     }
+    if (avecChamps) {
+      const eanTexte = (reste[idxReste++] || '').replace(/\s+/g, '');
+      const uniteTexte = reste[idxReste++] || '';
+      ligne.ean = eanTexte || null;
+      if (uniteTexte) {
+        const norm = (v) => String(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        const trouvee = UNITES_MESURE.find(([code, fr]) => norm(code) === norm(uniteTexte) || norm(fr) === norm(uniteTexte) || norm(libelleUniteMesure(code)) === norm(uniteTexte));
+        if (!trouvee) { erreurs.push(tR('Ligne {n} : unité de mesure inconnue (« {u} »), ignorée.', { n: numero, u: uniteTexte })); continue; }
+        ligne.unit_of_measure = trouvee[0];
+      } else {
+        ligne.unit_of_measure = 'piece';
+      }
+    }
     lignes.push(ligne);
   }
   return { lignes, erreurs };
@@ -853,6 +888,7 @@ function modeleCsvCatalogue() {
   const exemple = ['FLT-0142', 'Filtre à huile moteur', '24.90', 'Motoculture Pacifique', '5'];
   if (SCHEMA.hasStockPackaging) exemple.push('Boîte de 12');
   if (SCHEMA.hasStock) exemple.push('3');
+  if (SCHEMA.hasStockChamps) exemple.push('3760123456789', 'Pièce');
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   return [enteteCsvPieces(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
@@ -1090,6 +1126,8 @@ function cablerCatalogueTco(root) {
   const champDelai = root.querySelector('#tco-piece-delai');
   const champConditionnement = root.querySelector('#tco-piece-conditionnement');
   const champSeuil = root.querySelector('#tco-piece-seuil');
+  const champEan = root.querySelector('#tco-piece-ean');
+  const champUnite = root.querySelector('#tco-piece-unite');
   const titreForm = root.querySelector('#tco-piece-form-titre');
   const boutonAjouter = root.querySelector('#tco-piece-ajouter');
   const boutonAjouterLabel = boutonAjouter?.querySelector('span');
@@ -1104,6 +1142,8 @@ function cablerCatalogueTco(root) {
     if (champDelai) champDelai.value = '';
     if (champConditionnement) champConditionnement.value = '';
     if (champSeuil) champSeuil.value = '';
+    if (champEan) champEan.value = '';
+    if (champUnite) champUnite.value = 'piece';
     if (titreForm) titreForm.textContent = trad('Ajouter une pièce au catalogue');
     if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Ajouter au catalogue');
     if (boutonAnnuler) boutonAnnuler.hidden = true;
@@ -1121,12 +1161,15 @@ function cablerCatalogueTco(root) {
     const delai = nombreDepuisTexte(champDelai.value);
     const conditionnement = champConditionnement ? champConditionnement.value.trim() : '';
     const seuil = champSeuil ? nombreDepuisTexte(champSeuil.value) : null;
+    const ean = champEan ? champEan.value.replace(/\s+/g, '') : '';
+    const unite = champUnite ? champUnite.value : 'piece';
     if (!designation) { message(msg, trad('La désignation est obligatoire.'), true); return; }
     btn.disabled = true;
     if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
     const champsOptionnels = {
       ...(SCHEMA.hasStockPackaging ? { packaging: conditionnement || null } : {}),
       ...(SCHEMA.hasStock ? { default_reorder_point: seuil } : {}),
+      ...(SCHEMA.hasStockChamps ? { ean: ean || null, unit_of_measure: unite || 'piece' } : {}),
     };
     try {
       if (pieceEnEdition) {
@@ -1180,6 +1223,8 @@ function cablerCatalogueTco(root) {
       if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
       if (champConditionnement) champConditionnement.value = piece.packaging || '';
       if (champSeuil) champSeuil.value = piece.default_reorder_point != null ? texteAvecSeparateurs(piece.default_reorder_point) : '';
+      if (champEan) champEan.value = piece.ean || '';
+      if (champUnite) champUnite.value = piece.unit_of_measure || 'piece';
       if (titreForm) titreForm.textContent = trad('Modifier une pièce');
       if (boutonAjouterLabel) boutonAjouterLabel.textContent = trad('Enregistrer les modifications');
       if (boutonAnnuler) boutonAnnuler.hidden = false;
@@ -1878,14 +1923,16 @@ function ligneInventaireStockHtml(it) {
         <div class="ui-ligne-icone">${picto('boite')}</div>
         <div class="ui-ligne-textes">
           <span class="ui-ligne-nom">${esc(piece ? piece.designation : designationPiece(it.part_id))}${piece?.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${enAlerte ? `<span class="ui-statut is-retard">${trad('Seuil bas')}</span>` : ''}</span>
-          <span class="ui-ligne-sous">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}</span>
+          <span class="ui-ligne-sous">${esc(nomMagasin(it.warehouse_id))}${piece?.reference ? ' · ' + esc(piece.reference) : ''}${it.location ? ' · ' + esc(it.location) : ''}</span>
+          ${SCHEMA.hasStockChamps && statutLigneStock(it) !== 'libere' ? `<span class="ui-statut is-retard">${esc(libelleStatutStock(statutLigneStock(it)))}</span>` : ''}
         </div>
       </div>
       <div class="ui-ligne-action">
         <div class="ui-chiffre is-droite">
-          <span class="ui-chiffre-valeur">${texteAvecSeparateurs(it.quantity)}</span>
+          <span class="ui-chiffre-valeur">${texteAvecSeparateurs(it.quantity)}${SCHEMA.hasStockChamps && piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ` <span class="ui-ligne-sous">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
           ${gerant ? `<span class="ui-ligne-sous">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
         </div>
+        ${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-icone" data-stock-emplacement="${esc(it.part_id)}|${esc(it.warehouse_id)}" title="${esc(trad('Emplacement et statut'))}" aria-label="${esc(trad('Emplacement et statut'))}">${picto('crayon')}</button>` : ''}
       </div>
     </div>`;
 }
@@ -1894,7 +1941,7 @@ function blocInventaireStockHtml() {
   return `
     <section class="ui-section" id="stock-inventaire-section">
       ${teteSectionKit('boite', trad('Inventaire'), trad('Quantités physiques en stock par référence et valorisation unitaire'),
-        `<span class="ui-tag" id="stock-inventaire-badge"></span><button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
+        `<span class="ui-tag" id="stock-inventaire-badge"></span>${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-emplacement-ajouter">${picto('plusCercle')}<span>${trad('Emplacement')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
       <div class="ui-section-corps">
         <div class="ui-barre">
           <input id="stock-inventaire-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
@@ -2176,17 +2223,103 @@ function blocBesoinsRisqueStockHtml() {
     </section>`;
 }
 
+// Fenêtre « Emplacement et statut » d'une ligne de stock (article × magasin). Sans argument : l'utilisateur
+// choisit l'article et le magasin (utile pour fixer l'emplacement AVANT la première entrée). Écriture par la
+// fonction serveur definir_emplacement_statut_stock (stock_items n'est jamais écrit directement).
+function ouvrirModaleEmplacementStock(partIdInitial, magasinIdInitial) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const pieces = (UI.partsCatalog || []).slice().sort((a, b) => a.designation.localeCompare(b.designation));
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  const figee = !!(partIdInitial && magasinIdInitial);
+  const ligneExistante = (partId, magasinId) => (UI.stockItems || []).find((it) => String(it.part_id) === String(partId) && String(it.warehouse_id) === String(magasinId));
+  const optionsPieces = pieces.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' (' + esc(p.reference) + ')' : ''}</option>`).join('');
+  const optionsMagasins = magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('');
+  overlay.innerHTML = `
+    <div class="modal export-modal" role="dialog" aria-modal="true" aria-labelledby="emplacement-titre">
+      <h2 id="emplacement-titre">${trad('Emplacement et statut')}</h2>
+      <div class="ui-champ-groupe">
+        <label for="emplacement-piece"><strong>${trad('Article')}</strong></label>
+        <div class="ui-select-wrap"><select id="emplacement-piece" class="ui-champ" ${figee ? 'disabled' : ''}>${optionsPieces}</select>${picto('chevronBas')}</div>
+        <label for="emplacement-magasin"><strong>${trad('Magasin')}</strong></label>
+        <div class="ui-select-wrap"><select id="emplacement-magasin" class="ui-champ" ${figee ? 'disabled' : ''}>${optionsMagasins}</select>${picto('chevronBas')}</div>
+      </div>
+      <div class="ui-champ-groupe">
+        <label for="emplacement-texte"><strong>${trad('Emplacement')}</strong></label>
+        <input id="emplacement-texte" class="ui-champ" maxlength="60" placeholder="${trad('Ex : Allée B, rayon 3, casier 12')}">
+        <label for="emplacement-statut"><strong>${trad('Statut du stock')}</strong></label>
+        <div class="ui-select-wrap">
+          <select id="emplacement-statut" class="ui-champ">${STATUTS_STOCK.map(([code]) => `<option value="${code}">${esc(libelleStatutStock(code))}</option>`).join('')}</select>
+          ${picto('chevronBas')}
+        </div>
+        <div class="ui-aide">${trad('En quarantaine ou en rebut, le stock de cette ligne ne peut plus être sorti ni transféré, et n\'est plus compté comme disponible pour les kits.')}</div>
+      </div>
+      <div id="emplacement-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="emplacement-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="emplacement-go">${picto('coche')}<span>${trad('Enregistrer')}</span></button>
+      </div>
+    </div>`;
+  const selPiece = overlay.querySelector('#emplacement-piece');
+  const selMagasin = overlay.querySelector('#emplacement-magasin');
+  const champTexte = overlay.querySelector('#emplacement-texte');
+  const selStatut = overlay.querySelector('#emplacement-statut');
+  const msg = overlay.querySelector('#emplacement-msg');
+  if (partIdInitial) selPiece.value = partIdInitial;
+  if (magasinIdInitial) selMagasin.value = magasinIdInitial;
+  const remplirDepuisLigne = () => {
+    const it = ligneExistante(selPiece.value, selMagasin.value);
+    champTexte.value = it?.location || '';
+    selStatut.value = statutLigneStock(it);
+  };
+  remplirDepuisLigne();
+  selPiece.addEventListener('change', remplirDepuisLigne);
+  selMagasin.addEventListener('change', remplirDepuisLigne);
+  overlay.querySelector('#emplacement-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#emplacement-go').addEventListener('click', async () => {
+    const bouton = overlay.querySelector('#emplacement-go');
+    if (!selPiece.value || !selMagasin.value) { msg.textContent = trad('Choisis un article et un magasin.'); return; }
+    bouton.disabled = true;
+    msg.textContent = '';
+    try {
+      const { data, error } = await sb.rpc('definir_emplacement_statut_stock', {
+        p_part_id: selPiece.value, p_warehouse_id: selMagasin.value, p_location: champTexte.value.trim(), p_status: selStatut.value,
+      });
+      if (error) throw error;
+      const ligne = Array.isArray(data) ? data[0] : data;
+      if (ligne) {
+        const autres = (UI.stockItems || []).filter((it) => String(it.id) !== String(ligne.id));
+        UI.stockItems = [...autres, ligne];
+        UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+      }
+      showToast(trad('Emplacement enregistré'));
+      overlay.remove();
+      renderApp();
+    } catch (err) {
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      bouton.disabled = false;
+    }
+  });
+}
+
 function exporterInventaireStockCsv() {
   const gerant = peutGererParametresStock();
   const header = gerant
     ? [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité'), trad('Coût PUMP'), trad('Valeur')]
     : [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité')];
+  if (SCHEMA.hasStockChamps) header.push(trad('EAN'), trad('Unité de mesure'), trad('Emplacement'), trad('Statut'));
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const items = (UI.stockItems || []).slice().sort((a, b) => designationPiece(a.part_id).localeCompare(designationPiece(b.part_id)));
   const rows = items.map((it) => {
     const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
     const base = [piece?.reference || '', piece?.designation || designationPiece(it.part_id), nomMagasin(it.warehouse_id), it.quantity];
-    return gerant ? [...base, it.pump_unit_cost, Number(it.quantity) * Number(it.pump_unit_cost)] : base;
+    const ligne = gerant ? [...base, it.pump_unit_cost, Number(it.quantity) * Number(it.pump_unit_cost)] : base;
+    if (SCHEMA.hasStockChamps) {
+      ligne.push(piece?.ean || '', libelleUniteMesure(piece?.unit_of_measure || 'piece'), it.location || '', libelleStatutStock(statutLigneStock(it)));
+    }
+    return ligne;
   });
   const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
   telechargerCsv(`stock_${todayIso()}.csv`, csv);
@@ -2341,7 +2474,7 @@ function ouvrirNouveauMouvementModal() {
       // la RPC) — on le relit plutôt que de reconstruire le calcul en JS,
       // jamais deux implémentations du même calcul qui pourraient diverger.
       const { data: soldes } = await sb.from('stock_items')
-        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at' + colonnesLigneStockEnPlus())
         .eq('company_id', UI.companyId);
       UI.stockItems = soldes || [];
       UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
@@ -2588,7 +2721,7 @@ function ouvrirImportMouvementsStock() {
         }
       }
       const { data: soldes } = await sb.from('stock_items')
-        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at' + colonnesLigneStockEnPlus())
         .eq('company_id', UI.companyId);
       UI.stockItems = soldes || [];
       UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
@@ -2716,6 +2849,13 @@ VIEWS.stock = {
     root.querySelector('#stock-inventaire-filtre')?.addEventListener('input', rafraichirInventaire);
     root.querySelector('#stock-inventaire-magasin')?.addEventListener('change', rafraichirInventaire);
     root.querySelector('#stock-inventaire-export')?.addEventListener('click', () => exporterInventaireStockCsv());
+    root.querySelector('#stock-emplacement-ajouter')?.addEventListener('click', () => ouvrirModaleEmplacementStock());
+    root.querySelector('#stock-inventaire-liste')?.addEventListener('click', (e) => {
+      const bouton = e.target.closest('[data-stock-emplacement]');
+      if (!bouton) return;
+      const [partId, magasinId] = bouton.getAttribute('data-stock-emplacement').split('|');
+      ouvrirModaleEmplacementStock(partId, magasinId);
+    });
 
     // ── Magasins : CRUD réservé au gérant, même patron que le catalogue
     // de pièces TCO (formulaire unique ajout/édition). ──
