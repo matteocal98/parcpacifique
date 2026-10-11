@@ -1949,7 +1949,7 @@ function blocInventaireStockHtml() {
   return `
     <section class="ui-section" id="stock-inventaire-section">
       ${teteSectionKit('boite', trad('État du stock'), trad('Quantités physiques en stock par référence et valorisation unitaire'),
-        `<span class="ui-tag" id="stock-inventaire-badge"></span>${SCHEMA.hasStockChamps ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-etiquettes-ouvrir">${picto('export')}<span>${trad('Étiquettes')}</span></button>` : ''}${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-emplacement-ajouter">${picto('plusCercle')}<span>${trad('Emplacement')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
+        `<span class="ui-tag" id="stock-inventaire-badge"></span>${SCHEMA.hasStockChamps ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-etiquettes-ouvrir">${picto('qrcode')}<span>${trad('Étiquettes')}</span></button>` : ''}${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-emplacement-ajouter">${picto('plusCercle')}<span>${trad('Emplacement')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
       <div class="ui-section-corps">
         <div class="ui-barre">
           <input id="stock-inventaire-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
