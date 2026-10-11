@@ -2748,7 +2748,7 @@ function openLogInterventionModal(machine, tache) {
             sel.value = String(piece.id);
             sel.dispatchEvent(new Event('change', { bubbles: true }));
             if (typeof sel.__majBouton === 'function') sel.__majBouton();
-            majStockLigneLog(nouvelle, lue.warehouseId, true);
+            if (lue.warehouseId) majStockLigneLog(nouvelle, lue.warehouseId, true);
           }
           recalcTotalPieces();
           showToast(tR('Pièce ajoutée : {nom}', { nom: piece.designation }));
