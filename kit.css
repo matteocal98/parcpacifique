@@ -1202,3 +1202,15 @@ textarea:not([data-x]),
   .machine-modal-edit form > div:last-child > div.justify-between button:first-child{flex:0 0 30%;}
   .machine-modal-edit form > div:last-child > div.justify-center{align-self:center;}
 }
+@media (max-width:700px){
+  /* second suivi : Kilométrage + Calendaire côte à côte, puis Échéance + Rappel côte à côte et alignés */
+  .machine-modal-edit #secondaire-champs .grid:has(#carte-secondaire-km),.machine-modal-edit #secondaire-champs .grid:has(#carte-secondaire-days){grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;}
+  .machine-modal-edit #secondaire-champs .grid:has(input){grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;align-items:start !important;}
+  .machine-modal-edit #secondaire-champs .grid:has(input) > div > label{min-height:2.5em;line-height:1.2 !important;display:flex;align-items:flex-end;}
+  .machine-modal-edit #secondaire-champs .grid:has(input) > div{min-width:0;}
+}
+@media (max-width:700px){
+  /* premier suivi : « Échéance tous les (…) » et « Rappel avant (…) » alignés, mêmes hauteurs de libellé */
+  .machine-modal-edit #bloc-mode-suivi .grid:has(#f-interval){grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;align-items:start !important;}
+  .machine-modal-edit #bloc-mode-suivi .grid:has(#f-interval) > div > label{min-height:2.5em;line-height:1.2 !important;display:flex;align-items:flex-end;}
+}
