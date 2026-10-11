@@ -367,7 +367,7 @@ textarea:not([data-x]),
    Objectif : gagner de la hauteur de défilement sur TOUS les menus, en restant lisible (texte courant ≥ 12 px,
    zones tactiles ≥ 36 px). Seules les marges, paddings, hauteurs et tailles de titres changent ; la hiérarchie
    des 3 niveaux de boutons (plein / compact / puce) et la règle 8 (champs blancs à bordure 2 px) restent intactes. */
-@media (max-width:560px){
+@media (max-width:700px){
   /* en-tête collant du téléphone et zone de contenu */
   .barre-mobile{padding:6px 14px;gap:10px;}
   .bm-logo,.bm-logo svg{width:32px;height:32px;}
@@ -399,13 +399,13 @@ textarea:not([data-x]),
   .ui-btn-icone{width:36px;height:36px;}
   .ui-puce{height:32px;padding:0 10px;font-size:12.5px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* ligne à deux zones dont l'action n'est faite que d'icônes (modifier / supprimer) : à droite du texte, pas dessous */
   .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-btn-icone):not(:has(> .ui-ligne-action > :not(.ui-btn-icone))){grid-template-columns:minmax(0,1fr) auto;}
   .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-btn-icone):not(:has(> .ui-ligne-action > :not(.ui-btn-icone))) .ui-ligne-action{justify-content:flex-end;}
   .ui-grille,.ui-grille.is-3{gap:8px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* bandeaux-compteurs (« 2 magasin(s) », « 4 échéance(s) prioritaire(s) »…) : moins hauts */
   .ui-section-acces > .ui-tag{padding:2px 10px;}
   /* tableau de bord : carte de salut et cartes */
@@ -416,7 +416,7 @@ textarea:not([data-x]),
   .priority{padding:12px;}
   .dash-grid .card-title{font-size:17px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* cartes machine (Parc) : photo plus petite, blocs compteur et boutons resserrés */
   .mstrip-corps{padding:10px 12px;gap:8px;}
   .mstrip-identite{gap:10px;}
@@ -428,12 +428,12 @@ textarea:not([data-x]),
   .mstrip-actions .mstrip-btn-principal{min-height:40px;padding:6px 12px;}
   .mstrip-actions .mstrip-btn-icone{width:40px;height:40px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* « Bonjour … / N machines / avatar » répété en tête de chaque menu : déjà dans la barre du haut (nom du menu + compte).
      Seul le tableau de bord garde sa carte de salut. */
   .page-head:not([data-view="dashboard"]){display:none;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* modales : moins de marge autour et à l'intérieur, titres et textes d'aide resserrés */
   .overlay{padding:calc(10px + var(--safe-top)) 8px calc(10px + var(--safe-bottom));}
   .modal{padding:14px;}
@@ -441,7 +441,7 @@ textarea:not([data-x]),
   .modal .sub{font-size:13.5px;line-height:1.4;margin:0 0 12px;}
   .modal-actions{margin-top:14px;gap:8px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* « Ajouter une machine » : cartes et écarts resserrés (classes utilitaires du kit Tailwind local) */
   .machine-modal-add main{padding:10px 12px;}
   .machine-modal-add .p-5{padding:12px;}
@@ -453,11 +453,11 @@ textarea:not([data-x]),
   .machine-modal-add .gap-5{gap:12px;}
   .machine-modal-add :is(.space-y-4 > :not([hidden]) ~ :not([hidden])){margin-top:10px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* Télémétrie : carte moins haute (elle prenait 74 % de l'écran) et pleine largeur */
   .tele-carte-zone{height:clamp(320px,52vh,480px);width:100%;margin-top:2px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* choix de type de mouvement de stock : 2 × 2 au lieu de quatre lignes empilées */
   .modal .field-row:has(> label > input[type="radio"]){display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px 10px !important;}
 }
@@ -466,7 +466,7 @@ textarea:not([data-x]),
    Règles : compteurs plus petits ; choix multiples en 3 petits blocs côte à côte ; filtres sur UNE ligne ;
    boutons d'action d'une même carte sur UNE ligne ; longs textes d'aide repliés derrière une pastille « i »
    (voir compacterAidesTelephone dans app-06-etat-interface.js). */
-@media (max-width:560px){
+@media (max-width:700px){
   /* compteurs : valeur 30 → 22 px, libellés et badges resserrés */
   .compteur-carte{gap:4px;}
   .compteur-carte-tap{gap:3px;min-height:0;}
@@ -504,9 +504,9 @@ textarea:not([data-x]),
   .info-bulle-texte:not(.is-ouvert){display:none !important;}
   .info-bulle-texte.is-ouvert{margin-top:6px;padding:8px 10px;border-radius:var(--r-md);background:var(--surface);box-shadow:var(--shadow-soft);}
 }
-@media (min-width:561px){.ui-info-btn,.ui-info-ligne{display:none;}}
+@media (min-width:701px){.ui-info-btn,.ui-info-ligne{display:none;}}
 
-@media (max-width:560px){
+@media (max-width:700px){
   /* zones de dépôt de PDF : compactes, sans la ligne « format accepté » */
   .dropzone{padding:10px;gap:6px;}
   .dropzone .dz-title{font-size:15px;}
@@ -515,7 +515,7 @@ textarea:not([data-x]),
   .dropzone .dz-formats{display:none;}
   .dropzone .dz-glisser{font-size:13px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* filtres : 4 pastilles tiennent sur 308 px */
   .ui-puces{gap:4px;}
   .ui-puce{padding:0 6px;gap:3px;font-size:11.5px;height:30px;}
@@ -529,21 +529,21 @@ textarea:not([data-x]),
   .compteur2-ligne{min-height:26px;}
   .compteur2-edit{width:24px;height:24px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   .ui-puces{gap:3px;}
   .ui-puce{padding:0 5px;gap:3px;font-size:11px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* grilles de tuiles chiffrées : toujours 2 par ligne */
   .ui-grille:has(> .ui-tuile){grid-template-columns:repeat(2,minmax(0,1fr));}
   .ui-grille > .ui-tuile:last-child:nth-child(odd){grid-column:1 / -1;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* ligne texte + chiffre seul (ex. « 0/2 dispo/besoin ») : le chiffre à droite du texte, pas dessous */
   .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-chiffre:only-child){grid-template-columns:minmax(0,1fr) auto;}
   .ui-ligne.is-deux:has(> .ui-ligne-action > .ui-chiffre:only-child) .ui-ligne-action{justify-content:flex-end;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* lignes dont l'action n'est faite que d'icônes et/ou d'un chiffre : texte à gauche, action à droite */
   .ui-ligne.is-deux:has(> .ui-ligne-action):not(.is-etiquettes):not(:has(> .ui-ligne-action > :not(.ui-btn-icone):not(.ui-chiffre):not(.ui-chiffre-valeur))){grid-template-columns:minmax(0,1fr) auto;}
   .ui-ligne.is-deux:has(> .ui-ligne-action):not(:has(> .ui-ligne-action > :not(.ui-btn-icone):not(.ui-chiffre):not(.ui-chiffre-valeur))) > .ui-ligne-action{justify-content:flex-end;}
@@ -554,10 +554,10 @@ textarea:not([data-x]),
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{flex:1 1 0;min-width:0;padding:0 6px;font-size:12.5px;white-space:nowrap;}
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn:not(#fleet-scanner):not(#fleet-export) svg{display:none;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   .ui-ligne-nom .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* étiquettes et statuts d'une ligne : petits, côte à côte */
   .ui-ligne-sous:has(.ui-tag,.ui-statut){display:flex;flex-wrap:wrap;gap:3px 4px;align-items:center;}
   .ui-ligne-sous .ui-tag,.ui-ligne-sous .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;margin:0;}
@@ -565,7 +565,7 @@ textarea:not([data-x]),
 }
 
 /* ── Téléphone : fenêtre « Modifier une machine » (espacements en jetons space-* du kit compilé) ─────────────── */
-@media (max-width:560px){
+@media (max-width:700px){
   .machine-modal-edit .modal{max-height:94vh;}
   .machine-modal-edit .px-space-xl{padding-left:12px;padding-right:12px;}
   .machine-modal-edit .pt-space-lg{padding-top:12px;}
@@ -587,13 +587,13 @@ textarea:not([data-x]),
   .machine-modal-edit .mform-card-titre{font-size:12px;line-height:1.2;}
   .machine-modal-edit .mform-card-texte{font-size:10px;line-height:1.2;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   .machine-modal-edit .py-3{padding-top:8px;padding-bottom:8px;}
   .machine-modal-edit form > div:last-child button{white-space:nowrap;font-size:13px;}
 }
 
 /* ── Téléphone : fiche machine / plan d'entretien (classes fm-* et fm2-*) ──────────────────────────────────── */
-@media (max-width:560px){
+@media (max-width:700px){
   .plan-fil-ariane{margin-bottom:8px;gap:4px;font-size:12px;}
   .plan-fil-retour{font-size:12px;}
   /* barre d'actions : 2 colonnes, l'action principale sur toute la largeur */
@@ -619,7 +619,7 @@ textarea:not([data-x]),
   .fm2-o2-ligne3{gap:6px;}
   .fm2-mini-carte-o2{padding:8px 10px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* fiche machine : cartes « tâche » en 2 colonnes (libellé | valeur) au lieu d'une pile verticale */
   .taches-cartes{gap:8px;}
   .tache-carte{padding:8px 10px;}
@@ -628,7 +628,7 @@ textarea:not([data-x]),
   .tache-libelle{font-size:9.5px;letter-spacing:.04em;}
   .tache-valeur{font-size:12.5px;line-height:1.35;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* fenêtres « Plan proposé » (pplan-*) : en-tête, corps et pied resserrés, boutons du pied côte à côte */
   .pplan-head{padding:12px 14px 10px;gap:8px;}
   .pplan-body{padding:12px 14px;gap:12px;}
@@ -637,7 +637,7 @@ textarea:not([data-x]),
   .pplan-dropzone{padding:10px;}
   .pplan-note{padding:8px 10px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* Coûts : graphique en anneau à gauche, légende à droite */
   .tco-donut-bloc-tete{margin-bottom:8px;}
   .tco-donut-corps{display:flex;flex-direction:row;align-items:center;gap:10px;}
@@ -648,7 +648,7 @@ textarea:not([data-x]),
 }
 
 /* ── Téléphone : assistant « Ajouter une machine », 3e passe (retour du vrai téléphone, 2026-10-11) ───────────── */
-@media (max-width:560px){
+@media (max-width:700px){
   /* type de machine : 2 petits blocs centrés, sans pictogramme ni pastille (le texte ne dépasse plus) */
   .machine-modal-add #f-kind-cards{gap:6px;}
   .machine-modal-add #f-kind-cards > label{flex-direction:column;align-items:center;text-align:center;padding:8px 6px;min-width:0;}
@@ -674,15 +674,15 @@ textarea:not([data-x]),
   .machine-modal-add #photo-preview + div > .flex > button .material-symbols-outlined{display:none;}
   .machine-modal-add #photo-preview + div{gap:6px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   .machine-modal-add #photo-preview + div > .flex > button{white-space:nowrap;font-size:11px;padding:7px 4px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* le texte des boutons photo peut passer sur 2 lignes (police agrandie du téléphone) au lieu de déborder */
   .machine-modal-add #photo-preview + div{min-width:0;}
   .machine-modal-add #photo-preview + div > .flex > button{white-space:normal;text-align:center;line-height:1.15;overflow:hidden;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* bloc photo : vignette plus petite (plus de place pour le texte) et boutons en police réduite */
   .machine-modal-add #photo-preview{width:48px;height:48px;}
   .machine-modal-add #photo-preview span.text-[10px]{display:none;}
@@ -690,14 +690,14 @@ textarea:not([data-x]),
   .machine-modal-add #photo-preview + div > .flex{gap:4px;}
   .machine-modal-add #photo-preview + div > .flex > button{font-size:10.5px;padding:6px 3px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* Plan : « Voir le plan / Ouvrir le PDF / Remplacer » moins serrés dans leur cadre (police du téléphone agrandie) */
   .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{font-size:11px;padding:0 2px;line-height:1.1;}
   .ui-ligne-action.is-etiquettes:has(> .ui-btn){gap:4px;}
 }
 
 /* ── Téléphone : menu Rappels (retour du vrai téléphone, 2026-10-11) ───────────────────────────────────────── */
-@media (max-width:560px){
+@media (max-width:700px){
   /* cases à cocher et paragraphes d'aide : moins de marges verticales dans tous les blocs */
   .check-row{margin:6px 0 2px;gap:8px;}
   .ui-aide{margin:4px 0;}
@@ -721,7 +721,7 @@ textarea:not([data-x]),
 }
 
 /* ── Téléphone : menu Coûts / TCO (retour du vrai téléphone, 2026-10-11) ───────────────────────────────────── */
-@media (max-width:560px){
+@media (max-width:700px){
   /* 3 indicateurs du haut (devise, taux MO, catalogue) sur une seule ligne */
   .ui-section:has(#tco-rapport-pdf) > .ui-grille{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
   .ui-section:has(#tco-rapport-pdf) > .ui-grille > .ui-tuile{grid-column:auto;padding:7px 8px;gap:1px;}
@@ -766,7 +766,7 @@ textarea:not([data-x]),
   /* légende du graphique en anneau : les pastilles de pourcentage ne dépassent plus */
   .tco-donut-legende-grille > *{min-width:0;font-size:11px;padding:6px 8px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* seuils : hauteur de ligne = la plus haute carte de la ligne (plus de lignes toutes égales à la plus grande) */
   .ui-deux.is-egal{grid-auto-rows:auto;align-items:stretch;}
   .ui-deux.is-egal > .ui-liste{gap:8px;}
@@ -778,16 +778,16 @@ textarea:not([data-x]),
   /* filtres catégorie / tri : police plus petite pour ne plus être tronqués */
   .ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-categorie-bouton,.ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-tri-bouton{font-size:10px;padding:0 6px;gap:3px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   .ui-deux.is-egal .ui-ligne-info .ui-btn{font-size:10px;padding:4px 6px;min-height:0;height:auto;line-height:1.15;flex:0 0 auto;width:100%;border-radius:10px;white-space:normal;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* Parc : Scanner et Exporter gardent leur pictogramme (boutons-icônes) ; filtres un peu plus serrés pour tenir sur une ligne */
   #fleet-scanner svg,#fleet-export svg{display:inline-block !important;}
   .ui-puces .ui-puce{font-size:10.5px;padding:0 4px;gap:2px;}
   .ui-puces .ui-puce .ui-compte{padding:0 4px;font-size:9.5px;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* TCO : les 3 champs de paramètres alignés (libellé sur 2 lignes réservées, champ toujours à la même hauteur) */
   .ui-grille.is-3:has(#tco-taux-horaire){align-items:start;}
   .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{min-height:2.3em;display:flex;align-items:flex-end;}
@@ -795,23 +795,23 @@ textarea:not([data-x]),
   .ui-btn-plein{font-size:14px;min-height:40px;padding:8px 14px;}
   div:not([class]) > .ui-btn-plein,.ui-section-corps > .ui-btn-plein{display:flex;width:fit-content;max-width:100%;margin-left:auto;margin-right:auto;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* TCO : libellés et aides des 3 paramètres centrés au-dessus / au-dessous de leur champ */
   .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{justify-content:center;text-align:center;}
   .ui-grille.is-3:has(#tco-taux-horaire) .ui-aide{display:block;text-align:center;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* barres de 3 boutons (Inventaire : Étiquettes / Emplacement / Exporter en CSV) : le texte ne dépasse plus */
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{font-size:11px;white-space:normal;line-height:1.1;padding:4px 3px;height:auto;min-height:34px;overflow:hidden;text-align:center;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* fiche machine : cartes repliables (fermées par défaut), chevron à droite de l'en-tête */
   .fm-card-repliable > .fm-card-head{cursor:pointer;position:relative;padding-right:26px;}
   .fm-card-repliable > .fm-card-head::after{content:"";position:absolute;right:6px;top:8px;width:8px;height:8px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg);transition:transform .15s ease;}
   .fm-card-repliable.is-ouvert > .fm-card-head::after{transform:rotate(-135deg);top:12px;}
   .fm-card-repliable:not(.is-ouvert) > :not(.fm-card-head){display:none;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* « Fermer » en bas des fenêtres : même taille que les autres boutons compacts de l'appli (13 px, 36 px de haut) */
   .overlay .modal-actions{justify-content:center;margin-top:10px;}
   .overlay .modal-actions > button.secondary,.overlay .modal-actions > #close-plan{font-size:13px;font-weight:700;height:36px;min-height:0;padding:0 18px;line-height:1;border-radius:var(--r-md);}
@@ -832,11 +832,11 @@ textarea:not([data-x]),
   body.barres-masquees .barre-mobile{transform:translateY(-115%);}
   body.barres-masquees .tabbar{transform:translateY(115%);}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* lignes à plusieurs boutons (équipe : Générer un mot de passe / Changer le droit / Retirer) : le texte passe à la ligne dans son bouton, il ne déborde plus */
   .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{white-space:normal;height:auto;min-height:34px;padding:4px 3px;overflow:hidden;line-height:1.1;font-size:11px;overflow-wrap:anywhere;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* pastille « i » : cercle et lettre en orange de la charte, bien visible */
   .ui-info-btn{background:var(--late-bg);border:2px solid var(--late);color:var(--late);font-weight:800;font-size:12px;width:22px;height:22px;box-sizing:border-box;}
   .ui-info-btn.is-ouvert{background:var(--late);color:#fff;}
@@ -846,7 +846,7 @@ textarea:not([data-x]),
 
 /* ── Téléphone : page de connexion qui tient dans la hauteur de l'écran (logo inchangé, 68 px) ──────────────────
    Les marges verticales suivent la hauteur de l'écran (clamp sur vh) : un petit téléphone les resserre, un grand les laisse respirer. */
-@media (max-width:560px){
+@media (max-width:700px){
   .login-box{margin-top:0;padding:clamp(8px,1.6vh,16px) 20px 6px;}
   .login-box.dans-app{margin-top:0;}
   .login-box .lang-switch{margin-bottom:clamp(2px,.8vh,8px);}
@@ -866,7 +866,7 @@ textarea:not([data-x]),
   .login-box .legal-footer{margin-top:clamp(4px,1vh,10px);font-size:11.5px;}
   .login-box .legal-footer p{margin:2px 0 0;}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* pastille « i » dans un libellé : décollée du champ qui suit (remontée de 4 px + petite marge sous elle) */
   label .ui-info-btn,.ui-etiquette .ui-info-btn{position:relative;top:-4px;margin-bottom:2px;}
 }
@@ -874,7 +874,7 @@ textarea:not([data-x]),
 /* ── Téléphone (application) : page de connexion répartie sur toute la hauteur de l'écran ────────────────────────
    Langue en haut ; logo + titre + champs + déverrouillage CENTRÉS dans l'espace restant ; « Se connecter » / « Créer un compte »,
    mentions légales et version collés en BAS de l'écran, quelle que soit la hauteur du téléphone. */
-@media (max-width:560px){
+@media (max-width:700px){
   .login-box.dans-app{min-height:100vh;min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;}
   .login-box.dans-app > form#login-form{display:contents;}
   .login-box.dans-app > .marque-connexion{margin-top:auto;}
@@ -882,13 +882,13 @@ textarea:not([data-x]),
   .login-box.dans-app .login-actions{margin-top:clamp(8px,1.6vh,14px);}
   .login-box.dans-app .legal-footer{margin-top:clamp(6px,1.2vh,12px);padding-bottom:calc(8px + var(--safe-bottom,0px));}
 }
-@media (max-width:560px){
+@media (max-width:700px){
   /* pastille « i » dans un libellé : plus petite (18 px) pour ne jamais recouvrir le texte du libellé */
   label .ui-info-btn,.ui-etiquette .ui-info-btn{position:static;top:auto;width:18px;height:18px;font-size:11px;margin:-3px 0 -3px 5px;vertical-align:middle;}
 }
 
 /* ── Téléphone : « Historique des entretiens » en cartes (une carte par entretien, libellé | valeur) au lieu d'un tableau coupé ── */
-@media (max-width:560px){
+@media (max-width:700px){
   #history-section .ref-scroll{overflow:visible;border:0;}
   #history-section .ref-scroll > .ref-table,#history-section .ref-table{display:block;min-width:0;width:100%;border:0;background:none;}
   #history-section .ref-table thead{display:none;}
@@ -918,9 +918,10 @@ textarea:not([data-x]),
   /* sections : deux colonnes, comme sur ordinateur (le seuil d'origine, 880 px de colonne, n'était jamais atteint) */
   .ui-colonnes{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
   /* cartes machine du Parc : deux par ligne */
-  .mstrip-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;}
+  .mstrip-liste,#fleet-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;}
+  #fleet-list > .fleet-count{grid-column:1 / -1;}
   /* tuiles chiffrées : jusqu'à quatre par ligne */
-  .ui-grille,.ui-grille.is-3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+  .ui-grille,.ui-grille.is-3{grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;}
   /* listes de lignes (échéances, pièces, kits, membres…) : deux par ligne */
   .ui-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
   .ui-liste > .ui-ligne{height:100%;}
@@ -934,4 +935,35 @@ textarea:not([data-x]),
   .ui-ligne{padding:8px 12px;}
   /* fenêtres : plus larges en paysage */
   .overlay .modal{max-width:620px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* tableau de bord : carte de salut sur une seule petite ligne ; titres de section plus petits */
+  .page-head[data-view="dashboard"] .greeting-row{padding:6px 10px;gap:10px;}
+  .page-head[data-view="dashboard"] .greeting-row .avatar{width:30px;height:30px;border-radius:9px;font-size:12px;}
+  .page-head[data-view="dashboard"] .greeting{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .page-head[data-view="dashboard"] .greeting .hello{font-size:15px;}
+  .page-head[data-view="dashboard"] .greeting .count{font-size:11.5px;margin:0;}
+  .ui-section-titre{font-size:15px;}
+  .ui-section-icone{width:26px;height:26px;}
+  .ui-tuile-note{font-size:10.5px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* la carte « Bonjour … » ne sert à rien quand l'écran ne fait que 260 px de haut : le bandeau du haut dit déjà où l'on est */
+  .page-head[data-view="dashboard"]{display:none;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* listes : deux colonnes seulement quand elles ont toute la largeur (pas dans une demi-colonne de section) */
+  .ui-colonne .ui-liste{grid-template-columns:minmax(0,1fr);}
+  /* tuiles : la dernière ne s'étire plus sur toute la ligne */
+  .ui-grille > .ui-tuile:last-child:nth-child(odd){grid-column:auto;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* calendrier de l'agenda : cases basses (le mois entier doit tenir en peu de défilement) */
+  .agenda-grille,.agenda-semaine-noms{gap:4px;}
+  .agenda-jour{min-height:34px;padding:3px 6px;gap:2px;}
+  .agenda-jour-num{font-size:12px;}
+  .agenda-semaine-noms{margin-bottom:4px;}
+  .agenda-semaine-noms span{font-size:10px;}
+  /* fenêtres : marges réduites autour */
+  .overlay{padding-top:calc(4px + var(--safe-top));padding-bottom:calc(4px + var(--safe-bottom));}
 }

@@ -1283,7 +1283,7 @@ const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-tit
 const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {
-  if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
+  if (!window.matchMedia || !window.matchMedia('(max-width:700px)').matches) return;
   // Mon compte › « Verrouillage et reconnexion » : les deux phrases d'état (ids fixes, mises à jour par le code) vont dans la
   // pastille de la case à cocher qui les suit ; l'élément reste en place, seul son affichage est replié.
   ['acc-bio-etat', 'acc-acces-etat'].forEach((id) => {
@@ -1379,7 +1379,7 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('click', (ev) => {
   const entete = ev.target.closest && ev.target.closest('.fm-card-repliable > .fm-card-head');
   if (!entete || ev.target.closest('button,a,input,select')) return;
-  if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
+  if (!window.matchMedia || !window.matchMedia('(max-width:700px)').matches) return;
   entete.parentElement.classList.toggle('is-ouvert');
 });
 
