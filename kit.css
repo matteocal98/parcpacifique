@@ -322,8 +322,9 @@ details.ui-groupe[open] > summary{margin-bottom:4px;}
    remplace une liste native) : fond BLANC obligatoire + bordure noire de 2 px, partout (pages, blocs
    teintés, modales). !important voulu : c'est une règle de charte sans exception, qu'aucun style de
    modale ou de bloc ne doit pouvoir défaire. Cases à cocher, boutons radio et envoi de fichier ne sont
-   pas concernés. */
-input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]):not([type=button]):not([type=submit]):not([type=color]),
+   pas concernés. SEULE EXCEPTION (demande explicite, 2026-10-11) : la valeur du compteur compact des
+   cartes Machines (.compteur-strip-saisie) est affichée SANS cadre ni fond blanc ; son style est dans styles.css. */
+input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=hidden]):not([type=button]):not([type=submit]):not([type=color]):not(.compteur-strip-saisie input),
 select:not([data-x]),
 textarea:not([data-x]),
 .champ-select:not([data-x]){
