@@ -1069,3 +1069,9 @@ textarea:not([data-x]),
   .ui-deux.is-egal .ui-ligne-info > .ui-tag{align-self:flex-start;}
   .ui-deux.is-egal .ui-ligne-action{width:100%;}
 }
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* barres de 3 boutons (Inventaire : Étiquettes / Emplacement / Exporter en CSV) : jamais rognées sur les côtés —
+     chaque bouton prend la largeur de son texte, et la barre passe sur 2 lignes si elle ne tient pas */
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)){flex-wrap:wrap;}
+  .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{flex:1 1 auto;min-width:max-content;padding:4px 6px;overflow:visible;white-space:nowrap;overflow-wrap:normal;word-break:normal;}
+}
