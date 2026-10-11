@@ -1271,13 +1271,14 @@ const SELECTEUR_AIDES_TELEPHONE = [
   '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
   '.overlay .hint',
   '.ui-aide',
+  '.ui-ligne-textes > .ui-ligne-sous',
   '#tco-classement-corps > .ui-grille .ui-tuile-note',
   '.ui-encadre.is-attention > p',
   '.ui-encadre.is-conseil p',
   '.machine-modal-add div.text-xs > span.block',
   '.ui-encadre:not(:has(.ui-encadre-titre))'
 ].join(',');
-const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.text-xs.font-bold,.block.uppercase,.pplan-head-ligne,.ui-tuile-etiquette,.ui-encadre-titre,strong,.ui-section-acces:not(:has(.ui-btn))';
+const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.text-xs.font-bold,.block.uppercase,.pplan-head-ligne,.ui-ligne-nom,.ui-tuile-etiquette,.ui-encadre-titre,strong,.ui-section-acces:not(:has(.ui-btn))';
 const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {

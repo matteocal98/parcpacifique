@@ -832,3 +832,7 @@ textarea:not([data-x]),
   body.barres-masquees .barre-mobile{transform:translateY(-115%);}
   body.barres-masquees .tabbar{transform:translateY(115%);}
 }
+@media (max-width:560px){
+  /* lignes à plusieurs boutons (équipe : Générer un mot de passe / Changer le droit / Retirer) : le texte passe à la ligne dans son bouton, il ne déborde plus */
+  .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{white-space:normal;height:auto;min-height:34px;padding:4px 3px;overflow:hidden;line-height:1.1;font-size:11px;overflow-wrap:anywhere;}
+}
