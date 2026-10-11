@@ -1075,3 +1075,12 @@ textarea:not([data-x]),
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)){flex-wrap:wrap;}
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn{flex:1 1 auto;min-width:max-content;padding:4px 6px;overflow:visible;white-space:nowrap;overflow-wrap:normal;word-break:normal;}
 }
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* fiche machine (Voir le plan) : la grille d'origine est à 12 colonnes avec des « grid-column » imposés par bloc —
+     on les neutralise pour que photo (gauche) et informations (droite) se placent côte à côte */
+  .fm2-grid > *{grid-column:auto !important;}
+  .fm2-o2-photo,.fm2-o2-photo-box{height:118px;}
+  /* tâches de maintenance et historique : deux cartes par ligne */
+  .taches-cartes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
+  #history-section .ref-table tbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
+}
