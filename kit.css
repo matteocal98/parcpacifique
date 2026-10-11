@@ -1100,3 +1100,10 @@ textarea:not([data-x]),
   .fm2-o2-intervalles *{font-size:11.5px;}
   .fm2-o2-intervalles [class*="titre"],.fm2-o2-intervalles strong{font-size:12.5px;}
 }
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* Voir le plan : photo + titre/compteur en haut ; intervalles et petits blocs en dessous, calés à gauche sur TOUTE la largeur */
+  .fm2-o2-main{display:contents;}
+  .fm2-grid > .fm2-o2-photo{grid-column:1 !important;grid-row:1;}
+  .fm2-grid .fm2-o2-ligne1{grid-column:2;grid-row:1;}
+  .fm2-grid .fm2-o2-ligne2,.fm2-grid .fm2-o2-ligne3{grid-column:1 / -1;}
+}
