@@ -1214,3 +1214,13 @@ textarea:not([data-x]),
   .machine-modal-edit #bloc-mode-suivi .grid:has(#f-interval){grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;align-items:start !important;}
   .machine-modal-edit #bloc-mode-suivi .grid:has(#f-interval) > div > label{min-height:2.5em;line-height:1.2 !important;display:flex;align-items:flex-end;}
 }
+
+/* ── Fenêtre d'intervention en PORTRAIT : les 3 boutons de pièces sur une même ligne (demande du 2026-10-11) ── */
+@media (max-width:700px){
+  .log-modal .log-bento-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .log-modal .log-bento-btn{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:8px 4px;min-width:0;min-height:0;}
+  .log-modal .log-bento-btn .log-bento-icone{width:26px;height:26px;flex:0 0 auto;}
+  .log-modal .log-bento-btn > span:not(.log-bento-icone){min-width:0;text-align:center;}
+  .log-modal .log-bento-titre{display:block;font-size:11px;line-height:1.2;white-space:normal;overflow-wrap:break-word;}
+  .log-modal .log-bento-badge{display:inline-block;font-size:8.5px;padding:1px 5px;margin-top:2px;}
+}
