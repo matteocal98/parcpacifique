@@ -1271,10 +1271,13 @@ const SELECTEUR_AIDES_TELEPHONE = [
   '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
   '.overlay .hint',
   '.ui-aide',
+  '#tco-classement-corps > .ui-grille .ui-tuile-note',
+  '.ui-encadre.is-attention > p',
+  '.ui-encadre.is-conseil p',
   '.machine-modal-add div.text-xs > span.block',
   '.ui-encadre:not(:has(.ui-encadre-titre))'
 ].join(',');
-const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.text-xs.font-bold,.block.uppercase,.pplan-head-ligne,strong,.ui-section-acces:not(:has(.ui-btn))';
+const SELECTEUR_TITRE_AIDE_TELEPHONE = 'h1,h2,h3,label,.ui-section-titre,.dz-titre,.text-sm.font-bold,.text-xs.font-bold,.block.uppercase,.pplan-head-ligne,.ui-tuile-etiquette,.ui-encadre-titre,strong,.ui-section-acces:not(:has(.ui-btn))';
 const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {
@@ -1284,7 +1287,8 @@ function compacterAidesTelephone(racine) {
     if (el.id || el.getAttribute('role') || el.getAttribute('aria-live')) return;
     if (el.querySelector('a,button,input,select,textarea')) return;
     const texte = (el.textContent || '').trim();
-    if (texte.length < SEUIL_AIDE_TELEPHONE) return;
+    const seuil = el.matches('.ui-tuile-note,.ui-encadre.is-attention > p') ? 20 : (el.matches('.ui-section-sous') ? 40 : SEUIL_AIDE_TELEPHONE);
+    if (texte.length < seuil) return;
     // un avertissement (retard, erreur) ne se replie jamais
     if (el.matches('.is-late,.is-retard,.is-erreur,.is-alerte,.err,.error')) return;
     // aides et encadrés : seuls les vrais paragraphes (≥ 80 caractères) sont repliés

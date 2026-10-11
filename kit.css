@@ -719,3 +719,65 @@ textarea:not([data-x]),
   .ui-grille.is-3:has(> .ui-tuile > .ui-tuile-etiquette + .ui-tuile-note){grid-template-columns:minmax(0,1fr);}
   .ui-grille.is-3:has(> .ui-tuile > .ui-tuile-etiquette + .ui-tuile-note) > .ui-tuile{grid-column:auto;padding:9px 11px;}
 }
+
+/* ── Téléphone : menu Coûts / TCO (retour du vrai téléphone, 2026-10-11) ───────────────────────────────────── */
+@media (max-width:560px){
+  /* 3 indicateurs du haut (devise, taux MO, catalogue) sur une seule ligne */
+  .ui-section:has(#tco-rapport-pdf) > .ui-grille{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ui-section:has(#tco-rapport-pdf) > .ui-grille > .ui-tuile{grid-column:auto;padding:7px 8px;gap:1px;}
+  .ui-section:has(#tco-rapport-pdf) .ui-tuile-etiquette{font-size:8.5px;letter-spacing:.03em;line-height:1.15;}
+  .ui-section:has(#tco-rapport-pdf) .ui-tuile-valeur{font-size:14px;}
+  .ui-section:has(#tco-rapport-pdf) .ui-tuile-valeur .ui-unite,.ui-section:has(#tco-rapport-pdf) .ui-tuile-valeur small{font-size:9px;}
+  .ui-section:has(#tco-rapport-pdf) .ui-tuile-note{font-size:9.5px;line-height:1.2;}
+  /* Classement : indicateurs plus bas */
+  #tco-classement-corps > .ui-grille > .ui-tuile{padding:7px 9px;gap:1px;}
+  #tco-classement-corps > .ui-grille .ui-tuile-etiquette{font-size:9px;line-height:1.15;}
+  #tco-classement-corps > .ui-grille .ui-tuile-valeur{font-size:17px;}
+  /* périodes : texte réduit pour tenir sur 2 lignes */
+  #tco-filtre-periode button{font-size:10.5px;line-height:1.15;padding:5px 4px;}
+  /* filtres catégorie / tri : sur une même ligne */
+  .ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-categorie-bouton,.ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-tri-bouton{flex:1 1 0;min-width:0;height:34px;min-height:0;padding:0 8px;font-size:11px;}
+  .ui-barre:has(#tco-filtre-tri-bouton){flex-wrap:nowrap;flex-wrap:wrap;}
+  .ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-periode{flex:1 1 100%;}
+  /* encadré « sans prix d'achat » : une seule petite ligne (icône, pastille « i », bouton) */
+  .ui-encadre.is-attention{flex-wrap:wrap;align-items:center;padding:7px 10px;gap:8px;}
+  .ui-encadre.is-attention > .ui-info-ligne{flex:0 0 auto;margin-right:auto;}
+  .ui-encadre.is-attention > p.is-ouvert{flex:1 1 100%;order:9;margin:2px 0 0;}
+  /* paramètres (taux MO, assurance, stockage) : 3 colonnes */
+  .ui-section-corps > .ui-grille.is-3:has(#tco-taux-horaire){grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{font-size:10px;line-height:1.15;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-champ{min-height:34px;padding:4px 26px 4px 6px;font-size:13px;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-unite{font-size:9px;padding:1px 4px;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-aide{font-size:9px;line-height:1.15;margin:2px 0 0;}
+  /* seuils : 2 petits blocs par ligne, sans espace vide */
+  .ui-deux.is-egal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
+  .ui-deux.is-egal > .ui-ligne{padding:8px;gap:5px;grid-template-columns:minmax(0,1fr);}
+  .ui-deux.is-egal .ui-ligne-icone{display:none;}
+  .ui-deux.is-egal .ui-ligne-nom{font-size:11px;line-height:1.2;}
+  .ui-deux.is-egal .ui-ligne-sous{font-size:9.5px;}
+  .ui-deux.is-egal .ui-ligne-info{gap:4px;}
+  .ui-deux.is-egal .ui-ligne-info:not(:has(*)),.tco-seuil-raccourcis:empty{display:none;}
+  .ui-deux.is-egal .ui-tag{font-size:9.5px;padding:1px 6px;}
+  .ui-deux.is-egal .tco-seuil-raccourcis{flex-direction:column;align-items:stretch;gap:4px;flex-wrap:nowrap;overflow:visible;}
+  .ui-deux.is-egal .tco-seuil-raccourcis > .ui-btn{height:auto;min-height:0;padding:4px 6px;font-size:10px;line-height:1.15;white-space:normal;flex:0 0 auto;}
+  .ui-deux.is-egal .ui-ligne-action{min-height:0;}
+  .ui-deux.is-egal .ui-champ{min-height:32px;padding:4px 28px 4px 8px;font-size:13px;}
+  .ui-deux.is-egal .ui-unite{font-size:9px;}
+  /* légende du graphique en anneau : les pastilles de pourcentage ne dépassent plus */
+  .tco-donut-legende-grille > *{min-width:0;font-size:11px;padding:6px 8px;}
+}
+@media (max-width:560px){
+  /* seuils : hauteur de ligne = la plus haute carte de la ligne (plus de lignes toutes égales à la plus grande) */
+  .ui-deux.is-egal{grid-auto-rows:auto;align-items:stretch;}
+  .ui-deux.is-egal > .ui-liste{gap:8px;}
+  .ui-deux.is-egal > .ui-liste > .ui-ligne{height:100%;align-content:start;}
+  .ui-deux.is-egal details summary{font-size:10px;}
+  .ui-deux.is-egal .ui-aide{font-size:9.5px;}
+  /* paramètres : champs alignés en bas même si un libellé passe sur 2 lignes */
+  .ui-grille.is-3:has(#tco-taux-horaire){align-items:end;}
+  /* filtres catégorie / tri : police plus petite pour ne plus être tronqués */
+  .ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-categorie-bouton,.ui-barre:has(#tco-filtre-tri-bouton) > #tco-filtre-tri-bouton{font-size:10px;padding:0 6px;gap:3px;}
+}
+@media (max-width:560px){
+  .ui-deux.is-egal .ui-ligne-info .ui-btn{font-size:10px;padding:4px 6px;min-height:0;height:auto;line-height:1.15;flex:0 0 auto;width:100%;border-radius:10px;white-space:normal;}
+}
