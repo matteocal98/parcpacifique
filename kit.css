@@ -843,3 +843,26 @@ textarea:not([data-x]),
   /* « Verrouillage et reconnexion » : les cases à cocher tiennent sur une ligne chacune, explications dans la pastille */
   #acc-bio-corps .check-row,#acc-acces-corps .check-row{font-size:12.5px;margin:4px 0;gap:8px;}
 }
+
+/* ── Téléphone : page de connexion qui tient dans la hauteur de l'écran (logo inchangé, 68 px) ──────────────────
+   Les marges verticales suivent la hauteur de l'écran (clamp sur vh) : un petit téléphone les resserre, un grand les laisse respirer. */
+@media (max-width:560px){
+  .login-box{margin-top:0;padding:clamp(8px,1.6vh,16px) 20px 6px;}
+  .login-box.dans-app{margin-top:0;}
+  .login-box .lang-switch{margin-bottom:clamp(2px,.8vh,8px);}
+  .login-box .lang-btn{padding-top:4px;padding-bottom:4px;min-height:0;}
+  .marque-connexion{margin:0 auto clamp(2px,.8vh,8px);}
+  .login-box h1{font-size:22px;margin:0 0 2px;}
+  .login-box > p{font-size:12.5px;line-height:1.35;margin-bottom:clamp(6px,1.4vh,14px);}
+  .login-box form label{font-size:13px;margin-bottom:4px;}
+  .login-box form input{min-height:40px;}
+  .champ-entete{margin-top:clamp(6px,1.4vh,12px);}
+  .champ-entete label{margin-bottom:4px;}
+  .acces-local{margin-top:clamp(6px,1.4vh,12px);padding-top:clamp(4px,1vh,10px);}
+  .bio-connexion{margin-top:clamp(4px,1vh,10px);padding-top:clamp(4px,1vh,8px);}
+  .bio-connexion .check-row{min-height:0;margin:2px 0;font-size:12.5px;}
+  .login-actions{margin-top:clamp(8px,1.6vh,14px);gap:8px;}
+  .login-actions button{min-height:40px;font-size:14px;padding:6px 8px;white-space:nowrap;}
+  .login-box .legal-footer{margin-top:clamp(4px,1vh,10px);font-size:11.5px;}
+  .login-box .legal-footer p{margin:2px 0 0;}
+}

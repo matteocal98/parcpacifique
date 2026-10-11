@@ -1271,6 +1271,7 @@ const SELECTEUR_AIDES_TELEPHONE = [
   '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
   '.overlay .hint',
   '.ui-aide',
+  '.login-box form > p.hint',
   '.ui-ligne-textes > .ui-ligne-sous',
   '#tco-classement-corps > .ui-grille .ui-tuile-note',
   '.ui-encadre.is-attention > p',
