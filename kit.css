@@ -795,3 +795,8 @@ textarea:not([data-x]),
   .ui-btn-plein{font-size:14px;min-height:40px;padding:8px 14px;}
   div:not([class]) > .ui-btn-plein,.ui-section-corps > .ui-btn-plein{display:flex;width:fit-content;max-width:100%;margin-left:auto;margin-right:auto;}
 }
+@media (max-width:560px){
+  /* TCO : libellés et aides des 3 paramètres centrés au-dessus / au-dessous de leur champ */
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-etiquette{justify-content:center;text-align:center;}
+  .ui-grille.is-3:has(#tco-taux-horaire) .ui-aide{display:block;text-align:center;}
+}
