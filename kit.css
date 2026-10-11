@@ -703,10 +703,10 @@ textarea:not([data-x]),
   .ui-aide{margin:4px 0;}
   .ui-etiquette{margin-bottom:3px;}
   /* indicateurs du haut : étiquette, valeur et note réduites */
-  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile{padding:8px 9px;gap:2px;}
-  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-etiquette{font-size:9px;letter-spacing:.04em;}
-  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-valeur{font-size:15px;line-height:1.15;}
-  .ui-page:has(#rap-save) .ui-section:first-child .ui-tuile-note{font-size:10px;line-height:1.25;}
+  .ui-page:has(#push-cible-save) .ui-section:first-child .ui-tuile{padding:8px 9px;gap:2px;}
+  .ui-page:has(#push-cible-save) .ui-section:first-child .ui-tuile-etiquette{font-size:9px;letter-spacing:.04em;}
+  .ui-page:has(#push-cible-save) .ui-section:first-child .ui-tuile-valeur{font-size:15px;line-height:1.15;}
+  .ui-page:has(#push-cible-save) .ui-section:first-child .ui-tuile-note{font-size:10px;line-height:1.25;}
   /* les 3 droits (Gérant / Droit de gestion / Droit de saisie) sur une même ligne */
   .ui-section-corps:has(#push-cible-save):has(> .ui-groupe + .ui-groupe + .ui-groupe){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
   .ui-section-corps:has(#push-cible-save):has(> .ui-groupe + .ui-groupe + .ui-groupe) > *{grid-column:1 / -1;}
@@ -1049,12 +1049,12 @@ textarea:not([data-x]),
   .vue-agenda .agenda-calendrier{grid-column:1 / -1;}
 
   /* Rappels : « Rappels sur le téléphone » (et le bloc push mobile) sur toute la largeur */
-  .ui-colonnes:has(#rap-save){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
-  .ui-colonnes:has(#rap-save) > .ui-colonne{display:contents;}
-  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(1){order:1;}
-  .ui-colonnes:has(#rap-save) > .ui-colonne:nth-child(2) > .ui-section{order:2;}
-  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(2){order:3;grid-column:1 / -1;}
-  .ui-colonnes:has(#rap-save) > .ui-colonne:first-child > .ui-section:nth-child(3){order:4;grid-column:1 / -1;}
+  .ui-colonnes:has(#push-cible-save){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
+  .ui-colonnes:has(#push-cible-save) > .ui-colonne{display:contents;}
+  .ui-colonnes:has(#push-cible-save) > .ui-colonne:first-child > .ui-section:nth-child(1){order:1;}
+  .ui-colonnes:has(#push-cible-save) > .ui-colonne:nth-child(2) > .ui-section{order:2;}
+  .ui-colonnes:has(#push-cible-save) > .ui-colonne:first-child > .ui-section:nth-child(2){order:3;grid-column:1 / -1;}
+  .ui-colonnes:has(#push-cible-save) > .ui-colonne:first-child > .ui-section:nth-child(3){order:4;grid-column:1 / -1;}
 
   /* Télémétrie : « Compteur automatique » sur toute la largeur, « Machines reliées » dessous, 2 machines par ligne */
   #acc-telemetrie{grid-template-columns:minmax(0,1fr);}
