@@ -1704,6 +1704,7 @@ function habillerSelectPieceCatalogue(select) {
     bouton.disabled = select.disabled;
   };
   majBouton();
+  select.__majBouton = majBouton; // permet à un scan de QR de rafraîchir le libellé après select.value = …
 
   bouton.addEventListener('click', () => {
     // Même seuil que .compteur-mobile/.compteur-bureau : la modale centrée
@@ -2428,6 +2429,10 @@ function openLogInterventionModal(machine, tache) {
               <span class="log-bento-icone">${picto('croix')}</span>
               <span><span class="log-bento-titre">${trad('+ Ajouter une pièce')}</span><br><span class="log-bento-sub">${trad('Catalogue ou référence libre')}</span></span>
             </button>
+            ${SCHEMA.hasStockChamps ? `<button type="button" class="log-bento-btn" id="log-piece-scanner">
+              <span class="log-bento-icone">${picto('qrcode')}</span>
+              <span><span class="log-bento-titre">${trad('Scanner une pièce')}</span><br><span class="log-bento-sub">${trad('QR code de l\'étiquette de stock')}</span></span>
+            </button>` : ''}
             <button type="button" class="log-bento-btn" id="log-facture-photo-btn">
               <span class="log-bento-icone">${picto('photo')}</span>
               <span><span class="log-bento-titre">${trad('Scanner une facture')}</span><span class="log-bento-badge">${trad('OCR IA')}</span><br><span class="log-bento-sub">${trad('Lecture automatique du montant')}</span></span>
@@ -2668,6 +2673,39 @@ function openLogInterventionModal(machine, tache) {
       const nouvelleLigne = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
       activerSeparateurMilliers(nouvelleLigne?.querySelector('.log-piece-prix'));
       habillerSelectPieceCatalogue(nouvelleLigne?.querySelector('.log-piece-select'));
+    });
+    // Scan d'une étiquette de stock : la pièce est ajoutée à l'intervention (ou sa quantité augmente d'une unité si
+    // elle y est déjà). Le prix du catalogue se propose comme pour une pièce choisie à la main.
+    overlay.querySelector('#log-piece-scanner')?.addEventListener('click', () => {
+      ouvrirScannerQr({
+        titre: trad('Scanner une pièce'),
+        surTexte: (texte) => {
+          const lue = lireQrLigneStock(texte);
+          if (!lue) return trad('Ce QR code n\'est pas une étiquette de stock KALEA.');
+          const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(lue.partId));
+          if (!piece) return trad('Pièce introuvable dans le catalogue.');
+          if (!piecesListe) return trad('Saisie des pièces indisponible.');
+          const existante = Array.from(piecesListe.querySelectorAll('.log-piece-ligne'))
+            .find((l) => l.querySelector('.log-piece-select')?.value === String(piece.id));
+          if (existante) {
+            const champQte = existante.querySelector('.log-piece-qte');
+            champQte.value = String((Number(champQte.value) || 0) + 1);
+          } else {
+            pieceIdx += 1;
+            piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
+            const nouvelle = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
+            activerSeparateurMilliers(nouvelle?.querySelector('.log-piece-prix'));
+            const sel = nouvelle.querySelector('.log-piece-select');
+            habillerSelectPieceCatalogue(sel);
+            sel.value = String(piece.id);
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof sel.__majBouton === 'function') sel.__majBouton();
+          }
+          recalcTotalPieces();
+          showToast(tR('Pièce ajoutée : {nom}', { nom: piece.designation }));
+          return true;
+        },
+      });
     });
     piecesListe?.addEventListener('change', (e) => {
       if (e.target.classList.contains('log-piece-select')) {

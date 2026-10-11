@@ -33,6 +33,8 @@ const __isModeSupport = __paramsSupport.has('mode_support');
 // voir boot()) puisqu'elle n'est capturée qu'une seule fois au chargement.
 const __paramsQr = new URLSearchParams(window.location.search);
 const __machineIdDepuisQr = __paramsQr.get('qr');
+// Même principe pour l'étiquette d'une LIGNE DE STOCK : `?stock=<id article>.<id magasin>` (voir lireQrLigneStock).
+const __stockDepuisQr = __paramsQr.get('stock');
 // Même besoin que le lien profond QR, pour une raison différente : le tap
 // sur une notification push peut arriver AVANT que UI.machines soit chargé
 // (lancement à froid de l'appli). Posée par wirePushEcouteurs(), résolue par

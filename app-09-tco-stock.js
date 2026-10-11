@@ -2304,18 +2304,183 @@ function ouvrirModaleEmplacementStock(partIdInitial, magasinIdInitial) {
   });
 }
 
+// ── QR CODE D'UNE LIGNE DE STOCK (article × magasin) ─────────────────────────────────────────────────────
+// Le QR contient un lien `<adresse de l'appli>?stock=<id article + id magasin, en base64 court>`. Il s'ouvre :
+//   · avec l'appareil photo du téléphone → l'appli s'ouvre (connexion demandée si besoin) sur la fiche de la ligne ;
+//   · avec le scanner de l'appli (Parc › Scanner un QR) → même fiche ;
+//   · avec le scanner « Scanner une pièce » d'une intervention → la pièce est ajoutée à l'intervention.
+// Un QR ne révèle rien à un inconnu : sans connexion à la bonne société, la fiche reste introuvable.
+function urlBaseApp() {
+  const l = window.location;
+  // Dans l'appli Android (adresse locale « localhost » sans port, ou schéma capacitor/file), l'adresse de la page
+  // n'est PAS joignable depuis un autre téléphone : on imprime l'adresse publique.
+  const local = (l.hostname === 'localhost' || l.hostname === '127.0.0.1') && !l.port;
+  if (local || /^(capacitor|file|ionic)/.test(l.protocol)) return 'https://kalea.pro/app.html';
+  return l.origin + l.pathname;
+}
+// Les deux identifiants (2 × 16 octets) sont écrits en base64 « URL-safe » : 43 caractères au lieu de 73, donc un QR
+// beaucoup moins dense (modules plus gros, lecture plus facile au téléphone, même sur une étiquette abîmée).
+function identifiantsVersCompact(partId, warehouseId) {
+  const hex = (String(partId) + String(warehouseId)).replace(/-/g, '');
+  let binaire = '';
+  for (let i = 0; i < 32; i++) binaire += String.fromCharCode(parseInt(hex.substr(i * 2, 2), 16));
+  return btoa(binaire).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function compactVersIdentifiants(texte) {
+  try {
+    const binaire = atob(String(texte).replace(/-/g, '+').replace(/_/g, '/'));
+    if (binaire.length !== 32) return null;
+    let hex = '';
+    for (let i = 0; i < 32; i++) hex += binaire.charCodeAt(i).toString(16).padStart(2, '0');
+    const uuid = (h) => `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+    return { partId: uuid(hex.slice(0, 32)), warehouseId: uuid(hex.slice(32)) };
+  } catch (e) { return null; }
+}
+function urlQrLigneStock(partId, warehouseId) {
+  return `${urlBaseApp()}?stock=${identifiantsVersCompact(partId, warehouseId)}`;
+}
+// Lit le texte d'un QR scanné ; renvoie { partId, warehouseId } ou null si ce n'est pas une étiquette de stock KALEA.
+function lireQrLigneStock(texte) {
+  let valeur = null;
+  try { valeur = new URL(texte).searchParams.get('stock'); } catch (e) { /* pas une URL */ }
+  if (!valeur) return null;
+  if (/^[A-Za-z0-9_-]{43}$/.test(valeur)) return compactVersIdentifiants(valeur);
+  const m = /^([0-9a-f-]{36})\.([0-9a-f-]{36})$/i.exec(valeur); // forme longue (tolérée)
+  return m ? { partId: m[1], warehouseId: m[2] } : null;
+}
+// SVG du QR (zone de silence de 2 modules comprise). Correction d'erreur « Q » (25 %) : une étiquette collée sur un
+// rayon se salit et se plie ; c'est un bon compromis entre robustesse et densité (le lien est long).
+async function qrSvgPourTexte(texte) {
+  const lib = await loadQrCodeLib();
+  const qr = lib(0, 'Q');
+  qr.addData(texte);
+  qr.make();
+  const n = qr.getModuleCount();
+  const marge = 2;
+  let d = '';
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      if (qr.isDark(r, c)) d += `M${c + marge} ${r + marge}h1v1h-1z`;
+    }
+  }
+  const t = n + marge * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${t} ${t}" shape-rendering="crispEdges"><rect width="${t}" height="${t}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
+
+// ── FICHE D'UNE LIGNE DE STOCK (ouverte par le QR) : état de la ligne + sortie / entrée en deux gestes ──────
+function ouvrirFicheLigneStock(partId, warehouseId) {
+  if (!(SCHEMA.hasStock && planCouvreStock())) {
+    showToast(trad('Le module Stock n\'est pas disponible sur cette offre.'));
+    return false;
+  }
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const magasin = (UI.warehouses || []).find((w) => String(w.id) === String(warehouseId));
+  if (!piece || !magasin) {
+    // Silencieux et sans erreur technique : un id inconnu ou d'une AUTRE société est simplement « introuvable ».
+    showToast(trad('Article ou magasin introuvable ou non accessible.'));
+    return false;
+  }
+  const trouverLigne = () => (UI.stockItems || []).find((it) => String(it.part_id) === String(partId) && String(it.warehouse_id) === String(warehouseId));
+  const ligne = trouverLigne();
+  const peut = peutGererMouvementsStock();
+  const gerant = peutGererParametresStock();
+  const statut = statutLigneStock(ligne);
+  const unite = piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? libelleUniteMesure(piece.unit_of_measure) : '';
+  const ailleurs = (UI.stockItems || [])
+    .filter((it) => String(it.part_id) === String(partId) && String(it.warehouse_id) !== String(warehouseId) && Number(it.quantity) > 0)
+    .map((it) => `${esc(nomMagasin(it.warehouse_id))} : ${esc(texteAvecSeparateurs(it.quantity))}`)
+    .join(' · ');
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const sortieBloquee = statut !== 'libere';
+  overlay.innerHTML = `
+    <div class="modal export-modal fiche-ligne-stock" role="dialog" aria-modal="true" aria-labelledby="fiche-stock-titre">
+      <h2 id="fiche-stock-titre">${esc(piece.designation)}</h2>
+      <div class="ui-aide">${esc([piece.reference, piece.ean ? 'EAN ' + piece.ean : ''].filter(Boolean).join(' · '))}</div>
+      <div class="fiche-stock-infos">
+        <div class="ligne-info"><span>${trad('Magasin')}</span><strong>${esc(magasin.name)}</strong></div>
+        <div class="ligne-info"><span>${trad('Emplacement')}</span><strong>${ligne?.location ? esc(ligne.location) : '—'}</strong></div>
+        <div class="ligne-info"><span>${trad('Statut du stock')}</span><strong>${esc(libelleStatutStock(statut))}</strong></div>
+        <div class="ligne-info"><span>${trad('En stock')}</span><strong>${esc(texteAvecSeparateurs(ligne ? ligne.quantity : 0))}${unite ? ' ' + esc(unite) : ''}</strong></div>
+        ${gerant && ligne ? `<div class="ligne-info"><span>${trad('Coût moyen (PUMP)')}</span><strong>${esc(texteAvecSeparateurs(ligne.pump_unit_cost))} ${esc(deviseCourte())}</strong></div>` : ''}
+        ${ailleurs ? `<div class="ligne-info"><span>${trad('Ailleurs')}</span><strong>${ailleurs}</strong></div>` : ''}
+      </div>
+      ${peut ? `
+      <div class="ui-champ-groupe">
+        <strong>${trad('Mouvement rapide')}</strong>
+        <label class="ui-case"><input type="radio" name="fiche-type" value="sortie" ${sortieBloquee ? 'disabled' : 'checked'}> ${trad('Sortie')}</label>
+        <label class="ui-case"><input type="radio" name="fiche-type" value="entree" ${sortieBloquee ? 'checked' : ''}> ${trad('Entrée')}</label>
+        ${sortieBloquee ? `<div class="ui-aide">${trad('Cette ligne n\'est pas libérée : la sortie est impossible.')}</div>` : ''}
+        <label for="fiche-quantite">${trad('Quantité')}</label>
+        <input id="fiche-quantite" class="ui-champ" type="number" min="0" step="any" value="1" inputmode="decimal">
+        <div id="fiche-cout-bloc" ${sortieBloquee ? '' : 'hidden'}>
+          <label for="fiche-cout">${trad('Coût unitaire')} (${esc(deviseCourte())})</label>
+          <input id="fiche-cout" class="ui-champ" type="text" inputmode="decimal" value="${esc(texteAvecSeparateurs(piece.unit_price))}">
+        </div>
+        <label for="fiche-motif">${trad('Motif (optionnel)')}</label>
+        <input id="fiche-motif" class="ui-champ" maxlength="120">
+      </div>` : ''}
+      <div id="fiche-stock-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="fiche-stock-fermer">${trad('Fermer')}</button>
+        ${peut && SCHEMA.hasStockChamps ? `<button type="button" class="ui-btn ui-btn-pastille" id="fiche-stock-emplacement">${picto('crayon')}<span>${trad('Emplacement et statut')}</span></button>` : ''}
+        ${peut ? `<button type="button" class="ui-btn ui-btn-plein" id="fiche-stock-valider">${picto('coche')}<span>${trad('Valider')}</span></button>` : ''}
+      </div>
+    </div>`;
+  const msg = overlay.querySelector('#fiche-stock-msg');
+  overlay.querySelector('#fiche-stock-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#fiche-stock-emplacement')?.addEventListener('click', () => { overlay.remove(); ouvrirModaleEmplacementStock(partId, warehouseId); });
+  const typeChoisi = () => overlay.querySelector('input[name="fiche-type"]:checked')?.value || 'sortie';
+  overlay.querySelectorAll('input[name="fiche-type"]').forEach((r) => r.addEventListener('change', () => {
+    const blocCout = overlay.querySelector('#fiche-cout-bloc');
+    if (blocCout) blocCout.hidden = typeChoisi() !== 'entree';
+  }));
+  overlay.querySelector('#fiche-stock-valider')?.addEventListener('click', async () => {
+    const bouton = overlay.querySelector('#fiche-stock-valider');
+    const type = typeChoisi();
+    const qte = nombreDepuisTexte(overlay.querySelector('#fiche-quantite').value);
+    const cout = type === 'entree' ? nombreDepuisTexte(overlay.querySelector('#fiche-cout').value) : null;
+    if (!qte || qte <= 0) { msg.textContent = trad('Quantité invalide.'); return; }
+    if (type === 'entree' && (cout == null || cout < 0)) { msg.textContent = trad('Coût unitaire requis pour une entrée.'); return; }
+    bouton.disabled = true;
+    msg.textContent = trad('Enregistrement…');
+    try {
+      const { error } = await sb.rpc('enregistrer_mouvement_stock', {
+        p_type: type, p_part_id: partId, p_warehouse_id: warehouseId, p_destination_warehouse_id: null,
+        p_quantity: qte, p_unit_cost: cout, p_intervention_id: null,
+        p_reason: overlay.querySelector('#fiche-motif').value.trim() || null,
+      });
+      if (error) throw error;
+      const { data: soldes } = await sb.from('stock_items')
+        .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at' + colonnesLigneStockEnPlus())
+        .eq('company_id', UI.companyId);
+      UI.stockItems = soldes || [];
+      UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+      showToast(trad('Mouvement enregistré'));
+      overlay.remove();
+      renderApp();
+    } catch (err) {
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      bouton.disabled = false;
+    }
+  });
+  return true;
+}
+
 // ── ÉTIQUETTES DE STOCK : une par ligne de stock (article × magasin × emplacement) ──────────────────────────
 // Deux formats, choisis à l'impression :
 //   · feuille A4 d'étiquettes autocollantes, grille 3 × 8 (70 × 37 mm, 24 par feuille — format très courant) ;
 //   · étiquette unitaire 62 × 29 mm (imprimante d'étiquettes).
 // Le document est construit à part (iframe masquée) : son @page ne touche jamais à l'impression du reste de l'appli.
-// La zone « qr » est réservée : elle sera remplie par le QR code de la ligne (étape suivante).
+// La zone « qr » porte le QR code de la ligne (voir qrSvgPourTexte / urlQrLigneStock).
 const FORMATS_ETIQUETTE = {
   a4: { libelle: 'Feuille A4 — 24 étiquettes (3 × 8, 70 × 37 mm)', l: 70, h: 37, colonnes: 3, rangees: 8 },
   unitaire: { libelle: 'Étiquette unitaire (62 × 29 mm)', l: 62, h: 29 },
 };
 
-function htmlUneEtiquette(it) {
+function htmlUneEtiquette(it, qrSvg) {
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
   const designation = piece ? piece.designation : designationPiece(it.part_id);
   const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? libelleUniteMesure(piece.unit_of_measure) : '';
@@ -2326,12 +2491,13 @@ function htmlUneEtiquette(it) {
     + (piece?.ean ? `<div class="ean">EAN ${esc(piece.ean)}</div>` : '')
     + `<div class="lieu">${esc(lieu)}</div>`
     + (unite ? `<div class="unite">${esc(unite)}</div>` : '')
-    + `</div><div class="qr"></div></div>`;
+    + `</div><div class="qr">${qrSvg || ''}</div></div>`;
 }
 
 // lignes : lignes de stock à imprimer (déjà répétées selon le nombre d'exemplaires) ; premiere : n° (1…24) de la
 // première case libre de la 1re feuille A4 (réutiliser une feuille entamée).
-function documentEtiquettes(lignes, formatCle, premiere) {
+function documentEtiquettes(lignes, formatCle, premiere, qrParCle) {
+  const qrDe = (it) => (qrParCle || {})[`${it.part_id}.${it.warehouse_id}`];
   const f = FORMATS_ETIQUETTE[formatCle];
   const a4 = formatCle === 'a4';
   const css = `
@@ -2358,10 +2524,10 @@ function documentEtiquettes(lignes, formatCle, premiere) {
     const cases = [...Array(Math.max(0, (premiere || 1) - 1)).fill(null), ...lignes];
     const parFeuille = f.colonnes * f.rangees;
     for (let i = 0; i < cases.length; i += parFeuille) {
-      corps += `<div class="feuille">${cases.slice(i, i + parFeuille).map((c) => (c ? htmlUneEtiquette(c) : '<div class="vide"></div>')).join('')}</div>`;
+      corps += `<div class="feuille">${cases.slice(i, i + parFeuille).map((c) => (c ? htmlUneEtiquette(c, qrDe(c)) : '<div class="vide"></div>')).join('')}</div>`;
     }
   } else {
-    corps = lignes.map((c) => `<div class="page">${htmlUneEtiquette(c)}</div>`).join('');
+    corps = lignes.map((c) => `<div class="page">${htmlUneEtiquette(c, qrDe(c))}</div>`).join('');
   }
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(trad('Étiquettes de stock'))}</title><style>${css}</style></head><body>${corps}</body></html>`;
 }
@@ -2460,13 +2626,27 @@ function ouvrirModaleEtiquettes() {
     overlay.querySelector('#etiquettes-debut-bloc').hidden = formatChoisi() !== 'a4';
   }));
   overlay.querySelector('#etiquettes-fermer').addEventListener('click', () => overlay.remove());
-  overlay.querySelector('#etiquettes-go').addEventListener('click', () => {
+  overlay.querySelector('#etiquettes-go').addEventListener('click', async () => {
+    const boutonGo = overlay.querySelector('#etiquettes-go');
     const choisies = coches();
     if (!choisies.length) { msg.textContent = trad('Coche au moins une ligne.'); return; }
     const copies = Math.max(1, Math.min(10, Math.round(Number(overlay.querySelector('#etiquettes-copies').value) || 1)));
     const debut = Math.max(1, Math.min(24, Math.round(Number(overlay.querySelector('#etiquettes-debut').value) || 1)));
     const lignes = choisies.flatMap((it) => Array(copies).fill(it));
-    imprimerDocumentHtml(documentEtiquettes(lignes, formatChoisi(), formatChoisi() === 'a4' ? debut : 1));
+    // Un QR par ligne distincte (les exemplaires réutilisent le même). Si le générateur est indisponible, les
+    // étiquettes s'impriment quand même, sans QR : jamais un blocage.
+    boutonGo.disabled = true;
+    msg.textContent = trad('Préparation des étiquettes…');
+    const qrParCle = {};
+    try {
+      for (const it of choisies) {
+        const cle = `${it.part_id}.${it.warehouse_id}`;
+        if (!qrParCle[cle]) qrParCle[cle] = await qrSvgPourTexte(urlQrLigneStock(it.part_id, it.warehouse_id));
+      }
+    } catch (err) {
+      msg.textContent = trad('QR code indisponible : les étiquettes sont imprimées sans QR.');
+    }
+    imprimerDocumentHtml(documentEtiquettes(lignes, formatChoisi(), formatChoisi() === 'a4' ? debut : 1, qrParCle));
     overlay.remove();
   });
 }

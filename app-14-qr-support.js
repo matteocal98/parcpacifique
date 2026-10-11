@@ -22,6 +22,15 @@
 //      décode le texte, en extrait le paramètre `qr`, et appelle directement
 //      ouvrirFicheParId() — sans recharger la page.
 // Les deux chemins passent donc par ouvrirFicheParId(), jamais dupliquée.
+// Lien profond d'une ÉTIQUETTE DE STOCK (`?stock=<article>.<magasin>`) : même discipline que ci-dessus.
+function ouvrirFicheStockDepuisQrSiPresent() {
+  if (!__stockDepuisQr) return;
+  history.replaceState(null, '', window.location.pathname);
+  const s = lireQrLigneStock(window.location.origin + window.location.pathname + '?stock=' + __stockDepuisQr);
+  if (!s) { showToast(trad('Ce QR code ne correspond pas à une étiquette de stock KALEA.')); return; }
+  ouvrirFicheLigneStock(s.partId, s.warehouseId);
+}
+
 function ouvrirFicheParId(machineId) {
   const m = UI.machines.find((x) => x.id === machineId);
   if (m) { openPlanView(m, UI.companyId, UI.categories); return true; }
@@ -156,7 +165,7 @@ function imprimerQr(dataUrl, machine) {
 // navigateur/WebView moderne) en priorité, repli sur la bibliothèque vendue
 // jsQR (loadJsQrLib) si l'API native est absente — jamais un échec silencieux
 // faute de support natif.
-async function ouvrirScannerQr() {
+async function ouvrirScannerQr(options = {}) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
@@ -175,7 +184,7 @@ async function ouvrirScannerQr() {
 
   overlay.innerHTML = `
     <div class="modal" style="max-width:420px;text-align:center;">
-      <h2>${trad('Scanner un QR code')}</h2>
+      <h2>${esc(options.titre || trad('Scanner un QR code'))}</h2>
       <div id="scan-zone" style="position:relative;background:#000;border-radius:var(--r-md);overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;">
         <span class="muted" style="color:#fff;">${trad('Démarrage de la caméra…')}</span>
       </div>
@@ -228,12 +237,22 @@ async function ouvrirScannerQr() {
   // Même résolution que le lien profond (§ ouvrirFicheParId) : un QR qui
   // n'est pas une URL KALEA valide, ou qui pointe vers une machine hors de
   // portée, le dit simplement — jamais une erreur technique.
+  // Renvoie vrai quand le QR est accepté (le scanner se ferme), faux sinon (le scan CONTINUE, avec un message).
   const traiterTexte = (texte) => {
+    if (typeof options.surTexte === 'function') {
+      const res = options.surTexte(texte);
+      if (res === true) { fermer(); return true; }
+      if (message) message.textContent = typeof res === 'string' ? res : trad('Ce QR code ne correspond pas à ce qui est attendu ici.');
+      return false;
+    }
+    const ligneStock = lireQrLigneStock(texte);
+    if (ligneStock) { fermer(); ouvrirFicheLigneStock(ligneStock.partId, ligneStock.warehouseId); return true; }
     let id = null;
     try { id = new URL(texte).searchParams.get('qr'); } catch (e) { /* pas une URL : ignoré ci-dessous */ }
-    if (!id) { if (message) message.textContent = trad('Ce QR code ne correspond pas à une machine KALEA.'); return; }
+    if (!id) { if (message) message.textContent = trad('Ce QR code ne correspond pas à une machine ni à une étiquette de stock KALEA.'); return false; }
     fermer();
     ouvrirFicheParId(id);
+    return true;
   };
 
   async function boucleDecodage() {
@@ -242,14 +261,14 @@ async function ouvrirScannerQr() {
     try {
       if (detecteurNatif) {
         const codes = await detecteurNatif.detect(video);
-        if (codes.length) { traiterTexte(codes[0].rawValue); return; }
+        if (codes.length && traiterTexte(codes[0].rawValue)) return;
       } else if (jsQrFn) {
         canvasDecode.width = video.videoWidth;
         canvasDecode.height = video.videoHeight;
         ctxDecode.drawImage(video, 0, 0, canvasDecode.width, canvasDecode.height);
         const image = ctxDecode.getImageData(0, 0, canvasDecode.width, canvasDecode.height);
         const resultat = jsQrFn(image.data, image.width, image.height);
-        if (resultat && resultat.data) { traiterTexte(resultat.data); return; }
+        if (resultat && resultat.data && traiterTexte(resultat.data)) return;
       }
     } catch (e) { /* une frame ratée n'interrompt jamais la boucle */ }
     if (!arret) requestAnimationFrame(boucleDecodage);
@@ -1882,6 +1901,7 @@ async function boot(toastMessage) {
   // ★ LIEN PROFOND QR CODE : UI.machines est chargé, on peut résoudre. Sans
   //   effet si aucun paramètre `?qr=` n'est présent (cas normal).
   ouvrirFicheDepuisQrSiPresent();
+  ouvrirFicheStockDepuisQrSiPresent();
 
   // ★ TAP SUR UNE NOTIFICATION PUSH arrivé avant que UI.machines soit chargé
   //   (lancement à froid) : résolu ici, même emplacement que le lien QR.
