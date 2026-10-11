@@ -1884,7 +1884,7 @@ function blocMagasinsStockHtml() {
         `<span class="ui-tag">${tR('{n} magasin(s)', { n: magasins.length })}</span>`)}
       <div class="ui-section-corps">
         ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant.')}</div>`}
-        <div class="ui-liste" id="stock-magasins-liste">${liste}</div>
+        <div class="ui-liste is-defilant" id="stock-magasins-liste">${liste}</div>
         ${gerant ? `
         <div class="ui-groupe">
           <div class="ui-groupe-tete">${picto('plusCercle')}<span class="ui-groupe-titre" id="stock-magasin-form-titre">${trad('Ajouter un magasin')}</span></div>
