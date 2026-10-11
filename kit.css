@@ -1407,3 +1407,15 @@ textarea:not([data-x]),
   /* un seul événement ce jour-là : pleine largeur ; un nombre impair : le dernier prend toute la ligne */
   .agenda-jour-modal .jm-liste > :only-child,.agenda-jour-modal .jm-liste > :last-child:nth-child(odd){grid-column:1 / -1;}
 }
+
+/* ── Agenda (téléphone) : les deux boutons du bas (Programmer / Planifier + Fermer) sur UNE ligne — une ligne de lecture gagnée ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .pe-pied,.jm-pied{flex-direction:row !important;align-items:stretch;gap:8px;margin-top:10px;}
+  .pe-pied > .pe-confirmer,.jm-pied > :first-child{flex:1 1 0;min-width:0;min-height:44px;white-space:normal;line-height:1.15;}
+  .pe-pied > .pe-fermer,.jm-pied > :last-child:not(:first-child){flex:0 0 auto;min-width:96px;min-height:44px;}
+}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .pe-pied > button,.jm-pied > button{width:auto !important;}
+  .pe-pied > .pe-confirmer,.jm-pied > button:first-child{flex:1 1 0 !important;}
+  .pe-pied > .pe-fermer,.jm-pied > button:last-child:not(:first-child){flex:0 0 auto !important;min-width:96px;padding:0 18px;}
+}
