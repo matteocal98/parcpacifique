@@ -1383,19 +1383,21 @@ document.addEventListener('click', (ev) => {
   entete.parentElement.classList.toggle('is-ouvert');
 });
 
-// ── Téléphone en mode paysage : le bandeau du haut et la barre d'onglets s'effacent après quelques secondes ──────────
+// ── Téléphone (portrait ET paysage) : le bandeau du haut et la barre d'onglets s'effacent après quelques secondes ──────────
 // Demande du 2026-10-11 : en paysage l'écran est bas, les deux bandeaux mangent presque la moitié de la lecture.
 // Ils disparaissent après 3 s sans toucher, et dès qu'on fait défiler vers le bas ; ils reviennent quand on remonte
-// d'un geste, ou en touchant le bord haut / le bord bas de l'écran. Uniquement en paysage bas (≤ 520 px de haut,
-// < 900 px de large) : en portrait et sur ordinateur, rien ne change.
+// d'un geste, ou en touchant le bord haut / le bord bas de l'écran. Sur téléphone (< 900 px de large) seulement ;
+// jamais tout en haut de la page, jamais quand une fenêtre est ouverte. Sur ordinateur, rien ne change.
 (function barresAutoMasqueesPaysage() {
   if (!window.matchMedia) return;
-  const mq = window.matchMedia('(orientation:landscape) and (max-height:520px) and (max-width:899px)');
+  const mq = window.matchMedia('(max-width:899px)');
   const DELAI = 3000;
   let minuteur = null;
   let dernierY = 0;
   const masquer = () => {
     if (!mq.matches || document.querySelector('.overlay')) return;
+    // tout en haut de la page, les bandeaux restent affichés : il n'y a rien à gagner et la page n'aurait qu'un trou à leur place
+    if ((window.scrollY || 0) < 20) return;
     document.body.classList.add('barres-masquees');
   };
   const armer = () => {

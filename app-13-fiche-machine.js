@@ -1491,11 +1491,11 @@ function openPlanView(machine, companyId, categories, options = {}) {
           ${shown.map(h => `
             <tr>
               <td class="item-label">${esc(h.performed_at)}</td>
-              ${isCounterMode ? `<td>${h.hours_at_intervention != null ? esc(h.hours_at_intervention) + ' ' + counterShort(unit) : '<span class="muted">—</span>'}</td>` : ''}
-              <td>${Array.isArray(h.items_done) && h.items_done.length ? esc(h.items_done.join(', ')) : '<span class="muted">—</span>'}</td>
-              <td>${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
-              <td>${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
-              ${tcoActif() ? `<td>${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
+              ${isCounterMode ? `<td data-label="${esc(trad('Compteur'))}">${h.hours_at_intervention != null ? esc(h.hours_at_intervention) + ' ' + counterShort(unit) : '<span class="muted">—</span>'}</td>` : ''}
+              <td data-label="${esc(trad('Éléments traités'))}">${Array.isArray(h.items_done) && h.items_done.length ? esc(h.items_done.join(', ')) : '<span class="muted">—</span>'}</td>
+              <td data-label="${esc(trad('Opérateur / Atelier'))}">${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
+              <td data-label="${esc(trad('Remarques'))}">${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
+              ${tcoActif() ? `<td data-label="${esc(trad('Coût total'))}">${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
             </tr>`).join('')}
         </tbody>
       </table></div>

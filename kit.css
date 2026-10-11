@@ -886,3 +886,52 @@ textarea:not([data-x]),
   /* pastille « i » dans un libellé : plus petite (18 px) pour ne jamais recouvrir le texte du libellé */
   label .ui-info-btn,.ui-etiquette .ui-info-btn{position:static;top:auto;width:18px;height:18px;font-size:11px;margin:-3px 0 -3px 5px;vertical-align:middle;}
 }
+
+/* ── Téléphone : « Historique des entretiens » en cartes (une carte par entretien, libellé | valeur) au lieu d'un tableau coupé ── */
+@media (max-width:560px){
+  #history-section .ref-scroll{overflow:visible;border:0;}
+  #history-section .ref-scroll > .ref-table,#history-section .ref-table{display:block;min-width:0;width:100%;border:0;background:none;}
+  #history-section .ref-table thead{display:none;}
+  #history-section .ref-table tbody{display:flex;flex-direction:column;gap:8px;}
+  #history-section .ref-table tr{display:block;padding:8px 10px;border-radius:12px;background:var(--surface-soft);}
+  #history-section .ref-table tr:nth-child(even) td{background:transparent;}
+  #history-section .ref-table td{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 8px;padding:1px 0;border:0;background:transparent;font-size:12.5px;line-height:1.35;overflow-wrap:anywhere;}
+  #history-section .ref-table td::before{content:attr(data-label);font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--primary-dark);padding-top:2px;}
+  #history-section .ref-table td.item-label{display:block;font-size:13px;font-weight:800;padding-bottom:3px;}
+  #history-section .ref-table td.item-label::before{content:none;}
+  #history-section .ref-table td:has(> .muted:only-child){display:none;}
+}
+
+/* ── Téléphone en portrait : bandeau du haut flottant (comme en paysage) pour pouvoir s'effacer sans décaler la page ── */
+@media (max-width:899px) and (orientation:portrait){
+  .barre-mobile{position:fixed;left:0;right:0;top:var(--safe-top);z-index:20;transition:transform .25s ease;}
+  .content{padding-top:62px;}
+  .tabbar{transition:transform .25s ease;}
+  body.barres-masquees .barre-mobile{transform:translateY(-115%);}
+  body.barres-masquees .tabbar{transform:translateY(115%);}
+}
+
+/* ── Téléphone en PAYSAGE : plus de blocs par ligne (première passe, 2026-10-11 — à valider sur le téléphone) ───────
+   En paysage la largeur utile fait 640–900 px mais la hauteur à peine 300–400 px : on empile moins et on aligne plus. */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .content{padding-left:14px;padding-right:14px;}
+  /* sections : deux colonnes, comme sur ordinateur (le seuil d'origine, 880 px de colonne, n'était jamais atteint) */
+  .ui-colonnes{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
+  /* cartes machine du Parc : deux par ligne */
+  .mstrip-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;}
+  /* tuiles chiffrées : jusqu'à quatre par ligne */
+  .ui-grille,.ui-grille.is-3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+  /* listes de lignes (échéances, pièces, kits, membres…) : deux par ligne */
+  .ui-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start;}
+  .ui-liste > .ui-ligne{height:100%;}
+  /* tableau de bord : les deux colonnes de cartes */
+  .dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;}
+  /* sections plus compactes en hauteur */
+  .ui-section{padding:12px 14px;gap:8px;margin-bottom:10px;}
+  .ui-section-corps{gap:8px;}
+  .ui-tuile{padding:9px 11px;}
+  .ui-tuile-valeur{font-size:20px;}
+  .ui-ligne{padding:8px 12px;}
+  /* fenêtres : plus larges en paysage */
+  .overlay .modal{max-width:620px;}
+}
