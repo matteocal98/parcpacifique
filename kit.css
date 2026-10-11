@@ -967,3 +967,58 @@ textarea:not([data-x]),
   /* fenêtres : marges réduites autour */
   .overlay{padding-top:calc(4px + var(--safe-top));padding-bottom:calc(4px + var(--safe-bottom));}
 }
+
+/* ── Paysage (téléphone) : fenêtres — en-tête et pied fins pour laisser la hauteur au contenu (262 px d'écran seulement) ── */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-add .max-h-[92vh]{max-height:calc(100dvh - 8px);}
+  .machine-modal-add header,.machine-modal-add footer{padding:4px 12px !important;min-height:0;}
+  .machine-modal-add header .w-10{width:28px !important;height:28px !important;}
+  .machine-modal-add header h1{font-size:15px !important;line-height:20px !important;}
+  .machine-modal-add header .material-symbols-outlined{font-size:20px;}
+  .machine-modal-add header button{width:28px !important;height:28px !important;}
+  .machine-modal-add footer button{padding-top:5px !important;padding-bottom:5px !important;font-size:12px !important;min-height:0 !important;}
+  .machine-modal-add main{padding:6px 12px;}
+  .machine-modal-add main section{margin-top:0;}
+  .machine-modal-edit .modal{max-height:calc(100dvh - 8px);}
+  .machine-modal-edit .px-space-xl{padding-left:12px;padding-right:12px;}
+  .machine-modal-edit .pt-space-lg{padding-top:6px;}
+  .machine-modal-edit .py-space-md{padding-top:4px;padding-bottom:4px;}
+  .machine-modal-edit .text-headline-lg{font-size:16px;line-height:20px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-add main input:not([type=checkbox]):not([type=radio]),.machine-modal-add main select{height:34px !important;min-height:0 !important;}
+  .machine-modal-add main .p-5{padding:8px;}
+  .machine-modal-add main .mt-5{margin-top:8px;}
+  .machine-modal-add main .mt-7{margin-top:10px;}
+  .machine-modal-add main .gap-4,.machine-modal-add main .gap-3{gap:8px;}
+  .machine-modal-add main label.block{font-size:9.5px;margin-bottom:2px;}
+  .machine-modal-add main textarea{min-height:48px;}
+  .machine-modal-add main .mb-1.5,.machine-modal-add main .mb-2{margin-bottom:2px;}
+  .machine-modal-add main :is(.space-y-4 > :not([hidden]) ~ :not([hidden])){margin-top:8px;}
+  .machine-modal-add main section h2{font-size:14px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* fenêtre d'intervention : en-tête et pied fins */
+  .log-modal .log-header2{padding-top:8px;padding-bottom:6px;gap:4px;}
+  .log-modal .log-header2-eyebrow{display:none;}
+  .log-modal .log-header2-titre-ligne,.log-modal [class*="log-header2-titre"]{font-size:17px;line-height:22px;}
+  .log-modal .log-footer2{padding:8px 14px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* « Modifier une machine » : pied sur UNE ligne (Annuler, Enregistrer, Supprimer) et en-tête fin */
+  .machine-modal-edit form > div:last-child{flex-direction:row !important;align-items:center;flex-wrap:nowrap;gap:8px;padding:4px 12px !important;}
+  .machine-modal-edit form > div:last-child > *{margin:0 !important;padding:0 !important;}
+  .machine-modal-edit form > div:last-child > div:first-child{flex:1 1 auto;gap:8px;}
+  .machine-modal-edit form > div:last-child button{padding:5px 12px !important;font-size:12px !important;white-space:nowrap;}
+  .machine-modal-edit .modal > div:first-child{padding-top:4px !important;padding-bottom:2px !important;}
+  .machine-modal-edit .modal > div:first-child .w-10{width:28px;height:28px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* fiche machine : photo à gauche, informations à droite ; indicateurs sur une ligne */
+  .fm2-grid{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;}
+  .fm2-o2-photo,.fm2-o2-photo-box{height:110px;}
+  .fm2-o2-photo-box img{height:98px;}
+  .fm-kpi-row{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .fm-toolbar{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .fm-toolbar .fm-btn-primary{grid-column:auto;}
+}

@@ -6445,7 +6445,7 @@ body:has(.login-box.dans-app){background:var(--surface);}
    le haut en défilant, et le total des pièces débordait de son bloc. Sur écran étroit : marges et polices réduites,
    types d'intervention côte à côte, boutons d'ajout de pièce en lignes compactes, total qui passe à la ligne.
    Rien ne change au-dessus de 560 px (ordinateur, tablette). */
-@media (max-width:560px){
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
   .log-modal .log-body2{padding:0 12px 14px;gap:10px;}
   .log-modal .log-bloc{padding:10px 12px;}
   .log-modal h2{font-size:20px;line-height:26px;}
@@ -6481,7 +6481,7 @@ body:has(.login-box.dans-app){background:var(--surface);}
 }
 
 /* téléphone compact — checklist et indications (suite du bloc ci-dessus) */
-@media (max-width:560px){
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
   .log-modal .log-bloc-elements{padding:10px 12px;}
   .log-modal .log-elements-tete{margin-bottom:8px;gap:6px;}
   .log-modal .log-checklist{gap:6px;}
@@ -6493,7 +6493,7 @@ body:has(.login-box.dans-app){background:var(--surface);}
 }
 
 /* téléphone compact — lignes de pièces (demande du 2026-10-11 : « compacter ces blocs produits ») */
-@media (max-width:560px){
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
   /* une ligne de pièce = 2 niveaux : [icône | pièce | corbeille] puis [quantité | prix] ; le choix du magasin
      n'apparaît que si « Sortir du stock » est coché */
   .log-modal .log-pieces-liste{gap:6px;margin-top:6px;}
@@ -6519,7 +6519,7 @@ body:has(.login-box.dans-app){background:var(--surface);}
 }
 
 /* téléphone compact — main d'œuvre et bloc produit (demande du 2026-10-11) */
-@media (max-width:560px){
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
   /* heures et coût de main d'œuvre sur UNE ligne ; le bouton « Ajouter » passe dessous */
   .log-modal #log-couts-section .field-row{flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:8px;}
   .log-modal #log-couts-section .field-row > div{width:auto;flex:1 1 0;min-width:0;}
@@ -6537,7 +6537,7 @@ body:has(.login-box.dans-app){background:var(--surface);}
 }
 
 /* téléphone compact — bouton Valider (demande du 2026-10-11) : « Valider » puis le total en dessous */
-@media (max-width:560px){
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
   .log-modal .log-footer2 button{padding:8px 16px;min-height:0;height:auto;}
   .log-modal #log-submit-btn > span{display:flex;flex-direction:column;align-items:center;line-height:1.2;}
   .log-modal .log-submit-total{font-size:12.5px;font-weight:600;opacity:.9;}
