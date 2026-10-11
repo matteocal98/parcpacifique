@@ -1403,3 +1403,7 @@ textarea:not([data-x]),
   .agenda-jour-modal .jm-liste > *{min-width:0;height:100%;box-sizing:border-box;}
   .agenda-jour-modal .jm-liste > .jm-vide{grid-column:1 / -1;}
 }
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* un seul événement ce jour-là : pleine largeur ; un nombre impair : le dernier prend toute la ligne */
+  .agenda-jour-modal .jm-liste > :only-child,.agenda-jour-modal .jm-liste > :last-child:nth-child(odd){grid-column:1 / -1;}
+}
