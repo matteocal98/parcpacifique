@@ -1941,7 +1941,7 @@ function blocInventaireStockHtml() {
   return `
     <section class="ui-section" id="stock-inventaire-section">
       ${teteSectionKit('boite', trad('Inventaire'), trad('Quantités physiques en stock par référence et valorisation unitaire'),
-        `<span class="ui-tag" id="stock-inventaire-badge"></span>${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-emplacement-ajouter">${picto('plusCercle')}<span>${trad('Emplacement')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
+        `<span class="ui-tag" id="stock-inventaire-badge"></span>${SCHEMA.hasStockChamps ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-etiquettes-ouvrir">${picto('export')}<span>${trad('Étiquettes')}</span></button>` : ''}${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-emplacement-ajouter">${picto('plusCercle')}<span>${trad('Emplacement')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="stock-inventaire-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>`)}
       <div class="ui-section-corps">
         <div class="ui-barre">
           <input id="stock-inventaire-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, magasin…')}">
@@ -2301,6 +2301,173 @@ function ouvrirModaleEmplacementStock(partIdInitial, magasinIdInitial) {
       msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
       bouton.disabled = false;
     }
+  });
+}
+
+// ── ÉTIQUETTES DE STOCK : une par ligne de stock (article × magasin × emplacement) ──────────────────────────
+// Deux formats, choisis à l'impression :
+//   · feuille A4 d'étiquettes autocollantes, grille 3 × 8 (70 × 37 mm, 24 par feuille — format très courant) ;
+//   · étiquette unitaire 62 × 29 mm (imprimante d'étiquettes).
+// Le document est construit à part (iframe masquée) : son @page ne touche jamais à l'impression du reste de l'appli.
+// La zone « qr » est réservée : elle sera remplie par le QR code de la ligne (étape suivante).
+const FORMATS_ETIQUETTE = {
+  a4: { libelle: 'Feuille A4 — 24 étiquettes (3 × 8, 70 × 37 mm)', l: 70, h: 37, colonnes: 3, rangees: 8 },
+  unitaire: { libelle: 'Étiquette unitaire (62 × 29 mm)', l: 62, h: 29 },
+};
+
+function htmlUneEtiquette(it) {
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
+  const designation = piece ? piece.designation : designationPiece(it.part_id);
+  const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? libelleUniteMesure(piece.unit_of_measure) : '';
+  const lieu = [nomMagasin(it.warehouse_id), it.location].filter(Boolean).join(' · ');
+  return `<div class="et"><div class="txt">`
+    + `<div class="des">${esc(designation)}</div>`
+    + (piece?.reference ? `<div class="ref">${esc(piece.reference)}</div>` : '')
+    + (piece?.ean ? `<div class="ean">EAN ${esc(piece.ean)}</div>` : '')
+    + `<div class="lieu">${esc(lieu)}</div>`
+    + (unite ? `<div class="unite">${esc(unite)}</div>` : '')
+    + `</div><div class="qr"></div></div>`;
+}
+
+// lignes : lignes de stock à imprimer (déjà répétées selon le nombre d'exemplaires) ; premiere : n° (1…24) de la
+// première case libre de la 1re feuille A4 (réutiliser une feuille entamée).
+function documentEtiquettes(lignes, formatCle, premiere) {
+  const f = FORMATS_ETIQUETTE[formatCle];
+  const a4 = formatCle === 'a4';
+  const css = `
+    @page { size: ${a4 ? 'A4' : `${f.l}mm ${f.h}mm`}; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+    .feuille { width: 210mm; height: 297mm; display: grid; grid-template-columns: repeat(${f.colonnes || 1}, ${f.l}mm); grid-template-rows: repeat(${f.rangees || 1}, ${f.h}mm); break-after: page; page-break-after: always; }
+    .feuille:last-child { break-after: auto; page-break-after: auto; }
+    .page { width: ${f.l}mm; height: ${f.h}mm; break-after: page; page-break-after: always; overflow: hidden; }
+    .page:last-child { break-after: auto; page-break-after: auto; }
+    .et { width: ${f.l}mm; height: ${f.h}mm; padding: ${a4 ? 3 : 2}mm; display: flex; gap: ${a4 ? 2 : 1.5}mm; overflow: hidden; }
+    .vide { width: ${f.l}mm; height: ${f.h}mm; }
+    .txt { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: .6mm; }
+    .des { font-weight: 700; font-size: ${a4 ? 9.5 : 8}pt; line-height: 1.12; max-height: 2.3em; overflow: hidden; }
+    .ref { font-family: "Courier New", monospace; font-weight: 700; font-size: ${a4 ? 8.5 : 7.5}pt; }
+    .ean { font-size: ${a4 ? 7 : 6.5}pt; }
+    .lieu { font-size: ${a4 ? 8 : 7}pt; font-weight: 700; margin-top: auto; line-height: 1.12; max-height: 2.3em; overflow: hidden; }
+    .unite { font-size: ${a4 ? 7 : 6.5}pt; }
+    .qr { flex: 0 0 ${a4 ? 22 : 17}mm; width: ${a4 ? 22 : 17}mm; height: ${a4 ? 22 : 17}mm; align-self: center; }
+    .qr svg, .qr img { width: 100%; height: 100%; display: block; }
+  `;
+  let corps = '';
+  if (a4) {
+    const cases = [...Array(Math.max(0, (premiere || 1) - 1)).fill(null), ...lignes];
+    const parFeuille = f.colonnes * f.rangees;
+    for (let i = 0; i < cases.length; i += parFeuille) {
+      corps += `<div class="feuille">${cases.slice(i, i + parFeuille).map((c) => (c ? htmlUneEtiquette(c) : '<div class="vide"></div>')).join('')}</div>`;
+    }
+  } else {
+    corps = lignes.map((c) => `<div class="page">${htmlUneEtiquette(c)}</div>`).join('');
+  }
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(trad('Étiquettes de stock'))}</title><style>${css}</style></head><body>${corps}</body></html>`;
+}
+
+// Imprime un document HTML complet via une iframe masquée (retirée après l'impression).
+function imprimerDocumentHtml(html) {
+  const cadre = document.createElement('iframe');
+  cadre.setAttribute('aria-hidden', 'true');
+  cadre.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+  document.body.appendChild(cadre);
+  const doc = cadre.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  const lancer = () => {
+    try { cadre.contentWindow.focus(); cadre.contentWindow.print(); } catch (e) { /* impression indisponible */ }
+    setTimeout(() => cadre.remove(), 60000);
+  };
+  // laisse le temps aux images éventuelles (QR) de se charger avant l'impression
+  setTimeout(lancer, 350);
+}
+
+function ouvrirModaleEtiquettes() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  const toutes = (UI.stockItems || []).slice().sort((a, b) =>
+    nomMagasin(a.warehouse_id).localeCompare(nomMagasin(b.warehouse_id))
+    || String(a.location || '').localeCompare(String(b.location || ''))
+    || designationPiece(a.part_id).localeCompare(designationPiece(b.part_id)));
+  overlay.innerHTML = `
+    <div class="modal export-modal etiquettes-modal" role="dialog" aria-modal="true" aria-labelledby="etiquettes-titre">
+      <h2 id="etiquettes-titre">${trad('Imprimer des étiquettes')}</h2>
+      <div class="ui-champ-groupe">
+        <strong>${trad('Format')}</strong>
+        ${Object.entries(FORMATS_ETIQUETTE).map(([cle, f], i) => `<label class="ui-case"><input type="radio" name="etiquettes-format" value="${cle}" ${i === 0 ? 'checked' : ''}> ${esc(trad(f.libelle))}</label>`).join('')}
+        <div id="etiquettes-debut-bloc">
+          <label for="etiquettes-debut">${trad('Commencer à l\'étiquette n°')}</label>
+          <input id="etiquettes-debut" class="ui-champ" type="number" min="1" max="24" value="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="etiquettes-copies">${trad('Exemplaires par ligne')}</label>
+          <input id="etiquettes-copies" class="ui-champ" type="number" min="1" max="10" value="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="ui-champ-groupe">
+        <strong>${trad('Lignes de stock à étiqueter')}</strong>
+        <div class="ui-select-wrap">
+          <select id="etiquettes-magasin" class="ui-champ">
+            <option value="">${trad('Tous les magasins')}</option>
+            ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
+          </select>
+          ${picto('chevronBas')}
+        </div>
+        <label class="ui-case"><input type="checkbox" id="etiquettes-tout" checked> <span id="etiquettes-compte"></span></label>
+        <div class="etiquettes-liste" id="etiquettes-liste"></div>
+      </div>
+      <div id="etiquettes-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="etiquettes-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="etiquettes-go">${picto('export')}<span>${trad('Imprimer')}</span></button>
+      </div>
+    </div>`;
+  const liste = overlay.querySelector('#etiquettes-liste');
+  const msg = overlay.querySelector('#etiquettes-msg');
+  const caseTout = overlay.querySelector('#etiquettes-tout');
+  const compte = overlay.querySelector('#etiquettes-compte');
+  const visibles = () => {
+    const mag = overlay.querySelector('#etiquettes-magasin').value;
+    return toutes.filter((it) => !mag || String(it.warehouse_id) === String(mag));
+  };
+  const coches = () => [...liste.querySelectorAll('input[type=checkbox]:checked')].map((c) => visibles()[Number(c.value)]).filter(Boolean);
+  const majCompte = () => {
+    const n = liste.querySelectorAll('input[type=checkbox]:checked').length;
+    compte.textContent = tR('{n} ligne(s) sélectionnée(s)', { n });
+    caseTout.checked = n > 0 && n === liste.querySelectorAll('input[type=checkbox]').length;
+  };
+  const remplir = () => {
+    const lignes = visibles();
+    liste.innerHTML = lignes.length
+      ? lignes.map((it, i) => `<label class="ui-case"><input type="checkbox" value="${i}" checked> <span>${esc(designationPiece(it.part_id))} <small>— ${esc([nomMagasin(it.warehouse_id), it.location].filter(Boolean).join(' · '))}</small></span></label>`).join('')
+      : `<div class="ui-aide">${trad('Aucune ligne de stock.')}</div>`;
+    liste.querySelectorAll('input[type=checkbox]').forEach((c) => c.addEventListener('change', majCompte));
+    majCompte();
+  };
+  remplir();
+  overlay.querySelector('#etiquettes-magasin').addEventListener('change', remplir);
+  caseTout.addEventListener('change', () => {
+    liste.querySelectorAll('input[type=checkbox]').forEach((c) => { c.checked = caseTout.checked; });
+    majCompte();
+  });
+  const formatChoisi = () => overlay.querySelector('input[name="etiquettes-format"]:checked').value;
+  overlay.querySelectorAll('input[name="etiquettes-format"]').forEach((r) => r.addEventListener('change', () => {
+    overlay.querySelector('#etiquettes-debut-bloc').hidden = formatChoisi() !== 'a4';
+  }));
+  overlay.querySelector('#etiquettes-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#etiquettes-go').addEventListener('click', () => {
+    const choisies = coches();
+    if (!choisies.length) { msg.textContent = trad('Coche au moins une ligne.'); return; }
+    const copies = Math.max(1, Math.min(10, Math.round(Number(overlay.querySelector('#etiquettes-copies').value) || 1)));
+    const debut = Math.max(1, Math.min(24, Math.round(Number(overlay.querySelector('#etiquettes-debut').value) || 1)));
+    const lignes = choisies.flatMap((it) => Array(copies).fill(it));
+    imprimerDocumentHtml(documentEtiquettes(lignes, formatChoisi(), formatChoisi() === 'a4' ? debut : 1));
+    overlay.remove();
   });
 }
 
@@ -2850,6 +3017,7 @@ VIEWS.stock = {
     root.querySelector('#stock-inventaire-magasin')?.addEventListener('change', rafraichirInventaire);
     root.querySelector('#stock-inventaire-export')?.addEventListener('click', () => exporterInventaireStockCsv());
     root.querySelector('#stock-emplacement-ajouter')?.addEventListener('click', () => ouvrirModaleEmplacementStock());
+    root.querySelector('#stock-etiquettes-ouvrir')?.addEventListener('click', ouvrirModaleEtiquettes);
     root.querySelector('#stock-inventaire-liste')?.addEventListener('click', (e) => {
       const bouton = e.target.closest('[data-stock-emplacement]');
       if (!bouton) return;
