@@ -870,3 +870,15 @@ textarea:not([data-x]),
   /* pastille « i » dans un libellé : décollée du champ qui suit (remontée de 4 px + petite marge sous elle) */
   label .ui-info-btn,.ui-etiquette .ui-info-btn{position:relative;top:-4px;margin-bottom:2px;}
 }
+
+/* ── Téléphone (application) : page de connexion répartie sur toute la hauteur de l'écran ────────────────────────
+   Langue en haut ; logo + titre + champs + déverrouillage CENTRÉS dans l'espace restant ; « Se connecter » / « Créer un compte »,
+   mentions légales et version collés en BAS de l'écran, quelle que soit la hauteur du téléphone. */
+@media (max-width:560px){
+  .login-box.dans-app{min-height:100vh;min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;}
+  .login-box.dans-app > form#login-form{display:contents;}
+  .login-box.dans-app > .marque-connexion{margin-top:auto;}
+  .login-box.dans-app .acces-local{margin-bottom:auto;}
+  .login-box.dans-app .login-actions{margin-top:clamp(8px,1.6vh,14px);}
+  .login-box.dans-app .legal-footer{margin-top:clamp(6px,1.2vh,12px);padding-bottom:calc(8px + var(--safe-bottom,0px));}
+}
