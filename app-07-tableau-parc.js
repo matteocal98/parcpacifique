@@ -784,8 +784,10 @@ function ouvrirRouleauxCompteur(cible, unite, machine, refraichir, options) {
   const opts = options || {};
   const u = COUNTER_UNITS[unite] || COUNTER_UNITS.hours;
   const config = configRouleauxCompteur(unite);
-  const ITEM_HEIGHT = 44;
-  const VISIBLE_OFFSET = 2; // 5 lignes visibles par rouleau, la 3e est centrale
+  // Hauteur d'un chiffre et nombre de lignes visibles : 44 px × 5 par défaut ; la feuille CSS peut les réduire
+  // (téléphone en paysage : 36 px × 3) via --rouleau-item / --rouleau-lignes — lus une fois la feuille affichée.
+  let ITEM_HEIGHT = 44;
+  let VISIBLE_OFFSET = 2; // 5 lignes visibles par rouleau, la 3e est centrale
 
   const vibrer = () => { if (navigator.vibrate) { try { navigator.vibrate(10); } catch (err) { /* sans conséquence */ } } };
 
@@ -841,6 +843,13 @@ function ouvrirRouleauxCompteur(cible, unite, machine, refraichir, options) {
         <button type="button" class="primary compteur-rouleaux-valider" id="rouleaux-valider"><span>${trad('Valider le relevé')}</span></button>
       </div>`;
     document.body.appendChild(overlay);
+    {
+      const style = getComputedStyle(overlay);
+      const item = parseFloat(style.getPropertyValue('--rouleau-item'));
+      const lignes = parseInt(style.getPropertyValue('--rouleau-lignes'), 10);
+      if (item > 0) ITEM_HEIGHT = item;
+      if (lignes >= 3 && lignes % 2 === 1) VISIBLE_OFFSET = (lignes - 1) / 2;
+    }
 
     const affichage = overlay.querySelector('#rouleaux-affichage');
     const loupe = overlay.querySelector('#rouleaux-loupe');

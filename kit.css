@@ -1256,3 +1256,63 @@ textarea:not([data-x]),
   .log-modal .log-item-cycle,.log-modal .log-item-spec{overflow-wrap:break-word;font-size:10px;padding:2px 5px;}
   .log-modal .log-item-titre{font-size:12px;overflow-wrap:break-word;}
 }
+
+/* ── Paysage (téléphone) : petites fenêtres du Stock — mouvement, export, étiquettes, emplacement, fiche de ligne (2026-10-12) ── */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .overlay .modal{padding:10px 14px;}
+  .overlay .modal h2{font-size:16px;margin:0 0 4px;}
+  .overlay .modal label:not(.ui-case){font-size:11.5px;margin-bottom:2px;}
+  .overlay .modal :is(input:not([type=radio]):not([type=checkbox]),select){min-height:0;height:32px;padding:0 10px;font-size:13px;}
+  .overlay .modal input[type=radio],.overlay .modal input[type=checkbox]{width:16px;height:16px;}
+  .overlay .modal .ui-case,.overlay .modal .field-row label{font-size:12.5px;gap:6px;}
+  .overlay .modal .modal-actions{margin-top:8px;}
+  /* nouveau mouvement : les 4 types sur UNE ligne ; champs deux par ligne */
+  .stock-mouvement-modal .field-row:has(> label > input[type="radio"]){grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:4px 8px !important;}
+  .stock-mouvement-modal .field-row{gap:8px;}
+  /* export, étiquettes, emplacement : les groupes se rangent côte à côte */
+  .export-modal:not(.fiche-ligne-stock):not(.etiquettes-modal){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;align-items:start;}
+  .export-modal:not(.fiche-ligne-stock):not(.etiquettes-modal) > :is(h2,.modal-actions,[role=status],.ui-aide,.sub){grid-column:1 / -1;}
+  .export-modal .ui-champ-groupe{gap:6px;margin:6px 0 8px;}
+  /* fiche d'une ligne de stock : infos sur deux colonnes */
+  .fiche-stock-infos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;}
+  .fiche-stock-infos .ligne-info{padding:5px 0;font-size:12.5px;}
+  .fiche-ligne-stock .ui-champ-groupe{gap:4px;margin:6px 0;}
+  /* étiquettes : liste plus courte pour laisser voir le bouton Imprimer */
+  .etiquettes-liste{max-height:110px;}
+  .etiquettes-modal .ui-champ-groupe{gap:4px;margin:6px 0 8px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* nouveau mouvement : magasin / destination / quantité / coût se rangent sur la même ligne tant que la place le permet */
+  .stock-mouvement-modal .modal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 10px;align-items:end;}
+  .stock-mouvement-modal .modal > *{grid-column:1 / -1;}
+  .stock-mouvement-modal .modal > .field-row:not(:has(> label > input[type="radio"])){display:contents;}
+  .stock-mouvement-modal .modal > .field-row:not(:has(> label > input[type="radio"])) > div:not([hidden]){grid-column:auto;min-width:0;}
+  .stock-mouvement-modal .modal > .field-row > div > label{display:block;margin:0 0 2px;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* fiche d'une ligne de stock : Sortie / Entrée côte à côte, champs pleine largeur */
+  .fiche-ligne-stock .ui-champ-groupe{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;}
+  .fiche-ligne-stock .ui-champ-groupe > strong,.fiche-ligne-stock .ui-champ-groupe > .ui-aide,.fiche-ligne-stock .ui-champ-groupe > label:not(.ui-case),.fiche-ligne-stock .ui-champ-groupe > input,.fiche-ligne-stock .ui-champ-groupe > div{flex:1 1 100%;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* scanner de QR code : le cadre de la caméra (carré en portrait) devient un rectangle bas, message et boutons à sa droite */
+  .overlay .modal:has(#scan-zone){max-width:560px;display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:6px 12px;align-items:center;}
+  .overlay .modal:has(#scan-zone) > h2{grid-column:1 / -1;text-align:left;}
+  .overlay .modal:has(#scan-zone) > #scan-zone{grid-column:1;grid-row:2 / span 2;aspect-ratio:auto;height:170px;}
+  .overlay .modal:has(#scan-zone) > #scan-message{grid-column:2;grid-row:2;align-self:end;margin:0;}
+  .overlay .modal:has(#scan-zone) > .modal-actions{grid-column:2;grid-row:3;margin:0;align-self:start;flex-direction:column;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* relevé par rouleaux : index à gauche, rouleaux à droite (3 lignes de 36 px), bandeau et bouton fins */
+  .compteur-rouleaux-overlay{--rouleau-item:36px;--rouleau-lignes:3;}
+  .compteur-rouleaux-tete{min-height:0;padding:2px 8px;}
+  .compteur-rouleaux-corps{flex-direction:row;align-items:center;justify-content:center;gap:18px;padding:6px 14px;}
+  .compteur-rouleaux-module{max-width:380px;padding:8px 12px;border-radius:18px;}
+  .compteur-rouleau-chiffre{font-size:19px;}
+  .compteur-rouleau-chiffre.is-central{font-size:23px;}
+  .compteur-rouleau-ombre-haut,.compteur-rouleau-ombre-bas{height:26px;}
+  .compteur-rouleau-etiquette{margin-top:3px;}
+  .compteur-rouleaux-astuce{display:none;}
+  .compteur-rouleaux-pied{padding:6px 14px;}
+  .compteur-rouleaux-valider{min-height:40px;padding:6px 16px;}
+}
