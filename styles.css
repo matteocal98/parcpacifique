@@ -6406,3 +6406,10 @@ button.compteur2-ligne:active .compteur2-edit{background:var(--line-2);}
    l'écran, donc la page est d'un seul blanc, sans marge ni arrondi autour de la carte. */
 body:has(.login-box.dans-app){background:var(--surface);}
 .login-box.dans-app{margin-top:0;border-radius:0;}
+
+/* Fenêtre « Exporter (CSV) » du parc (ouvrirModaleExport) */
+.export-modal{width:min(460px,92vw);}
+.export-modal .ui-champ-groupe{display:flex;flex-direction:column;gap:10px;margin:14px 0 18px;}
+.export-modal .ui-case{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.export-modal .modal-actions{justify-content:flex-end;}
+#export-msg{min-height:1.2em;font-size:13px;color:var(--ink-2);}

@@ -1244,7 +1244,7 @@ VIEWS.machines = {
     // Chaque branchement est tolérant : un élément absent ne doit pas empêcher
     // l'affichage de la liste, qui est l'essentiel de cette vue.
     root.querySelector('#fleet-add')?.addEventListener('click', handleAddMachine);
-    root.querySelector('#fleet-export')?.addEventListener('click', exporterParcCsv);
+    root.querySelector('#fleet-export')?.addEventListener('click', ouvrirModaleExport);
     // Le scanner n'existe plus en offre Gratuit (bouton absent) ; la garde ci-dessous couvre un changement d'offre en
     // cours de session. Un QR d'une société tierce scanné ici résout silencieusement à rien.
     root.querySelector('#fleet-scanner')?.addEventListener('click', () => {

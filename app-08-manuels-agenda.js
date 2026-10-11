@@ -603,17 +603,42 @@ function csvToUtf16Buffer(csvString) {
   return buf;
 }
 
-function telechargerPreparationCsv() {
-  const jours = UI.preparationJours || 90;
-  const blob = new Blob([csvToUtf16Buffer(preparationCsv(jours))], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
+// ── Encodage des fichiers CSV : UTF-16 (Excel, par défaut) ou UTF-8 (logiciels de gestion) ──
+// Choix mémorisé par appareil (localStorage, jamais bloquant : sans stockage on garde l'UTF-16).
+// L'UTF-8 porte aussi un BOM : Excel l'ouvre correctement, et les autres logiciels le lisent sans réglage.
+// TOUS les exports passent par csvEnOctets / csvVersBlob / telechargerCsv — jamais une copie locale.
+const CLE_CSV_ENCODAGE = 'kalea_csv_encodage';
+function encodageCsv() {
+  try { return localStorage.getItem(CLE_CSV_ENCODAGE) === 'utf8' ? 'utf8' : 'utf16'; } catch (e) { return 'utf16'; }
+}
+function definirEncodageCsv(valeur) {
+  try { localStorage.setItem(CLE_CSV_ENCODAGE, valeur === 'utf8' ? 'utf8' : 'utf16'); } catch (e) { /* sans conséquence */ }
+}
+function csvEnOctets(csvString) {
+  if (encodageCsv() !== 'utf8') return csvToUtf16Buffer(csvString);
+  const texte = new TextEncoder().encode(csvString);
+  const sortie = new Uint8Array(3 + texte.length);
+  sortie.set([0xEF, 0xBB, 0xBF], 0);
+  sortie.set(texte, 3);
+  return sortie.buffer;
+}
+function csvVersBlob(csvString) {
+  return new Blob([csvEnOctets(csvString)], { type: encodageCsv() === 'utf8' ? 'text/csv;charset=utf-8;' : 'text/csv;charset=utf-16le;' });
+}
+function telechargerCsv(nomFichier, csvString) {
+  const url = URL.createObjectURL(csvVersBlob(csvString));
   const a = document.createElement('a');
   a.href = url;
-  a.download = `preparation_${jours}j.csv`;
+  a.download = nomFichier;
   document.body.appendChild(a);
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function telechargerPreparationCsv() {
+  const jours = UI.preparationJours || 90;
+  telechargerCsv(`preparation_${jours}j.csv`, preparationCsv(jours));
 }
 
 // Web Share quand le navigateur le permet (le fichier CSV, directement) ;
@@ -622,7 +647,7 @@ function telechargerPreparationCsv() {
 async function partagerPreparation() {
   const jours = UI.preparationJours || 90;
   const filename = `preparation_${jours}j.csv`;
-  const file = new File([csvToUtf16Buffer(preparationCsv(jours))], filename, { type: 'text/csv' });
+  const file = new File([csvEnOctets(preparationCsv(jours))], filename, { type: 'text/csv' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: trad('Préparation des entretiens'), text: preparationTexte() });

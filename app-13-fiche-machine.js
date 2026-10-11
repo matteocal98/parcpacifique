@@ -1421,31 +1421,13 @@ function openPlanView(machine, companyId, categories, options = {}) {
     return [header, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
   };
 
-  const csvToUtf16Buffer = (csvString) => {
-    const buf = new ArrayBuffer(2 + csvString.length * 2);
-    const view = new DataView(buf);
-    view.setUint16(0, 0xFEFF, true);
-    for (let i = 0; i < csvString.length; i++) {
-      view.setUint16(2 + i * 2, csvString.charCodeAt(i), true);
-    }
-    return buf;
-  };
-
   overlay.querySelector('#export-history-csv').addEventListener('click', () => {
-    const blob = new Blob([csvToUtf16Buffer(buildHistoryCsv())], { type: 'text/csv;charset=utf-16le;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `historique_${machine.name.replace(/[^a-z0-9]+/gi, '_')}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    telechargerCsv(`historique_${machine.name.replace(/[^a-z0-9]+/gi, '_')}.csv`, buildHistoryCsv());
   });
 
   overlay.querySelector('#share-history-email').addEventListener('click', async () => {
     const filename = `historique_${machine.name.replace(/[^a-z0-9]+/gi, '_')}.csv`;
-    const file = new File([csvToUtf16Buffer(buildHistoryCsv())], filename, { type: 'text/csv' });
+    const file = new File([csvEnOctets(buildHistoryCsv())], filename, { type: 'text/csv' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: `tR('Historique entretien — {machine}', { machine: machine.name })`, text: `tR('Historique des entretiens pour {machine}', { machine: machine.name })` });

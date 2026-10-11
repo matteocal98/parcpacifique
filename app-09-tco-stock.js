@@ -339,29 +339,154 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
 // machines actuellement filtrées/triées (fleetSorted(fleetMatches())),
 // pas systématiquement la flotte entière — l'export reflète ce que
 // l'utilisateur regarde à l'instant du clic.
-function exporterParcCsv() {
-  const header = [trad('Machine'), trad('Catégorie'), trad('Marque / Modèle'), trad('Identifiant'), trad('État'), trad('Compteur'), trad('Échéance'), trad('Carnet PDF')];
+// Colonnes de l'export du parc. Les 8 PREMIÈRES (texte lisible) sont inchangées pour ne pas casser les
+// tableurs déjà construits dessus ; les suivantes sont faites pour être lues par un PROGRAMME (identifiant
+// technique stable, valeurs numériques brutes, dates AAAA-MM-JJ) — voir docs/note-cadrage-integrations.md §8.
+// options.toutLeParc : vrai = toute la flotte (ignore les filtres de l'écran) ; sinon = les machines affichées.
+function exporterParcCsv(options) {
+  const toutLeParc = !!(options && options.toutLeParc);
+  const header = [
+    trad('Machine'), trad('Catégorie'), trad('Marque / Modèle'), trad('Identifiant'), trad('État'), trad('Compteur'), trad('Échéance'), trad('Carnet PDF'),
+    trad('ID technique'), trad('N° de série'), trad('Plaque'), trad('Année'), trad('Date d\'achat'),
+    trad('Unité du compteur'), trad('Valeur du compteur'), trad('Source du compteur'),
+    trad('Prochaine échéance (date)'), trad('Prochaine échéance (compteur)'),
+  ];
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const liste = fleetSorted(fleetMatches());
+  const liste = toutLeParc ? fleetSorted((UI.machines || []).slice()) : fleetSorted(fleetMatches());
   const rows = liste.map((m) => {
     const info = infoMachine(m);
-    const unite = planIsCounter(m.plan) ? counterUnitOf(m) : null;
+    const enCompteur = planIsCounter(m.plan);
+    const unite = enCompteur ? counterUnitOf(m) : null;
     const compteur = unite ? formatCounter(machineCounter(m), unite) : '';
+    const brut = machineCounter(m);
+    const echeanceDate = !enCompteur && m.plan?.next_due_at ? String(m.plan.next_due_at).slice(0, 10) : '';
+    const echeanceCompteur = enCompteur ? (planNextDueCounter(m.plan) ?? '') : '';
+    const source = SCHEMA.hasTelemetry ? (m.counter_source === 'telemetry' ? trad('Automatique') : trad('Manuelle')) : '';
     return [
       m.name, m.category?.name || '', machineBrandModel(m) || '', identifiantAffiche(m) || '',
       badgeLabel(info.state), compteur, info.short, m.manual_url ? trad('Oui') : trad('Non'),
+      m.id, m.serial_number || '', m.plate || '', m.model_year ?? '', m.purchase_date ? String(m.purchase_date).slice(0, 10) : '',
+      unite || '', unite && brut != null ? brut : '', source,
+      echeanceDate, echeanceCompteur,
     ];
   });
   const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
-  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `parc_machines_${todayIso()}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  telechargerCsv(`parc_machines_${todayIso()}.csv`, csv);
+}
+
+// Interventions de TOUT le parc sur une période (jours = nombre de jours en arrière ; 0 = tout l'historique).
+// Lecture par tranches de machines puis par pages de 1000 : jamais tronquée, jamais une URL démesurée.
+async function exporterInterventionsCsv(jours) {
+  const machines = UI.machines || [];
+  const noms = new Map(machines.map((m) => [m.id, m.name]));
+  const ids = machines.map((m) => m.id);
+  const avecCouts = tcoActif();
+  const colonnes = `id, machine_id, performed_at, hours_at_intervention, description, items_done, performed_by${avecCouts ? ', parts_cost, labor_cost, labor_hours' : ''}`;
+  let depuis = null;
+  if (jours > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() - jours);
+    depuis = d.toISOString().slice(0, 10);
+  }
+  const toutes = [];
+  for (let i = 0; i < ids.length; i += 40) {
+    const tranche = ids.slice(i, i + 40);
+    for (let from = 0; ; from += 1000) {
+      let req = sb.from('interventions').select(colonnes).in('machine_id', tranche)
+        .order('performed_at', { ascending: false }).order('id', { ascending: false });
+      if (depuis) req = req.gte('performed_at', depuis);
+      const { data, error } = await req.range(from, from + 999);
+      if (error) throw error;
+      toutes.push(...(data || []));
+      if (!data || data.length < 1000) break;
+    }
+  }
+  toutes.sort((a, b) => String(b.performed_at).localeCompare(String(a.performed_at)));
+  let equipe = new Map();
+  try { equipe = new Map((await equipePourAttribution()).map((m) => [m.id, m.nom_affiche])); } catch (e) { /* colonne Opérateur laissée vide */ }
+  const header = [
+    trad('ID intervention'), trad('ID technique machine'), trad('Machine'), trad('Date'), trad('Compteur à l\'intervention'),
+    trad('Éléments traités'), trad('Remarques'), trad('Opérateur'),
+  ];
+  if (avecCouts) header.push(trad('Coût pièces'), trad('Coût main-d\'œuvre'), trad('Heures main-d\'œuvre'));
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = toutes.map((h) => {
+    const ligne = [
+      h.id, h.machine_id, noms.get(h.machine_id) || '', h.performed_at, h.hours_at_intervention ?? '',
+      Array.isArray(h.items_done) ? h.items_done.join('; ') : '', h.description ?? '', equipe.get(h.performed_by) || '',
+    ];
+    if (avecCouts) ligne.push(h.parts_cost ?? '', h.labor_cost ?? '', h.labor_hours ?? '');
+    return ligne;
+  });
+  if (rows.length === 0) return 0;
+  const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
+  telechargerCsv(`interventions_${todayIso()}.csv`, csv);
+  return rows.length;
+}
+
+// Fenêtre « Exporter » : choix du contenu (machines affichées / tout le parc / interventions + période)
+// et du format de fichier (Excel UTF-16 / universel UTF-8, mémorisé par appareil).
+function ouvrirModaleExport() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const nbAffichees = fleetMatches().length;
+  const nbTotal = (UI.machines || []).length;
+  const utf8 = encodageCsv() === 'utf8';
+  overlay.innerHTML = `
+    <div class="modal export-modal" role="dialog" aria-modal="true" aria-labelledby="export-titre">
+      <h2 id="export-titre">${trad('Exporter (CSV)')}</h2>
+      <div class="ui-champ-groupe">
+        <strong>${trad('Contenu')}</strong>
+        <label class="ui-case"><input type="radio" name="export-contenu" value="affichees" checked> ${tR('Les machines affichées ({n})', { n: nbAffichees })}</label>
+        <label class="ui-case"><input type="radio" name="export-contenu" value="tout"> ${tR('Tout le parc ({n})', { n: nbTotal })}</label>
+        <label class="ui-case"><input type="radio" name="export-contenu" value="interventions"> ${trad('Les interventions de tout le parc')}</label>
+        <div id="export-periode-bloc" hidden>
+          <label class="sr-only" for="export-periode">${trad('Période')}</label>
+          <select id="export-periode" class="ui-champ">
+            <option value="30">${trad('30 derniers jours')}</option>
+            <option value="90">${trad('90 derniers jours')}</option>
+            <option value="365" selected>${trad('12 derniers mois')}</option>
+            <option value="0">${trad('Tout l\'historique')}</option>
+          </select>
+        </div>
+      </div>
+      <div class="ui-champ-groupe">
+        <strong>${trad('Format du fichier')}</strong>
+        <label class="ui-case"><input type="radio" name="export-format" value="utf16" ${utf8 ? '' : 'checked'}> ${trad('Excel (UTF-16) — s\'ouvre directement dans Excel')}</label>
+        <label class="ui-case"><input type="radio" name="export-format" value="utf8" ${utf8 ? 'checked' : ''}> ${trad('Universel (UTF-8) — pour un autre logiciel ou un programme')}</label>
+      </div>
+      <div id="export-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="export-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="export-go">${picto('export')}<span>${trad('Télécharger')}</span></button>
+      </div>
+    </div>`;
+  const contenu = () => overlay.querySelector('input[name="export-contenu"]:checked').value;
+  overlay.querySelectorAll('input[name="export-contenu"]').forEach((r) => r.addEventListener('change', () => {
+    overlay.querySelector('#export-periode-bloc').hidden = contenu() !== 'interventions';
+  }));
+  overlay.querySelector('#export-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#export-go').addEventListener('click', async () => {
+    const bouton = overlay.querySelector('#export-go');
+    const msg = overlay.querySelector('#export-msg');
+    definirEncodageCsv(overlay.querySelector('input[name="export-format"]:checked').value);
+    bouton.disabled = true;
+    try {
+      if (contenu() === 'interventions') {
+        msg.textContent = trad('Préparation du fichier…');
+        const n = await exporterInterventionsCsv(Number(overlay.querySelector('#export-periode').value));
+        if (n === 0) { msg.textContent = trad('Aucune intervention sur cette période.'); bouton.disabled = false; return; }
+      } else {
+        exporterParcCsv({ toutLeParc: contenu() === 'tout' });
+      }
+      overlay.remove();
+    } catch (err) {
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      bouton.disabled = false;
+    }
+  });
 }
 function exporterClassementTcoCsv(flotte) {
   const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
@@ -374,15 +499,7 @@ function exporterClassementTcoCsv(flotte) {
     decision ? etatTco(decision.ratio, decision.base) : '',
   ]);
   const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
-  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `tco_flotte_${todayIso()}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  telechargerCsv(`tco_flotte_${todayIso()}.csv`, csv);
 }
 // Section pleine largeur, placeholder synchrone rempli en asynchrone dans
 // VIEWS.tco.mount() (même motif que la scorecard/coûts d'exploitation de
@@ -740,15 +857,7 @@ function modeleCsvCatalogue() {
   return [enteteCsvPieces(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
 function telechargerModeleCsvCatalogue() {
-  const blob = new Blob([csvToUtf16Buffer(modeleCsvCatalogue())], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'modele_catalogue_pieces.csv';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  telechargerCsv('modele_catalogue_pieces.csv', modeleCsvCatalogue());
 }
 
 // Import : un « Référence » déjà présente dans le catalogue de la société
@@ -2080,15 +2189,7 @@ function exporterInventaireStockCsv() {
     return gerant ? [...base, it.pump_unit_cost, Number(it.quantity) * Number(it.pump_unit_cost)] : base;
   });
   const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n');
-  const blob = new Blob([csvToUtf16Buffer(csv)], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `stock_${todayIso()}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  telechargerCsv(`stock_${todayIso()}.csv`, csv);
 }
 
 // ── Modale « Nouveau mouvement » ── idiome .overlay/.modal habituel
@@ -2314,15 +2415,7 @@ function modeleCsvMouvements() {
   return [enteteCsvMouvements(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
 function telechargerModeleCsvMouvements() {
-  const blob = new Blob([csvToUtf16Buffer(modeleCsvMouvements())], { type: 'text/csv;charset=utf-16le;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'modele_mouvements_stock.csv';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  telechargerCsv('modele_mouvements_stock.csv', modeleCsvMouvements());
 }
 function ouvrirImportMouvementsStock() {
   const overlay = document.createElement('div');
