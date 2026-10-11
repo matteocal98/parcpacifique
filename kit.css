@@ -682,3 +682,11 @@ textarea:not([data-x]),
   .machine-modal-add #photo-preview + div{min-width:0;}
   .machine-modal-add #photo-preview + div > .flex > button{white-space:normal;text-align:center;line-height:1.15;overflow:hidden;}
 }
+@media (max-width:560px){
+  /* bloc photo : vignette plus petite (plus de place pour le texte) et boutons en police réduite */
+  .machine-modal-add #photo-preview{width:48px;height:48px;}
+  .machine-modal-add #photo-preview span.text-[10px]{display:none;}
+  .machine-modal-add .flex.flex-col.items-center:has(> #photo-preview){gap:8px;}
+  .machine-modal-add #photo-preview + div > .flex{gap:4px;}
+  .machine-modal-add #photo-preview + div > .flex > button{font-size:10.5px;padding:6px 3px;}
+}
