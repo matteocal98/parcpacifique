@@ -811,3 +811,8 @@ textarea:not([data-x]),
   .fm-card-repliable.is-ouvert > .fm-card-head::after{transform:rotate(-135deg);top:12px;}
   .fm-card-repliable:not(.is-ouvert) > :not(.fm-card-head){display:none;}
 }
+@media (max-width:560px){
+  /* « Fermer » en bas des fenêtres : même taille que les autres boutons compacts de l'appli (13 px, 36 px de haut) */
+  .overlay .modal-actions{justify-content:center;margin-top:10px;}
+  .overlay .modal-actions > button.secondary,.overlay .modal-actions > #close-plan{font-size:13px;font-weight:700;height:36px;min-height:0;padding:0 18px;line-height:1;border-radius:var(--r-md);}
+}
