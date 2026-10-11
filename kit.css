@@ -1334,3 +1334,18 @@ textarea:not([data-x]),
   .pplan-foot{padding:6px 14px;gap:8px;flex-wrap:nowrap;}
   .pplan-foot > button{padding:7px 14px;}
 }
+
+/* ── Voir le plan (téléphone) : « Associer des pièces de maintenance » en bas à droite de chaque carte de tâche ; bloc intervalle du modèle « o1 » pleine largeur ── */
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .tache-carte{display:flex;flex-direction:column;}
+  .tache-carte > .tache-ligne:has(.choisir-kit){display:flex;flex-direction:row;justify-content:flex-end;align-items:flex-end;margin:auto 0 0;padding-top:6px;}
+  .tache-carte > .tache-ligne:has(.choisir-kit) > .tache-libelle{display:none;}
+  .tache-carte > .tache-ligne:has(.choisir-kit) > .tache-valeur{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;text-align:right;}
+  .tache-carte .choisir-kit{font-size:11px;padding:6px 10px;line-height:1.15;white-space:normal;text-align:center;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  /* fiche machine, modèle « o1 » (ex. tracteur Kubota) : le bloc intervalle passe sous la photo ET le texte, sur toute la largeur */
+  .fm2-grid > .fm2-o1-side{grid-column:1 / -1 !important;}
+  .fm2-o1-side .fm2-intervalle-o1{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 20px;align-items:center;}
+  .fm2-o1-side .fm2-intervalle-o1 > :is(.fm2-piste-o1,.fm2-pied-o1){grid-column:1 / -1;}
+}
