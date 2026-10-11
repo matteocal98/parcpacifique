@@ -1283,6 +1283,27 @@ const SEUIL_AIDE_TELEPHONE = 60;
 
 function compacterAidesTelephone(racine) {
   if (!window.matchMedia || !window.matchMedia('(max-width:560px)').matches) return;
+  // Mon compte › « Verrouillage et reconnexion » : les deux phrases d'état (ids fixes, mises à jour par le code) vont dans la
+  // pastille de la case à cocher qui les suit ; l'élément reste en place, seul son affichage est replié.
+  ['acc-bio-etat', 'acc-acces-etat'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.infoBulle) return;
+    const ligne = el.nextElementSibling && el.nextElementSibling.querySelector('label.check-row');
+    if (!ligne) return;
+    el.dataset.infoBulle = '1';
+    el.classList.add('info-bulle-texte');
+    let bouton = ligne.querySelector('.ui-info-btn');
+    if (!bouton) {
+      bouton = document.createElement('button');
+      bouton.type = 'button';
+      bouton.className = 'ui-info-btn';
+      bouton.textContent = 'i';
+      bouton.setAttribute('aria-label', trad("Afficher l'explication"));
+      bouton.setAttribute('aria-expanded', 'false');
+      ligne.appendChild(bouton);
+    }
+    bouton._cible = [].concat(bouton._cible || [], el);
+  });
   (racine || document).querySelectorAll(SELECTEUR_AIDES_TELEPHONE).forEach((el) => {
     if (el.dataset.infoBulle) return;
     if (el.id || el.getAttribute('role') || el.getAttribute('aria-live')) return;
@@ -1329,9 +1350,10 @@ document.addEventListener('click', (ev) => {
   if (!bouton) return;
   ev.preventDefault();
   ev.stopPropagation();
-  const cible = bouton._cible;
-  if (!cible) return;
-  const ouvert = cible.classList.toggle('is-ouvert');
+  const cibles = [].concat(bouton._cible || []);
+  if (!cibles.length) return;
+  const ouvert = !cibles[0].classList.contains('is-ouvert');
+  cibles.forEach((c) => c.classList.toggle('is-ouvert', ouvert));
   bouton.classList.toggle('is-ouvert', ouvert);
   bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
 }, true);

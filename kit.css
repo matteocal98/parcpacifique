@@ -836,3 +836,10 @@ textarea:not([data-x]),
   /* lignes à plusieurs boutons (équipe : Générer un mot de passe / Changer le droit / Retirer) : le texte passe à la ligne dans son bouton, il ne déborde plus */
   .ui-ligne-action.is-etiquettes:has(> .ui-btn) > *{white-space:normal;height:auto;min-height:34px;padding:4px 3px;overflow:hidden;line-height:1.1;font-size:11px;overflow-wrap:anywhere;}
 }
+@media (max-width:560px){
+  /* pastille « i » : cercle et lettre en orange de la charte, bien visible */
+  .ui-info-btn{background:var(--late-bg);border:2px solid var(--late);color:var(--late);font-weight:800;font-size:12px;width:22px;height:22px;box-sizing:border-box;}
+  .ui-info-btn.is-ouvert{background:var(--late);color:#fff;}
+  /* « Verrouillage et reconnexion » : les cases à cocher tiennent sur une ligne chacune, explications dans la pastille */
+  #acc-bio-corps .check-row,#acc-acces-corps .check-row{font-size:12.5px;margin:4px 0;gap:8px;}
+}
