@@ -4354,6 +4354,7 @@ async function chargerSortiesAchats(fenetre) {
 function calculerSuggestionsAchat(params, sorties) {
   const { horizon, fenetre, securite } = params;
   const entretiens = new Map();
+  const enCommande = SCHEMA.hasCommandes ? quantitesEnCommande() : new Map();
   if (SCHEMA.hasKits) {
     const prep = listePreparation(UI.machines, horizon);
     (prep.produits || []).forEach((p) => {
@@ -4379,7 +4380,8 @@ function calculerSuggestionsAchat(params, sorties) {
     const demandeRythme = taux * horizon;
     const demande = Math.max(e.besoin, demandeRythme);
     const seuil = Number(piece.default_reorder_point) || 0;
-    const manque = demande + seuil - stock;
+    const commande = enCommande.get(id) || 0;
+    const manque = demande + seuil - stock - commande;
     const aCommander = manque > 0 ? Math.ceil(manque) : 0;
     if (!aCommander) return;
     const fournisseur = piece.supplier_id ? fournisseurParId(piece.supplier_id) : (piece.supplier_name ? fournisseurParNom(piece.supplier_name) : null);
@@ -4399,7 +4401,7 @@ function calculerSuggestionsAchat(params, sorties) {
     else if (e.etat === 'soon' && urgence !== 'late') urgence = 'soon';
     if (stock <= 0 && demande > 0) urgence = 'late';
     lignes.push({
-      id, piece, fournisseur, delai, stock, taux, jours, seuil,
+      id, piece, fournisseur, delai, stock, taux, jours, seuil, enCommande: commande,
       besoinEntretien: e.besoin, dateEntretien: e.date, demande, aCommander, raisons, urgence,
     });
   });
@@ -4437,6 +4439,7 @@ function ligneAchatHtml(l) {
   const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[l.urgence];
   const faits = [
     tR('Stock : {n}', { n: texteAvecSeparateurs(l.stock) }),
+    l.enCommande ? tR('En commande : {n}', { n: texteAvecSeparateurs(l.enCommande) }) : '',
     l.besoinEntretien ? tR('Entretiens : {n}', { n: texteAvecSeparateurs(l.besoinEntretien) }) : '',
     l.taux > 0 ? tR('Sorties : {n}/j', { n: texteAvecSeparateurs(Math.round(l.taux * 100) / 100) }) : '',
     l.jours != null ? tR('Couverture : {n} j', { n: Math.round(l.jours) }) : '',
@@ -4491,7 +4494,7 @@ function blocAchatsHtml() {
         <div id="achats-resume" class="ui-aide" role="status" aria-live="polite"></div>
         <div id="achats-contenu"><div class="ui-aide">${trad('Chargement…')}</div></div>
       </div>
-    </section>`;
+    </section>${SCHEMA.hasCommandes ? blocCommandesHtml() : ''}`;
 }
 function resumeAchats(lignes) {
   const incluses = lignes.filter(ligneEstInclue);
@@ -4569,7 +4572,14 @@ function cablerAchats(root) {
     const g = groupesAchat(root._lignesAchats || []).find((x) => x.cle === bon.getAttribute('data-achats-bon'));
     if (g) ouvrirBonDeCommande(g);
   });
-  rafraichirAchats(root);
+  root.querySelector('#commandes-liste')?.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-commande-ouvrir]');
+    if (b) ouvrirCommande(b.getAttribute('data-commande-ouvrir'), () => { dessinerCommandes(root); rafraichirAchats(root); });
+  });
+  (async () => {
+    if (SCHEMA.hasCommandes) await rafraichirCommandes(root);
+    rafraichirAchats(root);
+  })();
 }
 // ── Bon de commande : aperçu, impression / PDF, copie, e-mail ──
 function lignesDuBon(g) {
@@ -4585,7 +4595,7 @@ function referenceBon(g) {
 }
 function texteBonDeCommande(g, infos) {
   const f = g.fournisseur;
-  const lignes = lignesDuBon(g);
+  const lignes = g._lignesFigees || lignesDuBon(g);
   const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
   const devise = deviseCourte();
   return [
@@ -4604,7 +4614,7 @@ function texteBonDeCommande(g, infos) {
 }
 function documentBonDeCommandeHtml(g, infos) {
   const f = g.fournisseur;
-  const lignes = lignesDuBon(g);
+  const lignes = g._lignesFigees || lignesDuBon(g);
   const devise = deviseCourte();
   const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
   const adresseFourn = f ? [f.legal_name && f.legal_name !== f.name ? f.legal_name : '', f.address, [f.postal_code, f.city].filter(Boolean).join(' '), f.country].filter(Boolean) : [];
@@ -4632,6 +4642,7 @@ function ouvrirBonDeCommande(g) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const f = g.fournisseur;
   const emailDest = f ? (f.po_email || f.email || '') : '';
+  const peutEnregistrer = !!(SCHEMA.hasCommandes && peutGererParametresStock() && f);
   overlay.innerHTML = `
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="bon-titre">
       <h2 id="bon-titre">${trad('Bon de commande')} — ${esc(g.nom)}</h2>
@@ -4652,7 +4663,8 @@ function ouvrirBonDeCommande(g) {
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-annuler">${trad('Annuler')}</button>
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-email"${emailDest ? '' : ' hidden'}>${picto('mail')}<span>${trad('E-mail')}</span></button>
-        <button type="button" class="ui-btn ui-btn-plein" id="bon-imprimer">${picto('export')}<span>${trad('Imprimer / PDF')}</span></button>
+        ${peutEnregistrer ? `<button type="button" class="ui-btn ui-btn-plein" id="bon-enregistrer">${picto('coche')}<span>${trad('Enregistrer la commande')}</span></button>` : ''}
+        <button type="button" class="ui-btn ${peutEnregistrer ? 'ui-btn-pastille' : 'ui-btn-plein'}" id="bon-imprimer">${picto('export')}<span>${trad('Imprimer / PDF')}</span></button>
       </div>
     </div>`;
   ajouterCroixModale(overlay);
@@ -4668,6 +4680,30 @@ function ouvrirBonDeCommande(g) {
   };
   apercu();
   q('#bon-annuler').addEventListener('click', () => overlay.remove());
+  q('#bon-enregistrer')?.addEventListener('click', async (e) => {
+    const bouton = e.currentTarget;
+    const lignes = lignesDuBon(g);
+    if (!lignes.length) return;
+    const i = infos();
+    bouton.disabled = true;
+    q('#bon-msg').textContent = trad('Enregistrement…');
+    const { data, error } = await sb.rpc('creer_commande', {
+      p_supplier_id: f.id,
+      p_lines: lignes.map((x) => ({ part_id: x.l.piece.id, quantity: x.qte, unit_price: Number(x.l.piece.unit_price) || 0, suggested_qty: x.l.aCommander, reason: x.l.raisons.join(',') })),
+      p_requested_delivery: i.livraison || null,
+      p_address: i.adresse || null,
+      p_note: i.note || null,
+      p_warehouse_id: null,
+    });
+    if (error) { q('#bon-msg').textContent = trad('Erreur :') + ' ' + error.message; bouton.disabled = false; return; }
+    q('#bon-ref').value = data.reference;
+    q('#bon-ref').readOnly = true;
+    bouton.hidden = true;
+    q('#bon-msg').textContent = tR('Commande {ref} enregistrée (brouillon). Imprime-la ou envoie-la, puis marque-la envoyée depuis la liste des commandes.', { ref: data.reference });
+    showToast(trad('Commande enregistrée'));
+    const racine = document.getElementById('view-root');
+    if (racine) { await rafraichirCommandes(racine); rafraichirAchats(racine); }
+  });
   q('#bon-imprimer').addEventListener('click', () => imprimerDocumentHtml(documentBonDeCommandeHtml(g, infos())));
   q('#bon-copier').addEventListener('click', async () => {
     const texte = texteBonDeCommande(g, infos());
@@ -4678,6 +4714,235 @@ function ouvrirBonDeCommande(g) {
     const i = infos();
     const sujet = `${trad('Bon de commande')} ${i.reference} — ${UI.companyName || ''}`;
     window.location.href = `mailto:${encodeURIComponent(emailDest)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(texteBonDeCommande(g, i))}`;
+  });
+}
+
+// ── Commandes enregistrées : suivi et réception (kalea-serveur/migrations/stock-commandes.sql) ──────────────
+const STATUTS_COMMANDE_OUVERTS = ['brouillon', 'envoyee', 'partielle'];
+function libelleStatutCommande(statut) {
+  return ({ brouillon: trad('Brouillon'), envoyee: trad('Envoyée'), partielle: trad('Partielle'), recue: trad('Reçue'), annulee: trad('Annulée') })[statut] || statut;
+}
+function classeStatutCommande(statut) {
+  return ({ brouillon: '', envoyee: 'is-bientot', partielle: 'is-bientot', recue: 'is-ok', annulee: 'is-retard' })[statut] || '';
+}
+async function chargerCommandes() {
+  const { data, error } = await sb.from('purchase_orders').select('*').eq('company_id', UI.companyId)
+    .order('created_at', { ascending: false }).limit(100);
+  if (error) throw error;
+  UI.commandes = data || [];
+  const ouvertes = UI.commandes.filter((c) => STATUTS_COMMANDE_OUVERTS.includes(c.status)).map((c) => c.id);
+  UI.commandesLignes = [];
+  if (ouvertes.length) {
+    const { data: lignes, error: err2 } = await sb.from('purchase_order_lines').select('*').in('order_id', ouvertes).eq('company_id', UI.companyId);
+    if (err2) throw err2;
+    UI.commandesLignes = lignes || [];
+  }
+}
+// Reste à recevoir par pièce, sur les commandes ouvertes : sert à ne pas re-proposer ce qui est déjà commandé.
+function quantitesEnCommande() {
+  const parPiece = new Map();
+  (UI.commandesLignes || []).forEach((l) => {
+    if (!l.part_id) return;
+    const reste = Math.max(0, (Number(l.quantity_ordered) || 0) - (Number(l.quantity_received) || 0));
+    if (reste > 0) parPiece.set(String(l.part_id), (parPiece.get(String(l.part_id)) || 0) + reste);
+  });
+  return parPiece;
+}
+function blocCommandesHtml() {
+  return `
+    <section class="ui-section" id="commandes-section">
+      ${teteSectionKit('calendrier', trad('Commandes fournisseurs'), trad('Commandes enregistrées : à envoyer, en attente de livraison, reçues.'),
+        `<span class="ui-tag" id="commandes-badge"></span>`)}
+      <div class="ui-section-corps">
+        <div class="ui-liste is-defilant" id="commandes-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
+      </div>
+    </section>`;
+}
+function ligneCommandeHtml(c) {
+  const classe = classeStatutCommande(c.status);
+  const sous = [
+    c.supplier_name,
+    tR('{n} pièce(s) · {t}', { n: lignesDeCommande(c.id).length || '…', t: texteAvecSeparateurs(Number(c.total_estimated) || 0) + ' ' + deviseCourte() }),
+    formatShortDate(String(c.created_at).slice(0, 10)),
+    c.requested_delivery ? tR('Livraison souhaitée {d}', { d: formatShortDate(c.requested_delivery) }) : '',
+  ].filter(Boolean).join(' · ');
+  return `
+    <div class="ui-ligne is-deux ${classe}" data-commande-id="${esc(c.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('export')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(c.reference)}<span class="ui-statut ${classe}">${esc(libelleStatutCommande(c.status))}</span></span>
+          <span class="ui-ligne-sous">${esc(sous)}</span>
+        </div>
+      </div>
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-pastille" data-commande-ouvrir="${esc(c.id)}">${trad('Ouvrir')}</button>
+      </div>
+    </div>`;
+}
+function lignesDeCommande(id) { return (UI.commandesLignes || []).filter((l) => String(l.order_id) === String(id)); }
+function dessinerCommandes(root) {
+  const zone = root.querySelector('#commandes-liste');
+  if (!zone) return;
+  const liste = UI.commandes || [];
+  const ouvertes = liste.filter((c) => STATUTS_COMMANDE_OUVERTS.includes(c.status));
+  const closes = liste.filter((c) => !STATUTS_COMMANDE_OUVERTS.includes(c.status));
+  const badge = root.querySelector('#commandes-badge');
+  if (badge) badge.textContent = tR('{n} en cours', { n: ouvertes.length });
+  zone.innerHTML = liste.length
+    ? ouvertes.map(ligneCommandeHtml).join('')
+      + (closes.length ? `<details class="commandes-historique"><summary>${tR('Historique ({n})', { n: closes.length })}</summary><div class="ui-liste">${closes.slice(0, 30).map(ligneCommandeHtml).join('')}</div></details>` : '')
+      + (ouvertes.length ? '' : `<div class="ui-aide">${trad('Aucune commande en cours.')}</div>`)
+    : `<div class="ui-aide">${trad('Aucune commande enregistrée. Prépare un bon ci-dessus puis enregistre-le.')}</div>`;
+}
+async function rafraichirCommandes(root) {
+  const zone = root.querySelector('#commandes-liste');
+  if (!zone) return;
+  try { await chargerCommandes(); } catch (err) {
+    zone.innerHTML = `<div class="ui-aide is-late">${esc(trad('Erreur de chargement :') + ' ' + (err.message || err))}</div>`;
+    return;
+  }
+  if (!root.isConnected) return;
+  dessinerCommandes(root);
+}
+// Une commande enregistrée, sous la forme attendue par le document et le texte du bon.
+function groupeDepuisCommande(c, lignes) {
+  const f = c.supplier_id ? fournisseurParId(c.supplier_id) : null;
+  return {
+    cle: 'commande:' + c.id, fournisseur: f, nom: c.supplier_name,
+    _lignesFigees: lignes.map((l) => ({
+      l: { piece: { reference: l.reference, designation: l.designation, packaging: l.packaging, unit_price: l.unit_price } },
+      qte: Number(l.quantity_ordered) || 0,
+    })),
+  };
+}
+async function ouvrirCommande(orderId, rafraichir) {
+  const c = (UI.commandes || []).find((x) => String(x.id) === String(orderId));
+  if (!c) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `<div class="modal export-modal achats-bon-modal"><div class="ui-aide">${trad('Chargement…')}</div></div>`;
+  let lignes = [];
+  try {
+    const { data, error } = await sb.from('purchase_order_lines').select('*').eq('order_id', c.id).order('designation', { ascending: true });
+    if (error) throw error;
+    lignes = data || [];
+  } catch (err) {
+    overlay.querySelector('.modal').innerHTML = `<div class="ui-aide is-late">${esc(trad('Erreur de chargement :') + ' ' + (err.message || err))}</div>`;
+    return;
+  }
+  const gerant = peutGererParametresStock();
+  const peutRecevoir = peutGererMouvementsStock();
+  const ouverte = STATUTS_COMMANDE_OUVERTS.includes(c.status);
+  const classe = classeStatutCommande(c.status);
+  overlay.innerHTML = `
+    <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="cmd-titre">
+      <h2 id="cmd-titre">${esc(c.reference)} <span class="ui-statut ${classe}">${esc(libelleStatutCommande(c.status))}</span></h2>
+      <p class="sub">${esc([c.supplier_name, formatShortDate(String(c.created_at).slice(0, 10)), c.requested_delivery ? tR('Livraison souhaitée {d}', { d: formatShortDate(c.requested_delivery) }) : ''].filter(Boolean).join(' · '))}</p>
+      <div class="achats-bon-apercu">
+        <table class="achats-bon-table"><tbody>
+          ${lignes.map((l) => {
+            const reste = (Number(l.quantity_ordered) || 0) - (Number(l.quantity_received) || 0);
+            return `<tr><td>${esc(l.designation)}${l.reference ? `<span class="ui-ligne-sous">${esc(l.reference)}</span>` : ''}</td><td class="n">${esc(texteAvecSeparateurs(Number(l.quantity_received) || 0))} / ${esc(texteAvecSeparateurs(Number(l.quantity_ordered) || 0))}${reste > 0 && ouverte && Number(l.quantity_received) > 0 ? `<span class="ui-ligne-sous">${tR('reste {n}', { n: texteAvecSeparateurs(reste) })}</span>` : ''}</td></tr>`;
+          }).join('')}
+        </tbody></table>
+        <div class="achats-bon-total">${trad('Total estimé')} : ${esc(texteAvecSeparateurs(Number(c.total_estimated) || 0))} ${esc(deviseCourte())}</div>
+      </div>
+      ${c.note ? `<p class="ui-aide">${trad('Note')} : ${esc(c.note)}</p>` : ''}
+      ${c.close_note ? `<p class="ui-aide">${esc(c.close_note)}</p>` : ''}
+      <div id="cmd-msg" class="ui-aide" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="cmd-fermer">${trad('Fermer')}</button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="cmd-imprimer">${picto('export')}<span>${trad('Imprimer / PDF')}</span></button>
+        ${gerant && c.status === 'brouillon' ? `<button type="button" class="ui-btn ui-btn-pastille" id="cmd-envoyee">${trad('Marquer envoyée')}</button>` : ''}
+        ${gerant && ['brouillon', 'envoyee'].includes(c.status) ? `<button type="button" class="ui-btn ui-btn-pastille is-danger" id="cmd-annuler">${trad('Annuler la commande')}</button>` : ''}
+        ${gerant && c.status === 'partielle' ? `<button type="button" class="ui-btn ui-btn-pastille" id="cmd-cloturer">${trad('Clôturer (solde abandonné)')}</button>` : ''}
+        ${peutRecevoir && ouverte ? `<button type="button" class="ui-btn ui-btn-plein" id="cmd-recevoir">${picto('coche')}<span>${trad('Réceptionner')}</span></button>` : ''}
+      </div>
+    </div>`;
+  ajouterCroixModale(overlay);
+  const q = (s) => overlay.querySelector(s);
+  const msg = q('#cmd-msg');
+  const apres = async () => { overlay.remove(); await chargerCommandes(); if (rafraichir) rafraichir(); };
+  q('#cmd-fermer').addEventListener('click', () => overlay.remove());
+  q('#cmd-imprimer').addEventListener('click', () => imprimerDocumentHtml(documentBonDeCommandeHtml(groupeDepuisCommande(c, lignes), { reference: c.reference, livraison: c.requested_delivery || '', adresse: c.delivery_address || '', note: c.note || '' })));
+  const action = (sel, nomRpc, args, texteOk, confirmation) => q(sel)?.addEventListener('click', async (e) => {
+    if (confirmation && !window.confirm(confirmation)) return;
+    e.currentTarget.disabled = true;
+    msg.textContent = trad('Enregistrement…');
+    const { error } = await sb.rpc(nomRpc, args);
+    if (error) { msg.textContent = trad('Erreur :') + ' ' + error.message; e.currentTarget.disabled = false; return; }
+    showToast(texteOk);
+    await apres();
+  });
+  action('#cmd-envoyee', 'marquer_commande_envoyee', { p_order_id: c.id }, trad('Commande marquée envoyée'));
+  action('#cmd-annuler', 'annuler_commande', { p_order_id: c.id, p_reason: null }, trad('Commande annulée'), trad('Annuler cette commande ?'));
+  action('#cmd-cloturer', 'cloturer_commande', { p_order_id: c.id }, trad('Commande clôturée'), trad('Clôturer : le solde non livré sera abandonné. Continuer ?'));
+  q('#cmd-recevoir')?.addEventListener('click', () => { overlay.remove(); ouvrirReceptionCommande(c, lignes, rafraichir); });
+}
+function ouvrirReceptionCommande(c, lignes, rafraichir) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  const defaut = c.default_warehouse_id && magasins.some((w) => String(w.id) === String(c.default_warehouse_id)) ? c.default_warehouse_id : (magasins[0] && magasins[0].id);
+  const aRecevoir = lignes.filter((l) => (Number(l.quantity_ordered) || 0) - (Number(l.quantity_received) || 0) > 0);
+  overlay.innerHTML = `
+    <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="rec-titre">
+      <h2 id="rec-titre">${trad('Réceptionner')} ${esc(c.reference)}</h2>
+      <p class="sub">${trad('Indique ce qui est réellement arrivé. Chaque quantité reçue entre en stock dans le magasin choisi, au prix indiqué (il alimente le coût moyen du stock).')}</p>
+      <div class="ui-champ-groupe">
+        <label for="rec-magasin"><strong>${trad('Magasin de réception')}</strong></label>
+        <div class="ui-select-wrap"><select id="rec-magasin" class="ui-champ">${magasins.map((w) => `<option value="${esc(w.id)}"${String(w.id) === String(defaut) ? ' selected' : ''}>${esc(w.name)}</option>`).join('')}</select>${picto('chevronBas')}</div>
+      </div>
+      <div class="achats-lignes" id="rec-lignes">
+        ${aRecevoir.map((l) => {
+          const reste = (Number(l.quantity_ordered) || 0) - (Number(l.quantity_received) || 0);
+          return `<div class="achats-ligne is-ok" data-rec-ligne="${esc(l.id)}">
+            <span></span>
+            <div class="achats-textes"><span class="ui-ligne-nom">${esc(l.designation)}</span><span class="ui-ligne-sous">${esc([l.reference, tR('Reste à recevoir : {n}', { n: texteAvecSeparateurs(reste) })].filter(Boolean).join(' · '))}</span></div>
+            <div class="achats-qte">
+              <label class="sr-only" for="rec-qte-${esc(l.id)}">${trad('Quantité reçue')}</label>
+              <input id="rec-qte-${esc(l.id)}" class="ui-champ" type="text" inputmode="decimal" data-rec-qte="${esc(l.id)}" value="${esc(String(reste))}">
+              <label class="sr-only" for="rec-cout-${esc(l.id)}">${trad('Prix unitaire reçu')}</label>
+              <input id="rec-cout-${esc(l.id)}" class="ui-champ" type="text" inputmode="decimal" data-rec-cout="${esc(l.id)}" value="${esc(String(Number(l.unit_price) || 0))}" title="${esc(trad('Prix unitaire'))}">
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="ui-champ-groupe">
+        <label for="rec-note"><strong>${trad('Note (bon de livraison…)')}</strong></label>
+        <input id="rec-note" class="ui-champ" maxlength="200" placeholder="${esc(trad('Facultatif'))}">
+      </div>
+      <div id="rec-msg" class="ui-aide" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="rec-annuler">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="rec-go">${picto('coche')}<span>${trad('Valider la réception')}</span></button>
+      </div>
+    </div>`;
+  ajouterCroixModale(overlay);
+  const q = (s) => overlay.querySelector(s);
+  q('#rec-annuler').addEventListener('click', () => overlay.remove());
+  q('#rec-go').addEventListener('click', async (e) => {
+    const bouton = e.currentTarget;
+    const msg = q('#rec-msg');
+    const recues = [...overlay.querySelectorAll('[data-rec-ligne]')].map((el) => {
+      const id = el.getAttribute('data-rec-ligne');
+      return { line_id: id, quantity: nombrePositif(q(`[data-rec-qte="${CSS.escape(id)}"]`).value, 0), unit_cost: nombrePositif(q(`[data-rec-cout="${CSS.escape(id)}"]`).value, 0) };
+    }).filter((x) => x.quantity > 0);
+    if (!recues.length) { msg.textContent = trad('Indique au moins une quantité reçue.'); return; }
+    bouton.disabled = true;
+    msg.textContent = trad('Enregistrement…');
+    const { error } = await sb.rpc('receptionner_commande', { p_order_id: c.id, p_warehouse_id: q('#rec-magasin').value, p_lines: recues, p_note: q('#rec-note').value.trim() || null });
+    if (error) { msg.textContent = trad('Erreur :') + ' ' + error.message; bouton.disabled = false; return; }
+    try { await rechargerSoldesStock(); } catch (err) { /* les soldes se mettront à jour au prochain chargement */ }
+    showToast(trad('Réception enregistrée : le stock est à jour'));
+    overlay.remove();
+    await chargerCommandes();
+    renderApp();
   });
 }
 

@@ -701,6 +701,8 @@ SCHEMA.hasSuppliers = false;
 SCHEMA.hasSuppliersFull = false;
 // Pièces jointes des fournisseurs (stock-fournisseurs-documents.sql) : table supplier_documents + espace de stockage privé.
 SCHEMA.hasSupplierDocs = false;
+// Commandes fournisseurs + réception (stock-commandes.sql) : tables purchase_orders / purchase_order_lines / purchase_order_receipts.
+SCHEMA.hasCommandes = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et
