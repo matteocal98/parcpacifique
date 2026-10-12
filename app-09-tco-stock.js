@@ -700,7 +700,7 @@ function blocCatalogueTcoHtml() {
   return `
     <section class="ui-section" id="tco-catalogue-section">
       ${teteSectionKit('boite', trad('Catalogue de pièces'), trad('Sélectionnable sur chaque intervention (« Enregistrer un entretien ») pour calculer automatiquement le coût des pièces consommées.'),
-        `<span class="ui-tag" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>${etiquettesCataloguePossibles() ? `<button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-etiquettes">${picto('qrcode')}<span>${trad('Étiquettes')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button>`)}
+        `<span class="ui-tag" id="tco-catalogue-badge">${tR('{n} référence(s) active(s)', { n: pieces.length })}</span>${etiquettesCataloguePossibles() ? `<button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-etiquettes">${picto('qrcode')}<span>${trad('Étiquettes')}</span></button>` : ''}<button type="button" class="ui-btn ui-btn-pastille" id="tco-catalogue-importer">${picto('televerser')}<span>${trad('Importer des pièces (CSV)')}</span></button>`)}
       <div class="ui-section-corps">
         ${tcoTipCarteHtml()}
         <div class="ui-deux">
@@ -1886,17 +1886,17 @@ function stockKpiGridHtml() {
     <section class="ui-section">
       ${stockEyebrowToolbarHtml()}
       <div class="ui-grille is-3">
-        <div class="ui-tuile">
+        <div class="ui-tuile stock-tuile-lien" role="button" tabindex="0" data-stock-aller="pieces">
           <span class="ui-tuile-etiquette">${trad('Valeur totale du stock')}</span>
           <span class="ui-tuile-valeur">${gerant ? `${texteAvecSeparateurs(valeurTotale)}<small>${esc(deviseCourte())}</small>` : '—'}</span>
           <span class="ui-tuile-note">${gerant ? trad('Valorisation PUMP, tous magasins') : trad('Réservé au gérant')}</span>
         </div>
-        <div class="ui-tuile ${nbAlertes ? 'is-retard' : 'is-ok'}">
+        <div class="ui-tuile stock-tuile-lien ${nbAlertes ? 'is-retard' : 'is-ok'}" role="button" tabindex="0" data-stock-aller="pieces">
           <span class="ui-tuile-etiquette">${trad('Références en alerte')}</span>
           <span class="ui-tuile-valeur">${nbAlertes}</span>
           <span class="ui-tuile-note">${nbAlertes ? trad('Sous le seuil de sécurité') : trad('Aucune alerte')}</span>
         </div>
-        <div class="ui-tuile">
+        <div class="ui-tuile stock-tuile-lien" role="button" tabindex="0" data-stock-aller="mouvements">
           <span class="ui-tuile-etiquette">${trad('Mouvements ce mois-ci')}</span>
           <span class="ui-tuile-valeur" id="stock-kpi-mouvements">…</span>
           <span class="ui-tuile-note">${tR('{n} magasin(s) actif(s)', { n: nbMagasins })}</span>
@@ -2051,7 +2051,7 @@ function blocMouvementsStockHtml() {
   return `
     <section class="ui-section" id="stock-mouvements-section">
       ${teteSectionKit('calendrier', trad('Mouvements'), trad('Entrées, sorties, transferts et ajustements'),
-        peut ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-importer">${picto('televerser')}<span>${trad('Importer un CSV')}</span></button><button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : '')}
+        peut ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-importer">${picto('televerser')}<span>${trad('Importer des mouvements (CSV)')}</span></button><button type="button" class="ui-btn ui-btn-pastille" id="stock-mouvements-nouveau">${picto('plusCercle')}<span>${trad('Nouveau mouvement')}</span></button>` : '')}
       <div class="ui-section-corps">
         <div class="ui-liste is-defilant" id="stock-mouvements-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
         <div class="ui-barre is-centre"><button type="button" class="ui-btn ui-btn-teinte" id="stock-mouvements-plus" hidden>${trad('Voir plus')}</button></div>
@@ -4274,28 +4274,82 @@ async function rattacherFournisseursImport(lignes) {
   });
 }
 
+// ── Onglets du menu Stock ── la page regroupait 9 blocs sur 4 écrans : on la
+// découpe par USAGE (consulter / bouger / compter / régler). L'onglet choisi
+// est gardé dans UI.stockOnglet pour survivre aux renderApp().
+function stockOngletsDisponibles() {
+  const liste = [];
+  if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Vue d\'ensemble'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
+  liste.push({ id: 'pieces', libelle: trad('Pièces'), picto: 'boite', aide: trad('Ce qu\'il y a en stock, magasin par magasin, et le catalogue des références.') });
+  liste.push({ id: 'mouvements', libelle: trad('Mouvements'), picto: 'calendrier', aide: trad('Entrées, sorties, transferts et ajustements.') });
+  if (inventairePhysiquePossible()) liste.push({ id: 'inventaire', libelle: trad('Inventaire'), picto: 'coche', aide: trad('Compter le stock réel et régulariser les écarts.') });
+  liste.push({ id: 'organisation', libelle: trad('Organisation'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
+  return liste;
+}
+function stockOngletActif(onglets) {
+  const voulu = UI.stockOnglet;
+  if (onglets.some((o) => o.id === voulu)) return voulu;
+  return onglets.some((o) => o.id === 'pieces') ? (onglets[0].id === 'apercu' ? 'apercu' : 'pieces') : onglets[0].id;
+}
+function stockGuideHtml(onglets) {
+  const cartes = onglets.filter((o) => o.id !== 'apercu');
+  return `
+    <section class="ui-section">
+      ${teteSectionKit('info', trad('Où trouver quoi ?'), '')}
+      <div class="ui-section-corps">
+        <div class="stock-guide">
+          ${cartes.map((o) => `<button type="button" class="stock-guide-carte" data-stock-aller="${o.id}">${picto(o.picto)}<span class="stock-guide-texte"><strong>${esc(o.libelle)}</strong><span>${esc(o.aide)}</span></span></button>`).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+// Bascule d'onglet : sans renderApp() (les blocs sont déjà dans la page).
+function stockAllerOnglet(root, id) {
+  const bouton = root.querySelector(`[data-stock-onglet="${id}"]`);
+  if (!bouton) return;
+  UI.stockOnglet = id;
+  root.querySelectorAll('[data-stock-onglet]').forEach((b) => {
+    const actif = b === bouton;
+    b.classList.toggle('is-actif', actif);
+    b.setAttribute('aria-selected', String(actif));
+  });
+  root.querySelectorAll('.stock-panneau').forEach((p) => { p.hidden = p.id !== `stock-panneau-${id}`; });
+}
+
 VIEWS.stock = {
   fondBlanc: true,
   title: trad('Stocks & SAV'),
   subtitle: () => trad('Magasins, mouvements et valorisation du stock'),
   render() {
+    // Le menu Stock est découpé en onglets (tous les blocs restent dans la page,
+    // seul l'onglet actif est visible) : les branchements de mount() retrouvent
+    // donc leurs éléments par identifiant, où qu'ils soient rangés.
+    const onglets = stockOngletsDisponibles();
+    const actif = stockOngletActif(onglets);
+    const panneau = (id, contenu) => `<div class="stock-panneau" role="tabpanel" id="stock-panneau-${id}" aria-labelledby="stock-onglet-${id}"${id === actif ? '' : ' hidden'}>${contenu}</div>`;
+    const piecesActives = UI.stockPiecesVue === 'catalogue' ? 'catalogue' : 'stock';
     return `
       <div class="ui-page">
         ${stockKpiGridHtml()}
-        <div class="ui-colonnes">
-          <div class="ui-colonne">
-            ${blocMagasinsStockHtml()}
-            ${fournisseursActifs() ? blocFournisseursStockHtml() : ''}
-            ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}
-            ${SCHEMA.hasKits ? blocBesoinsRisqueStockHtml() : ''}
-          </div>
-          <div class="ui-colonne">
-            ${blocInventaireStockHtml()}
-            ${inventairePhysiquePossible() ? blocInventairePhysiqueHtml() : ''}
-            ${blocMouvementsStockHtml()}
-          </div>
+        <div class="stock-onglets" role="tablist" aria-label="${esc(trad('Sections du stock'))}">
+          ${onglets.map((o) => `<button type="button" class="stock-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" id="stock-onglet-${o.id}" aria-selected="${o.id === actif}" aria-controls="stock-panneau-${o.id}" data-stock-onglet="${o.id}">${picto(o.picto)}<span>${esc(o.libelle)}</span></button>`).join('')}
         </div>
-        ${blocCatalogueTcoHtml()}
+        ${onglets.some((o) => o.id === 'apercu') ? panneau('apercu', `
+          ${blocBesoinsRisqueStockHtml()}
+          ${stockGuideHtml(onglets)}`) : ''}
+        ${panneau('pieces', `
+          <div class="ui-segment stock-pieces-vues" role="group" aria-label="${esc(trad('Affichage des pièces'))}">
+            <button type="button" data-stock-pieces-vue="stock" class="${piecesActives === 'stock' ? 'is-actif' : ''}">${trad('Stock par magasin')}</button>
+            <button type="button" data-stock-pieces-vue="catalogue" class="${piecesActives === 'catalogue' ? 'is-actif' : ''}">${trad('Catalogue de pièces')}</button>
+          </div>
+          <div class="stock-pieces-vue" data-stock-pieces-bloc="stock"${piecesActives === 'stock' ? '' : ' hidden'}>${blocInventaireStockHtml()}</div>
+          <div class="stock-pieces-vue" data-stock-pieces-bloc="catalogue"${piecesActives === 'catalogue' ? '' : ' hidden'}>${blocCatalogueTcoHtml()}</div>`)}
+        ${panneau('mouvements', blocMouvementsStockHtml())}
+        ${inventairePhysiquePossible() ? panneau('inventaire', blocInventairePhysiqueHtml()) : ''}
+        ${panneau('organisation', `
+          ${blocMagasinsStockHtml()}
+          ${fournisseursActifs() ? blocFournisseursStockHtml() : ''}
+          ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}`)}
       </div>`;
   },
   mount() {
@@ -4308,6 +4362,33 @@ VIEWS.stock = {
     };
 
     root.querySelector('#stock-pump-info')?.addEventListener('click', ouvrirExplicationPump);
+
+    // ── Onglets, guide « Où trouver quoi ? » et tuiles de chiffres cliquables. ──
+    root.addEventListener('click', (e) => {
+      const onglet = e.target.closest('[data-stock-onglet]');
+      if (onglet) { stockAllerOnglet(root, onglet.getAttribute('data-stock-onglet')); return; }
+      const aller = e.target.closest('[data-stock-aller]');
+      if (aller) { stockAllerOnglet(root, aller.getAttribute('data-stock-aller')); window.scrollTo({ top: 0 }); return; }
+      const vue = e.target.closest('[data-stock-pieces-vue]');
+      if (vue) {
+        const choix = vue.getAttribute('data-stock-pieces-vue');
+        UI.stockPiecesVue = choix;
+        root.querySelectorAll('[data-stock-pieces-vue]').forEach((b) => b.classList.toggle('is-actif', b === vue));
+        root.querySelectorAll('[data-stock-pieces-bloc]').forEach((b) => { b.hidden = b.getAttribute('data-stock-pieces-bloc') !== choix; });
+      }
+    });
+    root.querySelectorAll('.stock-tuile-lien').forEach((t) => t.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.click(); }
+    }));
+    root.querySelector('[role="tablist"]')?.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const boutons = [...root.querySelectorAll('[data-stock-onglet]')];
+      const i = boutons.indexOf(document.activeElement);
+      if (i < 0) return;
+      const suivant = boutons[(i + (e.key === 'ArrowRight' ? 1 : boutons.length - 1)) % boutons.length];
+      suivant.focus();
+      stockAllerOnglet(root, suivant.getAttribute('data-stock-onglet'));
+    });
 
     // ── Kits d'entretien : CRUD réservé au gérant. ──
     if (SCHEMA.hasKits) {

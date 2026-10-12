@@ -105,7 +105,7 @@ body.fond-blanc .main{background:var(--surface);}
 /* Champ avec unité à droite (€/h, h, km…) */
 .ui-champ-unite{position:relative;display:flex;align-items:center;min-width:0;}
 .ui-champ-unite .ui-champ{padding-right:68px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
-.ui-unite{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:10.5px;font-weight:700;pointer-events:none;}
+.ui-unite{position:absolute;right:10px;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);color:var(--ink);font-size:12px;font-weight:700;pointer-events:none;}
 .ui-ligne .ui-unite,.ui-tuile .ui-unite,.ui-encadre .ui-unite{background:var(--surface);}
 
 /* ── 5. Boutons : trois formats, pas un de plus (règle 6) ───────────────────────── */
@@ -555,13 +555,13 @@ textarea:not([data-x]),
   .ui-section-acces:has(> .ui-btn:nth-of-type(3)) > .ui-btn:not(#fleet-scanner):not(#fleet-export):not(#stock-etiquettes-ouvrir) svg{display:none;}
 }
 @media (max-width:700px){
-  .ui-ligne-nom .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;}
+  .ui-ligne-nom .ui-statut{font-size:11px;padding:1px 7px;line-height:1.3;}
 }
 @media (max-width:700px){
   /* étiquettes et statuts d'une ligne : petits, côte à côte */
   .ui-ligne-sous:has(.ui-tag,.ui-statut){display:flex;flex-wrap:wrap;gap:3px 4px;align-items:center;}
-  .ui-ligne-sous .ui-tag,.ui-ligne-sous .ui-statut{font-size:9.5px;padding:1px 7px;line-height:1.3;margin:0;}
-  .ui-ligne-nom .ui-tag{font-size:9.5px;padding:1px 7px;margin-left:4px;}
+  .ui-ligne-sous .ui-tag,.ui-ligne-sous .ui-statut{font-size:11px;padding:1px 7px;line-height:1.3;margin:0;}
+  .ui-ligne-nom .ui-tag{font-size:11px;padding:1px 7px;margin-left:4px;}
 }
 
 /* ── Téléphone : fenêtre « Modifier une machine » (espacements en jetons space-* du kit compilé) ─────────────── */
@@ -1564,3 +1564,28 @@ textarea:not([data-x]),
   #fo-msg{order:5;flex-basis:100%;}
   .fo-pied .fo-actif{flex:1 1 auto;}
 }
+
+/* ── Menu Stock : onglets par usage (Vue d'ensemble / Pièces / Mouvements / Inventaire / Organisation) ── */
+.stock-onglets{display:flex;gap:6px;overflow-x:auto;padding:4px;margin:0 0 12px;border-radius:var(--r-md);background:var(--surface);scrollbar-width:none;}
+.stock-onglets::-webkit-scrollbar{display:none;}
+.stock-onglet{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 16px;border:none;border-radius:var(--r-chip);background:transparent;color:var(--ink-2);font-family:inherit;font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer;}
+.stock-onglet svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.stock-onglet:hover{background:var(--surface-soft);}
+.stock-onglet.is-actif{background:var(--ink);color:#fff;}
+.stock-panneau[hidden],.stock-pieces-vue[hidden]{display:none !important;}
+.stock-panneau{display:flex;flex-direction:column;gap:12px;}
+.stock-pieces-vues{align-self:flex-start;}
+.stock-tuile-lien{cursor:pointer;}
+.stock-tuile-lien:hover{box-shadow:0 0 0 2px var(--primary-tint-2);}
+.stock-guide{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
+.stock-guide-carte{display:flex;align-items:flex-start;gap:12px;padding:14px;border:none;border-radius:var(--r-md);background:var(--surface-soft);color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;}
+.stock-guide-carte:hover{box-shadow:0 0 0 2px var(--primary-tint-2);}
+.stock-guide-carte svg{width:22px;height:22px;flex:0 0 auto;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.stock-guide-texte{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.4;color:var(--ink-2);}
+.stock-guide-texte strong{font-size:14px;color:var(--ink);}
+@media (max-width:899px){
+  .stock-onglets{gap:2px;}
+  .stock-onglet{flex:1 1 0;min-width:0;padding:8px 6px;font-size:13px;}
+  .stock-onglet svg{display:none;}
+}
+@media (max-width:420px){.stock-onglet{font-size:12px;padding:8px 3px;}}
