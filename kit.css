@@ -1527,7 +1527,7 @@ textarea:not([data-x]),
 .fo-sous-bloc .fo-grille{padding:4px 0 0;}
 .fo-sous-titre{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;}
 .fo-sous-titre svg{width:16px;height:16px;color:var(--fa);flex:0 0 auto;}
-.fo-sous-titre em{margin-left:auto;font-style:normal;font-weight:600;font-size:11.5px;color:var(--ink-2);text-align:right;}
+.fo-sous-titre em{margin-left:auto;font-style:normal;font-weight:600;font-size:12px;color:var(--ink-2);text-align:right;}
 .fo-doc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff;border:1.5px dashed rgba(14,19,51,.22);}
 .fo-doc.est-rempli{border-style:solid;border-color:var(--ok);}
 .fo-doc-icone{width:36px;height:36px;border-radius:10px;background:var(--fa);color:#fff;display:grid;place-items:center;}
@@ -1589,3 +1589,33 @@ textarea:not([data-x]),
   .stock-onglet svg{display:none;}
 }
 @media (max-width:420px){.stock-onglet{font-size:12px;padding:8px 3px;}}
+
+/* ── Fenêtres du Stock : croix de fermeture, boutons du bas, type de mouvement (2026-10-12) ── */
+.modal.a-croix{position:relative;}
+.modal.a-croix > h2{padding-right:44px;}
+.modal-croix{position:absolute;top:8px;right:8px;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink-2);cursor:pointer;z-index:2;}
+.modal-croix svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.modal-croix:hover{background:var(--surface-soft);color:var(--ink);}
+/* largeur commune des petites fenêtres */
+.export-modal:not(.etiquettes-modal):not(.inventaire-modal){width:min(480px,92vw);}
+/* type de mouvement : sélecteur à segments (les boutons radio restent là, invisibles mais utilisables au clavier) */
+.mvt-types{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:4px;padding:4px;margin-bottom:8px;border-radius:var(--r-md);background:var(--surface);}
+.mvt-type{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:6px 4px;border-radius:var(--r-chip);color:var(--ink-2);font-size:13px;font-weight:700;text-align:center;cursor:pointer;}
+.mvt-type input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.mvt-type:has(input:checked){background:var(--ink);color:#fff;}
+.mvt-type:has(input:focus-visible){outline:3px solid var(--primary);outline-offset:2px;}
+/* boutons du bas : 44 px au toucher (hors téléphone en paysage, où la place manque) */
+@media (min-height:521px),(orientation:portrait),(min-width:900px){
+  .modal.a-croix .modal-actions .ui-btn,.import-modal .modal .ui-btn,.fo-pied .ui-btn,.fo-doc-actions .ui-btn{min-height:44px;}
+}
+@media (max-width:560px) and (orientation:portrait){
+  .modal.a-croix .modal-actions{flex-wrap:nowrap;}
+  .modal.a-croix .modal-actions > .ui-btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .modal-croix{top:2px;right:2px;width:36px;height:36px;}
+  .mvt-type{min-height:34px;font-size:12.5px;}
+  .mvt-types{margin-bottom:4px;padding:3px;}
+}
+.etiquettes-modal small{font-size:12px;}
+.modal.a-croix .modal-actions .ui-btn-pastille{background:var(--surface-soft);}

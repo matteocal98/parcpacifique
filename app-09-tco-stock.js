@@ -998,7 +998,7 @@ function ouvrirImportCatalogue() {
         <div id="import-msg" role="status" aria-live="polite"></div>
       </div>
       <div class="import-csv-pied">
-        <button type="button" class="secondary" id="import-fermer">${trad('Fermer')}</button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="import-fermer">${trad('Annuler')}</button>
         <button type="button" class="primary" id="import-go" disabled>${picto('coche')}<span>${trad('Importer')}</span></button>
       </div>
     </div>`;
@@ -1849,6 +1849,20 @@ function stockEyebrowToolbarHtml() {
       <button type="button" class="ui-btn ui-btn-pastille" id="stock-pump-info">${picto('info')}<span>${trad('Principe de valorisation PUMP')}</span></button>
     </div>`;
 }
+// Croix de fermeture commune à toutes les fenêtres du Stock (en haut à droite,
+// zone tactile de 44 px) : la même sortie évidente, au pouce, sur chaque fenêtre.
+function ajouterCroixModale(overlay) {
+  const modal = overlay.querySelector('.modal');
+  if (!modal || modal.querySelector('.modal-croix')) return;
+  modal.classList.add('a-croix');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'modal-croix';
+  b.setAttribute('aria-label', trad('Fermer'));
+  b.innerHTML = picto('fermer');
+  b.addEventListener('click', () => overlay.remove());
+  modal.prepend(b);
+}
 function ouvrirExplicationPump() {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -1864,9 +1878,10 @@ function ouvrirExplicationPump() {
         <p style="margin-top:8px;">${trad('Une sortie ou un transfert ne modifie jamais ce coût moyen — seule une nouvelle entrée le fait évoluer. C\'est ce coût qui sert à calculer la valeur totale du stock (quantité × coût moyen) affichée en haut de cette page.')}</p>
       </div>
       <div class="modal-actions">
-        <button type="button" class="primary" id="pump-fermer">${trad('Compris')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="pump-fermer">${trad('Compris')}</button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   overlay.querySelector('#pump-fermer').addEventListener('click', () => overlay.remove());
 }
 
@@ -2113,8 +2128,8 @@ function ouvrirEditionKit(kit) {
 
   const ligneEditHtml = () => `
     <div class="stock-field-row" data-kit-ligne style="grid-template-columns:2fr 1fr auto;align-items:center;">
-      <select data-kit-ligne-piece>${optionsPieces}</select>
-      <input type="text" inputmode="decimal" data-kit-ligne-qte placeholder="${trad('Quantité')}">
+      <select data-kit-ligne-piece aria-label="${esc(trad('Pièce'))}">${optionsPieces}</select>
+      <input type="text" inputmode="decimal" data-kit-ligne-qte aria-label="${esc(trad('Quantité'))}" placeholder="${trad('Quantité')}">
       <button type="button" class="stock-row-actions is-danger" data-kit-ligne-retirer title="${esc(trad('Retirer cette ligne'))}" style="padding:7px;">${picto('corbeille')}</button>
     </div>`;
 
@@ -2139,10 +2154,11 @@ function ouvrirEditionKit(kit) {
       </div>
       <div class="ui-aide" id="kit-msg" role="status" aria-live="polite" style="margin-top:10px;"></div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="kit-fermer">${trad('Fermer')}</button>
-        <button type="button" class="primary" id="kit-enregistrer"><span>${trad('Enregistrer le kit')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="kit-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="kit-enregistrer"><span>${trad('Enregistrer le kit')}</span></button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
 
   // Pré-remplit chaque ligne existante (pièce + quantité) puis habille tous
   // les sélecteurs de pièce (recherche cherchable, même composant que
@@ -2325,6 +2341,7 @@ function ouvrirModaleEmplacementStock(partIdInitial, magasinIdInitial) {
         <button type="button" class="ui-btn ui-btn-plein" id="emplacement-go">${picto('coche')}<span>${trad('Enregistrer')}</span></button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   const selPiece = overlay.querySelector('#emplacement-piece');
   const selMagasin = overlay.querySelector('#emplacement-magasin');
   const champTexte = overlay.querySelector('#emplacement-texte');
@@ -2460,6 +2477,7 @@ function ouvrirFichePieceStock(partId) {
         ${peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-plein" id="fiche-piece-mouvement">${picto('plusCercle')}<span>${trad('Nouveau mouvement de stock')}</span></button>` : ''}
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   overlay.querySelector('#fiche-piece-fermer').addEventListener('click', () => overlay.remove());
   overlay.querySelectorAll('[data-fiche-magasin]').forEach((b) => b.addEventListener('click', () => {
     const magasinId = b.getAttribute('data-fiche-magasin');
@@ -2538,6 +2556,7 @@ function ouvrirFicheLigneStock(partId, warehouseId) {
         ${peut ? `<button type="button" class="ui-btn ui-btn-plein" id="fiche-stock-valider">${picto('coche')}<span>${trad('Valider')}</span></button>` : ''}
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   const msg = overlay.querySelector('#fiche-stock-msg');
   overlay.querySelector('#fiche-stock-fermer').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#fiche-stock-emplacement')?.addEventListener('click', () => { overlay.remove(); ouvrirModaleEmplacementStock(partId, warehouseId); });
@@ -2711,9 +2730,9 @@ function ouvrirModaleEtiquettes(options = {}) {
       <div class="ui-champ-groupe">
         <strong id="etiquettes-titre-liste"></strong>
         <div class="etiquettes-filtres">
-          <input id="etiquettes-recherche" class="ui-champ" placeholder="${trad('Rechercher par désignation, référence, EAN…')}">
+          <input id="etiquettes-recherche" class="ui-champ" aria-label="${esc(trad('Rechercher une pièce'))}" placeholder="${trad('Rechercher par désignation, référence, EAN…')}">
           <div class="ui-select-wrap" id="etiquettes-magasin-bloc">
-            <select id="etiquettes-magasin" class="ui-champ">
+            <select id="etiquettes-magasin" class="ui-champ" aria-label="${esc(trad('Magasin'))}">
               <option value="">${trad('Tous les magasins')}</option>
               ${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}
             </select>
@@ -2729,6 +2748,7 @@ function ouvrirModaleEtiquettes(options = {}) {
         <button type="button" class="ui-btn ui-btn-plein" id="etiquettes-go">${picto('export')}<span>${trad('Imprimer')}</span></button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   const liste = overlay.querySelector('#etiquettes-liste');
   const msg = overlay.querySelector('#etiquettes-msg');
   const caseTout = overlay.querySelector('#etiquettes-tout');
@@ -2854,11 +2874,11 @@ function ouvrirNouveauMouvementModal() {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mvt-titre">
       <h2 id="mvt-titre">${trad('Nouveau mouvement de stock')}</h2>
-      <div class="field-row" style="grid-template-columns:repeat(${gerant ? 4 : 3},1fr);gap:8px;margin-bottom:4px;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="entree" checked style="width:16px;height:16px;">${trad('Entrée')}</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="sortie" style="width:16px;height:16px;">${trad('Sortie')}</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="transfert" style="width:16px;height:16px;">${trad('Transfert')}</label>
-        ${gerant ? `<label style="display:flex;align-items:center;gap:6px;font-size:13.5px;"><input type="radio" name="mvt-type" value="ajustement" style="width:16px;height:16px;">${trad('Ajustement')}</label>` : ''}
+      <div class="mvt-types" role="radiogroup" aria-label="${esc(trad('Type de mouvement'))}" style="--n:${gerant ? 4 : 3};">
+        <label class="mvt-type"><input type="radio" name="mvt-type" value="entree" checked><span>${trad('Entrée')}</span></label>
+        <label class="mvt-type"><input type="radio" name="mvt-type" value="sortie"><span>${trad('Sortie')}</span></label>
+        <label class="mvt-type"><input type="radio" name="mvt-type" value="transfert"><span>${trad('Transfert')}</span></label>
+        ${gerant ? `<label class="mvt-type"><input type="radio" name="mvt-type" value="ajustement"><span>${trad('Ajustement')}</span></label>` : ''}
       </div>
       <label class="sr-only" for="mvt-piece">${trad('Pièce')}</label>
       <select id="mvt-piece">${optionsPieces}</select>
@@ -2901,10 +2921,11 @@ function ouvrirNouveauMouvementModal() {
       <input id="mvt-motif" placeholder="${trad('Ex : bon de livraison, casse, inventaire…')}">
       <div class="ui-aide" id="mvt-msg" role="status" aria-live="polite"></div>
       <div class="modal-actions">
-        <button type="button" class="secondary" id="mvt-fermer">${trad('Fermer')}</button>
-        <button type="button" class="primary" id="mvt-valider"><span>${trad('Enregistrer le mouvement')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="mvt-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="mvt-valider"><span>${trad('Enregistrer le mouvement')}</span></button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
 
   activerSeparateurMilliers(overlay.querySelector('#mvt-quantite'));
   activerSeparateurMilliers(overlay.querySelector('#mvt-cout'));
@@ -3091,7 +3112,7 @@ function ouvrirImportMouvementsStock() {
 
         <div class="import-csv-section">
           <p class="import-csv-libelle">${trad('Magasin de destination')} <strong class="import-csv-badge">${trad('OBLIGATOIRE')}</strong></p>
-          <select id="import-mvt-magasin">
+          <select id="import-mvt-magasin" aria-label="${esc(trad('Magasin'))}">
             <option value="">${trad('Choisir un magasin…')}</option>
             ${optionsMagasins}
           </select>
@@ -3137,8 +3158,8 @@ function ouvrirImportMouvementsStock() {
         <div id="import-mvt-msg" role="status" aria-live="polite"></div>
       </div>
       <div class="import-csv-pied">
-        <button type="button" class="secondary" id="import-mvt-fermer">${trad('Fermer')}</button>
-        <button type="button" class="primary" id="import-mvt-go" disabled>${picto('coche')}<span>${trad('Importer')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="import-mvt-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="import-mvt-go" disabled>${picto('coche')}<span>${trad('Importer')}</span></button>
       </div>
     </div>`;
 
@@ -3354,6 +3375,7 @@ function ouvrirNouvelInventaire(surCree) {
         <button type="button" class="ui-btn ui-btn-plein" id="invnew-go">${picto('coche')}<span>${trad('Ouvrir l\'inventaire')}</span></button>
       </div>
     </div>`;
+  ajouterCroixModale(overlay);
   overlay.querySelector('#invnew-fermer').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#invnew-go').addEventListener('click', async () => {
     const bouton = overlay.querySelector('#invnew-go');
