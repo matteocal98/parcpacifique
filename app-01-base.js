@@ -697,6 +697,8 @@ SCHEMA.hasStockInventaire = false;
 // Fiches fournisseurs (kalea-serveur/migrations/stock-fournisseurs.sql) : table suppliers + parts_catalog.supplier_id.
 // Faux tant que la sonde ne trouve pas la colonne : le catalogue garde son champ texte « Fournisseur ».
 SCHEMA.hasSuppliers = false;
+// Fiche fournisseur complète (stock-fournisseurs-complet.sql) : identité légale, adresses, contacts, finance, conditions + table bancaire.
+SCHEMA.hasSuppliersFull = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

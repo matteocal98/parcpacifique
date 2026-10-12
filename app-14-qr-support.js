@@ -1514,7 +1514,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets,
   ] = await Promise.all([
     sonderColonne('companies', 'contact_first_name'),
     sonderColonne('companies', 'notification_email'),
@@ -1533,6 +1533,7 @@ async function boot(toastMessage) {
     sonderColonne('stock_items', 'location, status'),
     sonderColonne('stock_items', 'last_counted_at'),
     sonderColonne('parts_catalog', 'supplier_id'),
+    sonderColonne('suppliers', 'legal_name, incoterm, rib_received_at'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1549,6 +1550,7 @@ async function boot(toastMessage) {
   SCHEMA.hasStockChamps = aChampsCatalogue && aChampsLigne;
   SCHEMA.hasStockInventaire = aInventaire;
   SCHEMA.hasSuppliers = aFournisseurs;
+  SCHEMA.hasSuppliersFull = aFournisseurs && aFournisseursComplets;
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -1763,7 +1765,7 @@ async function boot(toastMessage) {
   let suppliers = [];
   if (SCHEMA.hasSuppliers) {
     const { data: fournisseurs } = await sb.from('suppliers')
-      .select(COLONNES_FOURNISSEUR)
+      .select(colonnesFournisseur())
       .eq('company_id', profile.company_id)
       .order('name');
     suppliers = fournisseurs || [];

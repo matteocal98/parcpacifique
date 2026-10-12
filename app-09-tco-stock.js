@@ -3695,7 +3695,6 @@ async function ouvrirSessionInventaire(countId) {
 // SQL : kalea-serveur/migrations/stock-fournisseurs.sql (table suppliers + parts_catalog.supplier_id). Le texte
 // parts_catalog.supplier_name reste la copie lisible du nom (utilisée partout) : on l'écrit toujours avec supplier_id,
 // et la base le tient à jour quand une fiche est renommée. Réservé au module Stock (offre Enterprise), comme les kits.
-const COLONNES_FOURNISSEUR = 'id, name, contact_name, email, phone, address, lead_time_days, payment_terms, min_order_amount, note, active';
 function fournisseursActifs() {
   return !!(SCHEMA.hasSuppliers && SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock());
 }
@@ -3726,7 +3725,7 @@ function ligneFournisseurHtml(f) {
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone is-ambre">${picto('mallette')}</div>
         <div class="ui-ligne-textes">
-          <span class="ui-ligne-nom">${esc(f.name)}${f.active === false ? `<span class="ui-tag">${trad('Inactif')}</span>` : ''}</span>
+          <span class="ui-ligne-nom">${esc(f.name)}${f.active === false ? `<span class="ui-tag">${trad('Inactif')}</span>` : ''}${kbisAExpirer(f) ? `<span class="ui-statut is-bientot">${trad('Kbis > 3 mois')}</span>` : ''}</span>
           <span class="ui-ligne-sous">${esc(sous)}</span>
         </div>
       </div>
@@ -3763,6 +3762,130 @@ function rafraichirListeFournisseurs() {
   if (badge) badge.textContent = tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length });
 }
 
+// Fiche fournisseur COMPLÈTE (kalea-serveur/migrations/stock-fournisseurs-complet.sql). Tant que cette seconde migration n'est
+// pas visible (SCHEMA.hasSuppliersFull), seuls les champs de base sont lus et écrits : l'appli marche avant ET après.
+const COLONNES_FOURNISSEUR_BASE = 'id, name, contact_name, email, phone, address, lead_time_days, payment_terms, min_order_amount, note, active';
+const COLONNES_FOURNISSEUR_PLUS = ', legal_name, legal_form, company_number, vat_number, activity_code, postal_code, city, country, shipping_address, billing_address, website, sales_contact_phone, po_email, accounting_contact_name, accounting_contact_phone, accounting_contact_email, logistics_contact_name, logistics_contact_phone, logistics_contact_email, payment_method, currency, franco_amount, min_order_quantity, incoterm, kbis_received_at, rib_received_at';
+function colonnesFournisseur() {
+  return COLONNES_FOURNISSEUR_BASE + (SCHEMA.hasSuppliersFull ? COLONNES_FOURNISSEUR_PLUS : '');
+}
+const FORMES_JURIDIQUES = ['SAS', 'SASU', 'SARL', 'EURL', 'SA', 'SNC', 'EI', 'Micro-entreprise', 'Association', 'Autre'];
+const MODES_PAIEMENT_FOURNISSEUR = [['virement', 'Virement bancaire'], ['prelevement', 'Prélèvement'], ['cheque', 'Chèque'], ['traite', 'Traite'], ['comptant', 'Comptant'], ['carte', 'Carte bancaire'], ['autre', 'Autre']];
+const DEVISES_FOURNISSEUR = ['EUR', 'XPF', 'USD', 'AUD', 'NZD', 'GBP', 'CHF', 'CAD', 'JPY', 'CNY'];
+const INCOTERMS_FOURNISSEUR = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'];
+const CONDITIONS_PAIEMENT_USUELLES = ['Comptant', '30 jours net', '45 jours fin de mois', '60 jours net'];
+
+// Description des champs, par section. t : text | tel | email | select | date | num | int ; full : toute la largeur ; ext : champ
+// de la seconde migration. L'identifiant HTML est « fo-<k> ».
+function sectionsFournisseur() {
+  return [
+    { cle: 'identite', titre: trad('Identité'), ouverte: true, champs: [
+      { k: 'name', l: trad('Nom usuel (affiché dans l\'application)'), t: 'text', max: 120, full: true },
+      { k: 'legal_name', l: trad('Raison sociale'), t: 'text', max: 160, ext: true },
+      { k: 'legal_form', l: trad('Forme juridique'), t: 'text', max: 60, ext: true, liste: FORMES_JURIDIQUES },
+      { k: 'company_number', l: trad('N° SIRET / RIDET / RCS'), t: 'text', max: 40, ext: true },
+      { k: 'vat_number', l: trad('N° de TVA / numéro fiscal'), t: 'text', max: 40, ext: true },
+      { k: 'activity_code', l: trad('Code APE / NAF'), t: 'text', max: 20, ext: true },
+    ] },
+    { cle: 'coordonnees', titre: trad('Coordonnées'), champs: [
+      { k: 'address', l: trad('Adresse du siège'), t: 'text', max: 300, full: true },
+      { k: 'postal_code', l: trad('Code postal'), t: 'text', max: 20, ext: true },
+      { k: 'city', l: trad('Ville'), t: 'text', max: 100, ext: true },
+      { k: 'country', l: trad('Pays'), t: 'text', max: 60, ext: true },
+      { k: 'phone', l: trad('Téléphone standard'), t: 'tel', max: 60 },
+      { k: 'website', l: trad('Site web'), t: 'text', max: 200, ext: true, full: true },
+      { k: 'shipping_address', l: trad('Adresse d\'expédition ou d\'enlèvement (si différente)'), t: 'text', max: 300, ext: true, full: true },
+      { k: 'billing_address', l: trad('Adresse de facturation (si différente)'), t: 'text', max: 300, ext: true, full: true },
+    ] },
+    { cle: 'contacts', titre: trad('Contacts'), champs: [
+      { k: 'contact_name', l: trad('Contact commercial'), t: 'text', max: 120 },
+      { k: 'sales_contact_phone', l: trad('Ligne directe'), t: 'tel', max: 60, ext: true },
+      { k: 'email', l: trad('E-mail du contact commercial'), t: 'email', max: 200 },
+      { k: 'po_email', l: trad('E-mail pour les bons de commande'), t: 'email', max: 200, ext: true },
+      { k: 'accounting_contact_name', l: trad('Contact comptabilité'), t: 'text', max: 120, ext: true },
+      { k: 'accounting_contact_phone', l: trad('Téléphone comptabilité'), t: 'tel', max: 60, ext: true },
+      { k: 'accounting_contact_email', l: trad('E-mail comptabilité'), t: 'email', max: 200, ext: true, full: true },
+      { k: 'logistics_contact_name', l: trad('Contact logistique / SAV'), t: 'text', max: 120, ext: true },
+      { k: 'logistics_contact_phone', l: trad('Téléphone logistique / SAV'), t: 'tel', max: 60, ext: true },
+      { k: 'logistics_contact_email', l: trad('E-mail logistique / SAV'), t: 'email', max: 200, ext: true, full: true },
+    ] },
+    { cle: 'finance', titre: trad('Paiement et banque'), champs: [
+      { k: 'payment_terms', l: trad('Conditions de paiement'), t: 'text', max: 120, liste: CONDITIONS_PAIEMENT_USUELLES.map((c) => trad(c)) },
+      { k: 'payment_method', l: trad('Mode de paiement'), t: 'select', ext: true, options: MODES_PAIEMENT_FOURNISSEUR.map(([c, l]) => [c, trad(l)]) },
+      { k: 'currency', l: trad('Devise'), t: 'select', ext: true, options: DEVISES_FOURNISSEUR.map((c) => [c, c]) },
+    ], banque: true },
+    { cle: 'conditions', titre: trad('Conditions commerciales'), champs: [
+      { k: 'lead_time_days', l: trad('Délai de livraison standard (jours)'), t: 'int' },
+      { k: 'min_order_amount', l: trad('Minimum de commande (montant)'), t: 'num', unite: true },
+      { k: 'min_order_quantity', l: trad('Minimum de commande (quantité)'), t: 'num', ext: true },
+      { k: 'franco_amount', l: trad('Franco de port (montant)'), t: 'num', ext: true, unite: true },
+      { k: 'incoterm', l: trad('Incoterm (fournisseurs étrangers)'), t: 'select', ext: true, options: INCOTERMS_FOURNISSEUR.map((c) => [c, c]) },
+    ] },
+    { cle: 'conformite', titre: trad('Conformité et notes'), champs: [
+      { k: 'kbis_received_at', l: trad('Extrait Kbis / RIDET reçu le'), t: 'date', ext: true },
+      { k: 'rib_received_at', l: trad('RIB reçu le'), t: 'date', ext: true },
+      { k: 'note', l: trad('Note'), t: 'text', max: 500, full: true },
+    ] },
+  ];
+}
+function champsBanque() {
+  return [
+  { k: 'account_holder', l: trad('Titulaire du compte'), max: 160, full: true },
+  { k: 'iban', l: 'IBAN', max: 40, full: true },
+  { k: 'bic', l: 'BIC / SWIFT', max: 20 },
+  { k: 'bank_name', l: trad('Banque'), max: 120 },
+  { k: 'bank_address', l: trad('Adresse de la banque'), max: 300, full: true },
+  { k: 'account_number', l: trad('Autre numéro de compte (hors IBAN)'), max: 60, full: true },
+  ];
+}
+// Contrôle d'un IBAN : forme + clé modulo 97 (la saisie d'un IBAN faux est refusée plutôt qu'enregistrée en silence).
+function ibanValide(iban) {
+  const s = String(iban || '').replace(/\s+/g, '').toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
+  const rearrange = s.slice(4) + s.slice(0, 4);
+  let reste = 0;
+  for (const c of rearrange) {
+    const v = c >= 'A' ? String(c.charCodeAt(0) - 55) : c;
+    for (const d of v) reste = (reste * 10 + Number(d)) % 97;
+  }
+  return reste === 1;
+}
+function bicValide(bic) {
+  return /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(String(bic || '').replace(/\s+/g, '').toUpperCase());
+}
+function kbisAExpirer(f) {
+  if (!f || !f.kbis_received_at) return false;
+  const d = new Date(f.kbis_received_at + 'T00:00:00');
+  return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > 92;
+}
+
+function champFournisseurHtml(c, f) {
+  const id = 'fo-' + c.k;
+  const brut = f ? f[c.k] : null;
+  const valeur = brut == null ? '' : (c.t === 'num' ? texteAvecSeparateurs(brut) : String(brut));
+  let champ;
+  if (c.t === 'select') {
+    const options = [['', '—'], ...c.options];
+    champ = `<div class="ui-select-wrap"><select id="${id}" class="ui-champ">${options.map(([v, l]) => `<option value="${esc(v)}"${String(brut ?? '') === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>${picto('chevronBas')}</div>`;
+  } else if (c.t === 'date') {
+    champ = `<input id="${id}" class="ui-champ" type="date" value="${esc(valeur)}">`;
+  } else if (c.t === 'num' || c.t === 'int') {
+    champ = `<div class="ui-champ-unite"><input id="${id}" class="ui-champ" type="text" inputmode="${c.t === 'int' ? 'numeric' : 'decimal'}" value="${esc(valeur)}">${c.unite ? `<span class="ui-unite">${esc(deviseCourte())}</span>` : ''}</div>`;
+  } else {
+    champ = `<input id="${id}" class="ui-champ" type="${c.t === 'tel' ? 'tel' : c.t === 'email' ? 'email' : 'text'}" maxlength="${c.max || 200}" value="${esc(valeur)}"${c.liste ? ` list="${id}-liste"` : ''}>`
+      + (c.liste ? `<datalist id="${id}-liste">${c.liste.map((o) => `<option value="${esc(o)}"></option>`).join('')}</datalist>` : '');
+  }
+  return `<div class="ui-champ-groupe fo-champ${c.full ? ' is-large' : ''}"><label for="${id}"><strong>${c.l}</strong></label>${champ}</div>`;
+}
+function valeurChampFournisseur(overlay, c) {
+  const el = overlay.querySelector('#fo-' + c.k);
+  if (!el) return undefined;
+  const v = el.value.trim();
+  if (c.t === 'num') { const n = nombreDepuisTexte(v); return n != null && n >= 0 ? n : null; }
+  if (c.t === 'int') { const n = nombreDepuisTexte(v); return n != null && n >= 0 ? Math.round(n) : null; }
+  return v || null;
+}
+
 // Création (f = null) ou modification d'une fiche. surEnregistre(fiche) : appelé après l'enregistrement
 // (le catalogue s'en sert pour sélectionner le fournisseur qui vient d'être créé).
 function ouvrirEditionFournisseur(f, surEnregistre) {
@@ -3770,84 +3893,81 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const complet = !!SCHEMA.hasSuppliersFull;
+  const gerant = peutGererParametresStock();
+  const sections = sectionsFournisseur()
+    .map((s) => ({ ...s, champs: s.champs.filter((c) => complet || !c.ext) }))
+    .filter((s) => s.champs.length || (s.banque && complet));
+  // Nouvelle fiche : la devise de la société est proposée.
+  const valeursInitiales = f || { currency: complet ? (UI.company?.currency || '') : '' };
   overlay.innerHTML = `
     <div class="modal export-modal fournisseur-modal" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
       <h2 id="fo-titre">${f ? trad('Modifier le fournisseur') : trad('Nouveau fournisseur')}</h2>
-      <div class="ui-champ-groupe">
-        <label for="fo-nom"><strong>${trad('Nom')}</strong></label>
-        <input id="fo-nom" class="ui-champ" maxlength="120" value="${esc(f?.name || '')}">
-        <div class="ui-grille">
-          <div class="ui-champ-groupe">
-            <label for="fo-contact"><strong>${trad('Contact')}</strong></label>
-            <input id="fo-contact" class="ui-champ" maxlength="120" value="${esc(f?.contact_name || '')}">
+      ${sections.map((s) => `
+        <details class="fo-section"${s.ouverte ? ' open' : ''}>
+          <summary>${s.titre}</summary>
+          <div class="fo-grille">
+            ${s.champs.map((c) => champFournisseurHtml(c, valeursInitiales)).join('')}
+            ${s.banque && complet && gerant ? `
+            <div class="fo-banque ui-champ-groupe fo-champ is-large">
+              <strong>${trad('Coordonnées bancaires (visibles du gérant seul)')}</strong>
+              <div class="fo-grille" id="fo-banque-grille">${champsBanque().map((c) => champFournisseurHtml({ ...c, t: 'text', k: 'bk_' + c.k }, null)).join('')}</div>
+              <div class="ui-aide" id="fo-banque-etat">${trad('Chargement…')}</div>
+            </div>` : ''}
           </div>
-          <div class="ui-champ-groupe">
-            <label for="fo-tel"><strong>${trad('Téléphone')}</strong></label>
-            <input id="fo-tel" class="ui-champ" type="tel" maxlength="60" value="${esc(f?.phone || '')}">
-          </div>
-        </div>
-        <div class="ui-grille">
-          <div class="ui-champ-groupe">
-            <label for="fo-delai"><strong>${trad('Délai habituel')}</strong></label>
-            <div class="ui-champ-unite"><input id="fo-delai" class="ui-champ" type="text" inputmode="numeric" value="${f?.lead_time_days != null ? esc(f.lead_time_days) : ''}"><span class="ui-unite">${trad('jours')}</span></div>
-          </div>
-          <div class="ui-champ-groupe">
-            <label for="fo-minimum"><strong>${trad('Minimum de commande')}</strong></label>
-            <div class="ui-champ-unite"><input id="fo-minimum" class="ui-champ" type="text" inputmode="decimal" value="${f?.min_order_amount != null ? esc(texteAvecSeparateurs(f.min_order_amount)) : ''}"><span class="ui-unite">${esc(deviseCourte())}</span></div>
-          </div>
-        </div>
-        <div class="ui-grille">
-          <div class="ui-champ-groupe">
-            <label for="fo-email"><strong>${trad('E-mail')}</strong></label>
-            <input id="fo-email" class="ui-champ" type="email" maxlength="200" value="${esc(f?.email || '')}">
-          </div>
-          <div class="ui-champ-groupe">
-            <label for="fo-paiement"><strong>${trad('Paiement')}</strong></label>
-            <input id="fo-paiement" class="ui-champ" maxlength="120" placeholder="${trad('Ex : 30 jours fin de mois')}" value="${esc(f?.payment_terms || '')}">
-          </div>
-        </div>
-        <label for="fo-adresse"><strong>${trad('Adresse')}</strong></label>
-        <input id="fo-adresse" class="ui-champ" maxlength="300" value="${esc(f?.address || '')}">
-        <label for="fo-note"><strong>${trad('Note')}</strong></label>
-        <input id="fo-note" class="ui-champ" maxlength="500" value="${esc(f?.note || '')}">
-        <label class="ui-case"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
-      </div>
+        </details>`).join('')}
+      <label class="ui-case"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
       <div id="fo-msg" role="status" aria-live="polite"></div>
       <div class="modal-actions">
         <button type="button" class="ui-btn ui-btn-pastille" id="fo-annuler">${trad('Annuler')}</button>
         <button type="button" class="ui-btn ui-btn-plein" id="fo-go">${picto('coche')}<span>${trad('Enregistrer')}</span></button>
       </div>
     </div>`;
-  activerSeparateurMilliers(overlay.querySelector('#fo-minimum'));
+  overlay.querySelectorAll('#fo-min_order_amount, #fo-franco_amount, #fo-min_order_quantity').forEach((el) => activerSeparateurMilliers(el));
   const q = (sel) => overlay.querySelector(sel);
   const msg = q('#fo-msg');
   q('#fo-annuler').addEventListener('click', () => overlay.remove());
+
+  // Coordonnées bancaires : table à part (gérant seul). Lues à l'ouverture ; on n'y touche à l'enregistrement que si la
+  // lecture a réussi (jamais d'écrasement à l'aveugle).
+  let banqueLue = null; // null = pas (encore) lue ; objet = ligne existante ; false = aucune ligne
+  const banque = complet && gerant && q('#fo-banque-grille');
+  if (banque) {
+    const etat = q('#fo-banque-etat');
+    if (!f) { banqueLue = false; etat.textContent = ''; }
+    else {
+      sb.from('supplier_bank_details').select('*').eq('supplier_id', f.id).maybeSingle().then(({ data, error }) => {
+        if (error) { etat.textContent = trad('Erreur :') + ' ' + error.message; return; }
+        banqueLue = data || false;
+        etat.textContent = '';
+        if (data) champsBanque().forEach((c) => { const el = q('#fo-bk_' + c.k); if (el) el.value = data[c.k] || ''; });
+      });
+    }
+  }
+
   q('#fo-go').addEventListener('click', async () => {
     const bouton = q('#fo-go');
-    const nom = q('#fo-nom').value.trim();
-    if (!nom) { msg.textContent = trad('Le nom est obligatoire.'); return; }
-    const delai = nombreDepuisTexte(q('#fo-delai').value);
-    const minimum = nombreDepuisTexte(q('#fo-minimum').value);
-    const texteOuNull = (sel) => q(sel).value.trim() || null;
-    const fiche = {
-      name: nom,
-      contact_name: texteOuNull('#fo-contact'),
-      email: texteOuNull('#fo-email'),
-      phone: texteOuNull('#fo-tel'),
-      address: texteOuNull('#fo-adresse'),
-      lead_time_days: delai != null && delai >= 0 ? Math.round(delai) : null,
-      payment_terms: texteOuNull('#fo-paiement'),
-      min_order_amount: minimum != null && minimum >= 0 ? minimum : null,
-      note: texteOuNull('#fo-note'),
-      active: q('#fo-actif').checked,
-    };
+    const fiche = {};
+    sections.forEach((s) => s.champs.forEach((c) => { fiche[c.k] = valeurChampFournisseur(overlay, c); }));
+    fiche.active = q('#fo-actif').checked;
+    if (!fiche.name) { msg.textContent = trad('Le nom est obligatoire.'); return; }
+    // Banque : validation avant tout enregistrement.
+    let valeursBanque = null;
+    if (banque && banqueLue !== null) {
+      valeursBanque = {};
+      champsBanque().forEach((c) => { valeursBanque[c.k] = (q('#fo-bk_' + c.k).value || '').trim() || null; });
+      if (valeursBanque.iban) valeursBanque.iban = valeursBanque.iban.replace(/\s+/g, '').toUpperCase();
+      if (valeursBanque.bic) valeursBanque.bic = valeursBanque.bic.replace(/\s+/g, '').toUpperCase();
+      if (valeursBanque.iban && !ibanValide(valeursBanque.iban)) { msg.textContent = trad('IBAN invalide : vérifie les caractères et la clé de contrôle.'); return; }
+      if (valeursBanque.bic && !bicValide(valeursBanque.bic)) { msg.textContent = trad('BIC invalide (8 ou 11 caractères).'); return; }
+    }
     bouton.disabled = true;
     msg.textContent = '';
     try {
       const requete = f
         ? sb.from('suppliers').update(fiche).eq('id', f.id)
         : sb.from('suppliers').insert({ company_id: UI.companyId, ...fiche });
-      const { data, error } = await requete.select(COLONNES_FOURNISSEUR).single();
+      const { data, error } = await requete.select(colonnesFournisseur()).single();
       if (error) throw error;
       UI.suppliers = [...(UI.suppliers || []).filter((s) => String(s.id) !== String(data.id)), data];
       trierFournisseurs();
@@ -3855,9 +3975,22 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
       if (f && f.name !== data.name) {
         UI.partsCatalog = (UI.partsCatalog || []).map((p) => (String(p.supplier_id) === String(data.id) ? { ...p, supplier_name: data.name } : p));
       }
+      let erreurBanque = null;
+      if (valeursBanque) {
+        const vide = Object.values(valeursBanque).every((v) => !v);
+        try {
+          if (vide) {
+            if (banqueLue) { const { error: e1 } = await sb.from('supplier_bank_details').delete().eq('supplier_id', data.id); if (e1) throw e1; }
+          } else {
+            const { error: e2 } = await sb.from('supplier_bank_details').upsert({ supplier_id: data.id, company_id: UI.companyId, ...valeursBanque }, { onConflict: 'supplier_id' });
+            if (e2) throw e2;
+          }
+        } catch (err) { erreurBanque = err; }
+      }
       showToast(f ? trad('Fournisseur modifié') : trad('Fournisseur ajouté'));
       overlay.remove();
       rafraichirListeFournisseurs();
+      if (erreurBanque) window.alert(trad('La fiche est enregistrée, mais pas les coordonnées bancaires :') + ' ' + (erreurBanque.message || erreurBanque));
       if (typeof surEnregistre === 'function') surEnregistre(data);
     } catch (err) {
       msg.textContent = String(err.code) === '23505'
@@ -3867,6 +4000,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
     }
   });
 }
+
 async function supprimerFournisseur(id) {
   const f = fournisseurParId(id);
   if (!f) return;
@@ -3909,7 +4043,7 @@ async function rattacherFournisseursImport(lignes) {
   if (manquants.size && peutGererParametresStock()) {
     const { data, error } = await sb.from('suppliers')
       .insert([...manquants.values()].map((name) => ({ company_id: UI.companyId, name })))
-      .select(COLONNES_FOURNISSEUR);
+      .select(colonnesFournisseur());
     if (error) throw error;
     UI.suppliers = [...(UI.suppliers || []), ...(data || [])];
     trierFournisseurs();

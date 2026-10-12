@@ -1487,3 +1487,17 @@ textarea:not([data-x]),
 .export-modal .modal-actions .ui-btn-plein svg{width:16px;height:16px;}
 .export-modal .modal-actions .ui-btn-pastille{font-size:13px;height:38px;}
 .export-modal .modal-actions .ui-btn-plein,.export-modal .modal-actions .ui-btn-pastille{min-height:38px;}
+
+/* Fiche fournisseur complète : sections repliables, champs par deux */
+.fournisseur-modal{width:min(640px,94vw);}
+.fournisseur-modal .fo-section{border-radius:var(--r-md);background:rgba(14,19,51,.04);margin:0 0 8px;padding:0 12px;}
+.fournisseur-modal .fo-section > summary{cursor:pointer;font-weight:800;font-size:14px;padding:11px 0;list-style:none;display:flex;align-items:center;justify-content:space-between;}
+.fournisseur-modal .fo-section > summary::-webkit-details-marker{display:none;}
+.fournisseur-modal .fo-section > summary::after{content:"+";font-weight:700;font-size:18px;color:var(--ink-2);}
+.fournisseur-modal .fo-section[open] > summary::after{content:"−";}
+.fournisseur-modal .fo-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:0 0 12px;}
+.fournisseur-modal .fo-champ{margin:0;min-width:0;}
+.fournisseur-modal .fo-champ.is-large{grid-column:1 / -1;}
+.fournisseur-modal .fo-champ label{font-size:12.5px;}
+.fournisseur-modal .fo-banque{padding-top:4px;border-top:1px solid rgba(14,19,51,.08);}
+.fournisseur-modal .fo-banque .fo-grille{padding:6px 0 0;}
