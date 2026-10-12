@@ -1436,8 +1436,9 @@ textarea:not([data-x]),
 .inventaire-modal{width:min(720px,94vw);}
 .inventaire-modal h2 .ui-statut{margin-left:8px;vertical-align:middle;}
 .inventaire-modal .ui-barre{margin-top:10px;}
-.inventaire-modal .ui-barre .ui-select-wrap{flex:0 1 220px;}
-.inventaire-modal .ui-barre:has(#inv-ajout) .ui-select-wrap{flex:1 1 100%;}
+/* les deux listes déroulantes prennent toute la largeur de la fenêtre (sans la dépasser) */
+.inventaire-modal .ui-barre .ui-select-wrap{flex:1 1 100%;max-width:100%;}
+.inventaire-modal .ui-barre .ui-select-wrap select{width:100%;max-width:100%;box-sizing:border-box;}
 .inventaire-modal .inv-qte{width:104px;flex:0 0 auto;text-align:right;}
 .inventaire-modal .inv-ecart{min-width:56px;display:inline-flex;justify-content:flex-end;}
 .inventaire-modal .ui-liste.is-defilant{margin-top:10px;}
