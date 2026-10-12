@@ -1270,6 +1270,7 @@ const SELECTEUR_AIDES_TELEPHONE = [
   '.machine-modal-add div.text-xs.text-slate-500',
   '.machine-modal-add div.text-slate-500[class~="text-[11px]"]',
   '.overlay .hint',
+  '.machine-modal-edit #f-analysis',
   '.ui-aide',
   '.machine-modal-edit span.font-body-sm',
   '.login-box form > p.hint',
@@ -1326,9 +1327,24 @@ function compacterAidesTelephone(racine) {
     }
     bouton._cible = [].concat(bouton._cible || [], el);
   });
+  // Zone « carnet » de la fenêtre de modification : son texte d'accueil est une simple explication (repliée), mais la zone sert
+  // ensuite à afficher l'état de l'analyse (en cours, erreur, résultat) : dès que son contenu change, elle se déplie et la
+  // pastille disparaît — un message d'état n'est jamais caché.
+  (racine || document).querySelectorAll('[data-texte-initial]').forEach((el) => {
+    if ((el.textContent || '').trim() === el.dataset.texteInitial) return;
+    el.classList.remove('info-bulle-texte', 'is-ouvert');
+    const ligne = el.previousElementSibling;
+    if (ligne && ligne.classList.contains('ui-info-ligne')) ligne.remove();
+    delete el.dataset.texteInitial;
+  });
+  (racine || document).querySelectorAll('.machine-modal-edit #f-analysis').forEach((el) => {
+    if (el.dataset.infoBulle || el.dataset.texteInitial !== undefined) return;
+    if ((el.textContent || '').trim().length < 60) return;
+    el.dataset.texteInitial = (el.textContent || '').trim();
+  });
   (racine || document).querySelectorAll(SELECTEUR_AIDES_TELEPHONE).forEach((el) => {
     if (el.dataset.infoBulle) return;
-    if (el.id || el.getAttribute('role') || el.getAttribute('aria-live')) return;
+    if ((el.id && el.dataset.texteInitial === undefined) || el.getAttribute('role') || el.getAttribute('aria-live')) return;
     if (el.querySelector('a,button,input,select,textarea')) return;
     const texte = (el.textContent || '').trim();
     const seuil = el.matches('.ui-tuile-note,.ui-encadre.is-attention > p') ? 20 : (el.matches('.ui-section-sous') ? 40 : SEUIL_AIDE_TELEPHONE);
