@@ -1207,81 +1207,45 @@ VIEWS.machines = {
     // seule la présentation change. Depuis la charte du 2026-10-04, la page est
     // construite avec le kit (kit.css) : une section = un bloc teinté, les
     // machines sont des lignes blanches posées dedans.
-    // ★ ESSAI « BENTO » (2026-10-12) : même contenu et mêmes identifiants qu'avant
-    // (#fleet-add, #fleet-export, #fleet-scanner, #fleet-search, #fleet-sort,
-    // .parc-pill, #fleet-list) — seule la mise en page change, en grille asymétrique.
-    // Pour revenir en arrière : git revert du commit « essai bento ».
-    const dispo = UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100;
-    const carteEtat = (statut, classe, picton, valeur, libelle, aide) => `
-      <button type="button" class="bento-carte bento-etat ${classe}" data-fleet-filtre="${statut}" aria-label="${esc(libelle + ' : ' + valeur + '. ' + trad('Filtrer la liste'))}">
-        <span class="bento-pastille">${picto(picton)}</span>
-        <span class="bento-valeur">${valeur}</span>
-        <span class="bento-libelle">${libelle}</span>
-        <span class="bento-aide">${aide}</span>
-      </button>`;
     return `
-      <div class="ui-page machines-bento">
-        <div class="bento">
-          <section class="bento-carte bento-hero" aria-labelledby="bento-titre">
-            <div class="bento-hero-texte">
-              <span class="bento-sur-titre">${esc(UI.companyName || '')}</span>
-              <h2 class="bento-titre" id="bento-titre">${trad('Parc Machines')}</h2>
-              <p class="bento-sous-titre">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })} · ${trad('état d\'entretien et échéances de chacune, en un coup d\'œil.')}</p>
-              <div class="bento-actions">
-                <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>
-                ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
-                <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
-              </div>
+      <div class="ui-page">
+        <section class="ui-section">
+          ${teteSectionKit('parcMachine', trad('Parc Machines'), '',
+            `<span class="ui-tag">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
+            ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
+            <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
+            <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>`)}
+          <div class="ui-section-corps">
+            <div class="ui-barre">
+              <input id="fleet-search" class="ui-champ" type="search" value="${esc(f.q)}"
+                     placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
+                     aria-label="${trad('Rechercher dans le parc')}">
+              <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
+              <select id="fleet-sort" class="ui-selecteur">
+                <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
+                <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
+                <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
+              </select>
             </div>
-            <div class="bento-visuel" aria-hidden="true">${picto('parcMachine')}</div>
-          </section>
-
-          <section class="bento-carte bento-kpi" aria-label="${esc(trad('Disponibilité du parc :'))}">
-            <span class="bento-libelle">${trad('Disponibilité du parc :')}</span>
-            <span class="bento-valeur is-grand">${dispo}<small>%</small></span>
-            <span class="bento-jauge" aria-hidden="true"><span style="width:${dispo}%"></span></span>
-            <span class="bento-aide">${trad('Part de la flotte sans entretien en retard')}</span>
-          </section>
-
-          ${carteEtat('late', 'is-retard', 'retard', c.late, trad('En retard'), trad('À traiter en priorité'))}
-          ${carteEtat('soon', 'is-bientot', 'bientot', c.soon, trad('Bientôt'), trad('À planifier'))}
-          ${carteEtat('ok', 'is-ok', 'ajuste', c.ok, trad('À jour'), trad('Rien à faire'))}
-
-          <section class="bento-carte bento-liste" aria-label="${esc(trad('Liste des machines'))}">
-            <div class="ui-section-corps">
-              <div class="ui-barre">
-                <input id="fleet-search" class="ui-champ" type="search" value="${esc(f.q)}"
-                       placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
-                       aria-label="${trad('Rechercher dans le parc')}">
-                <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
-                <select id="fleet-sort" class="ui-selecteur">
-                  <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
-                  <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
-                  <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
-                </select>
-              </div>
-              <div class="ui-puces" role="group" aria-label="${trad('Filtrer par état')}">
-                ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
-                ${parcPillHtml('late', trad('En retard'), c.late, 'late')}
-                ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
-                ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
-              </div>
-              <div id="fleet-list" class="mstrip-liste"></div>
+            <div class="ui-puces" role="group" aria-label="${trad('Filtrer par état')}">
+              ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
+              ${parcPillHtml('late', trad('En retard'), c.late, 'late')}
+              ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
+              ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
             </div>
-          </section>
-        </div>
+            <div id="fleet-list" class="mstrip-liste"></div>
+            <div class="ui-tuile is-ok">
+              <span class="ui-tuile-etiquette">${trad('Disponibilité du parc :')}</span>
+              <span class="ui-tuile-valeur">${UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100}%</span>
+              <span class="ui-tuile-note">${trad('Part de la flotte sans entretien en retard')}</span>
+            </div>
+          </div>
+        </section>
       </div>`;
   },
   mount() {
     const root = document.getElementById('view-root');
     if (!root) return;
-    // Cartes d'état du bento : un clic filtre la liste (même effet que les pastilles).
-    root.querySelectorAll('[data-fleet-filtre]').forEach((carte) => carte.addEventListener('click', () => {
-      const cible = root.querySelector(`.parc-pill[data-status="${carte.getAttribute('data-fleet-filtre')}"]`);
-      if (!cible) return;
-      cible.click();
-      root.querySelector('.bento-liste')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }));
     // Un relevé de compteur saisi hors connexion attend son envoi : on réessaie
     // en arrivant sur le parc (le retour du réseau, lui, est traité par
     // l'écouteur « online » posé dans views.js).
