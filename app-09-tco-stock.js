@@ -3774,68 +3774,79 @@ const MODES_PAIEMENT_FOURNISSEUR = [['virement', 'Virement bancaire'], ['preleve
 const DEVISES_FOURNISSEUR = ['EUR', 'XPF', 'USD', 'AUD', 'NZD', 'GBP', 'CHF', 'CAD', 'JPY', 'CNY'];
 const INCOTERMS_FOURNISSEUR = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'];
 const CONDITIONS_PAIEMENT_USUELLES = ['Comptant', '30 jours net', '45 jours fin de mois', '60 jours net'];
+// Pièces jointes (kalea-serveur/migrations/stock-fournisseurs-documents.sql) : espace de stockage privé, gérant seul.
+const BUCKET_DOCS_FOURNISSEUR = 'supplier-docs';
+const TAILLE_MAX_DOC_FOURNISSEUR = 5 * 1024 * 1024;
+const TYPES_MIME_DOC_FOURNISSEUR = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+function typesDocFournisseur() {
+  return [
+    { kind: 'kbis', libelle: trad('Extrait Kbis / RIDET'), aide: trad('Datant de moins de 3 mois'), icone: 'carnet', colonneDate: 'kbis_received_at' },
+    { kind: 'rib', libelle: trad('RIB'), aide: trad('Sur papier à en-tête de la banque ou de l\'entreprise'), icone: 'institution', colonneDate: 'rib_received_at' },
+  ];
+}
+function docsFournisseurActifs() {
+  return !!(SCHEMA.hasSuppliersFull && SCHEMA.hasSupplierDocs && typeof peutGererParametresStock === 'function' && peutGererParametresStock());
+}
 
-// Description des champs, par section. t : text | tel | email | select | date | num | int ; full : toute la largeur ; ext : champ
-// de la seconde migration. L'identifiant HTML est « fo-<k> ».
+// Description des champs, par carte colorée. t : text | tel | email | select | num | int ; i : pictogramme dans le champ ;
+// full : toute la largeur ; ext : champ de la seconde migration. L'identifiant HTML est « fo-<k> ».
 function sectionsFournisseur() {
   return [
-    { cle: 'identite', titre: trad('Identité'), ouverte: true, champs: [
-      { k: 'name', l: trad('Nom usuel (affiché dans l\'application)'), t: 'text', max: 120, full: true },
-      { k: 'legal_name', l: trad('Raison sociale'), t: 'text', max: 160, ext: true },
+    { cle: 'identite', titre: trad('Identité'), sous: trad('Qui est ce fournisseur'), icone: 'institution', accent: 'indigo', colonne: 0, champs: [
+      { k: 'name', l: trad('Nom usuel (affiché dans l\'application)'), t: 'text', max: 120, full: true, i: 'mallette' },
+      { k: 'legal_name', l: trad('Raison sociale'), t: 'text', max: 160, ext: true, i: 'institution' },
       { k: 'legal_form', l: trad('Forme juridique'), t: 'text', max: 60, ext: true, liste: FORMES_JURIDIQUES },
-      { k: 'company_number', l: trad('N° SIRET / RIDET / RCS'), t: 'text', max: 40, ext: true },
-      { k: 'vat_number', l: trad('N° de TVA / numéro fiscal'), t: 'text', max: 40, ext: true },
+      { k: 'company_number', l: trad('N° SIRET / RIDET / RCS'), t: 'text', max: 40, ext: true, i: 'carnet' },
+      { k: 'vat_number', l: trad('N° de TVA / numéro fiscal'), t: 'text', max: 40, ext: true, i: 'carnet' },
       { k: 'activity_code', l: trad('Code APE / NAF'), t: 'text', max: 20, ext: true },
     ] },
-    { cle: 'coordonnees', titre: trad('Coordonnées'), champs: [
-      { k: 'address', l: trad('Adresse du siège'), t: 'text', max: 300, full: true },
+    { cle: 'coordonnees', titre: trad('Coordonnées'), sous: trad('Adresses, téléphone, site'), icone: 'monde', accent: 'bleu', colonne: 0, champs: [
+      { k: 'address', l: trad('Adresse du siège'), t: 'text', max: 300, full: true, i: 'batiment' },
       { k: 'postal_code', l: trad('Code postal'), t: 'text', max: 20, ext: true },
       { k: 'city', l: trad('Ville'), t: 'text', max: 100, ext: true },
-      { k: 'country', l: trad('Pays'), t: 'text', max: 60, ext: true },
-      { k: 'phone', l: trad('Téléphone standard'), t: 'tel', max: 60 },
-      { k: 'website', l: trad('Site web'), t: 'text', max: 200, ext: true, full: true },
-      { k: 'shipping_address', l: trad('Adresse d\'expédition ou d\'enlèvement (si différente)'), t: 'text', max: 300, ext: true, full: true },
-      { k: 'billing_address', l: trad('Adresse de facturation (si différente)'), t: 'text', max: 300, ext: true, full: true },
+      { k: 'country', l: trad('Pays'), t: 'text', max: 60, ext: true, i: 'monde' },
+      { k: 'phone', l: trad('Téléphone standard'), t: 'tel', max: 60, i: 'telephone' },
+      { k: 'website', l: trad('Site web'), t: 'text', max: 200, ext: true, full: true, i: 'monde' },
+      { k: 'shipping_address', l: trad('Adresse d\'expédition ou d\'enlèvement (si différente)'), t: 'text', max: 300, ext: true, full: true, i: 'boite' },
+      { k: 'billing_address', l: trad('Adresse de facturation (si différente)'), t: 'text', max: 300, ext: true, full: true, i: 'paiement' },
     ] },
-    { cle: 'contacts', titre: trad('Contacts'), champs: [
-      { k: 'contact_name', l: trad('Contact commercial'), t: 'text', max: 120 },
-      { k: 'sales_contact_phone', l: trad('Ligne directe'), t: 'tel', max: 60, ext: true },
-      { k: 'email', l: trad('E-mail du contact commercial'), t: 'email', max: 200 },
-      { k: 'po_email', l: trad('E-mail pour les bons de commande'), t: 'email', max: 200, ext: true },
-      { k: 'accounting_contact_name', l: trad('Contact comptabilité'), t: 'text', max: 120, ext: true },
-      { k: 'accounting_contact_phone', l: trad('Téléphone comptabilité'), t: 'tel', max: 60, ext: true },
-      { k: 'accounting_contact_email', l: trad('E-mail comptabilité'), t: 'email', max: 200, ext: true, full: true },
-      { k: 'logistics_contact_name', l: trad('Contact logistique / SAV'), t: 'text', max: 120, ext: true },
-      { k: 'logistics_contact_phone', l: trad('Téléphone logistique / SAV'), t: 'tel', max: 60, ext: true },
-      { k: 'logistics_contact_email', l: trad('E-mail logistique / SAV'), t: 'email', max: 200, ext: true, full: true },
+    { cle: 'contacts', titre: trad('Contacts'), sous: trad('Commercial, comptabilité, logistique'), icone: 'equipe', accent: 'teal', colonne: 0, champs: [
+      { k: 'contact_name', l: trad('Contact commercial'), t: 'text', max: 120, i: 'personne' },
+      { k: 'sales_contact_phone', l: trad('Ligne directe'), t: 'tel', max: 60, ext: true, i: 'telephone' },
+      { k: 'email', l: trad('E-mail du contact commercial'), t: 'email', max: 200, i: 'mail' },
+      { k: 'po_email', l: trad('E-mail pour les bons de commande'), t: 'email', max: 200, ext: true, i: 'envoyer' },
+      { k: 'accounting_contact_name', l: trad('Contact comptabilité'), t: 'text', max: 120, ext: true, i: 'personne' },
+      { k: 'accounting_contact_phone', l: trad('Téléphone comptabilité'), t: 'tel', max: 60, ext: true, i: 'telephone' },
+      { k: 'accounting_contact_email', l: trad('E-mail comptabilité'), t: 'email', max: 200, ext: true, full: true, i: 'mail' },
+      { k: 'logistics_contact_name', l: trad('Contact logistique / SAV'), t: 'text', max: 120, ext: true, i: 'personne' },
+      { k: 'logistics_contact_phone', l: trad('Téléphone logistique / SAV'), t: 'tel', max: 60, ext: true, i: 'telephone' },
+      { k: 'logistics_contact_email', l: trad('E-mail logistique / SAV'), t: 'email', max: 200, ext: true, full: true, i: 'mail' },
     ] },
-    { cle: 'finance', titre: trad('Paiement et banque'), champs: [
-      { k: 'payment_terms', l: trad('Conditions de paiement'), t: 'text', max: 120, liste: CONDITIONS_PAIEMENT_USUELLES.map((c) => trad(c)) },
+    { cle: 'finance', titre: trad('Paiement et banque'), sous: trad('Règlement et coordonnées bancaires'), icone: 'paiement', accent: 'orange', colonne: 1, banque: true, champs: [
+      { k: 'payment_terms', l: trad('Conditions de paiement'), t: 'text', max: 120, liste: CONDITIONS_PAIEMENT_USUELLES.map((c) => trad(c)), i: 'calendrier' },
       { k: 'payment_method', l: trad('Mode de paiement'), t: 'select', ext: true, options: MODES_PAIEMENT_FOURNISSEUR.map(([c, l]) => [c, trad(l)]) },
       { k: 'currency', l: trad('Devise'), t: 'select', ext: true, options: DEVISES_FOURNISSEUR.map((c) => [c, c]) },
-    ], banque: true },
-    { cle: 'conditions', titre: trad('Conditions commerciales'), champs: [
-      { k: 'lead_time_days', l: trad('Délai de livraison standard (jours)'), t: 'int' },
+    ] },
+    { cle: 'conditions', titre: trad('Conditions commerciales'), sous: trad('Délais, minimums, franco'), icone: 'boite', accent: 'prune', colonne: 1, champs: [
+      { k: 'lead_time_days', l: trad('Délai de livraison standard (jours)'), t: 'int', i: 'sablier' },
       { k: 'min_order_amount', l: trad('Minimum de commande (montant)'), t: 'num', unite: true },
       { k: 'min_order_quantity', l: trad('Minimum de commande (quantité)'), t: 'num', ext: true },
       { k: 'franco_amount', l: trad('Franco de port (montant)'), t: 'num', ext: true, unite: true },
-      { k: 'incoterm', l: trad('Incoterm (fournisseurs étrangers)'), t: 'select', ext: true, options: INCOTERMS_FOURNISSEUR.map((c) => [c, c]) },
+      { k: 'incoterm', l: trad('Incoterm (fournisseurs étrangers)'), t: 'select', ext: true, options: INCOTERMS_FOURNISSEUR.map((c) => [c, c]), full: true },
     ] },
-    { cle: 'conformite', titre: trad('Conformité et notes'), champs: [
-      { k: 'kbis_received_at', l: trad('Extrait Kbis / RIDET reçu le'), t: 'date', ext: true },
-      { k: 'rib_received_at', l: trad('RIB reçu le'), t: 'date', ext: true },
-      { k: 'note', l: trad('Note'), t: 'text', max: 500, full: true },
+    { cle: 'documents', titre: trad('Documents et notes'), sous: trad('Kbis, RIB et remarques'), icone: 'bouclier', accent: 'ardoise', colonne: 1, docs: true, champs: [
+      { k: 'note', l: trad('Note'), t: 'text', max: 500, full: true, i: 'crayon' },
     ] },
   ];
 }
 function champsBanque() {
   return [
-  { k: 'account_holder', l: trad('Titulaire du compte'), max: 160, full: true },
-  { k: 'iban', l: 'IBAN', max: 40, full: true },
-  { k: 'bic', l: 'BIC / SWIFT', max: 20 },
-  { k: 'bank_name', l: trad('Banque'), max: 120 },
-  { k: 'bank_address', l: trad('Adresse de la banque'), max: 300, full: true },
-  { k: 'account_number', l: trad('Autre numéro de compte (hors IBAN)'), max: 60, full: true },
+    { k: 'account_holder', l: trad('Titulaire du compte'), max: 160, full: true, i: 'personne' },
+    { k: 'iban', l: 'IBAN', max: 40, full: true, i: 'institution' },
+    { k: 'bic', l: 'BIC / SWIFT', max: 20 },
+    { k: 'bank_name', l: trad('Banque'), max: 120 },
+    { k: 'bank_address', l: trad('Adresse de la banque'), max: 300, full: true, i: 'batiment' },
+    { k: 'account_number', l: trad('Autre numéro de compte (hors IBAN)'), max: 60, full: true },
   ];
 }
 // Contrôle d'un IBAN : forme + clé modulo 97 (la saisie d'un IBAN faux est refusée plutôt qu'enregistrée en silence).
@@ -3853,10 +3864,14 @@ function ibanValide(iban) {
 function bicValide(bic) {
   return /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(String(bic || '').replace(/\s+/g, '').toUpperCase());
 }
+// Extrait Kbis déposé depuis plus de 3 mois (la date de dépôt sert de repère : kbis_received_at est rempli au dépôt du fichier).
 function kbisAExpirer(f) {
   if (!f || !f.kbis_received_at) return false;
   const d = new Date(f.kbis_received_at + 'T00:00:00');
   return !isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 > 92;
+}
+function initialesFournisseur(nom) {
+  return String(nom || '').split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]).join('').toUpperCase() || '?';
 }
 
 function champFournisseurHtml(c, f) {
@@ -3867,12 +3882,10 @@ function champFournisseurHtml(c, f) {
   if (c.t === 'select') {
     const options = [['', '—'], ...c.options];
     champ = `<div class="ui-select-wrap"><select id="${id}" class="ui-champ">${options.map(([v, l]) => `<option value="${esc(v)}"${String(brut ?? '') === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>${picto('chevronBas')}</div>`;
-  } else if (c.t === 'date') {
-    champ = `<input id="${id}" class="ui-champ" type="date" value="${esc(valeur)}">`;
   } else if (c.t === 'num' || c.t === 'int') {
     champ = `<div class="ui-champ-unite"><input id="${id}" class="ui-champ" type="text" inputmode="${c.t === 'int' ? 'numeric' : 'decimal'}" value="${esc(valeur)}">${c.unite ? `<span class="ui-unite">${esc(deviseCourte())}</span>` : ''}</div>`;
   } else {
-    champ = `<input id="${id}" class="ui-champ" type="${c.t === 'tel' ? 'tel' : c.t === 'email' ? 'email' : 'text'}" maxlength="${c.max || 200}" value="${esc(valeur)}"${c.liste ? ` list="${id}-liste"` : ''}>`
+    champ = `<div class="fo-saisie${c.i ? ' a-icone' : ''}">${c.i ? picto(c.i) : ''}<input id="${id}" class="ui-champ" type="${c.t === 'tel' ? 'tel' : c.t === 'email' ? 'email' : 'text'}" maxlength="${c.max || 200}" value="${esc(valeur)}"${c.liste ? ` list="${id}-liste"` : ''}></div>`
       + (c.liste ? `<datalist id="${id}-liste">${c.liste.map((o) => `<option value="${esc(o)}"></option>`).join('')}</datalist>` : '');
   }
   return `<div class="ui-champ-groupe fo-champ${c.full ? ' is-large' : ''}"><label for="${id}"><strong>${c.l}</strong></label>${champ}</div>`;
@@ -3885,6 +3898,21 @@ function valeurChampFournisseur(overlay, c) {
   if (c.t === 'int') { const n = nombreDepuisTexte(v); return n != null && n >= 0 ? Math.round(n) : null; }
   return v || null;
 }
+function formaterTailleFichier(octets) {
+  return octets >= 1048576 ? (octets / 1048576).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(octets / 1024)) + ' Ko';
+}
+async function telechargerDocFournisseur(doc) {
+  const { data, error } = await sb.storage.from(BUCKET_DOCS_FOURNISSEUR).download(doc.storage_path);
+  if (error) throw error;
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = doc.file_name || 'document';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 
 // Création (f = null) ou modification d'une fiche. surEnregistre(fiche) : appelé après l'enregistrement
 // (le catalogue s'en sert pour sélectionner le fournisseur qui vient d'être créé).
@@ -3892,44 +3920,92 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  let modifie = false;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay && !modifie) overlay.remove(); });
   const complet = !!SCHEMA.hasSuppliersFull;
   const gerant = peutGererParametresStock();
+  const avecDocs = docsFournisseurActifs();
+  const types = typesDocFournisseur();
   const sections = sectionsFournisseur()
     .map((s) => ({ ...s, champs: s.champs.filter((c) => complet || !c.ext) }))
-    .filter((s) => s.champs.length || (s.banque && complet));
+    .filter((s) => s.champs.length || (s.banque && complet && gerant) || (s.docs && avecDocs));
   // Nouvelle fiche : la devise de la société est proposée.
   const valeursInitiales = f || { currency: complet ? (UI.company?.currency || '') : '' };
+  // État des pièces jointes : { existant (ligne en base), fichier (à envoyer à l'enregistrement), retire }
+  const docs = {};
+  types.forEach((t) => { docs[t.kind] = { existant: null, fichier: null, retire: false }; });
+
+  const carteHtml = (s) => `
+    <details class="fo-carte" data-accent="${s.accent}" open>
+      <summary>
+        <span class="fo-puce">${picto(s.icone)}</span>
+        <span class="fo-carte-titres"><span class="fo-carte-titre">${s.titre}</span><span class="fo-carte-sous">${s.sous}</span></span>
+        <span class="fo-carte-bascule" aria-hidden="true"></span>
+      </summary>
+      <div class="fo-grille">
+        ${s.champs.map((c) => champFournisseurHtml(c, valeursInitiales)).join('')}
+        ${s.banque && complet && gerant ? `
+        <div class="fo-sous-bloc is-large">
+          <div class="fo-sous-titre">${picto('cadenas')}<span>${trad('Coordonnées bancaires')}</span><em>${trad('visibles du gérant seul')}</em></div>
+          <div class="fo-grille" id="fo-banque-grille">${champsBanque().map((c) => champFournisseurHtml({ ...c, t: 'text', k: 'bk_' + c.k }, null)).join('')}</div>
+          <div class="ui-aide" id="fo-banque-etat">${trad('Chargement…')}</div>
+        </div>` : ''}
+        ${s.docs && avecDocs ? `
+        <div class="fo-sous-bloc is-large">
+          <div class="fo-sous-titre">${picto('cadenas')}<span>${trad('Pièces jointes')}</span><em>${trad('visibles du gérant seul · PDF, JPG ou PNG, 5 Mo max')}</em></div>
+          ${types.map((t) => `
+          <div class="fo-doc" data-doc="${t.kind}">
+            <span class="fo-doc-icone">${picto(t.icone)}</span>
+            <span class="fo-doc-textes"><strong>${t.libelle}</strong><span class="fo-doc-etat" data-doc-etat="${t.kind}"></span></span>
+            <span class="fo-doc-actions">
+              <button type="button" class="ui-btn ui-btn-pastille" data-doc-voir="${t.kind}">${picto('export')}<span>${trad('Voir')}</span></button>
+              <button type="button" class="ui-btn ui-btn-pastille" data-doc-choisir="${t.kind}">${picto('televerser')}<span data-doc-choisir-texte="${t.kind}">${trad('Ajouter')}</span></button>
+              <button type="button" class="ui-btn ui-btn-icone is-danger" data-doc-retirer="${t.kind}" title="${esc(trad('Retirer'))}" aria-label="${esc(trad('Retirer') + ' ' + t.libelle)}">${picto('corbeille')}</button>
+            </span>
+            <input type="file" hidden data-doc-fichier="${t.kind}" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
+          </div>`).join('')}
+        </div>` : ''}
+      </div>
+    </details>`;
+  const colonnes = [0, 1].map((n) => sections.filter((s) => s.colonne === n));
   overlay.innerHTML = `
-    <div class="modal export-modal fournisseur-modal" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
-      <h2 id="fo-titre">${f ? trad('Modifier le fournisseur') : trad('Nouveau fournisseur')}</h2>
-      ${sections.map((s) => `
-        <details class="fo-section"${s.ouverte ? ' open' : ''}>
-          <summary>${s.titre}</summary>
-          <div class="fo-grille">
-            ${s.champs.map((c) => champFournisseurHtml(c, valeursInitiales)).join('')}
-            ${s.banque && complet && gerant ? `
-            <div class="fo-banque ui-champ-groupe fo-champ is-large">
-              <strong>${trad('Coordonnées bancaires (visibles du gérant seul)')}</strong>
-              <div class="fo-grille" id="fo-banque-grille">${champsBanque().map((c) => champFournisseurHtml({ ...c, t: 'text', k: 'bk_' + c.k }, null)).join('')}</div>
-              <div class="ui-aide" id="fo-banque-etat">${trad('Chargement…')}</div>
-            </div>` : ''}
-          </div>
-        </details>`).join('')}
-      <label class="ui-case"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
-      <div id="fo-msg" role="status" aria-live="polite"></div>
-      <div class="modal-actions">
+    <div class="modal fournisseur-modal" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
+      <header class="fo-hero">
+        <span class="fo-avatar" id="fo-avatar">${esc(initialesFournisseur(f?.name))}</span>
+        <div class="fo-hero-textes">
+          <h2 id="fo-titre">${f ? esc(f.name) : trad('Nouveau fournisseur')}</h2>
+          <p id="fo-hero-sous">${f ? esc([f.legal_name, f.city].filter(Boolean).join(' · ')) : trad('Remplis ce que tu connais : le reste peut venir plus tard.')}</p>
+        </div>
+        <div class="fo-completude" title="${esc(trad('Part des informations utiles pour passer commande'))}">
+          <span class="fo-completude-texte" id="fo-completude-texte"></span>
+          <span class="fo-completude-barre"><span id="fo-completude-remplie"></span></span>
+        </div>
+        <button type="button" class="fo-fermer-x" id="fo-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </header>
+      <div class="fo-corps">
+        <div class="fo-colonnes">
+          ${colonnes.map((cartes) => `<div class="fo-colonne">${cartes.map(carteHtml).join('')}</div>`).join('')}
+        </div>
+      </div>
+      <footer class="fo-pied">
+        <label class="ui-case fo-actif"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
+        <div id="fo-msg" role="status" aria-live="polite"></div>
         <button type="button" class="ui-btn ui-btn-pastille" id="fo-annuler">${trad('Annuler')}</button>
         <button type="button" class="ui-btn ui-btn-plein" id="fo-go">${picto('coche')}<span>${trad('Enregistrer')}</span></button>
-      </div>
+      </footer>
     </div>`;
   overlay.querySelectorAll('#fo-min_order_amount, #fo-franco_amount, #fo-min_order_quantity').forEach((el) => activerSeparateurMilliers(el));
   const q = (sel) => overlay.querySelector(sel);
   const msg = q('#fo-msg');
-  q('#fo-annuler').addEventListener('click', () => overlay.remove());
+  // Ordinateur : toutes les cartes ouvertes ; téléphone : seule la première, les autres se déplient au toucher.
+  const telephone = window.matchMedia && window.matchMedia('(max-width:700px)').matches;
+  overlay.querySelectorAll('.fo-carte').forEach((d, i) => { d.open = !telephone || i === 0; });
+  const fermer = () => overlay.remove();
+  q('#fo-annuler').addEventListener('click', fermer);
+  q('#fo-fermer-x').addEventListener('click', () => { if (!modifie || window.confirm(trad('Fermer sans enregistrer les modifications ?'))) fermer(); });
 
-  // Coordonnées bancaires : table à part (gérant seul). Lues à l'ouverture ; on n'y touche à l'enregistrement que si la
-  // lecture a réussi (jamais d'écrasement à l'aveugle).
+  // ── Coordonnées bancaires : table à part (gérant seul). Lues à l'ouverture ; on n'y touche à l'enregistrement que si la
+  // lecture a réussi (jamais d'écrasement à l'aveugle). ──
   let banqueLue = null; // null = pas (encore) lue ; objet = ligne existante ; false = aucune ligne
   const banque = complet && gerant && q('#fo-banque-grille');
   if (banque) {
@@ -3941,16 +4017,153 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
         banqueLue = data || false;
         etat.textContent = '';
         if (data) champsBanque().forEach((c) => { const el = q('#fo-bk_' + c.k); if (el) el.value = data[c.k] || ''; });
+        majCompletude();
       });
     }
   }
 
+  // ── Pièces jointes : choix du fichier ici, envoi à l'enregistrement. ──
+  const majDoc = (kind) => {
+    const d = docs[kind];
+    const etat = q(`[data-doc-etat="${kind}"]`);
+    if (!etat) return;
+    const dateTexte = d.existant && d.existant.uploaded_at ? formatDateHeureMouvement(d.existant.uploaded_at) : '';
+    let texte;
+    let classe = '';
+    if (d.fichier) { texte = tR('{nom} ({taille}) — sera envoyé à l\'enregistrement', { nom: d.fichier.name, taille: formaterTailleFichier(d.fichier.size) }); classe = 'is-nouveau'; }
+    else if (d.existant && d.retire) { texte = trad('Sera retiré à l\'enregistrement'); classe = 'is-retire'; }
+    else if (d.existant) { texte = `${d.existant.file_name}${dateTexte ? ' · ' + tR('ajouté le {d}', { d: dateTexte }) : ''}`; classe = 'is-present'; }
+    else { texte = trad('Aucun fichier'); }
+    etat.textContent = texte;
+    etat.className = 'fo-doc-etat ' + classe;
+    const aFichierActif = !!d.fichier || (!!d.existant && !d.retire);
+    q(`[data-doc-voir="${kind}"]`).hidden = !(d.existant && !d.retire && !d.fichier);
+    q(`[data-doc-retirer="${kind}"]`).hidden = !aFichierActif && !(d.existant && d.retire);
+    const texteChoisir = q(`[data-doc-choisir-texte="${kind}"]`);
+    if (texteChoisir) texteChoisir.textContent = aFichierActif ? trad('Remplacer') : trad('Ajouter');
+    const retirer = q(`[data-doc-retirer="${kind}"]`);
+    if (retirer) retirer.title = d.existant && d.retire ? trad('Annuler le retrait') : trad('Retirer');
+    q(`[data-doc="${kind}"]`).classList.toggle('est-rempli', aFichierActif);
+    majCompletude();
+  };
+  if (avecDocs) {
+    types.forEach((t) => majDoc(t.kind));
+    if (f) {
+      sb.from('supplier_documents').select('*').eq('supplier_id', f.id).then(({ data }) => {
+        (data || []).forEach((ligne) => { if (docs[ligne.kind]) docs[ligne.kind].existant = ligne; });
+        types.forEach((t) => majDoc(t.kind));
+      });
+    }
+    overlay.addEventListener('click', async (e) => {
+      const voir = e.target.closest('[data-doc-voir]');
+      if (voir) {
+        const d = docs[voir.getAttribute('data-doc-voir')];
+        try { await telechargerDocFournisseur(d.existant); } catch (err) { msg.textContent = trad('Erreur :') + ' ' + (err.message || err); }
+        return;
+      }
+      const choisir = e.target.closest('[data-doc-choisir]');
+      if (choisir) { q(`[data-doc-fichier="${choisir.getAttribute('data-doc-choisir')}"]`).click(); return; }
+      const retirer = e.target.closest('[data-doc-retirer]');
+      if (retirer) {
+        const kind = retirer.getAttribute('data-doc-retirer');
+        const d = docs[kind];
+        if (d.fichier) d.fichier = null;
+        else if (d.existant) d.retire = !d.retire;
+        modifie = true;
+        majDoc(kind);
+      }
+    });
+    overlay.addEventListener('change', (e) => {
+      const input = e.target.closest('[data-doc-fichier]');
+      if (!input) return;
+      const kind = input.getAttribute('data-doc-fichier');
+      const fichier = input.files && input.files[0];
+      input.value = '';
+      if (!fichier) return;
+      if (fichier.size > TAILLE_MAX_DOC_FOURNISSEUR) { msg.textContent = trad('Fichier trop lourd (5 Mo maximum).'); return; }
+      if (!TYPES_MIME_DOC_FOURNISSEUR.includes(fichier.type)) { msg.textContent = trad('Format non accepté : PDF, JPG, PNG ou WebP.'); return; }
+      msg.textContent = '';
+      docs[kind].fichier = fichier;
+      docs[kind].retire = false;
+      modifie = true;
+      majDoc(kind);
+    });
+  }
+
+  // ── En-tête vivant : nom, sous-titre, pastille d'initiales, et jauge de complétude. ──
+  function majCompletude() {
+    const rempli = (id) => { const el = overlay.querySelector(id); return el ? el.value.trim() !== '' : null; };
+    const criteres = [
+      rempli('#fo-name'), rempli('#fo-legal_name'), rempli('#fo-company_number'), rempli('#fo-address'),
+      (rempli('#fo-po_email') ?? null) !== null ? (rempli('#fo-po_email') || rempli('#fo-email')) : rempli('#fo-email'),
+      (rempli('#fo-phone') || rempli('#fo-contact_name')), rempli('#fo-payment_terms'), rempli('#fo-lead_time_days'),
+    ];
+    if (banque) criteres.push(rempli('#fo-bk_iban'));
+    if (avecDocs) types.forEach((t) => { const d = docs[t.kind]; criteres.push(!!d.fichier || (!!d.existant && !d.retire)); });
+    const valides = criteres.filter((c) => c !== null && c !== undefined);
+    const part = valides.length ? Math.round((valides.filter(Boolean).length / valides.length) * 100) : 0;
+    const texte = q('#fo-completude-texte');
+    if (texte) texte.textContent = tR('Fiche complète à {n} %', { n: part });
+    const barre = q('#fo-completude-remplie');
+    if (barre) { barre.style.width = part + '%'; barre.dataset.niveau = part >= 100 ? 'complet' : part >= 50 ? 'moyen' : 'faible'; }
+  }
+  overlay.addEventListener('input', (e) => {
+    modifie = true;
+    if (e.target.id === 'fo-name') {
+      q('#fo-titre').textContent = e.target.value.trim() || (f ? f.name : trad('Nouveau fournisseur'));
+      q('#fo-avatar').textContent = initialesFournisseur(e.target.value);
+    }
+    if (e.target.id === 'fo-legal_name' || e.target.id === 'fo-city') {
+      const sous = [q('#fo-legal_name')?.value.trim(), q('#fo-city')?.value.trim()].filter(Boolean).join(' · ');
+      q('#fo-hero-sous').textContent = sous || trad('Remplis ce que tu connais : le reste peut venir plus tard.');
+    }
+    majCompletude();
+  });
+  overlay.addEventListener('change', () => { modifie = true; majCompletude(); });
+  majCompletude();
+
+  // ── Enregistrement ──
+  const appliquerDocs = async (fournisseurId) => {
+    const erreurs = [];
+    for (const t of types) {
+      const d = docs[t.kind];
+      try {
+        if (d.existant && d.retire) {
+          await sb.storage.from(BUCKET_DOCS_FOURNISSEUR).remove([d.existant.storage_path]);
+          const { error } = await sb.from('supplier_documents').delete().eq('id', d.existant.id);
+          if (error) throw error;
+        }
+        if (d.fichier) {
+          const extension = (d.fichier.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'bin';
+          const chemin = `${UI.companyId}/${fournisseurId}/${t.kind}-${Date.now()}.${extension}`;
+          const { error: errEnvoi } = await sb.storage.from(BUCKET_DOCS_FOURNISSEUR).upload(chemin, d.fichier, { contentType: d.fichier.type, upsert: false });
+          if (errEnvoi) throw errEnvoi;
+          const { error: errLigne } = await sb.from('supplier_documents').upsert({
+            supplier_id: fournisseurId, company_id: UI.companyId, kind: t.kind, storage_path: chemin,
+            file_name: d.fichier.name.slice(0, 200), mime_type: d.fichier.type, size_bytes: d.fichier.size,
+          }, { onConflict: 'supplier_id,kind' });
+          if (errLigne) throw errLigne;
+          // L'ancien fichier (remplacé) n'est plus référencé : on le supprime.
+          if (d.existant && !d.retire) await sb.storage.from(BUCKET_DOCS_FOURNISSEUR).remove([d.existant.storage_path]);
+        }
+      } catch (err) { erreurs.push(`${t.libelle} : ${err.message || err}`); }
+    }
+    return erreurs;
+  };
   q('#fo-go').addEventListener('click', async () => {
     const bouton = q('#fo-go');
     const fiche = {};
     sections.forEach((s) => s.champs.forEach((c) => { fiche[c.k] = valeurChampFournisseur(overlay, c); }));
     fiche.active = q('#fo-actif').checked;
-    if (!fiche.name) { msg.textContent = trad('Le nom est obligatoire.'); return; }
+    if (!fiche.name) { msg.textContent = trad('Le nom est obligatoire.'); q('#fo-name')?.focus(); return; }
+    // Date de dépôt des pièces (repère « Kbis de plus de 3 mois ») : posée au dépôt, effacée au retrait.
+    if (avecDocs) {
+      types.forEach((t) => {
+        const d = docs[t.kind];
+        if (d.fichier) fiche[t.colonneDate] = todayIso();
+        else if (d.existant && d.retire) fiche[t.colonneDate] = null;
+      });
+    }
     // Banque : validation avant tout enregistrement.
     let valeursBanque = null;
     if (banque && banqueLue !== null) {
@@ -3958,8 +4171,8 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
       champsBanque().forEach((c) => { valeursBanque[c.k] = (q('#fo-bk_' + c.k).value || '').trim() || null; });
       if (valeursBanque.iban) valeursBanque.iban = valeursBanque.iban.replace(/\s+/g, '').toUpperCase();
       if (valeursBanque.bic) valeursBanque.bic = valeursBanque.bic.replace(/\s+/g, '').toUpperCase();
-      if (valeursBanque.iban && !ibanValide(valeursBanque.iban)) { msg.textContent = trad('IBAN invalide : vérifie les caractères et la clé de contrôle.'); return; }
-      if (valeursBanque.bic && !bicValide(valeursBanque.bic)) { msg.textContent = trad('BIC invalide (8 ou 11 caractères).'); return; }
+      if (valeursBanque.iban && !ibanValide(valeursBanque.iban)) { msg.textContent = trad('IBAN invalide : vérifie les caractères et la clé de contrôle.'); q('#fo-bk_iban').closest('details').open = true; q('#fo-bk_iban').focus(); return; }
+      if (valeursBanque.bic && !bicValide(valeursBanque.bic)) { msg.textContent = trad('BIC invalide (8 ou 11 caractères).'); q('#fo-bk_bic').focus(); return; }
     }
     bouton.disabled = true;
     msg.textContent = '';
@@ -3975,7 +4188,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
       if (f && f.name !== data.name) {
         UI.partsCatalog = (UI.partsCatalog || []).map((p) => (String(p.supplier_id) === String(data.id) ? { ...p, supplier_name: data.name } : p));
       }
-      let erreurBanque = null;
+      const erreursSecondaires = [];
       if (valeursBanque) {
         const vide = Object.values(valeursBanque).every((v) => !v);
         try {
@@ -3985,12 +4198,13 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
             const { error: e2 } = await sb.from('supplier_bank_details').upsert({ supplier_id: data.id, company_id: UI.companyId, ...valeursBanque }, { onConflict: 'supplier_id' });
             if (e2) throw e2;
           }
-        } catch (err) { erreurBanque = err; }
+        } catch (err) { erreursSecondaires.push(`${trad('Coordonnées bancaires')} : ${err.message || err}`); }
       }
+      if (avecDocs) erreursSecondaires.push(...await appliquerDocs(data.id));
       showToast(f ? trad('Fournisseur modifié') : trad('Fournisseur ajouté'));
       overlay.remove();
       rafraichirListeFournisseurs();
-      if (erreurBanque) window.alert(trad('La fiche est enregistrée, mais pas les coordonnées bancaires :') + ' ' + (erreurBanque.message || erreurBanque));
+      if (erreursSecondaires.length) window.alert(trad('La fiche est enregistrée, mais :') + '\n' + erreursSecondaires.join('\n'));
       if (typeof surEnregistre === 'function') surEnregistre(data);
     } catch (err) {
       msg.textContent = String(err.code) === '23505'
@@ -4010,6 +4224,11 @@ async function supprimerFournisseur(id) {
     : tR('Supprimer « {nom} » ?', { nom: f.name });
   if (!window.confirm(question)) return;
   try {
+    if (docsFournisseurActifs()) {
+      const { data: pieces } = await sb.from('supplier_documents').select('storage_path').eq('supplier_id', id);
+      const chemins = (pieces || []).map((p) => p.storage_path).filter(Boolean);
+      if (chemins.length) await sb.storage.from(BUCKET_DOCS_FOURNISSEUR).remove(chemins);
+    }
     const { error } = await sb.from('suppliers').delete().eq('id', id);
     if (error) throw error;
     UI.suppliers = (UI.suppliers || []).filter((s) => String(s.id) !== String(id));

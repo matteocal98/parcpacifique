@@ -699,6 +699,8 @@ SCHEMA.hasStockInventaire = false;
 SCHEMA.hasSuppliers = false;
 // Fiche fournisseur complète (stock-fournisseurs-complet.sql) : identité légale, adresses, contacts, finance, conditions + table bancaire.
 SCHEMA.hasSuppliersFull = false;
+// Pièces jointes des fournisseurs (stock-fournisseurs-documents.sql) : table supplier_documents + espace de stockage privé.
+SCHEMA.hasSupplierDocs = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

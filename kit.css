@@ -1471,15 +1471,6 @@ textarea:not([data-x]),
 .inventaire-modal .modal-actions .ui-btn,.inventaire-modal #inv-confirm .ui-btn{height:38px;}
 .inventaire-modal [hidden]{display:none !important;}
 
-/* Stock › Fournisseurs : fenêtre de fiche compacte (champs par deux, sans marges empilées) */
-.fournisseur-modal{width:min(560px,94vw);}
-.fournisseur-modal .ui-champ-groupe{gap:6px;}
-.fournisseur-modal .ui-champ-groupe .ui-champ-groupe{margin:0;}
-.fournisseur-modal .ui-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;}
-.fournisseur-modal .ui-champ{height:40px;}
-.fournisseur-modal [hidden]{display:none !important;}
-.fournisseur-modal .modal-actions .ui-btn-plein{font-size:14px;height:38px;padding:0 16px;}
-.fournisseur-modal .modal-actions .ui-btn-pastille{font-size:13px;height:38px;}
 
 /* Fenêtres « export-modal » (Emplacement et statut, Nouvel inventaire, Fournisseur, Étiquettes…) : pied de page homogène —
    bouton plein à 14 px, bouton clair à 13 px, même hauteur (le plein n'est plus plus gros que son voisin) */
@@ -1488,16 +1479,88 @@ textarea:not([data-x]),
 .export-modal .modal-actions .ui-btn-pastille{font-size:13px;height:38px;}
 .export-modal .modal-actions .ui-btn-plein,.export-modal .modal-actions .ui-btn-pastille{min-height:38px;}
 
-/* Fiche fournisseur complète : sections repliables, champs par deux */
-.fournisseur-modal{width:min(640px,94vw);}
-.fournisseur-modal .fo-section{border-radius:var(--r-md);background:rgba(14,19,51,.04);margin:0 0 8px;padding:0 12px;}
-.fournisseur-modal .fo-section > summary{cursor:pointer;font-weight:800;font-size:14px;padding:11px 0;list-style:none;display:flex;align-items:center;justify-content:space-between;}
-.fournisseur-modal .fo-section > summary::-webkit-details-marker{display:none;}
-.fournisseur-modal .fo-section > summary::after{content:"+";font-weight:700;font-size:18px;color:var(--ink-2);}
-.fournisseur-modal .fo-section[open] > summary::after{content:"−";}
-.fournisseur-modal .fo-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:0 0 12px;}
-.fournisseur-modal .fo-champ{margin:0;min-width:0;}
-.fournisseur-modal .fo-champ.is-large{grid-column:1 / -1;}
-.fournisseur-modal .fo-champ label{font-size:12.5px;}
-.fournisseur-modal .fo-banque{padding-top:4px;border-top:1px solid rgba(14,19,51,.08);}
-.fournisseur-modal .fo-banque .fo-grille{padding:6px 0 0;}
+/* Stock › Fournisseurs : fiche fournisseur — bandeau coloré avec jauge de complétude, cartes colorées par thème (pictogramme + teinte),
+   deux colonnes sur ordinateur, une seule (cartes repliables) sur téléphone. */
+.fournisseur-modal{width:min(1040px,96vw);max-width:min(1040px,96vw);max-height:92vh;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#F2F4F8;}
+.fournisseur-modal [hidden]{display:none !important;}
+.fo-hero{display:flex;align-items:center;gap:14px;padding:18px 22px;background:linear-gradient(120deg,#0E1333 0%,#2A2F7D 55%,#6366F1 100%);color:#fff;flex:0 0 auto;}
+.fo-avatar{flex:0 0 auto;width:50px;height:50px;border-radius:15px;background:rgba(255,255,255,.18);display:grid;place-items:center;font:800 19px 'Space Grotesk',sans-serif;letter-spacing:.02em;}
+.fo-hero-textes{flex:1 1 auto;min-width:0;}
+.fo-hero h2{margin:0;color:#fff;font-size:21px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fo-hero p{margin:3px 0 0;font-size:12.5px;color:rgba(255,255,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fo-completude{flex:0 0 190px;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;}
+.fo-completude-barre{display:block;height:7px;border-radius:99px;background:rgba(255,255,255,.22);overflow:hidden;}
+#fo-completude-remplie{display:block;height:100%;width:0;border-radius:99px;background:#F2B04A;transition:width .25s;}
+#fo-completude-remplie[data-niveau="moyen"]{background:#A9ABFF;}
+#fo-completude-remplie[data-niveau="complet"]{background:#4FDCCB;}
+.fo-fermer-x{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer;}
+.fo-fermer-x svg{width:16px;height:16px;}
+.fo-corps{flex:1 1 auto;overflow-y:auto;padding:16px 20px;}
+.fo-colonnes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start;}
+.fo-colonne{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.fo-carte{--fa:#6366F1;--fa-bg:rgba(99,102,241,.12);background:#fff;border-radius:16px;box-shadow:var(--shadow-soft);overflow:hidden;}
+.fo-carte[data-accent="bleu"]{--fa:#236FE0;--fa-bg:rgba(35,111,224,.12);}
+.fo-carte[data-accent="teal"]{--fa:#24B5A8;--fa-bg:rgba(36,181,168,.15);}
+.fo-carte[data-accent="orange"]{--fa:#DE7A16;--fa-bg:rgba(222,122,22,.14);}
+.fo-carte[data-accent="prune"]{--fa:#8E4EC6;--fa-bg:rgba(142,78,198,.12);}
+.fo-carte[data-accent="ardoise"]{--fa:#0E1333;--fa-bg:rgba(14,19,51,.08);}
+.fo-carte > summary{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--fa-bg);cursor:pointer;list-style:none;}
+.fo-carte > summary::-webkit-details-marker{display:none;}
+.fo-puce{flex:0 0 auto;width:36px;height:36px;border-radius:11px;background:var(--fa);color:#fff;display:grid;place-items:center;}
+.fo-puce svg{width:19px;height:19px;}
+.fo-carte-titres{flex:1 1 auto;min-width:0;}
+.fo-carte-titre{display:block;font-weight:800;font-size:15px;line-height:1.25;}
+.fo-carte-sous{display:block;font-size:12px;color:var(--ink-2);}
+.fo-carte-bascule::after{content:"+";font-size:20px;font-weight:700;color:var(--fa);}
+.fo-carte[open] .fo-carte-bascule::after{content:"−";}
+.fo-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 12px;padding:14px 16px 16px;}
+.fo-champ{margin:0;min-width:0;gap:5px;}
+.fo-champ.is-large,.fo-sous-bloc.is-large{grid-column:1 / -1;}
+.fo-champ label{font-size:12px;color:var(--ink-2);}
+.fo-champ label strong{font-weight:700;}
+.fo-carte .ui-champ{height:40px;border-width:1.5px;border-color:rgba(14,19,51,.2);background:#fff;}
+.fo-carte .ui-champ:focus,.fo-carte .ui-champ:focus-visible{border-color:var(--fa);box-shadow:0 0 0 3px var(--fa-bg);outline:none;}
+.fo-saisie{position:relative;}
+.fo-saisie.a-icone > svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--fa);pointer-events:none;}
+.fo-saisie.a-icone .ui-champ{padding-left:36px;}
+.fo-sous-bloc{background:var(--fa-bg);border-radius:12px;padding:12px;}
+.fo-sous-bloc .fo-grille{padding:4px 0 0;}
+.fo-sous-titre{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;}
+.fo-sous-titre svg{width:16px;height:16px;color:var(--fa);flex:0 0 auto;}
+.fo-sous-titre em{margin-left:auto;font-style:normal;font-weight:600;font-size:11.5px;color:var(--ink-2);text-align:right;}
+.fo-doc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff;border:1.5px dashed rgba(14,19,51,.22);}
+.fo-doc.est-rempli{border-style:solid;border-color:var(--ok);}
+.fo-doc-icone{width:36px;height:36px;border-radius:10px;background:var(--fa);color:#fff;display:grid;place-items:center;}
+.fo-doc-icone svg{width:18px;height:18px;}
+.fo-doc-textes{min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13.5px;}
+.fo-doc-etat{font-size:12px;color:var(--ink-2);overflow-wrap:anywhere;}
+.fo-doc-etat.is-present{color:var(--ok);font-weight:700;}
+.fo-doc-etat.is-nouveau{color:var(--primary-dark);font-weight:700;}
+.fo-doc-etat.is-retire{color:var(--late);font-weight:700;}
+.fo-doc-actions{display:flex;align-items:center;gap:6px;}
+.fo-doc-actions .ui-btn-pastille{height:34px;min-height:34px;padding:0 12px;font-size:13px;}
+.fo-doc-actions .ui-btn-pastille svg{width:15px;height:15px;}
+.fo-pied{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 20px;background:#fff;border-top:1px solid rgba(14,19,51,.08);}
+.fo-pied .fo-actif{margin:0;flex:0 0 auto;}
+#fo-msg{flex:1 1 auto;min-width:0;color:var(--late);font-size:12.5px;font-weight:700;}
+.fo-pied .ui-btn-plein{font-size:14px;height:38px;min-height:38px;padding:0 18px;}
+.fo-pied .ui-btn-plein svg{width:16px;height:16px;}
+.fo-pied .ui-btn-pastille{font-size:13px;height:38px;min-height:38px;}
+@media (max-width:860px){
+  .fo-colonnes{grid-template-columns:minmax(0,1fr);}
+  .fo-completude{flex-basis:140px;}
+}
+@media (max-width:700px){
+  .fournisseur-modal{width:100vw;max-height:94vh;border-radius:18px 18px 0 0;}
+  .fo-hero{padding:14px 14px;gap:10px;}
+  .fo-avatar{width:42px;height:42px;font-size:16px;border-radius:12px;}
+  .fo-hero h2{font-size:17px;}
+  .fo-completude{display:none;}
+  .fo-corps{padding:12px;}
+  .fo-grille{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:12px;gap:8px 10px;}
+  .fo-doc{grid-template-columns:auto minmax(0,1fr);}
+  .fo-doc-actions{grid-column:1 / -1;justify-content:flex-end;}
+  .fo-pied{flex-wrap:wrap;padding:10px 12px;gap:8px;}
+  #fo-msg{order:5;flex-basis:100%;}
+  .fo-pied .fo-actif{flex:1 1 auto;}
+}
