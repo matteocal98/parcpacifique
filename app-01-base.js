@@ -689,6 +689,10 @@ SCHEMA.hasTco = false;
 // ne s'affiche ni ne s'écrit alors (comportement d'avant inchangé).
 SCHEMA.hasStockChamps = false;
 
+// Inventaire physique (kalea-serveur/migrations/stock-inventaire.sql) : tables stock_counts / stock_count_lines et colonne
+// stock_items.last_counted_at. Faux tant que la sonde ne trouve pas la colonne : le bloc « Inventaire » n'apparaît pas.
+SCHEMA.hasStockInventaire = false;
+
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et
 // counter_readings (kalea-serveur/migrations/telemetrie.sql). Faux tant que la

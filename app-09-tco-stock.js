@@ -3227,6 +3227,442 @@ function ouvrirImportMouvementsStock() {
   });
 }
 
+// ═══════════════════════ INVENTAIRE PHYSIQUE (comptage du stock réel) ═══════════════════════
+// SQL : kalea-serveur/migrations/stock-inventaire.sql (tables stock_counts / stock_count_lines + 5 fonctions).
+// Principe : une session par magasin (zone en option) fige le stock théorique ; on compte ; le gérant valide ; chaque
+// écart devient un ajustement de stock (moteur enregistrer_mouvement_stock). Les lignes ne se lisent QUE par la
+// fonction lignes_inventaire() : en mode « aveugle », elle masque le théorique (NULL) à tous sauf au gérant.
+function inventairePhysiquePossible() {
+  return !!(SCHEMA.hasStockInventaire && SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock());
+}
+const STATUTS_INVENTAIRE = { en_cours: ['En cours', 'is-bientot'], valide: ['Validé', 'is-ok'], annule: ['Annulé', ''] };
+function statutInventaireHtml(c) {
+  const [texte, classe] = STATUTS_INVENTAIRE[c.status] || STATUTS_INVENTAIRE.en_cours;
+  return `<span class="ui-statut ${classe}">${esc(trad(texte))}</span>`;
+}
+function titreInventaire(c) {
+  return tR('Inventaire n°{n}', { n: c.numero }) + (c.label ? ' — ' + c.label : '');
+}
+function sousTitreInventaire(c) {
+  return [nomMagasin(c.warehouse_id), c.zone ? tR('zone « {z} »', { z: c.zone }) : '', c.blind ? trad('en aveugle') : '', formatDateHeureMouvement(c.opened_at)]
+    .filter(Boolean).join(' · ');
+}
+async function chargerInventairesPhysiques() {
+  const { data, error } = await sb.from('stock_counts').select('*').eq('company_id', UI.companyId)
+    .order('opened_at', { ascending: false }).limit(50);
+  if (error) throw error;
+  UI.inventairesPhysiques = data || [];
+  return UI.inventairesPhysiques;
+}
+// Après une validation : les ajustements ont changé les quantités, on relit les soldes comme après un mouvement.
+async function rechargerSoldesStock() {
+  const { data: soldes } = await sb.from('stock_items')
+    .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at' + colonnesLigneStockEnPlus())
+    .eq('company_id', UI.companyId);
+  UI.stockItems = soldes || [];
+  UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
+}
+
+function ligneInventairePhysiqueHtml(c) {
+  const bilan = c.status === 'valide'
+    ? tR('{n} ligne(s) comptée(s) · {e} écart(s)', { n: c.lines_counted ?? 0, e: c.lines_with_variation ?? 0 })
+      + (peutGererParametresStock() && c.lines_with_variation ? ` · ${texteAvecSeparateurs(c.net_value || 0)} ${deviseCourte()}` : '')
+    : '';
+  const reprise = c.status === 'en_cours' && peutGererMouvementsStock();
+  return `
+    <div class="ui-ligne is-deux">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto('coche')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(titreInventaire(c))}${statutInventaireHtml(c)}</span>
+          <span class="ui-ligne-sous">${esc(sousTitreInventaire(c))}${bilan ? ' · ' + esc(bilan) : ''}</span>
+        </div>
+      </div>
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-pastille" data-invphys-ouvrir="${esc(c.id)}">${reprise ? trad('Reprendre') : trad('Consulter')}</button>
+      </div>
+    </div>`;
+}
+function blocInventairePhysiqueHtml() {
+  const peut = peutGererMouvementsStock();
+  return `
+    <section class="ui-section" id="stock-invphys-section">
+      ${teteSectionKit('coche', trad('Inventaire'), trad('Compter le stock réel, voir les écarts et les régulariser'),
+        peut ? `<button type="button" class="ui-btn ui-btn-pastille" id="invphys-nouveau">${picto('plusCercle')}<span>${trad('Nouvel inventaire')}</span></button>` : '')}
+      <div class="ui-section-corps">
+        <div class="ui-liste is-defilant" id="invphys-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
+      </div>
+    </section>`;
+}
+
+// ── Fenêtre « Nouvel inventaire » ──
+function ouvrirNouvelInventaire(surCree) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const magasins = (UI.warehouses || []).filter((w) => w.active !== false);
+  overlay.innerHTML = `
+    <div class="modal export-modal" role="dialog" aria-modal="true" aria-labelledby="invnew-titre">
+      <h2 id="invnew-titre">${trad('Nouvel inventaire')}</h2>
+      <div class="ui-champ-groupe">
+        <label for="invnew-magasin"><strong>${trad('Magasin')}</strong></label>
+        <div class="ui-select-wrap"><select id="invnew-magasin" class="ui-champ">${magasins.map((w) => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join('')}</select>${picto('chevronBas')}</div>
+        <label for="invnew-label"><strong>${trad('Nom (optionnel)')}</strong></label>
+        <input id="invnew-label" class="ui-champ" maxlength="80" placeholder="${trad('Ex : Inventaire annuel')}">
+        <label for="invnew-zone"><strong>${trad('Zone (optionnel)')}</strong></label>
+        <input id="invnew-zone" class="ui-champ" maxlength="60" placeholder="${trad('Ex : A-')}">
+        <div class="ui-aide">${trad('Une zone limite l\'inventaire aux emplacements qui commencent par ce texte. Laisse vide pour compter tout le magasin.')}</div>
+        <label class="ui-case"><input type="checkbox" id="invnew-aveugle"> ${trad('Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)')}</label>
+      </div>
+      <div id="invnew-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="invnew-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="invnew-go">${picto('coche')}<span>${trad('Ouvrir l\'inventaire')}</span></button>
+      </div>
+    </div>`;
+  overlay.querySelector('#invnew-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#invnew-go').addEventListener('click', async () => {
+    const bouton = overlay.querySelector('#invnew-go');
+    const msg = overlay.querySelector('#invnew-msg');
+    const magasinId = overlay.querySelector('#invnew-magasin').value;
+    if (!magasinId) { msg.textContent = trad('Choisis un magasin.'); return; }
+    bouton.disabled = true;
+    msg.textContent = '';
+    try {
+      const { data, error } = await sb.rpc('ouvrir_inventaire', {
+        p_warehouse_id: magasinId,
+        p_label: overlay.querySelector('#invnew-label').value.trim(),
+        p_blind: overlay.querySelector('#invnew-aveugle').checked,
+        p_zone: overlay.querySelector('#invnew-zone').value.trim(),
+      });
+      if (error) throw error;
+      const c = Array.isArray(data) ? data[0] : data;
+      UI.inventairesPhysiques = [c, ...(UI.inventairesPhysiques || [])];
+      overlay.remove();
+      surCree(c);
+    } catch (err) {
+      msg.textContent = trad('Erreur :') + ' ' + (err.message || err);
+      bouton.disabled = false;
+    }
+  });
+}
+
+// ── Export CSV d'une session ──
+function exporterSessionInventaireCsv(c, lignes) {
+  const gerant = peutGererParametresStock();
+  const entete = [trad('Référence'), trad('Désignation'), trad('Emplacement'), trad('Unité de mesure'), trad('Quantité théorique'), trad('Quantité comptée'), trad('Écart')];
+  if (c.status === 'valide') entete.push(trad('Écart appliqué'));
+  if (gerant) entete.push(trad('Coût PUMP'), trad('Valeur de l\'écart'));
+  const echapper = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = lignes.map((l) => {
+    const theo = l.theoretical_at_count ?? l.expected_qty;
+    const ecart = l.variation_qty != null ? l.variation_qty : (l.counted_qty != null && theo != null ? Number(l.counted_qty) - Number(theo) : '');
+    const r = [l.reference || '', l.designation || '', l.location || '', libelleUniteMesure(l.unit_of_measure || 'piece'), theo ?? '', l.counted_qty ?? '', ecart];
+    if (c.status === 'valide') r.push(l.applied_qty ?? '');
+    if (gerant) r.push(l.pump_unit_cost ?? '', ecart === '' ? '' : Number(ecart) * Number(l.pump_unit_cost || 0));
+    return r;
+  });
+  const csv = [entete, ...rows].map((r) => r.map(echapper).join(',')).join('\r\n');
+  telechargerCsv(`inventaire_${c.numero}_${todayIso()}.csv`, csv);
+}
+
+// ── Fenêtre de comptage (session en cours) ou de consultation (session close) ──
+async function ouvrirSessionInventaire(countId) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  let modifie = false;
+  const fermer = () => { overlay.remove(); if (modifie) renderApp(); };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
+  overlay.innerHTML = `<div class="modal export-modal inventaire-modal"><div class="ui-aide">${trad('Chargement…')}</div></div>`;
+
+  let c = (UI.inventairesPhysiques || []).find((x) => String(x.id) === String(countId));
+  let lignes = [];
+  const gerant = peutGererParametresStock();
+  const peut = peutGererMouvementsStock();
+  const chargerLignes = async () => {
+    const { data, error } = await sb.rpc('lignes_inventaire', { p_count_id: countId });
+    if (error) throw error;
+    lignes = (data || []).map((l) => ({
+      ...l,
+      expected_qty: l.expected_qty == null ? null : Number(l.expected_qty),
+      counted_qty: l.counted_qty == null ? null : Number(l.counted_qty),
+      variation_qty: l.variation_qty == null ? null : Number(l.variation_qty),
+      applied_qty: l.applied_qty == null ? null : Number(l.applied_qty),
+      theoretical_at_count: l.theoretical_at_count == null ? null : Number(l.theoretical_at_count),
+    }));
+  };
+  try {
+    if (!c) {
+      const { data, error } = await sb.from('stock_counts').select('*').eq('id', countId).single();
+      if (error) throw error;
+      c = data;
+    }
+    await chargerLignes();
+  } catch (err) {
+    overlay.querySelector('.modal').innerHTML = `<div class="ui-aide">${esc(trad('Erreur :') + ' ' + (err.message || err))}</div>
+      <div class="modal-actions"><button type="button" class="ui-btn ui-btn-pastille" id="inv-fermer">${trad('Fermer')}</button></div>`;
+    overlay.querySelector('#inv-fermer').addEventListener('click', fermer);
+    return;
+  }
+
+  const ouvert = c.status === 'en_cours';
+  const peutCompter = ouvert && peut;
+  const nombreOuNull = (v) => (v == null || Number.isNaN(v) ? null : v);
+  // Écart affiché : session close → écart calculé par le serveur ; session ouverte → compté − théorique figé (indicatif).
+  const ecartDe = (l) => {
+    if (l.counted_qty == null) return null;
+    if (!ouvert) return nombreOuNull(l.variation_qty);
+    return l.expected_qty == null ? null : l.counted_qty - l.expected_qty;
+  };
+  const ecartHtml = (l) => {
+    if (l.counted_qty == null) return '';
+    const e = ecartDe(l);
+    if (e == null) return `<span class="ui-statut is-ok">${trad('Compté')}</span>`;
+    if (e === 0) return `<span class="ui-statut is-ok">${trad('OK')}</span>`;
+    return `<span class="ui-statut is-retard">${e > 0 ? '+' : '−'}${texteAvecSeparateurs(Math.abs(e))}</span>`;
+  };
+  const unite = (l) => (l.unit_of_measure && l.unit_of_measure !== 'piece' ? ' ' + libelleUniteMesure(l.unit_of_measure) : '');
+  const ligneHtml = (l) => {
+    const theo = ouvert ? l.expected_qty : (l.theoretical_at_count ?? l.expected_qty);
+    const sous = [
+      l.reference, l.location,
+      theo != null ? tR('Théorique : {q}', { q: texteAvecSeparateurs(theo) + unite(l) }) : '',
+      !ouvert && l.applied_qty != null && l.variation_qty != null && l.applied_qty !== l.variation_qty ? tR('Appliqué : {q}', { q: texteAvecSeparateurs(l.applied_qty) }) : '',
+      l.line_status && l.line_status !== 'libere' ? libelleStatutStock(l.line_status) : '',
+    ].filter(Boolean).join(' · ');
+    return `
+      <div class="ui-ligne is-deux inv-ligne" data-inv-part="${esc(l.part_id)}">
+        <div class="ui-ligne-id">
+          <div class="ui-ligne-textes">
+            <span class="ui-ligne-nom">${esc(l.designation || trad('Référence supprimée'))}</span>
+            <span class="ui-ligne-sous">${esc(sous)}</span>
+          </div>
+        </div>
+        <div class="ui-ligne-action">
+          ${peutCompter
+            ? `<input type="number" class="ui-champ inv-qte" step="any" min="0" inputmode="decimal" value="${l.counted_qty == null ? '' : esc(l.counted_qty)}" aria-label="${esc(tR('Quantité comptée : {nom}', { nom: l.designation }))}" placeholder="${esc(trad('Qté'))}">`
+            : `<span class="ui-chiffre-valeur">${l.counted_qty == null ? '—' : texteAvecSeparateurs(l.counted_qty)}</span>`}
+          <span class="inv-ecart">${ecartHtml(l)}</span>
+        </div>
+      </div>`;
+  };
+
+  overlay.querySelector('.modal').outerHTML = `
+    <div class="modal export-modal inventaire-modal" role="dialog" aria-modal="true" aria-labelledby="inv-titre">
+      <h2 id="inv-titre">${esc(titreInventaire(c))} ${statutInventaireHtml(c)}</h2>
+      <p class="sub">${esc(sousTitreInventaire(c))}</p>
+      ${c.blind && ouvert && !gerant ? `<div class="ui-aide">${trad('Comptage en aveugle : les quantités théoriques sont cachées.')}</div>` : ''}
+      <div class="ui-barre">
+        <span class="ui-tag" id="inv-progres"></span>
+        ${peutCompter ? `<button type="button" class="ui-btn ui-btn-pastille" id="inv-scan">${picto('qrcode')}<span>${trad('Scanner une étiquette')}</span></button>` : ''}
+        <button type="button" class="ui-btn ui-btn-pastille" id="inv-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
+      </div>
+      <div class="ui-barre">
+        <input id="inv-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, emplacement…')}">
+        <div class="ui-select-wrap">
+          <select id="inv-vue" class="ui-champ">
+            <option value="">${trad('Toutes les lignes')}</option>
+            <option value="acompter">${trad('À compter')}</option>
+            <option value="comptees">${trad('Comptées')}</option>
+            <option value="ecarts">${trad('Avec écart')}</option>
+          </select>${picto('chevronBas')}
+        </div>
+      </div>
+      ${peutCompter ? `
+      <div class="ui-barre">
+        <div class="ui-select-wrap"><select id="inv-ajout" class="ui-champ" aria-label="${esc(trad('Ajouter un article non prévu'))}"></select>${picto('chevronBas')}</div>
+      </div>` : ''}
+      <div class="ui-liste is-defilant" id="inv-liste"></div>
+      <div class="ui-aide" id="inv-vide"></div>
+      <div id="inv-confirm" hidden></div>
+      <div id="inv-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions" id="inv-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="inv-fermer">${trad('Fermer')}</button>
+        ${ouvert && gerant ? `<button type="button" class="ui-btn ui-btn-pastille is-danger" id="inv-annuler">${trad('Annuler l\'inventaire')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="inv-valider">${picto('coche')}<span>${trad('Valider l\'inventaire')}</span></button>` : ''}
+      </div>
+    </div>`;
+
+  const q = (sel) => overlay.querySelector(sel);
+  const msg = q('#inv-msg');
+  const liste = q('#inv-liste');
+  const dire = (texte, erreur) => { msg.textContent = texte; msg.style.color = erreur ? 'var(--late)' : 'var(--ok)'; };
+  q('#inv-fermer').addEventListener('click', fermer);
+  q('#inv-export').addEventListener('click', () => exporterSessionInventaireCsv(c, lignes));
+
+  const majProgres = () => {
+    const comptees = lignes.filter((l) => l.counted_qty != null).length;
+    q('#inv-progres').textContent = tR('{n} sur {t} comptée(s)', { n: comptees, t: lignes.length });
+  };
+  const majListeAjout = () => {
+    const sel = q('#inv-ajout');
+    if (!sel) return;
+    const presentes = new Set(lignes.map((l) => String(l.part_id)));
+    const dispo = (UI.partsCatalog || []).filter((p) => !presentes.has(String(p.id))).sort((a, b) => a.designation.localeCompare(b.designation));
+    sel.innerHTML = `<option value="">${esc(trad('Ajouter un article non prévu…'))}</option>`
+      + dispo.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' (' + esc(p.reference) + ')' : ''}</option>`).join('');
+  };
+  const dessiner = () => {
+    const terme = (q('#inv-filtre').value || '').trim().toLowerCase();
+    const vue = q('#inv-vue').value;
+    let vues = lignes.filter((l) => {
+      if (terme && ![l.designation, l.reference, l.location].filter(Boolean).join(' ').toLowerCase().includes(terme)) return false;
+      if (vue === 'acompter') return l.counted_qty == null;
+      if (vue === 'comptees') return l.counted_qty != null;
+      if (vue === 'ecarts') { const e = ecartDe(l); return e != null && e !== 0; }
+      return true;
+    });
+    liste.innerHTML = vues.map(ligneHtml).join('');
+    q('#inv-vide').textContent = vues.length ? '' : trad('Aucune ligne pour ce filtre.');
+    majProgres();
+  };
+  majListeAjout();
+  dessiner();
+  q('#inv-filtre').addEventListener('input', dessiner);
+  q('#inv-vue').addEventListener('change', dessiner);
+
+  // Ajout d'un article trouvé sur place alors qu'il n'était pas prévu : ligne locale, créée côté serveur au premier comptage.
+  const ajouterLigneLocale = (partId) => {
+    const p = (UI.partsCatalog || []).find((x) => String(x.id) === String(partId));
+    if (!p) return null;
+    let l = lignes.find((x) => String(x.part_id) === String(partId));
+    if (!l) {
+      l = { id: null, part_id: p.id, reference: p.reference || '', designation: p.designation, unit_of_measure: p.unit_of_measure || 'piece',
+        location: null, line_status: 'libere', expected_qty: null, pump_unit_cost: 0, counted_qty: null, nouvelle: true };
+      lignes.push(l);
+      lignes.sort((a, b) => String(a.location || '').localeCompare(String(b.location || '')) || a.designation.localeCompare(b.designation));
+      majListeAjout();
+    }
+    return l;
+  };
+  const aller = (partId) => {
+    q('#inv-filtre').value = '';
+    q('#inv-vue').value = '';
+    dessiner();
+    const ligneDom = Array.from(liste.querySelectorAll('.inv-ligne')).find((el) => el.getAttribute('data-inv-part') === String(partId));
+    if (!ligneDom) return;
+    ligneDom.scrollIntoView({ block: 'center' });
+    ligneDom.querySelector('.inv-qte')?.focus();
+  };
+  q('#inv-ajout')?.addEventListener('change', (e) => {
+    const l = ajouterLigneLocale(e.target.value);
+    if (l) aller(l.part_id);
+  });
+  q('#inv-scan')?.addEventListener('click', () => {
+    ouvrirScannerQr({
+      titre: trad('Scanner une étiquette'),
+      surTexte: (texte) => {
+        const lue = lireQrLigneStock(texte);
+        if (!lue) return trad('Ce QR code n\'est pas une étiquette de stock KALEA.');
+        const l = ajouterLigneLocale(lue.partId);
+        if (!l) return trad('Pièce introuvable dans le catalogue.');
+        setTimeout(() => aller(l.part_id), 50);
+        return true;
+      },
+    });
+  });
+
+  // Enregistrement d'un comptage dès que la case est quittée (ou Entrée) ; Entrée passe à la ligne suivante.
+  liste.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !e.target.classList.contains('inv-qte')) return;
+    e.preventDefault();
+    const champs = Array.from(liste.querySelectorAll('.inv-qte'));
+    const suivant = champs[champs.indexOf(e.target) + 1];
+    e.target.blur();
+    if (suivant) suivant.focus();
+  });
+  liste.addEventListener('change', async (e) => {
+    const champ = e.target.closest('.inv-qte');
+    if (!champ) return;
+    const ligneDom = champ.closest('.inv-ligne');
+    const l = lignes.find((x) => String(x.part_id) === ligneDom.getAttribute('data-inv-part'));
+    if (!l) return;
+    const brut = champ.value.trim();
+    const qte = brut === '' ? null : Number(brut.replace(',', '.'));
+    if (qte !== null && (!Number.isFinite(qte) || qte < 0)) {
+      dire(trad('La quantité doit être un nombre positif.'), true);
+      champ.value = l.counted_qty == null ? '' : l.counted_qty;
+      return;
+    }
+    champ.disabled = true;
+    try {
+      const { error } = await sb.rpc('enregistrer_comptage', { p_count_id: countId, p_part_id: l.part_id, p_quantity: qte, p_note: null });
+      if (error) throw error;
+      const etaitNouvelle = !!l.nouvelle;
+      l.counted_qty = qte;
+      modifie = true;
+      if (etaitNouvelle) {
+        // La ligne existe maintenant côté serveur : on la relit (théorique, emplacement…).
+        await chargerLignes();
+        majListeAjout();
+        dessiner();
+      } else {
+        ligneDom.querySelector('.inv-ecart').innerHTML = ecartHtml(l);
+        majProgres();
+      }
+      dire('');
+    } catch (err) {
+      dire(trad('Erreur :') + ' ' + (err.message || err), true);
+      champ.value = l.counted_qty == null ? '' : l.counted_qty;
+    } finally {
+      champ.disabled = false;
+    }
+  });
+
+  // ── Annulation et validation (gérant) ──
+  q('#inv-annuler')?.addEventListener('click', async () => {
+    if (!window.confirm(trad('Annuler cet inventaire ? Aucune quantité de stock ne sera modifiée.'))) return;
+    try {
+      const { error } = await sb.rpc('annuler_inventaire', { p_count_id: countId });
+      if (error) throw error;
+      await chargerInventairesPhysiques();
+      showToast(trad('Inventaire annulé'));
+      modifie = true;
+      fermer();
+    } catch (err) {
+      dire(trad('Erreur :') + ' ' + (err.message || err), true);
+    }
+  });
+  q('#inv-valider')?.addEventListener('click', () => {
+    const comptees = lignes.filter((l) => l.counted_qty != null);
+    const nonComptees = lignes.length - comptees.length;
+    const ecarts = comptees.filter((l) => { const e = ecartDe(l); return e != null && e !== 0; }).length;
+    const zone = q('#inv-confirm');
+    zone.hidden = false;
+    q('#inv-actions').hidden = true;
+    zone.innerHTML = `
+      <div class="ui-groupe">
+        <div class="ui-aide"><strong>${trad('Valider cet inventaire ?')}</strong><br>
+          ${tR('{n} ligne(s) comptée(s), dont {e} avec un écart par rapport au théorique figé.', { n: comptees.length, e: ecarts })}
+          ${trad('Chaque écart devient un ajustement de stock, définitif et visible dans les mouvements. Les mouvements saisis pendant le comptage sont pris en compte.')}</div>
+        ${nonComptees ? `<label class="ui-case"><input type="checkbox" id="inv-zero"> ${tR('Traiter les {n} ligne(s) non comptée(s) comme vides (quantité 0)', { n: nonComptees })}</label>` : ''}
+        <div class="modal-actions">
+          <button type="button" class="ui-btn ui-btn-pastille" id="inv-retour">${trad('Retour')}</button>
+          <button type="button" class="ui-btn ui-btn-plein" id="inv-confirmer">${picto('coche')}<span>${trad('Confirmer la validation')}</span></button>
+        </div>
+      </div>`;
+    q('#inv-retour').addEventListener('click', () => { zone.hidden = true; zone.innerHTML = ''; q('#inv-actions').hidden = false; });
+    q('#inv-confirmer').addEventListener('click', async () => {
+      const bouton = q('#inv-confirmer');
+      bouton.disabled = true;
+      try {
+        const { data, error } = await sb.rpc('valider_inventaire', { p_count_id: countId, p_non_comptees_a_zero: !!q('#inv-zero')?.checked });
+        if (error) throw error;
+        await Promise.all([chargerInventairesPhysiques(), rechargerSoldesStock()]);
+        const bilan = Array.isArray(data) ? data[0] : data;
+        showToast(tR('Inventaire validé : {e} ajustement(s)', { e: bilan?.lignes_avec_ecart ?? 0 }));
+        modifie = true;
+        fermer();
+      } catch (err) {
+        dire(trad('Erreur :') + ' ' + (err.message || err), true);
+        bouton.disabled = false;
+      }
+    });
+  });
+}
+
 VIEWS.stock = {
   fondBlanc: true,
   title: trad('Stocks & SAV'),
@@ -3243,6 +3679,7 @@ VIEWS.stock = {
           </div>
           <div class="ui-colonne">
             ${blocInventaireStockHtml()}
+            ${inventairePhysiquePossible() ? blocInventairePhysiqueHtml() : ''}
             ${blocMouvementsStockHtml()}
           </div>
         </div>
@@ -3333,6 +3770,28 @@ VIEWS.stock = {
       const [partId, magasinId] = bouton.getAttribute('data-stock-emplacement').split('|');
       ouvrirModaleEmplacementStock(partId, magasinId);
     });
+
+    // ── Inventaire physique : liste des sessions chargée en asynchrone (jamais au boot). ──
+    if (inventairePhysiquePossible()) {
+      const listeInv = root.querySelector('#invphys-liste');
+      const dessinerInv = () => {
+        if (!listeInv) return;
+        const sessions = UI.inventairesPhysiques || [];
+        listeInv.innerHTML = sessions.length
+          ? sessions.map(ligneInventairePhysiqueHtml).join('')
+          : `<div class="ui-aide">${trad('Aucun inventaire pour l\'instant.')}</div>`;
+      };
+      chargerInventairesPhysiques().then(dessinerInv).catch((err) => {
+        if (listeInv) listeInv.innerHTML = `<div class="ui-aide">${esc(trad('Erreur :') + ' ' + (err.message || err))}</div>`;
+      });
+      root.querySelector('#invphys-nouveau')?.addEventListener('click', () => {
+        ouvrirNouvelInventaire((c) => { renderApp(); ouvrirSessionInventaire(c.id); });
+      });
+      listeInv?.addEventListener('click', (e) => {
+        const bouton = e.target.closest('[data-invphys-ouvrir]');
+        if (bouton) ouvrirSessionInventaire(bouton.getAttribute('data-invphys-ouvrir'));
+      });
+    }
 
     // ── Magasins : CRUD réservé au gérant, même patron que le catalogue
     // de pièces TCO (formulaire unique ajout/édition). ──

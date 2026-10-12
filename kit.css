@@ -1431,3 +1431,18 @@ textarea:not([data-x]),
   /* fiche machine › « Voir le plan » : « Enregistrer une intervention » (bouton plein) à 14 px comme les autres */
   .fm-toolbar .fm-btn-primary{font-size:14px;}
 }
+
+/* Stock › Inventaire : fenêtre de comptage (une ligne = article à gauche, quantité comptée + écart à droite) */
+.inventaire-modal{width:min(720px,94vw);}
+.inventaire-modal h2 .ui-statut{margin-left:8px;vertical-align:middle;}
+.inventaire-modal .ui-barre{margin-top:10px;}
+.inventaire-modal .ui-barre .ui-select-wrap{flex:0 1 220px;}
+.inventaire-modal .ui-barre:has(#inv-ajout) .ui-select-wrap{flex:1 1 100%;}
+.inventaire-modal .inv-qte{width:104px;flex:0 0 auto;text-align:right;}
+.inventaire-modal .inv-ecart{min-width:56px;display:inline-flex;justify-content:flex-end;}
+.inventaire-modal .ui-liste.is-defilant{margin-top:10px;}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .inventaire-modal .inv-qte{width:84px;}
+  .inventaire-modal .ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto;}
+  .inventaire-modal .ui-ligne.is-deux .ui-ligne-action{justify-content:flex-end;}
+}
