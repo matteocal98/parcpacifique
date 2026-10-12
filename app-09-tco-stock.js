@@ -3758,11 +3758,27 @@ function ligneFournisseurHtml(f) {
       </div>` : ''}
     </div>`;
 }
-function listeFournisseursHtml() {
+// Normalise pour la recherche : sans accents ni majuscules.
+function formeRecherche(texte) { return String(texte || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function fournisseursFiltres() {
+  const terme = formeRecherche(UI.stockRechercheFournisseurs).trim();
   const liste = UI.suppliers || [];
+  if (!terme) return liste;
+  const mots = terme.split(/\s+/).filter(Boolean);
+  return liste.filter((f) => {
+    const botte = formeRecherche([
+      f.name, f.legal_name, f.contact_name, f.phone, f.email, f.po_email, f.city, f.company_number, f.note,
+      ...piecesDuFournisseur(f.id).map((p) => [p.designation, p.reference].filter(Boolean).join(' ')),
+    ].filter(Boolean).join(' '));
+    return mots.every((m) => botte.includes(m));
+  });
+}
+function listeFournisseursHtml() {
+  const liste = fournisseursFiltres();
+  if (!(UI.suppliers || []).length) return `<div class="ui-aide">${trad('Aucun fournisseur pour l\'instant.')}</div>`;
   return liste.length
     ? liste.map(ligneFournisseurHtml).join('')
-    : `<div class="ui-aide">${trad('Aucun fournisseur pour l\'instant.')}</div>`;
+    : `<div class="ui-aide">${trad('Aucun fournisseur ne correspond à cette recherche.')}</div>`;
 }
 function blocFournisseursStockHtml() {
   const gerant = peutGererParametresStock();
@@ -3772,6 +3788,7 @@ function blocFournisseursStockHtml() {
         `<span class="ui-tag" id="stock-fournisseurs-badge">${tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length })}</span>${gerant ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-fournisseur-nouveau">${picto('plusCercle')}<span>${trad('Nouveau fournisseur')}</span></button>` : ''}`)}
       <div class="ui-section-corps">
         ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant.')}</div>`}
+        <div class="ui-barre"><input id="stock-fournisseur-recherche" class="ui-champ" type="search" value="${esc(UI.stockRechercheFournisseurs || '')}" placeholder="${esc(trad('Rechercher un fournisseur (nom, contact, ville, pièce…)'))}" aria-label="${esc(trad('Rechercher un fournisseur'))}"></div>
         <div class="ui-liste is-defilant" id="stock-fournisseurs-liste">${listeFournisseursHtml()}</div>
       </div>
     </section>`;
@@ -4292,6 +4309,378 @@ async function rattacherFournisseursImport(lignes) {
   });
 }
 
+// ── Achats : bon de commande suggéré ──────────────────────────────────────────
+// Rien n'est enregistré en base à ce stade : l'écran CALCULE ce qu'il faut commander (aucune donnée inventée) et
+// prépare un bon par fournisseur, à imprimer / envoyer. Le suivi des commandes et leur réception viendront ensuite.
+//
+// Règle de calcul, par pièce du catalogue (tous magasins confondus, stock « libéré » seulement) :
+//   demande prévue  = la plus grande de deux estimations (jamais leur somme : les sorties passées contiennent déjà
+//                      la consommation des entretiens, on ne compte pas deux fois)
+//                       · besoin des entretiens à venir (kits reliés aux plans, sur l'horizon choisi)
+//                       · rythme de sortie observé (sorties de stock — ventes de pièces comprises — sur la fenêtre
+//                         choisie, ramené à l'horizon)
+//   à commander     = demande prévue + seuil de réapprovisionnement − stock disponible (arrondi à l'unité supérieure)
+//   urgence         = jours de couverture du stock comparés au délai d'appro (+ marge de sécurité), ou état de
+//                     couverture des entretiens (même logique que « Besoins à risque »).
+const PARAMS_ACHATS_DEFAUT = { horizon: 60, fenetre: 90, securite: 7, rythme: true };
+function paramsAchats() {
+  UI.achatsParams = { ...PARAMS_ACHATS_DEFAUT, ...(UI.achatsParams || {}) };
+  return UI.achatsParams;
+}
+function nombrePositif(valeur, defaut) {
+  const n = Number(String(valeur ?? '').replace(/\s/g, '').replace(',', '.'));
+  return Number.isFinite(n) && n >= 0 ? n : defaut;
+}
+// Sorties de stock des N derniers jours, cumulées par pièce (chargées à la demande, jamais au démarrage).
+let sortiesAchats = { fenetre: null, donnees: null, erreur: null };
+async function chargerSortiesAchats(fenetre) {
+  if (sortiesAchats.donnees && sortiesAchats.fenetre === fenetre) return sortiesAchats.donnees;
+  const depuis = new Date(Date.now() - fenetre * 86400000).toISOString();
+  const { data, error } = await sb.from('stock_movements')
+    .select('part_id, quantity, type, performed_at')
+    .eq('company_id', UI.companyId)
+    .eq('type', 'sortie')
+    .gte('performed_at', depuis)
+    .limit(5000);
+  if (error) { sortiesAchats = { fenetre: null, donnees: null, erreur: error.message }; throw error; }
+  const parPiece = new Map();
+  (data || []).forEach((m) => {
+    const id = String(m.part_id);
+    parPiece.set(id, (parPiece.get(id) || 0) + Math.abs(Number(m.quantity) || 0));
+  });
+  sortiesAchats = { fenetre, donnees: parPiece, erreur: null };
+  return parPiece;
+}
+function calculerSuggestionsAchat(params, sorties) {
+  const { horizon, fenetre, securite } = params;
+  const entretiens = new Map();
+  if (SCHEMA.hasKits) {
+    const prep = listePreparation(UI.machines, horizon);
+    (prep.produits || []).forEach((p) => {
+      if (!p.partId || !p.stockCouverture) return;
+      const id = String(p.partId);
+      const avant = entretiens.get(id) || { besoin: 0, etat: 'ok', date: null };
+      const gravite = { late: 0, soon: 1, inconnu: 2, ok: 3 };
+      entretiens.set(id, {
+        besoin: avant.besoin + (Number(p.total) || 0),
+        etat: (gravite[p.stockCouverture.state] ?? 9) < (gravite[avant.etat] ?? 9) ? p.stockCouverture.state : avant.etat,
+        date: [avant.date, p.premiereDate].filter(Boolean).sort()[0] || null,
+      });
+    });
+  }
+  const lignes = [];
+  (UI.partsCatalog || []).forEach((piece) => {
+    const id = String(piece.id);
+    const stock = (UI.stockItems || [])
+      .filter((it) => String(it.part_id) === id && statutLigneStock(it) === 'libere')
+      .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+    const e = entretiens.get(id) || { besoin: 0, etat: 'ok', date: null };
+    const taux = params.rythme && sorties ? (sorties.get(id) || 0) / fenetre : 0;
+    const demandeRythme = taux * horizon;
+    const demande = Math.max(e.besoin, demandeRythme);
+    const seuil = Number(piece.default_reorder_point) || 0;
+    const manque = demande + seuil - stock;
+    const aCommander = manque > 0 ? Math.ceil(manque) : 0;
+    if (!aCommander) return;
+    const fournisseur = piece.supplier_id ? fournisseurParId(piece.supplier_id) : (piece.supplier_name ? fournisseurParNom(piece.supplier_name) : null);
+    const delai = piece.avg_lead_time_days != null ? Number(piece.avg_lead_time_days) : (fournisseur && fournisseur.lead_time_days != null ? Number(fournisseur.lead_time_days) : null);
+    const jours = taux > 0 ? stock / taux : null;
+    const raisons = [];
+    if (e.besoin > stock) raisons.push('entretien');
+    if (taux > 0 && demandeRythme > stock) raisons.push('rythme');
+    if (seuil > 0 && stock <= seuil) raisons.push('seuil');
+    if (!raisons.length) raisons.push('seuil');
+    let urgence = 'ok';
+    if (jours != null) {
+      if (delai != null) urgence = jours <= delai ? 'late' : (jours <= delai + securite ? 'soon' : 'ok');
+      else if (jours <= securite) urgence = 'soon';
+    }
+    if (e.etat === 'late') urgence = 'late';
+    else if (e.etat === 'soon' && urgence !== 'late') urgence = 'soon';
+    if (stock <= 0 && demande > 0) urgence = 'late';
+    lignes.push({
+      id, piece, fournisseur, delai, stock, taux, jours, seuil,
+      besoinEntretien: e.besoin, dateEntretien: e.date, demande, aCommander, raisons, urgence,
+    });
+  });
+  const gravite = { late: 0, soon: 1, ok: 2 };
+  lignes.sort((a, b) => gravite[a.urgence] - gravite[b.urgence] || a.piece.designation.localeCompare(b.piece.designation));
+  return lignes;
+}
+const LIBELLE_URGENCE_ACHAT = () => ({ late: trad('Urgent'), soon: trad('Bientôt'), ok: trad('À prévoir') });
+const LIBELLE_RAISON_ACHAT = () => ({ entretien: trad('Entretiens'), rythme: trad('Rythme de sortie'), seuil: trad('Sous le seuil') });
+function quantiteAchat(ligne) {
+  const saisie = (UI.achatsQuantites || {})[ligne.id];
+  return saisie != null ? saisie : ligne.aCommander;
+}
+function ligneEstInclue(ligne) { return !(UI.achatsExclus || new Set()).has(ligne.id); }
+function groupesAchat(lignes) {
+  const groupes = new Map();
+  lignes.forEach((l) => {
+    const cle = l.fournisseur ? String(l.fournisseur.id) : (l.piece.supplier_name ? 'nom:' + l.piece.supplier_name : 'aucun');
+    if (!groupes.has(cle)) groupes.set(cle, { cle, fournisseur: l.fournisseur, nom: l.fournisseur ? l.fournisseur.name : (l.piece.supplier_name || trad('Sans fournisseur')), lignes: [] });
+    groupes.get(cle).lignes.push(l);
+  });
+  const gravite = { late: 0, soon: 1, ok: 2 };
+  return [...groupes.values()].sort((a, b) => {
+    const ga = Math.min(...a.lignes.map((l) => gravite[l.urgence]));
+    const gb = Math.min(...b.lignes.map((l) => gravite[l.urgence]));
+    return ga - gb || a.nom.localeCompare(b.nom);
+  });
+}
+function totalLigneAchat(ligne) {
+  return nombrePositif(quantiteAchat(ligne), 0) * (Number(ligne.piece.unit_price) || 0);
+}
+function ligneAchatHtml(l) {
+  const urg = LIBELLE_URGENCE_ACHAT();
+  const rai = LIBELLE_RAISON_ACHAT();
+  const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[l.urgence];
+  const faits = [
+    tR('Stock : {n}', { n: texteAvecSeparateurs(l.stock) }),
+    l.besoinEntretien ? tR('Entretiens : {n}', { n: texteAvecSeparateurs(l.besoinEntretien) }) : '',
+    l.taux > 0 ? tR('Sorties : {n}/j', { n: texteAvecSeparateurs(Math.round(l.taux * 100) / 100) }) : '',
+    l.jours != null ? tR('Couverture : {n} j', { n: Math.round(l.jours) }) : '',
+    l.delai != null ? tR('Délai : {n} j', { n: l.delai }) : '',
+  ].filter(Boolean).join(' · ');
+  const inclus = ligneEstInclue(l);
+  return `
+    <div class="achats-ligne ${classe}${inclus ? '' : ' is-exclue'}" data-achats-ligne="${esc(l.id)}">
+      <label class="achats-case"><input type="checkbox" data-achats-inclure="${esc(l.id)}"${inclus ? ' checked' : ''} aria-label="${esc(tR('Inclure {nom} dans le bon', { nom: l.piece.designation }))}"></label>
+      <div class="achats-textes">
+        <span class="ui-ligne-nom">${esc(l.piece.designation)}${l.piece.packaging ? `<span class="ui-tag">${esc(l.piece.packaging)}</span>` : ''}</span>
+        <span class="ui-ligne-sous">${esc([l.piece.reference || trad('Sans référence'), l.piece.ean ? 'EAN ' + l.piece.ean : ''].filter(Boolean).join(' · '))}</span>
+        <span class="ui-ligne-sous">${esc(faits)}</span>
+        <span class="achats-badges"><span class="ui-statut ${classe}">${esc(urg[l.urgence])}</span>${l.raisons.map((r) => `<span class="ui-tag">${esc(rai[r])}</span>`).join('')}</span>
+      </div>
+      <div class="achats-qte">
+        <label class="sr-only" for="achats-qte-${esc(l.id)}">${trad('Quantité à commander')}</label>
+        <input id="achats-qte-${esc(l.id)}" class="ui-champ" type="text" inputmode="decimal" data-achats-qte="${esc(l.id)}" value="${esc(String(quantiteAchat(l)))}">
+        <span class="ui-ligne-sous" data-achats-total="${esc(l.id)}">${l.piece.unit_price ? esc(texteAvecSeparateurs(totalLigneAchat(l)) + ' ' + deviseCourte()) : '—'}</span>
+      </div>
+    </div>`;
+}
+function groupeAchatHtml(g) {
+  const delaiMax = Math.max(0, ...g.lignes.map((l) => l.delai || 0));
+  return `
+    <div class="achats-groupe" data-achats-groupe="${esc(g.cle)}">
+      <div class="achats-groupe-tete">
+        <div class="achats-groupe-titre">
+          <span class="ui-section-icone">${picto('mallette')}</span>
+          <span><strong>${esc(g.nom)}</strong>${delaiMax ? `<span class="ui-ligne-sous">${tR('Délai habituel : {n} j', { n: delaiMax })}</span>` : ''}</span>
+        </div>
+        <span class="achats-groupe-total ui-chiffre-valeur" data-achats-groupe-total="${esc(g.cle)}"></span>
+        <button type="button" class="ui-btn ui-btn-plein" data-achats-bon="${esc(g.cle)}">${picto('export')}<span>${trad('Préparer le bon')}</span></button>
+      </div>
+      <div class="achats-lignes">${g.lignes.map(ligneAchatHtml).join('')}</div>
+    </div>`;
+}
+function blocAchatsHtml() {
+  const p = paramsAchats();
+  return `
+    <section class="ui-section" id="achats-section">
+      ${teteSectionKit('boite', trad('Bon de commande suggéré'), trad('Pièces à commander d\'après les échéances d\'entretien à venir et le rythme de sortie du stock (ventes de pièces comprises).'),
+        `<span class="ui-tag" id="achats-badge"></span>`)}
+      <div class="ui-section-corps">
+        <div class="achats-params">
+          <div class="ui-champ-groupe"><label for="achats-horizon">${trad('Prévoir sur (jours)')}</label><input id="achats-horizon" class="ui-champ" type="text" inputmode="numeric" value="${p.horizon}"></div>
+          <div class="ui-champ-groupe"><label for="achats-fenetre">${trad('Rythme observé sur (jours)')}</label><input id="achats-fenetre" class="ui-champ" type="text" inputmode="numeric" value="${p.fenetre}"></div>
+          <div class="ui-champ-groupe"><label for="achats-securite">${trad('Marge de sécurité (jours)')}</label><input id="achats-securite" class="ui-champ" type="text" inputmode="numeric" value="${p.securite}"></div>
+        </div>
+        <label class="ui-case achats-rythme"><input type="checkbox" id="achats-rythme"${p.rythme ? ' checked' : ''}> ${trad('Tenir compte du rythme de sortie du stock (ventes de pièces détachées comprises)')}</label>
+        <div class="ui-aide">${trad('La quantité proposée couvre la plus grande des deux estimations (entretiens à venir ou rythme de sortie), plus le seuil de réapprovisionnement, moins le stock disponible. Chaque quantité reste modifiable.')}</div>
+        <div id="achats-resume" class="ui-aide" role="status" aria-live="polite"></div>
+        <div id="achats-contenu"><div class="ui-aide">${trad('Chargement…')}</div></div>
+      </div>
+    </section>`;
+}
+function resumeAchats(lignes) {
+  const incluses = lignes.filter(ligneEstInclue);
+  const total = incluses.reduce((s, l) => s + totalLigneAchat(l), 0);
+  const nbFourn = new Set(incluses.map((l) => (l.fournisseur ? l.fournisseur.id : l.piece.supplier_name || 'aucun'))).size;
+  return incluses.length
+    ? tR('{n} pièce(s) à commander chez {f} fournisseur(s) · total estimé {t}', { n: incluses.length, f: nbFourn, t: texteAvecSeparateurs(total) + ' ' + deviseCourte() })
+    : trad('Rien à commander avec ces réglages.');
+}
+function majTotauxAchats(root, lignes) {
+  lignes.forEach((l) => {
+    const el = root.querySelector(`[data-achats-total="${CSS.escape(l.id)}"]`);
+    if (el) el.textContent = l.piece.unit_price ? texteAvecSeparateurs(totalLigneAchat(l)) + ' ' + deviseCourte() : '—';
+  });
+  groupesAchat(lignes).forEach((g) => {
+    const el = root.querySelector(`[data-achats-groupe-total="${CSS.escape(g.cle)}"]`);
+    const total = g.lignes.filter(ligneEstInclue).reduce((s, l) => s + totalLigneAchat(l), 0);
+    if (el) el.textContent = total ? texteAvecSeparateurs(total) + ' ' + deviseCourte() : '';
+  });
+  const resume = root.querySelector('#achats-resume');
+  if (resume) resume.textContent = resumeAchats(lignes);
+}
+async function rafraichirAchats(root) {
+  const zone = root.querySelector('#achats-contenu');
+  if (!zone) return;
+  const p = paramsAchats();
+  let sorties = null;
+  let avertissement = '';
+  if (p.rythme) {
+    try { sorties = await chargerSortiesAchats(p.fenetre); } catch (err) { avertissement = trad('Rythme de sortie indisponible (lecture des mouvements impossible) : seuls les entretiens et les seuils sont pris en compte.'); }
+  }
+  if (!root.isConnected || !zone.isConnected) return;
+  const lignes = calculerSuggestionsAchat(p, sorties);
+  root._lignesAchats = lignes;
+  const badge = root.querySelector('#achats-badge');
+  if (badge) badge.textContent = tR('{n} pièce(s)', { n: lignes.length });
+  zone.innerHTML = (avertissement ? `<div class="ui-aide is-late">${esc(avertissement)}</div>` : '')
+    + (lignes.length ? groupesAchat(lignes).map(groupeAchatHtml).join('') : `<div class="ui-aide">${trad('Rien à commander avec ces réglages.')}</div>`);
+  majTotauxAchats(root, lignes);
+}
+function cablerAchats(root) {
+  if (!root.querySelector('#achats-section')) return;
+  const relire = () => {
+    const p = paramsAchats();
+    p.horizon = Math.max(1, Math.round(nombrePositif(root.querySelector('#achats-horizon').value, p.horizon)));
+    p.fenetre = Math.max(1, Math.round(nombrePositif(root.querySelector('#achats-fenetre').value, p.fenetre)));
+    p.securite = Math.round(nombrePositif(root.querySelector('#achats-securite').value, p.securite));
+    p.rythme = root.querySelector('#achats-rythme').checked;
+    rafraichirAchats(root);
+  };
+  let minuterie = null;
+  ['#achats-horizon', '#achats-fenetre', '#achats-securite'].forEach((sel) => {
+    root.querySelector(sel).addEventListener('input', () => { clearTimeout(minuterie); minuterie = setTimeout(relire, 500); });
+  });
+  root.querySelector('#achats-rythme').addEventListener('change', relire);
+  const zone = root.querySelector('#achats-contenu');
+  zone.addEventListener('input', (e) => {
+    const champ = e.target.closest('[data-achats-qte]');
+    if (!champ) return;
+    (UI.achatsQuantites = UI.achatsQuantites || {})[champ.getAttribute('data-achats-qte')] = champ.value;
+    majTotauxAchats(root, root._lignesAchats || []);
+  });
+  zone.addEventListener('change', (e) => {
+    const case_ = e.target.closest('[data-achats-inclure]');
+    if (!case_) return;
+    UI.achatsExclus = UI.achatsExclus || new Set();
+    const id = case_.getAttribute('data-achats-inclure');
+    if (case_.checked) UI.achatsExclus.delete(id); else UI.achatsExclus.add(id);
+    case_.closest('.achats-ligne')?.classList.toggle('is-exclue', !case_.checked);
+    majTotauxAchats(root, root._lignesAchats || []);
+  });
+  zone.addEventListener('click', (e) => {
+    const bon = e.target.closest('[data-achats-bon]');
+    if (!bon) return;
+    const g = groupesAchat(root._lignesAchats || []).find((x) => x.cle === bon.getAttribute('data-achats-bon'));
+    if (g) ouvrirBonDeCommande(g);
+  });
+  rafraichirAchats(root);
+}
+// ── Bon de commande : aperçu, impression / PDF, copie, e-mail ──
+function lignesDuBon(g) {
+  return g.lignes.filter(ligneEstInclue)
+    .map((l) => ({ l, qte: nombrePositif(quantiteAchat(l), 0) }))
+    .filter((x) => x.qte > 0);
+}
+function referenceBon(g) {
+  const d = new Date();
+  const jour = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  const sigle = String(g.nom || 'X').normalize('NFD').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'X';
+  return `BC-${jour}-${sigle}`;
+}
+function texteBonDeCommande(g, infos) {
+  const f = g.fournisseur;
+  const lignes = lignesDuBon(g);
+  const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
+  const devise = deviseCourte();
+  return [
+    `${trad('BON DE COMMANDE')} ${infos.reference}`,
+    `${trad('Date')} : ${formatShortDate(todayIso())}`,
+    `${trad('De')} : ${UI.companyName || ''}`,
+    `${trad('À')} : ${g.nom}${f && f.contact_name ? ' — ' + f.contact_name : ''}`,
+    infos.livraison ? `${trad('Livraison souhaitée')} : ${formatShortDate(infos.livraison)}` : '',
+    infos.adresse ? `${trad('Adresse de livraison')} : ${infos.adresse}` : '',
+    '',
+    ...lignes.map((x) => `- ${x.qte} × ${x.l.piece.designation}${x.l.piece.reference ? ' (' + x.l.piece.reference + ')' : ''}${x.l.piece.packaging ? ' [' + x.l.piece.packaging + ']' : ''}${x.l.piece.unit_price ? ' — ' + texteAvecSeparateurs(Number(x.l.piece.unit_price)) + ' ' + devise : ''}`),
+    '',
+    total ? `${trad('Total estimé')} : ${texteAvecSeparateurs(total)} ${devise}` : '',
+    infos.note ? `${trad('Note')} : ${infos.note}` : '',
+  ].filter((ligne, i, tab) => ligne !== '' || (tab[i - 1] !== '' && i > 0)).join('\n');
+}
+function documentBonDeCommandeHtml(g, infos) {
+  const f = g.fournisseur;
+  const lignes = lignesDuBon(g);
+  const devise = deviseCourte();
+  const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
+  const adresseFourn = f ? [f.legal_name && f.legal_name !== f.name ? f.legal_name : '', f.address, [f.postal_code, f.city].filter(Boolean).join(' '), f.country].filter(Boolean) : [];
+  const contact = f ? [f.contact_name, f.phone, f.po_email || f.email].filter(Boolean) : [];
+  const css = `body{font-family:Arial,Helvetica,sans-serif;color:#18181B;margin:28px;font-size:13px}h1{margin:0 0 4px;font-size:22px}.sous{color:#555;margin-bottom:18px}.cartes{display:flex;gap:24px;margin-bottom:18px}.carte{flex:1;border:1px solid #ccc;border-radius:4px;padding:10px 12px;line-height:1.5}.carte b{display:block;margin-bottom:4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#555}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ddd;padding:7px 6px;text-align:left}th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#555}td.n,th.n{text-align:right;white-space:nowrap}.total{margin-top:14px;text-align:right;font-size:15px;font-weight:700}.note{margin-top:16px;line-height:1.5}`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(trad('Bon de commande'))} ${esc(infos.reference)}</title><style>${css}</style></head><body>
+    <h1>${esc(trad('Bon de commande'))} ${esc(infos.reference)}</h1>
+    <div class="sous">${esc(trad('Date'))} : ${esc(formatShortDate(todayIso()))}${infos.livraison ? ' · ' + esc(trad('Livraison souhaitée')) + ' : ' + esc(formatShortDate(infos.livraison)) : ''}</div>
+    <div class="cartes">
+      <div class="carte"><b>${esc(trad('Commandé par'))}</b>${esc(UI.companyName || '')}${infos.adresse ? '<br>' + esc(infos.adresse) : ''}</div>
+      <div class="carte"><b>${esc(trad('Fournisseur'))}</b>${esc(g.nom)}${adresseFourn.map((l) => '<br>' + esc(l)).join('')}${contact.map((l) => '<br>' + esc(l)).join('')}</div>
+    </div>
+    <table><thead><tr><th>${esc(trad('Référence'))}</th><th>${esc(trad('Désignation'))}</th><th class="n">${esc(trad('Qté'))}</th><th class="n">${esc(trad('Prix unitaire'))}</th><th class="n">${esc(trad('Total'))}</th></tr></thead><tbody>
+      ${lignes.map((x) => `<tr><td>${esc(x.l.piece.reference || '—')}</td><td>${esc(x.l.piece.designation)}${x.l.piece.packaging ? ' <small>(' + esc(x.l.piece.packaging) + ')</small>' : ''}</td><td class="n">${esc(texteAvecSeparateurs(x.qte))}</td><td class="n">${x.l.piece.unit_price ? esc(texteAvecSeparateurs(Number(x.l.piece.unit_price)) + ' ' + devise) : '—'}</td><td class="n">${x.l.piece.unit_price ? esc(texteAvecSeparateurs(x.qte * Number(x.l.piece.unit_price)) + ' ' + devise) : '—'}</td></tr>`).join('')}
+    </tbody></table>
+    ${total ? `<div class="total">${esc(trad('Total estimé'))} : ${esc(texteAvecSeparateurs(total))} ${esc(devise)}</div>` : ''}
+    ${infos.note ? `<div class="note"><b>${esc(trad('Note'))} :</b> ${esc(infos.note)}</div>` : ''}
+    ${f && f.payment_terms ? `<div class="note"><b>${esc(trad('Conditions de paiement'))} :</b> ${esc(f.payment_terms)}</div>` : ''}
+  </body></html>`;
+}
+function ouvrirBonDeCommande(g) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const f = g.fournisseur;
+  const emailDest = f ? (f.po_email || f.email || '') : '';
+  overlay.innerHTML = `
+    <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="bon-titre">
+      <h2 id="bon-titre">${trad('Bon de commande')} — ${esc(g.nom)}</h2>
+      <p class="sub">${trad('Vérifie le bon, puis imprime-le (ou enregistre-le en PDF), copie-le ou envoie-le par e-mail. Il n\'est pas encore enregistré dans l\'application.')}</p>
+      <div class="ui-champ-groupe">
+        <label for="bon-ref"><strong>${trad('Référence du bon')}</strong></label>
+        <input id="bon-ref" class="ui-champ" maxlength="40" value="${esc(referenceBon(g))}">
+        <label for="bon-livraison"><strong>${trad('Livraison souhaitée')}</strong></label>
+        <input id="bon-livraison" class="ui-champ" type="date">
+        <label for="bon-adresse"><strong>${trad('Adresse de livraison')}</strong></label>
+        <input id="bon-adresse" class="ui-champ" maxlength="160" placeholder="${esc(trad('Facultatif'))}">
+        <label for="bon-note"><strong>${trad('Note pour le fournisseur')}</strong></label>
+        <input id="bon-note" class="ui-champ" maxlength="200" placeholder="${esc(trad('Facultatif'))}">
+      </div>
+      <div class="achats-bon-apercu" id="bon-apercu"></div>
+      <div id="bon-msg" class="ui-aide" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-annuler">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-email"${emailDest ? '' : ' hidden'}>${picto('mail')}<span>${trad('E-mail')}</span></button>
+        <button type="button" class="ui-btn ui-btn-plein" id="bon-imprimer">${picto('export')}<span>${trad('Imprimer / PDF')}</span></button>
+      </div>
+    </div>`;
+  ajouterCroixModale(overlay);
+  const q = (s) => overlay.querySelector(s);
+  const infos = () => ({ reference: q('#bon-ref').value.trim() || referenceBon(g), livraison: q('#bon-livraison').value, adresse: q('#bon-adresse').value.trim(), note: q('#bon-note').value.trim() });
+  const apercu = () => {
+    const lignes = lignesDuBon(g);
+    const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
+    q('#bon-apercu').innerHTML = lignes.length
+      ? `<table class="achats-bon-table"><tbody>${lignes.map((x) => `<tr><td>${esc(x.l.piece.designation)}${x.l.piece.reference ? `<span class="ui-ligne-sous">${esc(x.l.piece.reference)}</span>` : ''}</td><td class="n">${esc(texteAvecSeparateurs(x.qte))}</td></tr>`).join('')}</tbody></table>${total ? `<div class="achats-bon-total">${trad('Total estimé')} : ${esc(texteAvecSeparateurs(total))} ${esc(deviseCourte())}</div>` : ''}`
+      : `<div class="ui-aide is-late">${trad('Aucune ligne à commander : coche au moins une pièce avec une quantité.')}</div>`;
+    ['#bon-imprimer', '#bon-copier', '#bon-email'].forEach((s) => { const b = q(s); if (b) b.disabled = !lignes.length; });
+  };
+  apercu();
+  q('#bon-annuler').addEventListener('click', () => overlay.remove());
+  q('#bon-imprimer').addEventListener('click', () => imprimerDocumentHtml(documentBonDeCommandeHtml(g, infos())));
+  q('#bon-copier').addEventListener('click', async () => {
+    const texte = texteBonDeCommande(g, infos());
+    try { await navigator.clipboard.writeText(texte); q('#bon-msg').textContent = trad('Bon copié dans le presse-papiers.'); }
+    catch (e) { q('#bon-msg').textContent = trad('Copie impossible sur cet appareil : utilise « Imprimer / PDF ».'); }
+  });
+  q('#bon-email')?.addEventListener('click', () => {
+    const i = infos();
+    const sujet = `${trad('Bon de commande')} ${i.reference} — ${UI.companyName || ''}`;
+    window.location.href = `mailto:${encodeURIComponent(emailDest)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(texteBonDeCommande(g, i))}`;
+  });
+}
+
 // ── Onglets du menu Stock ── la page regroupait 9 blocs sur 4 écrans : on la
 // découpe par USAGE (consulter / bouger / compter / régler). L'onglet choisi
 // est gardé dans UI.stockOnglet pour survivre aux renderApp().
@@ -4300,6 +4689,7 @@ function stockOngletsDisponibles() {
   if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Aperçu'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
   liste.push({ id: 'pieces', libelle: trad('Pièces'), picto: 'boite', aide: trad('Ce qu\'il y a en stock, magasin par magasin, et le catalogue des références.') });
   liste.push({ id: 'mouvements', libelle: trad('Mouvements'), picto: 'calendrier', aide: trad('Entrées, sorties, transferts et ajustements.') });
+  if (SCHEMA.hasStock && peutGererMouvementsStock()) liste.push({ id: 'achats', libelle: trad('Commandes'), picto: 'export', aide: trad('Bon de commande suggéré : les pièces à commander avant la rupture.') });
   if (inventairePhysiquePossible()) liste.push({ id: 'inventaire', libelle: trad('Inventaire'), picto: 'coche', aide: trad('Compter le stock réel et régulariser les écarts.') });
   liste.push({ id: 'organisation', libelle: trad('Réglages'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
   return liste;
@@ -4363,6 +4753,7 @@ VIEWS.stock = {
           <div class="stock-pieces-vue" data-stock-pieces-bloc="stock"${piecesActives === 'stock' ? '' : ' hidden'}>${blocInventaireStockHtml()}</div>
           <div class="stock-pieces-vue" data-stock-pieces-bloc="catalogue"${piecesActives === 'catalogue' ? '' : ' hidden'}>${blocCatalogueTcoHtml()}</div>`)}
         ${panneau('mouvements', blocMouvementsStockHtml())}
+        ${onglets.some((o) => o.id === 'achats') ? panneau('achats', blocAchatsHtml()) : ''}
         ${inventairePhysiquePossible() ? panneau('inventaire', blocInventairePhysiqueHtml()) : ''}
         ${panneau('organisation', `
           ${blocMagasinsStockHtml()}
@@ -4445,6 +4836,7 @@ VIEWS.stock = {
     // câblage que sur la page TCO pour les autres paliers — voir
     // cablerCatalogueTco() et VIEWS.tco.mount().
     cablerCatalogueTco(root);
+    cablerAchats(root);
 
     // ── Inventaire : filtre magasin + recherche, entièrement en mémoire
     // (UI.stockItems déjà chargé au boot — jamais un second fetch ici). ──
@@ -4484,6 +4876,13 @@ VIEWS.stock = {
 
     // ── Fournisseurs : création / modification / suppression (gérant). ──
     if (fournisseursActifs()) {
+      root.querySelector('#stock-fournisseur-recherche')?.addEventListener('input', (e) => {
+        UI.stockRechercheFournisseurs = e.target.value;
+        const zone = root.querySelector('#stock-fournisseurs-liste');
+        if (zone) zone.innerHTML = listeFournisseursHtml();
+        const badge = root.querySelector('#stock-fournisseurs-badge');
+        if (badge) badge.textContent = UI.stockRechercheFournisseurs ? tR('{a} / {n} fournisseur(s)', { a: fournisseursFiltres().length, n: (UI.suppliers || []).length }) : tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length });
+      });
       root.querySelector('#stock-fournisseur-nouveau')?.addEventListener('click', () => ouvrirEditionFournisseur(null));
       root.querySelector('#stock-fournisseurs-liste')?.addEventListener('click', (e) => {
         const modifier = e.target.closest('[data-fournisseur-modifier]');
