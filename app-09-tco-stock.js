@@ -3991,25 +3991,22 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
     </details>`;
   const colonnes = [0, 1].map((n) => sections.filter((s) => s.colonne === n));
   overlay.innerHTML = `
-    <div class="modal fournisseur-modal" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
-      <header class="fo-hero">
-        <span class="fo-avatar" id="fo-avatar">${esc(initialesFournisseur(f?.name))}</span>
-        <div class="fo-hero-textes">
-          <h2 id="fo-titre">${f ? esc(f.name) : trad('Nouveau fournisseur')}</h2>
-          <p id="fo-hero-sous">${f ? esc([f.legal_name, f.city].filter(Boolean).join(' · ')) : trad('Remplis ce que tu connais : le reste peut venir plus tard.')}</p>
-        </div>
+    <div class="modal export-modal fournisseur-modal a-croix" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
+      <header class="fo-entete">
+        <h2 id="fo-titre">${f ? esc(f.name) : trad('Nouveau fournisseur')}</h2>
+        <p class="sub" id="fo-hero-sous">${f ? esc([f.legal_name, f.city].filter(Boolean).join(' · ')) : trad('Remplis ce que tu connais : le reste peut venir plus tard.')}</p>
         <div class="fo-completude" title="${esc(trad('Part des informations utiles pour passer commande'))}">
           <span class="fo-completude-texte" id="fo-completude-texte"></span>
           <span class="fo-completude-barre"><span id="fo-completude-remplie"></span></span>
         </div>
-        <button type="button" class="fo-fermer-x" id="fo-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+        <button type="button" class="modal-croix fo-fermer-x" id="fo-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </header>
       <div class="fo-corps">
         <div class="fo-colonnes">
           ${colonnes.map((cartes) => `<div class="fo-colonne">${cartes.map(carteHtml).join('')}</div>`).join('')}
         </div>
       </div>
-      <footer class="fo-pied">
+      <footer class="fo-pied modal-actions">
         <label class="ui-case fo-actif"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
         <div id="fo-msg" role="status" aria-live="polite"></div>
         <button type="button" class="ui-btn ui-btn-pastille" id="fo-annuler">${trad('Annuler')}</button>
@@ -4133,7 +4130,6 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
     modifie = true;
     if (e.target.id === 'fo-name') {
       q('#fo-titre').textContent = e.target.value.trim() || (f ? f.name : trad('Nouveau fournisseur'));
-      q('#fo-avatar').textContent = initialesFournisseur(e.target.value);
     }
     if (e.target.id === 'fo-legal_name' || e.target.id === 'fo-city') {
       const sous = [q('#fo-legal_name')?.value.trim(), q('#fo-city')?.value.trim()].filter(Boolean).join(' · ');
