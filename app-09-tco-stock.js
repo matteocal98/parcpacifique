@@ -4301,11 +4301,11 @@ async function rattacherFournisseursImport(lignes) {
 // est gardé dans UI.stockOnglet pour survivre aux renderApp().
 function stockOngletsDisponibles() {
   const liste = [];
-  if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Vue d\'ensemble'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
+  if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Aperçu'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
   liste.push({ id: 'pieces', libelle: trad('Pièces'), picto: 'boite', aide: trad('Ce qu\'il y a en stock, magasin par magasin, et le catalogue des références.') });
   liste.push({ id: 'mouvements', libelle: trad('Mouvements'), picto: 'calendrier', aide: trad('Entrées, sorties, transferts et ajustements.') });
   if (inventairePhysiquePossible()) liste.push({ id: 'inventaire', libelle: trad('Inventaire'), picto: 'coche', aide: trad('Compter le stock réel et régulariser les écarts.') });
-  liste.push({ id: 'organisation', libelle: trad('Organisation'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
+  liste.push({ id: 'organisation', libelle: trad('Réglages'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
   return liste;
 }
 function stockOngletActif(onglets) {

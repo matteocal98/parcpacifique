@@ -1584,11 +1584,12 @@ textarea:not([data-x]),
 .stock-guide-texte{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.4;color:var(--ink-2);}
 .stock-guide-texte strong{font-size:14px;color:var(--ink);}
 @media (max-width:899px){
-  .stock-onglets{gap:2px;}
-  .stock-onglet{flex:1 1 0;min-width:0;padding:8px 6px;font-size:13px;}
+  /* les onglets ne rétrécissent jamais sous leur texte : s'il manque de la place (gros texte système), ils passent sur 2 lignes */
+  .stock-onglets{flex-wrap:wrap;overflow:visible;gap:6px;padding:0;background:transparent;}
+  .stock-onglet{flex:1 1 auto;min-width:max-content;padding:8px 12px;font-size:13px;background:var(--surface-soft);}
+  .stock-onglet.is-actif{background:var(--ink);}
   .stock-onglet svg{display:none;}
 }
-@media (max-width:420px){.stock-onglet{font-size:12px;padding:8px 3px;}}
 
 /* ── Fenêtres du Stock : croix de fermeture, boutons du bas, type de mouvement (2026-10-12) ── */
 .modal.a-croix{position:relative;}
