@@ -3480,8 +3480,8 @@ async function ouvrirSessionInventaire(countId) {
       <div id="inv-msg" role="status" aria-live="polite"></div>
       <div class="modal-actions" id="inv-actions">
         <button type="button" class="ui-btn ui-btn-pastille" id="inv-fermer">${trad('Fermer')}</button>
-        ${ouvert && gerant ? `<button type="button" class="ui-btn ui-btn-pastille is-danger" id="inv-annuler">${trad('Annuler l\'inventaire')}</button>
-        <button type="button" class="ui-btn ui-btn-plein" id="inv-valider">${picto('coche')}<span>${trad('Valider l\'inventaire')}</span></button>` : ''}
+        ${ouvert && gerant ? `<button type="button" class="ui-btn ui-btn-pastille is-danger" id="inv-annuler" title="${esc(trad('Annuler l\'inventaire'))}">${trad('Abandonner')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="inv-valider" title="${esc(trad('Valider l\'inventaire'))}">${picto('coche')}<span>${trad('Valider')}</span></button>` : ''}
       </div>
     </div>`;
 

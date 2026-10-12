@@ -1447,3 +1447,11 @@ textarea:not([data-x]),
   .inventaire-modal .ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto;}
   .inventaire-modal .ui-ligne.is-deux .ui-ligne-action{justify-content:flex-end;}
 }
+
+/* Inventaire : Fermer / Annuler / Valider sur UNE seule ligne */
+.inventaire-modal .modal-actions{flex-wrap:nowrap;justify-content:flex-end;gap:8px;}
+.inventaire-modal .modal-actions > .ui-btn{width:auto !important;flex:0 1 auto;min-width:0;white-space:nowrap;}
+@media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .inventaire-modal .modal-actions > .ui-btn{padding-left:12px;padding-right:12px;font-size:13px;}
+  .inventaire-modal .modal-actions > .ui-btn svg{display:none;}
+}
