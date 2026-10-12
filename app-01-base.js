@@ -624,7 +624,8 @@ function colonnesCatalogueePiece() {
   return 'id, reference, designation, unit_price, supplier_name, avg_lead_time_days'
     + (SCHEMA.hasStock ? ', default_reorder_point' : '')
     + (SCHEMA.hasStockPackaging ? ', packaging' : '')
-    + (SCHEMA.hasStockChamps ? ', ean, unit_of_measure' : '');
+    + (SCHEMA.hasStockChamps ? ', ean, unit_of_measure' : '')
+    + (SCHEMA.hasSuppliers ? ', supplier_id' : '');
 }
 // Colonnes en plus sur stock_items (emplacement, statut) — même principe : un seul endroit pour les 3 lectures.
 function colonnesLigneStockEnPlus() {
@@ -692,6 +693,10 @@ SCHEMA.hasStockChamps = false;
 // Inventaire physique (kalea-serveur/migrations/stock-inventaire.sql) : tables stock_counts / stock_count_lines et colonne
 // stock_items.last_counted_at. Faux tant que la sonde ne trouve pas la colonne : le bloc « Inventaire » n'apparaît pas.
 SCHEMA.hasStockInventaire = false;
+
+// Fiches fournisseurs (kalea-serveur/migrations/stock-fournisseurs.sql) : table suppliers + parts_catalog.supplier_id.
+// Faux tant que la sonde ne trouve pas la colonne : le catalogue garde son champ texte « Fournisseur ».
+SCHEMA.hasSuppliers = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

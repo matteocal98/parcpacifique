@@ -1470,3 +1470,13 @@ textarea:not([data-x]),
 .inventaire-modal .inv-outils .ui-champ{height:40px;padding-top:0;padding-bottom:0;}
 .inventaire-modal .modal-actions .ui-btn,.inventaire-modal #inv-confirm .ui-btn{height:38px;}
 .inventaire-modal [hidden]{display:none !important;}
+
+/* Stock › Fournisseurs : fenêtre de fiche compacte (champs par deux, sans marges empilées) */
+.fournisseur-modal{width:min(560px,94vw);}
+.fournisseur-modal .ui-champ-groupe{gap:6px;}
+.fournisseur-modal .ui-champ-groupe .ui-champ-groupe{margin:0;}
+.fournisseur-modal .ui-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;}
+.fournisseur-modal .ui-champ{height:40px;}
+.fournisseur-modal [hidden]{display:none !important;}
+.fournisseur-modal .modal-actions .ui-btn-plein{font-size:14px;height:38px;padding:0 16px;}
+.fournisseur-modal .modal-actions .ui-btn-pastille{font-size:13px;height:38px;}

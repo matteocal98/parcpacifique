@@ -1514,7 +1514,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs,
   ] = await Promise.all([
     sonderColonne('companies', 'contact_first_name'),
     sonderColonne('companies', 'notification_email'),
@@ -1532,6 +1532,7 @@ async function boot(toastMessage) {
     sonderColonne('parts_catalog', 'ean, unit_of_measure'),
     sonderColonne('stock_items', 'location, status'),
     sonderColonne('stock_items', 'last_counted_at'),
+    sonderColonne('parts_catalog', 'supplier_id'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1547,6 +1548,7 @@ async function boot(toastMessage) {
   SCHEMA.hasStructureType = aStructure;
   SCHEMA.hasStockChamps = aChampsCatalogue && aChampsLigne;
   SCHEMA.hasStockInventaire = aInventaire;
+  SCHEMA.hasSuppliers = aFournisseurs;
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -1757,6 +1759,16 @@ async function boot(toastMessage) {
     stockItems = soldes || [];
   }
 
+  // Fiches fournisseurs : chargées une fois ici comme le reste du module Stock (absentes tant que la migration n'est pas visible).
+  let suppliers = [];
+  if (SCHEMA.hasSuppliers) {
+    const { data: fournisseurs } = await sb.from('suppliers')
+      .select(COLONNES_FOURNISSEUR)
+      .eq('company_id', profile.company_id)
+      .order('name');
+    suppliers = fournisseurs || [];
+  }
+
   // Kits d'entretien : bundles de pièces réutilisables, reliables à une
   // étape de plan (maintenance_plans.items[].kit_id) — chargés une fois ici
   // comme le reste du module Stock. Absent tant que la migration n'est pas
@@ -1837,6 +1849,7 @@ async function boot(toastMessage) {
   UI.partsCatalog = partsCatalog;
   UI.referencesTypes = referencesTypes;
   UI.warehouses = warehouses;
+  UI.suppliers = suppliers;
   UI.stockItems = stockItems;
   UI.stockCounts = calculerStockCounts(stockItems, partsCatalog);
   UI.maintenanceKits = maintenanceKits;

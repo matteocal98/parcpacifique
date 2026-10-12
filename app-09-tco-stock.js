@@ -733,7 +733,9 @@ function blocCatalogueTcoHtml() {
             <div class="ui-grille">
               <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-fournisseur">${trad('Fournisseur')}</label>
-                <input id="tco-piece-fournisseur" class="ui-champ" placeholder="${trad('Fournisseur (optionnel)')}">
+                ${fournisseursActifs()
+                  ? `<div class="ui-select-wrap"><select id="tco-piece-fournisseur" class="ui-champ">${optionsFournisseursHtml(null, '')}</select>${picto('chevronBas')}</div>`
+                  : `<input id="tco-piece-fournisseur" class="ui-champ" placeholder="${trad('Fournisseur (optionnel)')}">`}
               </div>
               <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-delai">${trad('Délai moyen de disponibilité')}</label>
@@ -1064,6 +1066,7 @@ function ouvrirImportCatalogue() {
         labelGo.textContent = trad('Importer');
         return;
       }
+      if (fournisseursActifs()) await rattacherFournisseursImport(lignes);
       const { data, error } = await sb.from('parts_catalog')
         .upsert(
           lignes.map((l) => ({ ...l, company_id: UI.companyId })),
@@ -1160,12 +1163,42 @@ function cablerCatalogueTco(root) {
   const boutonAjouterLabel = boutonAjouter?.querySelector('span');
   const boutonAnnuler = root.querySelector('#tco-piece-annuler');
   const COLONNES_PIECE = colonnesCatalogueePiece();
+  // Fournisseur : liste de fiches (module Stock) ou texte libre (autres offres).
+  const fournisseurEstListe = !!champFournisseur && champFournisseur.tagName === 'SELECT';
+  let texteHeriteEnCours = '';
+  const fixerFournisseur = (piece) => {
+    if (!champFournisseur) return;
+    if (!fournisseurEstListe) { champFournisseur.value = piece ? (piece.supplier_name || '') : ''; return; }
+    const id = piece ? (piece.supplier_id || fournisseurParNom(piece.supplier_name)?.id || '') : '';
+    texteHeriteEnCours = (!id && piece && piece.supplier_name) ? piece.supplier_name : '';
+    champFournisseur.innerHTML = optionsFournisseursHtml(id, texteHeriteEnCours);
+    champFournisseur.value = id || (texteHeriteEnCours ? VALEUR_FOURNISSEUR_TEXTE : '');
+  };
+  const lireFournisseur = () => {
+    if (!champFournisseur) return {};
+    if (!fournisseurEstListe) return { supplier_name: champFournisseur.value.trim() || null };
+    const v = champFournisseur.value;
+    if (!v || v === VALEUR_FOURNISSEUR_NOUVEAU) return { supplier_id: null, supplier_name: null };
+    if (v === VALEUR_FOURNISSEUR_TEXTE) return { supplier_id: null, supplier_name: texteHeriteEnCours || null };
+    const f = fournisseurParId(v);
+    return { supplier_id: v, supplier_name: f ? f.name : null };
+  };
+  if (fournisseurEstListe) {
+    champFournisseur.addEventListener('change', () => {
+      if (champFournisseur.value !== VALEUR_FOURNISSEUR_NOUVEAU) return;
+      champFournisseur.value = '';
+      ouvrirEditionFournisseur(null, (nouveau) => {
+        champFournisseur.innerHTML = optionsFournisseursHtml(nouveau.id, '');
+        champFournisseur.value = nouveau.id;
+      });
+    });
+  }
   const sortirDuModeEdition = () => {
     pieceEnEdition = null;
     if (champRef) champRef.value = '';
     if (champDesignation) champDesignation.value = '';
     if (champPrix) champPrix.value = '';
-    if (champFournisseur) champFournisseur.value = '';
+    fixerFournisseur(null);
     if (champDelai) champDelai.value = '';
     if (champConditionnement) champConditionnement.value = '';
     if (champSeuil) champSeuil.value = '';
@@ -1185,7 +1218,7 @@ function cablerCatalogueTco(root) {
     const reference = champRef.value.trim();
     const designation = champDesignation.value.trim();
     const prix = nombreDepuisTexte(champPrix.value) ?? 0;
-    const fournisseur = champFournisseur.value.trim();
+    const fournisseurChamps = lireFournisseur();
     const delai = nombreDepuisTexte(champDelai.value);
     const conditionnement = champConditionnement ? champConditionnement.value.trim() : '';
     const seuil = champSeuil ? nombreDepuisTexte(champSeuil.value) : null;
@@ -1204,7 +1237,7 @@ function cablerCatalogueTco(root) {
         const { data, error } = await sb.from('parts_catalog')
           .update({
             reference: reference || null, designation, unit_price: prix,
-            supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            avg_lead_time_days: delai != null ? Math.round(delai) : null, ...fournisseurChamps,
             ...champsOptionnels,
           })
           .eq('id', pieceEnEdition)
@@ -1219,7 +1252,7 @@ function cablerCatalogueTco(root) {
         const { data, error } = await sb.from('parts_catalog')
           .insert({
             company_id: UI.companyId, reference: reference || null, designation, unit_price: prix,
-            supplier_name: fournisseur || null, avg_lead_time_days: delai != null ? Math.round(delai) : null,
+            avg_lead_time_days: delai != null ? Math.round(delai) : null, ...fournisseurChamps,
             ...champsOptionnels,
           })
           .select(COLONNES_PIECE)
@@ -1249,7 +1282,7 @@ function cablerCatalogueTco(root) {
       if (champRef) champRef.value = piece.reference || '';
       if (champDesignation) champDesignation.value = piece.designation || '';
       if (champPrix) { champPrix.value = texteAvecSeparateurs(piece.unit_price); }
-      if (champFournisseur) champFournisseur.value = piece.supplier_name || '';
+      fixerFournisseur(piece);
       if (champDelai) champDelai.value = piece.avg_lead_time_days != null ? String(piece.avg_lead_time_days) : '';
       if (champConditionnement) champConditionnement.value = piece.packaging || '';
       if (champSeuil) champSeuil.value = piece.default_reorder_point != null ? texteAvecSeparateurs(piece.default_reorder_point) : '';
@@ -3658,6 +3691,236 @@ async function ouvrirSessionInventaire(countId) {
   });
 }
 
+// ═══════════════════════ FOURNISSEURS (fiches) ═══════════════════════
+// SQL : kalea-serveur/migrations/stock-fournisseurs.sql (table suppliers + parts_catalog.supplier_id). Le texte
+// parts_catalog.supplier_name reste la copie lisible du nom (utilisée partout) : on l'écrit toujours avec supplier_id,
+// et la base le tient à jour quand une fiche est renommée. Réservé au module Stock (offre Enterprise), comme les kits.
+const COLONNES_FOURNISSEUR = 'id, name, contact_name, email, phone, address, lead_time_days, payment_terms, min_order_amount, note, active';
+function fournisseursActifs() {
+  return !!(SCHEMA.hasSuppliers && SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock());
+}
+function fournisseurParId(id) {
+  return (UI.suppliers || []).find((s) => String(s.id) === String(id)) || null;
+}
+function fournisseurParNom(nom) {
+  const cle = String(nom || '').trim().toLowerCase();
+  return cle ? (UI.suppliers || []).find((s) => String(s.name).trim().toLowerCase() === cle) || null : null;
+}
+function piecesDuFournisseur(id) {
+  return (UI.partsCatalog || []).filter((p) => String(p.supplier_id) === String(id));
+}
+function trierFournisseurs() {
+  UI.suppliers = (UI.suppliers || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function ligneFournisseurHtml(f) {
+  const gerant = peutGererParametresStock();
+  const nbPieces = piecesDuFournisseur(f.id).length;
+  const sous = [
+    f.contact_name, f.phone,
+    f.lead_time_days != null ? tR('Délai : {n} j', { n: f.lead_time_days }) : '',
+    tR('{n} pièce(s)', { n: nbPieces }),
+  ].filter(Boolean).join(' · ');
+  return `
+    <div class="ui-ligne is-deux" data-fournisseur-id="${esc(f.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone is-ambre">${picto('mallette')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(f.name)}${f.active === false ? `<span class="ui-tag">${trad('Inactif')}</span>` : ''}</span>
+          <span class="ui-ligne-sous">${esc(sous)}</span>
+        </div>
+      </div>
+      ${gerant ? `
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-icone" data-fournisseur-modifier="${esc(f.id)}" title="${esc(trad('Modifier'))}" aria-label="${esc(tR('Modifier {nom}', { nom: f.name }))}">${picto('crayon')}</button>
+        <button type="button" class="ui-btn ui-btn-icone is-danger" data-fournisseur-retirer="${esc(f.id)}" title="${esc(trad('Supprimer'))}" aria-label="${esc(tR('Supprimer {nom}', { nom: f.name }))}">${picto('corbeille')}</button>
+      </div>` : ''}
+    </div>`;
+}
+function listeFournisseursHtml() {
+  const liste = UI.suppliers || [];
+  return liste.length
+    ? liste.map(ligneFournisseurHtml).join('')
+    : `<div class="ui-aide">${trad('Aucun fournisseur pour l\'instant.')}</div>`;
+}
+function blocFournisseursStockHtml() {
+  const gerant = peutGererParametresStock();
+  return `
+    <section class="ui-section" id="stock-fournisseurs-section">
+      ${teteSectionKit('mallette', trad('Fournisseurs'), trad('Contacts, délais et conditions de tes fournisseurs de pièces'),
+        `<span class="ui-tag" id="stock-fournisseurs-badge">${tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length })}</span>${gerant ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-fournisseur-nouveau">${picto('plusCercle')}<span>${trad('Nouveau fournisseur')}</span></button>` : ''}`)}
+      <div class="ui-section-corps">
+        ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant.')}</div>`}
+        <div class="ui-liste is-defilant" id="stock-fournisseurs-liste">${listeFournisseursHtml()}</div>
+      </div>
+    </section>`;
+}
+// Met à jour la liste affichée (si la page Stock est à l'écran) sans reconstruire la page.
+function rafraichirListeFournisseurs() {
+  const liste = document.getElementById('stock-fournisseurs-liste');
+  if (liste) liste.innerHTML = listeFournisseursHtml();
+  const badge = document.getElementById('stock-fournisseurs-badge');
+  if (badge) badge.textContent = tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length });
+}
+
+// Création (f = null) ou modification d'une fiche. surEnregistre(fiche) : appelé après l'enregistrement
+// (le catalogue s'en sert pour sélectionner le fournisseur qui vient d'être créé).
+function ouvrirEditionFournisseur(f, surEnregistre) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal fournisseur-modal" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
+      <h2 id="fo-titre">${f ? trad('Modifier le fournisseur') : trad('Nouveau fournisseur')}</h2>
+      <div class="ui-champ-groupe">
+        <label for="fo-nom"><strong>${trad('Nom')}</strong></label>
+        <input id="fo-nom" class="ui-champ" maxlength="120" value="${esc(f?.name || '')}">
+        <div class="ui-grille">
+          <div class="ui-champ-groupe">
+            <label for="fo-contact"><strong>${trad('Contact')}</strong></label>
+            <input id="fo-contact" class="ui-champ" maxlength="120" value="${esc(f?.contact_name || '')}">
+          </div>
+          <div class="ui-champ-groupe">
+            <label for="fo-tel"><strong>${trad('Téléphone')}</strong></label>
+            <input id="fo-tel" class="ui-champ" type="tel" maxlength="60" value="${esc(f?.phone || '')}">
+          </div>
+        </div>
+        <div class="ui-grille">
+          <div class="ui-champ-groupe">
+            <label for="fo-delai"><strong>${trad('Délai habituel')}</strong></label>
+            <div class="ui-champ-unite"><input id="fo-delai" class="ui-champ" type="text" inputmode="numeric" value="${f?.lead_time_days != null ? esc(f.lead_time_days) : ''}"><span class="ui-unite">${trad('jours')}</span></div>
+          </div>
+          <div class="ui-champ-groupe">
+            <label for="fo-minimum"><strong>${trad('Minimum de commande')}</strong></label>
+            <div class="ui-champ-unite"><input id="fo-minimum" class="ui-champ" type="text" inputmode="decimal" value="${f?.min_order_amount != null ? esc(texteAvecSeparateurs(f.min_order_amount)) : ''}"><span class="ui-unite">${esc(deviseCourte())}</span></div>
+          </div>
+        </div>
+        <div class="ui-grille">
+          <div class="ui-champ-groupe">
+            <label for="fo-email"><strong>${trad('E-mail')}</strong></label>
+            <input id="fo-email" class="ui-champ" type="email" maxlength="200" value="${esc(f?.email || '')}">
+          </div>
+          <div class="ui-champ-groupe">
+            <label for="fo-paiement"><strong>${trad('Paiement')}</strong></label>
+            <input id="fo-paiement" class="ui-champ" maxlength="120" placeholder="${trad('Ex : 30 jours fin de mois')}" value="${esc(f?.payment_terms || '')}">
+          </div>
+        </div>
+        <label for="fo-adresse"><strong>${trad('Adresse')}</strong></label>
+        <input id="fo-adresse" class="ui-champ" maxlength="300" value="${esc(f?.address || '')}">
+        <label for="fo-note"><strong>${trad('Note')}</strong></label>
+        <input id="fo-note" class="ui-champ" maxlength="500" value="${esc(f?.note || '')}">
+        <label class="ui-case"><input type="checkbox" id="fo-actif" ${f && f.active === false ? '' : 'checked'}> ${trad('Fournisseur actif')}</label>
+      </div>
+      <div id="fo-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="fo-annuler">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="fo-go">${picto('coche')}<span>${trad('Enregistrer')}</span></button>
+      </div>
+    </div>`;
+  activerSeparateurMilliers(overlay.querySelector('#fo-minimum'));
+  const q = (sel) => overlay.querySelector(sel);
+  const msg = q('#fo-msg');
+  q('#fo-annuler').addEventListener('click', () => overlay.remove());
+  q('#fo-go').addEventListener('click', async () => {
+    const bouton = q('#fo-go');
+    const nom = q('#fo-nom').value.trim();
+    if (!nom) { msg.textContent = trad('Le nom est obligatoire.'); return; }
+    const delai = nombreDepuisTexte(q('#fo-delai').value);
+    const minimum = nombreDepuisTexte(q('#fo-minimum').value);
+    const texteOuNull = (sel) => q(sel).value.trim() || null;
+    const fiche = {
+      name: nom,
+      contact_name: texteOuNull('#fo-contact'),
+      email: texteOuNull('#fo-email'),
+      phone: texteOuNull('#fo-tel'),
+      address: texteOuNull('#fo-adresse'),
+      lead_time_days: delai != null && delai >= 0 ? Math.round(delai) : null,
+      payment_terms: texteOuNull('#fo-paiement'),
+      min_order_amount: minimum != null && minimum >= 0 ? minimum : null,
+      note: texteOuNull('#fo-note'),
+      active: q('#fo-actif').checked,
+    };
+    bouton.disabled = true;
+    msg.textContent = '';
+    try {
+      const requete = f
+        ? sb.from('suppliers').update(fiche).eq('id', f.id)
+        : sb.from('suppliers').insert({ company_id: UI.companyId, ...fiche });
+      const { data, error } = await requete.select(COLONNES_FOURNISSEUR).single();
+      if (error) throw error;
+      UI.suppliers = [...(UI.suppliers || []).filter((s) => String(s.id) !== String(data.id)), data];
+      trierFournisseurs();
+      // Renommé : la base a renommé le texte des pièces rattachées, on reflète la même chose ici.
+      if (f && f.name !== data.name) {
+        UI.partsCatalog = (UI.partsCatalog || []).map((p) => (String(p.supplier_id) === String(data.id) ? { ...p, supplier_name: data.name } : p));
+      }
+      showToast(f ? trad('Fournisseur modifié') : trad('Fournisseur ajouté'));
+      overlay.remove();
+      rafraichirListeFournisseurs();
+      if (typeof surEnregistre === 'function') surEnregistre(data);
+    } catch (err) {
+      msg.textContent = String(err.code) === '23505'
+        ? trad('Un fournisseur porte déjà ce nom.')
+        : trad('Erreur :') + ' ' + (err.message || err);
+      bouton.disabled = false;
+    }
+  });
+}
+async function supprimerFournisseur(id) {
+  const f = fournisseurParId(id);
+  if (!f) return;
+  const n = piecesDuFournisseur(id).length;
+  const question = n
+    ? tR('Supprimer « {nom} » ? Ses {n} pièce(s) gardent son nom en texte mais ne sont plus rattachées à une fiche.', { nom: f.name, n })
+    : tR('Supprimer « {nom} » ?', { nom: f.name });
+  if (!window.confirm(question)) return;
+  try {
+    const { error } = await sb.from('suppliers').delete().eq('id', id);
+    if (error) throw error;
+    UI.suppliers = (UI.suppliers || []).filter((s) => String(s.id) !== String(id));
+    UI.partsCatalog = (UI.partsCatalog || []).map((p) => (String(p.supplier_id) === String(id) ? { ...p, supplier_id: null } : p));
+    showToast(trad('Fournisseur supprimé'));
+    rafraichirListeFournisseurs();
+  } catch (err) {
+    window.alert(trad('Erreur :') + ' ' + (err.message || err));
+  }
+}
+
+// Liste déroulante « Fournisseur » du formulaire du catalogue : fiches actives (+ celle déjà choisie si elle est
+// devenue inactive), une valeur spéciale pour un nom non référencé hérité d'avant les fiches, et « + Nouveau ».
+const VALEUR_FOURNISSEUR_NOUVEAU = '__nouveau__';
+const VALEUR_FOURNISSEUR_TEXTE = '__texte__';
+function optionsFournisseursHtml(idChoisi, texteHerite) {
+  const actifs = (UI.suppliers || []).filter((s) => s.active !== false || String(s.id) === String(idChoisi));
+  return `<option value="">${esc(trad('Fournisseur (optionnel)'))}</option>`
+    + (texteHerite ? `<option value="${VALEUR_FOURNISSEUR_TEXTE}">${esc(texteHerite)} ${esc(trad('(non référencé)'))}</option>` : '')
+    + actifs.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')
+    + (peutGererParametresStock() ? `<option value="${VALEUR_FOURNISSEUR_NOUVEAU}">${esc(trad('+ Nouveau fournisseur…'))}</option>` : '');
+}
+
+// Import CSV : rattache chaque nom de fournisseur à une fiche (la crée si elle manque et si c'est le gérant qui importe).
+async function rattacherFournisseursImport(lignes) {
+  const manquants = new Map();
+  lignes.forEach((l) => {
+    const nom = (l.supplier_name || '').trim();
+    if (nom && !fournisseurParNom(nom)) manquants.set(nom.toLowerCase(), nom);
+  });
+  if (manquants.size && peutGererParametresStock()) {
+    const { data, error } = await sb.from('suppliers')
+      .insert([...manquants.values()].map((name) => ({ company_id: UI.companyId, name })))
+      .select(COLONNES_FOURNISSEUR);
+    if (error) throw error;
+    UI.suppliers = [...(UI.suppliers || []), ...(data || [])];
+    trierFournisseurs();
+  }
+  lignes.forEach((l) => {
+    const f = fournisseurParNom(l.supplier_name);
+    l.supplier_id = f ? f.id : null;
+    if (f) l.supplier_name = f.name;
+  });
+}
+
 VIEWS.stock = {
   fondBlanc: true,
   title: trad('Stocks & SAV'),
@@ -3669,6 +3932,7 @@ VIEWS.stock = {
         <div class="ui-colonnes">
           <div class="ui-colonne">
             ${blocMagasinsStockHtml()}
+            ${fournisseursActifs() ? blocFournisseursStockHtml() : ''}
             ${SCHEMA.hasKits ? blocKitsEntretienStockHtml() : ''}
             ${SCHEMA.hasKits ? blocBesoinsRisqueStockHtml() : ''}
           </div>
@@ -3765,6 +4029,21 @@ VIEWS.stock = {
       const [partId, magasinId] = bouton.getAttribute('data-stock-emplacement').split('|');
       ouvrirModaleEmplacementStock(partId, magasinId);
     });
+
+    // ── Fournisseurs : création / modification / suppression (gérant). ──
+    if (fournisseursActifs()) {
+      root.querySelector('#stock-fournisseur-nouveau')?.addEventListener('click', () => ouvrirEditionFournisseur(null));
+      root.querySelector('#stock-fournisseurs-liste')?.addEventListener('click', (e) => {
+        const modifier = e.target.closest('[data-fournisseur-modifier]');
+        if (modifier) {
+          const f = fournisseurParId(modifier.getAttribute('data-fournisseur-modifier'));
+          if (f) ouvrirEditionFournisseur(f);
+          return;
+        }
+        const retirer = e.target.closest('[data-fournisseur-retirer]');
+        if (retirer) supprimerFournisseur(retirer.getAttribute('data-fournisseur-retirer'));
+      });
+    }
 
     // ── Inventaire physique : liste des sessions chargée en asynchrone (jamais au boot). ──
     if (inventairePhysiquePossible()) {
