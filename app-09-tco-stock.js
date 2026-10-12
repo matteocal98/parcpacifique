@@ -3454,26 +3454,21 @@ async function ouvrirSessionInventaire(countId) {
       <h2 id="inv-titre">${esc(titreInventaire(c))} ${statutInventaireHtml(c)}</h2>
       <p class="sub">${esc(sousTitreInventaire(c))}</p>
       ${c.blind && ouvert && !gerant ? `<div class="ui-aide">${trad('Comptage en aveugle : les quantités théoriques sont cachées.')}</div>` : ''}
-      <div class="ui-barre">
+      <div class="ui-barre inv-outils">
         <span class="ui-tag" id="inv-progres"></span>
-        ${peutCompter ? `<button type="button" class="ui-btn ui-btn-pastille" id="inv-scan">${picto('qrcode')}<span>${trad('Scanner une étiquette')}</span></button>` : ''}
-        <button type="button" class="ui-btn ui-btn-pastille" id="inv-export">${picto('export')}<span>${trad('Exporter en CSV')}</span></button>
-      </div>
-      <div class="ui-barre">
+        ${peutCompter ? `<button type="button" class="ui-btn ui-btn-pastille" id="inv-scan" title="${esc(trad('Scanner une étiquette'))}">${picto('qrcode')}<span>${trad('Scanner')}</span></button>` : ''}
+        <button type="button" class="ui-btn ui-btn-pastille" id="inv-export" title="${esc(trad('Exporter en CSV'))}">${picto('export')}<span>CSV</span></button>
         <input id="inv-filtre" class="ui-champ" placeholder="${trad('Rechercher par référence, désignation, emplacement…')}">
         <div class="ui-select-wrap">
-          <select id="inv-vue" class="ui-champ">
+          <select id="inv-vue" class="ui-champ" aria-label="${esc(trad('Afficher'))}">
             <option value="">${trad('Toutes les lignes')}</option>
             <option value="acompter">${trad('À compter')}</option>
             <option value="comptees">${trad('Comptées')}</option>
             <option value="ecarts">${trad('Avec écart')}</option>
           </select>${picto('chevronBas')}
         </div>
+        ${peutCompter ? `<div class="ui-select-wrap"><select id="inv-ajout" class="ui-champ" aria-label="${esc(trad('Ajouter un article non prévu'))}"></select>${picto('chevronBas')}</div>` : ''}
       </div>
-      ${peutCompter ? `
-      <div class="ui-barre">
-        <div class="ui-select-wrap"><select id="inv-ajout" class="ui-champ" aria-label="${esc(trad('Ajouter un article non prévu'))}"></select>${picto('chevronBas')}</div>
-      </div>` : ''}
       <div class="ui-liste is-defilant" id="inv-liste"></div>
       <div class="ui-aide" id="inv-vide"></div>
       <div id="inv-confirm" hidden></div>
@@ -3494,14 +3489,14 @@ async function ouvrirSessionInventaire(countId) {
 
   const majProgres = () => {
     const comptees = lignes.filter((l) => l.counted_qty != null).length;
-    q('#inv-progres').textContent = tR('{n} sur {t} comptée(s)', { n: comptees, t: lignes.length });
+    q('#inv-progres').textContent = tR('Comptées : {n}/{t}', { n: comptees, t: lignes.length });
   };
   const majListeAjout = () => {
     const sel = q('#inv-ajout');
     if (!sel) return;
     const presentes = new Set(lignes.map((l) => String(l.part_id)));
     const dispo = (UI.partsCatalog || []).filter((p) => !presentes.has(String(p.id))).sort((a, b) => a.designation.localeCompare(b.designation));
-    sel.innerHTML = `<option value="">${esc(trad('Ajouter un article non prévu…'))}</option>`
+    sel.innerHTML = `<option value="">${esc(trad('+ Article non prévu…'))}</option>`
       + dispo.map((p) => `<option value="${esc(p.id)}">${esc(p.designation)}${p.reference ? ' (' + esc(p.reference) + ')' : ''}</option>`).join('');
   };
   const dessiner = () => {
