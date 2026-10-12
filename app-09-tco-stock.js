@@ -4301,11 +4301,11 @@ async function rattacherFournisseursImport(lignes) {
 // est gardé dans UI.stockOnglet pour survivre aux renderApp().
 function stockOngletsDisponibles() {
   const liste = [];
-  if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Vue d\'ensemble'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
+  if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Aperçu'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
   liste.push({ id: 'pieces', libelle: trad('Pièces'), picto: 'boite', aide: trad('Ce qu\'il y a en stock, magasin par magasin, et le catalogue des références.') });
   liste.push({ id: 'mouvements', libelle: trad('Mouvements'), picto: 'calendrier', aide: trad('Entrées, sorties, transferts et ajustements.') });
   if (inventairePhysiquePossible()) liste.push({ id: 'inventaire', libelle: trad('Inventaire'), picto: 'coche', aide: trad('Compter le stock réel et régulariser les écarts.') });
-  liste.push({ id: 'organisation', libelle: trad('Organisation'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
+  liste.push({ id: 'organisation', libelle: trad('Réglages'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
   return liste;
 }
 function stockOngletActif(onglets) {
@@ -4351,7 +4351,7 @@ VIEWS.stock = {
     const panneau = (id, contenu) => `<div class="stock-panneau" role="tabpanel" id="stock-panneau-${id}" aria-labelledby="stock-onglet-${id}"${id === actif ? '' : ' hidden'}>${contenu}</div>`;
     const piecesActives = UI.stockPiecesVue === 'catalogue' ? 'catalogue' : 'stock';
     return `
-      <div class="ui-page">
+      <div class="ui-page stock-industriel">
         ${stockKpiGridHtml()}
         <div class="stock-onglets" role="tablist" aria-label="${esc(trad('Sections du stock'))}">
           ${onglets.map((o) => `<button type="button" class="stock-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" id="stock-onglet-${o.id}" aria-selected="${o.id === actif}" aria-controls="stock-panneau-${o.id}" data-stock-onglet="${o.id}">${picto(o.picto)}<span>${esc(o.libelle)}</span></button>`).join('')}
