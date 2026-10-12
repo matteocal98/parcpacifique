@@ -4636,6 +4636,7 @@ function ouvrirBonDeCommande(g) {
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="bon-titre">
       <h2 id="bon-titre">${trad('Bon de commande')} — ${esc(g.nom)}</h2>
       <p class="sub">${trad('Vérifie le bon, puis imprime-le (ou enregistre-le en PDF), copie-le ou envoie-le par e-mail. Il n\'est pas encore enregistré dans l\'application.')}</p>
+      <div class="achats-bon-apercu" id="bon-apercu"></div>
       <div class="ui-champ-groupe">
         <label for="bon-ref"><strong>${trad('Référence du bon')}</strong></label>
         <input id="bon-ref" class="ui-champ" maxlength="40" value="${esc(referenceBon(g))}">
@@ -4646,7 +4647,6 @@ function ouvrirBonDeCommande(g) {
         <label for="bon-note"><strong>${trad('Note pour le fournisseur')}</strong></label>
         <input id="bon-note" class="ui-champ" maxlength="200" placeholder="${esc(trad('Facultatif'))}">
       </div>
-      <div class="achats-bon-apercu" id="bon-apercu"></div>
       <div id="bon-msg" class="ui-aide" role="status" aria-live="polite"></div>
       <div class="modal-actions">
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-annuler">${trad('Annuler')}</button>
