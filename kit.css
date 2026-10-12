@@ -1619,3 +1619,84 @@ textarea:not([data-x]),
 }
 .etiquettes-modal small{font-size:12px;}
 .modal.a-croix .modal-actions .ui-btn-pastille{background:var(--surface-soft);}
+
+/* ── Page Machines : ESSAI « bento » (2026-10-12) — grille asymétrique, cartes à bordure fine, coins 20 px ──
+   1 colonne sur téléphone, 2 sur tablette, 12 sur grand écran. Pour annuler : git revert du commit « essai bento ». */
+.machines-bento .bento{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;}
+.bento-carte{position:relative;min-width:0;display:flex;flex-direction:column;gap:6px;padding:24px;border:1px solid #E2E8F0;border-radius:20px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.05);font-family:inherit;text-align:left;color:var(--ink);}
+.bento-libelle{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+.bento-aide{font-size:13px;line-height:1.4;color:var(--ink-2);}
+.bento-valeur{font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink);}
+.bento-valeur.is-grand{font-size:60px;}
+.bento-valeur small{margin-left:2px;font-size:.45em;font-weight:600;color:var(--ink-3);}
+/* hero : fond teinté translucide + grand visuel */
+.bento-hero{flex-direction:row;align-items:center;justify-content:space-between;gap:24px;border-color:rgba(99,102,241,.28);background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(255,255,255,.78));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+.bento-hero-texte{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.bento-sur-titre{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-dark);}
+.bento-titre{margin:0;font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--ink);}
+.bento-sous-titre{margin:0;max-width:46ch;font-size:15px;line-height:1.5;color:var(--ink-2);}
+.bento-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.bento-actions .ui-btn{min-height:44px;}
+.bento-visuel{flex:0 0 auto;display:grid;place-items:center;width:104px;height:104px;border-radius:28px;background:var(--primary);color:#fff;box-shadow:0 10px 30px rgba(99,102,241,.35);}
+.bento-visuel svg{width:52px;height:52px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+/* jauge de disponibilité */
+.bento-jauge{display:block;height:8px;margin:10px 0 4px;border-radius:999px;background:#E2E8F0;overflow:hidden;}
+.bento-jauge > span{display:block;height:100%;border-radius:inherit;background:var(--ok);transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+/* cartes d'état : cliquables, filtrent la liste */
+.bento-etat{cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s,box-shadow .2s;}
+.bento-etat:hover{transform:translateY(-2px);border-color:#CBD5E1;box-shadow:0 8px 24px rgba(15,23,42,.08);}
+.bento-etat:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
+.bento-pastille{display:grid;place-items:center;width:40px;height:40px;margin-bottom:10px;border-radius:12px;background:var(--surface-soft);color:var(--ink);}
+.bento-pastille svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.bento-etat.is-retard .bento-pastille{background:var(--late-bg);color:#B45309;}
+.bento-etat.is-retard .bento-valeur{color:#B45309;}
+.bento-etat.is-bientot .bento-pastille{background:var(--soon-bg);color:var(--primary-dark);}
+.bento-etat.is-ok .bento-pastille{background:var(--ok-bg);color:#0F766E;}
+.bento-liste{padding:20px;}
+/* tablette : 2 colonnes */
+@media (min-width:640px){
+  .machines-bento .bento{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .bento-hero,.bento-liste{grid-column:1 / -1;}
+}
+/* grand écran : 12 colonnes asymétriques — hero 8 + disponibilité 4, puis « en retard » 6 + 3 + 3 */
+@media (min-width:1024px){
+  .machines-bento .bento{grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;}
+  .bento-hero{grid-column:span 8;padding:32px;}
+  .bento-kpi{grid-column:span 4;justify-content:center;}
+  .bento-etat.is-retard{grid-column:span 6;}
+  .bento-etat.is-bientot,.bento-etat.is-ok{grid-column:span 3;}
+  .bento-liste{grid-column:1 / -1;}
+}
+/* petit téléphone en portrait : visuel masqué, titre plus compact */
+@media (max-width:559px){
+  .bento-carte{padding:18px;}
+  .bento-hero{flex-direction:column;align-items:flex-start;}
+  .bento-visuel{display:none;}
+  .bento-titre{font-size:26px;}
+  .bento-valeur.is-grand{font-size:52px;}
+  .bento-actions .ui-btn{flex:1 1 auto;}
+}
+/* téléphone en paysage : tout sur peu de hauteur — hero pleine largeur, 4 cartes côte à côte */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machines-bento .bento{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+  .bento-hero{grid-column:1 / -1;padding:12px 14px;flex-direction:row;}
+  .bento-hero-texte{gap:4px;}
+  .bento-titre{font-size:20px;}
+  .bento-sous-titre,.bento-sur-titre,.bento-visuel{display:none;}
+  .bento-actions{margin-top:4px;}
+  .bento-kpi,.bento-etat.is-retard,.bento-etat.is-bientot,.bento-etat.is-ok{grid-column:span 1;padding:10px 12px;gap:2px;}
+  .bento-valeur,.bento-valeur.is-grand{font-size:26px;}
+  .bento-pastille{width:30px;height:30px;margin-bottom:4px;}
+  .bento-aide{display:none;}
+  .bento-liste{grid-column:1 / -1;padding:12px;}
+}
+@media (prefers-reduced-motion:reduce){.bento-etat,.bento-jauge > span{transition:none;}.bento-etat:hover{transform:none;}}
+/* téléphone en portrait : les trois cartes d'état se rangent côte à côte pour ne pas repousser la liste */
+@media (max-width:559px){
+  .machines-bento .bento{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+  .bento-hero,.bento-kpi,.bento-liste{grid-column:1 / -1;}
+  .bento-etat{padding:14px 12px;gap:2px;}
+  .bento-etat .bento-valeur{font-size:32px;}
+  .bento-etat .bento-aide{display:none;}
+  .bento-pastille{width:34px;height:34px;margin-bottom:6px;}
+}
