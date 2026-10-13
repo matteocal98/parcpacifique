@@ -2035,3 +2035,13 @@ textarea:not([data-x]),
   .log-modal .log-bloc-cout .log-pieces-total-ligne{margin-top:2px;}
   .log-modal .log-bloc-cout{gap:6px !important;}
 }
+/* ── Corbeilles : orange foncé partout (supprimer / retirer) ── */
+:root{--corbeille:#B45309;}
+.ui-btn-icone.is-danger,.ui-btn-pastille.is-danger,.ui-btn-teinte.is-danger,.stock-row-actions.is-danger,.log-piece-retirer,.log-piece-retirer svg{color:var(--corbeille);}
+.ui-btn-icone.is-danger svg,.ui-btn-pastille.is-danger svg,.ui-btn-teinte.is-danger svg,.stock-row-actions.is-danger svg{color:var(--corbeille);stroke:currentColor;}
+.log-piece-retirer:hover,.stock-row-actions.is-danger:hover,.ui-btn-icone.is-danger:hover{color:var(--corbeille);}
+/* ── Fenêtre d'intervention (téléphone) : taille des champs de saisie (le cadre noir de 2 px est imposé par la charte, plus haut) ── */
+@media (max-width:560px){
+  .log-modal textarea{height:48px;min-height:48px;padding:8px 12px;font-size:14px;line-height:1.3;resize:none;}
+  .log-modal .log-mo-ajouter{height:36px;padding:0 14px;font-size:14px;}
+}
