@@ -3238,7 +3238,7 @@ async function ouvrirListePannes() {
       return `<div class="panne-ligne ${classe}">
         <div class="panne-ligne-tete"><strong>${esc(p.machine_name || '')}</strong>${p.stopped ? `<span class="ui-statut is-retard">${trad('À l\'arrêt')}</span>` : ''}<span class="ui-statut ${classe}">${esc(trad(STATUTS_PANNE[p.status] || p.status))}</span></div>
         <div class="panne-ligne-desc">${esc(p.description)}</div>
-        <div class="panne-ligne-meta">${esc(trad((GRAVITES_PANNE.find((g) => g.id === p.severity) || {}).libelle || p.severity))} · ${esc(quand)}${p.reported_by_name ? ` · ${esc(p.reported_by_name)}` : ''}</div>
+        <div class="panne-ligne-meta">${esc(trad((GRAVITES_PANNE.find((g) => g.id === p.severity) || {}).libelle || p.severity))} · ${esc(quand)}${p.reported_by_name ? ` · ${esc(p.reported_by_name)}` : ''}${p.downtime_hours != null ? ` · ${esc(String(Number(p.downtime_hours)).replace('.', ','))} h` : ''}${p.downtime_cost != null ? ` · ${esc(formatMontant(p.downtime_cost))}` : ''}</div>
         ${actions ? `<div class="panne-ligne-actions">${actions}</div>` : ''}
       </div>`;
     }).join('') : `<div class="ui-aide">${filtre === 'ouvertes' ? trad('Aucune panne ouverte.') : trad('Aucune panne résolue.')}</div>`;
@@ -3250,6 +3250,18 @@ async function ouvrirListePannes() {
     if (f) { filtre = f.getAttribute('data-filtre'); dessiner(); return; }
     const b = e.target.closest('[data-panne-statut]');
     if (!b) return;
+    if (b.getAttribute('data-panne-statut') === 'resolue' && SCHEMA.hasArretCout) {
+      const panne = (UI.pannes || []).find((x) => String(x.id) === String(b.getAttribute('data-id')));
+      if (panne) {
+        ouvrirResolutionPanne(panne, async () => {
+          try { await chargerPannes(); } catch (err) { /* la liste garde son dernier état */ }
+          dessiner();
+          const racine = document.getElementById('view-root');
+          if (racine && racine.querySelector('#vig-pannes')) chargerVigilancePannes(racine);
+        });
+        return;
+      }
+    }
     b.disabled = true;
     const { error } = await sb.rpc('changer_statut_panne', { p_id: b.getAttribute('data-id'), p_status: b.getAttribute('data-panne-statut'), p_note: null });
     if (error) { b.disabled = false; showToast(error.message || trad('Action impossible.')); return; }
@@ -3257,5 +3269,91 @@ async function ouvrirListePannes() {
     dessiner();
     const racine = document.getElementById('view-root');
     if (racine && racine.querySelector('#vig-pannes')) chargerVigilancePannes(racine);
+  });
+}
+
+
+// ── Résoudre une panne avec les heures d'arrêt (panne-cout-arret.sql) ───────────────────────────────────────
+// Heures ouvrées : on compte les jours ouvrés (lundi à vendredi) touchés par l'arrêt × les heures d'une journée,
+// sans jamais dépasser le temps réellement écoulé. L'estimation est PROPOSÉE : la personne la corrige si besoin.
+function heuresArretEstimees(debutIso, fin, heuresJour) {
+  const debut = new Date(debutIso);
+  const ecoule = Math.max((fin - debut) / 3600000, 0);
+  let jours = 0;
+  const d = new Date(debut.getFullYear(), debut.getMonth(), debut.getDate());
+  const dernier = new Date(fin.getFullYear(), fin.getMonth(), fin.getDate());
+  for (; d <= dernier; d.setDate(d.getDate() + 1)) {
+    const j = d.getDay();
+    if (j >= 1 && j <= 5) jours++;
+  }
+  const heures = Math.min(ecoule, jours * heuresJour);
+  return { heures: Math.round(heures * 2) / 2, jours };
+}
+function tauxArretMachine(machineId) {
+  const m = (UI.machines || []).find((x) => String(x.id) === String(machineId));
+  if (!m) return null;
+  const brut = m.downtime_hourly_cost != null ? m.downtime_hourly_cost : (m.category ? m.category.downtime_hourly_cost : null);
+  const n = Number(brut);
+  return brut != null && brut !== '' && isFinite(n) && n >= 0 ? n : null;
+}
+async function ouvrirResolutionPanne(panne, apres) {
+  let heuresJour = 8;
+  try {
+    const { data } = await sb.from('companies').select('workday_hours').eq('id', UI.companyId).maybeSingle();
+    if (data && Number(data.workday_hours) > 0) heuresJour = Number(data.workday_hours);
+  } catch (e) { /* la journée de 8 h reste la valeur par défaut */ }
+  const taux = tauxArretMachine(panne.machine_id);
+  const estimation = heuresArretEstimees(panne.reported_at, new Date(), heuresJour);
+  const monnaie = (n) => Number(n).toLocaleString(localeActive(), { style: 'currency', currency: (UI.company && UI.company.currency) || 'EUR', maximumFractionDigits: 2 });
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal panne-modal" role="dialog" aria-modal="true" aria-labelledby="resolution-titre">
+      <h2 id="resolution-titre">${trad('Résoudre la panne')}</h2>
+      <p class="sub">${esc(panne.machine_name || '')} — ${esc(panne.description || '')}</p>
+      ${panne.stopped ? `
+      <label class="ui-etiquette" for="resolution-heures">${trad('Heures d\'arrêt (heures ouvrées)')}</label>
+      <input id="resolution-heures" class="ui-champ" type="text" inputmode="decimal" value="${esc(String(estimation.heures).replace('.', ','))}" autocomplete="off">
+      <p class="ui-aide">${tR('Estimation : {j} jour(s) ouvré(s) × {h} h par jour, sans dépasser le temps écoulé. Corrige si besoin.', { j: estimation.jours, h: heuresJour })}</p>
+      <p class="ui-aide" id="resolution-cout">${taux == null ? trad('Aucun coût horaire d\'arrêt réglé pour cette machine : l\'arrêt ne sera pas chiffré.') : ''}</p>` : `<p class="ui-aide">${trad('La machine n\'était pas à l\'arrêt : aucun coût d\'arrêt.')}</p>`}
+      <label class="ui-etiquette" for="resolution-note">${trad('Note (facultatif)')}</label>
+      <textarea id="resolution-note" class="ui-champ" rows="2" maxlength="300"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="resolution-annuler">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="resolution-valider">${trad('Marquer résolue')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  ajouterCroixModale(overlay);
+  const q = (s) => overlay.querySelector(s);
+  const lireHeures = () => {
+    const brut = String((q('#resolution-heures') || {}).value || '').replace(/\s/g, '').replace(',', '.');
+    const n = Number(brut);
+    return brut !== '' && isFinite(n) && n >= 0 ? n : null;
+  };
+  const majCout = () => {
+    const zone = q('#resolution-cout');
+    if (!zone || taux == null) return;
+    const h = lireHeures();
+    zone.textContent = h == null ? '' : tR('Coût d\'arrêt : {h} h × {t} = {c}', {
+      h: String(h).replace('.', ','), t: monnaie(taux), c: monnaie(Math.round(h * taux * 100) / 100),
+    });
+  };
+  if (panne.stopped) { q('#resolution-heures').addEventListener('input', majCout); majCout(); }
+  q('#resolution-annuler').addEventListener('click', () => overlay.remove());
+  q('#resolution-valider').addEventListener('click', async () => {
+    let heures = null;
+    if (panne.stopped) {
+      heures = lireHeures();
+      if (heures == null) { showToast(trad('Indique les heures d\'arrêt (un nombre).')); q('#resolution-heures').focus(); return; }
+    }
+    const bouton = q('#resolution-valider');
+    bouton.disabled = true;
+    const { error } = await sb.rpc('resoudre_panne', { p_id: panne.id, p_heures: heures, p_note: q('#resolution-note').value.trim() || null });
+    if (error) { bouton.disabled = false; showToast(error.message || trad('Action impossible.')); return; }
+    overlay.remove();
+    showToast(trad('Panne résolue.'));
+    if (typeof apres === 'function') apres();
   });
 }

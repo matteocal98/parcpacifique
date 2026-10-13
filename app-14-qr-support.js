@@ -1514,7 +1514,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret,
   ] = await Promise.all([
 
     sonderColonne('companies', 'contact_first_name'),
@@ -1538,6 +1538,7 @@ async function boot(toastMessage) {
     sonderColonne('supplier_documents', 'storage_path'),
     sonderColonne('purchase_orders', 'supplier_name, status, total_estimated'),
     sonderColonne('machine_breakdowns', 'severity, status, stopped'),
+    sonderColonne('machine_breakdowns', 'downtime_hours, downtime_rate, downtime_cost'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1558,6 +1559,7 @@ async function boot(toastMessage) {
   SCHEMA.hasSupplierDocs = SCHEMA.hasSuppliersFull && aDocsFournisseurs;
   SCHEMA.hasCommandes = aCommandes && aFournisseurs;
   SCHEMA.hasPannes = aPannes;
+  SCHEMA.hasArretCout = aPannes && aArret;
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
@@ -1688,6 +1690,7 @@ async function boot(toastMessage) {
     ...(SCHEMA.hasTco
       ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
       : []),
+    ...(SCHEMA.hasArretCout ? ['downtime_hourly_cost'] : []),
   ].join(', ');
   const colonnesPlan = [
     'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
@@ -1704,7 +1707,7 @@ async function boot(toastMessage) {
   // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
   // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco plus haut
   // (UI.companyPlan pas encore prêt à ce stade du boot).
-  const colonnesCategorie = SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name';
+  const colonnesCategorie = (SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name') + (SCHEMA.hasArretCout ? ', downtime_hourly_cost' : '');
   const { data: machines, error: machinesErr } = await sb
     .from('machines')
     .select(`${colonnesMachine}, category:machine_categories(${colonnesCategorie}), plan:maintenance_plans(${colonnesPlan})`)
