@@ -1920,3 +1920,38 @@ textarea:not([data-x]),
   .tache-carte:not(.is-ouvert) .tache-titre{margin-bottom:2px;}
   .tache-carte:not(.is-ouvert) .tache-ligne-echeance{margin-bottom:0;}
 }
+
+/* ── Fenêtre « Enregistrer une intervention » sur téléphone (phase 4) ── */
+@media (max-width:560px){
+  .log-modal .log-header2-eyebrow{display:none;}
+  .log-modal .log-section-soustitre,.log-modal .log-num-hint{display:none;}
+  /* date et compteur côte à côte, intervenant dessous */
+  .log-modal .log-bloc-quand .field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;}
+  .log-modal .log-bloc-quand .field-row > div:nth-child(3){grid-column:1 / -1;}
+  .log-modal .log-bloc-quand .hint,.log-modal .log-bloc-quand [class*="hint"],.log-modal .log-bloc-quand small{display:none;}
+  /* liste des postes : une colonne de lignes compactes au lieu de grosses cartes sur deux colonnes */
+  .log-modal .log-checklist{grid-template-columns:minmax(0,1fr) !important;gap:6px;}
+  .log-modal .log-item-carte{min-height:0;padding:8px 10px;}
+  /* coûts optionnels : repliés */
+  .log-bloc-cout > .log-elements-tete{cursor:pointer;position:relative;padding-right:30px;}
+  .log-bloc-cout > .log-elements-tete::after{content:"+";position:absolute;right:6px;top:10px;font-size:22px;font-weight:700;color:var(--ink-2);}
+  .log-bloc-cout.is-ouvert > .log-elements-tete::after{content:"−";}
+  .log-bloc-cout:not(.is-ouvert) > :not(.log-elements-tete){display:none;}
+}
+@media (max-width:560px){
+  .log-modal .log-item-carte{flex-direction:row !important;align-items:center;gap:10px;padding:8px 10px;}
+  .log-modal .log-item-check{flex:0 0 auto;}
+  .log-modal .log-item-colonnes{flex:1 1 auto;min-width:0;}
+  .log-modal .log-bloc-elements .log-section-icone{display:none;}
+  .log-modal .log-bloc-elements .log-section-titre{font-size:16px;}
+  .log-modal .log-bloc-elements .log-elements-tete{gap:8px;padding-bottom:6px;}
+}
+@media (max-width:560px){
+  /* poste de la checklist : une ligne (case + libellé) ; la fréquence est consultable dans le plan */
+  .log-modal .log-item-colonnes > :not(.log-item-titre-ligne){display:none;}
+  .log-modal .log-item-carte{min-height:48px;}
+}
+@media (max-width:560px){
+  .log-modal .log-item-cycle{display:none;}
+  .log-modal .log-item-titre-ligne{align-items:center;}
+}

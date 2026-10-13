@@ -2212,6 +2212,11 @@ function openLogInterventionModal(machine, tache) {
   overlay.className = 'overlay log-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  // Coûts d'intervention (optionnels) : repliés sur téléphone, un toucher sur l'en-tête les déplie.
+  overlay.addEventListener('click', (e) => {
+    const tete = e.target.closest('.log-bloc-cout > .log-elements-tete');
+    if (tete) tete.closest('.log-bloc-cout').classList.toggle('is-ouvert');
+  });
 
   // Idem ici : le classement est projeté au rendu (même règle que l'écriture),
   // sans rien enregistrer. Les libellés cochés restent ceux du plan.
