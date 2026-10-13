@@ -2289,3 +2289,14 @@ textarea:not([data-x]),
   .tco-page [data-seuil-ligne] .ui-champ-unite .ui-unite{right:6px;}
   .tco-page [data-seuil-ligne] .ui-ligne-nom{font-size:11px !important;}
 }
+/* ── TCO › Répartition des charges (téléphone) : la légende ne déborde plus de son cadre ── */
+@media (max-width:560px){
+  .tco-page .tco-donut-corps{flex-wrap:nowrap;align-items:flex-start;}
+  .tco-page .tco-donut-details{min-width:0;flex:1 1 0;}
+  .tco-page .tco-donut-legende-grille{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .tco-page .tco-donut-legende-carte{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 6px;min-width:0;padding:6px 8px;box-sizing:border-box;max-width:100%;overflow:hidden;}
+  .tco-page .tco-donut-legende-carte .gauche{display:inline-flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto;white-space:normal;line-height:1.15;}
+  .tco-page .tco-donut-legende-carte .droite{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;}
+  .tco-page .tco-donut-legende-carte .badge{flex:0 0 auto;padding:2px 8px;}
+  .tco-page .tco-donut-legende-carte .heures{white-space:nowrap;}
+}
