@@ -59,6 +59,15 @@ async function fetchTousCoutsExploitationFlotte(machineIds) {
 // — même forme que ce qu'attendent tcoMachine()/coutsInterventionsMachine()
 // pour une seule machine, réutilisable telle quelle par machine une fois
 // regroupée.
+// Arrêts de pannes RÉSOLUS (panne-cout-arret.sql) : seules les pannes « à l'arrêt » ont un coût. Vide sans la migration.
+async function fetchArretsResolus(machineIds) {
+  if (!SCHEMA.hasArretCout || !machineIds || !machineIds.length) return [];
+  const { data, error } = await sb.from('machine_breakdowns')
+    .select('machine_id, downtime_hours, downtime_cost, stopped, status')
+    .in('machine_id', machineIds).eq('status', 'resolue').eq('stopped', true).limit(5000);
+  if (error) throw error;
+  return data || [];
+}
 function grouperParMachine(lignes) {
   const carte = new Map();
   (lignes || []).forEach((ligne) => {
@@ -1351,6 +1360,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
   // Coûts d'exploitation (voir tcoActif()) : chargés en même temps que
   // l'historique, réutilisés par la scorecard TCO ci-dessous.
   let operatingCosts = [];
+  let arretsPannes = [];
   const OC_LABELS = { fuel: trad('Carburant'), insurance: trad('Assurance'), tax: trad('Taxe'), storage: trad('Stockage'), other: trad('Autre') };
   const renderOperatingCosts = () => {
     const liste = overlay.querySelector('#operating-costs-liste');
@@ -1382,7 +1392,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
   const renderScorecardTco = () => {
     const section = overlay.querySelector('#tco-scorecard-section');
     if (!section) return;
-    const tco = tcoMachine(machine, historyData, operatingCosts);
+    const tco = tcoMachine(machine, historyData, operatingCosts, arretsPannes);
     if (!tco) { section.remove(); return; }
     const kpi = (label, valeur, unite, alerte) => `
       <div class="fm-kpi-card">
@@ -1407,6 +1417,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
       <div class="fm-kpi-row">
         ${kpi(trad('Coût de revient effectif'), tco.coutParUnite != null ? formatMontant(tco.coutParUnite) : '—', tco.coutParUnite != null ? tR('/ {unite}', { unite: counterShort(counterUnitOf(machine)) }) : '')}
         ${kpi(trad('Dépenses totales cumulées'), formatMontant(tco.parEntretien + tco.parExploitation))}
+        ${tco.nbArret ? kpi(trad('Coût d\'arrêt'), tco.parArret ? formatMontant(tco.parArret) : '—', tR('{h} h · {n} panne(s)', { h: String(Math.round(tco.heuresArret * 10) / 10).replace('.', ','), n: tco.nbArret })) : ''}
         ${(() => {
           const vie = partDureeDeVie(machine);
           return vie ? kpi(trad('Durée de vie consommée'), tR('{n} %', { n: vie.pct }), tR('reste {valeur}', { valeur: formatCounter(vie.restant, vie.unite) }), vie.pct >= 90) : '';
@@ -1475,16 +1486,18 @@ function openPlanView(machine, companyId, categories, options = {}) {
       // se charge EN MÊME TEMPS : si elle échoue (hors connexion, etc.), la
       // colonne « Opérateur » reste vide — l'historique lui-même s'affiche
       // quand même, jamais bloqué par un souci qui lui est étranger.
-      const [interventions, equipe, coutsExploitation] = await Promise.all([
+      const [interventions, equipe, coutsExploitation, arrets] = await Promise.all([
         fetchAllInterventions(machine.id),
         equipePourAttribution().catch(() => []),
         // La scorecard TCO ne doit pas attendre un second aller-retour : elle
         // se calcule dès que l'historique (déjà nécessaire à l'écran) est là.
         tcoActif() ? fetchOperatingCosts(machine.id).catch(() => []) : Promise.resolve([]),
+        tcoActif() ? fetchArretsResolus([machine.id]).catch(() => []) : Promise.resolve([]),
       ]);
       historyData = interventions;
       nomsEquipe = new Map(equipe.map(m => [m.id, m.nom_affiche]));
       operatingCosts = coutsExploitation;
+      arretsPannes = arrets;
     } catch (error) {
       if (valueEl) valueEl.textContent = trad('Erreur de chargement de l\'historique :') + " " + error.message;
       return;

@@ -640,11 +640,12 @@ async function chargerCarteTcoDashboard(root) {
   let flotte = null;
   let repartition = null;
   try {
-    const [interventionsFlotte, coutsFlotte] = await Promise.all([
+    const [interventionsFlotte, coutsFlotte, arretsFlotte] = await Promise.all([
       fetchToutesInterventionsFlotte(machineIds),
       fetchTousCoutsExploitationFlotte(machineIds),
+      fetchArretsResolus(machineIds).catch(() => []),
     ]);
-    flotte = calculerFlotteTco(UI.machines || [], grouperParMachine(interventionsFlotte), grouperParMachine(coutsFlotte));
+    flotte = calculerFlotteTco(UI.machines || [], grouperParMachine(interventionsFlotte), grouperParMachine(coutsFlotte), grouperParMachine(arretsFlotte));
     repartition = repartitionFlotteTco(interventionsFlotte, coutsFlotte);
   } catch (err) {
     if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
@@ -1436,13 +1437,15 @@ VIEWS.tco = {
         let interventionsFlotte = [];
         let coutsFlotte = [];
         try {
-          [interventionsFlotte, coutsFlotte] = await Promise.all([
+          let arretsFlotte = [];
+          [interventionsFlotte, coutsFlotte, arretsFlotte] = await Promise.all([
             fetchToutesInterventionsFlotte(machineIds),
             fetchTousCoutsExploitationFlotte(machineIds),
+            fetchArretsResolus(machineIds).catch(() => []),
           ]);
           const interventionsParMachine = grouperParMachine(interventionsFlotte);
           const coutsParMachine = grouperParMachine(coutsFlotte);
-          flotte = calculerFlotteTco(UI.machines || [], interventionsParMachine, coutsParMachine);
+          flotte = calculerFlotteTco(UI.machines || [], interventionsParMachine, coutsParMachine, grouperParMachine(arretsFlotte));
         } catch (err) {
           if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
           return;

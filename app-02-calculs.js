@@ -191,13 +191,21 @@ function partDureeDeVie(machine) {
 // Le TCO d'une machine. Retourne `null` sans prix d'achat : c'est ce `null`
 // qui décide, partout, si un bloc TCO s'affiche — jamais un calcul sur une
 // base à moitié connue.
-function tcoMachine(machine, interventions, operatingCosts) {
+// `pannes` (facultatif) : arrêts de pannes RÉSOLUS de la machine (panne-cout-arret.sql). Leur coût, figé à la résolution,
+// s'ajoute au total (sauf si UI.tcoAvecArret === false) mais N'ENTRE PAS dans le ratio Garder/Remplacer, qui reste
+// entretien / dépréciation : on ne mélange pas la production perdue avec l'usure de la machine.
+function tcoMachine(machine, interventions, operatingCosts, pannes) {
   if (!machine || machine.purchase_price == null || machine.purchase_price === '') return null;
   const achat = Number(machine.purchase_price) || 0;
   const revente = Number(machine.estimated_resale_value) || 0;
   const parEntretien = coutsInterventionsMachine(interventions);
   const parExploitation = coutsExploitationMachine(operatingCosts);
-  const total = achat + parEntretien + parExploitation - revente;
+  const arrets = (pannes || []).filter((p) => p && p.downtime_hours != null);
+  const parArret = arrets.reduce((somme, p) => somme + (Number(p.downtime_cost) || 0), 0);
+  const heuresArret = arrets.reduce((somme, p) => somme + (Number(p.downtime_hours) || 0), 0);
+  const nbArretNonChiffres = arrets.filter((p) => p.downtime_cost == null).length;
+  const arretInclus = typeof UI === 'undefined' || !UI || UI.tcoAvecArret !== false;
+  const total = achat + parEntretien + parExploitation + (arretInclus ? parArret : 0) - revente;
   const usage = machineCounter(machine);
   const coutParUnite = usage ? total / usage : null;
   const ratioMaintenanceAchat = achat > 0 ? parEntretien / achat : null;
@@ -210,7 +218,7 @@ function tcoMachine(machine, interventions, operatingCosts) {
   const depreciation = depreciationAnnuelle(machine);
   const ratioAmortissement = (depreciation && coutEntretienAnnuel != null) ? coutEntretienAnnuel / depreciation : null;
   return {
-    total, parAcquisition: achat, parEntretien, parExploitation, revente, coutParUnite, ratioMaintenanceAchat,
+    total, parAcquisition: achat, parEntretien, parExploitation, parArret, heuresArret, nbArret: arrets.length, nbArretNonChiffres, arretInclus, revente, coutParUnite, ratioMaintenanceAchat,
     coutAnnuel: annees ? total / annees : null, coutEntretienAnnuel, depreciationAnnuelle: depreciation, ratioAmortissement,
   };
 }
@@ -318,11 +326,11 @@ function ventilationCoutsInterventions(interventions) {
 // retourne null) et comptée séparément — jamais cachée en silence.
 // `interventionsParMachine`/`coutsParMachine` : Map(machine_id -> lignes),
 // voir grouperParMachine().
-function calculerFlotteTco(machines, interventionsParMachine, coutsParMachine) {
+function calculerFlotteTco(machines, interventionsParMachine, coutsParMachine, arretsParMachine) {
   const exclues = [];
   const lignes = (machines || [])
     .map((m) => {
-      const tco = tcoMachine(m, interventionsParMachine.get(m.id) || [], coutsParMachine.get(m.id) || []);
+      const tco = tcoMachine(m, interventionsParMachine.get(m.id) || [], coutsParMachine.get(m.id) || [], arretsParMachine ? (arretsParMachine.get(m.id) || []) : []);
       if (!tco) { exclues.push(m); return null; }
       return { machine: m, tco, decision: ratioDecisionTco(tco) };
     })
