@@ -230,6 +230,7 @@ function blocSeuilsCategorieTcoHtml() {
                   <input type="text" inputmode="decimal" class="ui-champ" data-seuil-input value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
                   <span class="ui-unite">${deviseCourte()}/h</span>
                 </div>
+                <button type="button" class="ui-btn ui-btn-pastille tco-seuil-plus" data-seuil-plus aria-expanded="false" aria-label="${esc(trad('Afficher l\'aide de saisie'))}" title="${esc(trad('Aide de saisie : moyenne actuelle, amortissement…'))}">+</button>
               </div>
               ${repere ? `
               <details class="ui-ligne-calcul">
@@ -1329,6 +1330,15 @@ VIEWS.tco = {
       </div>`;
   },
   mount() {
+    // Seuils (téléphone) : le « + » d'une ligne déroule son aide de saisie (moyenne, amortissement, raccourcis).
+    document.getElementById('view-root')?.addEventListener('click', (e) => {
+      const plus = e.target.closest('[data-seuil-plus]');
+      if (!plus) return;
+      const ligne = plus.closest('[data-seuil-ligne]');
+      const ouvert = ligne.classList.toggle('is-aide-ouverte');
+      plus.setAttribute('aria-expanded', String(ouvert));
+      plus.textContent = ouvert ? '−' : '+';
+    });
     const root = document.getElementById('view-root');
     if (!root) return;
     const message = (el, texte, erreur) => {
