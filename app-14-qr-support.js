@@ -459,6 +459,10 @@ function openMachineModal(companyId, categories, existing) {
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-amortissement">${trad('Amortissement (ans)')}</label>
                 <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-amortissement" inputmode="numeric" placeholder="${trad('Ex. 5')}" value="${isEdit && existing.amortization_years != null ? esc(existing.amortization_years) : ''}">
               </div>
+              ${SCHEMA.hasArretCout ? `<div class="flex flex-col gap-space-xs col-span-2">
+                <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-arret-horaire">${tR('Coût horaire d\'arrêt ({unite}/h)', { unite: deviseCourte() })}</label>
+                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-arret-horaire" inputmode="decimal" placeholder="${esc(trad('Vide = coût de la catégorie'))}" value="${isEdit && existing.downtime_hourly_cost != null ? esc(existing.downtime_hourly_cost) : ''}">
+              </div>` : ''}
             </div>
             <div class="hint" id="f-duree-vie-note"></div>
             <div class="hint">${trad('L\'amortissement (en années) sert à comparer le coût d\'entretien à la dépréciation annuelle de la machine (jauge Garder/Remplacer) ; sans lui, la jauge se base sur le cumul entretien / prix d\'achat. La durée de vie (en heures ou en km) sert à afficher la part de vie déjà consommée de la machine.')}</div>
@@ -1123,6 +1127,7 @@ function openMachineModal(companyId, categories, existing) {
         updatePayload.estimated_resale_value = nombreDepuisTexte(overlay.querySelector('#f-revente-estimee')?.value);
         updatePayload.expected_lifespan_counter = nombreDepuisTexte(overlay.querySelector('#f-duree-vie')?.value);
         updatePayload.amortization_years = nombreDepuisTexte(overlay.querySelector('#f-amortissement')?.value);
+        if (SCHEMA.hasArretCout) updatePayload.downtime_hourly_cost = nombreDepuisTexte(overlay.querySelector('#f-arret-horaire')?.value);
       }
       if (resolvedImageUrl) updatePayload.image_url = resolvedImageUrl;
       const { error: updErr } = await sb

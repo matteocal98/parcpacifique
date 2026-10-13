@@ -248,6 +248,64 @@ function blocSeuilsCategorieTcoHtml() {
       </div>
     </section>`;
 }
+// ── Coût d'arrêt (panne-cout-arret.sql) ──────────────────────────────────────────────────────────────────────
+// Coût par heure d'arrêt d'une machine, par catégorie (surchargeable machine par machine dans sa fiche) + heures d'une
+// journée ouvrée de la société. Le coût d'une panne « à l'arrêt » est calculé et figé à sa résolution.
+function blocCoutArretTcoHtml() {
+  const gerant = UI.role === 'gerant';
+  const bloque = gerant ? '' : ' disabled';
+  const parId = new Map();
+  (UI.machines || []).forEach((m) => {
+    if (!m.category || !m.category.id || !String(m.category.name || '').trim()) return;
+    if (!parId.has(m.category.id)) parId.set(m.category.id, (UI.categories || []).find((c) => c.id === m.category.id) || m.category);
+  });
+  const categories = [...parId.values()].sort((a, b) => String(a.name).localeCompare(String(b.name), 'fr'));
+  if (!categories.length) return '';
+  const TEINTES = ['is-roi', 'is-ok', 'is-amber', 'is-indigo'];
+  return `
+    <section class="ui-section" id="tco-arret-section">
+      <div class="ui-section-tete">
+        <div class="ui-section-icone">${picto('retard')}</div>
+        <div class="ui-section-titres">
+          <span class="ui-section-sur-titre">${trad('Paramétrage de rentabilité')}</span>
+          <h2 class="ui-section-titre">${trad('Coût d\'arrêt des machines')}</h2>
+          <p class="ui-section-sous">${trad('Ce que coûte une heure de machine à l\'arrêt (location de remplacement, production perdue…)')}</p>
+        </div>
+      </div>
+      <div class="ui-section-corps">
+        ${!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : ''}
+        <div class="ui-champ-groupe">
+          <label class="ui-etiquette" for="tco-arret-heures-jour">${trad('Heures d\'une journée de travail')}</label>
+          <div class="ui-champ-unite">
+            <input id="tco-arret-heures-jour" class="ui-champ" type="text" inputmode="decimal" value="8"${bloque}>
+            <span class="ui-unite">h</span>
+          </div>
+          <span class="ui-aide">${trad('Sert à estimer les heures d\'arrêt d\'une panne : jours ouvrés (lundi à vendredi) × ces heures.')}</span>
+        </div>
+        <div class="ui-deux is-egal">
+          ${categories.map((cat, i) => `
+          <div class="ui-liste"><div class="ui-ligne" data-arret-ligne data-categorie-id="${esc(cat.id)}">
+            <div class="ui-ligne-id">
+              <div class="ui-ligne-icone ${TEINTES[i % TEINTES.length]}">${picto(iconeCategorieMachine(cat.name))}</div>
+              <div class="ui-ligne-textes">
+                <span class="ui-ligne-nom">${esc(cat.name)}</span>
+                <span class="ui-ligne-sous">${tR('{n} machine(s) suivie(s)', { n: (UI.machines || []).filter((m) => m.category?.id === cat.id).length })}</span>
+              </div>
+            </div>
+            <div class="ui-ligne-action">
+              <div class="ui-champ-unite">
+                <input type="text" inputmode="decimal" class="ui-champ" data-arret-input value="${cat.downtime_hourly_cost != null ? esc(cat.downtime_hourly_cost) : ''}"${bloque}>
+                <span class="ui-unite">${deviseCourte()}/h</span>
+              </div>
+            </div>
+          </div></div>`).join('')}
+        </div>
+        <div class="ui-aide">${trad('Laisse vide une catégorie dont l\'arrêt n\'a pas de coût : ses pannes ne seront pas chiffrées. Une machine peut avoir son propre coût horaire dans sa fiche (Modifier la machine).')}</div>
+        <div class="ui-aide" id="tco-arret-msg" role="status" aria-live="polite"></div>
+        <div><button type="button" class="ui-btn ui-btn-plein" id="tco-save-arret"${bloque}>${picto('coche')}<span>${trad('Enregistrer le coût d\'arrêt')}</span></button></div>
+      </div>
+    </section>`;
+}
 // Donut RÉEL (phase 2) — remplace l'illustration « MODÈLE KALEA » statique
 // de la phase 1. Factorisé : réutilisé par la page Coûts & TCO (grand) ET
 // la carte du tableau de bord (petit, voir tcoDashboardCarteHtml) — une
@@ -1326,6 +1384,7 @@ VIEWS.tco = {
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
         ${blocParametresTcoHtml()}
         ${blocSeuilsCategorieTcoHtml()}
+        ${SCHEMA.hasArretCout ? blocCoutArretTcoHtml() : ''}
         ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
       </div>`;
   },
@@ -1764,6 +1823,59 @@ VIEWS.tco = {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
         btn.disabled = false;
         if (label) label.textContent = trad('Enregistrer les seuils');
+      }
+    });
+
+    // Coût d'arrêt (panne-cout-arret.sql) : heures ouvrées de la société (fonction réservée au gérant) + coût horaire
+    // par catégorie (même motif que les seuils : un update par catégorie MODIFIÉE).
+    const champHeuresJour = root.querySelector('#tco-arret-heures-jour');
+    if (champHeuresJour) {
+      sb.from('companies').select('workday_hours').eq('id', UI.companyId).maybeSingle().then(({ data }) => {
+        if (data && Number(data.workday_hours) > 0) { champHeuresJour.value = String(data.workday_hours).replace('.', ','); champHeuresJour.dataset.initial = String(Number(data.workday_hours)); }
+        else champHeuresJour.dataset.initial = '8';
+      });
+    }
+    root.querySelector('#tco-save-arret')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const label = btn.querySelector('span');
+      const msg = root.querySelector('#tco-arret-msg');
+      const heures = nombreDepuisTexte(champHeuresJour ? champHeuresJour.value : '8');
+      if (heures == null || heures < 1 || heures > 24) { message(msg, trad('Les heures d\'une journée doivent être comprises entre 1 et 24.'), true); return; }
+      const lignes = [...root.querySelectorAll('[data-arret-ligne]')];
+      const modifiees = lignes.map((ligne) => {
+        const id = ligne.dataset.categorieId;
+        const valeur = nombreDepuisTexte(ligne.querySelector('[data-arret-input]').value);
+        const categorie = (UI.categories || []).find((c) => c.id === id);
+        const ancien = categorie && categorie.downtime_hourly_cost != null ? Number(categorie.downtime_hourly_cost) : null;
+        return { id, valeur, changed: !!categorie && ancien !== valeur };
+      }).filter((l) => l.changed);
+      const heuresChangees = champHeuresJour && Number(champHeuresJour.dataset.initial || 8) !== heures;
+      if (!modifiees.length && !heuresChangees) { message(msg, trad('Aucun changement.'), false); return; }
+      btn.disabled = true;
+      if (label) label.textContent = trad('Enregistrement…');
+      try {
+        if (heuresChangees) {
+          const { error } = await sb.rpc('definir_heures_ouvrees', { p_heures: heures });
+          if (error) throw error;
+          champHeuresJour.dataset.initial = String(heures);
+        }
+        const resultats = await Promise.all(modifiees.map(({ id, valeur }) =>
+          sb.from('machine_categories').update({ downtime_hourly_cost: valeur }).eq('id', id)));
+        const erreur = resultats.find((r) => r.error);
+        if (erreur) throw erreur.error;
+        modifiees.forEach(({ id, valeur }) => {
+          const categorie = (UI.categories || []).find((c) => c.id === id);
+          if (categorie) categorie.downtime_hourly_cost = valeur;
+          (UI.machines || []).forEach((m) => { if (m.category && m.category.id === id) m.category.downtime_hourly_cost = valeur; });
+        });
+        showToast(trad('Coût d\'arrêt enregistré'));
+        message(msg, trad('Enregistré.'), false);
+        btn.disabled = false;
+        if (label) label.textContent = trad('Enregistrer le coût d\'arrêt');
+      } catch (err) {
+        message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
+        btn.disabled = false;
+        if (label) label.textContent = trad('Enregistrer le coût d\'arrêt');
       }
     });
 
