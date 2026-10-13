@@ -2045,3 +2045,9 @@ textarea:not([data-x]),
   .log-modal textarea{height:48px;min-height:48px;padding:8px 12px;font-size:14px;line-height:1.3;resize:none;}
   .log-modal .log-mo-ajouter{height:36px;padding:0 14px;font-size:14px;}
 }
+/* ── « Dépannage / Curatif » : le bloc lié à une panne ressort en orange (cadre et texte orange foncé, fond orange clair) ── */
+.log-type-carte[data-kind="depannage"]{background:#FDEBD8 !important;border:2px solid #B45309 !important;color:#B45309 !important;}
+.log-type-carte[data-kind="depannage"] .log-type-titre,.log-type-carte[data-kind="depannage"] .log-type-texte{color:#B45309 !important;}
+.log-type-carte[data-kind="depannage"] svg{color:#B45309;stroke:currentColor;}
+.log-type-carte[data-kind="depannage"] .log-type-icone,.log-type-carte[data-kind="depannage"] [class*="icone"]{background:rgba(180,83,9,.14) !important;color:#B45309 !important;}
+.log-type-carte[data-kind="depannage"].is-active{background:#F9D9B5 !important;box-shadow:0 0 0 3px rgba(180,83,9,.28) !important;}
