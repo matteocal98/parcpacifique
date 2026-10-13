@@ -16,6 +16,215 @@
 // ── Vue : Tableau de bord ─────────────────────────────────────
 const VIEWS = {};
 
+// ── Accueils par rôle et actions rapides (plan de reconfiguration du 2026-10-13, phase 3) ─────────────────────
+// Le gérant pilote : points de vigilance cliquables. Le terrain agit : actions rapides (entretien, relevé, pièce,
+// scan). Les données viennent toutes de ce que l'application calcule déjà ; rien n'est inventé.
+function estRoleTerrain() { return UI.role === 'mecanicien' || UI.role === 'chauffeur'; }
+
+// Une action = un geste du quotidien. `visible()` tient compte du rôle, de l'offre et de ce qui est installé.
+function actionsRapidesDuRole() {
+  const stockOk = !!(SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock()
+    && vueAutoriseePourRole('stock') && typeof peutGererMouvementsStock === 'function' && peutGererMouvementsStock());
+  const actions = [];
+  if (UI.role === 'gerant' || !UI.role) {
+    actions.push({ id: 'machine', titre: trad('Ajouter une machine'), sous: trad('Nouvelle machine dans le parc'), picto: 'plusCercle', teinte: 'is-signature', agir: () => handleAddMachine() });
+  }
+  actions.push({
+    id: 'entretien', titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
+    agir: () => choisirMachineRapide(trad('Entretien : quelle machine ?'), (m) => openLogInterventionModal(m)),
+  });
+  actions.push({
+    id: 'releve', titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
+    agir: () => choisirMachineRapide(trad('Relevé : quelle machine ?'), (m) => ouvrirFicheParId(m.id)),
+  });
+  if (stockOk) {
+    actions.push({
+      id: 'piece', titre: trad('Sortir une pièce du stock'), sous: trad('Mouvement de sortie rapide'), picto: 'boite', teinte: 'is-amber',
+      agir: () => { ouvrirNouveauMouvementModal(); document.querySelector('.stock-mouvement-modal input[name="mvt-type"][value="sortie"]')?.click(); },
+    });
+  }
+  actions.push({
+    id: 'scan', titre: trad('Scanner un QR code'), sous: trad('Ouvre la fiche de la machine ou de la pièce'), picto: 'qrcode', teinte: 'is-royal',
+    agir: () => {
+      if (typeof planPermetScannerQr === 'function' && !planPermetScannerQr()) {
+        openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
+        return;
+      }
+      ouvrirScannerQr();
+    },
+  });
+  return actions;
+}
+function ouvrirFeuilleActions() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.style.alignItems = 'flex-end';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const actions = actionsRapidesDuRole();
+  overlay.innerHTML = `
+    <div class="plus-sheet" role="dialog" aria-modal="true" aria-labelledby="actions-rapides-titre">
+      <div class="plus-sheet-poignee"><span></span></div>
+      <div class="plus-sheet-entete">
+        <div class="plus-sheet-identite"><div><span class="plus-sheet-nom" id="actions-rapides-titre">${estRoleTerrain() ? trad('Saisir') : trad('Actions rapides')}</span></div></div>
+        <button type="button" class="plus-sheet-fermer" id="actions-fermer" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
+      </div>
+      <div class="plus-sheet-corps"><div class="plus-sheet-section">
+        ${actions.map((a) => `
+          <button type="button" class="plus-sheet-item" data-action-rapide="${a.id}">
+            <span class="plus-sheet-item-gauche">
+              <span class="plus-sheet-item-icone ${a.teinte}">${picto(a.picto)}</span>
+              <span class="plus-sheet-item-texte"><span class="plus-sheet-item-titre">${esc(a.titre)}</span><span class="plus-sheet-item-sous">${esc(a.sous)}</span></span>
+            </span>
+            <span class="plus-sheet-item-droite">${picto('flecheDroite')}</span>
+          </button>`).join('')}
+      </div></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#actions-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelectorAll('[data-action-rapide]').forEach((b) => b.addEventListener('click', () => {
+    overlay.remove();
+    const action = actions.find((a) => a.id === b.getAttribute('data-action-rapide'));
+    if (action) action.agir();
+  }));
+}
+// Choisir une machine d'un toucher (recherche + liste) puis agir dessus.
+function choisirMachineRapide(titre, onChoix) {
+  const machines = (UI.machines || []).filter((m) => !m.archived);
+  if (!machines.length) { showToast(trad('Aucune machine dans le parc.')); return; }
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal saisie-picker" role="dialog" aria-modal="true" aria-labelledby="picker-titre">
+      <h2 id="picker-titre">${esc(titre)}</h2>
+      <input id="picker-recherche" class="ui-champ" type="search" placeholder="${esc(trad('Rechercher une machine…'))}" aria-label="${esc(trad('Rechercher une machine'))}">
+      <div class="saisie-picker-liste" id="picker-liste"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  ajouterCroixModale(overlay);
+  const liste = overlay.querySelector('#picker-liste');
+  const dessiner = () => {
+    const f = (overlay.querySelector('#picker-recherche').value || '').trim().toLowerCase();
+    const trouvees = machines.filter((m) => !f || [libelleMachineCourt(m), m.brand, m.model, m.serial_number, m.plate].filter(Boolean).some((v) => String(v).toLowerCase().includes(f)));
+    liste.innerHTML = trouvees.length
+      ? trouvees.map((m) => `<button type="button" class="saisie-picker-ligne" data-machine="${esc(m.id)}"><span class="saisie-picker-nom">${esc(libelleMachineCourt(m) || m.id)}</span>${sousTitreMachinePicker(m) ? `<span class="saisie-picker-sous">${esc(sousTitreMachinePicker(m))}</span>` : ''}</button>`).join('')
+      : `<div class="ui-aide">${trad('Aucune machine ne correspond.')}</div>`;
+  };
+  dessiner();
+  overlay.querySelector('#picker-recherche').addEventListener('input', dessiner);
+  liste.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-machine]');
+    if (!b) return;
+    const m = machines.find((x) => String(x.id) === b.getAttribute('data-machine'));
+    overlay.remove();
+    if (m) onChoix(m);
+  });
+}
+
+// Terrain : les mêmes gestes, en grosses tuiles sur l'accueil.
+function actionsRapidesSectionHtml() {
+  const actions = actionsRapidesDuRole().filter((a) => a.id !== 'machine');
+  return `
+    <section class="ui-section" id="accueil-actions">
+      ${teteSectionKit('ajuste', trad('À faire maintenant'), '')}
+      <div class="ui-section-corps">
+        <div class="accueil-actions">
+          ${actions.map((a) => `<button type="button" class="accueil-action" data-action-rapide="${a.id}"><span class="plus-sheet-item-icone ${a.teinte}">${picto(a.picto)}</span><span>${esc(a.titre)}</span></button>`).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+
+// Gérant : ce qui demande son attention, en une liste cliquable. Chaque ligne mène à l'écran qui la traite.
+function calculerVigilance() {
+  const c = UI.counts || { late: 0, soon: 0 };
+  const lignes = [];
+  lignes.push({ id: 'late', picto: 'retard', libelle: trad('Entretiens en retard'), n: c.late, etat: c.late ? 'late' : 'ok', aide: c.late ? trad('À traiter en priorité') : trad('Aucun retard') });
+  lignes.push({ id: 'soon', picto: 'bientot', libelle: tR('Échéances sous {n} jours', { n: SOON_DAYS }), n: c.soon, etat: c.soon ? 'soon' : 'ok', aide: c.soon ? trad('À planifier') : trad('Rien d\'urgent') });
+  const stockVisible = !!(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock'));
+  if (stockVisible && SCHEMA.hasKits) {
+    let n = 0;
+    try {
+      const horizon = Math.max(...PREPARATION_HORIZON);
+      n = (listePreparation(UI.machines, horizon).produits || []).filter((p) => p.stockCouverture && p.stockCouverture.solde < 0).length;
+    } catch (e) { n = 0; }
+    lignes.push({ id: 'pieces', picto: 'boite', libelle: trad('Pièces à risque de rupture'), n, etat: n ? 'late' : 'ok', aide: n ? trad('Pas assez de stock pour les entretiens à venir') : trad('Stock suffisant') });
+  }
+  if (stockVisible) {
+    const seuil = (UI.stockCounts && UI.stockCounts.seuilBas) || 0;
+    lignes.push({ id: 'seuil', picto: 'alerte', libelle: trad('Références sous le seuil'), n: seuil, etat: seuil ? 'soon' : 'ok', aide: seuil ? trad('Sous le seuil de sécurité') : trad('Aucune alerte') });
+  }
+  if (stockVisible && SCHEMA.hasCommandes) {
+    lignes.push({ id: 'commandes', picto: 'export', libelle: trad('Commandes en cours'), n: null, etat: 'ok', aide: trad('Chargement…') });
+  }
+  if (typeof tcoActif === 'function' && tcoActif() && peutVoirCouts()) {
+    lignes.push({ id: 'couts', picto: 'argent', libelle: trad('Machines au-dessus du seuil de coût'), n: null, etat: 'ok', aide: trad('Chargement…') });
+  }
+  return lignes;
+}
+function ligneVigilanceHtml(l) {
+  const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[l.etat] || '';
+  return `
+    <button type="button" class="ui-ligne is-deux vig-ligne ${classe}" data-vigilance="${l.id}" id="vig-${l.id}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone">${picto(l.picto)}</div>
+        <div class="ui-ligne-textes"><span class="ui-ligne-nom">${esc(l.libelle)}</span><span class="ui-ligne-sous" data-vig-aide>${esc(l.aide)}</span></div>
+      </div>
+      <div class="ui-ligne-action"><span class="ui-chiffre-valeur ${classe}" data-vig-n>${l.n == null ? '…' : l.n}</span>${picto('flecheDroite')}</div>
+    </button>`;
+}
+function vigilanceHtml() {
+  return `
+    <section class="ui-section" id="accueil-vigilance">
+      ${teteSectionKit('alerte', trad('Points de vigilance'), '')}
+      <div class="ui-section-corps"><div class="ui-liste vig-liste">${calculerVigilance().map(ligneVigilanceHtml).join('')}</div></div>
+    </section>`;
+}
+function majLigneVigilance(root, id, n, etat, aide) {
+  const el = root.querySelector(`#vig-${id}`);
+  if (!el) return;
+  const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[etat] || '';
+  el.className = `ui-ligne is-deux vig-ligne ${classe}`;
+  const nEl = el.querySelector('[data-vig-n]');
+  if (nEl) { nEl.textContent = String(n); nEl.className = `ui-chiffre-valeur ${classe}`; }
+  const aEl = el.querySelector('[data-vig-aide]');
+  if (aEl) aEl.textContent = aide;
+}
+async function chargerVigilanceCommandes(root) {
+  if (!root.querySelector('#vig-commandes')) return;
+  try {
+    await chargerCommandes();
+    const ouvertes = (UI.commandes || []).filter((c) => STATUTS_COMMANDE_OUVERTS.includes(c.status));
+    const aEnvoyer = ouvertes.filter((c) => c.status === 'brouillon').length;
+    majLigneVigilance(root, 'commandes', ouvertes.length, aEnvoyer ? 'soon' : 'ok',
+      ouvertes.length ? (aEnvoyer ? tR('{n} à envoyer', { n: aEnvoyer }) : trad('En attente de livraison')) : trad('Aucune commande en cours'));
+  } catch (e) {
+    majLigneVigilance(root, 'commandes', '—', 'ok', trad('Indisponible'));
+  }
+}
+function brancherAccueilRole(root) {
+  root.addEventListener('click', (e) => {
+    const rapide = e.target.closest('[data-action-rapide]');
+    if (rapide) {
+      const a = actionsRapidesDuRole().find((x) => x.id === rapide.getAttribute('data-action-rapide'));
+      if (a) a.agir();
+      return;
+    }
+    const vig = e.target.closest('[data-vigilance]');
+    if (!vig) return;
+    const id = vig.getAttribute('data-vigilance');
+    if (id === 'late' || id === 'soon') {
+      fleetFilters().status = id;
+      fleetFilters().limit = FLEET_PAGE_SIZE;
+      goTo('machines');
+    } else if (id === 'pieces') { UI.stockOnglet = 'apercu'; goTo('stock'); }
+    else if (id === 'seuil') { UI.stockOnglet = 'pieces'; UI.stockPiecesVue = 'stock'; goTo('stock'); }
+    else if (id === 'commandes') { UI.stockOnglet = 'achats'; goTo('stock'); }
+    else if (id === 'couts') goTo('tco');
+  });
+  if (!estRoleTerrain()) chargerVigilanceCommandes(root);
+}
+
 VIEWS.dashboard = {
   fondBlanc: true,
   title: trad('Tableau de bord'),
@@ -48,6 +257,7 @@ VIEWS.dashboard = {
     const affichees = alertsAVenir.slice(0, 4);
     return `
       <div class="ui-page">
+        ${estRoleTerrain() ? actionsRapidesSectionHtml() : vigilanceHtml()}
         ${retards.length
           ? prioritiesHtml(retards)
           : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}
@@ -69,11 +279,11 @@ VIEWS.dashboard = {
               <span class="ui-tuile-valeur">${c.ok}<small>${c.ok > 1 ? trad('machines') : trad('machine')}</small></span>
               <span class="ui-tuile-note">${UI.machines.length ? tR('{pct}% de la flotte opérationnelle', { pct: Math.round(100 * c.ok / UI.machines.length) }) : trad('Aucune machine suivie')}</span>
             </div>
-            <div class="ui-tuile">
+            ${estRoleTerrain() ? '' : `<div class="ui-tuile">
               <span class="ui-tuile-etiquette">${trad('Manuels analysés')}</span>
               <span class="ui-tuile-valeur">${c.analysed}<small>${trad('indexés')}</small></span>
               <span class="ui-tuile-note">${tR('{n} manuel(s) numérisé(s) par OCR', { n: c.analysed })}${UI.machines.length ? ` · ${tR('{n} % du parc', { n: Math.round(100 * c.analysed / UI.machines.length) })}` : ''}</span>
-            </div>
+            </div>`}
           </div>
         </section>
 
@@ -91,15 +301,15 @@ VIEWS.dashboard = {
               </div>
             </section>
 
-            ${preparationResumeHtml()}
+            ${UI.role === 'chauffeur' ? '' : preparationResumeHtml()}
           </div>
 
           <div class="ui-colonne">
-            <section class="ui-section">${dropzoneHtml('dash-drop')}</section>
+            ${estRoleTerrain() ? '' : `<section class="ui-section">${dropzoneHtml('dash-drop')}</section>`}
             ${remindersCardHtml()}
             ${tcoActif() && peutVoirCouts() ? tcoDashboardCarteHtml() : ''}
 
-            ${aiCardHtml()}
+            ${estRoleTerrain() ? '' : aiCardHtml()}
           </div>
         </div>
       </div>
@@ -107,6 +317,7 @@ VIEWS.dashboard = {
   },
   mount() {
     const root = document.getElementById('view-root');
+    brancherAccueilRole(root);
     wireReminderSwitches(root);
     // Reprise Stitch : la liste des échéances réutilise chronologieCarteHtml
     // (déjà en prod sur l'Agenda) au lieu de l'accordéon alertRowHtml/

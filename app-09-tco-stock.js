@@ -589,10 +589,11 @@ async function chargerCarteTcoDashboard(root) {
     repartition = repartitionFlotteTco(interventionsFlotte, coutsFlotte);
   } catch (err) {
     if (valueEl) valueEl.textContent = trad('Erreur de chargement :') + ' ' + err.message;
+    majLigneVigilance(root, 'couts', '—', 'ok', trad('Indisponible'));
     return;
   }
   if (!root.isConnected || !carte.isConnected) return;
-  if (!flotte) { carte.remove(); return; }
+  if (!flotte) { majLigneVigilance(root, 'couts', '—', 'ok', trad('Indisponible')); carte.remove(); return; }
   if (valueEl) valueEl.remove();
 
   const tauxActif = UI.company?.labor_hourly_rate != null;
@@ -600,6 +601,7 @@ async function chargerCarteTcoDashboard(root) {
   const coutHoraireMoyen = coutHoraireValeurs.length ? coutHoraireValeurs.reduce((s, v) => s + v, 0) / coutHoraireValeurs.length : null;
   const auDessusSeuil = machinesAuDessusSeuilCategorie(flotte);
   const coutHoraireEtat = auDessusSeuil.length > 0 ? 'late' : 'ok';
+  majLigneVigilance(root, 'couts', auDessusSeuil.length, coutHoraireEtat, auDessusSeuil.length ? trad('À examiner dans Coûts & TCO') : trad('Aucune machine au-dessus du seuil'));
   const tendance = tendanceRatioMoyenFlotte(flotte);
   const spotlight = categorieTcoAMettreEnAvant(flotte);
   // Unité (h/km) : celle d'une vraie machine de cette catégorie — jamais

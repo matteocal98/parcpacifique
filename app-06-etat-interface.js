@@ -149,7 +149,7 @@ function tabsPourRole() {
   const plan = TABS[3];
   const plus = TABS[4];
   const scanner = typeof planPermetScannerQr === 'function' && planPermetScannerQr();
-  return scanner ? [accueil, parc, { id: 'fab-scan' }, plan, plus] : [accueil, parc, plan, plus];
+  return scanner ? [accueil, parc, { id: 'fab' }, { id: 'tab-scan' }, plus] : [accueil, parc, { id: 'fab' }, plan, plus];
 }
 
 // LES ICÔNES DE LA NAVIGATION — DESSINÉES UNE FOIS POUR TOUTES.
@@ -536,8 +536,8 @@ function barreMobileHtml() {
 
 function tabbarHtml() {
   const slot = (t) => {
-    if (t.id === 'fab-scan') return `<button type="button" class="tab-fab tab-fab-scan" id="fab-scan" aria-label="${esc(trad('Scanner un QR'))}"><span>${picto('qrcode')}</span></button>`;
-    if (t.id === 'fab') return `<button type="button" class="tab-fab" id="fab-add" aria-label="${trad('Ajouter une machine')}"><span>+</span></button>`;
+    if (t.id === 'tab-scan') return `<button type="button" class="tab" id="tab-scan"><span class="tab-icon" aria-hidden="true">${picto('qrcode')}</span>${trad('Scanner')}</button>`;
+    if (t.id === 'fab') return `<button type="button" class="tab-fab" id="fab-add" aria-label="${(UI.role === 'mecanicien' || UI.role === 'chauffeur') ? trad('Saisir') : trad('Actions rapides')}"><span>+</span></button>`;
     if (t.id === 'plus') return `<button type="button" class="tab" id="open-plus"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
     const active = tabActif(t.id);
     return `<button type="button" class="tab${active ? ' is-active' : ''}" data-nav="${t.id}"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
@@ -650,8 +650,8 @@ function wireShell() {
   document.querySelectorAll('.sidebar [data-nav], .tabbar [data-nav], .sous-nav [data-nav]').forEach(btn => {
     btn.addEventListener('click', () => goTo(btn.dataset.nav));
   });
-  document.getElementById('fab-add')?.addEventListener('click', handleAddMachine);
-  document.getElementById('fab-scan')?.addEventListener('click', () => {
+  document.getElementById('fab-add')?.addEventListener('click', ouvrirFeuilleActions);
+  document.getElementById('tab-scan')?.addEventListener('click', () => {
     if (typeof planPermetScannerQr === 'function' && !planPermetScannerQr()) {
       openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
       return;
