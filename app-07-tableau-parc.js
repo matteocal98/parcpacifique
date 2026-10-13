@@ -1425,7 +1425,7 @@ VIEWS.machines = {
     // machines sont des lignes blanches posées dedans.
     return `
       <div class="ui-page">
-        <section class="ui-section">
+        <section class="ui-section parc-section">
           ${teteSectionKit('parcMachine', trad('Parc Machines'), '',
             `<span class="ui-tag">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
             ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
@@ -1436,12 +1436,6 @@ VIEWS.machines = {
               <input id="fleet-search" class="ui-champ" type="search" value="${esc(f.q)}"
                      placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
                      aria-label="${trad('Rechercher dans le parc')}">
-              <label class="sr-only sort-label" for="fleet-sort">${trad('Trier par')}</label>
-              <select id="fleet-sort" class="ui-selecteur">
-                <option value="urgence"${f.sort === 'urgence' ? ' selected' : ''}>${trad('Urgence opérationnelle')}</option>
-                <option value="nom"${f.sort === 'nom' ? ' selected' : ''}>${trad('Nom (A → Z)')}</option>
-                <option value="compteur"${f.sort === 'compteur' ? ' selected' : ''}>${trad('Compteur décroissant')}</option>
-              </select>
             </div>
             <div class="ui-puces" role="group" aria-label="${trad('Filtrer par état')}">
               ${parcPillHtml('all', trad('Toutes'), UI.machines.length, null)}
@@ -1505,12 +1499,7 @@ VIEWS.machines = {
       refreshFleetList();
     }));
 
-    habillerSelect(root.querySelector('#fleet-sort'), trad('Trier par'));
-    root.querySelector('#fleet-sort')?.addEventListener('change', (e) => {
-      fleetFilters().sort = e.target.value;
-      fleetFilters().limit = FLEET_PAGE_SIZE;
-      refreshFleetList();
-    });
+    // Le tri est toujours « par urgence » : le sélecteur de tri a été retiré (peu utile, il prenait une ligne).
 
     refreshFleetList();
   },

@@ -101,6 +101,9 @@ const LIBELLE_SOUS_VUE = () => ({
   agenda: trad('Agenda et préparation'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'),
   account: trad('Mon compte'), reminders: trad('Rappels et notifications'),
 });
+const LIBELLE_SOUS_VUE_COURT = () => ({
+  manuals: trad('Plans'), agenda: trad('Agenda'), stock: trad('Stock'), tco: trad('Coûts'), account: trad('Compte'), reminders: trad('Rappels'),
+});
 function rubriqueDe(viewId) { return RUBRIQUES.find((r) => r.vues.includes(viewId)) || null; }
 function rubriquesVisibles() {
   const visibles = new Set(navItemsVisibles().map((i) => i.id));
@@ -118,7 +121,8 @@ function sousNavHtml() {
   const visible = r && rubriquesVisibles().find((x) => x.id === r.id);
   if (!visible || visible.vuesVisibles.length < 2) return '';
   const libelles = LIBELLE_SOUS_VUE();
-  return `<nav class="sous-nav" aria-label="${esc(r.label)}">${visible.vuesVisibles.map((v) => `<button type="button" class="sous-nav-lien${UI.view === v ? ' is-actif' : ''}" data-nav="${v}"${UI.view === v ? ' aria-current="page"' : ''}>${esc(libelles[v])}</button>`).join('')}</nav>`;
+  const courts = LIBELLE_SOUS_VUE_COURT();
+  return `<nav class="sous-nav" aria-label="${esc(r.label)}">${visible.vuesVisibles.map((v) => `<button type="button" class="sous-nav-lien${UI.view === v ? ' is-actif' : ''}" data-nav="${v}"${UI.view === v ? ' aria-current="page"' : ''} aria-label="${esc(libelles[v])}"><span class="sn-long">${esc(libelles[v])}</span><span class="sn-court">${esc(courts[v] || libelles[v])}</span></button>`).join('')}</nav>`;
 }
 // Onglet de la barre du bas actif : sa rubrique est celle de l'écran ouvert (ou l'écran exact quand deux onglets
 // partagent la même rubrique, comme Parc et Plan sur la barre du terrain).

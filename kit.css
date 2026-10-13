@@ -1847,3 +1847,29 @@ textarea:not([data-x]),
   .mstrip:not(.is-ouvert) .mstrip-badge{font-size:12.5px;padding:3px 9px;}
   .mstrip:not(.is-ouvert) .mstrip-nom-ligne{flex-wrap:wrap;row-gap:4px;}
 }
+
+/* ── Sous-navigation d'une rubrique : barre encadrée à onglets pleins (bien visible), libellés courts sur téléphone ── */
+.sous-nav{display:flex;flex-wrap:nowrap;gap:4px;width:fit-content;max-width:100%;margin:0 0 8px;padding:4px;border:0;border-radius:var(--r-lg);background:#fff;box-shadow:0 0 0 1px rgba(14,19,51,.12);}
+.sous-nav-lien{flex:0 0 auto;min-height:44px;margin:0;padding:0 16px;border:0;border-radius:var(--r-md);background:rgba(14,19,51,.05);color:var(--ink-2);font-size:14px;font-weight:800;}
+.sous-nav-lien:hover{background:rgba(14,19,51,.09);color:var(--ink);}
+.sous-nav-lien.is-actif{background:var(--ink);color:#fff;border-bottom:0;}
+.sn-court{display:none;}
+@media (max-width:560px){
+  .sous-nav{width:100%;}
+  .sous-nav-lien{flex:1 1 0;min-width:0;padding:0 6px;font-size:13px;}
+  .sn-long{display:none;}
+  .sn-court{display:inline;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){.sous-nav-lien{min-height:36px;}}
+/* le compteur « N machines » répète l'en-tête sur téléphone */
+@media (max-width:560px){.fleet-count{display:none;}}
+
+/* Parc sur téléphone : l'en-tête « Parc Machines » + compteur répète la barre du haut et l'onglet « Machines » :
+   seuls les boutons (scanner, export, ajouter) restent, tout remonte */
+@media (max-width:560px){
+  .parc-section .ui-section-icone,.parc-section .ui-section-titres,.parc-section .ui-section-acces .ui-tag{display:none;}
+  .parc-section .ui-section-tete{gap:0;}
+  .parc-section .ui-section-acces{width:100%;padding-left:0;}
+  .parc-section .ui-section-acces .ui-btn{flex:0 0 auto;}
+  .parc-section .ui-section-acces .fleet-ajouter{flex:1 1 auto;}
+}
