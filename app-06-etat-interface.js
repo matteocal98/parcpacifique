@@ -650,6 +650,33 @@ function apercuRoleHtml() {
   return `<div class="apercu-role${UI.role !== 'gerant' ? ' is-actif' : ''}"><label for="apercu-role">Voir comme</label><select id="apercu-role">${options.map(([id, libelle]) => `<option value="${id}"${UI.role === id ? ' selected' : ''}>${libelle}</option>`).join('')}</select></div>`;
 }
 
+// Fenêtres d'ajout / d'édition d'une machine : sur téléphone, la section FACULTATIVE « Visuel & photo » est repliée
+// (les sections qui portent des champs à remplir restent ouvertes : rien d'obligatoire n'est jamais caché).
+(function surveillerFenetresMachine() {
+  if (typeof MutationObserver === 'undefined') return;
+  const habiller = (overlay) => {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 560px)').matches) return;
+    overlay.querySelectorAll('section').forEach((sec) => {
+      if (sec.classList.contains('mf-acc')) return;
+      const tete = sec.firstElementChild;
+      if (!tete || !/visuel/i.test(tete.textContent || '')) return;
+      sec.classList.add('mf-acc');
+      tete.setAttribute('role', 'button'); tete.setAttribute('tabindex', '0'); tete.setAttribute('aria-expanded', 'false');
+      const basculer = () => { const o = sec.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(o)); };
+      tete.addEventListener('click', basculer);
+      tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+    });
+  };
+  new MutationObserver((muts) => {
+    muts.forEach((m) => m.addedNodes.forEach((n) => {
+      if (n.nodeType === 1 && n.classList && (n.classList.contains('machine-modal-add') || n.classList.contains('machine-modal-edit') || n.classList.contains('machine-modal'))) {
+        habiller(n);
+        new MutationObserver(() => habiller(n)).observe(n, { childList: true, subtree: true });
+      }
+    }));
+  }).observe(document.body, { childList: true });
+})();
+
 function wireShell() {
   document.querySelectorAll('.sidebar [data-nav], .tabbar [data-nav], .sous-nav [data-nav]').forEach(btn => {
     btn.addEventListener('click', () => goTo(btn.dataset.nav));

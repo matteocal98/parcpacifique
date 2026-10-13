@@ -2353,3 +2353,24 @@ textarea:not([data-x]),
   #acc-tele-machines .ui-select-wrap select,#acc-tele-machines .ui-champ,#acc-tele-machines input.ui-champ{width:100%;box-sizing:border-box;}
   #acc-tele-machines .ui-ligne-action{justify-content:flex-start;}
 }
+/* ── Ajout / édition d'une machine (téléphone, phase 4) : plus aucun texte sous 12 px, espacements resserrés ── */
+@media (max-width:560px){
+  .machine-modal-add [class*="text-[10px]"],.machine-modal-add [class*="text-[10.5px]"],.machine-modal-add [class*="text-[11px]"],
+  .machine-modal-edit [class*="text-[10px]"],.machine-modal-edit [class*="text-[10.5px]"],.machine-modal-edit [class*="text-[11px]"],
+  .machine-modal-add .text-xs,.machine-modal-edit .text-xs,.machine-modal-add label.block,.machine-modal-edit label.block,
+  .machine-modal-add #f-kind-cards .text-xs,.machine-modal-add #f-kind-cards [class*="text-["]{font-size:12px !important;line-height:1.25 !important;}
+  .machine-modal-add .space-y-7 > * + *,.machine-modal-edit .space-y-7 > * + *{margin-top:14px !important;}
+  .machine-modal-add section,.machine-modal-edit section{gap:8px !important;}
+  .machine-modal-add .overflow-y-auto,.machine-modal-edit .overflow-y-auto{padding-top:12px !important;padding-bottom:12px !important;}
+  .machine-modal-add input:not([type=checkbox]):not([type=radio]):not([type=hidden]),.machine-modal-add select,.machine-modal-add .champ-select,
+  .machine-modal-edit input:not([type=checkbox]):not([type=radio]):not([type=hidden]),.machine-modal-edit select,.machine-modal-edit .champ-select{min-height:40px;height:40px;font-size:14px;}
+  .machine-modal-add textarea,.machine-modal-edit textarea{font-size:14px;min-height:56px;}
+  /* section facultative « Visuel & photo » : repliée, un toucher sur son titre la déplie */
+  .machine-modal-add section.mf-acc > div:first-child,.machine-modal-edit section.mf-acc > div:first-child{cursor:pointer;position:relative;padding-right:32px;min-height:40px;}
+  .machine-modal-add section.mf-acc > div:first-child::after,.machine-modal-edit section.mf-acc > div:first-child::after{content:"+";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:700;color:var(--ink-2);}
+  .machine-modal-add section.mf-acc.is-ouvert > div:first-child::after,.machine-modal-edit section.mf-acc.is-ouvert > div:first-child::after{content:"−";}
+  .machine-modal-add section.mf-acc:not(.is-ouvert) > :not(:first-child),.machine-modal-edit section.mf-acc:not(.is-ouvert) > :not(:first-child){display:none !important;}
+}
+@media (max-width:560px){
+  .machine-modal-add .text-sm.font-bold,.machine-modal-edit .text-sm.font-bold{font-size:12px !important;}
+}
