@@ -685,7 +685,7 @@ function apercuRoleHtml() {
     if (!window.matchMedia || !window.matchMedia('(max-width: 560px), (orientation: landscape) and (max-height: 520px) and (max-width: 899px)').matches) return;
     const mod = ov.querySelector('.modal');
     if (!mod || mod.querySelector(SEL) || ov.classList.contains('piece-mobile-overlay') || mod.dataset.croixAjoutee) return;
-    mod.dataset.croixAjoutee = '1';
+    mod.dataset.croixAjoutee = '1'; mod.classList.add('a-croix');
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'modal-croix'; b.setAttribute('aria-label', trad('Fermer'));
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
