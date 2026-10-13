@@ -1355,11 +1355,11 @@ function openPlusSheet() {
             <span class="plus-sheet-section-accessoire">${trad('Accès rapide')}</span>
           </div>
           ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Plan d\'entretien'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
-          ${itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '')}
+          ${vueAutoriseePourRole('agenda') ? itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '') : ''}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
-          ${tcoActif() ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
+          ${(tcoActif() && vueAutoriseePourRole('tco')) ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
           ${(telemetrieActif() && UI.role === 'gerant') ? itemHtml('telemetrie', 'telemetrie', 'is-indigo', trad('Télémétrie'), trad('Compteurs automatiques des machines'), '') : ''}
-          ${(SCHEMA.hasStock && planCouvreStock()) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
+          ${(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
         </div>
         <div class="plus-sheet-separateur"></div>
         <div class="plus-sheet-section">

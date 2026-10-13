@@ -53,8 +53,29 @@ const NAV_ITEMS = [
 // garde-fou que le reste de la fonctionnalité (rien tant que la migration
 // n'est pas visible), mais recalculé au bon moment. Stock combine DEUX
 // conditions (migration visible ET palier Enterprise) — voir planCouvreStock().
+// ── Navigation par RÔLE (plan de reconfiguration du 2026-10-13, phase 1) ──────────────────────────────────
+// Un seul endroit décide ce que chaque rôle voit : la barre latérale, la fiche « Plus » du téléphone et la
+// garde de navigation s'appuient tous dessus. Ce n'est qu'un CONFORT d'affichage : la vraie barrière reste côté
+// serveur (sécurité par société et par rôle). Un rôle inconnu ou pas encore chargé ne masque RIEN (jamais
+// d'utilisateur enfermé dehors).
+//   gérant         : tout (comme avant) ;
+//   droit de gestion (mecanicien) : pas de coûts ni de télémétrie ;
+//   droit de saisie (chauffeur)   : le terrain seulement — parc, plans et manuels, rappels, compte.
+const VUES_MASQUEES_PAR_ROLE = {
+  mecanicien: ['tco', 'telemetrie'],
+  chauffeur: ['agenda', 'stock', 'tco', 'telemetrie'],
+};
+function vueAutoriseePourRole(id) {
+  const masquees = VUES_MASQUEES_PAR_ROLE[UI && UI.role];
+  return !(masquees && masquees.includes(id));
+}
+// Les chiffres de coût (TCO, valeur du stock) ne s'affichent qu'à ceux qui ont le droit de les voir.
+function peutVoirCouts() {
+  return vueAutoriseePourRole('tco');
+}
 function navItemsVisibles() {
   return NAV_ITEMS.filter((item) => {
+    if (!vueAutoriseePourRole(item.id)) return false;
     if (item.id === 'tco') return tcoActif();
     if (item.id === 'stock') return SCHEMA.hasStock && planCouvreStock();
     // Télémétrie : migration en place (SCHEMA) ET offre Enterprise ET gérant — la
@@ -72,6 +93,18 @@ const TABS = [
   { id: 'manuals', short: trad('Plan'), icon: 'manuels' },
   { id: 'plus', short: trad('Plus'), icon: 'plus' },
 ];
+// Barre du téléphone selon le rôle. Le gérant garde la sienne (bouton « + » = ajouter une machine). Le terrain
+// (droit de gestion, droit de saisie) a le SCANNER au centre — le geste le plus fréquent d'un technicien — si
+// l'offre le permet ; sinon la barre se passe de bouton central. Le détail « Saisir » viendra à la phase 3.
+function tabsPourRole() {
+  if (UI.role !== 'mecanicien' && UI.role !== 'chauffeur') return TABS;
+  const accueil = TABS[0];
+  const parc = TABS[1];
+  const plan = TABS[3];
+  const plus = TABS[4];
+  const scanner = typeof planPermetScannerQr === 'function' && planPermetScannerQr();
+  return scanner ? [accueil, parc, { id: 'fab-scan' }, plan, plus] : [accueil, parc, plan, plus];
+}
 
 // LES ICÔNES DE LA NAVIGATION — DESSINÉES UNE FOIS POUR TOUTES.
 // Le repère est 24 × 24, le trait fait 2 px et les extrémités sont arrondies :
@@ -457,12 +490,13 @@ function barreMobileHtml() {
 
 function tabbarHtml() {
   const slot = (t) => {
+    if (t.id === 'fab-scan') return `<button type="button" class="tab-fab tab-fab-scan" id="fab-scan" aria-label="${esc(trad('Scanner un QR'))}"><span>${picto('qrcode')}</span></button>`;
     if (t.id === 'fab') return `<button type="button" class="tab-fab" id="fab-add" aria-label="${trad('Ajouter une machine')}"><span>+</span></button>`;
     if (t.id === 'plus') return `<button type="button" class="tab" id="open-plus"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
     const active = UI.view === t.id;
     return `<button type="button" class="tab${active ? ' is-active' : ''}" data-nav="${t.id}"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
   };
-  return TABS.map(slot).join('');
+  return tabsPourRole().map(slot).join('');
 }
 
 // ★ LOT 8 — L'EN-TÊTE DE LA MAQUETTE, POUR LE TABLEAU DE BORD SEUL.
@@ -515,6 +549,7 @@ function renderApp() {
   // rendu venu (et le retour du réseau relance la tentative).
   if (typeof tenterViderPhotosEnAttente === 'function') tenterViderPhotosEnAttente();
   UI.counts = machineCounts(UI.machines);
+  if (!vueAutoriseePourRole(UI.view)) UI.view = 'dashboard';
   const view = VIEWS[UI.view] || VIEWS.dashboard;
   // Charte : les écrans migrés vers le kit (kit.css) reposent sur une page BLANCHE ; les autres gardent leur fond teinté.
   document.body.classList.toggle('fond-blanc', !!view.fondBlanc);
@@ -554,6 +589,13 @@ function wireShell() {
     btn.addEventListener('click', () => goTo(btn.dataset.nav));
   });
   document.getElementById('fab-add')?.addEventListener('click', handleAddMachine);
+  document.getElementById('fab-scan')?.addEventListener('click', () => {
+    if (typeof planPermetScannerQr === 'function' && !planPermetScannerQr()) {
+      openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
+      return;
+    }
+    ouvrirScannerQr();
+  });
   // ★ LOT 8 — le bouton d'ajout de l'en-tête du tableau de bord mène au MÊME
   // chemin que le « + » de la barre d'onglets et que « Ajouter une machine » du
   // Parc : `handleAddMachine()`, qui ouvre la fenêtre des offres quand le parc a

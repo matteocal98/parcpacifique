@@ -97,7 +97,7 @@ VIEWS.dashboard = {
           <div class="ui-colonne">
             <section class="ui-section">${dropzoneHtml('dash-drop')}</section>
             ${remindersCardHtml()}
-            ${tcoActif() ? tcoDashboardCarteHtml() : ''}
+            ${tcoActif() && peutVoirCouts() ? tcoDashboardCarteHtml() : ''}
 
             ${aiCardHtml()}
           </div>
