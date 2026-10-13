@@ -1037,6 +1037,8 @@ function openPlanView(machine, companyId, categories, options = {}) {
     .filter(Boolean);
   const simpleItems = items.length ? items.map(it => it.label).filter(Boolean) : taskItems;
   const cell = (v) => (v || v === 0) ? esc(v) : '<span class="muted">—</span>';
+  // Une information absente n'occupe pas de ligne sur la fiche de tâche (téléphone) : seules les valeurs renseignées s'affichent.
+  const renseigne = (v) => !!(v || v === 0) && String(v).trim() !== '';
   // Tâches dont le carnet laisse un choix (ou qui attendent encore leur
   // intervalle) : elles sont présentées à part, pour que l'utilisateur tranche.
   const tachesAChoisir = items.filter(it => tacheAttendUnChoix(it, machine.plan, machine));
@@ -1057,8 +1059,8 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const gerant = peutGererParametresStock();
     const nomAssocie = it.kit_id ? nomKit(it.kit_id) : null;
     if (!gerant) return nomAssocie ? esc(nomAssocie) : '<span class="muted">—</span>';
-    const libelleBouton = nomAssocie ? trad('Modifier') : trad('Associer des pièces de maintenance');
-    return `${nomAssocie ? esc(nomAssocie) + ' ' : ''}<button type="button" class="view-manual choisir-kit" data-tache-kit="${index}">${esc(libelleBouton)}</button>`;
+    const libelleBouton = nomAssocie ? `<span>${esc(trad('Modifier'))}</span>` : `<span class="lib-long">${esc(trad('Associer des pièces de maintenance'))}</span><span class="lib-court">${esc(trad('Associer des pièces'))}</span>`;
+    return `${nomAssocie ? esc(nomAssocie) + ' ' : ''}<button type="button" class="view-manual choisir-kit" data-tache-kit="${index}">${libelleBouton}</button>`;
   };
   const ligneTableau = (it, index) => {
     const state = infoTache(it, machine.plan, machine).state;
@@ -1080,9 +1082,9 @@ function openPlanView(machine, companyId, categories, options = {}) {
           <div class="tache-titre"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Fréquence')}</span><span class="tache-valeur">${cell(it.frequency)}</span></div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
-          <div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>
-          <div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>
-          <div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>
+          ${renseigne(it.spec) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>` : ''}
+          ${renseigne(it.qty) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>` : ''}
+          ${renseigne(it.note) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>` : ''}
           ${avecKits ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Pièces associées')}</span><span class="tache-valeur">${celluleKit(it, index)}</span></div>` : ''}
         </div>`;
   };
@@ -1170,10 +1172,10 @@ function openPlanView(machine, companyId, categories, options = {}) {
         <span class="plan-fil-courant">${trad('Plan d\'entretien & historique')}</span>
       </nav>
       <div class="fm-toolbar">
-        <button type="button" class="fm-btn" id="edit-from-plan"><span class="fm-btn-ico-primary">${picto('crayon')}</span><span>${trad('Modifier la machine')}</span></button>
-        ${machine.manual_url ? `<button type="button" class="fm-btn" id="plan-view-manual"><span class="fm-btn-ico-accent">${picto('carnet')}</span><span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
-        <button type="button" class="fm-btn" id="plan-qr-code">${picto('qrcode')}<span>${trad('QR code')}</span></button>
-        <button type="button" class="fm-btn fm-btn-primary" id="log-from-plan"><span class="fm-btn-ico-ok">${picto('entretien')}</span><span>${trad('Enregistrer une intervention')}</span></button>
+        <button type="button" class="fm-btn fm-btn-secondaire" id="edit-from-plan" aria-label="${esc(trad('Modifier la machine'))}" title="${esc(trad('Modifier la machine'))}"><span class="fm-btn-ico-primary">${picto('crayon')}</span><span>${trad('Modifier la machine')}</span></button>
+        ${machine.manual_url ? `<button type="button" class="fm-btn fm-btn-secondaire" id="plan-view-manual" aria-label="${esc(trad('Voir le carnet d\'entretien (PDF)'))}" title="${esc(trad('Voir le carnet d\'entretien (PDF)'))}"><span class="fm-btn-ico-accent">${picto('carnet')}</span><span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
+        <button type="button" class="fm-btn fm-btn-secondaire" id="plan-qr-code" aria-label="${esc(trad('QR code'))}" title="${esc(trad('QR code'))}">${picto('qrcode')}<span>${trad('QR code')}</span></button>
+        <button type="button" class="fm-btn fm-btn-primary" id="log-from-plan"><span class="fm-btn-ico-ok">${picto('entretien')}</span><span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>
       </div>
       ${bandeauHtml}
 
@@ -1255,6 +1257,11 @@ function openPlanView(machine, companyId, categories, options = {}) {
 
   overlay.querySelector('#close-plan').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#plan-fil-retour').addEventListener('click', () => overlay.remove());
+  // Scorecard TCO : sur téléphone, seul l'en-tête (prix d'achat, recommandation) se voit ; un toucher déplie les chiffres.
+  overlay.addEventListener('click', (e) => {
+    const tete = e.target.closest('#tco-scorecard-section .fm-card-head');
+    if (tete) tete.closest('#tco-scorecard-section').classList.toggle('is-ouvert');
+  });
   // Module incrémental tactile (version smartphone du compteur) — no-op
   // silencieux si la machine n'a pas de compteur numérique (calendaire,
   // ou non couverte par l'offre) : initCompteurRouleaux n'y trouve pas sa

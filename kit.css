@@ -1873,3 +1873,39 @@ textarea:not([data-x]),
   .parc-section .ui-section-acces .ui-btn{flex:0 0 auto;}
   .parc-section .ui-section-acces .fleet-ajouter{flex:1 1 auto;}
 }
+
+/* ── Fiche machine sur téléphone (phase 4) : barre d'actions sur une ligne, tâches sans lignes vides, TCO replié ── */
+.lib-court{display:none;}
+.fm-btn-primary .lib-court{display:none;}
+@media (max-width:560px){
+  .plan-modal .fm-toolbar{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-bottom:10px;}
+  .plan-modal .fm-toolbar .fm-btn-primary{order:-1;flex:1 1 auto;min-width:0;height:44px;justify-content:center;white-space:nowrap;}
+  .plan-modal .fm-toolbar .fm-btn-primary .lib-long{display:none;}
+  .plan-modal .fm-toolbar .fm-btn-primary .lib-court{display:inline;}
+  .plan-modal .fm-toolbar .fm-btn-secondaire{flex:0 0 44px;width:44px;height:44px;min-width:44px;padding:0;justify-content:center;}
+  .plan-modal .fm-toolbar .fm-btn-secondaire > span:not([class^="fm-btn-ico"]){display:none;}
+  .plan-fil-ariane > :not(.plan-fil-retour){display:none;}
+  .fm2-o2-photo-box{height:104px;}
+  .plan-modal .fm2-mini-carte-o2{padding:6px 10px;}
+  .tache-carte{padding:10px 12px;}
+  .tache-carte .tache-titre{margin-bottom:6px;}
+  .tache-carte .tache-ligne{flex-direction:row;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .tache-carte .tache-valeur{text-align:right;min-width:0;overflow-wrap:anywhere;}
+  .tache-carte .choisir-kit .lib-long{display:none;}
+  .tache-carte .choisir-kit .lib-court{display:inline;}
+  #tco-scorecard-section .fm-card-head{cursor:pointer;position:relative;padding-right:30px;}
+  #tco-scorecard-section .fm-card-head::after{content:"+";position:absolute;right:4px;top:4px;font-size:22px;font-weight:700;color:var(--ink-2);}
+  #tco-scorecard-section.is-ouvert .fm-card-head::after{content:"−";}
+  #tco-scorecard-section:not(.is-ouvert) .fm-kpi-row{display:none;}
+}
+@media (max-width:560px){
+  .plan-modal .fm2-o2-main{gap:8px;justify-content:flex-start;}
+  .plan-modal .fm2-o2-photo{min-height:0;height:auto;}
+  .plan-modal .fm2-o2-ligne1,.plan-modal .fm2-o2-ligne2,.plan-modal .fm2-o2-ligne3{gap:8px;}
+}
+@media (max-width:560px){
+  .plan-modal .fm2-bloc-intervalle{padding:9px 12px;gap:5px;}
+  .plan-modal .fm2-o2-intervalles{gap:6px;}
+  .plan-modal .fm2-o2-badges{gap:5px;}
+  .plan-modal .fm2-o2-suivi-hint{display:none;}
+}
