@@ -2174,3 +2174,22 @@ textarea:not([data-x]),
   .compte-page .ui-section{padding:8px 10px;gap:6px;margin-bottom:8px;}
   .compte-page .ui-colonnes,.compte-page .ui-colonne{gap:8px;}
 }
+
+/* ── Agenda (téléphone, phase 4) : en-tête redondant retiré, boutons sur une ligne, calendrier resserré, préparation repliée ── */
+.lib-court{display:none;}
+@media (max-width:560px){
+  .vue-agenda > .ui-section-tete .ui-section-icone,.vue-agenda > .ui-section-tete .ui-section-titres{display:none;}
+  .vue-agenda > .ui-section-tete .ui-section-acces{display:flex;flex-wrap:nowrap;gap:6px;width:100%;padding-left:0;}
+  .vue-agenda > .ui-section-tete .ui-section-acces .ui-btn{flex:1 1 0;min-width:0;justify-content:center;height:44px;padding:0 8px;font-size:13px;white-space:nowrap;}
+  .vue-agenda .ui-section-acces .lib-long{display:none;}
+  .vue-agenda .ui-section-acces .lib-court{display:inline;}
+  .vue-agenda .ui-section-acces .ui-info-btn{display:none;}
+  .agenda-page .ui-section{padding:8px 10px;gap:6px;margin-bottom:8px;}
+  .agenda-page .agenda-jour{min-height:44px;padding:4px;}
+}
+
+@media (max-width:560px){
+  .agenda-page .agenda-jour{aspect-ratio:auto !important;height:52px;min-height:0;padding:4px 6px;}
+  .agenda-page .agenda-calendrier [class*="jour"]{min-height:0;}
+  .vue-agenda > .ui-section-tete .ui-section-acces .ui-btn svg{display:none;}
+}

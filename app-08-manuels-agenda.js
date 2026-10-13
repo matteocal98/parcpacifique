@@ -1794,14 +1794,14 @@ VIEWS.agenda = {
     const calendrier = `
         <section class="ui-section vue-agenda">
           ${teteSectionKit('calendrier', trad('Agenda'), trad('Échéances datées et compteurs à surveiller'),
-            `<button type="button" class="ui-btn ui-btn-pastille" id="agenda-export-ics">${picto('export')}<span>${dansApplication() ? trad('Intégrer à l\'agenda du téléphone') : trad('Intégrer à l\'agenda de cet ordinateur')}</span></button><button type="button" class="ui-btn ui-btn-plein" id="agenda-planifier">${picto('croix')}<span>${trad('Planifier un entretien')}</span></button>`)}
+            `<button type="button" class="ui-btn ui-btn-pastille" id="agenda-export-ics">${picto('export')}<span class="lib-long">${dansApplication() ? trad('Intégrer à l\'agenda du téléphone') : trad('Intégrer à l\'agenda de cet ordinateur')}</span><span class="lib-court">${trad('Exporter')}</span></button><button type="button" class="ui-btn ui-btn-plein" id="agenda-planifier">${picto('croix')}<span class="lib-long">${trad('Planifier un entretien')}</span><span class="lib-court">${trad('Planifier')}</span></button>`)}
           <div class="ui-section-corps">
             ${agendaNavHtml()}
             <div class="agenda-calendrier">${agendaContenuHtml()}</div>
           </div>
         </section>`;
     return `
-      <div class="ui-page">
+      <div class="ui-page agenda-page">
         ${calendrier}
         ${piecesHtml}
       </div>`;
@@ -1812,6 +1812,18 @@ VIEWS.agenda = {
     wirePreparation(racine);
     wireReminderSwitches(racine);
     wireAgenda(racine);
+    // Téléphone : la préparation des pièces est repliée sur son titre ; un toucher sur l'en-tête la déplie.
+    racine.querySelectorAll('.agenda-page > .prep-detail-carte').forEach((sec) => {
+      const tete = sec.querySelector(':scope > .ui-section-tete');
+      if (!tete) return;
+      sec.classList.add('rappels-bloc');
+      tete.setAttribute('role', 'button');
+      tete.setAttribute('tabindex', '0');
+      tete.setAttribute('aria-expanded', 'false');
+      const basculer = () => { const ouvert = sec.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(ouvert)); };
+      tete.addEventListener('click', (e) => { if (e.target.closest('button,a,input,select,textarea,.ui-info-btn')) return; basculer(); });
+      tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+    });
   },
 };
 
