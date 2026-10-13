@@ -2461,3 +2461,17 @@ textarea:not([data-x]),
   .modal .modal-croix{z-index:5;}
 }
 .modal.a-croix{position:relative;}
+/* Paysage téléphone : aucun texte d'écran sous 12 px (étiquettes, pastilles, compteurs, onglets) */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  #view-root .ui-tag,#view-root .ui-tuile-note,#view-root .ui-tuile-etiquette,#view-root .ui-statut,#view-root .ui-compte,#view-root .ui-etiquette,#view-root .ui-chiffre-etiquette,
+  #view-root .mstrip-photo-tag,#view-root .fa-court,#view-root .tele-marker-nb,#view-root .badge,#view-root .heures,#view-root small,
+  #view-root .tco-donut-centre-eyebrow,#view-root .tco-donut-centre-note,#view-root button.is-actif,
+  #view-root span:not([class*="material"]):not(.ui-info-btn),#view-root strong,
+  .tabbar button.tab,.tabbar .tab span,.sous-nav button{font-size:12px !important;}
+}
+/* Paysage téléphone : on rend de la hauteur au contenu (écran de 262 px) */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .sous-nav{margin:0 0 4px;padding:3px;}
+  #view-root .ui-section{padding:8px 12px;margin-bottom:6px;}
+  #view-root .ui-page{gap:6px;}
+}
