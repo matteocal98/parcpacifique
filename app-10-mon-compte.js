@@ -840,7 +840,7 @@ VIEWS.account = {
           // écrit qu'une fois, dans la zone ci-dessus.
           const ligneVive = racine.querySelector(`[data-membre="${membre}"]`);
           if (ligneVive) {
-            ligneVive.innerHTML = `<p class="ui-aide">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessus.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
+            ligneVive.innerHTML = `<p class="ui-aide">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessous.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
           }
         } catch (err) {
           await preparerCarteEquipe(racine);
