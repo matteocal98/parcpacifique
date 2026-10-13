@@ -2101,3 +2101,46 @@ textarea:not([data-x]),
   /* trois boutons répartis sur toute la largeur, en bas de la carte */
   .manuel-carte .ui-ligne-action.is-etiquettes{width:100% !important;flex:1 1 100% !important;justify-content:space-between !important;margin-left:0;}
 }
+
+/* ── Fenêtre « Déposer un manuel » (téléphone, phase 4) : en-tête et zones plus courts, note masquée, boutons du bas communs ── */
+@media (max-width:560px){
+  .manual-modal .pplan-head{padding:12px 14px 8px;gap:8px;}
+  .manual-modal .pplan-head-ligne{flex-wrap:wrap;gap:4px 8px;align-items:center;}
+  .manual-modal .pplan-head h2{font-size:18px;line-height:1.2;margin:0;}
+  .manual-modal .pplan-head .sub{display:none;}
+  .manual-modal .pplan-badge{font-size:12px;padding:2px 8px;}
+  .manual-modal .pplan-close{width:36px;height:36px;flex:0 0 auto;}
+  .manual-modal .pplan-close:focus,.manual-modal .pplan-close:focus-visible{outline:none;box-shadow:none;}
+  .manual-modal .pplan-body{padding:8px 14px;gap:8px;}
+  .manual-modal .pplan-champ{gap:4px;}
+  .manual-modal .pplan-champ-label{font-size:12.5px;white-space:nowrap;}
+  .manual-modal .pplan-champ-label .material-symbols-outlined,.manual-modal .pplan-champ-label svg{display:none;}
+  .manual-modal .pplan-champ-note{font-size:12px;}
+  .manual-modal .pplan-select{height:40px;font-size:14px;}
+  .manual-modal .pplan-dropzone{padding:12px 10px;gap:4px;min-height:0;}
+  .manual-modal .pplan-drop-icon{transform:scale(.8);}
+  .manual-modal .pplan-drop-titre{font-size:14px;}
+  .manual-modal .pplan-drop-formats{display:none;}
+  .manual-modal .pplan-note{display:none;}
+  .manual-modal .pplan-foot{padding:8px 14px 12px;gap:8px;}
+  .manual-modal .pplan-foot button{min-height:44px;font-size:14px;}
+}
+@media (max-width:560px){
+  .manual-modal .pplan-champ-ligne{flex-wrap:wrap;gap:0 8px;}
+  .manual-modal .pplan-champ-note{white-space:normal;flex:1 1 100%;}
+  .manual-modal .pplan-champ-label{white-space:normal;}
+  .manual-modal .pplan-foot .pplan-btn-activer{white-space:nowrap;padding:0 14px;}
+  .manual-modal .pplan-foot .pplan-btn-activer .material-symbols-outlined:last-child{display:none;}
+  .manual-modal .pplan-head{padding-top:10px;}
+}
+@media (max-width:560px){
+  .manual-modal .pplan-foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px;}
+  .manual-modal .pplan-foot .pplan-btn-annuler,.manual-modal .pplan-foot .pplan-btn-activer{width:100%;min-width:0;justify-content:center;padding:0 8px;overflow:hidden;}
+  .manual-modal .pplan-foot .pplan-btn-activer{gap:6px;font-size:14px;}
+  .manual-modal .pplan-foot .pplan-btn-activer > span:not(.material-symbols-outlined){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+}
+@media (max-width:560px){
+  .manual-modal .pplan-foot{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);}
+  .manual-modal .pplan-foot .pplan-btn-activer .material-symbols-outlined,.manual-modal .pplan-foot .pplan-btn-activer svg{display:none;}
+  .manual-modal .pplan-foot .pplan-btn-activer > span:not(.material-symbols-outlined){overflow:visible;text-overflow:clip;}
+}
