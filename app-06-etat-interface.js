@@ -677,6 +677,26 @@ function apercuRoleHtml() {
   }).observe(document.body, { childList: true });
 })();
 
+// Téléphone : toute fenêtre qui n'a pas de croix de fermeture en reçoit une (plus besoin de chercher « Annuler » en bas).
+(function ajouterCroixFenetres() {
+  if (typeof MutationObserver === 'undefined') return;
+  const SEL = '.modal-croix,.log-close2,.mform-close,.fo-fermer-x,.pplan-close,.piece-mobile-overlay,[aria-label*="Fermer"],[aria-label*="fermer"],[aria-label*="Close"]';
+  const traiter = (ov) => {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 560px)').matches) return;
+    const mod = ov.querySelector('.modal');
+    if (!mod || mod.querySelector(SEL) || ov.classList.contains('piece-mobile-overlay') || mod.dataset.croixAjoutee) return;
+    mod.dataset.croixAjoutee = '1';
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'modal-croix'; b.setAttribute('aria-label', trad('Fermer'));
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    b.addEventListener('click', () => ov.remove());
+    mod.appendChild(b);
+  };
+  new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => {
+    if (n.nodeType === 1 && n.classList && n.classList.contains('overlay')) setTimeout(() => traiter(n), 80);
+  }))).observe(document.body, { childList: true });
+})();
+
 function wireShell() {
   document.querySelectorAll('.sidebar [data-nav], .tabbar [data-nav], .sous-nav [data-nav]').forEach(btn => {
     btn.addEventListener('click', () => goTo(btn.dataset.nav));

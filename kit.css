@@ -2410,3 +2410,13 @@ textarea:not([data-x]),
 .piece-mobile-overlay .piece-mobile-annuler,.piece-mobile-overlay .piece-mobile-valider{min-height:48px;height:48px;font-size:14px;padding:0 12px;}
 .piece-mobile-overlay .piece-mobile-valider{flex:1 1 auto;}
 .piece-mobile-overlay .piece-mobile-valider .card-ico{display:none;}
+
+/* Fenêtres secondaires : textes ≥ 12 px et pastilles plus hautes sur téléphone */
+@media (max-width:560px){
+  .modal .font-label-sm,.modal .font-body-sm,.modal .ml-space-xs,.modal .mmod-pill-actif,.modal .pe-date-label,.modal .jm-eyebrow,.modal .jm-compte{font-size:12px !important;}
+  .modal .pe-pill,.modal .jm-nav-btn{min-height:36px;}
+  .modal .modal-croix{z-index:5;}
+}
+@media (max-width:560px){
+  .choix-date-noms,.indicatif-raccourcis-tete,.indicatif-raccourcis-defaut,.indicatif-badge,.indicatif-pied-compte{font-size:12px !important;}
+}
