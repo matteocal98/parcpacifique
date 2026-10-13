@@ -1983,3 +1983,44 @@ textarea:not([data-x]),
   .log-modal .log-body2{gap:10px;}
   .log-modal .log-bloc-cout{padding-top:0;padding-bottom:0;}
 }
+@media (max-width:560px){
+  /* n° de série à droite du nom de la machine, sur la même ligne */
+  .log-modal .log-header2-titre-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;}
+  .log-modal .log-header2-titre-ligne h2{flex:1 1 100%;margin:0;}
+  .log-modal .log-chip-machine{flex:0 0 auto;}
+  .log-modal .log-chip-serial{flex:0 1 auto;min-width:0;padding:3px 8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .log-modal .log-chip-serial svg{display:none;}
+  /* plus d'espace vide avant « Coûts d'intervention » */
+  .log-modal .log-bloc-elements{padding:0 !important;}
+  .log-modal .log-checklist{margin-bottom:0 !important;}
+  .log-modal .log-bloc-cout > .log-elements-tete{padding-top:0;padding-bottom:0;margin:0;min-height:0;}
+  .log-modal .log-bloc-cout:not(.is-ouvert){padding:0;}
+}
+/* ── Coûts d'intervention (téléphone) : correction des défauts d'affichage ── */
+@media (max-width:560px){
+  .log-modal .log-bloc-cout{display:flex;flex-direction:column;gap:8px;}
+  .log-modal .log-bloc-cout .field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;}
+  .log-modal .log-bloc-cout .field-row > div{min-width:0;}
+  /* étiquettes : plusieurs lignes autorisées, plus de chevauchement */
+  .log-modal .log-bloc-cout label{white-space:normal !important;font-size:12.5px;line-height:1.25;overflow-wrap:anywhere;display:block;}
+  .log-modal .log-bloc-cout label svg{display:none;}
+  .log-modal .log-bloc-cout .log-cout-champ-icone{height:36px;min-height:0;}
+  .log-modal .log-bloc-cout .log-cout-champ-icone input{font-size:14px;height:100%;min-height:0;}
+  .log-modal .log-bloc-cout .log-cout-champ-icone svg{display:none;}
+  .log-modal .log-mo-ajouter-zone{margin-top:0;}
+  /* pièces : trois boutons compacts, icône à gauche du texte */
+  .log-modal .log-bento-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .log-modal .log-bento-btn{height:auto !important;min-height:0;padding:8px 4px;flex-direction:column;gap:4px;font-size:12px;line-height:1.2;}
+  .log-modal .log-bento-icone{width:22px;height:22px;}
+  .log-modal .log-bento-icone svg{width:14px;height:14px;}
+  /* total : libellé sur deux lignes si besoin, champ à droite */
+  .log-modal .log-pieces-total-ligne{display:grid;grid-template-columns:minmax(0,1fr) 110px;align-items:center;gap:8px;}
+  .log-modal .log-pieces-total-ligne input.montant{height:36px;font-size:15px;width:100%;}
+}
+@media (max-width:560px){
+  .log-modal .log-bloc-cout .log-bento-grid{align-items:stretch;grid-auto-rows:auto;}
+  .log-modal .log-bloc-cout .log-bento-grid .log-bento-btn{height:auto !important;min-height:0 !important;max-height:none;padding:8px 4px !important;justify-content:flex-start;}
+  .log-modal .log-bloc-cout .log-bento-btn > span:not(.log-bento-icone){min-height:0 !important;height:auto !important;}
+  .log-modal .log-bloc-cout .log-pieces-label{margin-top:2px;}
+  .log-modal .log-bloc-cout .log-pieces-total-ligne{margin-top:0;padding-top:0;}
+}
