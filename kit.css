@@ -2024,3 +2024,14 @@ textarea:not([data-x]),
   .log-modal .log-bloc-cout .log-pieces-label{margin-top:2px;}
   .log-modal .log-bloc-cout .log-pieces-total-ligne{margin-top:0;padding-top:0;}
 }
+@media (max-width:560px){
+  /* boutons des pièces : la hauteur suit le texte (plus de ligne vide ni de sous-titre masqué qui réserve de la place) */
+  .log-modal .log-bento-btn br,.log-modal .log-bento-btn .log-bento-sub{display:none !important;}
+  .log-modal .log-bento-btn > span:not(.log-bento-icone){display:block;height:auto !important;min-height:0 !important;line-height:1.2;}
+  .log-modal .log-bloc-cout .log-bento-grid .log-bento-btn{padding:8px 4px 8px !important;}
+  .log-modal .log-bloc-cout .hint{display:none !important;margin:0;}
+  .log-modal .log-bloc-cout .log-pieces-liste{margin-top:0;}
+  .log-modal .log-bloc-cout .log-pieces-liste:empty{display:none;}
+  .log-modal .log-bloc-cout .log-pieces-total-ligne{margin-top:2px;}
+  .log-modal .log-bloc-cout{gap:6px !important;}
+}
