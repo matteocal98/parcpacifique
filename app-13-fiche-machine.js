@@ -1079,9 +1079,9 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const state = infoTache(it, machine.plan, machine).state;
     return `
         <div class="tache-carte${state === 'late' ? ' is-late-row' : ''}" data-etat-tache="${state}">
-          <div class="tache-titre"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</div>
+          <div class="tache-titre" role="button" tabindex="0" aria-expanded="false"><span class="item-ico">${picto(PICTO_CATEGORIE[categorieProduit(it.label)] || 'boite')}</span>${cell(it.label)}</div>
           <div class="tache-ligne"><span class="tache-libelle">${trad('Fréquence')}</span><span class="tache-valeur">${cell(it.frequency)}</span></div>
-          <div class="tache-ligne"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
+          <div class="tache-ligne tache-ligne-echeance"><span class="tache-libelle">${trad('Échéance')}</span><span class="tache-valeur">${etatTacheHtml(it, machine.plan, machine, 'ligne')}</span></div>
           ${renseigne(it.spec) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Huile / graisse / pièce')}</span><span class="tache-valeur">${cell(it.spec)}</span></div>` : ''}
           ${renseigne(it.qty) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Quantité')}</span><span class="tache-valeur">${cell(it.qty)}</span></div>` : ''}
           ${renseigne(it.note) ? `<div class="tache-ligne"><span class="tache-libelle">${trad('Remarque')}</span><span class="tache-valeur">${cell(it.note)}</span></div>` : ''}
@@ -1261,6 +1261,15 @@ function openPlanView(machine, companyId, categories, options = {}) {
   overlay.addEventListener('click', (e) => {
     const tete = e.target.closest('#tco-scorecard-section .fm-card-head');
     if (tete) tete.closest('#tco-scorecard-section').classList.toggle('is-ouvert');
+    // Fiche d'une tâche : repliée par défaut sur téléphone (titre + échéance), un toucher sur le titre la déplie.
+    const titre = e.target.closest('.tache-carte .tache-titre');
+    if (titre) {
+      const ouverte = titre.closest('.tache-carte').classList.toggle('is-ouvert');
+      titre.setAttribute('aria-expanded', String(ouverte));
+    }
+  });
+  overlay.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.matches('.tache-carte .tache-titre')) { e.preventDefault(); e.target.click(); }
   });
   // Module incrémental tactile (version smartphone du compteur) — no-op
   // silencieux si la machine n'a pas de compteur numérique (calendaire,

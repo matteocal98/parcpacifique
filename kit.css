@@ -1909,3 +1909,14 @@ textarea:not([data-x]),
   .plan-modal .fm2-o2-badges{gap:5px;}
   .plan-modal .fm2-o2-suivi-hint{display:none;}
 }
+
+/* ── Fiche machine sur téléphone : chaque tâche repliée sur son titre et son échéance ── */
+@media (max-width:560px){
+  .tache-carte .tache-titre{cursor:pointer;position:relative;padding-right:28px;min-height:32px;align-items:center;margin-bottom:6px;}
+  .tache-carte .tache-titre::after{content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:700;color:var(--ink-2);}
+  .tache-carte.is-ouvert .tache-titre::after{content:"−";}
+  .tache-carte:not(.is-ouvert) .tache-ligne:not(.tache-ligne-echeance){display:none;}
+  .tache-carte:not(.is-ouvert){padding:8px 12px;}
+  .tache-carte:not(.is-ouvert) .tache-titre{margin-bottom:2px;}
+  .tache-carte:not(.is-ouvert) .tache-ligne-echeance{margin-bottom:0;}
+}
