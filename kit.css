@@ -1765,3 +1765,49 @@ textarea:not([data-x]),
   .accueil-terrain .ui-section-acces{display:flex;flex-wrap:wrap;gap:4px 6px;width:100%;padding-left:40px;}
   .accueil-terrain .ui-section-acces .ui-tag{padding:2px 8px;}
 }
+
+/* ── Points de vigilance du gérant : tuiles, 2 à 3 par ligne ── */
+.vig-liste{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+.vig-tuile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:10px 10px 10px 14px;border:0;border-radius:var(--r-md);background:#fff;color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;box-shadow:inset 4px 0 0 var(--ok);}
+.vig-tuile.is-retard{box-shadow:inset 4px 0 0 var(--late);}
+.vig-tuile.is-bientot{box-shadow:inset 4px 0 0 var(--soon);}
+.vig-tuile.is-ok{box-shadow:inset 4px 0 0 var(--ok);}
+.vig-tete{display:flex;align-items:center;gap:8px;}
+.vig-picto svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ink-3);}
+.vig-n{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);}
+.vig-n.is-retard{color:#B45309;}
+.vig-n.is-ok{color:#0F766E;}
+.vig-libelle{font-size:12.5px;font-weight:800;line-height:1.2;}
+.vig-aide{font-size:12px;line-height:1.3;color:var(--ink-2);}
+@media (max-width:560px){
+  .vig-liste{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .vig-tuile{padding:8px 6px 8px 10px;}
+  .vig-aide{display:none;}
+  .vig-n{font-size:24px;}
+}
+/* ── Carte machine du Parc sur téléphone : libellé court, échéance sur une ligne ── */
+.lib-court{display:none;}
+.compteur-jour-tel{display:none;}
+@media (max-width:700px){
+  .mstrip-btn-principal .lib-long{display:none;}
+  .mstrip-btn-principal .lib-court{display:inline;}
+  .mstrip-compteur-bloc .compteur-jour .compteur-titre,.mstrip-compteur-bloc .compteur-jour .compteur-jour-valeur,.mstrip-compteur-bloc .compteur-jour .compteur-note{display:none;}
+  .mstrip-compteur-bloc .compteur-jour .compteur-jour-tel{display:block;font-size:13px;font-weight:700;line-height:1.35;color:var(--ink);}
+  .mstrip-corps{padding:8px 10px;gap:6px;}
+}
+
+/* ── Parc sur téléphone : le compteur d'une machine à jour se replie (ouvert d'office si retard ou échéance proche) ── */
+.mstrip-plie{display:none;}
+@media (max-width:700px){
+  .mstrip-plie{display:inline-flex;align-items:center;justify-content:center;}
+  .mstrip-plie svg{transition:transform .2s;}
+  .mstrip.is-ouvert .mstrip-plie svg{transform:rotate(180deg);}
+  .mstrip:not(.is-ouvert) .mstrip-compteur-bloc{display:none;}
+}
+@media (max-width:560px){
+  /* en-têtes des sections de l'accueil (gérant comme terrain) : état et compteur sur une seule ligne */
+  .accueil-page .ui-section-tete{flex-wrap:wrap;align-items:center;gap:6px 8px;}
+  .accueil-page .ui-section-acces{display:flex;flex-wrap:wrap;gap:4px 6px;width:100%;padding-left:40px;}
+  .accueil-page .ui-section-acces .ui-tag{padding:2px 8px;}
+}
+@media (prefers-reduced-motion:reduce){.mstrip-plie svg{transition:none;}}

@@ -138,8 +138,8 @@ function actionsRapidesSectionHtml() {
 function calculerVigilance() {
   const c = UI.counts || { late: 0, soon: 0 };
   const lignes = [];
-  lignes.push({ id: 'late', picto: 'retard', libelle: trad('Entretiens en retard'), n: c.late, etat: c.late ? 'late' : 'ok', aide: c.late ? trad('À traiter en priorité') : trad('Aucun retard') });
-  lignes.push({ id: 'soon', picto: 'bientot', libelle: tR('Échéances sous {n} jours', { n: SOON_DAYS }), n: c.soon, etat: c.soon ? 'soon' : 'ok', aide: c.soon ? trad('À planifier') : trad('Rien d\'urgent') });
+  lignes.push({ id: 'late', picto: 'retard', court: trad('Retards'), libelle: trad('Entretiens en retard'), n: c.late, etat: c.late ? 'late' : 'ok', aide: c.late ? trad('À traiter en priorité') : trad('Aucun retard') });
+  lignes.push({ id: 'soon', picto: 'bientot', court: tR('Sous {n} j', { n: SOON_DAYS }), libelle: tR('Échéances sous {n} jours', { n: SOON_DAYS }), n: c.soon, etat: c.soon ? 'soon' : 'ok', aide: c.soon ? trad('À planifier') : trad('Rien d\'urgent') });
   const stockVisible = !!(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock'));
   if (stockVisible && SCHEMA.hasKits) {
     let n = 0;
@@ -147,45 +147,43 @@ function calculerVigilance() {
       const horizon = Math.max(...PREPARATION_HORIZON);
       n = (listePreparation(UI.machines, horizon).produits || []).filter((p) => p.stockCouverture && p.stockCouverture.solde < 0).length;
     } catch (e) { n = 0; }
-    lignes.push({ id: 'pieces', picto: 'boite', libelle: trad('Pièces à risque de rupture'), n, etat: n ? 'late' : 'ok', aide: n ? trad('Pas assez de stock pour les entretiens à venir') : trad('Stock suffisant') });
+    lignes.push({ id: 'pieces', picto: 'boite', court: trad('Pièces à risque'), libelle: trad('Pièces à risque de rupture'), n, etat: n ? 'late' : 'ok', aide: n ? trad('Pas assez de stock pour les entretiens à venir') : trad('Stock suffisant') });
   }
   if (stockVisible) {
     const seuil = (UI.stockCounts && UI.stockCounts.seuilBas) || 0;
-    lignes.push({ id: 'seuil', picto: 'alerte', libelle: trad('Références sous le seuil'), n: seuil, etat: seuil ? 'soon' : 'ok', aide: seuil ? trad('Sous le seuil de sécurité') : trad('Aucune alerte') });
+    lignes.push({ id: 'seuil', picto: 'alerte', court: trad('Sous le seuil'), libelle: trad('Références sous le seuil'), n: seuil, etat: seuil ? 'soon' : 'ok', aide: seuil ? trad('Sous le seuil de sécurité') : trad('Aucune alerte') });
   }
   if (stockVisible && SCHEMA.hasCommandes) {
-    lignes.push({ id: 'commandes', picto: 'export', libelle: trad('Commandes en cours'), n: null, etat: 'ok', aide: trad('Chargement…') });
+    lignes.push({ id: 'commandes', picto: 'export', court: trad('Commandes'), libelle: trad('Commandes en cours'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
   if (typeof tcoActif === 'function' && tcoActif() && peutVoirCouts()) {
-    lignes.push({ id: 'couts', picto: 'argent', libelle: trad('Machines au-dessus du seuil de coût'), n: null, etat: 'ok', aide: trad('Chargement…') });
+    lignes.push({ id: 'couts', picto: 'argent', court: trad('Coûts élevés'), libelle: trad('Machines au-dessus du seuil de coût'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
   return lignes;
 }
 function ligneVigilanceHtml(l) {
   const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[l.etat] || '';
   return `
-    <button type="button" class="ui-ligne is-deux vig-ligne ${classe}" data-vigilance="${l.id}" id="vig-${l.id}">
-      <div class="ui-ligne-id">
-        <div class="ui-ligne-icone">${picto(l.picto)}</div>
-        <div class="ui-ligne-textes"><span class="ui-ligne-nom">${esc(l.libelle)}</span><span class="ui-ligne-sous" data-vig-aide>${esc(l.aide)}</span></div>
-      </div>
-      <div class="ui-ligne-action"><span class="ui-chiffre-valeur ${classe}" data-vig-n>${l.n == null ? '…' : l.n}</span>${picto('flecheDroite')}</div>
+    <button type="button" class="vig-tuile ${classe}" data-vigilance="${l.id}" id="vig-${l.id}" title="${esc(l.libelle + ' : ' + l.aide)}" aria-label="${esc(l.libelle)}">
+      <span class="vig-tete"><span class="vig-picto">${picto(l.picto)}</span><span class="vig-n ${classe}" data-vig-n>${l.n == null ? '…' : l.n}</span></span>
+      <span class="vig-libelle">${esc(l.court || l.libelle)}</span>
+      <span class="vig-aide" data-vig-aide>${esc(l.aide)}</span>
     </button>`;
 }
 function vigilanceHtml() {
   return `
     <section class="ui-section" id="accueil-vigilance">
       ${teteSectionKit('alerte', trad('Points de vigilance'), '')}
-      <div class="ui-section-corps"><div class="ui-liste vig-liste">${calculerVigilance().map(ligneVigilanceHtml).join('')}</div></div>
+      <div class="ui-section-corps"><div class="vig-liste">${calculerVigilance().map(ligneVigilanceHtml).join('')}</div></div>
     </section>`;
 }
 function majLigneVigilance(root, id, n, etat, aide) {
   const el = root.querySelector(`#vig-${id}`);
   if (!el) return;
   const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[etat] || '';
-  el.className = `ui-ligne is-deux vig-ligne ${classe}`;
+  el.className = `vig-tuile ${classe}`;
   const nEl = el.querySelector('[data-vig-n]');
-  if (nEl) { nEl.textContent = String(n); nEl.className = `ui-chiffre-valeur ${classe}`; }
+  if (nEl) { nEl.textContent = String(n); nEl.className = `vig-n ${classe}`; }
   const aEl = el.querySelector('[data-vig-aide]');
   if (aEl) aEl.textContent = aide;
 }
@@ -255,7 +253,7 @@ VIEWS.dashboard = {
     // `UI.alerteOuverte` — un seul état, donc une seule ligne ouverte à la fois.
     const affichees = alertsAVenir.slice(0, 4);
     return `
-      <div class="ui-page${estRoleTerrain() ? ' accueil-terrain' : ''}">
+      <div class="ui-page accueil-page${estRoleTerrain() ? ' accueil-terrain' : ''}">
         ${estRoleTerrain() ? actionsRapidesSectionHtml() : vigilanceHtml()}
         ${retards.length
           ? prioritiesHtml(retards)
@@ -795,6 +793,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         <span class="compteur-titre" id="compteur-titre-${emplacement}-${id}">${trad('Date du jour')}</span>
         <span class="compteur-jour-valeur" aria-labelledby="compteur-titre-${emplacement}-${id}">${esc(formatLongDate(todayIso()))}</span>
         <span class="compteur-note">${trad('Suivi calendaire : rien à relever.')}</span>
+        ${emplacement === 'strip' && typeof infoMachine === 'function' ? `<span class="compteur-jour-tel">${esc(infoMachine(m).label || '')}</span>` : ''}
       </div>`;
   }
   const unite = counterUnitOf(m);
@@ -1353,6 +1352,13 @@ function wireMachineCards(root) {
   // machine) reste cliquable vers la fiche, comme .chrono-carte déjà
   // utilisée sur l'Agenda. stopPropagation sur les boutons/champs internes
   // (compteur, actions) évite qu'un clic dessus ouvre aussi la fiche.
+  // Sur téléphone, une machine à jour replie son compteur (retard ou échéance proche : ouvert d'office).
+  root.querySelectorAll('[data-plier-carte]').forEach((btn) => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const carte = btn.closest('.mstrip');
+    const ouvert = carte.classList.toggle('is-ouvert');
+    btn.setAttribute('aria-expanded', String(ouvert));
+  }));
   root.querySelectorAll('.mstrip-identite').forEach(zone => zone.addEventListener('click', () => {
     const carte = zone.closest('.mstrip');
     const m = carte && UI.machines.find(x => x.id === carte.dataset.machineId);
@@ -1691,7 +1697,7 @@ function machineCardHtml(m) {
   const segments = segmentsJaugeDepassement(info, m);
 
   return `
-    <article class="mstrip" data-machine-id="${esc(m.id)}">
+    <article class="mstrip${etat !== 'ok' ? ' is-ouvert' : ''}" data-machine-id="${esc(m.id)}">
       <span class="mstrip-accent is-${etat}" aria-hidden="true"></span>
       <div class="mstrip-corps">
         <div class="mstrip-identite">
@@ -1733,9 +1739,10 @@ function machineCardHtml(m) {
         </div>` : `<div class="mstrip-jauge desktop-only">${m.plan ? `<span class="mstrip-jauge-note">${esc(info.short)}</span>` : `<div class="mstrip-jauge-vide"><span class="card-ico">${picto('plan')}</span><div><p>${trad('Plan d\'entretien à définir')}</p><p>${trad('Configure une périodicité pour activer la jauge.')}</p></div></div>`}</div>`}
 
         <div class="mstrip-actions">
-          <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span>${trad('Enregistrer une intervention')}</span></button>
+          <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>
           ${m.manual_url ? `<button type="button" class="view-manual mstrip-btn-icone" data-path="${esc(m.manual_url)}" title="${esc(trad('Consulter le carnet numérique (PDF)'))}">${picto('carnet')}</button>` : ''}
-          <button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>
+          <button type="button" class="mstrip-btn-icone mstrip-plie" data-plier-carte aria-expanded="${etat !== 'ok'}" aria-label="${esc(trad('Afficher ou masquer le compteur'))}" title="${esc(trad('Afficher ou masquer le compteur'))}">${picto('chevronBas')}</button>
+          ${UI.role === 'chauffeur' ? '' : `<button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>`}
         </div>
       </div>
     </article>`;
