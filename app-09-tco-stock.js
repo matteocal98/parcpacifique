@@ -1320,7 +1320,7 @@ VIEWS.tco = {
   subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
   render() {
     return `
-      <div class="ui-page">
+      <div class="ui-page tco-page">
         ${tcoKpiGridHtml()}
         ${tcoActif() ? tcoClassementFlotteHtml() : ''}
         ${blocParametresTcoHtml()}
@@ -1336,6 +1336,19 @@ VIEWS.tco = {
       el.textContent = texte;
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
+    // Téléphone : les blocs de réglage (paramètres, seuils, catalogue) sont repliés sur leur titre ; l'analyse du parc reste ouverte.
+    root.querySelectorAll('.tco-page > .ui-section').forEach((sec, i) => {
+      if (i < 2) return;
+      const tete = sec.querySelector(':scope > .ui-section-tete');
+      if (!tete) return;
+      sec.classList.add('rappels-bloc');
+      tete.setAttribute('role', 'button');
+      tete.setAttribute('tabindex', '0');
+      tete.setAttribute('aria-expanded', 'false');
+      const basculer = () => { const ouvert = sec.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(ouvert)); };
+      tete.addEventListener('click', (e) => { if (e.target.closest('button,a,input,select,textarea,.ui-info-btn')) return; basculer(); });
+      tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+    });
 
     // ── Classement TCO du parc — chargé en asynchrone : un fetch en masse
     // sur toute la flotte (§1), jamais fait ailleurs sur cette page, jamais

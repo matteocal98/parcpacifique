@@ -2193,3 +2193,35 @@ textarea:not([data-x]),
   .agenda-page .agenda-calendrier [class*="jour"]{min-height:0;}
   .vue-agenda > .ui-section-tete .ui-section-acces .ui-btn svg{display:none;}
 }
+
+/* ── Coûts & TCO (téléphone, phase 4) : tous les textes à 12 px minimum, filtres lisibles, tuiles resserrées ── */
+@media (max-width:560px){
+  .tco-page .ui-chiffre-etiquette,.tco-page .ui-btn-teinte,.tco-page .ui-unite,.tco-page .ui-tag,.tco-page .ui-ligne-nom,.tco-page .ui-ligne-sous,.tco-page .ui-tuile-etiquette,.tco-page .badge,.tco-page .ui-etiquette,.tco-page .ui-aide,.tco-page summary,.tco-page .ui-tuile-note,.tco-page .ui-statut,.tco-page .ui-repere-indispo{font-size:12px !important;}
+  .tco-page .ui-section{padding:8px 10px;gap:6px;margin-bottom:8px;}
+  .tco-page .ui-segment{display:flex;width:100%;}
+  .tco-page .ui-segment button{flex:1 1 0;min-width:0;height:auto;min-height:44px;padding:4px 6px;font-size:12.5px;line-height:1.15;white-space:normal;}
+  .tco-page .ui-tuile{padding:8px 10px;gap:2px;}
+  .tco-page .ui-tuile-valeur{font-size:22px;}
+  .tco-page .ui-tuile-note{line-height:1.25;}
+  .tco-page .ui-tuile .ui-info-btn{position:static;margin:0 0 0 4px;vertical-align:middle;}
+  .tco-page .ui-section-sous{display:none;}
+  .tco-page > .ui-section:first-child .ui-grille{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+}
+@media (max-width:560px){
+  .tco-page small,.tco-page .ui-section-sur-titre,.tco-page .tco-donut-centre-eyebrow,.tco-page .tco-donut-centre-note,.tco-page .ui-segment button,.tco-page .is-actif,.tco-page button span,.tco-page .heures,.tco-page .tco-dash-legende span{font-size:12px !important;}
+}
+@media (max-width:560px){
+  .tco-page .ui-tuile{min-width:0;overflow:hidden;}
+  .tco-page .ui-tuile-etiquette{letter-spacing:0 !important;overflow-wrap:anywhere;line-height:1.2;}
+  .tco-page .ui-tuile-valeur{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 4px;overflow-wrap:anywhere;}
+  .tco-page .ui-tuile-valeur small{margin-left:0;white-space:normal;}
+  .tco-page .ui-tuile .ui-info-btn{display:none;}
+  .tco-page .ui-segment{height:auto !important;align-items:stretch;padding:3px;}
+  .tco-page .ui-segment button{height:auto !important;overflow:visible;}
+  .tco-page > .ui-section:first-child .ui-barre.is-droite{justify-content:stretch;}
+  .tco-page > .ui-section:first-child .ui-barre .ui-btn{flex:1 1 auto;justify-content:center;}
+}
+@media (max-width:560px){
+  .tco-page .ui-tuile-etiquette{text-transform:none;font-weight:800;overflow-wrap:normal !important;word-break:normal;hyphens:manual;}
+  .tco-page .tco-donut-centre-eyebrow,.tco-page .tco-donut-centre-note{display:none !important;}
+}
