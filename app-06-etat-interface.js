@@ -624,7 +624,6 @@ function renderApp() {
       </div>
     </div>
     <nav class="tabbar">${tabbarHtml()}</nav>
-    ${apercuRoleHtml()}
   `;
   wireShell();
   view.mount?.();
@@ -636,18 +635,6 @@ function goTo(viewId) {
   if (rub) UI.derniereVueRubrique = { ...(UI.derniereVueRubrique || {}), [rub.id]: viewId };
   renderApp();
   window.scrollTo({ top: 0 });
-}
-
-// ── À RETIRER : sélecteur « Voir comme… » (outil de développement du plan de navigation, 2026-10-13) ─────────
-// Réservé au gérant (rôle réel mémorisé au premier rendu). Il change UNIQUEMENT l'affichage de l'onglet ouvert :
-// UI.role est simulé, jamais écrit en base ; le serveur continue d'appliquer le vrai rôle. Disparaît au rechargement.
-// Pour le retirer : supprimer cette fonction, son appel dans renderApp(), l'écouteur dans wireShell() et le bloc
-// « .apercu-role » de kit.css.
-function apercuRoleHtml() {
-  if (!UI.roleReel && UI.role === 'gerant') UI.roleReel = 'gerant';
-  if (UI.roleReel !== 'gerant') return '';
-  const options = [['gerant', 'Gérant'], ['mecanicien', 'Droit de gestion'], ['chauffeur', 'Droit de saisie']];
-  return `<div class="apercu-role${UI.role !== 'gerant' ? ' is-actif' : ''}"><label for="apercu-role">Voir comme</label><select id="apercu-role">${options.map(([id, libelle]) => `<option value="${id}"${UI.role === id ? ' selected' : ''}>${libelle}</option>`).join('')}</select></div>`;
 }
 
 // Fenêtres d'ajout / d'édition d'une machine : sur téléphone, la section FACULTATIVE « Visuel & photo » est repliée
@@ -718,7 +705,6 @@ function wireShell() {
   document.getElementById('bm-compte')?.addEventListener('click', () => goTo('account'));
 
   document.getElementById('open-plus')?.addEventListener('click', openPlusSheet);
-  document.getElementById('apercu-role')?.addEventListener('change', (e) => { UI.role = e.target.value; renderApp(); window.scrollTo({ top: 0 }); });
   document.getElementById('logout-btn')?.addEventListener('click', doLogout);
   document.getElementById('offline-retry')?.addEventListener('click', () => boot());
 }
