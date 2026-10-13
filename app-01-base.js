@@ -703,6 +703,8 @@ SCHEMA.hasSuppliersFull = false;
 SCHEMA.hasSupplierDocs = false;
 // Commandes fournisseurs + réception (stock-commandes.sql) : tables purchase_orders / purchase_order_lines / purchase_order_receipts.
 SCHEMA.hasCommandes = false;
+// Signalement de pannes (signalements-panne.sql) : table machine_breakdowns + fonctions signaler_panne / changer_statut_panne.
+SCHEMA.hasPannes = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

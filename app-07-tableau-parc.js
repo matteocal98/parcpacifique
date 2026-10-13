@@ -33,6 +33,18 @@ function actionsRapidesDuRole() {
     id: 'entretien', court: trad('Entretien'), titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
     agir: () => choisirMachineRapide(trad('Entretien : quelle machine ?'), (m) => openLogInterventionModal(m)),
   });
+  if (SCHEMA.hasPannes) {
+    actions.push({
+      id: 'panne', court: trad('Panne'), titre: trad('Signaler une panne'), sous: trad('Prévient le gérant : machine, gravité, arrêt'), picto: 'alerte', teinte: 'is-amber',
+      agir: () => choisirMachineRapide(trad('Panne : quelle machine ?'), (m) => ouvrirSignalerPanne(m)),
+    });
+  }
+  if (SCHEMA.hasPannes && (UI.role === 'gerant' || UI.role === 'mecanicien')) {
+    actions.push({
+      id: 'pannes', court: trad('Suivi'), titre: trad('Pannes signalées'), sous: trad('Voir et traiter les signalements'), picto: 'retard', teinte: 'is-royal',
+      agir: () => ouvrirListePannes(),
+    });
+  }
   actions.push({
     id: 'releve', court: trad('Relevé'), titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
     agir: () => choisirMachineRapide(trad('Relevé : quelle machine ?'), (m) => ouvrirFicheParId(m.id)),
@@ -153,6 +165,9 @@ function calculerVigilance() {
     const seuil = (UI.stockCounts && UI.stockCounts.seuilBas) || 0;
     lignes.push({ id: 'seuil', picto: 'alerte', court: trad('Sous le seuil'), libelle: trad('Références sous le seuil'), n: seuil, etat: seuil ? 'soon' : 'ok', aide: seuil ? trad('Sous le seuil de sécurité') : trad('Aucune alerte') });
   }
+  if (SCHEMA.hasPannes) {
+    lignes.push({ id: 'pannes', picto: 'retard', court: trad('Pannes'), libelle: trad('Pannes signalées'), n: null, etat: 'ok', aide: trad('Chargement…') });
+  }
   if (stockVisible && SCHEMA.hasCommandes) {
     lignes.push({ id: 'commandes', picto: 'export', court: trad('Commandes'), libelle: trad('Commandes en cours'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
@@ -187,6 +202,18 @@ function majLigneVigilance(root, id, n, etat, aide) {
   const aEl = el.querySelector('[data-vig-aide]');
   if (aEl) aEl.textContent = aide;
 }
+async function chargerVigilancePannes(root) {
+  if (!root.querySelector('#vig-pannes')) return;
+  try {
+    await chargerPannes();
+    const ouvertes = (UI.pannes || []).filter((p) => p.status !== 'resolue');
+    const arret = ouvertes.filter((p) => p.stopped).length;
+    majLigneVigilance(root, 'pannes', ouvertes.length, arret ? 'late' : (ouvertes.length ? 'soon' : 'ok'),
+      ouvertes.length ? (arret ? tR('{n} machine(s) à l\'arrêt', { n: arret }) : trad('À prendre en charge')) : trad('Aucune panne ouverte'));
+  } catch (e) {
+    majLigneVigilance(root, 'pannes', '—', 'ok', trad('Indisponible'));
+  }
+}
 async function chargerVigilanceCommandes(root) {
   if (!root.querySelector('#vig-commandes')) return;
   try {
@@ -214,12 +241,13 @@ function brancherAccueilRole(root) {
       fleetFilters().status = id;
       fleetFilters().limit = FLEET_PAGE_SIZE;
       goTo('machines');
-    } else if (id === 'pieces') { UI.stockOnglet = 'apercu'; goTo('stock'); }
+    } else if (id === 'pannes') { ouvrirListePannes(); }
+    else if (id === 'pieces') { UI.stockOnglet = 'apercu'; goTo('stock'); }
     else if (id === 'seuil') { UI.stockOnglet = 'pieces'; UI.stockPiecesVue = 'stock'; goTo('stock'); }
     else if (id === 'commandes') { UI.stockOnglet = 'achats'; goTo('stock'); }
     else if (id === 'couts') goTo('tco');
   });
-  if (!estRoleTerrain()) chargerVigilanceCommandes(root);
+  if (!estRoleTerrain()) { chargerVigilanceCommandes(root); chargerVigilancePannes(root); }
 }
 
 VIEWS.dashboard = {

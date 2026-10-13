@@ -3144,3 +3144,118 @@ async function fetchAllInterventions(machineId) {
   }
   return all;
 }
+
+
+// ── Signaler une panne (signalements-panne.sql) ─────────────────────────────────────────────────────────────
+// Tout membre signale ; le gérant (et le droit de gestion) suit : ouverte → prise en charge → résolue.
+const GRAVITES_PANNE = [
+  { id: 'mineure', libelle: 'Mineure' },
+  { id: 'importante', libelle: 'Importante' },
+  { id: 'bloquante', libelle: 'Bloquante' },
+];
+const STATUTS_PANNE = { ouverte: 'Ouverte', prise_en_charge: 'Prise en charge', resolue: 'Résolue' };
+
+async function chargerPannes() {
+  const { data, error } = await sb.from('machine_breakdowns').select('*').eq('company_id', UI.companyId)
+    .order('reported_at', { ascending: false }).limit(200);
+  if (error) throw error;
+  UI.pannes = data || [];
+}
+
+function ouvrirSignalerPanne(machine) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal panne-modal" role="dialog" aria-modal="true" aria-labelledby="panne-titre">
+      <h2 id="panne-titre">${trad('Signaler une panne')}</h2>
+      <p class="sub">${esc(libelleMachineCourt(machine) || '')}</p>
+      <label class="ui-etiquette" for="panne-desc">${trad('Que se passe-t-il ?')}</label>
+      <textarea id="panne-desc" class="ui-champ" rows="3" maxlength="500" placeholder="${esc(trad('Ex. : fuite d\'huile sous le moteur'))}"></textarea>
+      <div class="ui-etiquette">${trad('Gravité')}</div>
+      <div class="ui-puces" role="radiogroup" aria-label="${esc(trad('Gravité'))}">
+        ${GRAVITES_PANNE.map((g) => `<label class="ui-puce${g.id === 'importante' ? ' is-actif' : ''}"><input type="radio" name="panne-gravite" value="${g.id}"${g.id === 'importante' ? ' checked' : ''}><span>${esc(trad(g.libelle))}</span></label>`).join('')}
+      </div>
+      <label class="panne-arret"><input type="checkbox" id="panne-arret"> <span>${trad('La machine est à l\'arrêt')}</span></label>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="panne-annuler">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="panne-envoyer">${trad('Envoyer le signalement')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  ajouterCroixModale(overlay);
+  const q = (s) => overlay.querySelector(s);
+  overlay.querySelectorAll('input[name="panne-gravite"]').forEach((r) => r.addEventListener('change', () => {
+    overlay.querySelectorAll('.panne-modal .ui-puce').forEach((p) => p.classList.toggle('is-actif', p.querySelector('input').checked));
+  }));
+  q('#panne-annuler').addEventListener('click', () => overlay.remove());
+  q('#panne-envoyer').addEventListener('click', async () => {
+    const description = q('#panne-desc').value.trim();
+    if (!description) { showToast(trad('Décris la panne en quelques mots.')); q('#panne-desc').focus(); return; }
+    const bouton = q('#panne-envoyer');
+    bouton.disabled = true;
+    const { error } = await sb.rpc('signaler_panne', {
+      p_machine_id: machine.id,
+      p_description: description,
+      p_severity: (overlay.querySelector('input[name="panne-gravite"]:checked') || {}).value || 'importante',
+      p_stopped: q('#panne-arret').checked,
+    });
+    if (error) { bouton.disabled = false; showToast(error.message || trad('Envoi impossible. Réessaie.')); return; }
+    overlay.remove();
+    showToast(trad('Panne signalée. Le gérant est prévenu dans l\'application.'));
+    const racine = document.getElementById('view-root');
+    if (racine && racine.querySelector('#vig-pannes')) chargerVigilancePannes(racine);
+  });
+  setTimeout(() => q('#panne-desc').focus(), 60);
+}
+
+async function ouvrirListePannes() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal panne-modal panne-liste-modal" role="dialog" aria-modal="true" aria-labelledby="pannes-titre">
+      <h2 id="pannes-titre">${trad('Pannes signalées')}</h2>
+      <div class="ui-puces" id="pannes-filtres" role="group"></div>
+      <div id="pannes-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  ajouterCroixModale(overlay);
+  const peutTraiter = UI.role === 'gerant' || UI.role === 'mecanicien';
+  let filtre = 'ouvertes';
+  const dessiner = () => {
+    const toutes = UI.pannes || [];
+    const ouvertes = toutes.filter((p) => p.status !== 'resolue');
+    const liste = filtre === 'ouvertes' ? ouvertes : toutes.filter((p) => p.status === 'resolue');
+    overlay.querySelector('#pannes-filtres').innerHTML = [['ouvertes', trad('Ouvertes'), ouvertes.length], ['resolues', trad('Résolues'), toutes.length - ouvertes.length]]
+      .map(([id, l, n]) => `<button type="button" class="ui-puce${filtre === id ? ' is-actif' : ''}" data-filtre="${id}"><span>${esc(l)}</span><span class="ui-compte">${n}</span></button>`).join('');
+    overlay.querySelector('#pannes-liste').innerHTML = liste.length ? liste.map((p) => {
+      const quand = new Date(p.reported_at).toLocaleDateString(LANGUE === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short' });
+      const classe = p.status === 'resolue' ? 'is-ok' : (p.stopped || p.severity === 'bloquante' ? 'is-retard' : 'is-bientot');
+      const actions = peutTraiter ? (p.status === 'ouverte'
+        ? `<button type="button" class="ui-btn ui-btn-pastille" data-panne-statut="prise_en_charge" data-id="${esc(p.id)}">${trad('Prendre en charge')}</button>`
+        : (p.status === 'prise_en_charge' ? `<button type="button" class="ui-btn ui-btn-plein" data-panne-statut="resolue" data-id="${esc(p.id)}">${trad('Marquer résolue')}</button>` : '')) : '';
+      return `<div class="panne-ligne ${classe}">
+        <div class="panne-ligne-tete"><strong>${esc(p.machine_name || '')}</strong>${p.stopped ? `<span class="ui-statut is-retard">${trad('À l\'arrêt')}</span>` : ''}<span class="ui-statut ${classe}">${esc(trad(STATUTS_PANNE[p.status] || p.status))}</span></div>
+        <div class="panne-ligne-desc">${esc(p.description)}</div>
+        <div class="panne-ligne-meta">${esc(trad((GRAVITES_PANNE.find((g) => g.id === p.severity) || {}).libelle || p.severity))} · ${esc(quand)}${p.reported_by_name ? ` · ${esc(p.reported_by_name)}` : ''}</div>
+        ${actions ? `<div class="panne-ligne-actions">${actions}</div>` : ''}
+      </div>`;
+    }).join('') : `<div class="ui-aide">${filtre === 'ouvertes' ? trad('Aucune panne ouverte.') : trad('Aucune panne résolue.')}</div>`;
+  };
+  try { await chargerPannes(); } catch (e) { overlay.querySelector('#pannes-liste').innerHTML = `<div class="ui-aide">${trad('Indisponible')}</div>`; return; }
+  dessiner();
+  overlay.addEventListener('click', async (e) => {
+    const f = e.target.closest('[data-filtre]');
+    if (f) { filtre = f.getAttribute('data-filtre'); dessiner(); return; }
+    const b = e.target.closest('[data-panne-statut]');
+    if (!b) return;
+    b.disabled = true;
+    const { error } = await sb.rpc('changer_statut_panne', { p_id: b.getAttribute('data-id'), p_status: b.getAttribute('data-panne-statut'), p_note: null });
+    if (error) { b.disabled = false; showToast(error.message || trad('Action impossible.')); return; }
+    try { await chargerPannes(); } catch (err) { /* la liste garde son dernier état */ }
+    dessiner();
+    const racine = document.getElementById('view-root');
+    if (racine && racine.querySelector('#vig-pannes')) chargerVigilancePannes(racine);
+  });
+}
