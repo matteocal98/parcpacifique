@@ -300,6 +300,7 @@ function blocCoutArretTcoHtml() {
             </div>
           </div></div>`).join('')}
         </div>
+        <label class="ui-case"><input type="checkbox" id="tco-arret-inclus"${tcoArretInclus() ? ' checked' : ''}> ${trad('Inclure le coût d\'arrêt dans le TCO total')}</label>
         <div class="ui-aide">${trad('Laisse vide une catégorie dont l\'arrêt n\'a pas de coût : ses pannes ne seront pas chiffrées. Une machine peut avoir son propre coût horaire dans sa fiche (Modifier la machine).')}</div>
         <div class="ui-aide" id="tco-arret-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="tco-save-arret"${bloque}>${picto('coche')}<span>${trad('Enregistrer le coût d\'arrêt')}</span></button></div>
@@ -405,6 +406,7 @@ function ligneClassementTcoHtml(machine, tco, decision, ventilation, periodeInfo
         ${decisionAffichee ? `<span class="ui-statut ${classeEtat}" title="${esc(libelles[etat]())}">${TENDANCE[etat]}</span>` : ''}
         ${ratioTexte ? `<span class="ui-tag">${ratioTexte}</span>` : ''}
         ${ecart != null ? `<span class="ui-statut ${ecart > 0 ? 'is-retard' : 'is-ok'}">${ecart > 0 ? `+${formatMontant(Math.round(ecart))}/${uniteCourte}` : trad('Sous le seuil')}</span>` : ''}
+        ${tco.nbArret ? `<span class="ui-tag">${tR('Arrêt : {c} · {h} h', { c: tco.parArret ? formatMontant(tco.parArret) : '—', h: String(Math.round(tco.heuresArret * 10) / 10).replace('.', ',') })}${!periodeInfo && !tco.arretInclus ? ' · ' + trad('hors TCO') : ''}</span>` : ''}
       </div>
     </div>`;
 }
@@ -570,11 +572,11 @@ function ouvrirModaleExport() {
   });
 }
 function exporterClassementTcoCsv(flotte) {
-  const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
+  const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('Coût d\'arrêt'), trad('Heures d\'arrêt'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const rows = flotte.lignes.map(({ machine, tco, decision }) => [
     machine.name, machine.purchase_price ?? '', machine.purchase_date ?? '', machine.estimated_resale_value ?? '',
-    Math.round(tco.parEntretien), Math.round(tco.parExploitation), Math.round(tco.total),
+    Math.round(tco.parEntretien), Math.round(tco.parExploitation), Math.round(tco.parArret || 0), Math.round((tco.heuresArret || 0) * 10) / 10, Math.round(tco.total),
     tco.coutAnnuel != null ? Math.round(tco.coutAnnuel) : '', tco.coutParUnite != null ? Math.round(tco.coutParUnite) : '',
     decision ? Math.round(decision.ratio * 100) : '', decision ? (decision.base === 'amortissement' ? trad('Dépréciation') : trad('Prix d\'achat')) : '',
     decision ? etatTco(decision.ratio, decision.base) : '',
@@ -1838,6 +1840,11 @@ VIEWS.tco = {
         else champHeuresJour.dataset.initial = '8';
       });
     }
+    root.querySelector('#tco-arret-inclus')?.addEventListener('change', (e) => {
+      UI.tcoAvecArret = e.currentTarget.checked;
+      try { localStorage.setItem('kalea.tcoAvecArret', UI.tcoAvecArret ? '1' : '0'); } catch (err) { /* sans stockage : réglage valable pour cette session */ }
+      renderApp();
+    });
     root.querySelector('#tco-save-arret')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const label = btn.querySelector('span');

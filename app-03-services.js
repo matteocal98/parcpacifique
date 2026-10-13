@@ -565,9 +565,9 @@ async function genererRapportTcoPdf(donnees) {
   T(doc, trad('Extrait de données par machine'), MX, y);
   y += 7;
 
-  const largeursE = [34, 22, 16, 20, 18, 18, 18, 18, 20];
-  const entetesE = [trad('Machine'), trad('Achat'), trad('Amort.'), trad('Seuil'), trad('Pièces'), trad('MO'), trad('Frais fixes'), trad('Carburant'), trad('TCO/unité')];
-  const alignementsE = ['left', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right'];
+  const largeursE = [28, 20, 14, 18, 17, 16, 17, 17, 17, 20];
+  const entetesE = [trad('Machine'), trad('Achat'), trad('Amort.'), trad('Seuil'), trad('Pièces'), trad('MO'), trad('Frais fixes'), trad('Carburant'), trad('Arrêt'), trad('TCO/unité')];
+  const alignementsE = ['left', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right'];
   const lignesE = donnees.extrait.map(({ machine, tco, pieces, mainOeuvre, fraisFixes, carburant }) => {
     const uc = counterShort(counterUnitOf(machine));
     return [
@@ -579,6 +579,7 @@ async function genererRapportTcoPdf(donnees) {
       formatMontant(mainOeuvre, donnees.devise),
       formatMontant(fraisFixes, donnees.devise),
       formatMontant(carburant, donnees.devise),
+      tco.nbArret ? (tco.parArret ? formatMontant(tco.parArret, donnees.devise) : '—') : '—',
       tco.coutParUnite != null ? `${formatMontant(tco.coutParUnite, donnees.devise)}/${uc}` : '—',
     ];
   });
@@ -596,6 +597,11 @@ async function genererRapportTcoPdf(donnees) {
   doc.setTextColor(60, 60, 70);
   const methodo = [
     trad('TCO total (machine) = prix d\'achat + entretien cumulé (pièces + main d\'œuvre) + coûts d\'exploitation − revente estimée.'),
+    ...(donnees.extrait.some((e) => e.tco.parArret > 0)
+      ? [donnees.extrait.some((e) => !e.tco.arretInclus)
+        ? trad('Coût d\'arrêt = heures d\'arrêt × coût horaire d\'arrêt, figé à la résolution de la panne ; affiché ici mais NON inclus dans le TCO total (réglage de l\'application).')
+        : trad('Le TCO total inclut le coût d\'arrêt des pannes (heures d\'arrêt × coût horaire d\'arrêt, figé à la résolution de la panne).')]
+      : []),
     trad('Coût par unité d\'usage = TCO total / relevé du compteur (heures ou km).'),
     trad('Dépréciation annuelle = (prix d\'achat − revente estimée) / durée d\'amortissement.'),
     trad('Ratio garder/remplacer = entretien annualisé / dépréciation annuelle ; repli sur entretien cumulé / prix d\'achat quand la durée d\'amortissement n\'est pas renseignée (la base retenue est alors indiquée).'),

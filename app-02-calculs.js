@@ -191,6 +191,15 @@ function partDureeDeVie(machine) {
 // Le TCO d'une machine. Retourne `null` sans prix d'achat : c'est ce `null`
 // qui décide, partout, si un bloc TCO s'affiche — jamais un calcul sur une
 // base à moitié connue.
+// Inclure le coût d'arrêt dans le TCO total ? Oui par défaut ; le choix se règle dans « Coût d'arrêt des machines »
+// et se mémorise sur l'appareil (jamais bloquant : sans stockage, l'arrêt reste inclus).
+function tcoArretInclus() {
+  if (typeof UI === 'undefined' || !UI) return true;
+  if (UI.tcoAvecArret === undefined) {
+    try { UI.tcoAvecArret = localStorage.getItem('kalea.tcoAvecArret') !== '0'; } catch (e) { UI.tcoAvecArret = true; }
+  }
+  return UI.tcoAvecArret !== false;
+}
 // `pannes` (facultatif) : arrêts de pannes RÉSOLUS de la machine (panne-cout-arret.sql). Leur coût, figé à la résolution,
 // s'ajoute au total (sauf si UI.tcoAvecArret === false) mais N'ENTRE PAS dans le ratio Garder/Remplacer, qui reste
 // entretien / dépréciation : on ne mélange pas la production perdue avec l'usure de la machine.
@@ -204,7 +213,7 @@ function tcoMachine(machine, interventions, operatingCosts, pannes) {
   const parArret = arrets.reduce((somme, p) => somme + (Number(p.downtime_cost) || 0), 0);
   const heuresArret = arrets.reduce((somme, p) => somme + (Number(p.downtime_hours) || 0), 0);
   const nbArretNonChiffres = arrets.filter((p) => p.downtime_cost == null).length;
-  const arretInclus = typeof UI === 'undefined' || !UI || UI.tcoAvecArret !== false;
+  const arretInclus = tcoArretInclus();
   const total = achat + parEntretien + parExploitation + (arretInclus ? parArret : 0) - revente;
   const usage = machineCounter(machine);
   const coutParUnite = usage ? total / usage : null;
