@@ -30,21 +30,21 @@ function actionsRapidesDuRole() {
     actions.push({ id: 'machine', titre: trad('Ajouter une machine'), sous: trad('Nouvelle machine dans le parc'), picto: 'plusCercle', teinte: 'is-signature', agir: () => handleAddMachine() });
   }
   actions.push({
-    id: 'entretien', titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
+    id: 'entretien', court: trad('Entretien'), titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
     agir: () => choisirMachineRapide(trad('Entretien : quelle machine ?'), (m) => openLogInterventionModal(m)),
   });
   actions.push({
-    id: 'releve', titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
+    id: 'releve', court: trad('Relevé'), titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
     agir: () => choisirMachineRapide(trad('Relevé : quelle machine ?'), (m) => ouvrirFicheParId(m.id)),
   });
   if (stockOk) {
     actions.push({
-      id: 'piece', titre: trad('Sortir une pièce du stock'), sous: trad('Mouvement de sortie rapide'), picto: 'boite', teinte: 'is-amber',
+      id: 'piece', court: trad('Pièce'), titre: trad('Sortir une pièce du stock'), sous: trad('Mouvement de sortie rapide'), picto: 'boite', teinte: 'is-amber',
       agir: () => { ouvrirNouveauMouvementModal(); document.querySelector('.stock-mouvement-modal input[name="mvt-type"][value="sortie"]')?.click(); },
     });
   }
   actions.push({
-    id: 'scan', titre: trad('Scanner un QR code'), sous: trad('Ouvre la fiche de la machine ou de la pièce'), picto: 'qrcode', teinte: 'is-royal',
+    id: 'scan', court: trad('Scanner'), titre: trad('Scanner un QR code'), sous: trad('Ouvre la fiche de la machine ou de la pièce'), picto: 'qrcode', teinte: 'is-royal',
     agir: () => {
       if (typeof planPermetScannerQr === 'function' && !planPermetScannerQr()) {
         openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
@@ -125,11 +125,10 @@ function choisirMachineRapide(titre, onChoix) {
 function actionsRapidesSectionHtml() {
   const actions = actionsRapidesDuRole().filter((a) => a.id !== 'machine');
   return `
-    <section class="ui-section" id="accueil-actions">
-      ${teteSectionKit('ajuste', trad('À faire maintenant'), '')}
+    <section class="ui-section" id="accueil-actions" aria-label="${esc(trad('À faire maintenant'))}">
       <div class="ui-section-corps">
-        <div class="accueil-actions">
-          ${actions.map((a) => `<button type="button" class="accueil-action" data-action-rapide="${a.id}"><span class="plus-sheet-item-icone ${a.teinte}">${picto(a.picto)}</span><span>${esc(a.titre)}</span></button>`).join('')}
+        <div class="accueil-actions" style="--n:${actions.length};">
+          ${actions.map((a) => `<button type="button" class="accueil-action" data-action-rapide="${a.id}" aria-label="${esc(a.titre)}"><span class="plus-sheet-item-icone ${a.teinte}">${picto(a.picto)}</span><span>${esc(a.court || a.titre)}</span></button>`).join('')}
         </div>
       </div>
     </section>`;
@@ -256,14 +255,14 @@ VIEWS.dashboard = {
     // `UI.alerteOuverte` — un seul état, donc une seule ligne ouverte à la fois.
     const affichees = alertsAVenir.slice(0, 4);
     return `
-      <div class="ui-page">
+      <div class="ui-page${estRoleTerrain() ? ' accueil-terrain' : ''}">
         ${estRoleTerrain() ? actionsRapidesSectionHtml() : vigilanceHtml()}
         ${retards.length
           ? prioritiesHtml(retards)
           : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}
 
         <section class="ui-section">
-          <div class="ui-grille is-3">
+          <div class="ui-grille is-3${estRoleTerrain() ? ' tuiles-compactes' : ''}">
             <div class="ui-tuile is-retard">
               <span class="ui-tuile-etiquette">${trad('En retard')}</span>
               <span class="ui-tuile-valeur">${c.late}<small>${c.late > 1 ? trad('interventions') : trad('intervention')}</small></span>

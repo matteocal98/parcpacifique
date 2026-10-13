@@ -1737,3 +1737,31 @@ textarea:not([data-x]),
 .saisie-picker-nom{font-weight:700;font-size:15px;color:var(--ink);overflow-wrap:anywhere;}
 .saisie-picker-sous{font-size:12px;color:var(--ink-2);overflow-wrap:anywhere;}
 @media (orientation:landscape) and (max-height:520px) and (max-width:899px){.saisie-picker-liste{max-height:30vh;}.accueil-action{min-height:64px;flex-direction:row;align-items:center;}}
+
+/* ── Phase 4 : accueil du terrain compact (téléphone) ──
+   Actions en une rangée, trois tuiles de situation sur une ligne, échéances sans bouton pleine largeur.
+   Mesuré sur téléphone réel (320 px) : 2 234 px de défilement avant, voir le journal de la phase 4. */
+.accueil-actions{grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;}
+.accueil-action{min-height:0;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 4px;text-align:center;font-size:12.5px;}
+.accueil-action .plus-sheet-item-icone{width:36px;height:36px;}
+@media (max-width:560px){
+  .accueil-terrain #accueil-actions{padding:8px;}
+  .accueil-terrain .ui-section{padding:10px;gap:6px;margin-bottom:8px;}
+  .accueil-terrain .ui-section-icone{width:30px;height:30px;}
+  .accueil-terrain .ui-section-titre{font-size:16px;}
+  .tuiles-compactes{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px;}
+  .tuiles-compactes .ui-tuile{padding:8px 8px 8px 10px;gap:2px;}
+  .tuiles-compactes .ui-tuile-etiquette{font-size:12px;letter-spacing:.03em;}
+  .tuiles-compactes .ui-tuile-valeur{font-size:24px;}
+  .tuiles-compactes .ui-tuile-valeur small,.tuiles-compactes .ui-tuile-note{display:none;}
+  .accueil-terrain [data-chrono-carte].ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto !important;align-items:center;padding:10px 10px 10px 14px;}
+  .accueil-terrain [data-chrono-carte] .ui-ligne-action{justify-content:flex-end !important;}
+  .accueil-terrain [data-chrono-carte] .ui-ligne-action .ui-btn{width:44px;min-width:44px;height:44px;padding:0;justify-content:center;}
+  .accueil-terrain [data-chrono-carte] .ui-ligne-action .ui-btn span{display:none;}
+}
+@media (max-width:560px){
+  /* en-tête de section du terrain : le titre, puis l'état et le nombre sur UNE ligne au lieu de deux étages */
+  .accueil-terrain .ui-section-tete{flex-wrap:wrap;align-items:center;gap:6px 8px;}
+  .accueil-terrain .ui-section-acces{display:flex;flex-wrap:wrap;gap:4px 6px;width:100%;padding-left:40px;}
+  .accueil-terrain .ui-section-acces .ui-tag{padding:2px 8px;}
+}

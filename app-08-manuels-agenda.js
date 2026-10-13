@@ -929,7 +929,7 @@ function chronologieCarteHtml(m, info, programme) {
           <span class="ui-ligne-sous">${esc(echeance)}</span>
         </div>
       </div>
-      <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" data-chrono="${cta.action}" data-machine-id="${esc(m.id)}">${picto(cta.picto)}<span>${cta.texte}</span></button></div>
+      <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" data-chrono="${cta.action}" data-machine-id="${esc(m.id)}" aria-label="${esc(cta.texte)}">${picto(cta.picto)}<span>${cta.texte}</span></button></div>
     </article>`;
 }
 
