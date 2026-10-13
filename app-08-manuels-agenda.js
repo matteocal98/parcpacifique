@@ -66,7 +66,7 @@ function manuelCarteHtml(m) {
   const meta = [machineBrandModel(m), m.category?.name].filter(Boolean).join(' · ');
   const photo = safeUrl(m.image_url);
   return `
-    <article class="ui-ligne is-deux ${classe}">
+    <article class="ui-ligne is-deux manuel-carte ${classe}">
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone" aria-hidden="true">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : picto('carnet')}</div>
         <div class="ui-ligne-textes">
@@ -76,9 +76,9 @@ function manuelCarteHtml(m) {
         </div>
       </div>
       <div class="ui-ligne-action is-etiquettes">
-        ${items.length ? `<button type="button" class="ui-btn ui-btn-pastille" data-plan="${esc(m.id)}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
-        ${hasManual ? `<button type="button" class="ui-btn ui-btn-teinte view-manual" data-path="${esc(m.manual_url)}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
-        <button type="button" class="ui-btn ui-btn-teinte" data-manual="${esc(m.id)}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
+        ${items.length ? `<button type="button" class="ui-btn ui-btn-pastille" data-plan="${esc(m.id)}" aria-label="${esc(trad('Voir le plan'))}" title="${esc(trad('Voir le plan'))}">${picto('plan')}<span>${trad('Voir le plan')}</span></button>` : ''}
+        ${hasManual ? `<button type="button" class="ui-btn ui-btn-teinte view-manual" data-path="${esc(m.manual_url)}" aria-label="${esc(trad('Ouvrir le PDF'))}" title="${esc(trad('Ouvrir le PDF'))}">${picto('photo')}<span>${trad('Ouvrir le PDF')}</span></button>` : ''}
+        <button type="button" class="ui-btn ui-btn-teinte" data-manual="${esc(m.id)}" aria-label="${esc(hasManual ? trad('Remplacer') : trad('Déposer'))}" title="${esc(hasManual ? trad('Remplacer le carnet') : trad('Déposer un carnet'))}">${picto('reglages')}<span>${hasManual ? trad('Remplacer') : trad('Déposer')}</span></button>
       </div>
     </article>`;
 }
@@ -119,9 +119,9 @@ VIEWS.manuals = {
     const aValider = UI.machines.filter((m) => etatManuel(m) === 'valider').length;
     const f = manuelsFilters();
     return `
-      <div class="ui-page">
-        <section class="ui-section">${dropzoneHtml('manuals-drop')}</section>
-        <section class="ui-section">
+      <div class="ui-page manuels-page">
+        <section class="ui-section manuels-depot">${dropzoneHtml('manuals-drop')}</section>
+        <section class="ui-section manuels-liste-section">
           ${teteSectionKit('carnet', trad('Carnets d\'entretien'), '',
             `<span class="ui-tag">${tR('{n} indexé(s)', { n: analyse })}${aValider ? ` · ${tR('{n} à valider', { n: aValider })}` : ''}</span>`)}
           <div class="ui-section-corps">

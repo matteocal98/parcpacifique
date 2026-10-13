@@ -2051,3 +2051,47 @@ textarea:not([data-x]),
 .log-type-carte[data-kind="depannage"] svg{color:#B45309;stroke:currentColor;}
 .log-type-carte[data-kind="depannage"] .log-type-icone,.log-type-carte[data-kind="depannage"] [class*="icone"]{background:rgba(180,83,9,.14) !important;color:#B45309 !important;}
 .log-type-carte[data-kind="depannage"].is-active{background:#F9D9B5 !important;box-shadow:0 0 0 3px rgba(180,83,9,.28) !important;}
+
+/* ── Plans d'entretien (téléphone, phase 4) : dépôt en une ligne, liste sans en-tête redondant, cartes à 3 boutons icônes ── */
+@media (max-width:560px){
+  .manuels-page .ui-section{padding:8px;margin-bottom:8px;gap:6px;}
+  .manuels-depot .dz-help,.manuels-depot .dz-formats,.manuels-depot .dz-titre svg + .dz-title{display:none;}
+  .manuels-depot .dropzone{padding:8px 10px;gap:6px;}
+  .manuels-depot .dz-titre{font-size:14px;}
+  .manuels-depot .dz-zone{padding:8px 10px;min-height:0;}
+  .manuels-depot .dz-icon{width:28px;height:28px;}
+  .manuels-liste-section .ui-section-tete{display:none;}
+  /* carte : texte à gauche, trois boutons icônes alignés à droite sur la ligne du bas */
+  .manuel-carte.ui-ligne.is-deux{grid-template-columns:minmax(0,1fr) auto !important;align-items:end;padding:8px 10px 8px 12px;}
+  .manuel-carte .ui-ligne-icone{width:40px;height:40px;flex:0 0 auto;}
+  .manuel-carte .ui-ligne-action.is-etiquettes{flex-wrap:nowrap;gap:4px;align-self:end;}
+  .manuel-carte .ui-ligne-action .ui-btn{width:44px;min-width:44px;height:44px;padding:0;justify-content:center;}
+  .manuel-carte .ui-ligne-action .ui-btn span{display:none;}
+  .manuel-carte .ui-ligne-nom{flex-wrap:wrap;gap:4px 6px;}
+}
+@media (max-width:560px){
+  .manuel-carte .ui-ligne-action .ui-btn svg{display:block !important;width:20px;height:20px;}
+  .manuel-carte .ui-ligne-action.is-etiquettes{display:flex;flex-wrap:nowrap;width:auto;}
+  .manuel-carte .ui-ligne-action.is-etiquettes > .ui-btn{flex:0 0 44px !important;width:44px !important;}
+  .manuels-depot .dz-titre{display:flex;align-items:center;gap:8px;}
+  .manuels-depot .dz-titre .dz-title{display:inline !important;}
+  .manuels-depot .dz-titre .ui-info-btn{margin-left:auto;}
+}
+@media (max-width:560px){
+  .manuel-carte.ui-ligne.is-deux{display:flex !important;flex-wrap:wrap;align-items:center;gap:4px 8px;}
+  .manuel-carte .ui-ligne-id{flex:1 1 100%;min-width:0;}
+  .manuel-carte .ui-ligne-action.is-etiquettes{flex:0 0 auto;margin-left:auto;gap:6px;}
+  .manuel-carte .ui-ligne-action.is-etiquettes > .ui-btn{height:40px !important;flex-basis:40px !important;width:40px !important;min-width:40px !important;}
+  .manuel-carte .ui-ligne-textes .ui-ligne-sous:last-child{display:none;}
+}
+@media (max-width:560px){
+  .manuel-carte .ui-ligne-action.is-etiquettes{width:auto !important;flex:0 0 auto !important;justify-content:flex-end !important;margin-left:auto;}
+  .manuel-carte .ui-ligne-id{flex:1 1 0;}
+  .manuel-carte .ui-ligne-icone{align-self:flex-start;}
+}
+@media (max-width:560px){
+  .manuel-carte .ui-ligne-id{flex:1 1 100% !important;}
+  .manuel-carte .ui-ligne-action.is-etiquettes{margin-left:auto;}
+  .manuel-carte .ui-ligne-nom{flex-wrap:nowrap;}
+  .manuel-carte .ui-ligne-nom .ui-statut{flex:0 0 auto;}
+}
