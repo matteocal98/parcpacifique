@@ -352,6 +352,7 @@ VIEWS.account = {
       gerant: { libelle: 'Gérant', invite: true, change: true, retire: true, nouveauMotDePasse: true },
       mecanicien: { libelle: 'Droit de gestion', invite: false, change: false, retire: false },
       chauffeur: { libelle: 'Droit de saisie', invite: false, change: false, retire: false },
+      achats: { libelle: 'Droit d\'achat', invite: false, change: false, retire: false },
     };
     const monDroit = () => ROLE_DROITS[UI.role] || ROLE_DROITS.mecanicien;
     // Le rôle se lit dans `profiles` avec le reste du profil : s'il manque, on ne
@@ -438,7 +439,7 @@ VIEWS.account = {
         const monLibelle = trad((ROLE_DROITS[UI.role] || {}).libelle || UI.role || '');
         const mesDroits = UI.role === 'gerant'
           ? trad('Tout, y compris l\'équipe et l\'abonnement')
-          : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : trad('Les compteurs'));
+          : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : (UI.role === 'achats' ? trad('Le stock, les fournisseurs et les commandes') : trad('Les compteurs')));
         liste.innerHTML = `<p class="ui-aide">${tR('Ton accès : {role}. {droits}', {
           role: esc(monLibelle),
           droits: esc(mesDroits),
@@ -480,6 +481,7 @@ VIEWS.account = {
         gerant: trad('Tout : le parc, les plans, l\'équipe et l\'abonnement.'),
         mecanicien: trad('Le parc et les entretiens : il ajoute, modifie et marque fait. Il ne gère pas l\'équipe.'),
         chauffeur: trad('Il consulte le parc, relève le compteur et prend la photo de sa machine. Il ne modifie rien d\'autre.'),
+        achats: trad('Le stock, les fournisseurs et les commandes. Il voit les coûts, consulte le parc et ne modifie ni les machines ni les entretiens.'),
       };
       const roleDe = (role) => trad((ROLE_DROITS[role] || {}).libelle || role || '');
       const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demande au gérant de vérifier son rôle.');
@@ -506,9 +508,10 @@ VIEWS.account = {
         gerant: trad('Gérant'),
         mecanicien: trad('Droit de gestion'),
         chauffeur: trad('Droit de saisie'),
+        achats: trad('Droit d\'achat'),
         autre: trad('Autre'),
       };
-      const ORDRE = ['gerant', 'mecanicien', 'chauffeur', 'autre'];
+      const ORDRE = ['gerant', 'mecanicien', 'chauffeur', 'achats', 'autre'];
       const libelleDe = (role) => LIBELLES[role] || roleDe(role);
       // Le nom affiché : `prenom`/`nom` quand la base les porte, le login ou
       // l'adresse sinon. Les sièges créés AVANT la migration n'ont pas encore
@@ -521,6 +524,7 @@ VIEWS.account = {
       const droitsResumes = (role) => {
         if (role === 'mecanicien') return trad('Le parc et les compteurs');
         if (role === 'chauffeur') return trad('Les compteurs');
+        if (role === 'achats') return trad('Le stock, les fournisseurs et les commandes');
         if (role === 'gerant') return trad('Tout, y compris l\'équipe et l\'abonnement');
         return trad('À confirmer');
       };
@@ -549,7 +553,7 @@ VIEWS.account = {
         // Une couleur par rôle, reprise des teintes déjà en usage ailleurs sur
         // cet écran (encre pour le gérant, indigo pour le mécanicien, teal pour
         // le chauffeur) — aucune couleur nouvelle.
-        const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : 'mecanicien');
+        const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : (role === 'achats' ? 'achats' : 'mecanicien'));
         return `
             <div class="ui-ligne is-texte-long" data-membre="${esc(m.id)}">
               <div class="ui-ligne-id">
@@ -685,9 +689,10 @@ VIEWS.account = {
               <select id="acc-membre-role" class="ui-selecteur is-plein" data-equipe-role-select>
                 <option value="mecanicien">${trad('Droit de gestion')}</option>
                 <option value="chauffeur">${trad('Droit de saisie')}</option>
+                <option value="achats">${trad('Droit d\'achat')}</option>
               </select>
             </div>
-            <div class="ui-aide">${trad('Droit de gestion : tient le parc et les entretiens. Droit de saisie : consulte le parc, relève le compteur et prend la photo de sa machine. Ni l\'un ni l\'autre ne gère l\'équipe.')}</div>
+            <div class="ui-aide">${trad('Droit de gestion : tient le parc et les entretiens. Droit de saisie : consulte le parc, relève le compteur et prend la photo de sa machine. Droit d\'achat : gère le stock, les fournisseurs et les commandes, voit les coûts. Aucun des trois ne gère l\'équipe.')}</div>
             <div><button type="button" class="ui-btn ui-btn-plein" id="acc-membre-creer">${trad('Créer le membre')}</button></div>
           </div>
           <div id="acc-membre-acces"></div>` : '';
@@ -723,6 +728,7 @@ VIEWS.account = {
             <select id="acc-invite-role" class="ui-selecteur is-plein">
               <option value="mecanicien">${trad('Droit de gestion')}</option>
               <option value="chauffeur">${trad('Droit de saisie')}</option>
+              <option value="achats">${trad('Droit d\'achat')}</option>
             </select>
           </div>
         </div>
@@ -919,7 +925,8 @@ VIEWS.account = {
         const bouton = this;
         const profil = bouton.getAttribute('data-equipe-role');
         const actuel = bouton.getAttribute('data-role-actuel');
-        const nouveau = actuel === 'mecanicien' ? 'chauffeur' : 'mecanicien';
+        const cycle = ['mecanicien', 'chauffeur', 'achats'];
+        const nouveau = cycle[(cycle.indexOf(actuel) + 1) % cycle.length];
         dire(trad('Enregistrement…'));
         try {
           const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: nouveau });

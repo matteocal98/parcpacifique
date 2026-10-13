@@ -1917,7 +1917,7 @@ function ouvrirExplicationPump() {
 // VIEWS.stock.mount(), pas au boot — voir le commentaire sur la section
 // Mouvements plus bas).
 function stockKpiGridHtml() {
-  const gerant = peutGererParametresStock();
+  const gerant = peutVoirValeursStock();
   const items = UI.stockItems || [];
   const valeurTotale = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.pump_unit_cost) || 0), 0);
   const nbAlertes = UI.stockCounts?.seuilBas || 0;
@@ -2016,7 +2016,7 @@ function blocMagasinsStockHtml() {
 // en mémoire, comme le classement TCO (rendreDynamique). Quantité visible
 // à tous ; coût PUMP/valeur réservés au gérant (peutGererParametresStock).
 function ligneInventaireStockHtml(it) {
-  const gerant = peutGererParametresStock();
+  const gerant = peutVoirValeursStock();
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
   const seuil = it.reorder_point ?? piece?.default_reorder_point ?? null;
   const enAlerte = seuil != null && Number(it.quantity) <= Number(seuil);
@@ -2535,7 +2535,7 @@ function ouvrirFicheLigneStock(partId, warehouseId) {
   const trouverLigne = () => (UI.stockItems || []).find((it) => String(it.part_id) === String(partId) && String(it.warehouse_id) === String(warehouseId));
   const ligne = trouverLigne();
   const peut = peutGererMouvementsStock();
-  const gerant = peutGererParametresStock();
+  const gerant = peutVoirValeursStock();
   const statut = statutLigneStock(ligne);
   const unite = piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? libelleUniteMesure(piece.unit_of_measure) : '';
   const ailleurs = (UI.stockItems || [])
@@ -2859,7 +2859,7 @@ function ouvrirModaleEtiquettes(options = {}) {
 }
 
 function exporterInventaireStockCsv() {
-  const gerant = peutGererParametresStock();
+  const gerant = peutVoirValeursStock();
   const header = gerant
     ? [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité'), trad('Coût PUMP'), trad('Valeur')]
     : [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité')];
@@ -3345,7 +3345,7 @@ async function rechargerSoldesStock() {
 function ligneInventairePhysiqueHtml(c) {
   const bilan = c.status === 'valide'
     ? tR('{n} ligne(s) comptée(s) · {e} écart(s)', { n: c.lines_counted ?? 0, e: c.lines_with_variation ?? 0 })
-      + (peutGererParametresStock() && c.lines_with_variation ? ` · ${texteAvecSeparateurs(c.net_value || 0)} ${deviseCourte()}` : '')
+      + (peutVoirValeursStock() && c.lines_with_variation ? ` · ${texteAvecSeparateurs(c.net_value || 0)} ${deviseCourte()}` : '')
     : '';
   const reprise = c.status === 'en_cours' && peutGererMouvementsStock();
   return `
@@ -3430,7 +3430,7 @@ function ouvrirNouvelInventaire(surCree) {
 
 // ── Export CSV d'une session ──
 function exporterSessionInventaireCsv(c, lignes) {
-  const gerant = peutGererParametresStock();
+  const gerant = peutVoirValeursStock();
   const entete = [trad('Référence'), trad('Désignation'), trad('Emplacement'), trad('Unité de mesure'), trad('Quantité théorique'), trad('Quantité comptée'), trad('Écart')];
   if (c.status === 'valide') entete.push(trad('Écart appliqué'));
   if (gerant) entete.push(trad('Coût PUMP'), trad('Valeur de l\'écart'));
@@ -3760,7 +3760,7 @@ function trierFournisseurs() {
 }
 
 function ligneFournisseurHtml(f) {
-  const gerant = peutGererParametresStock();
+  const gerant = peutAcheter();
   const nbPieces = piecesDuFournisseur(f.id).length;
   const sous = [
     f.contact_name, f.phone,
@@ -3806,13 +3806,13 @@ function listeFournisseursHtml() {
     : `<div class="ui-aide">${trad('Aucun fournisseur ne correspond à cette recherche.')}</div>`;
 }
 function blocFournisseursStockHtml() {
-  const gerant = peutGererParametresStock();
+  const gerant = peutAcheter();
   return `
     <section class="ui-section" id="stock-fournisseurs-section">
       ${teteSectionKit('mallette', trad('Fournisseurs'), trad('Contacts, délais et conditions de tes fournisseurs de pièces'),
         `<span class="ui-tag" id="stock-fournisseurs-badge">${tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length })}</span>${gerant ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-fournisseur-nouveau">${picto('plusCercle')}<span>${trad('Nouveau fournisseur')}</span></button>` : ''}`)}
       <div class="ui-section-corps">
-        ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant.')}</div>`}
+        ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant et au droit d\'achat.')}</div>`}
         <div class="ui-barre"><input id="stock-fournisseur-recherche" class="ui-champ" type="search" value="${esc(UI.stockRechercheFournisseurs || '')}" placeholder="${esc(trad('Rechercher un fournisseur (nom, contact, ville, pièce…)'))}" aria-label="${esc(trad('Rechercher un fournisseur'))}"></div>
         <div class="ui-liste is-defilant" id="stock-fournisseurs-liste">${listeFournisseursHtml()}</div>
       </div>
@@ -3849,7 +3849,7 @@ function typesDocFournisseur() {
   ];
 }
 function docsFournisseurActifs() {
-  return !!(SCHEMA.hasSuppliersFull && SCHEMA.hasSupplierDocs && typeof peutGererParametresStock === 'function' && peutGererParametresStock());
+  return !!(SCHEMA.hasSuppliersFull && SCHEMA.hasSupplierDocs && typeof peutAcheter === 'function' && peutAcheter());
 }
 
 // Description des champs, par carte colorée. t : text | tel | email | select | num | int ; i : pictogramme dans le champ ;
@@ -3987,7 +3987,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
   let modifie = false;
   overlay.addEventListener('click', (e) => { if (e.target === overlay && !modifie) overlay.remove(); });
   const complet = !!SCHEMA.hasSuppliersFull;
-  const gerant = peutGererParametresStock();
+  const gerant = peutAcheter();
   const avecDocs = docsFournisseurActifs();
   const types = typesDocFournisseur();
   const sections = sectionsFournisseur()
@@ -4309,7 +4309,7 @@ function optionsFournisseursHtml(idChoisi, texteHerite) {
   return `<option value="">${esc(trad('Fournisseur (optionnel)'))}</option>`
     + (texteHerite ? `<option value="${VALEUR_FOURNISSEUR_TEXTE}">${esc(texteHerite)} ${esc(trad('(non référencé)'))}</option>` : '')
     + actifs.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')
-    + (peutGererParametresStock() ? `<option value="${VALEUR_FOURNISSEUR_NOUVEAU}">${esc(trad('+ Nouveau fournisseur…'))}</option>` : '');
+    + (peutAcheter() ? `<option value="${VALEUR_FOURNISSEUR_NOUVEAU}">${esc(trad('+ Nouveau fournisseur…'))}</option>` : '');
 }
 
 // Import CSV : rattache chaque nom de fournisseur à une fiche (la crée si elle manque et si c'est le gérant qui importe).
@@ -4319,7 +4319,7 @@ async function rattacherFournisseursImport(lignes) {
     const nom = (l.supplier_name || '').trim();
     if (nom && !fournisseurParNom(nom)) manquants.set(nom.toLowerCase(), nom);
   });
-  if (manquants.size && peutGererParametresStock()) {
+  if (manquants.size && peutAcheter()) {
     const { data, error } = await sb.from('suppliers')
       .insert([...manquants.values()].map((name) => ({ company_id: UI.companyId, name })))
       .select(colonnesFournisseur());
@@ -4667,7 +4667,7 @@ function ouvrirBonDeCommande(g) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   const f = g.fournisseur;
   const emailDest = f ? (f.po_email || f.email || '') : '';
-  const peutEnregistrer = !!(SCHEMA.hasCommandes && peutGererParametresStock() && f);
+  const peutEnregistrer = !!(SCHEMA.hasCommandes && peutAcheter() && f);
   overlay.innerHTML = `
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="bon-titre">
       <h2 id="bon-titre">${trad('Bon de commande')} — ${esc(g.nom)}</h2>
@@ -4858,8 +4858,8 @@ async function ouvrirCommande(orderId, rafraichir) {
     overlay.querySelector('.modal').innerHTML = `<div class="ui-aide is-late">${esc(trad('Erreur de chargement :') + ' ' + (err.message || err))}</div>`;
     return;
   }
-  const gerant = peutGererParametresStock();
-  const peutRecevoir = peutGererMouvementsStock();
+  const gerant = peutAcheter();
+  const peutRecevoir = (peutGererMouvementsStock() || peutAcheter());
   const ouverte = STATUTS_COMMANDE_OUVERTS.includes(c.status);
   const classe = classeStatutCommande(c.status);
   overlay.innerHTML = `
@@ -4979,7 +4979,7 @@ function stockOngletsDisponibles() {
   if (SCHEMA.hasKits) liste.push({ id: 'apercu', libelle: trad('Aperçu'), picto: 'alerte', aide: trad('Les pièces à commander avant les prochains entretiens.') });
   liste.push({ id: 'pieces', libelle: trad('Pièces'), picto: 'boite', aide: trad('Ce qu\'il y a en stock, magasin par magasin, et le catalogue des références.') });
   liste.push({ id: 'mouvements', libelle: trad('Mouvements'), picto: 'calendrier', aide: trad('Entrées, sorties, transferts et ajustements.') });
-  if (SCHEMA.hasStock && peutGererMouvementsStock()) liste.push({ id: 'achats', libelle: trad('Commandes'), picto: 'export', aide: trad('Bon de commande suggéré : les pièces à commander avant la rupture.') });
+  if (SCHEMA.hasStock && (peutGererMouvementsStock() || peutAcheter())) liste.push({ id: 'achats', libelle: trad('Commandes'), picto: 'export', aide: trad('Bon de commande suggéré : les pièces à commander avant la rupture.') });
   if (inventairePhysiquePossible()) liste.push({ id: 'inventaire', libelle: trad('Inventaire'), picto: 'coche', aide: trad('Compter le stock réel et régulariser les écarts.') });
   liste.push({ id: 'organisation', libelle: trad('Réglages'), picto: 'reglages', aide: trad('Magasins, fournisseurs et kits d\'entretien (réglages rarement modifiés).') });
   return liste;

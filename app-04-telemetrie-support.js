@@ -824,6 +824,14 @@ function peutGererMouvementsStock() {
 function peutGererParametresStock() {
   return UI.role === 'gerant';
 }
+// Rôle « Droit d'achat » (role-achats-a/b.sql) : fournisseurs, RIB, documents, commandes, réception — avec le gérant.
+function peutAcheter() {
+  return UI.role === 'gerant' || UI.role === 'achats';
+}
+// Valeur du stock, coût moyen (PUMP) : le gérant et l'acheteur les voient.
+function peutVoirValeursStock() {
+  return UI.role === 'gerant' || UI.role === 'achats';
+}
 
 // La ligne affichée pour une offre payante : son nom puis son parc. Le prix est
 // lu dans la grille ci-dessus, jamais réécrit ici.

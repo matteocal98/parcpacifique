@@ -60,10 +60,13 @@ const NAV_ITEMS = [
 // d'utilisateur enfermé dehors).
 //   gérant         : tout (comme avant) ;
 //   droit de gestion (mecanicien) : pas de coûts ni de télémétrie ;
-//   droit de saisie (chauffeur)   : le terrain seulement — parc, plans et manuels, rappels, compte.
+//   droit de saisie (chauffeur)   : le terrain seulement — parc, plans et manuels, rappels, compte ;
+//   droit d'achat (achats)        : stock, fournisseurs, commandes et coûts ; parc et plans en lecture.
 const VUES_MASQUEES_PAR_ROLE = {
   mecanicien: ['tco', 'telemetrie'],
   chauffeur: ['agenda', 'stock', 'tco', 'telemetrie'],
+  // Droit d'achat : stock, fournisseurs, commandes et coûts ; le parc et les plans en lecture ; ni agenda ni télémétrie.
+  achats: ['agenda', 'telemetrie'],
 };
 function vueAutoriseePourRole(id) {
   const masquees = VUES_MASQUEES_PAR_ROLE[UI && UI.role];
@@ -147,6 +150,7 @@ const TABS = [
 // l'offre le permet ; sinon la barre se passe de bouton central. Le détail « Saisir » viendra à la phase 3.
 function tabsPourRole() {
   if (UI.role === 'gerant') return [TABS[0], TABS[1], TABS[2], { id: 'agenda', short: trad('Planning'), icon: 'agenda' }, TABS[4]];
+  if (UI.role === 'achats') return [TABS[0], TABS[1], { id: 'stock', short: trad('Stock'), icon: 'stock' }, { id: 'tco', short: trad('Coûts'), icon: 'couts' }, TABS[4]];
   if (UI.role !== 'mecanicien' && UI.role !== 'chauffeur') return TABS;
   const accueil = TABS[0];
   const parc = TABS[1];

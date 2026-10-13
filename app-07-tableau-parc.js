@@ -29,7 +29,7 @@ function actionsRapidesDuRole() {
   if (UI.role === 'gerant' || !UI.role) {
     actions.push({ id: 'machine', titre: trad('Ajouter une machine'), sous: trad('Nouvelle machine dans le parc'), picto: 'plusCercle', teinte: 'is-signature', agir: () => handleAddMachine() });
   }
-  actions.push({
+  if (UI.role !== 'achats') actions.push({
     id: 'entretien', court: trad('Entretien'), titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
     agir: () => choisirMachineRapide(trad('Entretien : quelle machine ?'), (m) => openLogInterventionModal(m)),
   });
@@ -45,7 +45,7 @@ function actionsRapidesDuRole() {
       agir: () => ouvrirListePannes(),
     });
   }
-  actions.push({
+  if (UI.role !== 'achats') actions.push({
     id: 'releve', court: trad('Relevé'), titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
     agir: () => choisirMachineRapide(trad('Relevé : quelle machine ?'), (m) => ouvrirFicheParId(m.id)),
   });
@@ -53,6 +53,12 @@ function actionsRapidesDuRole() {
     actions.push({
       id: 'piece', court: trad('Pièce'), titre: trad('Sortir une pièce du stock'), sous: trad('Mouvement de sortie rapide'), picto: 'boite', teinte: 'is-amber',
       agir: () => { ouvrirNouveauMouvementModal(); document.querySelector('.stock-mouvement-modal input[name="mvt-type"][value="sortie"]')?.click(); },
+    });
+  }
+  if (UI.role === 'achats' && SCHEMA.hasCommandes && vueAutoriseePourRole('stock')) {
+    actions.push({
+      id: 'commandes', court: trad('Commandes'), titre: trad('Commandes fournisseurs'), sous: trad('Suggestions, bons de commande et réceptions'), picto: 'export', teinte: 'is-olive',
+      agir: () => { UI.stockOnglet = 'achats'; goTo('stock'); },
     });
   }
   actions.push({
@@ -174,6 +180,8 @@ function calculerVigilance() {
   if (typeof tcoActif === 'function' && tcoActif() && peutVoirCouts()) {
     lignes.push({ id: 'couts', picto: 'argent', court: trad('Coûts élevés'), libelle: trad('Machines au-dessus du seuil de coût'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
+  // Droit d'achat : le bandeau « Achats et coûts » — pas les retards d'entretien ni les pannes.
+  if (UI.role === 'achats') return lignes.filter((l) => ['pieces', 'seuil', 'commandes', 'couts'].includes(l.id));
   return lignes;
 }
 function ligneVigilanceHtml(l) {
@@ -330,11 +338,11 @@ VIEWS.dashboard = {
           </div>
 
           <div class="ui-colonne">
-            ${estRoleTerrain() ? '' : `<section class="ui-section">${dropzoneHtml('dash-drop')}</section>`}
+            ${estRoleTerrain() || UI.role === 'achats' ? '' : `<section class="ui-section">${dropzoneHtml('dash-drop')}</section>`}
             ${remindersCardHtml()}
             ${tcoActif() && peutVoirCouts() ? tcoDashboardCarteHtml() : ''}
 
-            ${estRoleTerrain() ? '' : aiCardHtml()}
+            ${estRoleTerrain() || UI.role === 'achats' ? '' : aiCardHtml()}
           </div>
         </div>
       </div>
@@ -1761,7 +1769,7 @@ function machineCardHtml(m) {
           <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>
           ${m.manual_url ? `<button type="button" class="view-manual mstrip-btn-icone" data-path="${esc(m.manual_url)}" title="${esc(trad('Consulter le carnet numérique (PDF)'))}">${picto('carnet')}</button>` : ''}
           <button type="button" class="mstrip-btn-icone mstrip-plie" data-plier-carte aria-expanded="false" aria-label="${esc(trad('Afficher ou masquer le compteur'))}" title="${esc(trad('Afficher ou masquer le compteur'))}">${picto('chevronBas')}</button>
-          ${UI.role === 'chauffeur' ? '' : `<button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>`}
+          ${UI.role === 'chauffeur' || UI.role === 'achats' ? '' : `<button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>`}
         </div>
       </div>
     </article>`;
