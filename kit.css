@@ -2374,3 +2374,9 @@ textarea:not([data-x]),
 @media (max-width:560px){
   .machine-modal-add .text-sm.font-bold,.machine-modal-edit .text-sm.font-bold{font-size:12px !important;}
 }
+/* ── Ajout / édition d'une machine : mêmes fonds que les autres fenêtres du Stock et de l'intervention ──
+   fond de la fenêtre blanc, blocs en teinte légère rgba(14,19,51,.04), champs et cartes blancs posés dessus, pas d'ombre. */
+.machine-modal-add .modal,.machine-modal-edit .modal,.machine-modal-add .bg-modal-bg,.machine-modal-edit .bg-modal-bg{background:#fff !important;}
+.machine-modal-add section > [class*="bg-surface-container-low"],.machine-modal-edit section > [class*="bg-surface-container-low"]{background:rgba(14,19,51,.04) !important;box-shadow:none !important;}
+.machine-modal-add [class*="bg-surface-container-low"] label[class*="bg-surface-container"],.machine-modal-edit [class*="bg-surface-container-low"] label[class*="bg-surface-container"]:not(:has(input:checked)){background:#fff;}
+.machine-modal-add [class*="mform-close"]:focus,.machine-modal-edit [class*="mform-close"]:focus,.machine-modal-add button[aria-label="Fermer"]:focus,.machine-modal-edit button[aria-label="Fermer"]:focus{outline:none;box-shadow:none;}
