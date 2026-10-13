@@ -1826,3 +1826,24 @@ textarea:not([data-x]),
   .mstrip-titre .tele-long{display:none;}
   .mstrip-titre .tele-court{display:inline;}
 }
+
+/* ── Parc sur téléphone : filtres sur UNE ligne, cartes repliées en lignes compactes ── */
+.mstrip-valeur{display:none;}
+@media (max-width:700px){
+  .mstrip-nom-ligne{align-items:center;gap:6px;}
+  .mstrip:not(.is-ouvert) .mstrip-valeur{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-chip);background:var(--surface-soft);font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;}
+  .mstrip:not(.is-ouvert) .mstrip-meta{display:none;}
+  .mstrip:not(.is-ouvert) .mstrip-corps{padding:8px 10px;gap:6px;}
+  .mstrip:not(.is-ouvert) .mstrip-actions .mstrip-btn-principal{min-height:40px;}
+}
+@media (max-width:560px){
+  .ui-puces:has(.parc-pill){flex-wrap:nowrap;gap:4px;}
+  .parc-pill{flex:1 1 auto;min-width:0;gap:4px;padding:0 6px;font-size:12px;justify-content:center;}
+  .parc-pill .ui-point{display:none;}
+  .parc-pill .ui-compte{min-width:0;padding:0 5px;font-size:12px;}
+}
+@media (max-width:700px){
+  /* carte repliée : l'état et la valeur du compteur tiennent sur la même ligne */
+  .mstrip:not(.is-ouvert) .mstrip-badge{font-size:12.5px;padding:3px 9px;}
+  .mstrip:not(.is-ouvert) .mstrip-nom-ligne{flex-wrap:wrap;row-gap:4px;}
+}

@@ -1683,6 +1683,8 @@ function machineCardHtml(m) {
   const photo = safeUrl(m.image_url);
   const horsOffre = !machineCouverte(m);
   const tache = nextTaskLabel(m);
+  const valeurCompteur = planIsCounter(m.plan) ? machineCounter(m) : null;
+  const puceValeur = valeurCompteur != null ? `<span class="mstrip-valeur">${esc(formatCounter(valeurCompteur, counterUnitOf(m)))}</span>` : '';
 
   // Delta réel signé (voir dueInfo) : « -3 h »/« +100 h » pour un suivi au
   // compteur, « -3 j »/« +12 j » pour un suivi calendaire — jamais un taux,
@@ -1697,7 +1699,7 @@ function machineCardHtml(m) {
   const segments = segmentsJaugeDepassement(info, m);
 
   return `
-    <article class="mstrip${etat !== 'ok' ? ' is-ouvert' : ''}" data-machine-id="${esc(m.id)}">
+    <article class="mstrip" data-machine-id="${esc(m.id)}">
       <span class="mstrip-accent is-${etat}" aria-hidden="true"></span>
       <div class="mstrip-corps">
         <div class="mstrip-identite">
@@ -1708,7 +1710,7 @@ function machineCardHtml(m) {
           <div class="mstrip-info">
             <div class="mstrip-nom-ligne">
               <span class="mstrip-titre"><span class="mstrip-nom">${esc(m.name)}</span>${telemetrieBadgeHtml(m)}</span>
-              <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>
+              <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>${puceValeur}
             </div>
             ${metaLigne || identifiant ? `<div class="mstrip-meta">${[metaLigne, identifiant ? `<span class="id">${esc(identifiant)}</span>` : null].filter(Boolean).join(' &bull; ')}</div>` : ''}
             ${horsOffre ? `<div class="ui-aide">${trad('Non couverte par ton offre')}</div>` : ''}
@@ -1741,7 +1743,7 @@ function machineCardHtml(m) {
         <div class="mstrip-actions">
           <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>
           ${m.manual_url ? `<button type="button" class="view-manual mstrip-btn-icone" data-path="${esc(m.manual_url)}" title="${esc(trad('Consulter le carnet numérique (PDF)'))}">${picto('carnet')}</button>` : ''}
-          <button type="button" class="mstrip-btn-icone mstrip-plie" data-plier-carte aria-expanded="${etat !== 'ok'}" aria-label="${esc(trad('Afficher ou masquer le compteur'))}" title="${esc(trad('Afficher ou masquer le compteur'))}">${picto('chevronBas')}</button>
+          <button type="button" class="mstrip-btn-icone mstrip-plie" data-plier-carte aria-expanded="false" aria-label="${esc(trad('Afficher ou masquer le compteur'))}" title="${esc(trad('Afficher ou masquer le compteur'))}">${picto('chevronBas')}</button>
           ${UI.role === 'chauffeur' ? '' : `<button type="button" class="mstrip-btn-icone" data-open="edit" data-id="${esc(m.id)}" title="${esc(trad('Modifier la machine'))}">${picto('reglages')}</button>`}
         </div>
       </div>
