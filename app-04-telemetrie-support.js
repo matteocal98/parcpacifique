@@ -47,7 +47,10 @@ function telemetrieBadgeHtml(m) {
   if (age > TELEMETRIE_SILENCE_MS) {
     return `<span class="tele-badge is-silence" title="${esc(trad('Aucun relevé reçu depuis plus de 3 jours : vérifie le boîtier.'))}">${trad('Auto · sans signal')} (${esc(ilYaSupport(m.telemetry_last_at))})</span>`;
   }
-  return `<span class="tele-badge">${trad('Auto')} · ${esc(ilYaSupport(m.telemetry_last_at))}</span>`;
+  const depuis = ilYaSupport(m.telemetry_last_at);
+  // Version courte (« 2 j ») pour le titre d'une carte du Parc sur téléphone, où la place est comptée.
+  const court = String(depuis).replace(/^il y a /i, '').replace(/ ago$/i, '');
+  return `<span class="tele-badge">${trad('Auto')} · <span class="tele-long">${esc(depuis)}</span><span class="tele-court">${esc(court)}</span></span>`;
 }
 
 // Mise à jour EN DIRECT des machines reliées. L'appli ne relit la base qu'au

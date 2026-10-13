@@ -1811,3 +1811,18 @@ textarea:not([data-x]),
   .accueil-page .ui-section-acces .ui-tag{padding:2px 8px;}
 }
 @media (prefers-reduced-motion:reduce){.mstrip-plie svg{transition:none;}}
+
+/* Pastille « Auto · il y a 2 j » (télémétrie) : à droite du nom de la machine, sur la ligne du titre */
+.mstrip-titre{display:inline-flex;align-items:center;gap:8px;min-width:0;}
+.mstrip-titre .mstrip-nom{min-width:0;}
+.mstrip-titre .tele-badge{margin-top:0;align-self:center;flex:0 0 auto;font-size:12px;padding:3px 8px;}
+@media (max-width:700px){
+  .mstrip-titre{flex:1 1 100%;justify-content:space-between;}
+}
+
+.tele-court{display:none;}
+.mstrip-titre{flex-wrap:wrap;}
+@media (max-width:700px){
+  .mstrip-titre .tele-long{display:none;}
+  .mstrip-titre .tele-court{display:inline;}
+}

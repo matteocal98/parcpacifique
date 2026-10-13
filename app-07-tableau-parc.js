@@ -860,7 +860,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         </span>
       </button>
       ${carteEtat}
-      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${telemetrieBadgeHtml(m)}
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${emplacement === 'strip' ? '' : telemetrieBadgeHtml(m)}
     </div>`;
   }
   // BUREAU (fiche machine ET bandeau du Parc sur grand écran) : stepper
@@ -889,7 +889,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         </div>
         <button type="button" class="compteur-strip-icone is-valider" data-compteur-enregistrer="${id}" title="${esc(trad(libelleBouton || 'Enregistrer'))}" aria-label="${esc(trad(libelleBouton || 'Enregistrer'))}">${picto('coche')}<span>${trad('OK')}</span></button>
       </div>
-      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${telemetrieBadgeHtml(m)}
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${emplacement === 'strip' ? '' : telemetrieBadgeHtml(m)}
     </div>`;
   }
   return `
@@ -902,7 +902,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
         <span class="compteur-unite" aria-hidden="true">${esc(u.short)}</span>
         <button type="button" class="compteur-enregistrer" data-compteur-enregistrer="${id}">${trad(libelleBouton || 'Enregistrer')}</button>
       </div>
-      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${telemetrieBadgeHtml(m)}
+      <span class="compteur-note${attente != null ? ' is-late' : ''}" role="status">${attente != null ? trad('En attente d\'envoi') : ''}</span>${emplacement === 'strip' ? '' : telemetrieBadgeHtml(m)}
     </div>`;
 }
 
@@ -1707,7 +1707,7 @@ function machineCardHtml(m) {
           </div>
           <div class="mstrip-info">
             <div class="mstrip-nom-ligne">
-              <span class="mstrip-nom">${esc(m.name)}</span>
+              <span class="mstrip-titre"><span class="mstrip-nom">${esc(m.name)}</span>${telemetrieBadgeHtml(m)}</span>
               <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>
             </div>
             ${metaLigne || identifiant ? `<div class="mstrip-meta">${[metaLigne, identifiant ? `<span class="id">${esc(identifiant)}</span>` : null].filter(Boolean).join(' &bull; ')}</div>` : ''}
