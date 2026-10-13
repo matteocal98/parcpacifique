@@ -2428,3 +2428,14 @@ textarea:not([data-x]),
   .indicatif-raccourcis-liste{gap:5px;}
   .indicatif-chip{padding:3px 8px;}
 }
+@media (max-width:560px){
+  .modal .mf-meta{flex-wrap:nowrap;min-width:0;overflow:hidden;}
+  .modal .mf-meta > span{white-space:nowrap;}
+  .modal .mf-meta > span:first-child{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto;}
+  .modal .mf-meta > span.ml-space-xs{margin-left:2px;flex:0 0 auto;}
+  .modal .plan-tasks{list-style:none;margin:0;padding:0;}
+  .modal .plan-tasks li{display:flex;flex-direction:column;gap:0;padding:6px 0;border-bottom:1px solid var(--line-2);line-height:1.3;}
+  .modal .plan-tasks li:last-child{border-bottom:0;}
+  .modal .plan-tasks li strong{font-size:14px;}
+  .modal .plan-tasks .plan-task-freq{font-size:12px;color:var(--ink-3);}
+}

@@ -335,7 +335,7 @@ function openMachineModal(companyId, categories, existing) {
       <div class="px-space-xl pt-space-lg pb-space-md flex items-start justify-between">
         <div class="flex flex-col gap-space-xs">
           <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">${isEdit ? trad('Modifier une machine') : trad('Ajouter une machine')}</h2>
-          <div class="flex items-center gap-space-xs">
+          <div class="flex items-center gap-space-xs mf-meta">
             ${isEdit ? `<span class="font-label-md text-label-md text-primary font-semibold">${esc(existing.name)}</span>` : ''}
             ${isEdit && machineIdentifiant(existing) ? `<span class="w-1 h-1 rounded-full bg-outline-variant inline-block"></span>` : ''}
             ${isEdit && machineIdentifiant(existing) ? `<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">${esc(machineIdentifiant(existing))}</span>` : ''}

@@ -1456,7 +1456,7 @@ function openNextMaintenanceView(machine) {
       <div class="plan-field">
         <div class="label">${trad('À faire')}</div>
         ${items.length
-          ? `<ul class="plan-tasks">${items.map(it => `<li><strong>${esc(it.label)}</strong>${it.frequency ? ` — ${esc(it.frequency)}` : ''}</li>`).join('')}</ul>`
+          ? `<ul class="plan-tasks">${items.map(it => `<li><strong>${esc(it.label)}</strong>${it.frequency ? `<span class="plan-task-freq"> — ${esc(it.frequency)}</span>` : ''}</li>`).join('')}</ul>`
           : `<div class="value" style="color:var(--ink-soft);">${trad('Aucune tâche détaillée dans le plan.')}</div>`}
       </div>
 
