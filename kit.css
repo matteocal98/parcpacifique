@@ -2309,3 +2309,11 @@ textarea:not([data-x]),
   .tco-page .tco-donut-legende-carte{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;}
   .tco-page .tco-donut-legende-carte .droite{margin-left:0;}
 }
+@media (max-width:560px){
+  /* légende sous l'anneau, pleine largeur : le pourcentage tient à droite de chaque libellé */
+  .tco-page .tco-donut-corps{flex-direction:column;align-items:center;flex-wrap:nowrap;gap:8px;}
+  .tco-page .tco-donut-details{width:100%;flex:0 0 auto;}
+  .tco-page .tco-donut-legende-grille{width:100%;}
+  .tco-page .tco-donut-legende-carte{flex-direction:row;align-items:center;justify-content:space-between;width:100%;padding:6px 10px;}
+  .tco-page .tco-donut-legende-carte .droite{margin-left:auto;}
+}
