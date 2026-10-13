@@ -2172,7 +2172,7 @@ VIEWS.reminders = {
   subtitle: () => trad('Gestion des alertes préventives envoyées par le serveur, sur terminal mobile Android et par e-mail avant chaque seuil d\'entretien critique.'),
   render() {
     return `
-      <div class="ui-page">
+      <div class="ui-page rappels-page">
         ${apercuRappelsHtml()}
         <div class="ui-colonnes">
           <div class="ui-colonne">
@@ -2191,6 +2191,19 @@ VIEWS.reminders = {
       </div>`;
   },
   mount() {
+    // Téléphone : chaque bloc est replié sur son titre (accordéon) ; un toucher sur l'en-tête le déplie.
+    const racineRappels = document.getElementById('view-root');
+    racineRappels?.querySelectorAll('.rappels-page > .ui-colonnes .ui-section, .rappels-page > .ui-section:not(:first-child)').forEach((sec) => {
+      const tete = sec.querySelector(':scope > .ui-section-tete');
+      if (!tete) return;
+      sec.classList.add('rappels-bloc');
+      tete.setAttribute('role', 'button');
+      tete.setAttribute('tabindex', '0');
+      tete.setAttribute('aria-expanded', 'false');
+      const basculer = () => { const ouvert = sec.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(ouvert)); };
+      tete.addEventListener('click', (e) => { if (e.target.closest('button,a,input,select,textarea,.ui-info-btn')) return; basculer(); });
+      tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+    });
     // L'état de l'autorisation et ce qui attend, à l'ouverture de la rubrique :
     // on ne fait pas attendre l'utilisateur qu'une notification arrive (ou
     // n'arrive pas) pour savoir où il en est. Même câblage que « Mon compte »

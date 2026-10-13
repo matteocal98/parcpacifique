@@ -2144,3 +2144,27 @@ textarea:not([data-x]),
   .manual-modal .pplan-foot .pplan-btn-activer .material-symbols-outlined,.manual-modal .pplan-foot .pplan-btn-activer svg{display:none;}
   .manual-modal .pplan-foot .pplan-btn-activer > span:not(.material-symbols-outlined){overflow:visible;text-overflow:clip;}
 }
+
+/* ── Rappels & notifications (téléphone, phase 4) : résumé en 4 petites tuiles, blocs repliés en accordéon ── */
+@media (max-width:700px){
+  .rappels-page .ui-section{padding:8px 10px;gap:6px;margin-bottom:8px;}
+  .rappels-page > .ui-section:first-child .ui-grille{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .rappels-page > .ui-section:first-child .ui-tuile{padding:8px 10px;gap:1px;}
+  .rappels-page > .ui-section:first-child .ui-tuile-note{display:none;}
+  .rappels-page > .ui-section:first-child .ui-tuile-valeur{font-size:18px;}
+  .rappels-page .ui-colonnes,.rappels-page .ui-colonne{gap:8px;}
+  .rappels-bloc > .ui-section-tete{cursor:pointer;position:relative;padding-right:34px;min-height:44px;align-items:center;}
+  .rappels-bloc > .ui-section-tete::after{content:"+";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:700;color:var(--ink-2);}
+  .rappels-bloc.is-ouvert > .ui-section-tete::after{content:"−";}
+  .rappels-bloc:not(.is-ouvert) > :not(.ui-section-tete){display:none;}
+  .rappels-bloc .ui-section-sous{display:none;}
+  .rappels-bloc > .ui-section-tete .ui-section-icone{width:30px;height:30px;}
+  .rappels-bloc > .ui-section-tete .ui-section-titre{font-size:16px;}
+}
+@media (max-width:560px){
+  .rappels-bloc > .ui-section-tete{flex-wrap:wrap;gap:2px 8px;}
+  .rappels-bloc > .ui-section-tete .ui-section-acces{width:100%;padding-left:38px;gap:6px;margin:0;}
+  .rappels-bloc:not(.is-ouvert) > .ui-section-tete .ui-info-btn{display:none;}
+  .rappels-bloc.is-ouvert .ui-groupe,.rappels-bloc.is-ouvert .ui-section-corps{gap:8px;}
+  .rappels-bloc.is-ouvert .ui-aide{margin:0;}
+}
