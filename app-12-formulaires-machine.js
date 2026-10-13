@@ -1768,9 +1768,8 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
         <div class="piece-mobile-carte-ligne">
           <span class="piece-mobile-radio"><span class="point"></span></span>
           <div class="piece-mobile-carte-corps">
-            <span class="piece-mobile-abrev">${trad('Direct')}</span>
-            <div class="piece-mobile-carte-nom" style="margin-top:4px;">${trad('Intervention main-d\'œuvre seule')}</div>
-            <p class="muted-text" style="margin:2px 0 0;font-size:12.5px;">${trad('Aucune pièce du catalogue rattachée.')}</p>
+            <div class="piece-mobile-carte-nom">${trad('Intervention main-d\'œuvre seule')}</div>
+            <div class="piece-mobile-ligne-meta">${trad('Aucune pièce du catalogue rattachée')}</div>
           </div>
         </div>
       </label>`;
@@ -1783,22 +1782,16 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
     } else {
       zone.innerHTML = carteAucune + liste.map((p) => {
         const delai = p.avg_lead_time_days != null ? `<span class="piece-mobile-delai">${picto('sablier')}${tR('{n} j', { n: p.avg_lead_time_days })}</span>` : '';
+        const meta = [p.reference, p.supplier_name].filter(Boolean).map(esc).join(' · ');
         return `<label class="piece-mobile-carte${choisiId === String(p.id) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
           <div class="piece-mobile-carte-ligne">
             <span class="piece-mobile-radio"><span class="point"></span></span>
             <div class="piece-mobile-carte-corps">
               <div class="piece-mobile-carte-tete">
-                <span class="piece-mobile-carte-badges">
-                  <span class="piece-mobile-abrev">${esc(abrevFournisseur(p.supplier_name)) || trad('—')}</span>
-                  ${delai}
-                </span>
-                <span class="piece-mobile-prix"><span class="montant">${texteAvecSeparateurs(p.unit_price)}</span><span class="devise">${esc(deviseCourte())} HT</span></span>
+                <div class="piece-mobile-carte-nom">${esc(p.designation)}</div>
+                <span class="piece-mobile-prix"><span class="montant">${texteAvecSeparateurs(p.unit_price)}</span><span class="devise">${esc(deviseCourte())}</span></span>
               </div>
-              <div class="piece-mobile-carte-nom">${esc(p.designation)}</div>
-              ${(p.reference || p.supplier_name) ? `<div class="piece-mobile-carte-meta">
-                ${p.reference ? `<div class="piece-mobile-carte-meta-ligne"><span class="mot">${trad('Référence :')}</span><span class="val">${esc(p.reference)}</span></div>` : ''}
-                ${p.supplier_name ? `<div class="piece-mobile-carte-meta-ligne"><span class="mot">${trad('Fournisseur :')}</span><span class="val">${esc(p.supplier_name)}</span></div>` : ''}
-              </div>` : ''}
+              <div class="piece-mobile-ligne-meta">${meta}${delai ? ` ${delai}` : ''}</div>
             </div>
           </div>
         </label>`;
@@ -1828,7 +1821,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
         </div>
         <div class="piece-mobile-recherche">
           <span class="card-ico">${picto('recherche')}</span>
-          <input type="text" id="piece-m-recherche" placeholder="${esc(trad('Référence, désignation, fournisseur…'))}">
+          <input type="text" id="piece-m-recherche" placeholder="${esc(trad('Référence, désignation…'))}">
           <div class="piece-mobile-recherche-actions">
             <button type="button" id="piece-m-tri" aria-label="${esc(trad('Trier'))}">${picto('filtre')}</button>
           </div>

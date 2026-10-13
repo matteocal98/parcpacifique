@@ -2384,3 +2384,29 @@ textarea:not([data-x]),
 .piece-mobile-overlay .piece-mobile-abrev,.piece-mobile-overlay .devise,.piece-mobile-overlay .piece-mobile-delai,.piece-mobile-overlay .piece-mobile-compte-badge,.piece-mobile-overlay p,.piece-mobile-overlay small{font-size:12px !important;}
 .piece-mobile-overlay .piece-fournisseur-chip{min-height:44px;}
 .piece-mobile-overlay .piece-mobile-croix:focus,.piece-mobile-overlay button[aria-label*="Fermer"]:focus{outline:none;box-shadow:none;}
+
+/* ── Choix d'une pièce (plein écran téléphone) : liste compacte — une ligne pour le nom et le prix, une ligne de détail ── */
+.piece-mobile-overlay .piece-mobile-fournisseurs{display:none !important;}
+.piece-mobile-overlay .piece-mobile-compte-ligne{display:none;}
+.piece-mobile-overlay .piece-mobile-titre-bloc p{display:none;}
+.piece-mobile-overlay .piece-mobile-tete{min-height:52px;padding-top:4px;padding-bottom:4px;}
+.piece-mobile-overlay .piece-mobile-souscontexte{padding:8px 12px 4px;gap:6px;}
+.piece-mobile-overlay .piece-mobile-liste{display:flex;flex-direction:column;gap:6px;padding:6px 12px 12px;}
+.piece-mobile-overlay .piece-mobile-carte{display:block;padding:8px 10px;margin:0;border-radius:var(--r-md);min-height:0;}
+.piece-mobile-overlay .piece-mobile-carte-ligne{display:flex;align-items:center;gap:10px;}
+.piece-mobile-overlay .piece-mobile-radio{flex:0 0 22px;width:22px;height:22px;margin:0;}
+.piece-mobile-overlay .piece-mobile-carte-corps{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.piece-mobile-overlay .piece-mobile-carte-tete{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0;}
+.piece-mobile-overlay .piece-mobile-carte-nom{margin:0 !important;font-size:14px;font-weight:700;line-height:1.25;min-width:0;overflow-wrap:anywhere;}
+.piece-mobile-overlay .piece-mobile-prix{display:inline-flex;align-items:baseline;gap:3px;flex:0 0 auto;white-space:nowrap;}
+.piece-mobile-overlay .piece-mobile-prix .montant{font-size:15px;font-weight:800;}
+.piece-mobile-overlay .piece-mobile-ligne-meta{font-size:12px;line-height:1.3;color:var(--ink-2);display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;overflow-wrap:anywhere;}
+.piece-mobile-overlay .piece-mobile-delai{display:inline-flex;align-items:center;gap:3px;padding:0 6px;border-radius:var(--r-chip);background:var(--ok-bg);font-weight:700;}
+.piece-mobile-overlay .piece-mobile-delai svg{width:12px;height:12px;}
+
+.piece-mobile-overlay .piece-mobile-pied{padding:6px 12px 10px;gap:6px;}
+.piece-mobile-overlay .piece-mobile-resume{display:none;}
+.piece-mobile-overlay .piece-mobile-actions{gap:8px;}
+.piece-mobile-overlay .piece-mobile-annuler,.piece-mobile-overlay .piece-mobile-valider{min-height:48px;height:48px;font-size:14px;padding:0 12px;}
+.piece-mobile-overlay .piece-mobile-valider{flex:1 1 auto;}
+.piece-mobile-overlay .piece-mobile-valider .card-ico{display:none;}
