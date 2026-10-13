@@ -2317,3 +2317,9 @@ textarea:not([data-x]),
   .tco-page .tco-donut-legende-carte{flex-direction:row;align-items:center;justify-content:space-between;width:100%;padding:6px 10px;}
   .tco-page .tco-donut-legende-carte .droite{margin-left:auto;}
 }
+
+/* Carte de télémétrie (téléphone) : un doigt = défilement de la page ; le bandeau d'aide « deux doigts » reste lisible */
+@media (pointer:coarse){
+  .tele-carte-zone .leaflet-container{touch-action:pan-x pan-y;}
+  .tele-carte-indice{font-size:12px;white-space:nowrap;}
+}

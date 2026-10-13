@@ -384,7 +384,10 @@ async function preparerCarteGps(racine) {
   try { L = await chargerLeaflet(); }
   catch (err) { messageCarteGps(trad('La carte ne peut pas se charger (hors connexion ?). Les compteurs restent à jour.'), true); return; }
   if (!document.body.contains(zone)) return; // l'écran a changé pendant le chargement
-  carteGps = L.map(zone, { worldCopyJump: true });
+  // Écran tactile : UN doigt fait défiler la PAGE (sinon la carte « avale » le défilement et on ne peut plus descendre) ;
+  // il faut DEUX doigts pour déplacer ou zoomer la carte (le pincement reste géré par Leaflet).
+  const tactile = !!(L.Browser && L.Browser.mobile) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  carteGps = L.map(zone, { worldCopyJump: true, dragging: !tactile });
   L.tileLayer(URL_TUILES, { maxZoom: 19, attribution: ATTRIBUTION_TUILES }).addTo(carteGps);
   const geste = () => { etatCarteGps.manuel = true; };
   zone.addEventListener('pointerdown', geste);
@@ -392,7 +395,7 @@ async function preparerCarteGps(racine) {
   // dessus. Ctrl (ou Cmd, ou le pincement d'un pavé tactile) + molette zoome la carte ; un petit message le dit.
   const indice = document.createElement('div');
   indice.className = 'tele-carte-indice';
-  indice.textContent = trad('Ctrl + molette pour zoomer la carte');
+  indice.textContent = tactile ? trad('Deux doigts pour déplacer la carte') : trad('Ctrl + molette pour zoomer la carte');
   zone.appendChild(indice);
   let minuteurIndice = null;
   zone.addEventListener('wheel', (e) => {
@@ -403,6 +406,16 @@ async function preparerCarteGps(racine) {
     clearTimeout(minuteurIndice);
     minuteurIndice = setTimeout(() => indice.classList.remove('is-visible'), 1300);
   }, { capture: true, passive: true });
+  if (tactile) {
+    // un seul doigt qui glisse sur la carte : on laisse la page défiler et on rappelle comment bouger la carte
+    zone.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length === 1) {
+        indice.classList.add('is-visible');
+        clearTimeout(minuteurIndice);
+        minuteurIndice = setTimeout(() => indice.classList.remove('is-visible'), 1300);
+      }
+    }, { passive: true });
+  }
   carteGps.on('moveend', () => {
     if (!etatCarteGps.manuel) return;
     const c = carteGps.getCenter();
