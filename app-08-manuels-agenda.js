@@ -63,7 +63,8 @@ function manuelCarteHtml(m) {
   const sub = hasManual
     ? (items.length ? tR('{n} échéance(s) extraite(s) du carnet', { n: items.length }) : trad('Carnet déposé, plan non encore extrait'))
     : trad('Aucun carnet déposé');
-  const meta = [machineBrandModel(m), m.category?.name].filter(Boolean).join(' · ');
+  const marque = machineBrandModel(m);
+  const meta = [marque ? esc(marque) : '', m.category?.name ? `<span class="manuel-cat">${esc(m.category.name)}</span>` : ''].filter(Boolean).join('<span class="manuel-cat"> · </span>');
   const photo = safeUrl(m.image_url);
   return `
     <article class="ui-ligne is-deux manuel-carte ${classe}">
@@ -71,7 +72,7 @@ function manuelCarteHtml(m) {
         <div class="ui-ligne-icone" aria-hidden="true">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : picto('carnet')}</div>
         <div class="ui-ligne-textes">
           <span class="ui-ligne-nom">${esc(m.name)}<span class="ui-statut ${classe}">${label}</span></span>
-          ${meta ? `<span class="ui-ligne-sous">${esc(meta)}</span>` : ''}
+          ${meta ? `<span class="ui-ligne-sous">${meta}</span>` : ''}
           <span class="ui-ligne-sous">${esc(sub)}</span>
         </div>
       </div>

@@ -2095,3 +2095,9 @@ textarea:not([data-x]),
   .manuel-carte .ui-ligne-nom{flex-wrap:nowrap;}
   .manuel-carte .ui-ligne-nom .ui-statut{flex:0 0 auto;}
 }
+
+@media (max-width:560px){
+  .manuel-carte .manuel-cat{display:none;}
+  /* trois boutons répartis sur toute la largeur, en bas de la carte */
+  .manuel-carte .ui-ligne-action.is-etiquettes{width:100% !important;flex:1 1 100% !important;justify-content:space-between !important;margin-left:0;}
+}
