@@ -2323,3 +2323,33 @@ textarea:not([data-x]),
   .tele-carte-zone .leaflet-container{touch-action:pan-x pan-y;}
   .tele-carte-indice{font-size:12px;white-space:nowrap;}
 }
+
+/* ── Télémétrie (téléphone, phase 4) : carte plus basse, sources repliées, machines reliées en lignes compactes ── */
+@media (max-width:700px){
+  .tele-page .ui-section{padding:8px 10px;gap:6px;margin-bottom:8px;}
+  .tele-page .tele-carte-gps > .ui-section-tete .ui-section-icone,.tele-page .tele-carte-gps > .ui-section-tete .ui-section-sous{display:none;}
+  .tele-page .tele-carte-zone{height:clamp(240px,40vh,320px);}
+  .tele-page .ui-section-sous{display:none;}
+  .tele-page .ui-colonnes,.tele-page .ui-colonne{gap:8px;}
+  .tele-page .tele-sous,.tele-page .ui-aide{font-size:12px;}
+  /* machines reliées : nom + état sur une ligne, champs masqués jusqu'au toucher sur le nom */
+  #acc-tele-machines .ui-ligne{padding:8px 10px;gap:4px;}
+  #acc-tele-machines .ui-ligne-nom{cursor:pointer;position:relative;padding-right:30px;min-height:32px;display:flex;align-items:center;}
+  #acc-tele-machines .ui-ligne-nom::after{content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:700;color:var(--ink-2);}
+  #acc-tele-machines .ui-ligne.is-ouvert .ui-ligne-nom::after{content:"−";}
+  #acc-tele-machines .ui-ligne:not(.is-ouvert) .ui-ligne-info,#acc-tele-machines .ui-ligne:not(.is-ouvert) .ui-ligne-action,#acc-tele-machines .ui-ligne:not(.is-ouvert) .ui-case{display:none;}
+  #acc-tele-machines .ui-ligne-info.is-champs{display:flex;flex-direction:column;gap:6px;}
+  #acc-tele-machines .ui-champ{height:40px;font-size:14px;}
+  #acc-tele-machines .ui-ligne-action .ui-btn{min-height:44px;}
+}
+@media (max-width:700px){
+  #acc-tele-machines .ui-ligne-id,#acc-tele-machines .ui-ligne-textes{width:100%;flex:1 1 auto;}
+  #acc-tele-machines .ui-ligne-nom{width:100%;box-sizing:border-box;}
+  #acc-tele-machines .ui-ligne-textes{gap:0;}
+}
+@media (max-width:700px){
+  #acc-tele-machines .ui-ligne-info.is-champs{align-items:stretch;}
+  #acc-tele-machines .ui-select-wrap{width:100%;}
+  #acc-tele-machines .ui-select-wrap select,#acc-tele-machines .ui-champ,#acc-tele-machines input.ui-champ{width:100%;box-sizing:border-box;}
+  #acc-tele-machines .ui-ligne-action{justify-content:flex-start;}
+}

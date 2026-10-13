@@ -24,7 +24,7 @@ VIEWS.telemetrie = {
     const carte = telemetrieCarteHtml();
     const blocCarte = carteGpsHtml();
     return `
-      <div class="ui-page">
+      <div class="ui-page tele-page">
         ${blocCarte}
         ${carte || `<section class="ui-section"><p class="ui-aide">${trad('La télémétrie est réservée au gérant, sur l\'offre Enterprise.')}</p></section>`}
       </div>`;
@@ -34,6 +34,23 @@ VIEWS.telemetrie = {
     if (!root) return;
     preparerCarteTelemetrie(root);
     preparerCarteGps(root);
+    // Téléphone : le bloc « Compteur automatique » (sources) est replié ; chaque machine reliée est repliée sur son nom
+    // (un toucher sur le nom déplie sa source, son identifiant de boîtier et « Enregistrer »).
+    const blocSources = root.querySelector('#acc-telemetrie .ui-colonne:first-child > .ui-section');
+    if (blocSources) {
+      const tete = blocSources.querySelector(':scope > .ui-section-tete');
+      if (tete) {
+        blocSources.classList.add('rappels-bloc');
+        tete.setAttribute('role', 'button'); tete.setAttribute('tabindex', '0'); tete.setAttribute('aria-expanded', 'false');
+        const basculer = () => { const o = blocSources.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(o)); };
+        tete.addEventListener('click', (e) => { if (e.target.closest('button,a,input,select,textarea,.ui-info-btn')) return; basculer(); });
+        tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+      }
+    }
+    root.addEventListener('click', (e) => {
+      const nom = e.target.closest('#acc-tele-machines .ui-ligne-nom');
+      if (nom) nom.closest('.ui-ligne').classList.toggle('is-ouvert');
+    });
   },
 };
 
