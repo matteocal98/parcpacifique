@@ -682,7 +682,7 @@ function apercuRoleHtml() {
   if (typeof MutationObserver === 'undefined') return;
   const SEL = '.modal-croix,.log-close2,.mform-close,.fo-fermer-x,.pplan-close,.piece-mobile-overlay,[aria-label*="Fermer"],[aria-label*="fermer"],[aria-label*="Close"]';
   const traiter = (ov) => {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 560px)').matches) return;
+    if (!window.matchMedia || !window.matchMedia('(max-width: 560px), (orientation: landscape) and (max-height: 520px) and (max-width: 899px)').matches) return;
     const mod = ov.querySelector('.modal');
     if (!mod || mod.querySelector(SEL) || ov.classList.contains('piece-mobile-overlay') || mod.dataset.croixAjoutee) return;
     mod.dataset.croixAjoutee = '1';

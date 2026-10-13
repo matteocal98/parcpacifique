@@ -2439,3 +2439,24 @@ textarea:not([data-x]),
   .modal .plan-tasks li strong{font-size:14px;}
   .modal .plan-tasks .plan-task-freq{font-size:12px;color:var(--ink-3);}
 }
+@media (max-width:560px){
+  .machine-modal-add #btn-camera,.machine-modal-add #cancel,.machine-modal-add button[type=submit],
+  .machine-modal-edit #btn-camera,.machine-modal-edit #cancel,.machine-modal-edit button[type=submit],
+  .machine-modal #btn-camera,.machine-modal #cancel,.machine-modal button[type=submit]{min-height:44px;}
+}
+@media (max-width:560px){
+  .overlay #wiz-close{width:44px;height:44px;}
+  .overlay #pick-photo-btn,.overlay #shoot-photo-btn,.overlay .modal #cancel,.overlay .modal #btn-camera{min-height:44px;}
+  .overlay .modal button[type=submit]{min-height:44px;}
+}
+@media (max-width:560px){
+  .machine-modal-add header button{width:44px !important;height:44px !important;}
+  .machine-modal-add footer button{min-height:44px !important;}
+  .machine-modal-add #photo-preview + div > .flex > button{min-height:44px;}
+}
+/* Paysage téléphone : aucun texte de fenêtre sous 12 px */
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){
+  .machine-modal-add label,.machine-modal-add [class*="text-["],.machine-modal-add .text-xs,.machine-modal-add .text-sm,.machine-modal-add main div,.machine-modal-add main span{font-size:max(12px,1em) !important;}
+  .modal .font-label-sm,.modal .font-label-md,.modal .font-body-sm,.modal .ml-space-xs,.modal .mmod-pill-actif,.modal .pe-date-label,.modal .jm-eyebrow,.modal .jm-compte,.modal label,.modal .choix-date-noms,.modal .indicatif-raccourcis-tete,.modal .indicatif-raccourcis-defaut,.modal .indicatif-badge,.modal .indicatif-pied-compte{font-size:12px !important;}
+  .modal .modal-croix{z-index:5;}
+}
