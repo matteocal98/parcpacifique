@@ -57,7 +57,7 @@ VIEWS.account = {
           ${acces ? `<div class="ui-section-acces">${acces}</div>` : ''}
         </div>`;
     return `
-      <div class="ui-page"><div class="ui-colonnes"><div class="ui-colonne">
+      <div class="ui-page compte-page"><div class="ui-colonnes"><div class="ui-colonne">
       <section class="ui-section">
         ${tete('batiment', trad('Société & Identité légale'), trad('Renseignements légaux d\'exploitation et de facturation.'),
           c.registrationNumber ? `<span class="ui-statut is-ok">${tR('{registre} renseigné', { registre: libelleRegistre(c.country) })}</span>` : '')}
@@ -274,6 +274,18 @@ VIEWS.account = {
       </div></div></div>`;
   },
   mount() {
+    // Téléphone : chaque rubrique du compte est repliée sur son titre ; un toucher sur l'en-tête la déplie.
+    document.getElementById('view-root')?.querySelectorAll('.compte-page .ui-section').forEach((sec) => {
+      const tete = sec.querySelector(':scope > .ui-section-tete');
+      if (!tete) return;
+      sec.classList.add('rappels-bloc');
+      tete.setAttribute('role', 'button');
+      tete.setAttribute('tabindex', '0');
+      tete.setAttribute('aria-expanded', 'false');
+      const basculer = () => { const ouvert = sec.classList.toggle('is-ouvert'); tete.setAttribute('aria-expanded', String(ouvert)); };
+      tete.addEventListener('click', (e) => { if (e.target.closest('button,a,input,select,textarea,.ui-info-btn')) return; basculer(); });
+      tete.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
+    });
     const root = document.getElementById('view-root');
     if (!root) return;
 
