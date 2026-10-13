@@ -1356,7 +1356,6 @@ function openPlusSheet() {
           </div>
           ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Plan d\'entretien'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
           ${vueAutoriseePourRole('agenda') ? itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '') : ''}
-          ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           ${(tcoActif() && vueAutoriseePourRole('tco')) ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
           ${(telemetrieActif() && UI.role === 'gerant') ? itemHtml('telemetrie', 'telemetrie', 'is-indigo', trad('Télémétrie'), trad('Compteurs automatiques des machines'), '') : ''}
           ${(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
@@ -1365,6 +1364,7 @@ function openPlusSheet() {
         <div class="plus-sheet-section">
           <div class="plus-sheet-section-tete"><span class="plus-sheet-section-titre">${trad('Compte & organisation')}</span></div>
           ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), '')}
+          ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels & Alertes'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           <button type="button" class="plus-sheet-item is-deconnexion" id="plus-sheet-logout">
             <span class="plus-sheet-item-gauche">
               <span class="plus-sheet-item-icone is-neutre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>

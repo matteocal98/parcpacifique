@@ -1713,3 +1713,11 @@ textarea:not([data-x]),
 .apercu-role select{max-width:140px;border:0;background:transparent;font:inherit;font-weight:800;color:var(--ink);min-height:32px;}
 .apercu-role.is-actif{background:#FFE9C7;box-shadow:0 0 0 2px var(--late),0 2px 10px rgba(14,19,51,.22);}
 @media (min-width:900px){.apercu-role{bottom:12px;}}
+
+/* ── Sous-navigation d'une rubrique (Parc : Machines / Plans / Télémétrie ; Stock & achats : Stock / Coûts ; Compte) ── */
+.sous-nav{display:flex;flex-wrap:wrap;gap:0 20px;margin:0 0 6px;border-bottom:1px solid rgba(14,19,51,.12);}
+.sous-nav-lien{min-height:44px;padding:0 2px;margin-bottom:-1px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--ink-2);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.sous-nav-lien:hover{color:var(--ink);}
+.sous-nav-lien.is-actif{color:var(--ink);border-bottom-color:var(--primary);}
+@media (max-width:420px){.sous-nav{gap:0 14px;}.sous-nav-lien{font-size:13px;}}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){.sous-nav-lien{min-height:36px;}}

@@ -85,6 +85,51 @@ function navItemsVisibles() {
   });
 }
 
+// ── Rubriques (plan de reconfiguration du 2026-10-13, phase 2) ────────────────────────────────────────────
+// Neuf entrées de menu deviennent cinq RUBRIQUES. Les écrans, eux, ne changent pas d'identifiant : goTo('agenda'),
+// les liens et les notifications continuent de marcher tels quels. Une rubrique regroupe des écrans voisins, que
+// l'on retrouve en onglets sous le titre (sous-navigation) quand elle en compte au moins deux de visibles.
+const RUBRIQUES = [
+  { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil', vues: ['dashboard'] },
+  { id: 'parc', label: trad('Parc'), short: trad('Parc'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
+  { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda'] },
+  { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco'] },
+  { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
+];
+const LIBELLE_SOUS_VUE = () => ({
+  machines: trad('Machines'), manuals: trad('Plans d\'entretien'), telemetrie: trad('Télémétrie'),
+  agenda: trad('Agenda et préparation'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'),
+  account: trad('Mon compte'), reminders: trad('Rappels et notifications'),
+});
+function rubriqueDe(viewId) { return RUBRIQUES.find((r) => r.vues.includes(viewId)) || null; }
+function rubriquesVisibles() {
+  const visibles = new Set(navItemsVisibles().map((i) => i.id));
+  return RUBRIQUES
+    .map((r) => ({ ...r, vuesVisibles: r.vues.filter((v) => visibles.has(v)) }))
+    .filter((r) => r.vuesVisibles.length);
+}
+// Où mène une rubrique : le dernier écran qu'on y a ouvert, sinon son premier écran visible.
+function cibleRubrique(r) {
+  const memo = (UI.derniereVueRubrique || {})[r.id];
+  return r.vuesVisibles.includes(memo) ? memo : r.vuesVisibles[0];
+}
+function sousNavHtml() {
+  const r = rubriqueDe(UI.view);
+  const visible = r && rubriquesVisibles().find((x) => x.id === r.id);
+  if (!visible || visible.vuesVisibles.length < 2) return '';
+  const libelles = LIBELLE_SOUS_VUE();
+  return `<nav class="sous-nav" aria-label="${esc(r.label)}">${visible.vuesVisibles.map((v) => `<button type="button" class="sous-nav-lien${UI.view === v ? ' is-actif' : ''}" data-nav="${v}"${UI.view === v ? ' aria-current="page"' : ''}>${esc(libelles[v])}</button>`).join('')}</nav>`;
+}
+// Onglet de la barre du bas actif : sa rubrique est celle de l'écran ouvert (ou l'écran exact quand deux onglets
+// partagent la même rubrique, comme Parc et Plan sur la barre du terrain).
+function tabActif(id) {
+  if (UI.view === id) return true;
+  const r = rubriqueDe(id);
+  if (!r || r.id !== (rubriqueDe(UI.view) || {}).id) return false;
+  const autresDansLaRubrique = tabsPourRole().filter((t) => t.id !== id && rubriqueDe(t.id) && rubriqueDe(t.id).id === r.id);
+  return autresDansLaRubrique.length === 0;
+}
+
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
 const TABS = [
   { id: 'dashboard', short: trad('Accueil'), icon: 'accueil' },
@@ -97,6 +142,7 @@ const TABS = [
 // (droit de gestion, droit de saisie) a le SCANNER au centre — le geste le plus fréquent d'un technicien — si
 // l'offre le permet ; sinon la barre se passe de bouton central. Le détail « Saisir » viendra à la phase 3.
 function tabsPourRole() {
+  if (UI.role === 'gerant') return [TABS[0], TABS[1], TABS[2], { id: 'agenda', short: trad('Planning'), icon: 'agenda' }, TABS[4]];
   if (UI.role !== 'mecanicien' && UI.role !== 'chauffeur') return TABS;
   const accueil = TABS[0];
   const parc = TABS[1];
@@ -466,7 +512,7 @@ function marqueSvg(idDegrade, couleurBarre) {
 function sidebarHtml() {
   return `
     <span class="wordmark"><span class="wm-logo" aria-hidden="true">${marqueSvg('keeva-barre', '#0E1333')}</span><span>KALEA</span></span>
-    ${navItemsVisibles().map(item => `<button type="button" class="nav-item${UI.view === item.id ? ' is-active' : ''}" data-nav="${item.id}"><span class="nav-ico" aria-hidden="true">${navIcone(item.icon)}</span>${esc(item.label)}</button>`).join('')}
+    ${rubriquesVisibles().map((r) => `<button type="button" class="nav-item${(rubriqueDe(UI.view) || {}).id === r.id ? ' is-active' : ''}" data-nav="${cibleRubrique(r)}"><span class="nav-ico" aria-hidden="true">${navIcone(r.icon)}</span>${esc(r.label)}</button>`).join('')}
     <div class="sidebar-foot">
       <div class="version-ligne"><span>${trad('Version')}</span><span>v${esc(versionAffichee())}</span></div>
       <button type="button" id="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>${trad('Se déconnecter')}</span></button>
@@ -493,7 +539,7 @@ function tabbarHtml() {
     if (t.id === 'fab-scan') return `<button type="button" class="tab-fab tab-fab-scan" id="fab-scan" aria-label="${esc(trad('Scanner un QR'))}"><span>${picto('qrcode')}</span></button>`;
     if (t.id === 'fab') return `<button type="button" class="tab-fab" id="fab-add" aria-label="${trad('Ajouter une machine')}"><span>+</span></button>`;
     if (t.id === 'plus') return `<button type="button" class="tab" id="open-plus"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
-    const active = UI.view === t.id;
+    const active = tabActif(t.id);
     return `<button type="button" class="tab${active ? ' is-active' : ''}" data-nav="${t.id}"><span class="tab-icon" aria-hidden="true">${navIcone(t.icon)}</span>${esc(t.short)}</button>`;
   };
   return tabsPourRole().map(slot).join('');
@@ -561,6 +607,7 @@ function renderApp() {
         <div class="content">
           <div class="view">
             ${bandeauHorsLigneHtml()}
+            ${sousNavHtml()}
             <div class="page-head" data-view="${esc(UI.view)}">${pageHeadHtml()}</div>
             <main id="view-root" data-view="${esc(UI.view)}">${view.render()}</main>
           </div>
@@ -581,6 +628,8 @@ function renderApp() {
 
 function goTo(viewId) {
   UI.view = viewId;
+  const rub = rubriqueDe(viewId);
+  if (rub) UI.derniereVueRubrique = { ...(UI.derniereVueRubrique || {}), [rub.id]: viewId };
   renderApp();
   window.scrollTo({ top: 0 });
 }
@@ -598,7 +647,7 @@ function apercuRoleHtml() {
 }
 
 function wireShell() {
-  document.querySelectorAll('.sidebar [data-nav], .tabbar [data-nav]').forEach(btn => {
+  document.querySelectorAll('.sidebar [data-nav], .tabbar [data-nav], .sous-nav [data-nav]').forEach(btn => {
     btn.addEventListener('click', () => goTo(btn.dataset.nav));
   });
   document.getElementById('fab-add')?.addEventListener('click', handleAddMachine);
