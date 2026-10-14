@@ -1376,19 +1376,53 @@ function cablerCatalogueTco(root) {
   });
 }
 
+// ── Onglets de la page Coûts & TCO (bureau) ──
+function tcoOngletsDisponibles() {
+  const liste = [];
+  if (tcoActif()) liste.push({ id: 'classement', libelle: trad('Classement') });
+  liste.push({ id: 'baremes', libelle: trad('Barèmes') });
+  liste.push({ id: 'seuils', libelle: trad('Seuils de coût') });
+  if (SCHEMA.hasArretCout) liste.push({ id: 'arret', libelle: trad('Coût d\'arrêt') });
+  return liste;
+}
+function tcoOngletActif(onglets) {
+  return onglets.some((o) => o.id === UI.tcoOnglet) ? UI.tcoOnglet : onglets[0].id;
+}
+function tcoAllerOnglet(root, id) {
+  const bouton = root.querySelector(`[data-tco-onglet="${id}"]`);
+  if (!bouton) return;
+  UI.tcoOnglet = id;
+  root.querySelectorAll('[data-tco-onglet]').forEach((b) => {
+    const actif = b === bouton;
+    b.classList.toggle('is-actif', actif);
+    b.setAttribute('aria-selected', String(actif));
+  });
+  root.querySelectorAll('.tco-panneau').forEach((p) => { p.hidden = p.id !== `tco-panneau-${id}`; });
+}
+
 VIEWS.tco = {
   fondBlanc: true,
   title: trad('Coûts & TCO'),
-  subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
+  subtitle: () => trad('Classement de rentabilité du parc, barèmes de calcul et seuils de coût'),
   render() {
+    // Bureau : la page est découpée en onglets (un seul bloc visible à la fois, bandeau de chiffres toujours en haut) ;
+    // téléphone : les onglets sont masqués et les blocs restent empilés, repliables (voir kit.css). L'onglet choisi
+    // est gardé dans UI.tcoOnglet pour survivre aux renderApp().
+    const onglets = tcoOngletsDisponibles();
+    const actif = tcoOngletActif(onglets);
+    const panneau = (id, contenu) => (onglets.some((o) => o.id === id)
+      ? `<div class="tco-panneau" role="tabpanel" id="tco-panneau-${id}" aria-labelledby="tco-onglet-${id}"${id === actif ? '' : ' hidden'}>${contenu}</div>`
+      : '');
     return `
       <div class="ui-page tco-page">
         ${tcoKpiGridHtml()}
-        ${tcoActif() ? tcoClassementFlotteHtml() : ''}
-        ${blocParametresTcoHtml()}
-        ${blocSeuilsCategorieTcoHtml()}
-        ${SCHEMA.hasArretCout ? blocCoutArretTcoHtml() : ''}
-        ${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}
+        <div class="stock-onglets tco-onglets" role="tablist" aria-label="${esc(trad('Sections des coûts'))}">
+          ${onglets.map((o) => `<button type="button" class="stock-onglet tco-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" id="tco-onglet-${o.id}" aria-selected="${o.id === actif}" aria-controls="tco-panneau-${o.id}" data-tco-onglet="${o.id}">${esc(o.libelle)}</button>`).join('')}
+        </div>
+        ${panneau('classement', tcoActif() ? tcoClassementFlotteHtml() : '')}
+        ${panneau('baremes', `${blocParametresTcoHtml()}${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}`)}
+        ${panneau('seuils', blocSeuilsCategorieTcoHtml())}
+        ${panneau('arret', SCHEMA.hasArretCout ? blocCoutArretTcoHtml() : '')}
       </div>`;
   },
   mount() {
@@ -1403,13 +1437,27 @@ VIEWS.tco = {
     });
     const root = document.getElementById('view-root');
     if (!root) return;
+    // Onglets (bureau) : clic et flèches gauche/droite.
+    root.addEventListener('click', (e) => {
+      const onglet = e.target.closest('[data-tco-onglet]');
+      if (onglet) tcoAllerOnglet(root, onglet.getAttribute('data-tco-onglet'));
+    });
+    root.querySelector('.tco-onglets')?.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const boutons = [...root.querySelectorAll('[data-tco-onglet]')];
+      const i = boutons.indexOf(document.activeElement);
+      if (i < 0) return;
+      const suivant = boutons[(i + (e.key === 'ArrowRight' ? 1 : boutons.length - 1)) % boutons.length];
+      suivant.focus();
+      tcoAllerOnglet(root, suivant.getAttribute('data-tco-onglet'));
+    });
     const message = (el, texte, erreur) => {
       if (!el) return;
       el.textContent = texte;
       el.style.color = erreur ? 'var(--late)' : 'var(--ok)';
     };
     // Téléphone : les blocs de réglage (paramètres, seuils, catalogue) sont repliés sur leur titre ; l'analyse du parc reste ouverte.
-    root.querySelectorAll('.tco-page > .ui-section').forEach((sec, i) => {
+    root.querySelectorAll('.tco-page .ui-section').forEach((sec, i) => {
       if (i < 2) return;
       const tete = sec.querySelector(':scope > .ui-section-tete');
       if (!tete) return;

@@ -2514,16 +2514,6 @@ textarea:not([data-x]),
   .vue-agenda > .ui-section-tete .ui-section-acces{margin-left:auto;}
 }
 
-/* ── COÛTS & TCO (grand écran ≥ 1200 px) : les deux petits blocs de réglages (barèmes, coût d'arrêt) se placent côte à côte
-   au lieu de s'empiler ; le classement et les seuils restent pleine largeur. Ids/rangs ciblés : `.tco-page` est propre à cette page. ── */
-@media (min-width:1200px){
-  .tco-page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;}
-  .tco-page > .ui-section{grid-column:1 / -1;margin:0;}
-  .tco-page > .rappels-bloc:nth-child(3){grid-column:1;order:3;}
-  .tco-page > #tco-arret-section{grid-column:2;order:3;}
-  .tco-page > .rappels-bloc:nth-child(4){order:4;}
-}
-
 /* ════════════════════════════════════════════════════════════════════════════
    FENÊTRES (modales) — harmonisation bureau et tablette (≥ 900 px)
      • titre de fenêtre : 20 px / 800 partout (fournisseur 16 px et import catalogue 700 alignés) ;
@@ -2561,4 +2551,14 @@ textarea:not([data-x]),
   .accueil-page:not(.accueil-terrain) > .ui-section:not(#accueil-vigilance):nth-child(2){grid-column:1 / span 2;}
   .accueil-page:not(.accueil-terrain) > .ui-section:not(#accueil-vigilance):nth-child(3){grid-column:3;}
   .accueil-page:not(.accueil-terrain) > .ui-section:nth-child(3) > .ui-grille{grid-template-columns:minmax(0,1fr);}
+}
+
+/* ── COÛTS & TCO : onglets (bureau ≥ 900 px). Sur téléphone la barre d'onglets est masquée et tous les blocs restent empilés. ── */
+.tco-panneau{display:flex;flex-direction:column;gap:16px;}
+@media (min-width:900px){
+  .tco-panneau[hidden]{display:none !important;}
+  .tco-onglets{margin:0;}
+}
+@media (max-width:899px){
+  .tco-onglets{display:none;}
 }
