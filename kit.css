@@ -2513,3 +2513,13 @@ textarea:not([data-x]),
   .vue-agenda > .ui-section-tete .ui-section-titres{display:none;}
   .vue-agenda > .ui-section-tete .ui-section-acces{margin-left:auto;}
 }
+
+/* ── COÛTS & TCO (grand écran ≥ 1200 px) : les deux petits blocs de réglages (barèmes, coût d'arrêt) se placent côte à côte
+   au lieu de s'empiler ; le classement et les seuils restent pleine largeur. Ids/rangs ciblés : `.tco-page` est propre à cette page. ── */
+@media (min-width:1200px){
+  .tco-page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;}
+  .tco-page > .ui-section{grid-column:1 / -1;margin:0;}
+  .tco-page > .rappels-bloc:nth-child(3){grid-column:1;order:3;}
+  .tco-page > #tco-arret-section{grid-column:2;order:3;}
+  .tco-page > .rappels-bloc:nth-child(4){order:4;}
+}
