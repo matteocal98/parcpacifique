@@ -297,7 +297,7 @@ VIEWS.dashboard = {
 
         <section class="ui-section">
           <div class="ui-grille is-3${estRoleTerrain() ? ' tuiles-compactes' : ''}">
-            <div class="ui-tuile is-retard">
+            ${estRoleTerrain() ? `<div class="ui-tuile is-retard">
               <span class="ui-tuile-etiquette">${trad('En retard')}</span>
               <span class="ui-tuile-valeur">${c.late}<small>${c.late > 1 ? trad('interventions') : trad('intervention')}</small></span>
               <span class="ui-tuile-note">${tR('{n} intervention(s) en retard', { n: c.late })}</span>
@@ -306,7 +306,7 @@ VIEWS.dashboard = {
               <span class="ui-tuile-etiquette">${tR('Sous {n} jours', { n: SOON_DAYS })}</span>
               <span class="ui-tuile-valeur">${c.soon}<small>${trad('à planifier')}</small></span>
               <span class="ui-tuile-note">${tR('{n} machine(s) proche échéance', { n: c.soon })}</span>
-            </div>
+            </div>` : ''}
             <div class="ui-tuile is-ok">
               <span class="ui-tuile-etiquette">${trad('À jour')}</span>
               <span class="ui-tuile-valeur">${c.ok}<small>${c.ok > 1 ? trad('machines') : trad('machine')}</small></span>
