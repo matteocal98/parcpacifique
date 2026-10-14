@@ -109,7 +109,7 @@ function refreshManuelsListe() {
 
 VIEWS.manuals = {
   fondBlanc: true,
-  title: trad('Plan d\'entretien'),
+  title: trad('Plans d\'entretien'),
   subtitle: () => tR('{n} plan(s) extrait(s) de vos carnets sur {total} machine(s)', { n: UI.counts.analysed, total: UI.machines.length }),
   render() {
     if (!UI.machines.length) {
@@ -2180,7 +2180,7 @@ function wireReglagesRappelsEmail(root) {
 
 VIEWS.reminders = {
   fondBlanc: true,
-  title: trad('Rappels & Notifications d\'échéance'),
+  title: trad('Rappels et notifications'),
   subtitle: () => trad('Gestion des alertes préventives envoyées par le serveur, sur terminal mobile Android et par e-mail avant chaque seuil d\'entretien critique.'),
   render() {
     return `

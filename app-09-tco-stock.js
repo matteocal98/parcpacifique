@@ -1378,7 +1378,7 @@ function cablerCatalogueTco(root) {
 
 VIEWS.tco = {
   fondBlanc: true,
-  title: trad('Paramètres TCO & Coûts d\'exploitation'),
+  title: trad('Coûts & TCO'),
   subtitle: () => trad('Configurez les barèmes de calcul automatique du TCO (main-d\'œuvre, assurance, stockage) et enrichissez le catalogue de pièces pour pré-remplir instantanément vos fiches d\'entretien.'),
   render() {
     return `
