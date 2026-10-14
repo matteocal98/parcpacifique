@@ -1710,10 +1710,53 @@ async function desactiverPush() {
   try { await plugin?.removeAllDeliveredNotifications(); } catch (err) { /* sans conséquence */ }
 }
 
+// ── LIEN PROFOND DANS L'APPLICATION ANDROID ──────────────────────────────
+// Un QR scanné par l'appareil photo du téléphone ouvre l'appli installée (App Links, kalea.pro/app.html), mais le
+// WebView, lui, charge toujours ses fichiers locaux : l'adresse `?qr=` / `?stock=` n'est PAS dans window.location.
+// Android la remet au greffon @capacitor/app : `appUrlOpen` (appli déjà ouverte) et `getLaunchUrl` (lancement à froid).
+// Même résolution que le scan dans l'appli et que le tap sur une notification : ouvrirFicheParId().
+let __dernierLienNatif = { url: '', quand: 0 };
+let __stockDepuisLienNatifEnAttente = null;
+function ouvrirLienProfondNatif(url) {
+  if (!url || typeof url !== 'string') return;
+  // Les deux voies (appUrlOpen + getLaunchUrl) peuvent annoncer le même lien : une seule ouverture.
+  const maintenant = Date.now();
+  if (__dernierLienNatif.url === url && maintenant - __dernierLienNatif.quand < 5000) return;
+  __dernierLienNatif = { url, quand: maintenant };
+  let adresse;
+  try { adresse = new URL(url); } catch (err) { return; }
+  const machineId = adresse.searchParams.get('qr');
+  const stock = adresse.searchParams.get('stock');
+  if (machineId) {
+    // Appli pas encore chargée (lancement à froid, ou pas encore connecté) : même file d'attente que la notification.
+    if (__appPretePourPush) ouvrirFicheParId(machineId);
+    else __machineIdDepuisPushEnAttente = machineId;
+  } else if (stock) {
+    if (__appPretePourPush) ouvrirFicheStockDepuisLien(url);
+    else __stockDepuisLienNatifEnAttente = url;
+  }
+}
+function ouvrirFicheStockDepuisLien(url) {
+  const s = lireQrLigneStock(url);
+  if (!s) { showToast(trad('Ce QR code ne correspond pas à une étiquette de stock KALEA.')); return; }
+  ouvrirFicheLigneStock(s.partId, s.warehouseId);
+}
+function wireLienProfondNatif() {
+  const application = pluginApplication();
+  if (!application) return;
+  try {
+    application.addListener('appUrlOpen', (evenement) => ouvrirLienProfondNatif(evenement && evenement.url));
+    if (typeof application.getLaunchUrl === 'function') {
+      Promise.resolve(application.getLaunchUrl()).then((lancement) => ouvrirLienProfondNatif(lancement && lancement.url)).catch(() => {});
+    }
+  } catch (err) { /* greffon muet : le scan dans l'appli reste disponible */ }
+}
+
 // Câblés UNE FOIS, au niveau racine du script (voir l'appel tout en bas,
 // à côté de changerLangue) — ce sont des écouteurs du greffon natif, pas des
 // éléments du DOM, ils doivent survivre aux changements de vue.
 function wirePushEcouteurs() {
+  wireLienProfondNatif();
   const plugin = pluginPush();
   if (!plugin) return;
   plugin.addListener('registration', async (jeton) => {

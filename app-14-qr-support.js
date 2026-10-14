@@ -56,6 +56,11 @@ function ouvrirFicheDepuisQrSiPresent() {
 // avant que UI.machines soit chargé (voir wirePushEcouteurs) — appelée au
 // même endroit dans boot(), juste après ouvrirFicheDepuisQrSiPresent().
 function ouvrirFicheDepuisPushSiPresent() {
+  if (__stockDepuisLienNatifEnAttente) {
+    const lien = __stockDepuisLienNatifEnAttente;
+    __stockDepuisLienNatifEnAttente = null;
+    ouvrirFicheStockDepuisLien(lien);
+  }
   if (!__machineIdDepuisPushEnAttente) return;
   const machineId = __machineIdDepuisPushEnAttente;
   __machineIdDepuisPushEnAttente = null;
