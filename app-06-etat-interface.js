@@ -44,6 +44,7 @@ const NAV_ITEMS = [
   { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
   { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
   { id: 'stock', label: trad('Stocks & SAV'), short: trad('Stocks'), icon: 'stock' },
+  { id: 'stats', label: trad('Statistiques'), short: trad('Stats'), icon: 'graphique' },
   { id: 'telemetrie', label: trad('Télémétrie'), short: trad('Télémétrie'), icon: 'telemetrie' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
@@ -63,8 +64,8 @@ const NAV_ITEMS = [
 //   droit de saisie (chauffeur)   : le terrain seulement — parc, plans et manuels, rappels, compte ;
 //   droit d'achat (achats)        : stock, fournisseurs, commandes et coûts ; parc et plans en lecture.
 const VUES_MASQUEES_PAR_ROLE = {
-  mecanicien: ['tco', 'telemetrie'],
-  chauffeur: ['agenda', 'stock', 'tco', 'telemetrie'],
+  mecanicien: ['tco', 'stats', 'telemetrie'],
+  chauffeur: ['agenda', 'stock', 'tco', 'stats', 'telemetrie'],
   // Droit d'achat : stock, fournisseurs, commandes et coûts ; le parc et les plans en lecture ; ni agenda ni télémétrie.
   achats: ['agenda', 'telemetrie'],
 };
@@ -80,6 +81,7 @@ function navItemsVisibles() {
   return NAV_ITEMS.filter((item) => {
     if (!vueAutoriseePourRole(item.id)) return false;
     if (item.id === 'tco') return tcoActif();
+    if (item.id === 'stats') return tcoActif();
     if (item.id === 'stock') return SCHEMA.hasStock && planCouvreStock();
     // Télémétrie : migration en place (SCHEMA) ET offre Enterprise ET gérant — la
     // création des sources et la liaison des machines sont réservées au gérant.
@@ -96,16 +98,16 @@ const RUBRIQUES = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil', vues: ['dashboard'] },
   { id: 'parc', label: trad('Parc'), short: trad('Parc'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
   { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda'] },
-  { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco'] },
+  { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco', 'stats'] },
   { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
 ];
 const LIBELLE_SOUS_VUE = () => ({
   machines: trad('Machines'), manuals: trad('Plans d\'entretien'), telemetrie: trad('Télémétrie'),
-  agenda: trad('Agenda et préparation'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'),
+  agenda: trad('Agenda et préparation'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'), stats: trad('Statistiques'),
   account: trad('Mon compte'), reminders: trad('Rappels et notifications'),
 });
 const LIBELLE_SOUS_VUE_COURT = () => ({
-  manuals: trad('Plans'), agenda: trad('Agenda'), stock: trad('Stock'), tco: trad('Coûts'), account: trad('Compte'), reminders: trad('Rappels'),
+  manuals: trad('Plans'), agenda: trad('Agenda'), stock: trad('Stock'), tco: trad('Coûts'), stats: trad('Stats'), account: trad('Compte'), reminders: trad('Rappels'),
 });
 function rubriqueDe(viewId) { return RUBRIQUES.find((r) => r.vues.includes(viewId)) || null; }
 function rubriquesVisibles() {
@@ -178,6 +180,7 @@ const NAV_ICONES = {
   parc: '<rect x="2.5" y="13" width="15" height="7" rx="1.5"/><path d="M8 13V9h7l3.5 4"/><circle cx="6.5" cy="20.5" r="2"/><circle cx="16.5" cy="20.5" r="2"/>',
   manuels: '<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8.5 3v18"/>',
   plus: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  graphique: '<path d="M4 20V13"/><path d="M10.2 20V7.5"/><path d="M16.4 20v-9.5"/><path d="M4 20h16.4"/>',
   agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
   // Coûts & TCO : une pile de pièces (cylindre empilé), lecture immédiate

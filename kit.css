@@ -2587,3 +2587,41 @@ textarea:not([data-x]),
   .mstrip-liste.is-dense .mstrip-btn-principal{height:32px;}
   .mstrip-liste.is-dense .mstrip-btn-icone{width:32px;height:32px;}
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   STATISTIQUES (Stock & achats › Statistiques) — filtres, indicateurs, cartes de graphiques
+   Règle du kit : section teintée > éléments blancs. Les graphiques sont des SVG posés dans des cartes blanches.
+   ════════════════════════════════════════════════════════════════════════════ */
+.stat-filtres{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;}
+.stat-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 16px;}
+.stat-grille{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:stretch;}
+.stat-grille .c4{grid-column:span 4;}.stat-grille .c5{grid-column:span 5;}.stat-grille .c6{grid-column:span 6;}
+.stat-grille .c7{grid-column:span 7;}.stat-grille .c8{grid-column:span 8;}.stat-grille .c12{grid-column:span 12;}
+.stat-carte{min-width:0;background:var(--surface);border-radius:var(--r-md);padding:12px 14px;}
+.stat-carte h3{margin:0;font-size:14px;font-weight:700;color:var(--ink);}
+.stat-carte .sous{margin:2px 0 8px;font-size:12px;color:var(--ink-3);}
+.stat-centre{display:flex;justify-content:center;}
+.stat-legende{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0 0;font-size:12px;color:var(--ink-2);}
+.stat-legende i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:3px;vertical-align:-1px;}
+.stat-tendance{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;vertical-align:middle;}
+.t-bien{background:rgba(36,181,168,.14);color:#0f766e;}
+.t-mal{background:var(--late-bg);color:#9a4d0b;}
+.t-neutre{background:var(--surface-soft);color:var(--ink-2);}
+.stat-table{width:100%;border-collapse:collapse;font-size:13px;}
+.stat-table th{padding:4px 6px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+.stat-table th.n,.stat-table td.n{text-align:right;}
+.stat-table td{padding:7px 6px;border-top:1px solid rgba(14,19,51,.08);}
+.stat-table td.n{font-weight:700;font-variant-numeric:tabular-nums;}
+.stat-puce{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;}
+.stat-tableau-defile{overflow-x:auto;}
+.stats-page .ui-aide{margin:6px 0;}
+@media (max-width:1199px){
+  .stat-kpis{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .stat-grille .c4,.stat-grille .c5,.stat-grille .c6,.stat-grille .c7,.stat-grille .c8{grid-column:span 12;}
+}
+@media (max-width:899px){
+  .stat-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .stat-grille{gap:10px;}
+  .stat-carte{padding:10px 10px;}
+  .stat-filtres .ui-selecteur{flex:1 1 150px;min-width:0;}
+}

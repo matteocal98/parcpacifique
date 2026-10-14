@@ -1393,6 +1393,7 @@ function openPlusSheet() {
           ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Plans d\'entretien'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
           ${vueAutoriseePourRole('agenda') ? itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '') : ''}
           ${(tcoActif() && vueAutoriseePourRole('tco')) ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
+          ${(tcoActif() && vueAutoriseePourRole('stats')) ? itemHtml('stats', 'graphique', 'is-royal', trad('Statistiques'), trad('Dépenses, maintenance et stock en graphiques'), '') : ''}
           ${(telemetrieActif() && UI.role === 'gerant') ? itemHtml('telemetrie', 'telemetrie', 'is-indigo', trad('Télémétrie'), trad('Compteurs automatiques des machines'), '') : ''}
           ${(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
         </div>
