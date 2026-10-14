@@ -2523,3 +2523,18 @@ textarea:not([data-x]),
   .tco-page > #tco-arret-section{grid-column:2;order:3;}
   .tco-page > .rappels-bloc:nth-child(4){order:4;}
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FENÊTRES (modales) — harmonisation bureau et tablette (≥ 900 px)
+     • titre de fenêtre : 20 px / 800 partout (fournisseur 16 px et import catalogue 700 alignés) ;
+       les grandes fenêtres de saisie machine ajout/modification partagent le même titre 28 px ;
+     • pied de fenêtre : boutons à 44 px de haut, 14 px / 700 (Annuler et Enregistrer jumelés, plus de 13 px d'un côté).
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width:900px){
+  .fo-entete h2{font-size:20px;font-weight:800;line-height:1.25;}
+  .import-csv-entete h2{font-weight:800;}
+  .machine-modal-add header h1[class]{font-size:28px;line-height:36px;}
+  .modal .modal-actions > button,
+  .modal .modal-actions > .ui-btn,
+  .modal .fo-pied .ui-btn{font-size:14px;font-weight:700;min-height:44px;}
+}
