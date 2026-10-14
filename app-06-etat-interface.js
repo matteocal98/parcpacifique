@@ -38,7 +38,7 @@ const UI = {
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil' },
-  { id: 'machines', label: trad('Machines'), short: trad('Parc'), icon: 'parc' },
+  { id: 'machines', label: trad('Machines'), short: trad('Machines'), icon: 'parc' },
   { id: 'manuals', label: trad('Plan d\'entretien'), short: trad('Plan'), icon: 'manuels' },
   { id: 'agenda', label: trad('Agenda et préparation'), short: trad('Agenda'), icon: 'agenda' },
   { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
@@ -96,7 +96,7 @@ function navItemsVisibles() {
 // l'on retrouve en onglets sous le titre (sous-navigation) quand elle en compte au moins deux de visibles.
 const RUBRIQUES = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil', vues: ['dashboard'] },
-  { id: 'parc', label: trad('Parc'), short: trad('Parc'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
+  { id: 'parc', label: trad('Machines'), short: trad('Machines'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
   { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda'] },
   { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco', 'stats'] },
   { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
@@ -142,7 +142,7 @@ function tabActif(id) {
 // Onglets visibles dans la barre mobile (5 emplacements, FAB central).
 const TABS = [
   { id: 'dashboard', short: trad('Accueil'), icon: 'accueil' },
-  { id: 'machines', short: trad('Parc'), icon: 'parc' },
+  { id: 'machines', short: trad('Machines'), icon: 'parc' },
   { id: 'fab' },
   { id: 'manuals', short: trad('Plan'), icon: 'manuels' },
   { id: 'plus', short: trad('Plus'), icon: 'plus' },
@@ -177,7 +177,7 @@ function tabsPourRole() {
 // rien — à 15 px, une maison sans trou est un pâté plein.
 const NAV_ICONES = {
   accueil: '<path fill-rule="evenodd" d="M9 3.2 1.2 10.5V21h21.6V10.5Z M3.2 11.5 9 6.1l5.8 5.4v7.5H3.2Z M9.8 13.5h3.2v5.5H9.8Z"/>',
-  parc: '<rect x="2.5" y="13" width="15" height="7" rx="1.5"/><path d="M8 13V9h7l3.5 4"/><circle cx="6.5" cy="20.5" r="2"/><circle cx="16.5" cy="20.5" r="2"/>',
+  parc: '<circle cx="6.4" cy="17.4" r="3"/><circle cx="15" cy="17.4" r="3"/><path d="M3.4 17.4V13a1 1 0 0 1 1-1H8.4"/><path d="M5.2 12V9.2"/><path d="M8.4 12V6.4a1 1 0 0 1 1-1h2.8a1 1 0 0 1 1 1V12"/><path d="M9.4 17.4H11.7"/><path d="M13.2 8.8l4.6 4.2"/><path d="M17.8 13l1.4-3.4 2.6 1-1.2 5.8h-3.6z"/>',
   manuels: '<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8.5 3v18"/>',
   plus: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   graphique: '<path d="M4 20V13"/><path d="M10.2 20V7.5"/><path d="M16.4 20v-9.5"/><path d="M4 20h16.4"/>',
@@ -274,7 +274,7 @@ const PICTOS = {
   // ajuste, history/schedule→bientot, calendar_today→calendrier,
   // info→info) — réutilisés tels quels, pas redessinés une 2ᵉ fois.
   argent: '<rect x="3" y="6" width="15" height="10" rx="2"/><rect x="6" y="9" width="15" height="10" rx="2" fill="none"/><circle cx="13.5" cy="14" r="2"/>',
-  parcMachine: '<rect x="2.5" y="13" width="15" height="7" rx="1.5"/><path d="M8 13V9h7l3.5 4"/><circle cx="6.5" cy="20.5" r="2"/><circle cx="16.5" cy="20.5" r="2"/>',
+  parcMachine: '<circle cx="6.4" cy="17.4" r="3"/><circle cx="15" cy="17.4" r="3"/><path d="M3.4 17.4V13a1 1 0 0 1 1-1H8.4"/><path d="M5.2 12V9.2"/><path d="M8.4 12V6.4a1 1 0 0 1 1-1h2.8a1 1 0 0 1 1 1V12"/><path d="M9.4 17.4H11.7"/><path d="M13.2 8.8l4.6 4.2"/><path d="M17.8 13l1.4-3.4 2.6 1-1.2 5.8h-3.6z"/>',
   tendanceHausse: '<path d="M3.5 16.5 10 10l4 4 6.5-6.5"/><path d="M15 7.5h5.5V13"/>',
   trier: '<path d="M7 6v12"/><path d="M4 9l3-3 3 3"/><path d="M17 18V6"/><path d="M14 15l3 3 3-3"/>',
   ciseaux: '<circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8l11 8M8 16l11-8"/>',

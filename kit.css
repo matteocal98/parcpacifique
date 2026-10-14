@@ -2569,26 +2569,6 @@ textarea:not([data-x]),
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   PARC — mode « Tableau » (bureau ≥ 1180 px, là où la carte machine passe en ligne) : une ligne dense par machine.
-   Activé par la classe .is-dense sur #fleet-list (bascule Cartes / Tableau, mémorisée dans localStorage).
-   ════════════════════════════════════════════════════════════════════════════ */
-@media (min-width:1180px){
-  .mstrip-liste.is-dense{gap:6px;}
-  .mstrip-liste.is-dense .mstrip-corps{padding:6px 14px;gap:14px;}
-  .mstrip-liste.is-dense .mstrip-photo{width:48px;height:38px;}
-  .mstrip-liste.is-dense .mstrip-photo-tag{display:none;}
-  .mstrip-liste.is-dense .mstrip-identite{gap:10px;flex:1 1 300px;}
-  .mstrip-liste.is-dense .mstrip-tache{display:none;}
-  .mstrip-liste.is-dense .mstrip-meta{margin-top:0;}
-  .mstrip-liste.is-dense .mstrip-compteur-bloc{padding:3px 8px;min-width:0;}
-  .mstrip-liste.is-dense .mstrip-compteur-bloc .compteur-titre{display:none;}
-  .mstrip-liste.is-dense .mstrip-jauge-note{display:none;}
-  .mstrip-liste.is-dense .mstrip-jauge{gap:2px;}
-  .mstrip-liste.is-dense .mstrip-btn-principal{height:32px;}
-  .mstrip-liste.is-dense .mstrip-btn-icone{width:32px;height:32px;}
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
    STATISTIQUES (Stock & achats › Statistiques) — filtres, indicateurs, cartes de graphiques
    Règle du kit : section teintée > éléments blancs. Les graphiques sont des SVG posés dans des cartes blanches.
    ════════════════════════════════════════════════════════════════════════════ */
@@ -2624,4 +2604,40 @@ textarea:not([data-x]),
   .stat-grille{gap:10px;}
   .stat-carte{padding:10px 10px;}
   .stat-filtres .ui-selecteur{flex:1 1 150px;min-width:0;}
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MACHINES — mode « Tuiles » (bureau et tablette ≥ 900 px) : plusieurs carrés par ligne, avec seulement la photo, le nom
+   et une fine barre d'échéance à la couleur de l'état. Activé par .is-tuiles sur #fleet-list (bascule Cartes / Tuiles,
+   mémorisée dans localStorage). Un clic sur la tuile ouvre la fiche de la machine.
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width:900px){
+  .mstrip-liste.is-tuiles,#fleet-list.is-tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px;align-items:start;}
+  #fleet-list.is-tuiles > .fleet-count{grid-column:1 / -1;}
+  .mstrip-liste.is-tuiles .mstrip{flex-direction:column;cursor:pointer;transition:box-shadow .15s ease;}
+  .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(14,19,51,.14);}
+  .mstrip-liste.is-tuiles .mstrip-accent{display:none;}
+  .mstrip-liste.is-tuiles .mstrip-corps{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;padding:12px;}
+  .mstrip-liste.is-tuiles .mstrip-identite{flex:none;width:100%;flex-direction:column;align-items:stretch;gap:8px;}
+  .mstrip-liste.is-tuiles .mstrip-photo{width:100%;height:112px;}
+  .mstrip-liste.is-tuiles .mstrip-photo-tag,
+  .mstrip-liste.is-tuiles .mstrip-badge,
+  .mstrip-liste.is-tuiles .mstrip-valeur,
+  .mstrip-liste.is-tuiles .mstrip-meta,
+  .mstrip-liste.is-tuiles .mstrip-tache,
+  .mstrip-liste.is-tuiles .mstrip-compteur-bloc,
+  .mstrip-liste.is-tuiles .mstrip-actions{display:none;}
+  .mstrip-liste.is-tuiles .mstrip-nom-ligne{justify-content:center;}
+  .mstrip-liste.is-tuiles .mstrip-titre{max-width:100%;}
+  .mstrip-liste.is-tuiles .mstrip-nom-ligne > :not(.mstrip-titre){display:none;}
+  .mstrip-liste.is-tuiles .mstrip-titre > :not(.mstrip-nom){display:none;}
+  .mstrip-liste.is-tuiles .mstrip-nom{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.25;text-align:center;}
+  /* La barre d'échéance reste affichée (elle est « desktop-only » en mode cartes) ; sans plan ou sans mesure, un rail neutre. */
+  .mstrip-liste.is-tuiles .mstrip-jauge{display:flex;width:100%;gap:0;}
+  .mstrip-liste.is-tuiles .mstrip-jauge-tete,
+  .mstrip-liste.is-tuiles .mstrip-jauge-note,
+  .mstrip-liste.is-tuiles .mstrip-jauge-vide > *{display:none;}
+  .mstrip-liste.is-tuiles .mstrip-jauge-piste{height:6px;}
+  .mstrip-liste.is-tuiles .mstrip-jauge-vide{display:block;width:100%;height:6px;border-radius:999px;background:rgba(14,19,51,.12);}
+  .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-jauge-piste)):not(:has(.mstrip-jauge-vide))::before{content:'';display:block;width:100%;height:6px;border-radius:999px;background:rgba(14,19,51,.12);}
 }

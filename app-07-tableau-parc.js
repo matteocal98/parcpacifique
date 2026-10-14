@@ -1444,10 +1444,10 @@ function refreshFleetList() {
   });
 }
 
-// Affichage du parc sur bureau : « cartes » (détaillé, par défaut) ou « tableau » (une ligne dense par machine).
+// Affichage des machines sur bureau : « cartes » (détaillé, par défaut) ou « tuiles » (carrés : photo, nom, fine barre d'échéance).
 function parcVueActive() {
   if (UI.parcVue === undefined) {
-    try { UI.parcVue = localStorage.getItem('kalea.parcVue') === 'tableau' ? 'tableau' : 'cartes'; } catch (e) { UI.parcVue = 'cartes'; }
+    try { UI.parcVue = localStorage.getItem('kalea.parcVue') === 'tuiles' ? 'tuiles' : 'cartes'; } catch (e) { UI.parcVue = 'cartes'; }
   }
   return UI.parcVue;
 }
@@ -1474,7 +1474,7 @@ VIEWS.machines = {
             `<span class="ui-tag">${tR('{n} machine(s) enregistrée(s)', { n: UI.machines.length })}</span>
             <div class="ui-segment parc-vue desktop-only" role="group" aria-label="${esc(trad('Affichage du parc'))}">
               <button type="button" data-parc-vue="cartes" class="${parcVueActive() === 'cartes' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'cartes'}">${trad('Cartes')}</button>
-              <button type="button" data-parc-vue="tableau" class="${parcVueActive() === 'tableau' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'tableau'}">${trad('Tableau')}</button>
+              <button type="button" data-parc-vue="tuiles" class="${parcVueActive() === 'tuiles' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'tuiles'}">${trad('Tuiles')}</button>
             </div>
             ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
             <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
@@ -1491,7 +1491,7 @@ VIEWS.machines = {
               ${parcPillHtml('soon', trad('Bientôt'), c.soon, 'soon')}
               ${parcPillHtml('ok', trad('À jour'), c.ok, 'ok')}
             </div>
-            <div id="fleet-list" class="mstrip-liste${parcVueActive() === 'tableau' ? ' is-dense' : ''}"></div>
+            <div id="fleet-list" class="mstrip-liste${parcVueActive() === 'tuiles' ? ' is-tuiles' : ''}"></div>
             <div class="ui-tuile is-ok">
               <span class="ui-tuile-etiquette">${trad('Disponibilité du parc :')}</span>
               <span class="ui-tuile-valeur">${UI.machines.length ? Math.round(((UI.machines.length - c.late) / UI.machines.length) * 100) : 100}%</span>
@@ -1538,7 +1538,7 @@ VIEWS.machines = {
 
     // Affichage du parc (bureau) : cartes détaillées ou tableau dense — choix mémorisé sur l'appareil.
     root.querySelectorAll('[data-parc-vue]').forEach((bouton) => bouton.addEventListener('click', () => {
-      const choix = bouton.getAttribute('data-parc-vue') === 'tableau' ? 'tableau' : 'cartes';
+      const choix = bouton.getAttribute('data-parc-vue') === 'tuiles' ? 'tuiles' : 'cartes';
       UI.parcVue = choix;
       try { localStorage.setItem('kalea.parcVue', choix); } catch (err) { /* sans stockage : valable pour cette session */ }
       root.querySelectorAll('[data-parc-vue]').forEach((b) => {
@@ -1546,8 +1546,15 @@ VIEWS.machines = {
         b.classList.toggle('is-actif', actif);
         b.setAttribute('aria-pressed', String(actif));
       });
-      root.querySelector('#fleet-list')?.classList.toggle('is-dense', choix === 'tableau');
+      root.querySelector('#fleet-list')?.classList.toggle('is-tuiles', choix === 'tuiles');
     }));
+
+    root.querySelector('#fleet-list')?.addEventListener('click', (e) => {
+      if (!e.currentTarget.classList.contains('is-tuiles')) return;
+      const carte = e.target.closest('.mstrip');
+      if (!carte || e.target.closest('button, a, input')) return;
+      ouvrirFicheParId(carte.getAttribute('data-machine-id'));
+    });
 
     root.querySelectorAll('.parc-pill').forEach(pill => pill.addEventListener('click', () => {
       fleetFilters().status = pill.dataset.status;
