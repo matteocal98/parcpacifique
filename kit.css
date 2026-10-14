@@ -2562,3 +2562,8 @@ textarea:not([data-x]),
 @media (max-width:899px){
   .tco-onglets{display:none;}
 }
+
+/* ── STOCK (bureau ≥ 900 px) : le guide « Où trouver quoi ? » répète les onglets visibles juste au-dessus ; il reste sur téléphone, où la barre d'onglets défile. ── */
+@media (min-width:900px){
+  .ui-section:has(> .ui-section-corps > .stock-guide){display:none;}
+}
