@@ -707,6 +707,8 @@ SCHEMA.hasCommandes = false;
 SCHEMA.hasPannes = false;
 // Coût d'arrêt des pannes (panne-cout-arret.sql) : heures, taux et coût figés à la résolution ; taux par catégorie / machine.
 SCHEMA.hasArretCout = false;
+// Respect du plan (interventions-respect-plan.sql) : interventions.was_late = la machine était en retard quand l'entretien a été saisi.
+SCHEMA.hasRespectPlan = false;
 
 // Télémétrie (compteur automatique) : machines.telemetry_source_id/telemetry_ref/
 // counter_source/telemetry_last_at/telemetry_offset + tables telemetry_sources et

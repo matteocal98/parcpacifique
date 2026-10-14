@@ -51,7 +51,8 @@ async function statsChargerDonnees() {
   const d = { interventions: [], couts: [], pannes: [], mouvements: [], commandes: [], receptions: [] };
   const taches = [];
   if (ids.length) {
-    taches.push(statsLireTable('interventions', 'machine_id, kind, parts_cost, labor_cost, performed_at', (r) => r.in('machine_id', ids))
+    const colsInterv = 'machine_id, kind, parts_cost, labor_cost, performed_at';
+    taches.push(statsLireTable('interventions', SCHEMA.hasRespectPlan ? colsInterv + ', was_late' : colsInterv, (r) => r.in('machine_id', ids))
       .catch(() => statsLireTable('interventions', 'machine_id, parts_cost, labor_cost, performed_at', (r) => r.in('machine_id', ids)))
       .then((x) => { d.interventions = x; }));
     taches.push(statsLireTable('operating_costs', 'machine_id, amount, incurred_at, kind', (r) => r.in('machine_id', ids)).then((x) => { d.couts = x; }).catch(() => {}));
@@ -126,6 +127,7 @@ function statsCalculer(d, f) {
 
   const pieces = zero(); const mo = zero(); const expl = zero(); const arret = zero();
   const interv = { entretien: zero(), depannage: zero(), frais: zero() };
+  const aTemps = zero(); const enRetard = zero();     // entretiens planifiés dont on sait s'ils étaient à temps (colonne was_late)
   const pannesMois = zero();
   const parMachine = new Map();           // machine_id -> { pieces, mo, expl, arret, interv, prec }
   const ligne = (id) => { if (!parMachine.has(id)) parMachine.set(id, { pieces: 0, mo: 0, expl: 0, arret: 0, interv: 0, prec: 0 }); return parMachine.get(id); };
@@ -138,6 +140,8 @@ function statsCalculer(d, f) {
       pieces[i] += p; mo[i] += l;
       const type = r.kind === 'depannage' ? 'depannage' : (r.kind === 'frais' ? 'frais' : 'entretien');
       interv[type][i] += 1;
+      if (type === 'entretien' && r.was_late === false) aTemps[i] += 1;
+      if (type === 'entretien' && r.was_late === true) enRetard[i] += 1;
       const lg = ligne(r.machine_id); lg.pieces += p; lg.mo += l; lg.interv += 1;
     } else if (rangPrec.has(cle)) { totalPrec += p + l; ligne(r.machine_id).prec += p + l; }
   });
@@ -201,7 +205,7 @@ function statsCalculer(d, f) {
 
   return {
     mois, n, machines, total, totalPieces, totalMo, totalExpl, totalArret, totalPrec, pieces, mo, expl, arret, cumul, horaire, auDessusSeuil, avecSeuil, top,
-    interv, nbInterv, pannesMois, nbPannes, heuresArret, delaiMoyen: delaiN ? delaiTotal / delaiN : null, delaiN, heuresMachine, intervMachine, etatParc, stock,
+    interv, aTemps, enRetard, nbInterv, pannesMois, nbPannes, heuresArret, delaiMoyen: delaiN ? delaiTotal / delaiN : null, delaiN, heuresMachine, intervMachine, etatParc, stock,
     comparaison: f.periode !== 'tout',
   };
 }
@@ -444,9 +448,14 @@ function statsPanneauMaintenance(m) {
   const etroit = statsEtroit();
   const labels = m.mois.map((x) => x.label);
   const totalDep = statsSomme(m.interv.depannage); const totalEnt = statsSomme(m.interv.entretien); const totalFrais = statsSomme(m.interv.frais);
+  const respect = { aTemps: statsSomme(m.aTemps), enRetard: statsSomme(m.enRetard) };
+  respect.total = respect.aTemps + respect.enRetard;
+  respect.pct = respect.total ? Math.round(respect.aTemps / respect.total * 100) : 0;
   const dispo = m.machines.length ? Math.round((m.machines.length - m.etatParc.late) / m.machines.length * 100) : null;
   const tuiles = [
-    statsTuile(trad('Interventions'), `${m.nbInterv}`, m.nbInterv ? tR('dont {p} de dépannage', { p: statsPct(totalDep, m.nbInterv) }) : trad('Aucune intervention')),
+    (respect.total > 0
+      ? statsTuile(trad('Respect du plan'), `${respect.pct}`, tR('{n} entretien(s) mesuré(s)', { n: respect.total }), { unite: '%', classe: respect.pct < 70 ? 'is-retard' : '' })
+      : statsTuile(trad('Interventions'), `${m.nbInterv}`, m.nbInterv ? tR('dont {p} de dépannage', { p: statsPct(totalDep, m.nbInterv) }) : trad('Aucune intervention'))),
     statsTuile(trad('Pannes signalées'), `${m.nbPannes}`, SCHEMA.hasPannes ? trad('sur la période') : trad('Suivi des pannes non activé')),
     statsTuile(trad('Heures d\'arrêt'), statsHeures(m.heuresArret), m.heuresArret ? trad('pannes résolues, machine à l\'arrêt') : trad('Aucun arrêt enregistré'), { unite: 'h' }),
     statsTuile(trad('Délai moyen de résolution'), m.delaiMoyen != null ? statsHeures(m.delaiMoyen) : '—', m.delaiN ? tR('{n} panne(s) résolue(s)', { n: m.delaiN }) : trad('Aucune panne résolue'), { unite: m.delaiMoyen != null ? 'h' : '' }),
@@ -466,6 +475,8 @@ function statsPanneauMaintenance(m) {
       <div class="stat-grille">
         ${statsCarte('c8', trad('Interventions par mois'), trad('Entretiens planifiés, dépannages et frais'), statsSvgBarresEmpilees(labels, series, etroit ? 360 : 720, etroit ? 220 : 240), [[trad('Entretien planifié'), STATS_COULEURS.mo], [trad('Dépannage'), STATS_COULEURS.expl], [trad('Frais'), STATS_COULEURS.pieces]])}
         ${statsCarte('c4', trad('Nature des interventions'), trad('Entretien planifié, dépannage, frais'), `<div class="stat-centre">${statsSvgAnneau(nature, 180, `${m.nbInterv}`, trad('interventions'))}</div>`, nature.map((p) => [p.n, p.color, statsPct(p.v, m.nbInterv)]))}
+        ${SCHEMA.hasRespectPlan ? statsCarte('c8', trad('Respect du plan d\'entretien'), trad('Entretiens planifiés faits à temps ou en retard, par mois'), respect.total ? statsSvgBarresEmpilees(labels, [{ name: trad('À temps'), color: STATS_COULEURS.mo, data: m.aTemps, argent: false }, { name: trad('En retard'), color: STATS_COULEURS.expl, data: m.enRetard, argent: false }], etroit ? 360 : 720, etroit ? 210 : 230) : `<p class="ui-aide">${esc(trad('Le suivi a démarré : les premières mesures apparaîtront dès le prochain entretien enregistré.'))}</p>`, [[trad('À temps'), STATS_COULEURS.mo], [trad('En retard'), STATS_COULEURS.expl]]) : ''}
+        ${SCHEMA.hasRespectPlan ? statsCarte('c4', trad('Part des entretiens à temps'), trad('Sur la période, entretiens dont le retard est connu'), respect.total ? `<div class="stat-centre">${statsSvgAnneau([{ n: trad('À temps'), v: respect.aTemps, color: STATS_COULEURS.mo }, { n: trad('En retard'), v: respect.enRetard, color: STATS_COULEURS.expl }], 170, `${respect.pct} %`, trad('à temps'))}</div>` : statsVide(), respect.total ? [[trad('À temps'), STATS_COULEURS.mo, `${respect.aTemps}`], [trad('En retard'), STATS_COULEURS.expl, `${respect.enRetard}`]] : []) : ''}
         ${statsCarte('c6', trad('Pannes signalées par mois'), trad('Nombre de pannes déclarées'), statsSvgBarresEmpilees(labels, [{ name: trad('Pannes'), color: STATS_COULEURS.arret, data: pannes, argent: false }], etroit ? 360 : 520, 210))}
         ${statsCarte('c6', trad('Heures d\'arrêt par machine'), trad('Pannes résolues avec arrêt de la machine'), statsSvgBarresH(m.heuresMachine, { W: etroit ? 360 : 520, couleur: STATS_COULEURS.arret, fmtv: (v) => `${statsHeures(v)} h` }))}
         ${statsCarte('c4', trad('État du parc aujourd\'hui'), trad('Machines en retard, bientôt à échéance ou à jour'), `<div class="stat-centre">${statsSvgAnneau(etat, 170, `${m.machines.length}`, trad('machines'))}</div>`, etat.map((p) => [p.n, p.color, `${p.v}`]))}

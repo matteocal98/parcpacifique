@@ -3004,6 +3004,8 @@ function openLogInterventionModal(machine, tache) {
         items_done: checkedItems.length ? checkedItems : null,
         performed_by: operateur,
         ...(avecTypes ? { kind: kindActif, component: componentVal, severity: severiteVal } : {}),
+        // Respect du plan : l'état de la machine AVANT cette saisie (la fiche n'est pas encore mise à jour) — seulement pour un entretien planifié.
+        ...(SCHEMA.hasRespectPlan && (!avecTypes || kindActif === 'entretien') ? { was_late: infoMachine(machine).state === 'late' } : {}),
         ...(tcoActif() ? { parts_cost: partsCostEnregistre, labor_cost: laborCost, labor_hours: laborHours } : {}),
       }).select('id').single();
       if (logErr) throw logErr;

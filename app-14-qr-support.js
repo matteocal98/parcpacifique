@@ -1524,7 +1524,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret, aRespect,
   ] = await Promise.all([
 
     sonderColonne('companies', 'contact_first_name'),
@@ -1549,6 +1549,7 @@ async function boot(toastMessage) {
     sonderColonne('purchase_orders', 'supplier_name, status, total_estimated'),
     sonderColonne('machine_breakdowns', 'severity, status, stopped'),
     sonderColonne('machine_breakdowns', 'downtime_hours, downtime_rate, downtime_cost'),
+    sonderColonne('interventions', 'was_late'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1570,6 +1571,7 @@ async function boot(toastMessage) {
   SCHEMA.hasCommandes = aCommandes && aFournisseurs;
   SCHEMA.hasPannes = aPannes;
   SCHEMA.hasArretCout = aPannes && aArret;
+  SCHEMA.hasRespectPlan = aRespect;
 
   // Chargement de la société, avec repli en cascade si des colonnes
   // optionnelles manquent sur une base plus ancienne. L'ordre va du plus riche
