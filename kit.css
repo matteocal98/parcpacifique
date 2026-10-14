@@ -2505,3 +2505,11 @@ textarea:not([data-x]),
   .stock-onglet{min-height:40px;font-size:14px;font-weight:700;}
   .ui-segment button{min-height:32px;padding:0 14px;font-size:13px;font-weight:700;}
 }
+
+/* ── EN-TÊTES DE PAGE (bureau, ≥ 900 px) — pas de titre en double : le titre de page « Agenda » est déjà affiché au-dessus,
+   la carte du calendrier ne le répète pas (sur téléphone le titre de page est masqué, donc la carte le garde). ── */
+@media (min-width:900px){
+  .vue-agenda > .ui-section-tete .ui-section-icone,
+  .vue-agenda > .ui-section-tete .ui-section-titres{display:none;}
+  .vue-agenda > .ui-section-tete .ui-section-acces{margin-left:auto;}
+}
