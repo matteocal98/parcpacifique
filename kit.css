@@ -2567,3 +2567,23 @@ textarea:not([data-x]),
 @media (min-width:900px){
   .ui-section:has(> .ui-section-corps > .stock-guide){display:none;}
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PARC — mode « Tableau » (bureau ≥ 1180 px, là où la carte machine passe en ligne) : une ligne dense par machine.
+   Activé par la classe .is-dense sur #fleet-list (bascule Cartes / Tableau, mémorisée dans localStorage).
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width:1180px){
+  .mstrip-liste.is-dense{gap:6px;}
+  .mstrip-liste.is-dense .mstrip-corps{padding:6px 14px;gap:14px;}
+  .mstrip-liste.is-dense .mstrip-photo{width:48px;height:38px;}
+  .mstrip-liste.is-dense .mstrip-photo-tag{display:none;}
+  .mstrip-liste.is-dense .mstrip-identite{gap:10px;flex:1 1 300px;}
+  .mstrip-liste.is-dense .mstrip-tache{display:none;}
+  .mstrip-liste.is-dense .mstrip-meta{margin-top:0;}
+  .mstrip-liste.is-dense .mstrip-compteur-bloc{padding:3px 8px;min-width:0;}
+  .mstrip-liste.is-dense .mstrip-compteur-bloc .compteur-titre{display:none;}
+  .mstrip-liste.is-dense .mstrip-jauge-note{display:none;}
+  .mstrip-liste.is-dense .mstrip-jauge{gap:2px;}
+  .mstrip-liste.is-dense .mstrip-btn-principal{height:32px;}
+  .mstrip-liste.is-dense .mstrip-btn-icone{width:32px;height:32px;}
+}
