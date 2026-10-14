@@ -98,7 +98,8 @@ const RUBRIQUES = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil', vues: ['dashboard'] },
   { id: 'parc', label: trad('Machines'), short: trad('Machines'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
   { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda'] },
-  { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco', 'stats'] },
+  { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco'] },
+  { id: 'stats', label: trad('Statistiques'), short: trad('Stats'), icon: 'graphique', vues: ['stats'] },
   { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
 ];
 const LIBELLE_SOUS_VUE = () => ({
