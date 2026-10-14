@@ -2288,12 +2288,12 @@ function ouvrirEditionKit(kit) {
       <label for="kit-note" style="margin-top:8px;display:block;">${trad('Note (optionnel)')}</label>
       <input id="kit-note" placeholder="${trad('Note (optionnel)')}" value="${kit && kit.note ? esc(kit.note) : ''}">
       ${kit ? `
-      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px;">
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;">
         <input type="checkbox" id="kit-actif" ${kit.active !== false ? 'checked' : ''} style="width:16px;height:16px;">
         ${trad('Kit actif (proposable sur une fiche machine)')}
       </label>` : ''}
       <div style="margin-top:14px;">
-        <div style="font-weight:600;font-size:13.5px;color:var(--ink);margin-bottom:8px;">${trad('Pièces du kit')}</div>
+        <div style="font-weight:600;font-size:13px;color:var(--ink);margin-bottom:8px;">${trad('Pièces du kit')}</div>
         <div id="kit-lignes" style="display:flex;flex-direction:column;gap:8px;">
           ${lignesExistantes.length ? lignesExistantes.map(() => ligneEditHtml()).join('') : ligneEditHtml()}
         </div>
