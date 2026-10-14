@@ -557,7 +557,7 @@ VIEWS.stats = {
             ${categories.map((c) => `<option value="${esc(c.id)}"${e.categorie === c.id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}
           </select>
           <select class="ui-selecteur" id="stats-machine" aria-label="${esc(trad('Machine'))}">
-            <option value="">${esc(trad('Toutes les machines'))}</option>
+            <option value="">${esc(trad('Toutes machines'))}</option>
             ${(UI.machines || []).map((m) => `<option value="${esc(m.id)}"${e.machine === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}
           </select>
         </div>
