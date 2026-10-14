@@ -2487,3 +2487,21 @@ textarea:not([data-x]),
 .panne-ligne-actions .ui-btn{min-height:44px;}
 @media (max-width:560px){.panne-liste-modal{max-height:calc(100dvh - 24px);overflow:auto;}}
 .ui-ligne-icone.is-achats{background:#B45309;}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HARMONISATION DES BOUTONS — bureau et tablette (≥ 900 px). Le téléphone garde ses propres règles plus haut.
+   Trois niveaux, tous en graisse 700 :
+     48 px / 16 px  action principale de la page      (.ui-btn-plein, « Ajouter une machine »)
+     40 px / 14 px  bouton standard, onglets          (.ui-btn-pastille, boutons d'une ligne machine, sous-onglets)
+     32 px / 13 px  bouton compact, filtres, pastilles (.ui-btn-teinte, .ui-puce)
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (min-width:900px){
+  .ui-btn-plein,.dash-head .dash-ajouter{min-height:48px;font-size:16px;font-weight:700;}
+  .ui-btn-pastille{height:40px;padding:0 16px;font-size:14px;font-weight:700;}
+  .ui-btn-teinte{min-height:32px;padding:0 14px;font-size:13px;font-weight:700;}
+  .ui-puce{height:32px;font-size:13px;font-weight:700;}
+  .mstrip-btn-principal{height:40px;font-size:14px;font-weight:700;}
+  .sous-nav-lien{min-height:40px;font-size:14px;font-weight:700;}
+  .stock-onglet{min-height:40px;font-size:14px;font-weight:700;}
+  .ui-segment button{min-height:32px;padding:0 14px;font-size:13px;font-weight:700;}
+}
