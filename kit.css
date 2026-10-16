@@ -2653,3 +2653,9 @@ textarea:not([data-x]),
   .stat-filtres .ui-selecteur{flex:1 1 0;min-width:0;height:40px;padding:0 10px;font-size:12px;}
   .stats-onglets .stock-onglet{min-height:40px;padding:6px 8px;font-size:13px;}
 }
+
+/* Télémétrie — retour visuel après « Enregistrer » sur une machine reliée : la ligne passe un instant en vert (succès)
+   ou en orange (échec), pour que le gérant sache que l'enregistrement a bien eu lieu. */
+.ui-ligne{transition:background-color .25s ease,box-shadow .25s ease;}
+.ui-ligne.is-enregistre{background:color-mix(in srgb,var(--ok) 20%,#fff);box-shadow:inset 4px 0 0 var(--ok);}
+.ui-ligne.is-echec{background:color-mix(in srgb,var(--late) 20%,#fff);box-shadow:inset 4px 0 0 var(--late);}

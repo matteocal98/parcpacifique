@@ -63,10 +63,13 @@ function telemetrieBadgeHtml(m) {
 // les doigts de quelqu'un : fenêtre ouverte ou champ en cours de saisie → la
 // valeur est mise à jour en mémoire, l'écran la montrera au prochain rendu. Un
 // relevé manuel encore en attente d'envoi n'est jamais écrasé.
-const TELEMETRIE_RAFRAICHIR_MS = 60 * 1000;
+// Une relève toutes les 30 s, mais seulement une sur deux hors du menu Télémétrie (où la carte est sous les yeux).
+const TELEMETRIE_RAFRAICHIR_MS = 30 * 1000;
 let telemetrieRafraichissementEnCours = false;
-async function rafraichirTelemetrie() {
+let telemetrieCycle = 0;
+async function rafraichirTelemetrie(forcer) {
   if (telemetrieRafraichissementEnCours) return;
+  if (forcer !== true && UI.view !== 'telemetrie' && (telemetrieCycle++ % 2)) return;
   if (!SCHEMA.hasTelemetry || !UI.companyId || document.hidden) return;
   const reliees = (UI.machines || []).filter((m) => m.counter_source === 'telemetry');
   if (!reliees.length) return;
@@ -91,7 +94,8 @@ async function rafraichirTelemetrie() {
     if (!change) return;
     // Sur le menu Télémétrie, la carte est vivante : on déplace les repères sans redessiner
     // l'écran (un rendu fermerait la fenêtre ouverte, effacerait le trajet et le zoom).
-    if (UI.view === 'telemetrie' && carteGpsVivante()) { majMarqueursGps(); return; }
+    // Un repère qui apparaît ou qui bouge hors de la zone visible recadre la carte (sinon on croit que rien ne se passe).
+    if (UI.view === 'telemetrie' && carteGpsVivante()) { majMarqueursGps(false, true); return; }
     const occupe = document.querySelector('.overlay')
       || (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
     if (occupe) return;
@@ -102,7 +106,7 @@ async function rafraichirTelemetrie() {
   finally { telemetrieRafraichissementEnCours = false; }
 }
 setInterval(rafraichirTelemetrie, TELEMETRIE_RAFRAICHIR_MS);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) rafraichirTelemetrie(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) rafraichirTelemetrie(true); });
 
 // ═══ GÉOLOCALISATION — carte des machines (phase 3) ═══════════════════════════
 // Une grande carte dans le menu Télémétrie : un repère par machine que le gérant a
@@ -149,7 +153,9 @@ function chargerLeaflet() {
 }
 
 function machinesLocalisees() {
-  return (UI.machines || []).filter((m) => m.position_enabled && m.last_lat != null && m.last_lon != null
+  // Une machine n'est sur la carte que tant qu'elle est reliée à un boîtier : après une révocation de source
+  // (ou un retour en saisie manuelle), une ancienne position ne doit plus s'afficher.
+  return (UI.machines || []).filter((m) => m.counter_source === 'telemetry' && m.position_enabled && m.last_lat != null && m.last_lon != null
     && Number.isFinite(Number(m.last_lat)) && Number.isFinite(Number(m.last_lon)));
 }
 
@@ -245,10 +251,14 @@ function contenuPopupGroupeGps(ids) {
   return div;
 }
 
-function majMarqueursGps(ajuster) {
+// ajuster : recadre toujours la carte sur les repères (ouverture de l'écran). suivi : relève périodique — on ne recadre
+// que si un repère vient d'apparaître ou de bouger ET qu'il sort alors de la zone visible, sans jamais déranger la vue
+// du gérant le reste du temps (même s'il a déjà zoomé ou ouvert un trajet).
+function majMarqueursGps(ajuster, suivi) {
   if (!carteGpsVivante()) return;
   const L = window.L;
   const vus = new Set();
+  const bouges = [];
   const points = [];
   const groupes = new Map();
   machinesLocalisees().forEach((m) => {
@@ -283,11 +293,14 @@ function majMarqueursGps(ajuster) {
     let mk = couchesGps.marqueurs.get(idMarqueur);
     if (mk) {
       mk._ids = ids;
+      const avant = mk.getLatLng();
+      if (Math.abs(avant.lat - lat) > 1e-6 || Math.abs(avant.lng - lon) > 1e-6) bouges.push([lat, lon]);
       mk.setLatLng([lat, lon]);
       mk.setIcon(icone);
       if (mk.getTooltip()) mk.setTooltipContent(mk._ids.length > 1 ? contenuInfobulleGroupeGps(mk._ids) : contenuInfobulleGps(mk._ids[0]));
     } else {
       mk = L.marker([lat, lon], { icon: icone, title: machines.map((m) => m.name).join(', ') }).addTo(carteGps);
+      bouges.push([lat, lon]);
       mk._ids = ids;
       mk.bindPopup(() => (mk._ids.length > 1 ? contenuPopupGroupeGps(mk._ids) : contenuPopupGps(mk._ids[0])), { maxHeight: 340 });
       // permanent : toujours visible. interactive : un clic sur la bulle ouvre la fenêtre du
@@ -318,6 +331,13 @@ function majMarqueursGps(ajuster) {
   if (compte) compte.textContent = tR('{n} machine(s) localisée(s)', { n: points.length });
   if (!etatCarteGps.trajet) {
     messageCarteGps(points.length ? '' : trad('Aucune machine localisée pour l\'instant : relie une machine à un boîtier puis coche « Localiser » dans le tableau ci-dessous.'));
+  }
+  if (!ajuster && suivi && bouges.length && points.length) {
+    const vue = carteGps.getBounds();
+    if (bouges.some((p) => !vue.contains(p))) {
+      if (points.length === 1) carteGps.setView(points[0], Math.max(carteGps.getZoom(), 14));
+      else carteGps.fitBounds(points, { padding: [40, 40], maxZoom: 15 });
+    }
   }
   if (ajuster) {
     if (etatCarteGps.manuel && etatCarteGps.centre) carteGps.setView(etatCarteGps.centre, etatCarteGps.zoom);
@@ -552,15 +572,29 @@ async function preparerCarteTelemetrie(racine) {
         <div class="ui-ligne-id"><div class="ui-ligne-textes">
         <span class="ui-ligne-nom">${esc(m.name)}</span>
           <span class="ui-ligne-sous">${m.counter_source === 'telemetry' ? (m.telemetry_last_at ? tR('Dernier relevé automatique : {quand}', { quand: ilYaSupport(m.telemetry_last_at) }) : trad('En attente du premier relevé')) : trad('Saisie manuelle')}</span>
-          ${SCHEMA.hasGps ? `<label class="ui-case"${m.counter_source === 'telemetry' ? '' : ` title="${esc(trad('Relie d\'abord la machine à un boîtier.'))}"`}>
-            <input type="checkbox" data-tele-localiser${m.position_enabled ? ' checked' : ''}${m.counter_source === 'telemetry' ? '' : ' disabled'}>
-            <span>${trad('Localiser')}</span>${m.position_enabled && m.last_position_at ? ` <span class="tele-sous">· ${esc(tR('position {quand}', { quand: ilYaSupport(m.last_position_at) }))}</span>` : ''}
+          ${SCHEMA.hasGps ? `<label class="ui-case" title="${esc(trad('Indique d\'abord la source et l\'identifiant du boîtier.'))}">
+            <input type="checkbox" data-tele-localiser${m.position_enabled && m.counter_source === 'telemetry' ? ' checked' : ''}${m.counter_source === 'telemetry' ? '' : ' disabled'}>
+            <span>${trad('Localiser')}</span>${m.position_enabled && m.counter_source === 'telemetry' && m.last_position_at ? ` <span class="tele-sous">· ${esc(tR('position {quand}', { quand: ilYaSupport(m.last_position_at) }))}</span>` : ''}
           </label>` : ''}
         </div></div>
         <div class="ui-ligne-info is-champs"><div class="ui-select-wrap"><select class="ui-champ" data-tele-source aria-label="${esc(tR('Source de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}>${options(m.telemetry_source_id)}</select>${picto('chevronBas')}</div>
         <input class="ui-champ" data-tele-ref maxlength="64" value="${esc(m.telemetry_ref || '')}" placeholder="${esc(trad('Identifiant du boîtier'))}" aria-label="${esc(tR('Identifiant du boîtier de {machine}', { machine: m.name }))}"${sources.length ? '' : ' disabled'}></div>
         <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-teinte" data-tele-enregistrer${sources.length ? '' : ' disabled'}>${trad('Enregistrer')}</button></div>
       </div>`).join('') : `<p class="ui-aide">${trad('Aucune machine.')}</p>`;
+  }
+
+  // Retour visuel après « Enregistrer » : la ligne de la machine passe en vert (rouge-orangé en cas d'échec) et le
+  // bouton affiche « Enregistré ✓ » quelques secondes. Appelé après dessiner(), qui reconstruit les lignes.
+  function signalerEnregistrement(machineId, reussi) {
+    const ligne = Array.from(zoneMachines.querySelectorAll('[data-machine]')).find((l) => l.getAttribute('data-machine') === machineId);
+    if (!ligne) return;
+    const bouton = ligne.querySelector('[data-tele-enregistrer]');
+    ligne.classList.add(reussi ? 'is-enregistre' : 'is-echec');
+    if (reussi && bouton) bouton.textContent = trad('Enregistré ✓');
+    setTimeout(() => {
+      ligne.classList.remove('is-enregistre', 'is-echec');
+      if (reussi && bouton) bouton.textContent = trad('Enregistrer');
+    }, 3500);
   }
 
   async function charger() {
@@ -618,6 +652,8 @@ async function preparerCarteTelemetrie(racine) {
     const ligne = caseEl.closest('[data-machine]');
     const machine = ligne && (UI.machines || []).find((x) => x.id === ligne.getAttribute('data-machine'));
     if (!machine) return;
+    // Machine pas encore enregistrée comme reliée : la case n'est qu'une intention, appliquée par « Enregistrer ».
+    if (machine.counter_source !== 'telemetry') return;
     const actif = caseEl.checked;
     if (!actif && !window.confirm(trad('Désactiver la localisation ? La dernière position et tout l\'historique de trajets de cette machine seront supprimés.'))) {
       caseEl.checked = true;
@@ -639,8 +675,22 @@ async function preparerCarteTelemetrie(racine) {
       dire(tR('Enregistrement impossible : {erreur}', { erreur: String((err && err.message) || err) }), true);
     } finally { caseEl.disabled = false; }
   }
+  // La case « Localiser » devient utilisable dès que la source ET l'identifiant du boîtier sont remplis sur la ligne
+  // (inutile d'enregistrer d'abord) ; sinon elle est grisée et décochée.
+  function majCaseLocaliser(ligne) {
+    const caseEl = ligne && ligne.querySelector('[data-tele-localiser]');
+    if (!caseEl) return;
+    const pret = !!(ligne.querySelector('[data-tele-source]').value && (ligne.querySelector('[data-tele-ref]').value || '').trim());
+    caseEl.disabled = !pret;
+    if (!pret) caseEl.checked = false;
+  }
+  carte.addEventListener('input', (ev) => {
+    const t = ev.target;
+    if (t.hasAttribute && (t.hasAttribute('data-tele-ref') || t.hasAttribute('data-tele-source'))) majCaseLocaliser(t.closest('[data-machine]'));
+  });
   carte.addEventListener('change', (ev) => {
     if (ev.target.id === 'acc-tele-type' || ev.target.id === 'acc-tele-aemp-auth') majFormulaire();
+    if (ev.target.hasAttribute && ev.target.hasAttribute('data-tele-source')) majCaseLocaliser(ev.target.closest('[data-machine]'));
     if (ev.target.hasAttribute && ev.target.hasAttribute('data-tele-localiser')) basculerLocalisation(ev.target);
   });
 
@@ -751,8 +801,9 @@ async function preparerCarteTelemetrie(racine) {
         const { error } = await sb.rpc('revoquer_source_telemetrie', { p_id: id });
         if (error) throw error;
         (UI.machines || []).forEach((m) => {
-          if (m.telemetry_source_id === id) Object.assign(m, { telemetry_source_id: null, telemetry_ref: null, counter_source: 'manual', telemetry_last_at: null });
+          if (m.telemetry_source_id === id) Object.assign(m, { telemetry_source_id: null, telemetry_ref: null, counter_source: 'manual', telemetry_last_at: null, position_enabled: false, last_lat: null, last_lon: null, last_position_at: null });
         });
+        majMarqueursGps();
         zoneJeton.innerHTML = '';
         dire(trad('Source révoquée.'));
         await charger();
@@ -771,6 +822,8 @@ async function preparerCarteTelemetrie(racine) {
       const ref = (ligne.querySelector('[data-tele-ref]').value || '').trim() || null;
       if (source && !ref) { dire(trad('Indique l\'identifiant du boîtier de cette machine.'), true); return; }
       const auto = !!(source && ref);
+      const caseLoc = ligne.querySelector('[data-tele-localiser]');
+      const veutLocaliser = !!(auto && caseLoc && caseLoc.checked);
       // Un changement de boîtier repart de zéro : l'ancien décalage et l'ancien
       // dernier signal ne valent plus rien pour le nouveau.
       const patch = {
@@ -785,13 +838,31 @@ async function preparerCarteTelemetrie(racine) {
         const { error } = await sb.from('machines').update(patch).eq('id', machine.id);
         if (error) throw error;
         Object.assign(machine, patch);
+        // Repasser en saisie manuelle coupe aussi la localisation : on efface la dernière position et le trajet
+        // (même fonction serveur que la case « Localiser », qui seule a le droit d'effacer).
+        // Inversement, « Localiser » coché avant d'enregistrer s'applique ici, en une seule fois avec le lien.
+        if (veutLocaliser && !machine.position_enabled && SCHEMA.hasGps) {
+          const { error: errLoc } = await sb.rpc('definir_localisation_machine', { p_machine: machine.id, p_actif: true });
+          if (errLoc) throw errLoc;
+          machine.position_enabled = true;
+        }
+        if (!auto && machine.position_enabled && SCHEMA.hasGps) {
+          const { error: errPos } = await sb.rpc('definir_localisation_machine', { p_machine: machine.id, p_actif: false });
+          if (!errPos) {
+            Object.assign(machine, { position_enabled: false, last_lat: null, last_lon: null, last_position_at: null });
+            if (etatCarteGps.trajet && etatCarteGps.trajet.machineId === machine.id) effacerTrajetGps();
+            majMarqueursGps();
+          }
+        }
         dire(auto ? tR('{machine} sera mise à jour automatiquement.', { machine: machine.name }) : tR('{machine} repasse en saisie manuelle.', { machine: machine.name }));
         dessiner();
+        signalerEnregistrement(machine.id, true);
       } catch (err) {
         dire((err && err.code === '23505')
           ? trad('Cet identifiant est déjà relié à une autre machine.')
           : tR('Enregistrement impossible : {erreur}', { erreur: String((err && err.message) || err) }), true);
         cible.disabled = false;
+        signalerEnregistrement(machine.id, false);
       }
     }
   });
