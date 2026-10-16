@@ -2659,3 +2659,49 @@ textarea:not([data-x]),
 .ui-ligne{transition:background-color .25s ease,box-shadow .25s ease;}
 .ui-ligne.is-enregistre{background:color-mix(in srgb,var(--ok) 20%,#fff);box-shadow:inset 4px 0 0 var(--ok);}
 .ui-ligne.is-echec{background:color-mix(in srgb,var(--late) 20%,#fff);box-shadow:inset 4px 0 0 var(--late);}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FENÊTRE DES OFFRES (openUpgradeNotice) — téléphone (≤ 560 px). Avant : 4 grandes cartes empilées (≈ 6 écrans), l'offre actuelle
+   en dernier, un tableau comparatif dont on ne voyait que la première colonne. Maintenant : l'offre actuelle passe en premier,
+   les cartes sont compactes (prix et « /mois » sur une ligne, quotas IA en une ligne), le tableau montre le nom de la ligne
+   (colonne figée, étroite) et plusieurs colonnes, les blocs « Grand compte » et « plan » sont resserrés. Le bureau ne change pas.
+   ════════════════════════════════════════════════════════════════════════════ */
+@media (max-width:560px){
+  .offres-entete{margin-bottom:12px;}
+  .offres-entete h2{font-size:22px;}
+  .offres-grille{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+  .offre-carte.is-courante{order:-1;}
+  .offre-carte-corps{padding:14px;gap:8px;}
+  .offre-carte-entete{align-items:center;}
+  .offre-carte-nom{font-size:15px;}
+  .offre-carte-tag:empty{display:none;}   /* pastille vide (offre Gratuit) : plus de barre grise sans texte */
+  .offre-carte-prix{flex-wrap:nowrap;align-items:baseline;gap:3px;}
+  .offre-carte-prix .nombre{font-size:26px;}
+  .offre-carte-prix .reste{width:auto;font-size:13px;margin-left:2px;}
+  .offre-carte-capacite{padding:8px 10px;gap:8px;font-size:13px;}
+  .offre-carte-hint{font-size:12px;}
+  .offre-carte-inclus .eyebrow{font-size:12px;margin-bottom:4px;}
+  .offre-carte-inclus ul{gap:4px;}
+  .offre-carte-inclus li{font-size:13px;}
+  .offre-carte-ajoute{font-size:12px;padding:7px 10px;line-height:1.4;}
+  .offre-carte-ajoute .offre-carte-hint{display:none;}
+  .offre-carte-pied{padding:0 14px 14px;}
+  .offre-bouton{min-height:44px;}
+  /* tableau comparatif : colonne des libellés figée et étroite, colonnes serrées */
+  .offres-comparatif{margin:2px 0 12px;}
+  .offres-comparatif-table{min-width:0;width:max-content;font-size:12px;}
+  .offres-comparatif-table th,.offres-comparatif-table td{padding:7px 8px;}
+  .offres-comparatif-table thead th{font-size:12px;letter-spacing:0;}
+  .offres-comparatif-table thead th:not(:first-child),.offres-comparatif-table td{min-width:68px;}
+  .offres-comparatif-table tbody th{min-width:0;width:128px;max-width:128px;font-size:12px;line-height:1.3;z-index:1;}
+  /* blocs « Grand compte » et « plan d'entretien » : icône à côté du titre, texte court, bouton pleine largeur */
+  .offre-service{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:center;gap:8px 10px;padding:12px;margin-bottom:10px;}
+  .offre-service-icone{width:36px;height:36px;}
+  .offre-service-icone svg{width:18px;height:18px;}
+  .offre-service-corps{min-width:0;display:contents;}
+  .offre-service-titre-ligne{grid-column:2;gap:2px 8px;}
+  .offre-service-titre-ligne h3{font-size:15px;}
+  .offre-service-corps p{grid-column:1 / -1;font-size:12.5px;margin:0;}
+  .offre-service .offre-bouton{grid-column:1 / -1;width:100%;}
+  .offres-pied{padding-top:2px;gap:10px;}
+}

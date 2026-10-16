@@ -1591,7 +1591,7 @@ function openUpgradeNotice(companyId, message) {
     const { nombre, reste } = decoupePrix(o.prix);
     const estActuelle = o.cle === carteCleActuelle;
     return `
-      <div class="offre-carte offre-carte--${o.cle}${o.recommandee ? ' is-recommandee' : ''}">
+      <div class="offre-carte offre-carte--${o.cle}${o.recommandee ? ' is-recommandee' : ''}${estActuelle ? ' is-courante' : ''}">
         ${o.recommandee ? `<div class="offre-ruban">${picto('etincelle')}<span>${trad('RECOMMANDÉ')}</span></div>` : ''}
         <div class="offre-carte-corps">
           <div class="offre-carte-entete">
