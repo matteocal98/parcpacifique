@@ -4694,10 +4694,14 @@ function blocAchatsHtml() {
 function resumeAchats(lignes) {
   const incluses = lignes.filter(ligneEstInclue);
   const total = incluses.reduce((s, l) => s + totalLigneAchat(l), 0);
-  const nbFourn = new Set(incluses.map((l) => (l.fournisseur ? l.fournisseur.id : l.piece.supplier_name || 'aucun'))).size;
-  return incluses.length
-    ? tR('{n} pièce(s) à commander chez {f} fournisseur(s) · total estimé {t}', { n: incluses.length, f: nbFourn, t: texteAvecSeparateurs(total) + ' ' + deviseCourte() })
-    : trad('Rien à commander avec ces réglages.');
+  // « Sans fournisseur » n'est pas un fournisseur : on compte les vrais, et on signale à part les pièces sans fournisseur.
+  const cles = incluses.map((l) => (l.fournisseur ? l.fournisseur.id : l.piece.supplier_name || null));
+  const nbFourn = new Set(cles.filter((c) => c !== null)).size;
+  const nbSans = cles.filter((c) => c === null).length;
+  const morceaux = [tR('{n} pièce(s) à commander · total estimé {t}', { n: incluses.length, t: texteAvecSeparateurs(total) + ' ' + deviseCourte() })];
+  if (nbFourn) morceaux.push(tR('{f} fournisseur(s)', { f: nbFourn }));
+  if (nbSans) morceaux.push(tR('{n} pièce(s) sans fournisseur', { n: nbSans }));
+  return incluses.length ? morceaux.join(' · ') : trad('Rien à commander avec ces réglages.');
 }
 function majTotauxAchats(root, lignes) {
   lignes.forEach((l) => {
@@ -4957,7 +4961,10 @@ function ligneCommandeHtml(c) {
   const classe = classeStatutCommande(c.status);
   const sous = [
     c.supplier_name,
-    tR('{n} pièce(s) · {t}', { n: lignesDeCommande(c.id).length || '…', t: texteAvecSeparateurs(Number(c.total_estimated) || 0) + ' ' + deviseCourte() }),
+    // le nombre de pièces n'est connu que pour les commandes en cours (leurs lignes sont déjà chargées) : sinon, le total seul
+    lignesDeCommande(c.id).length
+      ? tR('{n} pièce(s) · {t}', { n: lignesDeCommande(c.id).length, t: texteAvecSeparateurs(Number(c.total_estimated) || 0) + ' ' + deviseCourte() })
+      : texteAvecSeparateurs(Number(c.total_estimated) || 0) + ' ' + deviseCourte(),
     formatShortDate(String(c.created_at).slice(0, 10)),
     c.requested_delivery ? tR('Livraison souhaitée {d}', { d: formatShortDate(c.requested_delivery) }) : '',
   ].filter(Boolean).join(' · ');
@@ -4967,7 +4974,7 @@ function ligneCommandeHtml(c) {
         <div class="ui-ligne-icone">${picto('export')}</div>
         <div class="ui-ligne-textes">
           <span class="ui-ligne-nom">${esc(c.reference)}<span class="ui-statut ${classe}">${esc(libelleStatutCommande(c.status))}</span></span>
-          <span class="ui-ligne-sous">${esc(sous)}</span>
+          <span class="ui-ligne-sous" data-essentiel="1">${esc(sous)}</span>
         </div>
       </div>
       <div class="ui-ligne-action">
@@ -4984,10 +4991,11 @@ function dessinerCommandes(root) {
   const closes = liste.filter((c) => !STATUTS_COMMANDE_OUVERTS.includes(c.status));
   const badge = root.querySelector('#commandes-badge');
   if (badge) badge.textContent = tR('{n} en cours', { n: ouvertes.length });
+  // « Aucune commande en cours » se lit AVANT l'historique (et non en dessous, où il semblait dire que l'historique est vide).
   zone.innerHTML = liste.length
-    ? ouvertes.map(ligneCommandeHtml).join('')
+    ? (ouvertes.length ? '' : `<div class="ui-aide">${trad('Aucune commande en cours.')}</div>`)
+      + ouvertes.map(ligneCommandeHtml).join('')
       + (closes.length ? `<details class="commandes-historique"><summary>${tR('Historique ({n})', { n: closes.length })}</summary><div class="ui-liste">${closes.slice(0, 30).map(ligneCommandeHtml).join('')}</div></details>` : '')
-      + (ouvertes.length ? '' : `<div class="ui-aide">${trad('Aucune commande en cours.')}</div>`)
     : `<div class="ui-aide">${trad('Aucune commande enregistrée. Prépare un bon ci-dessus puis enregistre-le.')}</div>`;
 }
 async function rafraichirCommandes(root) {
@@ -5035,7 +5043,7 @@ async function ouvrirCommande(orderId, rafraichir) {
   overlay.innerHTML = `
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="cmd-titre">
       <h2 id="cmd-titre">${esc(c.reference)} <span class="ui-statut ${classe}">${esc(libelleStatutCommande(c.status))}</span></h2>
-      <p class="sub">${esc([c.supplier_name, formatShortDate(String(c.created_at).slice(0, 10)), c.requested_delivery ? tR('Livraison souhaitée {d}', { d: formatShortDate(c.requested_delivery) }) : ''].filter(Boolean).join(' · '))}</p>
+      <p class="sub" data-essentiel="1">${esc([c.supplier_name, formatShortDate(String(c.created_at).slice(0, 10)), c.requested_delivery ? tR('Livraison souhaitée {d}', { d: formatShortDate(c.requested_delivery) }) : ''].filter(Boolean).join(' · '))}</p>
       <div class="achats-bon-apercu">
         <table class="achats-bon-table"><tbody>
           ${lignes.map((l) => {

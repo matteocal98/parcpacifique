@@ -1494,6 +1494,8 @@ function compacterAidesTelephone(racine) {
   });
   (racine || document).querySelectorAll(SELECTEUR_AIDES_TELEPHONE).forEach((el) => {
     if (el.dataset.infoBulle) return;
+    // une information essentielle (ex. fournisseur, pièces, total et date d'une commande) n'est jamais repliée derrière « i »
+    if (el.hasAttribute('data-essentiel')) return;
     if ((el.id && el.dataset.texteInitial === undefined) || el.getAttribute('role') || el.getAttribute('aria-live')) return;
     if (el.querySelector('a,button,input,select,textarea')) return;
     const texte = (el.textContent || '').trim();
