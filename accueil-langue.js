@@ -267,7 +267,7 @@
     [`29 € l'acte`, `€29 per plan`],
     [`Tu n'as pas le temps ou tu ne trouves pas le carnet constructeur ? Envoie-nous la photo de la plaque constructeur : nous recherchons et configurons votre plan complet dans l'application.`, `No time, or can't find the manufacturer's manual? Send us a photo of the manufacturer's plate: we research and configure your complete plan in the app.`],
     [`Demander un plan`, `Request a plan`],
-    [`Paiement sécurisé par Stancer`, `Secure payment by Stancer`],
+    [`Paiement sécurisé par Stripe`, `Secure payment by Stripe`],
     [`Résiliable à tout moment en 1 clic`, `Cancel any time in 1 click`],
     [`Lectures de compteur`, `Counter readings`],
     [`Changement d'offre au prorata`, `Pro-rata plan changes`],
