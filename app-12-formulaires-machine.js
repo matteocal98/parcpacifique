@@ -2225,6 +2225,8 @@ function openLogInterventionModal(machine, tache) {
   const identifiant = identifiantAffiche(machine);
   const compteurActuel = machineCounter(machine);
   const avecTypes = tcoActif();
+  // Plan au calendrier, tâches en heures/km, aucun compteur : on le dit ici (un plan au compteur, lui, exige déjà la saisie).
+  const tachesSansCompteur = isCounter ? [] : tachesAuCompteurSansCompteur(machine);
 
   // Organe mécanique défaillant (Dépannage) : référentiel configurable —
   // voir COMPOSANTS_DEPART/composantsUtiles/brancherComposant, écrit dans
@@ -2266,6 +2268,15 @@ function openLogInterventionModal(machine, tache) {
       </div>
       <form id="log-form">
       <div class="log-body2">
+        ${tachesSansCompteur.length ? `
+        <div class="ui-encadre is-attention log-alerte-compteur" role="note">
+          ${picto('alerte')}
+          <div>
+            <span class="ui-encadre-titre">${trad('Compteur manquant')}</span>
+            <p data-essentiel="1">${tR('{n} tâche(s) du plan se mesurent en {unite} (par exemple « {tache} »), mais aucun compteur n\'est renseigné sur cette machine : leurs échéances ne peuvent pas être calculées.', { n: tachesSansCompteur.length, unite: tachesSansCompteur.every((t) => t.interval_unite === 'km') ? trad('km') : (tachesSansCompteur.every((t) => t.interval_unite === 'heures') ? trad('heures') : trad('heures ou km')), tache: tachesSansCompteur[0].label || '' })}</p>
+            <button type="button" class="ui-btn ui-btn-teinte" data-log-renseigner-compteur><span>${trad('Renseigner le compteur')}</span></button>
+          </div>
+        </div>` : ''}
 
         ${avecTypes ? `
         <div>
@@ -2513,6 +2524,10 @@ function openLogInterventionModal(machine, tache) {
 
   overlay.querySelector('#cancel-log').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#cancel-log-x').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('[data-log-renseigner-compteur]')?.addEventListener('click', () => {
+    overlay.remove();
+    openMachineModal(UI.companyId, UI.categories, machine);
+  });
 
   habillerSelect(overlay.querySelector('#log-operateur'), trad('Intervenant assigné'));
   habillerChampDate(overlay.querySelector('#log-date'), trad('Date de l\'intervention'));

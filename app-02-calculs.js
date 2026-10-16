@@ -731,6 +731,23 @@ function machineCounter2(machine) {
   const v = machine.counter_value_2;
   return v == null ? null : Number(v);
 }
+// Tâches du plan qui se mesurent en heures ou en km alors que la machine n'a AUCUN compteur renseigné dans cette unité
+// (ni le premier, ni le second) : leur échéance ne peut pas être calculée. Cas typique : un plan suivi au calendrier dont
+// certaines tâches sont en heures, sur une machine dont le compteur est vide — elle reste « Plan à définir » sans que rien
+// n'explique pourquoi. Renvoie les tâches concernées (liste vide : tout va bien).
+function tachesAuCompteurSansCompteur(machine) {
+  if (!machine || !machine.plan) return [];
+  const mot = (u) => (u === 'km' || u === trad('km') ? 'km' : 'heures');
+  const u1 = counterUnitOf(machine);
+  const u2 = counterUnit2Of(machine);
+  const ok1 = machineCounter(machine) != null;
+  const ok2 = !!u2 && machineCounter2(machine) != null;
+  return normalizeItems(machine.plan.items).filter((it) => {
+    const info = UNITES_INTERVALLE[it.interval_unite];
+    if (!info || info.genre !== 'compteur') return false;
+    return !((ok1 && mot(u1) === it.interval_unite) || (ok2 && mot(u2) === it.interval_unite));
+  });
+}
 function machineCounter2Patch(value, unit) {
   if (!SCHEMA.hasCounter2) return {};
   return { counter_value_2: value, counter_unit_2: unit };
