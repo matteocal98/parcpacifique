@@ -57,7 +57,7 @@
     bouton.setAttribute('aria-label', lib.lire + ' : ' + video.titre[l]);
 
     var image = document.createElement('img');
-    image.src = './videos/' + video.cle + '-' + l + '.jpg';
+    image.src = '/videos/' + video.cle + '-' + l + '.jpg';
     image.alt = video.titre[l];
     image.loading = 'lazy';
     image.decoding = 'async';

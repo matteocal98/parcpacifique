@@ -1,11 +1,12 @@
 /* Config Tailwind des pages publiques : identique à celle qui était embarquée dans decouvrir.html (script « tailwind-config »).
-   Les sources analysées pour trouver les classes utilisées : les pages publiques et leurs scripts (les classes ajoutées
-   par JavaScript — vidéos, simulateur de tarifs, bascule de langue — doivent être écrites en toutes lettres dans ces fichiers). */
+   Sources analysées pour trouver les classes utilisées : les pages publiques (accueil FR/EN, pages de contenu) et leurs scripts.
+   Les classes ajoutées par JavaScript (vidéos, simulateur de tarifs) doivent être écrites en toutes lettres dans ces fichiers.
+   Les pages sont produites par outils/generer-pages-publiques.mjs : le relancer AVANT de compiler. */
 module.exports = {
   darkMode: 'class',
   content: [
-    '../../index.html', '../../decouvrir.html', '../../en/index.html', '../../gmao/*.html', '../../en/*/*.html',
-    '../../videos-accueil.js', '../../simulateur-tarifs.js', '../../accueil-langue.js',
+    '../../*.html', '../../en/**/*.html',
+    '../../videos-accueil.js', '../../simulateur-tarifs.js', '../../selecteur-langue.js',
   ],
   theme: {
     extend: {

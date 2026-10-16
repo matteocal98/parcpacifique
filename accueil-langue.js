@@ -41,6 +41,11 @@
     [`Vue d'ensemble en temps réel`, `Real-time overview`],
     [`Tableau de bord : alertes d'entretien, pièces consolidées et TCO`, `Dashboard: maintenance alerts, consolidated parts and TCO`],
 
+    // Marques (bandeau sous l'en-tête)
+    [`COMPATIBLE AVEC LES MANUELS DES GRANDS CONSTRUCTEURS`, `COMPATIBLE WITH THE MANUALS OF THE MAJOR MANUFACTURERS`],
+    [`KALEA lit le manuel PDF de n'importe quelle marque : engins de chantier, véhicules, outillage motorisé.`, `KALEA reads the PDF manual of any brand: construction equipment, vehicles, motorised tools.`],
+    [`Marques citées à titre indicatif, propriétés de leurs détenteurs respectifs. KALEA n'est affiliée à aucun constructeur.`, `Brands are named for information only and belong to their respective owners. KALEA is not affiliated with any manufacturer.`],
+
     // Coût d'un mauvais suivi
     [`CE QU'UN MAUVAIS SUIVI COÛTE`, `WHAT POOR TRACKING COSTS`],
     [`Un entretien en retard ne se rattrape pas toujours`, `Overdue maintenance can't always be made up`],
