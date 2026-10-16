@@ -1,0 +1,11 @@
+{
+  "name": "kalea-css-site",
+  "private": true,
+  "description": "Compile le CSS Tailwind des pages publiques (decouvrir/index/en/pages de contenu) : remplace le moteur Tailwind chargé depuis Internet par le navigateur.",
+  "scripts": { "build": "tailwindcss -c tailwind.config.cjs -i input.css -o ../../site.css --minify" },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "0.1.1",
+    "@tailwindcss/forms": "0.5.9",
+    "tailwindcss": "3.4.17"
+  }
+}

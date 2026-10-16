@@ -7,34 +7,7 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet">
 <!-- Tailwind CSS v3 with Plugins -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script data-purpose="tailwind-config">
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              ink: '#0E1333',
-              dark: '#070B19',
-              primary: '#236FE0',
-              indigo: '#5B52DF',
-              teal: '#24B5A8',
-              amber: '#EE7D1A',
-              surface: '#F8F9FC',
-              cardBg: '#FFFFFF',
-              subtleBg: '#EFF4FF',
-              borderMuted: '#E4E8F2'
-            }
-          },
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-            display: ['Space Grotesk', 'Plus Jakarta Sans', 'sans-serif']
-          }
-        }
-      }
-    };
-  </script>
+
 <style data-purpose="custom-typography-and-helpers">
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -83,6 +56,8 @@
       #comparatif-offres > div > div { display: block !important; }
     }
   </style>
+<!-- CSS compilé (outils/css-site) : remplace le moteur Tailwind qui était chargé depuis Internet. Placé en fin d'en-tête comme l'ancien moteur. -->
+<link rel="stylesheet" href="./site.css">
 </head>
 <body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
 <!-- Logo KALEA réel (picto-keeva), défini une fois, réutilisé en-tête + pied de page -->
