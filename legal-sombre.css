@@ -1,0 +1,10 @@
+/* KALEA — pages légales (CGU, mentions, confidentialité, suppression) : thème sombre.
+   Ces pages n'emploient que des variables : on les redéfinit. Actif seulement si html[data-theme="dark"] (theme.js). */
+html[data-theme="dark"] {
+  --bg: #0B0F22; --surface: #141A33; --ink: #F5F7FF; --ink-soft: rgba(245,247,255,.78);
+  --line: rgba(255,255,255,.14); --primary: #9D97FF; --primary-dark: #9D97FF;
+  --shadow-lg: 0 24px 60px rgba(0,0,0,.45);
+}
+html[data-theme="dark"] .box { background: rgba(255,255,255,.05); }
+html[data-theme="dark"] .lang-btn:hover { border-color: rgba(157,151,255,.6); }
+html[data-theme="dark"] .lang-btn.is-active { background: rgba(157,151,255,.16); border-color: rgba(157,151,255,.6); }

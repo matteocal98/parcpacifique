@@ -267,6 +267,8 @@ ${seo}
 ${polices}
 ${style}
 <link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/site-sombre.css">
+<script src="/theme.js"></script>
 <script type="application/ld+json">${JSON.stringify(faqLd)}</script>
 </head>
 <body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
@@ -293,6 +295,7 @@ ${faq}
 </main>
 ${parties.footer}
 <script src="/selecteur-langue.js"></script>
+<script src="/bouton-theme.js"></script>
 </body>
 </html>
 `;
