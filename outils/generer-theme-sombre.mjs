@@ -63,9 +63,9 @@ function texte(valeur) {
   const c = analyser(valeur);
   if (!c) return null;
   if (c.a === 0) return null;
-  if (estEncre(c)) return c.a >= 0.95 ? 'var(--ink)' : rgba(238, 241, 251, Math.min(0.92, c.a + 0.1));
+  if (estEncre(c)) return c.a >= 0.95 ? 'var(--ink)' : rgba(255, 255, 255, Math.min(0.92, c.a + 0.1));
   const l = lum(c);
-  if (l < 0.1 && sature(c) <= 40) return c.a >= 0.95 ? 'var(--ink)' : rgba(238, 241, 251, Math.min(0.92, c.a + 0.1));
+  if (l < 0.1 && sature(c) <= 40) return c.a >= 0.95 ? 'var(--ink)' : rgba(255, 255, 255, Math.min(0.92, c.a + 0.1));
   if (l < 0.25 && sature(c) > 40) { const e = eclaircir(c, 0.55); return rgba(e.r, e.g, e.b, c.a); }
   return null;
 }
@@ -127,6 +127,7 @@ function corrections(regle) {
     if (prop === 'background' || prop === 'background-color') {
       if (!/gradient|url\(/.test(val)) nouveau = fond(val);
     } else if (prop === 'color') nouveau = texte(val);
+    else if (prop === 'font-weight') nouveau = ({ normal: '500', 400: '500', 500: '600', 600: '700' })[val] || null; // graisse +1 cran en sombre (texte clair sur fond sombre : paraît plus fin)
     else if (/^(border|outline)(-(top|right|bottom|left))?-color$/.test(prop)) nouveau = bordure(val);
     else if (/^(border|outline)(-(top|right|bottom|left))?$/.test(prop) && !/var\(--/.test(val)) {
       const parts = val.split(SEPARE); let change = false;

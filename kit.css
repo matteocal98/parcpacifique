@@ -2718,12 +2718,12 @@ html[data-theme="dark"]{
   --surface:#141A33;
   --surface-soft:rgba(255,255,255,.06);
   --dark:#070A18;
-  --ink:#EEF1FB;
-  --ink-2:rgba(238,241,251,.80);
-  --ink-3:rgba(238,241,251,.72);
-  --ink-4:rgba(238,241,251,.64);
-  --ink-warm:rgba(238,241,251,.80);
-  --ink-soft:rgba(238,241,251,.76);
+  --ink:#FFFFFF;
+  --ink-2:rgba(255,255,255,.90);
+  --ink-3:rgba(255,255,255,.82);
+  --ink-4:rgba(255,255,255,.74);
+  --ink-warm:rgba(255,255,255,.90);
+  --ink-soft:rgba(255,255,255,.86);
   --line:rgba(255,255,255,.16);
   --line-2:rgba(255,255,255,.10);
   --line-3:rgba(255,255,255,.26);
@@ -2737,19 +2737,19 @@ html[data-theme="dark"]{
   --cyan:#3CCBBE;
   --late:#F0902F;
   --late-bg:rgba(240,144,47,.18);
-  --late-ink:#EEF1FB;
+  --late-ink:#FFFFFF;
   --soon:#8B8EF7;
   --soon-bg:rgba(139,142,247,.18);
-  --soon-ink:#EEF1FB;
+  --soon-ink:#FFFFFF;
   --ok:#3CCBBE;
   --ok-bg:rgba(60,203,190,.16);
-  --ok-ink:#EEF1FB;
+  --ok-ink:#FFFFFF;
   --ok-accent:#3CCBBE;
   --late-fort:#F5A04A;
   --soon-fort:#A8AAFB;
   --olive:#A9BA4F;
   --bleu-roi:#7DAEF7;
-  --alert:#EEF1FB;
+  --alert:#FFFFFF;
   --alert-bg:rgba(240,144,47,.20);
   --tint-action:rgba(139,142,247,.12);
   --voile-cyan:rgba(60,203,190,.18);
@@ -2763,27 +2763,40 @@ html[data-theme="dark"]{
   --fond-modale:#0E1226;
   --corbeille:#F59E0B;
 }
-html[data-theme="dark"] body{background:var(--surface);color:var(--ink);}
+html[data-theme="dark"] body{background:var(--surface);color:var(--ink);font-weight:500;}   /* écriture un cran plus épaisse en sombre : le texte clair sur fond sombre paraît plus fin */
 
 /* SOMBRE-GENERE:DEBUT — produit par outils/generer-theme-sombre.mjs : NE PAS MODIFIER À LA MAIN */
 html[data-theme="dark"] .erreur-globale{box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+html[data-theme="dark"] .offline-banner{font-weight:700}
+html[data-theme="dark"] .tab{font-weight:700}
+@media (min-width:900px){html[data-theme="dark"] .sidebar .nav-item{font-weight:700}}
 @media (min-width:900px){html[data-theme="dark"] .sidebar .nav-item:hover{background:rgba(255,255,255,0.01)}}
+@media (min-width:900px){html[data-theme="dark"] .sidebar .sidebar-foot button{font-weight:700}}
+html[data-theme="dark"] .greeting .hello{font-weight:700}
+html[data-theme="dark"] .dash-head-compte{font-weight:700}
 html[data-theme="dark"] .switch{background:rgba(255,255,255,0.2)}
 html[data-theme="dark"] .switch span{background:var(--surface)}
 html[data-theme="dark"] .parc-recherche input:focus{background:var(--surface)}
+html[data-theme="dark"] .parc-pill{font-weight:700}
 html[data-theme="dark"] .parc-pill.is-active{background:#5B52DF}
 html[data-theme="dark"] .parc-pill.is-active .compte{background:rgba(255,255,255,0.03)}
 html[data-theme="dark"] .mstrip-photo{background:var(--surface)}
+html[data-theme="dark"] .mstrip-tache{font-weight:700}
+html[data-theme="dark"] .mstrip-compteur-bloc .compteur-titre{font-weight:700}
 html[data-theme="dark"] .compteur-strip-saisie{background:var(--surface);box-shadow:inset 0 2px 4px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .compteur-strip-icone.is-valider{background:#5B52DF;box-shadow:0 3px 10px rgba(0,0,0,0.44)}
 html[data-theme="dark"] .machine{box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+html[data-theme="dark"] .machine-alerte-texte{font-weight:700}
 html[data-theme="dark"] .carnet-badge{background:#5B52DF}
 html[data-theme="dark"] .machine-jauge-part{background:#5B52DF}
+html[data-theme="dark"] .due{font-weight:700}
 html[data-theme="dark"] .compteur-unite{background:#5B52DF}
 html[data-theme="dark"] .pages-utiles{border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06)}
 html[data-theme="dark"] .pages-utiles .page-utile{border:1px solid rgba(255,255,255,0.15);box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .pages-utiles .vignette-bouton{border:1px solid rgba(255,255,255,0.1)}
+html[data-theme="dark"] .lecteur-page .lecteur-titre{font-weight:700}
 html[data-theme="dark"] .pages-utiles .credit-clair{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
+html[data-theme="dark"] .pages-utiles .credit-rassurance{font-weight:700}
 html[data-theme="dark"] .pages-utiles .ajout-page input{border:1px solid rgba(255,255,255,0.15)}
 html[data-theme="dark"] .modal{box-shadow:0 24px 60px rgba(0,0,0,0.53)}
 html[data-theme="dark"] .plan-modal .modal{background:var(--surface)}
@@ -2793,37 +2806,46 @@ html[data-theme="dark"] .fm-card{box-shadow:0 8px 24px -4px rgba(0,0,0,0.3),0 3p
 html[data-theme="dark"] .fm-filtre-chip.is-active{background:#5B52DF}
 html[data-theme="dark"] .fm2-hero{background:var(--surface);box-shadow:0 4px 20px -2px rgba(0,0,0,0.3),0 2px 6px -1px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .fm2-o1-photo-box{background:var(--surface)}
-html[data-theme="dark"] .fm2-chip-cat-o1{background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .fm2-vin{font-weight:600}
+html[data-theme="dark"] .fm2-badge-echeance{font-weight:700}
+html[data-theme="dark"] .fm2-chip-cat-o1{font-weight:700;background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .fm2-meta-o1{font-weight:600}
 html[data-theme="dark"] .fm2-titre-o1{color:var(--ink)}
+html[data-theme="dark"] .fm2-sous-titre-o1{font-weight:600}
 html[data-theme="dark"] .fm2-mini-carte-o1{background:var(--surface)}
 html[data-theme="dark"] .fm2-mini-valeur-o1{color:var(--ink)}
 html[data-theme="dark"] .fm2-o1-side{border-top:1px solid var(--line)}
 @media(min-width:768px){html[data-theme="dark"] .fm2-o1-side{border-left:1px solid var(--line)}}
 html[data-theme="dark"] .fm2-releve-valeur-o1{color:var(--ink)}
+html[data-theme="dark"] .fm2-releve-valeur-o1 span{font-weight:700}
 html[data-theme="dark"] .fm2-seuil-valeur-o1{color:var(--ink)}
 html[data-theme="dark"] .fm2-intervalle-o1{background:var(--surface-soft)}
 html[data-theme="dark"] .fm2-intervalle-o1-row1{color:var(--ink)}
 html[data-theme="dark"] .fm2-fort-o1{color:var(--ink)}
 html[data-theme="dark"] .fm2-intervalle-o1-row2{color:var(--ink)}
+html[data-theme="dark"] .fm2-reste-o1{font-weight:700}
 html[data-theme="dark"] .fm2-piste-o1{background:var(--surface-soft)}
-html[data-theme="dark"] .fm2-pct-o1{color:rgba(170,165,231,1)}
+html[data-theme="dark"] .fm2-pct-o1{font-weight:700;color:rgba(170,165,231,1)}
 html[data-theme="dark"] .fm2-o2-photo-box{background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,0.3);border:1px solid var(--line)}
 html[data-theme="dark"] .fm2-statut-o2{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .fm2-o2-ligne1{border-bottom:1px solid var(--line)}
-html[data-theme="dark"] .fm2-chip-cat-o2{background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .fm2-chip-cat-o2{font-weight:700;background:var(--surface);color:var(--ink)}
+html[data-theme="dark"] .fm2-meta-o2{font-weight:600}
 html[data-theme="dark"] .fm2-titre-o2{color:var(--ink)}
 html[data-theme="dark"] .fm2-compteur-entete-o2{background:rgba(255,255,255,0.1)}
 html[data-theme="dark"] .fm2-releve-valeur-o2{color:var(--ink)}
 html[data-theme="dark"] .fm2-divider-o2{background:var(--surface-soft)}
 html[data-theme="dark"] .fm2-seuil-valeur-o2{color:var(--ink)}
+html[data-theme="dark"] .fm2-o2-suivi-hint{font-weight:600}
 html[data-theme="dark"] .fm2-bloc-horaire{background:var(--surface-soft)}
 html[data-theme="dark"] .fm2-bloc-calendaire{background:var(--surface)}
-html[data-theme="dark"] .fm2-bloc-row1>span:first-child{color:var(--ink)}
+html[data-theme="dark"] .fm2-bloc-row1>span:first-child{color:var(--ink);font-weight:600}
 html[data-theme="dark"] .fm2-fort-o2{color:var(--ink)}
 html[data-theme="dark"] .fm2-bloc-label-horaire{color:rgba(170,165,231,1)}
 html[data-theme="dark"] .fm2-bloc-label-calendaire{color:rgba(148,183,180,1)}
 html[data-theme="dark"] .fm2-bloc-row2{color:var(--ink)}
 html[data-theme="dark"] .fm2-bloc-piste{background:var(--surface-soft)}
+html[data-theme="dark"] .fm2-bloc-pied{font-weight:600}
 html[data-theme="dark"] .fm2-bloc-pct-horaire{color:rgba(170,165,231,1)}
 html[data-theme="dark"] .fm2-bloc-pct-calendaire{color:rgba(147,193,190,1)}
 html[data-theme="dark"] .fm2-mini-carte-o2{background:var(--surface)}
@@ -2836,13 +2858,13 @@ html[data-theme="dark"] .machine-modal-edit .mform-card.is-selected .mform-card-
 html[data-theme="dark"] .machine-modal-edit .mform-card-titre{color:var(--ink)}
 html[data-theme="dark"] .machine-modal-edit .mform-check-off{background:rgba(220,233,255,0.2)}
 html[data-theme="dark"] .machine-modal-edit .mform-photo-web{background:var(--surface)}
-html[data-theme="dark"] .machine-modal-edit .mform-photo-web-corps span{color:var(--ink)}
+html[data-theme="dark"] .machine-modal-edit .mform-photo-web-corps span{font-weight:700;color:var(--ink)}
 html[data-theme="dark"] .machine-modal-edit .mmod-second-panel{background:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit .mmod-tco-panel{background:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit .mmod-photo-panel{background:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit #photo-preview{background:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit .mmod-second-panel-head span:first-child{color:var(--ink)}
-html[data-theme="dark"] .machine-modal-edit .mmod-pill-actif{background:rgba(201,230,255,0.2);color:rgba(140,174,190,1)}
+html[data-theme="dark"] .machine-modal-edit .mmod-pill-actif{background:rgba(201,230,255,0.2);color:rgba(140,174,190,1);font-weight:700}
 html[data-theme="dark"] .machine-modal-edit .bg-background{background-color:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit .bg-outline-variant{background-color:var(--surface-soft)}
 html[data-theme="dark"] .machine-modal-edit .bg-primary-fixed{background-color:rgba(201,230,255,0.2)}
@@ -2853,6 +2875,14 @@ html[data-theme="dark"] .machine-modal-edit .bg-surface-container-lowest{backgro
 html[data-theme="dark"] .machine-modal-edit .bg-surface-container\/50{background-color:var(--surface-soft)}
 html[data-theme="dark"] .machine-modal-edit .bg-surface\/80{background-color:rgba(255,255,255,0.1)}
 html[data-theme="dark"] .machine-modal-edit .bg-white\/20{background-color:rgba(255,255,255,0.03)}
+html[data-theme="dark"] .machine-modal-edit .text-body-md{font-weight:500}
+html[data-theme="dark"] .machine-modal-edit .text-body-sm{font-weight:500}
+html[data-theme="dark"] .machine-modal-edit .text-headline-lg{font-weight:700}
+html[data-theme="dark"] .machine-modal-edit .text-headline-sm{font-weight:700}
+html[data-theme="dark"] .machine-modal-edit .text-label-lg{font-weight:700}
+html[data-theme="dark"] .machine-modal-edit .text-label-md{font-weight:700}
+html[data-theme="dark"] .machine-modal-edit .font-medium{font-weight:600}
+html[data-theme="dark"] .machine-modal-edit .font-semibold{font-weight:700}
 html[data-theme="dark"] .machine-modal-edit .text-error{color:rgba(224,152,152,1)}
 html[data-theme="dark"] .machine-modal-edit .text-on-primary-fixed{color:rgba(140,154,161,1)}
 html[data-theme="dark"] .machine-modal-edit .text-on-surface{color:var(--ink)}
@@ -2884,6 +2914,8 @@ html[data-theme="dark"] .machine-modal-add .bg-surface-container-low\/70{backgro
 html[data-theme="dark"] .machine-modal-add .bg-surface-container-lowest{background-color:var(--surface)}
 html[data-theme="dark"] .machine-modal-add .bg-tertiary-light{background-color:var(--surface)}
 html[data-theme="dark"] .machine-modal-add .bg-white\/70{background-color:rgba(255,255,255,0.1)}
+html[data-theme="dark"] .machine-modal-add .font-medium{font-weight:600}
+html[data-theme="dark"] .machine-modal-add .font-semibold{font-weight:700}
 html[data-theme="dark"] .machine-modal-add .text-on-surface{color:var(--ink)}
 html[data-theme="dark"] .machine-modal-add .text-primary{color:rgba(140,186,206,1)}
 html[data-theme="dark"] .machine-modal-add .text-slate-600{color:var(--ink)}
@@ -2908,10 +2940,15 @@ html[data-theme="dark"] .offre-plan{background:var(--surface-soft)}
 html[data-theme="dark"] .signup-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .requis{color:rgba(238,161,155,1)}
 html[data-theme="dark"] .log-chip-machine{background:#5B52DF}
+html[data-theme="dark"] .log-modal label{font-weight:700}
 html[data-theme="dark"] .log-compteur-unite{background:#5B52DF}
 html[data-theme="dark"] .log-item-carte:has(input:checked) .log-item-check,html[data-theme="dark"] .log-item-carte.is-checked .log-item-check{background:#5B52DF}
+html[data-theme="dark"] .log-item-titre{font-weight:700}
 html[data-theme="dark"] .log-mo-ajouter{background:#5B52DF}
 html[data-theme="dark"] .log-bento-btn:hover .log-bento-icone{background:#5B52DF}
+html[data-theme="dark"] .log-bento-titre{font-weight:700}
+html[data-theme="dark"] .log-info-titre{font-weight:700}
+html[data-theme="dark"] .log-type-texte{font-weight:600}
 html[data-theme="dark"] .analyse-progress{border:1px solid rgba(255,255,255,0.05)}
 html[data-theme="dark"] .choix-info-box{background:var(--surface-soft)}
 html[data-theme="dark"] .kit-tache-modal .modal{background:var(--surface)}
@@ -2919,14 +2956,24 @@ html[data-theme="dark"] .programme-actions-modal .modal{background:var(--surface
 html[data-theme="dark"] .second-compteur-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .choix-frequence-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .mform-num{background:#5B52DF}
+html[data-theme="dark"] .error{font-weight:700}
 html[data-theme="dark"] button.primary{background:#5B52DF}
 html[data-theme="dark"] .suppr-compte-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .login-box{box-shadow:0 24px 60px rgba(0,0,0,0.35)}
+html[data-theme="dark"] .champ-entete .link-inline{font-weight:700}
+html[data-theme="dark"] .step-back{font-weight:700}
+html[data-theme="dark"] .opt-sub{font-weight:600}
+html[data-theme="dark"] .checklist label{font-weight:700}
+html[data-theme="dark"] .track-mode-choice label{font-weight:600}
 html[data-theme="dark"] .offres-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .offres-eyebrow.is-restreint{color:rgba(227,166,160,1)}
 html[data-theme="dark"] .offre-carte.is-recommandee{box-shadow:0 10px 28px rgba(0,0,0,0.48)}
+html[data-theme="dark"] .offre-carte-prix .devise{font-weight:700}
 html[data-theme="dark"] .offre-carte.is-recommandee .offre-carte-ajoute{background:rgba(255,255,255,0.08)}
 html[data-theme="dark"] .offre-bouton.is-primaire{box-shadow:0 6px 16px rgba(0,0,0,0.65)}
+html[data-theme="dark"] .offres-comparatif-table tbody th{font-weight:700}
+html[data-theme="dark"] .offres-modal #forfait-msg:not(:empty){font-weight:700}
+html[data-theme="dark"] .import-csv-libelle{font-weight:700}
 html[data-theme="dark"] .import-csv-terminal{box-shadow:inset 0 0 0 1px rgba(0,0,0,0.3)}
 html[data-theme="dark"] #import-copier{background:rgba(255,255,255,0.01)}
 html[data-theme="dark"] #import-copier:hover{background:rgba(255,255,255,0.02)}
@@ -2934,6 +2981,7 @@ html[data-theme="dark"] .pplan-modal{border:1px solid rgba(255,255,255,0.1);box-
 html[data-theme="dark"] .pplan-head{border-bottom:1px solid rgba(255,255,255,0.05)}
 html[data-theme="dark"] .pplan-close:hover{background:rgba(255,255,255,0.13)}
 html[data-theme="dark"] .pplan-resume{border-bottom:1px solid rgba(255,255,255,0.1)}
+html[data-theme="dark"] .pplan-resume-pill{font-weight:700}
 html[data-theme="dark"] .pplan-warning-ico{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .pplan-body{background:rgba(255,255,255,0.06)}
 html[data-theme="dark"] .pplan-champ-carte{border:1px solid rgba(255,255,255,0.1);box-shadow:0 1px 2px rgba(0,0,0,0.3)}
@@ -2943,6 +2991,8 @@ html[data-theme="dark"] .pplan-table-wrap{border:1px solid rgba(255,255,255,0.15
 html[data-theme="dark"] .pplan-table thead tr{border-bottom:1px solid rgba(255,255,255,0.1)}
 html[data-theme="dark"] .pplan-table tbody tr{border-top:1px solid rgba(255,255,255,0.05)}
 html[data-theme="dark"] .pplan-table tbody tr:hover{background:rgba(255,255,255,0.07)}
+html[data-theme="dark"] .pplan-table td{font-weight:600}
+html[data-theme="dark"] .pplan-elt{font-weight:700}
 html[data-theme="dark"] .pplan-elt-input{border:1px solid rgba(255,255,255,0.15)}
 html[data-theme="dark"] .pplan-statut.is-neutre{border:1px solid rgba(255,255,255,0.1)}
 html[data-theme="dark"] .pplan-btn-modifier{border:1px solid rgba(255,255,255,0.15)}
@@ -2956,72 +3006,124 @@ html[data-theme="dark"] .pplan-btn-activer{box-shadow:0 10px 20px -6px rgba(0,0,
 html[data-theme="dark"] .pplan-btn-activer:hover{background:#5B52DF}
 html[data-theme="dark"] .pplan-choix-item{border:2px solid rgba(255,255,255,0.15);box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .pplan-choix-item.is-recommande .pplan-choix-ico{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
-html[data-theme="dark"] select.pplan-select,html[data-theme="dark"] .champ-select.pplan-select{border:1px solid rgba(255,255,255,0.15);box-shadow:0 1px 2px rgba(0,0,0,0.3)}
+html[data-theme="dark"] select.pplan-select,html[data-theme="dark"] .champ-select.pplan-select{border:1px solid rgba(255,255,255,0.15);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .pplan-file-card{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .pplan-file-ico{box-shadow:0 4px 8px rgba(0,0,0,0.33)}
+html[data-theme="dark"] .pplan-file-verifie{font-weight:700}
 html[data-theme="dark"] .pplan-file-remplacer:hover{background:var(--surface);color:rgba(239,157,157,1)}
 html[data-theme="dark"] .pplan-fichier-bandeau{border-bottom:1px solid rgba(255,255,255,0.1)}
+html[data-theme="dark"] .pplan-fichier-bandeau-gauche{font-weight:700}
+html[data-theme="dark"] .pplan-fichier-bandeau-detail{font-weight:600}
 html[data-theme="dark"] .pplan-analyse-spin::before{border:4px solid rgba(255,255,255,0.08)}
+html[data-theme="dark"] .material-symbols-outlined{font-weight:500}
 html[data-theme="dark"] .plus-sheet-avatar{background:#5B52DF}
 html[data-theme="dark"] .plus-sheet-avatar-pastille{border:2px solid var(--line)}
+html[data-theme="dark"] .plus-sheet-sous-titre{font-weight:700}
+html[data-theme="dark"] .plus-sheet-item-sous{font-weight:600}
 html[data-theme="dark"] .chip.is-active .chip-count{background:rgba(255,255,255,0.03)}
-html[data-theme="dark"] .toast{box-shadow:0 12px 28px rgba(0,0,0,0.62)}
+html[data-theme="dark"] .prep-spec{font-weight:700}
+html[data-theme="dark"] .prep-groupe-meta{font-weight:700}
+html[data-theme="dark"] .fleet-count{font-weight:700}
+html[data-theme="dark"] .check-row{font-weight:700}
+html[data-theme="dark"] .mform-photo-web-corps{font-weight:700}
+html[data-theme="dark"] .toast{font-weight:700;box-shadow:0 12px 28px rgba(0,0,0,0.62)}
 html[data-theme="dark"] .canal .badge.neutral{background:rgba(255,255,255,0.1)}
+html[data-theme="dark"] .seg-btn{font-weight:700}
 html[data-theme="dark"] .seg-btn.is-active{background:#5B52DF}
 html[data-theme="dark"] .dropzone .dz-icon{color:rgba(156,190,241,1)}
 @media (min-width:900px){html[data-theme="dark"] .sidebar .nav-item.is-active{background:rgba(255,255,255,0.01)}}
 @media (min-width:900px){html[data-theme="dark"] .dash-head .dash-ajouter{background:#5B52DF}}
 @media (min-width:900px){html[data-theme="dark"] .dash-head .dash-compte{background:#5B52DF}}
+@media (max-width:899px){html[data-theme="dark"] .bm-page{font-weight:700}}
 @media (max-width:899px){html[data-theme="dark"] .bm-compte{background:#5B52DF}}
+@media (max-width:899px){html[data-theme="dark"] .page-head[data-view="dashboard"] .greeting .count{font-weight:600}}
 @media (max-width:899px){html[data-theme="dark"] .tab-fab span{box-shadow:0 6px 18px rgba(0,0,0,0.65)}}
 html[data-theme="dark"] .chip.is-active{background:#5B52DF}
 html[data-theme="dark"] .compteur-enregistrer{background:#5B52DF}
 html[data-theme="dark"] .machine:not(.is-late) .m-actions .btn-principal{background:#5B52DF}
+@media (max-width:899px){html[data-theme="dark"] .machine .m-titre .meta{font-weight:700}}
 html[data-theme="dark"] .machine-photo-cadre .carnet-badge:hover{background:#5B52DF}
 @media (min-width:900px){html[data-theme="dark"] .toolbar-parc .fleet-ajouter{background:#5B52DF;box-shadow:0 8px 24px rgba(0,0,0,0.3)}}
-@media (min-width:900px){html[data-theme="dark"] .chip{border:2px solid rgba(255,255,255,0.15)}}
+@media (min-width:900px){html[data-theme="dark"] .chip{font-weight:700;border:2px solid rgba(255,255,255,0.15)}}
 @media (min-width:900px){html[data-theme="dark"] .chip.is-active{background:#5B52DF}}
 @media (min-width:900px){html[data-theme="dark"] .chip .chip-count{background:rgba(255,255,255,0.13)}}
 @media (min-width:900px){html[data-theme="dark"] .chip.is-active .chip-count{background:rgba(255,255,255,0.03)}}
-@media (min-width:900px){html[data-theme="dark"] .sort-wrap select{border:1px solid rgba(255,255,255,0.2)}}
+@media (min-width:900px){html[data-theme="dark"] .sort-wrap .sort-label{font-weight:700}}
+@media (min-width:900px){html[data-theme="dark"] .sort-wrap select{border:1px solid rgba(255,255,255,0.2);font-weight:700}}
+@media (min-width:900px){html[data-theme="dark"] .machine .m-titre .meta{font-weight:600}}
 @media (min-width:900px){html[data-theme="dark"] .compteur-bureau .compteur-enregistrer{background:#5B52DF}}
 @media (min-width:900px){html[data-theme="dark"] .m-side{border-left:2px solid rgba(255,255,255,0.15)}}
 @media (min-width:900px){html[data-theme="dark"] .machine .m-actions .btn-principal{background:#5B52DF}}
+html[data-theme="dark"] .prep-alerte-texte{font-weight:700}
+html[data-theme="dark"] .prep-groupe-meta{font-weight:700}
+html[data-theme="dark"] .prep-besoin-qte{font-weight:700}
 html[data-theme="dark"] .agenda-jour.is-aujourdhui .agenda-jour-num{background:#5B52DF}
+html[data-theme="dark"] .agenda-legende-item{font-weight:700}
 html[data-theme="dark"] .agenda-tooltip{box-shadow:var(--shadow-soft),0 8px 24px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .agenda-planifier-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .pe-machine-icone{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .agenda-jour-modal .modal{background:var(--surface)}
+html[data-theme="dark"] .jm-carte-telemetrie-gauche{font-weight:700}
 html[data-theme="dark"] .card-ico-plein{background:#5B52DF}
 html[data-theme="dark"] .callout .card-ico{color:rgba(156,190,241,1)}
 html[data-theme="dark"] .support-statut.is-ouvert{color:rgba(202,174,147,1)}
 html[data-theme="dark"] .support-statut.is-resolu{color:rgba(146,183,179,1)}
+html[data-theme="dark"] .support-echange-sub{font-weight:700}
+html[data-theme="dark"] .support-bulle-auteur{font-weight:700}
 html[data-theme="dark"] .support-bulle-auteur .avatar{background:#5B52DF}
+html[data-theme="dark"] .support-bulle{font-weight:600}
+html[data-theme="dark"] .support-compositeur-hint{font-weight:600}
+html[data-theme="dark"] .support-badge-optionnel{font-weight:700}
+html[data-theme="dark"] .indicatif-chip{font-weight:700}
+html[data-theme="dark"] .indicatif-nom{font-weight:700}
+html[data-theme="dark"] .indicatif-vide p.muted-text{font-weight:600}
+html[data-theme="dark"] .indicatif-pied-compte{font-weight:700}
 html[data-theme="dark"] .compteur-carte{background:var(--surface)}
 html[data-theme="dark"] .compteur-carte-ajuster{background:var(--surface)}
+html[data-theme="dark"] .compteur-rouleaux-index-sous{font-weight:700}
 html[data-theme="dark"] .compteur-rouleaux-module{box-shadow:0 20px 40px -12px rgba(0,0,0,0.33)}
 html[data-theme="dark"] .compteur-rouleau-vue{box-shadow:inset 0 2px 6px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .compteur-rouleaux-loupe{box-shadow:0 10px 24px rgba(0,0,0,0.55)}
+html[data-theme="dark"] .compteur-rouleaux-astuce{font-weight:700}
 html[data-theme="dark"] .piece-fournisseur-chip.is-actif{background:#5B52DF}
+html[data-theme="dark"] .piece-ligne-meta strong{font-weight:700}
+html[data-theme="dark"] .piece-vide p.muted-text{font-weight:600}
 html[data-theme="dark"] .piece-resume-icone{background:#5B52DF}
 html[data-theme="dark"] .piece-mobile-tete{box-shadow:0 1px 8px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .piece-mobile-carte.is-choisie{box-shadow:0 4px 14px -2px rgba(0,0,0,0.33)}
 html[data-theme="dark"] .piece-mobile-delai{color:rgba(146,183,179,1)}
+html[data-theme="dark"] .piece-mobile-prix .devise{font-weight:700}
+html[data-theme="dark"] .piece-mobile-carte-nom{font-weight:700}
+html[data-theme="dark"] .piece-mobile-carte-meta-ligne .mot{font-weight:700}
+html[data-theme="dark"] .piece-mobile-carte-meta-ligne .val{font-weight:700}
+html[data-theme="dark"] .piece-mobile-vide p.muted-text{font-weight:600}
 html[data-theme="dark"] .piece-mobile-pied{background:var(--surface);box-shadow:0 -6px 20px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .rapport-tco-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .next-entretien-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .stock-btn-outline{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .stock-kit-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .stock-mouvement-modal .modal{background:var(--surface)}
+html[data-theme="dark"] .tco-champ-unite input{font-weight:700}
 html[data-theme="dark"] .tco-quick-add input{background:var(--surface)}
+html[data-theme="dark"] .tco-dash-legende{font-weight:700}
+html[data-theme="dark"] .tco-donut-centre-note{font-weight:700}
+html[data-theme="dark"] .tco-donut-legende-carte .gauche{font-weight:700}
+html[data-theme="dark"] .tco-donut-legende-carte .heures{font-weight:600}
 @media print{html[data-theme="dark"] #qr-impression .qr-impression-id{color:var(--ink)}}
 html[data-theme="dark"] .tele-marker-pt{border:3px solid var(--line);box-shadow:0 1px 6px rgba(0,0,0,0.65)}
 html[data-theme="dark"] .tele-vignette{background:var(--surface)}
 html[data-theme="dark"] .leaflet-tooltip.tele-infobulle{background:var(--surface);box-shadow:0 6px 18px rgba(0,0,0,0.62)}
 html[data-theme="dark"] .leaflet-tooltip.tele-infobulle.leaflet-tooltip-top:before{border-top-color:var(--line)}
 html[data-theme="dark"] .machine-modal-add label.ring-2.bg-surface-container-lowest{background-color:var(--surface-soft)}
+html[data-theme="dark"] .compteur2-lib{font-weight:700}
+html[data-theme="dark"] .log-piece-stock .ui-case{font-weight:700}
+@media (max-width:560px), (orientation:landscape) and (max-height:520px) and (max-width:899px){html[data-theme="dark"] .log-modal .log-submit-total{font-weight:700}}
 html[data-theme="dark"] .ui-section-icone{background:#5B52DF}
+html[data-theme="dark"] .ui-tuile-valeur small{font-weight:600}
+html[data-theme="dark"] .ui-ligne-nom{font-weight:700}
+html[data-theme="dark"] .ui-champ-unite .ui-champ{font-weight:700}
 html[data-theme="dark"] .ui-btn-plein{background:#5B52DF}
+html[data-theme="dark"] .ui-puce{font-weight:700}
 html[data-theme="dark"] .ui-puce.is-actif{background:#5B52DF}
 html[data-theme="dark"] .ui-puce.is-actif .ui-compte{background:rgba(255,255,255,0.03)}
 html[data-theme="dark"] .ui-segment button.is-actif{background:#5B52DF}
@@ -3031,6 +3133,7 @@ html[data-theme="dark"] .ui-ligne-icone.is-gerant{background:#5B52DF}
 html[data-theme="dark"] .ui-groupe .lang-btn.is-active{background:#5B52DF}
 html[data-theme="dark"] .ui-chiffre-valeur.is-ok{color:rgba(147,193,190,1)}
 html[data-theme="dark"] .ui-chiffre-valeur.is-retard{color:rgba(221,178,144,1)}
+html[data-theme="dark"] .ui-case{font-weight:700}
 @media (max-width:700px){html[data-theme="dark"] .ui-info-btn.is-ouvert{background:#5B52DF}}
 @media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){html[data-theme="dark"] .log-modal .log-item-carte:not(:has(input:checked)) .log-item-cycle,html[data-theme="dark"] .log-modal .log-item-carte:not(:has(input:checked)) .log-item-spec{background:rgba(255,255,255,0.08)}}
 html[data-theme="dark"] .fo-completude-barre{background:rgba(255,255,255,0.13)}
@@ -3038,6 +3141,7 @@ html[data-theme="dark"] .fo-carte{background:rgba(255,255,255,0.06)}
 html[data-theme="dark"] .fo-puce{background:var(--surface)}
 html[data-theme="dark"] .fo-carte .ui-champ{background:var(--surface)}
 html[data-theme="dark"] .fo-sous-bloc{background:var(--surface)}
+html[data-theme="dark"] .fo-sous-titre em{font-weight:600}
 html[data-theme="dark"] .fo-doc{background:rgba(255,255,255,0.06);border:1px dashed rgba(255,255,255,0.22)}
 html[data-theme="dark"] .fo-doc-icone{background:var(--surface)}
 html[data-theme="dark"] .fo-doc-etat.is-present{color:rgba(147,193,190,1)}
@@ -3068,6 +3172,7 @@ html[data-theme="dark"] .log-type-carte[data-kind="depannage"].is-active{backgro
 html[data-theme="dark"] .machine-modal-add .modal,html[data-theme="dark"] .machine-modal-edit .modal,html[data-theme="dark"] .machine-modal-add .bg-modal-bg,html[data-theme="dark"] .machine-modal-edit .bg-modal-bg{background:var(--surface) !important}
 html[data-theme="dark"] .machine-modal-add section > [class*="bg-surface-container-low"],html[data-theme="dark"] .machine-modal-edit section > [class*="bg-surface-container-low"]{background:rgba(255,255,255,0.06) !important}
 html[data-theme="dark"] .machine-modal-add [class*="bg-surface-container-low"] label[class*="bg-surface-container"],html[data-theme="dark"] .machine-modal-edit [class*="bg-surface-container-low"] label[class*="bg-surface-container"]:not(:has(input:checked)){background:var(--surface)}
+html[data-theme="dark"] .panne-arret{font-weight:700}
 html[data-theme="dark"] .t-bien{color:rgba(147,193,190,1)}
 html[data-theme="dark"] .t-mal{color:rgba(210,175,145,1)}
 html[data-theme="dark"] .stat-table td{border-top:1px solid rgba(255,255,255,0.08)}
