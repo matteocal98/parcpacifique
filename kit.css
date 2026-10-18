@@ -1636,7 +1636,7 @@ textarea:not([data-x]),
 /* fenêtres du Stock plus hautes que l'écran (téléphone en paysage, longues fenêtres) : la fenêtre défile
    elle-même et sa barre de boutons reste collée en bas, toujours atteignable sans chercher */
 .modal.a-croix:not(.fournisseur-modal){max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow-y:auto;}
-.modal.a-croix:not(.fournisseur-modal) > .modal-actions{position:sticky;bottom:0;z-index:3;margin-top:12px;padding:10px 0 2px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 22%);}
+.modal.a-croix:not(.fournisseur-modal) > .modal-actions{position:sticky;bottom:0;z-index:3;margin-top:12px;padding:10px 0 2px;background:linear-gradient(to bottom,transparent,var(--fond-modale,#fff) 22%);}
 .stock-mouvement-modal .modal.a-croix > .modal-actions{background:linear-gradient(to bottom,rgba(242,244,248,0),#F2F4F8 22%);}
 /* la fiche fournisseur reste en colonne (en-tête, corps qui défile, pied) même quand la règle « fenêtres d'export » du paysage s'applique */
 .modal.fournisseur-modal.export-modal{display:flex;flex-direction:column;align-items:stretch;gap:0;grid-template-columns:none;}
