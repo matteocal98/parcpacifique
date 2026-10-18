@@ -768,6 +768,18 @@ function versionAffichee() {
   return versionNative || VERSION_APPLICATION;
 }
 
+// APPLICATION IPHONE : Apple interdit de vendre un abonnement hors de son système d'achat (règle 3.1.1) ET d'inciter à
+// le faire (boutons, liens, prix). Sur iPhone l'appli ne vend donc RIEN : plus d'offres, de prix, de lien de paiement ni de
+// portail de facturation (l'abonnement se gère sur le site, hors de l'appli). Cette fonction est le seul interrupteur.
+// Test sur ordinateur : localStorage 'kalea.test-ios' = '1'.
+function estAppliIOS() {
+  try {
+    const cap = typeof window !== 'undefined' ? window.Capacitor : null;
+    if (cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'ios') return true;
+    return localStorage.getItem('kalea.test-ios') === '1';
+  } catch (err) { return false; }
+}
+
 // Lit la version RÉELLE du paquet Android. Le greffon s'annonce sur
 // window.Capacitor.Plugins.App : aucun import npm, rien à charger (même
 // mécanisme que le verrou d'arrière-plan). Sur le web, il n'existe pas et la

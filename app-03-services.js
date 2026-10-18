@@ -1357,8 +1357,8 @@ function renderLogin(errorMsg, horsLigne) {
       <div class="presentation-publique">
         <p class="pres-promesse"><strong>KALEA</strong> ${trad('automatise le plan d\'entretien à partir du carnet constructeur : alertes en dates ou horamètres, rappels préventifs et commandes de pièces.')}</p>
         <div class="pres-pied">
-          <span class="pres-gratuit">${trad('Gratuit pour 2 machines')}</span>
-          <a class="pres-lien" href="./decouvrir.html">${trad('Découvrir KALEA')} →</a>
+          ${estAppliIOS() ? '' : `<span class="pres-gratuit">${trad('Gratuit pour 2 machines')}</span>
+          <a class="pres-lien" href="./decouvrir.html">${trad('Découvrir KALEA')} →</a>`}
         </div>
       </div>`}
       ${horsLigne && horsLigne.copieDu ? `

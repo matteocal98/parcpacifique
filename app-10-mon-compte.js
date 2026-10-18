@@ -134,7 +134,7 @@ VIEWS.account = {
                 ${phraseMachinesEnPlus() ? `<span class="ui-aide">${esc(phraseMachinesEnPlus())}</span>` : ''}
               </div>
             </div>
-            <div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="account-upgrade">${trad('Changer d\'offre')}</button></div>
+            ${estAppliIOS() ? '' : `<div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="account-upgrade">${trad('Changer d\'offre')}</button></div>`}
           </div>
           ${estInstitution() ? `
           <div class="ui-ligne is-deux">
@@ -145,7 +145,7 @@ VIEWS.account = {
               </div>
             </div>
           </div>` : ''}
-          ${(PALIERS_PAYANTS.indexOf(plan) !== -1 && !estInstitution()) ? `
+          ${(PALIERS_PAYANTS.indexOf(plan) !== -1 && !estInstitution() && !estAppliIOS()) ? `
           <div class="ui-ligne is-deux">
             <div class="ui-ligne-id">
               <div class="ui-ligne-textes">

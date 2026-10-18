@@ -1436,6 +1436,11 @@ async function afficherFilTicket(overlay, moi, ticketId) {
 // parce qu'une écriture a été refusée sur une machine non couverte. Le message
 // s'affiche dans la zone d'annonce de la fenêtre — même texte partout.
 function openUpgradeNotice(companyId, message) {
+  // iPhone : aucune offre, aucun prix, aucun appel à s'abonner (règle 3.1.1 d'Apple) — seulement l'information, sans action.
+  if (estAppliIOS()) {
+    showToast(message || trad('Cette fonction n\'est pas disponible avec l\'offre actuelle de votre compte.'));
+    return;
+  }
   const overlay = document.createElement('div');
   overlay.className = 'overlay offres-modal';
   document.body.appendChild(overlay);
