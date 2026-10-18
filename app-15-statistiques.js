@@ -10,7 +10,7 @@
 // RECONSTITUÉE à partir des mouvements et annoncée comme estimée.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STATS_COULEURS = { pieces: '#6366F1', mo: '#24B5A8', expl: '#DE7A16', arret: '#0E1333', gris: '#C7CAD9', texte: 'rgba(14,19,51,.62)' };
+const STATS_COULEURS = { pieces: '#6366F1', mo: '#24B5A8', expl: '#DE7A16', arret: 'var(--ink)', gris: '#C7CAD9', texte: 'var(--ink-3)' };
 
 function statsEtat() {
   if (!UI.stats) UI.stats = { periode: '12m', categorie: '', machine: '', onglet: 'couts', donnees: null, erreur: null, chargement: false };
@@ -304,7 +304,7 @@ function statsSvgBarresEmpilees(labels, series, W, H) {
   const ticks = statsAxe(Math.max(...tot), 4, series.every((x) => x.argent === false)); const max = ticks[ticks.length - 1] || 1;
   const bw = w / labels.length * 0.62; const saut = labels.length > 14 ? Math.ceil(labels.length / 12) : (W < 500 ? 2 : 1);
   let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(trad('Graphique en barres'))}">`;
-  ticks.forEach((t) => { const y = m.t + h - t / max * h; s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="rgba(14,19,51,.08)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${STATS_COULEURS.texte}">${statsFmt(t)}</text>`; });
+  ticks.forEach((t) => { const y = m.t + h - t / max * h; s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="var(--line-2)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${STATS_COULEURS.texte}">${statsFmt(t)}</text>`; });
   labels.forEach((lb, i) => {
     const x = m.l + w / labels.length * i + (w / labels.length - bw) / 2; let y = m.t + h;
     series.forEach((se, k) => { const hh = se.data[i] / max * h; if (hh <= 0) return; y -= hh; s += `<rect x="${x}" y="${y}" width="${bw}" height="${hh}" fill="${se.color}"${k === series.length - 1 ? ' rx="3"' : ''}><title>${esc(lb)} — ${esc(se.name)} : ${esc(formatMontantOuNombre(se.data[i], se.argent))}</title></rect>`; });
@@ -323,7 +323,7 @@ function statsSvgAnneau(parts, taille, centre, sous) {
     s += `<path d="M${c + r * Math.cos(a0)} ${c + r * Math.sin(a0)} A${r} ${r} 0 ${grand} 1 ${c + r * Math.cos(a1)} ${c + r * Math.sin(a1)}" fill="none" stroke="${p.color}" stroke-width="22"><title>${esc(p.n)} : ${Math.round(part * 100)} %</title></path>`;
     a0 = a1;
   });
-  s += `<text x="${c}" y="${c + (sous ? 0 : 5)}" text-anchor="middle" font-size="19" font-weight="800" fill="#0E1333">${esc(centre)}</text>`;
+  s += `<text x="${c}" y="${c + (sous ? 0 : 5)}" text-anchor="middle" font-size="19" font-weight="800" fill="var(--ink)">${esc(centre)}</text>`;
   if (sous) s += `<text x="${c}" y="${c + 16}" text-anchor="middle" font-size="11" fill="${STATS_COULEURS.texte}">${esc(sous)}</text>`;
   return `${s}</svg>`;
 }
@@ -336,11 +336,11 @@ function statsSvgBarresH(items, opt) {
   items.forEach((it, i) => {
     const y = 4 + i * o.rowH; const bw = it.v / max * w; const depasse = o.seuil && it.s != null && it.v > it.s;
     const nom = String(it.n).length > maxCar ? `${String(it.n).slice(0, maxCar - 1)}…` : String(it.n);
-    s += `<text x="${lab - 10}" y="${y + o.rowH / 2 + 3}" text-anchor="end" font-size="12" fill="#0E1333" font-weight="600">${esc(nom)}</text>`;
-    s += `<rect x="${lab}" y="${y + 6}" width="${w}" height="${o.rowH - 14}" rx="5" fill="rgba(14,19,51,.05)"/>`;
+    s += `<text x="${lab - 10}" y="${y + o.rowH / 2 + 3}" text-anchor="end" font-size="12" fill="var(--ink)" font-weight="600">${esc(nom)}</text>`;
+    s += `<rect x="${lab}" y="${y + 6}" width="${w}" height="${o.rowH - 14}" rx="5" fill="var(--surface-soft)"/>`;
     s += `<rect x="${lab}" y="${y + 6}" width="${Math.max(bw, 2)}" height="${o.rowH - 14}" rx="5" fill="${depasse ? STATS_COULEURS.expl : o.couleur}"><title>${esc(it.n)} : ${esc(o.fmtv(it.v, it))}</title></rect>`;
-    s += `<text x="${o.W - 6}" y="${y + o.rowH / 2 + 3}" text-anchor="end" font-size="12" font-weight="700" fill="#0E1333">${esc(o.fmtv(it.v, it))}</text>`;
-    if (o.seuil && it.s != null) { const xs = lab + it.s / max * w; s += `<line x1="${xs}" x2="${xs}" y1="${y + 2}" y2="${y + o.rowH - 4}" stroke="#0E1333" stroke-width="2"/>`; }
+    s += `<text x="${o.W - 6}" y="${y + o.rowH / 2 + 3}" text-anchor="end" font-size="12" font-weight="700" fill="var(--ink)">${esc(o.fmtv(it.v, it))}</text>`;
+    if (o.seuil && it.s != null) { const xs = lab + it.s / max * w; s += `<line x1="${xs}" x2="${xs}" y1="${y + 2}" y2="${y + o.rowH - 4}" stroke="var(--ink)" stroke-width="2"/>`; }
   });
   return `${s}</svg>`;
 }
@@ -352,11 +352,11 @@ function statsSvgCourbe(labels, data, opt) {
   const px = (i) => m.l + (labels.length > 1 ? w * i / (labels.length - 1) : w / 2); const py = (v) => m.t + h - v / hi * h;
   const saut = labels.length > 14 ? Math.ceil(labels.length / 12) : (o.W < 500 ? 2 : 1);
   let s = `<svg viewBox="0 0 ${o.W} ${o.H}" width="100%" role="img" aria-label="${esc(trad('Courbe'))}">`;
-  ticks.forEach((t) => { const y = py(t); s += `<line x1="${m.l}" x2="${o.W - m.r}" y1="${y}" y2="${y}" stroke="rgba(14,19,51,.08)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${STATS_COULEURS.texte}">${esc(o.fmty(t))}</text>`; });
+  ticks.forEach((t) => { const y = py(t); s += `<line x1="${m.l}" x2="${o.W - m.r}" y1="${y}" y2="${y}" stroke="var(--line-2)"/><text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="${STATS_COULEURS.texte}">${esc(o.fmty(t))}</text>`; });
   const pts = data.map((v, i) => `${px(i)},${py(v)}`).join(' ');
   s += `<polygon points="${m.l},${m.t + h} ${pts} ${px(data.length - 1)},${m.t + h}" fill="${o.couleur}" opacity=".12"/>`;
   s += `<polyline points="${pts}" fill="none" stroke="${o.couleur}" stroke-width="2.5" stroke-linejoin="round"/>`;
-  data.forEach((v, i) => { s += `<circle cx="${px(i)}" cy="${py(v)}" r="3.5" fill="#fff" stroke="${o.couleur}" stroke-width="2"><title>${esc(labels[i])} : ${esc(o.fmty(v))}</title></circle>`; });
+  data.forEach((v, i) => { s += `<circle cx="${px(i)}" cy="${py(v)}" r="3.5" fill="var(--surface)" stroke="${o.couleur}" stroke-width="2"><title>${esc(labels[i])} : ${esc(o.fmty(v))}</title></circle>`; });
   labels.forEach((lb, i) => { if (i % saut === 0) s += `<text x="${px(i)}" y="${o.H - 8}" text-anchor="middle" font-size="11" fill="${STATS_COULEURS.texte}">${esc(lb)}</text>`; });
   return `${s}</svg>`;
 }
@@ -364,7 +364,7 @@ function statsSvgDivergentes(labels, haut, bas, W, H) {
   if (!Math.max(...haut, ...bas)) return statsVide();
   const m = { l: 8, r: 8, t: 8, b: 24 }; const w = W - m.l - m.r; const h = H - m.t - m.b;
   const max = Math.max(...haut, ...bas) + 1; const y0 = m.t + h / 2; const bw = w / labels.length * 0.62; const saut = labels.length > 14 ? Math.ceil(labels.length / 12) : (W < 500 ? 2 : 1);
-  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(trad('Graphique en barres'))}"><line x1="${m.l}" x2="${W - m.r}" y1="${y0}" y2="${y0}" stroke="rgba(14,19,51,.25)"/>`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(trad('Graphique en barres'))}"><line x1="${m.l}" x2="${W - m.r}" y1="${y0}" y2="${y0}" stroke="var(--line-3)"/>`;
   labels.forEach((lb, i) => {
     const x = m.l + w / labels.length * i + (w / labels.length - bw) / 2; const hh = haut[i] / max * (h / 2); const bb = bas[i] / max * (h / 2);
     s += `<rect x="${x}" y="${y0 - hh}" width="${bw}" height="${hh}" fill="${STATS_COULEURS.mo}" rx="2"><title>${esc(lb)} — ${esc(trad('Entrées'))} : ${haut[i]}</title></rect>`;
@@ -379,7 +379,7 @@ function statsSvgPareto(items, W, H) {
   const m = { l: 34, r: 40, t: 10, b: 62 }; const w = W - m.l - m.r; const h = H - m.t - m.b;
   const max = Math.max(...items.map((i) => i.v)) * 1.1; const bw = w / items.length * 0.62; let cum = 0; let pts = '';
   let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(trad('Analyse ABC'))}">`;
-  [0, 25, 50, 75, 100].forEach((p) => { const y = m.t + h - p / 100 * h; s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="rgba(14,19,51,.08)"/><text x="${W - m.r + 6}" y="${y + 4}" font-size="11" fill="${STATS_COULEURS.texte}">${p} %</text>`; });
+  [0, 25, 50, 75, 100].forEach((p) => { const y = m.t + h - p / 100 * h; s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" stroke="var(--line-2)"/><text x="${W - m.r + 6}" y="${y + 4}" font-size="11" fill="${STATS_COULEURS.texte}">${p} %</text>`; });
   items.forEach((it, i) => {
     const x = m.l + w / items.length * i + (w / items.length - bw) / 2; const hh = it.v / max * h; cum += it.v; const cy = m.t + h - cum / total * h;
     const classe = cum / total <= 0.8 ? STATS_COULEURS.pieces : (cum / total <= 0.95 ? STATS_COULEURS.mo : STATS_COULEURS.gris);
@@ -388,7 +388,7 @@ function statsSvgPareto(items, W, H) {
     s += `<text x="${x + bw / 2}" y="${m.t + h + 12}" text-anchor="end" font-size="10" fill="${STATS_COULEURS.texte}" transform="rotate(-35 ${x + bw / 2} ${m.t + h + 12})">${esc(nom)}</text>`;
     pts += `${x + bw / 2},${cy} `;
   });
-  return `${s}<polyline points="${pts}" fill="none" stroke="#0E1333" stroke-width="2"/></svg>`;
+  return `${s}<polyline points="${pts}" fill="none" stroke="var(--ink)" stroke-width="2"/></svg>`;
 }
 
 // ── Pièces d'interface ───────────────────────────────────────────────────────────────────────────────────

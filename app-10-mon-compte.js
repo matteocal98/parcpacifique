@@ -260,6 +260,13 @@ VIEWS.account = {
             <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
             ${basculeLangueHtml()}
           </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Thème de l\'interface')}</span>
+            <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
+              ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
+            </div>
+            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
+          </div>
           ${dansApplication() ? `
           <div class="ui-groupe">
             <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
@@ -309,6 +316,16 @@ VIEWS.account = {
     root.querySelector('#account-upgrade')?.addEventListener('click', () => openUpgradeNotice(UI.companyId));
     wireReglagesRappelsEmail(root);
     wirePush(root);
+    root.querySelectorAll('[data-theme-choix]').forEach((bouton) => {
+      bouton.addEventListener('click', () => {
+        if (window.kaleaTheme) window.kaleaTheme.definir(bouton.getAttribute('data-theme-choix'));
+        root.querySelectorAll('[data-theme-choix]').forEach((b) => {
+          const actif = b === bouton;
+          b.classList.toggle('is-actif', actif);
+          b.setAttribute('aria-pressed', actif ? 'true' : 'false');
+        });
+      });
+    });
   const basculeCopie = document.getElementById('acc-hors-ligne');
   if (basculeCopie) {
     basculeCopie.addEventListener('change', () => {
