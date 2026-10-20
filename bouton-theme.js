@@ -5,8 +5,11 @@
   'use strict';
   function monter() {
     var T = window.kaleaTheme; if (!T) return;
-    var lien = document.querySelector('[data-langue]'); if (!lien || !lien.parentNode) return;
-    var ancre = lien.parentNode;
+    // Pages publiques : juste après le sélecteur FR/EN. Console d'administration (admin.html) : à l'endroit repéré par data-theme-ancre.
+    var lien = document.querySelector('[data-langue]');
+    var pointAdmin = document.querySelector('[data-theme-ancre]');
+    if (!(lien && lien.parentNode) && !pointAdmin) return;
+    var ancre = lien && lien.parentNode ? lien.parentNode : pointAdmin;
     var en = (document.documentElement.getAttribute('lang') || 'fr').indexOf('en') === 0;
     var ORDRE = ['auto', 'clair', 'sombre'];
     var ICONES = {
