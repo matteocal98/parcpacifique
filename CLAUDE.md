@@ -1,7 +1,7 @@
 # Projet KALEA (kalea.pro)
 
 ## Contexte
-- Application web **kalea.pro** (anciennement keeva.work — renommée fin septembre 2026 car la marque « KEEVA » était déjà déposée par un tiers) + application **Android** associée (en cours d'examen sur Google Play).
+- Application web **kalea.pro** (anciennement keeva.work — renommée fin septembre 2026 car la marque « KEEVA » était déjà déposée par un tiers) + application **Android** associée (publiée sur Google Play, annoncé le 2026-10-21).
 - Propriétaire : Matthieu Courtois, basé en Nouvelle-Calédonie (fuseau Pacific/Noumea, UTC+11).
 
 ## Stack technique
@@ -14,7 +14,7 @@
 
 ## État d'avancement
 - Application fonctionnelle, bêta-tests pas encore lancés.
-- Application Android soumise, en attente de validation par Google.
+- Application Android publiée sur Google Play (2026-10-21).
 - Redesign Stitch (menus + 12 modales cataloguées) terminé.
 - Rebranding KEEVA → KALEA terminé (nom affiché, logo, domaine) ; la palette de couleurs de l'app n'a volontairement pas été alignée sur la nouvelle charte graphique (écart jugé imperceptible en usage normal).
 
