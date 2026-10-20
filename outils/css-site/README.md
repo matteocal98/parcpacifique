@@ -19,4 +19,4 @@ npm run pages        # génère les pages puis recompile site.css
 
 Titres, descriptions, réseaux sociaux et image d'aperçu : `outils/seo-config.mjs`. Images d'aperçu : `partage-og.jpg` (FR) et `partage-og-en.jpg` (EN), 1200 × 630.
 
-Pas encore compilés (ils chargent encore Tailwind depuis Internet) : `login.html`, `admin.html`.
+Pas encore compilé (il charge encore Tailwind depuis Internet) : `admin.html`.
