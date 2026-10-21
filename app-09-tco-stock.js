@@ -5078,15 +5078,37 @@ function ouvrirBonDeCommande(g) {
   ajouterCroixModale(overlay);
   const q = (s) => overlay.querySelector(s);
   const infos = () => ({ reference: q('#bon-ref').value.trim() || referenceBon(g), livraison: q('#bon-livraison').value, adresse: q('#bon-adresse').value.trim(), note: q('#bon-note').value.trim() });
-  const apercu = () => {
+  // Aperçu du bon : les QUANTITÉS sont modifiables ici (champ par ligne). Elles sont mémorisées dans UI.achatsQuantites, la même réserve que les
+  // champs de l'onglet Commandes : les deux restent d'accord. 0 ou vide = ligne ignorée. Les lignes ne sont redessinées qu'à l'ouverture
+  // (pas à chaque frappe, pour ne pas perdre le curseur) ; seuls le total et l'état des boutons suivent la saisie.
+  const majTotalBon = () => {
     const lignes = lignesDuBon(g);
     const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
-    q('#bon-apercu').innerHTML = lignes.length
-      ? `<table class="achats-bon-table"><tbody>${lignes.map((x) => `<tr><td>${esc(x.l.piece.designation)}${x.l.piece.reference ? `<span class="ui-ligne-sous">${esc(x.l.piece.reference)}</span>` : ''}</td><td class="n">${esc(texteAvecSeparateurs(x.qte))}</td></tr>`).join('')}</tbody></table>${total ? `<div class="achats-bon-total">${trad('Total estimé')} : ${esc(texteAvecSeparateurs(total))} ${esc(deviseCourte())}</div>` : ''}`
-      : `<div class="ui-aide is-late">${trad('Aucune ligne à commander : coche au moins une pièce avec une quantité.')}</div>`;
+    const zoneTotal = q('#bon-total');
+    if (zoneTotal) zoneTotal.textContent = total ? `${trad('Total estimé')} : ${texteAvecSeparateurs(total)} ${deviseCourte()}` : '';
     ['#bon-imprimer', '#bon-copier', '#bon-email'].forEach((s) => { const b = q(s); if (b) b.disabled = !lignes.length; });
+    const aide = q('#bon-aide-vide');
+    if (aide) aide.hidden = !!lignes.length;
+  };
+  const apercu = () => {
+    const lignes = g.lignes.filter(ligneEstInclue);
+    q('#bon-apercu').innerHTML = lignes.length
+      ? `<table class="achats-bon-table"><tbody>${lignes.map((l) => `<tr><td>${esc(l.piece.designation)}${l.piece.reference ? `<span class="ui-ligne-sous">${esc(l.piece.reference)}</span>` : ''}</td><td class="n"><input class="ui-champ achats-bon-qte" type="text" inputmode="decimal" data-bon-qte="${esc(l.id)}" value="${esc(String(quantiteAchat(l)))}" aria-label="${esc(tR('Quantité de {nom}', { nom: l.piece.designation }))}"></td></tr>`).join('')}</tbody></table><div class="achats-bon-total" id="bon-total"></div><div class="ui-aide is-late" id="bon-aide-vide" hidden>${trad('Aucune ligne à commander : mets une quantité sur au moins une pièce.')}</div>`
+      : `<div class="ui-aide is-late">${trad('Aucune ligne à commander : coche au moins une pièce avec une quantité.')}</div>`;
+    majTotalBon();
   };
   apercu();
+  q('#bon-apercu').addEventListener('input', (e) => {
+    const champ = e.target.closest('[data-bon-qte]');
+    if (!champ) return;
+    const id = champ.getAttribute('data-bon-qte');
+    (UI.achatsQuantites = UI.achatsQuantites || {})[id] = champ.value;
+    majTotalBon();
+    // même quantité dans la liste de l'onglet Commandes (derrière la fenêtre)
+    const racine = document.getElementById('view-root');
+    const champListe = racine && racine.querySelector(`[data-achats-qte="${CSS.escape(id)}"]`);
+    if (champListe) { champListe.value = champ.value; majTotauxAchats(racine, racine._lignesAchats || []); }
+  });
   q('#bon-annuler').addEventListener('click', () => overlay.remove());
   q('#bon-enregistrer')?.addEventListener('click', async (e) => {
     const bouton = e.currentTarget;
@@ -5107,6 +5129,7 @@ function ouvrirBonDeCommande(g) {
     q('#bon-ref').value = data.reference;
     q('#bon-ref').readOnly = true;
     bouton.hidden = true;
+    overlay.querySelectorAll('[data-bon-qte]').forEach((c) => { c.readOnly = true; }); // la commande est enregistrée avec ces quantités : plus de modification
     q('#bon-msg').textContent = tR('Commande {ref} enregistrée (brouillon). Imprime-la ou envoie-la, puis marque-la envoyée depuis la liste des commandes.', { ref: data.reference });
     showToast(trad('Commande enregistrée'));
     const racine = document.getElementById('view-root');

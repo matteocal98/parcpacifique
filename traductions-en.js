@@ -6,6 +6,9 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Quantité de {nom}":"Quantity of {nom}",
+"Aucune ligne à commander : mets une quantité sur au moins une pièce.":"Nothing to order: set a quantity on at least one part.",
+
 "Cette pièce est déjà en commande (voir la liste des commandes).":"This part is already on order (see the orders list).",
 "Rien à commander pour cette pièce : le stock total (tous magasins) est suffisant.":"Nothing to order for this part: the total stock (all warehouses) is sufficient.",
 
