@@ -818,6 +818,11 @@ function fm2ResteTexte(detail) {
 }
 // Mini-carte Cadence/Rappel/Mode de suivi — déclinaison 1 : icône nue à
 // côté du libellé, sur la même ligne (structure exacte de l'Option 1).
+// Ligne « Utilisation moyenne » sous les cartes de la fiche (machines suivies au compteur) : le rythme d'utilisation et sa solidité.
+function fm2UsageHtml(machine) {
+  const texte = texteUtilisationMachine(machine);
+  return texte ? `<div class="fm2-usage">${esc(texte)}</div>` : '';
+}
 function fm2MiniCarteO1(label, valeur, svg, couleurIco) {
   return `<div class="fm2-mini-carte-o1">
       <div class="fm2-mini-tete-o1"><span>${esc(label)}</span><span class="fm2-mini-ico-o1" style="color:${couleurIco};">${svg}</span></div>
@@ -868,6 +873,7 @@ function fm2BandeauSimpleHtml(machine, info, unit, isCounterMode, releveCompteur
             ${fm2MiniCarteO1(trad('Rappel anticipé'), rappelTexte, FM2_SVG_CLOCHE, '#F59E0B')}
             ${fm2MiniCarteO1(trad('Mode de suivi'), modeTexte, FM2_SVG_MODE, '#00B4D8')}
           </div>
+          ${fm2UsageHtml(machine)}
         </div>
         <div class="fm2-o1-side">
           ${isCounterMode ? `
@@ -1015,6 +1021,7 @@ function fm2BandeauDoubleHtml(machine, infoBadge, infoPrincipal, v2, unit, isCou
             ${fm2MiniCarteO2(trad('Rappel anticipé'), rappelTexte, FM2_SVG_CLOCHE, '#FFFBEB', '#D97706')}
             ${fm2MiniCarteO2(trad('Mode de suivi'), modeTexte, FM2_SVG_MODE, '#F0FDFA', '#0D9488')}
           </div>
+          ${fm2UsageHtml(machine)}
 
         </div>
       </div>

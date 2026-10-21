@@ -1092,6 +1092,8 @@ textarea:not([data-x]),
   .taches-cartes,#history-section .ref-table tbody{align-items:stretch;}
   .taches-cartes > .tache-carte,#history-section .ref-table tbody > tr{height:100%;box-sizing:border-box;}
   .fm2-o2-ligne3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch;}
+/* Utilisation moyenne (fiche d'une machine au compteur) : une ligne discrète sous les cartes */
+.fm2-usage{margin-top:8px;font-size:12px;font-weight:600;line-height:1.4;color:var(--ink-2,#475569);}
   .fm2-o2-ligne3 > *{height:100%;box-sizing:border-box;}
 }
 @media (orientation:landscape) and (max-height:520px) and (max-width:899px){
@@ -3141,6 +3143,7 @@ html[data-theme="dark"] .ui-chiffre-valeur.is-ok{color:rgba(147,193,190,1)}
 html[data-theme="dark"] .ui-chiffre-valeur.is-retard{color:rgba(221,178,144,1)}
 html[data-theme="dark"] .ui-case{font-weight:700}
 @media (max-width:700px){html[data-theme="dark"] .ui-info-btn.is-ouvert{background:#5B52DF}}
+@media (orientation:landscape) and (max-height:520px) and (max-width:899px){html[data-theme="dark"] .fm2-usage{font-weight:700}}
 @media (max-width:700px), (orientation:landscape) and (max-height:520px) and (max-width:899px){html[data-theme="dark"] .log-modal .log-item-carte:not(:has(input:checked)) .log-item-cycle,html[data-theme="dark"] .log-modal .log-item-carte:not(:has(input:checked)) .log-item-spec{background:rgba(255,255,255,0.08)}}
 html[data-theme="dark"] .fo-completude-barre{background:rgba(255,255,255,0.13)}
 html[data-theme="dark"] .fo-carte{background:rgba(255,255,255,0.06)}

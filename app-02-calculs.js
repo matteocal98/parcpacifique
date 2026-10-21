@@ -989,13 +989,19 @@ function uniteCompatiblePlan(unite, plan, machine) {
 // fonction absente, hors connexion), la date reste inconnue et l'écran le dit. UI.rythmes : { 'machineId|indexCompteur': unités par jour }.
 async function chargerRythmesUtilisation() {
   const rythmes = {};
+  const details = {};
+  UI.rythmes = rythmes;
+  UI.rythmesDetail = details;
   if (!SCHEMA.hasTelemetry) return rythmes; // counter_readings n'existe qu'une fois la migration de télémétrie passée
   try {
     const { data, error } = await sb.rpc('rythmes_utilisation');
     if (error || !Array.isArray(data)) return rythmes;
     data.forEach((r) => {
       const v = Number(r.rythme_par_jour);
-      if (r.machine_id && Number.isFinite(v) && v > 0) rythmes[r.machine_id + '|' + (r.counter_index || 1)] = v;
+      if (!r.machine_id || !Number.isFinite(v) || v <= 0) return;
+      const cle = r.machine_id + '|' + (r.counter_index || 1);
+      rythmes[cle] = v;
+      details[cle] = { nb: Number(r.nb_releves) || 0, premier: String(r.premier || '').slice(0, 10), dernier: String(r.dernier || '').slice(0, 10) };
     });
   } catch (err) { /* fonction pas encore créée, ou hors connexion : pas d'estimation */ }
   return rythmes;
@@ -1009,8 +1015,14 @@ function rythmeUtilisation(machine, index) {
   if ((unite === 'km' && v > 2000) || (unite === 'hours' && v > 24)) return null;
   return v;
 }
-// Date estimée (YYYY-MM-DD) à laquelle une tâche au compteur arrivera à échéance, ou null si on ne peut pas l'estimer honnêtement.
-function dateEstimeeTache(item, plan, machine) {
+// Rythme écrit pour l'écran : « 159,7 km » / « 0,3 h » (une décimale sous 10, entier au-dessus).
+function texteRythme(rythme, unite) {
+  const u = COUNTER_UNITS[unite] ? unite : 'hours';
+  const v = rythme < 10 ? Math.round(rythme * 10) / 10 : Math.round(rythme);
+  return texteAvecSeparateurs(v) + ' ' + COUNTER_UNITS[u].short;
+}
+// Estimation d'une tâche au compteur : { date (YYYY-MM-DD), rythme, unite, index, nb, fragile, machineNom } ou null si on ne peut pas l'estimer honnêtement.
+function estimationTache(item, plan, machine) {
   if (!machine) return null;
   let index = 1;
   let echeance = null;
@@ -1032,7 +1044,28 @@ function dateEstimeeTache(item, plan, machine) {
   const reste = Number(echeance) - Number(courant);
   const jours = reste <= 0 ? 0 : Math.ceil(reste / rythme);
   if (jours > 730) return null; // au-delà de 2 ans, une extrapolation n'a plus de sens
-  return addDaysIso(todayIso(), jours);
+  const detail = (UI.rythmesDetail || {})[machine.id + '|' + index] || null;
+  const nb = detail ? detail.nb : 0;
+  // « fragile » : peu de relevés, ou période courte — l'écran le dit au lieu de présenter la date comme sûre
+  const fragile = !detail || nb < 3 || !detail.premier || !detail.dernier || (new Date(detail.dernier) - new Date(detail.premier)) / 86400000 < 14;
+  return { date: addDaysIso(todayIso(), jours), rythme, unite: index === 2 ? counterUnit2Of(machine) : counterUnitOf(machine), index, nb, fragile, machineNom: machine.name || '' };
+}
+// Date estimée seule (YYYY-MM-DD) ou null.
+function dateEstimeeTache(item, plan, machine) {
+  const e = estimationTache(item, plan, machine);
+  return e ? e.date : null;
+}
+// Ligne « Utilisation moyenne » de la fiche d'une machine suivie au compteur : le rythme et sa solidité, ou ce qu'il faut pour l'établir.
+function texteUtilisationMachine(machine) {
+  if (!machine || !machine.plan || !planIsCounter(machine.plan)) return '';
+  const rythme = rythmeUtilisation(machine, 1);
+  const detail = (UI.rythmesDetail || {})[machine.id + '|1'];
+  if (!rythme) return trad('Utilisation moyenne : à établir (il faut au moins 2 relevés de compteur espacés d\'une semaine)');
+  const base = tR('Utilisation moyenne : {rythme} par jour', { rythme: texteRythme(rythme, counterUnitOf(machine)) });
+  if (!detail) return base;
+  const periode = tR('{n} relevés du {debut} au {fin}', { n: detail.nb, debut: formatShortDate(detail.premier), fin: formatShortDate(detail.dernier) });
+  const fragile = detail.nb < 3 || (new Date(detail.dernier) - new Date(detail.premier)) / 86400000 < 14;
+  return base + ' · ' + periode + (fragile ? ' · ' + trad('estimation encore fragile') : '');
 }
 function uniteCompatibleCompteur2(unite, machine) {
   const u2 = counterUnit2Of(machine);

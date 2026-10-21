@@ -275,7 +275,8 @@ function listePreparation(machines, jours, maintenant) {
             quantite: Number(ligne.quantity) || 0,
             date,
             // entretien au compteur : date ESTIMÉE d'après le rythme d'utilisation (null si inconnue) — jamais mélangée à une vraie date
-            dateEstimee: compteur ? dateEstimeeTache(item, plan, machine) : null,
+            estimation: compteur ? estimationTache(item, plan, machine) : null,
+            dateEstimee: null, // renseigné juste après (voir plus bas) à partir de estimation
             estKit: true,
             partId: ligne.part_id,
             kitId: kit.id,
@@ -308,8 +309,12 @@ function listePreparation(machines, jours, maintenant) {
       ? produit.besoins.reduce((s, b) => s + (Number(b.quantite) || 0), 0)
       : totalQuantites(produit.besoins.map((b) => b.quantite));
     const premiereDate = produit.besoins.map((b) => b.date).filter(Boolean).sort()[0] || null;
+    produit.besoins.forEach((b) => { b.dateEstimee = b.estimation ? b.estimation.date : null; });
     const premiereDateEstimee = produit.besoins.map((b) => b.dateEstimee).filter(Boolean).sort()[0] || null;
-    const resultat = { ...produit, total, premiereDate, premiereDateEstimee };
+    // l'estimation qui porte la date retenue (pour dire d'après quel rythme et quelle machine)
+    const besoinEstime = produit.besoins.find((b) => b.dateEstimee && b.dateEstimee === premiereDateEstimee);
+    const estimation = besoinEstime ? besoinEstime.estimation : null;
+    const resultat = { ...produit, total, premiereDate, premiereDateEstimee, estimation };
     if (estKit) {
       const ref = produit.besoins[0];
       resultat.partId = ref.partId;

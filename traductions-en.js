@@ -6,6 +6,12 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Utilisation moyenne : à établir (il faut au moins 2 relevés de compteur espacés d'une semaine)":"Average usage: to be established (at least 2 meter readings a week apart are needed)",
+"Utilisation moyenne : {rythme} par jour":"Average usage: {rythme} per day",
+"{n} relevés du {debut} au {fin}":"{n} readings from {debut} to {fin}",
+"estimation encore fragile":"estimate still fragile",
+"Estimé d'après {rythme} par jour ({machine})":"Estimated from {rythme} per day ({machine})",
+
 "Échéance inconnue : rythme d'utilisation à établir":"Due date unknown: usage rate still to be established",
 "(estimé)":"(estimated)",
 

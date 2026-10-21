@@ -2469,6 +2469,7 @@ function ligneBesoinRisqueHtml(produit) {
         <div class="ui-ligne-textes">
           <span class="ui-ligne-nom">${esc(produit.label)}<span class="ui-statut ${classeEtat}">${esc(texteEtat)}</span></span>
           <span class="ui-ligne-sous">${produit.kitNom ? esc(produit.kitNom) : ''}${produit.tacheLabel ? ' · ' + esc(produit.tacheLabel) : ''}</span>
+          ${couv.estimee && produit.estimation ? `<span class="ui-ligne-sous">${esc(tR('Estimé d\'après {rythme} par jour ({machine})', { rythme: texteRythme(produit.estimation.rythme, produit.estimation.unite), machine: produit.estimation.machineNom }))}${produit.estimation.fragile ? ' · ' + esc(trad('estimation encore fragile')) : ''}</span>` : ''}
         </div>
       </div>
       <div class="ui-ligne-action">
