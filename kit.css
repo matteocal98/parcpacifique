@@ -2623,6 +2623,21 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 #fleet-list.is-tuiles > .fleet-count{grid-column:1 / -1;}
 .mstrip-liste.is-tuiles .mstrip{flex-direction:column;cursor:pointer;transition:box-shadow .15s ease;}
 .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(14,19,51,.14);}
+/* ── La zone « identité » d'une machine (photo, nom, tâche) OUVRE LA FICHE : on doit le voir.
+   • flèche « › » à côté du nom, TOUJOURS visible (un téléphone n'a pas de survol) ;
+   • au survol (ou au clavier) : nom coloré et souligné, flèche qui avance, photo qui s'agrandit un peu ;
+   • curseur « main » ; contour visible quand on y arrive au clavier. */
+.mstrip-identite{cursor:pointer;border-radius:var(--r-md);}
+.mstrip-nom{transition:color .15s ease;}
+.mstrip-titre .mstrip-nom::after{content:'\203A';display:inline-block;margin-left:6px;font-size:1.3em;line-height:1;font-weight:700;color:var(--primary);opacity:.9;transition:transform .15s ease,opacity .15s ease;}
+.mstrip-photo img{transition:transform .2s ease;}
+.mstrip-identite:hover .mstrip-nom,.mstrip-identite:focus-visible .mstrip-nom{color:var(--primary-dark);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;}
+.mstrip-identite:hover .mstrip-nom::after,.mstrip-identite:focus-visible .mstrip-nom::after{opacity:1;transform:translateX(3px);}
+.mstrip-identite:hover .mstrip-photo img,.mstrip-identite:focus-visible .mstrip-photo img{transform:scale(1.05);}
+.mstrip-identite:focus-visible{outline:2px solid var(--primary);outline-offset:3px;}
+/* En tuiles, c'est la carte entière qui s'ouvre : le nom est tronqué sur 2 lignes, on garde l'effet de survol sans la flèche. */
+.mstrip-liste.is-tuiles .mstrip-titre .mstrip-nom::after{display:none;}
+.mstrip-liste.is-tuiles .mstrip:hover .mstrip-nom{color:var(--primary-dark);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;}
 .mstrip-liste.is-tuiles .mstrip-accent{display:none;}
 .mstrip-liste.is-tuiles .mstrip-corps{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;padding:12px;}
 .mstrip-liste.is-tuiles .mstrip-identite{flex:none;width:100%;flex-direction:column;align-items:stretch;gap:8px;}

@@ -1395,11 +1395,20 @@ function wireMachineCards(root) {
     const ouvert = carte.classList.toggle('is-ouvert');
     btn.setAttribute('aria-expanded', String(ouvert));
   }));
-  root.querySelectorAll('.mstrip-identite').forEach(zone => zone.addEventListener('click', () => {
+  const ouvrirFicheDeLaCarte = (zone) => {
     const carte = zone.closest('.mstrip');
     const m = carte && UI.machines.find(x => x.id === carte.dataset.machineId);
     if (m) openPlanView(m, UI.companyId, UI.categories);
-  }));
+  };
+  root.querySelectorAll('.mstrip-identite').forEach(zone => {
+    zone.addEventListener('click', () => ouvrirFicheDeLaCarte(zone));
+    // au clavier : Entrée ou Espace ouvrent la fiche, comme un clic (la zone est un lien : role="link", tabindex="0")
+    zone.addEventListener('keydown', (e) => {
+      if (e.target !== zone || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      ouvrirFicheDeLaCarte(zone);
+    });
+  });
   // ★ LOT 3 — LE PLI D'UNE CARTE DU PARC.
   //   L'état du pli vit dans le DOM de la carte, et NULLE PART AILLEURS, pour
   //   une raison de fond : le parc se redessine à chaque recherche, filtre et
@@ -1759,7 +1768,7 @@ function machineCardHtml(m) {
     <article class="mstrip" data-machine-id="${esc(m.id)}">
       <span class="mstrip-accent is-${etat}" aria-hidden="true"></span>
       <div class="mstrip-corps">
-        <div class="mstrip-identite">
+        <div class="mstrip-identite" role="link" tabindex="0" title="${esc(trad('Ouvrir la fiche de la machine'))}" aria-label="${esc(tR('Ouvrir la fiche de {nom}', { nom: m.name }))}">
           <div class="mstrip-photo">
             ${photo ? `<img src="${esc(photo)}" alt="${esc(m.name)}" loading="lazy">` : `<span class="mstrip-photo-vide">${picto('boite')}</span>`}
             <span class="mstrip-photo-tag">${esc(cat)}</span>
