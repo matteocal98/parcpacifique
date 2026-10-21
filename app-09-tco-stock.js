@@ -4834,6 +4834,168 @@ function documentBonDeCommandeHtml(g, infos) {
     ${f && f.payment_terms ? `<div class="note"><b>${esc(trad('Conditions de paiement'))} :</b> ${esc(f.payment_terms)}</div>` : ''}
   </body></html>`;
 }
+// ── Bon de commande : PDF (jsPDF) et brouillon de message .eml (ordinateur) ──
+// Un lien mailto: ne peut JAMAIS joindre un fichier. Sur ordinateur, on fabrique donc un message complet (destinataire, sujet, texte,
+// bon en PDF joint) au format .eml : un double-clic l'ouvre en brouillon dans Outlook (classique), Thunderbird ou Mail ; l'en-tête
+// « X-Unsent: 1 » le fait ouvrir en rédaction plutôt qu'en lecture. Sur téléphone, on garde le lien mailto (texte seulement).
+function estOrdinateurPourEml() {
+  try {
+    const cap = window.Capacitor;
+    if (cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform()) return false;
+    const ua = navigator.userAgent || '';
+    if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return false;
+    if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return false; // iPad en mode « ordinateur »
+    return true;
+  } catch (err) { return false; }
+}
+async function genererBonDeCommandePdf(g, infos) {
+  const jsPDF = await loadJsPdfLib();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const T = (d, s, x, y, o) => d.text(pdfTexteSain(s), x, y, o);
+  const f = g.fournisseur;
+  const lignes = g._lignesFigees || lignesDuBon(g);
+  const devise = deviseCourte();
+  const total = lignes.reduce((s, x) => s + x.qte * (Number(x.l.piece.unit_price) || 0), 0);
+  const MX = 15;
+  // coupe un texte trop long pour sa colonne (le tableau dessiné à la main ne passe pas à la ligne)
+  const tenir = (texte, largeur) => {
+    let s = pdfTexteSain(texte);
+    if (doc.getTextWidth(s) <= largeur) return s;
+    while (s.length > 1 && doc.getTextWidth(s + '...') > largeur) s = s.slice(0, -1);
+    return s.trimEnd() + '...';
+  };
+  const enTete = () => {
+    doc.setFillColor(14, 19, 51);
+    doc.rect(0, 0, 210, 18, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    T(doc, UI.companyName || 'KALEA', MX, 11.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    T(doc, `${trad('Bon de commande')} ${infos.reference}`, 195, 11.5, { align: 'right' });
+    doc.setTextColor(14, 19, 51);
+  };
+  enTete();
+  let y = 28;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(90, 90, 100);
+  T(doc, `${trad('Date')} : ${formatShortDate(todayIso())}${infos.livraison ? '  -  ' + trad('Livraison souhaitée') + ' : ' + formatShortDate(infos.livraison) : ''}`, MX, y);
+  y += 8;
+  const adresseFourn = f ? [f.legal_name && f.legal_name !== f.name ? f.legal_name : '', f.address, [f.postal_code, f.city].filter(Boolean).join(' '), f.country].filter(Boolean) : [];
+  const contact = f ? [f.contact_name, f.phone, f.po_email || f.email].filter(Boolean) : [];
+  const carte = (x, titre, textes) => {
+    doc.setDrawColor(210, 210, 218);
+    doc.roundedRect(x, y, 87, 38, 2, 2);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(90, 90, 100);
+    T(doc, String(titre).toUpperCase(), x + 3, y + 5.5);
+    doc.setFontSize(9);
+    doc.setTextColor(14, 19, 51);
+    // chaque texte peut passer sur plusieurs lignes (adresse de livraison longue) ; le premier (le nom) est en gras ; 6 lignes au plus
+    const lignesCarte = [];
+    textes.forEach((t, k) => {
+      doc.setFont('helvetica', k === 0 ? 'bold' : 'normal');
+      doc.splitTextToSize(pdfTexteSain(t), 81).forEach((l) => lignesCarte.push([l, k === 0]));
+    });
+    lignesCarte.slice(0, 6).forEach(([l, gras], k) => {
+      doc.setFont('helvetica', gras ? 'bold' : 'normal');
+      T(doc, l, x + 3, y + 11.5 + k * 4.8);
+    });
+  };
+  carte(MX, trad('Commandé par'), [UI.companyName || '', infos.adresse ? `${trad('Adresse de livraison')} : ${infos.adresse}` : ''].filter(Boolean));
+  carte(MX + 93, trad('Fournisseur'), [g.nom, ...adresseFourn, ...contact]);
+  y += 46;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  const LARGEURS = [30, 78, 16, 28, 28];
+  const lignesTableau = lignes.map((x) => {
+    const p = x.l.piece;
+    const prix = Number(p.unit_price) || 0;
+    return [
+      tenir(p.reference || '-', LARGEURS[0] - 3),
+      tenir(`${p.designation}${p.packaging ? ' (' + p.packaging + ')' : ''}`, LARGEURS[1] - 3),
+      texteAvecSeparateurs(x.qte),
+      prix ? texteAvecSeparateurs(prix) : '-',
+      prix ? texteAvecSeparateurs(x.qte * prix) : '-',
+    ];
+  });
+  let py = pdfTableau(doc, {
+    x: MX, y, largeurs: LARGEURS,
+    entetes: [trad('Référence'), trad('Désignation'), trad('Qté'), trad('Prix unitaire'), trad('Total')],
+    alignements: ['left', 'left', 'right', 'right', 'right'], hauteurLigne: 6.5, lignes: lignesTableau, T, onNouvellePage: enTete,
+  });
+  const place = (hauteur) => { if (py + hauteur > 272) { doc.addPage(); enTete(); py = 28; } };
+  py += 7;
+  if (total) {
+    place(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(14, 19, 51);
+    T(doc, `${trad('Total estimé')} : ${texteAvecSeparateurs(total)} ${devise}`, 195, py, { align: 'right' });
+    py += 9;
+  }
+  const paragraphe = (titre, texte) => {
+    if (!texte) return;
+    const parties = doc.splitTextToSize(pdfTexteSain(`${titre} : ${texte}`), 180);
+    place(parties.length * 4.6 + 3);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 70);
+    doc.text(parties, MX, py);
+    py += parties.length * 4.6 + 3;
+  };
+  paragraphe(trad('Note'), infos.note);
+  paragraphe(trad('Conditions de paiement'), f && f.payment_terms);
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(140, 140, 150);
+    T(doc, tR('Page {n}/{total}', { n: p, total: pages }), MX, 292);
+    T(doc, `KALEA - ${formatShortDate(todayIso())}`, 195, 292, { align: 'right' });
+  }
+  return doc;
+}
+// En-tête de message encodé (RFC 2047, UTF-8 en base64) : accents du sujet corrects dans tous les logiciels, mots courts pour ne pas dépasser 76 caractères.
+function enteteMimeEncodee(texte) {
+  const propre = String(texte || '').replace(/[\r\n]+/g, ' ').trim();
+  if (/^[\x20-\x7e]*$/.test(propre)) return propre;
+  const encodeur = new TextEncoder();
+  const mots = [];
+  let courant = '';
+  for (const car of propre) {
+    if (encodeur.encode(courant + car).length > 42) { mots.push(courant); courant = ''; }
+    courant += car;
+  }
+  if (courant) mots.push(courant);
+  return mots.map((m) => '=?UTF-8?B?' + base64DOctets(encodeur.encode(m)) + '?=').join('\r\n ');
+}
+function base64DOctets(octets) {
+  let binaire = '';
+  for (let i = 0; i < octets.length; i += 0x8000) binaire += String.fromCharCode.apply(null, octets.subarray(i, i + 0x8000));
+  return btoa(binaire);
+}
+function coupeBase64(b64) { return b64.replace(/.{1,76}/g, '$&\r\n').trimEnd(); }
+function construireEml({ to, sujet, corps, pj }) {
+  const frontiere = '----=_KALEA_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  // adresses : une ou plusieurs (séparées par , ou ;), seulement celles qui ont une forme valide ; aucun retour à la ligne possible
+  const destinataires = String(to || '').split(/[;,]/).map((s) => s.trim()).filter((s) => /^[^\s<>@"]+@[^\s<>@"]+\.[^\s<>@"]+$/.test(s));
+  const entetes = ['X-Unsent: 1'];
+  if (destinataires.length) entetes.push('To: ' + destinataires.join(', '));
+  entetes.push('Subject: ' + enteteMimeEncodee(sujet), 'MIME-Version: 1.0', `Content-Type: multipart/mixed; boundary="${frontiere}"`);
+  const nomPj = String(pj.nom).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
+  const corpsOctets = new TextEncoder().encode(String(corps || '').replace(/\r?\n/g, '\r\n'));
+  return [
+    ...entetes, '',
+    `--${frontiere}`, 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', coupeBase64(base64DOctets(corpsOctets)), '',
+    `--${frontiere}`, `Content-Type: application/pdf; name="${nomPj}"`, 'Content-Transfer-Encoding: base64', `Content-Disposition: attachment; filename="${nomPj}"`, '', coupeBase64(base64DOctets(pj.octets)), '',
+    `--${frontiere}--`, '',
+  ].join('\r\n');
+}
 function ouvrirBonDeCommande(g) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -4861,7 +5023,7 @@ function ouvrirBonDeCommande(g) {
       <div class="modal-actions">
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-annuler">${trad('Annuler')}</button>
         <button type="button" class="ui-btn ui-btn-pastille" id="bon-copier">${picto('copier')}<span>${trad('Copier')}</span></button>
-        <button type="button" class="ui-btn ui-btn-pastille" id="bon-email"${emailDest ? '' : ' hidden'}>${picto('mail')}<span>${trad('E-mail')}</span></button>
+        <button type="button" class="ui-btn ui-btn-pastille" id="bon-email">${picto('mail')}<span>${trad('Envoyer par e-mail')}</span></button>
         ${peutEnregistrer ? `<button type="button" class="ui-btn ui-btn-plein" id="bon-enregistrer">${picto('coche')}<span>${trad('Enregistrer la commande')}</span></button>` : ''}
         <button type="button" class="ui-btn ${peutEnregistrer ? 'ui-btn-pastille' : 'ui-btn-plein'}" id="bon-imprimer">${picto('export')}<span>${trad('Imprimer / PDF')}</span></button>
       </div>
@@ -4909,10 +5071,32 @@ function ouvrirBonDeCommande(g) {
     try { await navigator.clipboard.writeText(texte); q('#bon-msg').textContent = trad('Bon copié dans le presse-papiers.'); }
     catch (e) { q('#bon-msg').textContent = trad('Copie impossible sur cet appareil : utilise « Imprimer / PDF ».'); }
   });
-  q('#bon-email')?.addEventListener('click', () => {
+  q('#bon-email')?.addEventListener('click', async (e) => {
+    const bouton = e.currentTarget;
     const i = infos();
     const sujet = `${trad('Bon de commande')} ${i.reference} — ${UI.companyName || ''}`;
-    window.location.href = `mailto:${encodeURIComponent(emailDest)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(texteBonDeCommande(g, i))}`;
+    // Téléphone : lien mailto (le bon en texte dans le message, sans pièce jointe — un lien mailto ne peut pas en joindre).
+    if (!estOrdinateurPourEml()) {
+      window.location.href = `mailto:${encodeURIComponent(emailDest)}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(texteBonDeCommande(g, i))}`;
+      return;
+    }
+    // Ordinateur : brouillon .eml (destinataire + texte + bon en PDF joint), ouvert par double-clic dans le logiciel de messagerie.
+    bouton.disabled = true;
+    q('#bon-msg').textContent = trad('Préparation du message…');
+    try {
+      const doc = await genererBonDeCommandePdf(g, i);
+      const corps = `${trad('Bonjour,')}\n\n${tR('Veuillez trouver ci-joint notre bon de commande {ref}.', { ref: i.reference })}\n\n${trad('Cordialement,')}\n${UI.companyName || ''}\n\n—\n${texteBonDeCommande(g, i)}`;
+      const eml = construireEml({ to: emailDest, sujet, corps, pj: { nom: `${i.reference}.pdf`, octets: new Uint8Array(doc.output('arraybuffer')) } });
+      const nom = `${i.reference}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
+      await telechargerFichierBinaire(new Blob([eml], { type: 'message/rfc822' }), `${nom}.eml`, 'message/rfc822');
+      q('#bon-msg').textContent = emailDest
+        ? trad('Brouillon téléchargé : ouvre le fichier .eml (double-clic) pour l\'écrire dans ton logiciel de messagerie, avec le fournisseur en destinataire et le bon en PDF joint. Rien ne s\'ouvre ? Utilise « Copier » ou « Imprimer / PDF ».')
+        : trad('Brouillon téléchargé : ouvre le fichier .eml (double-clic), le bon est en PDF joint. Ce fournisseur n\'a pas d\'adresse e-mail : renseigne-la dans sa fiche pour qu\'elle soit préremplie.');
+    } catch (err) {
+      q('#bon-msg').textContent = trad('Préparation impossible :') + ' ' + ((err && err.message) || trad('erreur inconnue')) + ' — ' + trad('utilise « Copier » ou « Imprimer / PDF ».');
+    } finally {
+      bouton.disabled = !lignesDuBon(g).length;
+    }
   });
 }
 
