@@ -6,6 +6,8 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Échéance inconnue (suivi au compteur)":"Due date unknown (meter-based tracking)",
+
 "Quantité de {nom}":"Quantity of {nom}",
 "Aucune ligne à commander : mets une quantité sur au moins une pièce.":"Nothing to order: set a quantity on at least one part.",
 

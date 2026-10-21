@@ -2460,7 +2460,7 @@ function ligneBesoinRisqueHtml(produit) {
   const couv = produit.stockCouverture;
   const texteEtat = couv.commanderAvantLe
     ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) })
-    : libelleCouverturePiece(couv.state);
+    : libelleCouverturePiece(couv.state, couv.raisonInconnue);
   const classeEtat = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[couv.state] || '';
   return `
     <div class="ui-ligne is-deux ${classeEtat}">

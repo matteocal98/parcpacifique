@@ -361,13 +361,16 @@ function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
     solde,
     commanderAvantLe,
     state,
+    // Pourquoi « inconnu » : le délai d'appro de la pièce manque (à renseigner dans sa fiche), OU la pièce a son délai mais la tâche n'a pas de
+    // date d'échéance (entretien suivi au compteur : heures/km, voir listePreparation) — deux situations à ne pas confondre à l'écran.
+    raisonInconnue: state === 'inconnu' ? (piece && piece.avg_lead_time_days != null ? 'echeance' : 'delai') : null,
   };
 }
 // Libellé de l'état de couverture — état 'inconnu' distinct de badgeLabel()
 // (son repli « Plan à définir » n'a pas de sens pour une pièce en manque
 // sans délai d'appro connu).
-function libelleCouverturePiece(state) {
-  if (state === 'inconnu') return trad('Délai d\'appro non renseigné');
+function libelleCouverturePiece(state, raison) {
+  if (state === 'inconnu') return raison === 'echeance' ? trad('Échéance inconnue (suivi au compteur)') : trad('Délai d\'appro non renseigné');
   return badgeLabel(state);
 }
 
@@ -783,7 +786,7 @@ function preparationCompleteAgendaHtml() {
     // d'échéance existant — ce sont deux informations distinctes.
     const couv = produit.stockCouverture;
     const repereCouverture = couv ? `<span class="ui-statut ${classeEtatKit(couv.state)}">${couv.solde < 0
-      ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) : libelleCouverturePiece('inconnu'))
+      ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) : libelleCouverturePiece('inconnu', couv.raisonInconnue))
       : tR('Stock {n}/{b}', { n: texteAvecSeparateurs(couv.stockDisponible), b: texteAvecSeparateurs(couv.besoin) })
     }</span>` : '';
     const classeBesoin = classeEtatKit(String(etat.classe || '').replace('alert', 'late'));
