@@ -1423,6 +1423,7 @@ function afficherDepuisCache(cache) {
   UI.referencesTypes = cache.referencesTypes || [];
   UI.warehouses = cache.warehouses || [];
   UI.stockItems = cache.stockItems || [];
+  UI.rythmes = cache.rythmes || {};
   UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
   UI.maintenanceKits = cache.maintenanceKits || [];
   UI.maintenanceKitLines = cache.maintenanceKitLines || [];
@@ -1900,6 +1901,8 @@ async function boot(toastMessage) {
     scheduledMaintenances = programmes || [];
   }
   UI.scheduledMaintenances = scheduledMaintenances;
+  // Rythme d'utilisation des machines au compteur (relevés datés) : sert à DATER leurs entretiens. Absent → aucune estimation, rien d'autre ne change.
+  UI.rythmes = await chargerRythmesUtilisation();
   UI.reminders = loadReminders();
   UI.horsLigne = null;
 
@@ -1917,6 +1920,7 @@ async function boot(toastMessage) {
     referencesTypes: UI.referencesTypes,
     warehouses: UI.warehouses,
     stockItems: UI.stockItems,
+    rythmes: UI.rythmes,
     maintenanceKits: UI.maintenanceKits,
     maintenanceKitLines: UI.maintenanceKitLines,
     machines: UI.machines,

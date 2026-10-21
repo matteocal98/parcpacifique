@@ -6,6 +6,9 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Échéance inconnue : rythme d'utilisation à établir":"Due date unknown: usage rate still to be established",
+"(estimé)":"(estimated)",
+
 "Échéance inconnue (suivi au compteur)":"Due date unknown (meter-based tracking)",
 
 "Quantité de {nom}":"Quantity of {nom}",

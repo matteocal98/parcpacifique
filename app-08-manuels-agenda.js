@@ -274,6 +274,8 @@ function listePreparation(machines, jours, maintenant) {
             machine,
             quantite: Number(ligne.quantity) || 0,
             date,
+            // entretien au compteur : date ESTIMÉE d'après le rythme d'utilisation (null si inconnue) — jamais mélangée à une vraie date
+            dateEstimee: compteur ? dateEstimeeTache(item, plan, machine) : null,
             estKit: true,
             partId: ligne.part_id,
             kitId: kit.id,
@@ -306,7 +308,8 @@ function listePreparation(machines, jours, maintenant) {
       ? produit.besoins.reduce((s, b) => s + (Number(b.quantite) || 0), 0)
       : totalQuantites(produit.besoins.map((b) => b.quantite));
     const premiereDate = produit.besoins.map((b) => b.date).filter(Boolean).sort()[0] || null;
-    const resultat = { ...produit, total, premiereDate };
+    const premiereDateEstimee = produit.besoins.map((b) => b.dateEstimee).filter(Boolean).sort()[0] || null;
+    const resultat = { ...produit, total, premiereDate, premiereDateEstimee };
     if (estKit) {
       const ref = produit.besoins[0];
       resultat.partId = ref.partId;
@@ -316,7 +319,7 @@ function listePreparation(machines, jours, maintenant) {
       // Couverture de stock : uniquement pour un besoin réellement relié à
       // une pièce du catalogue — jamais pour le texte libre, faute de
       // référence à comparer à un vrai stock.
-      resultat.stockCouverture = calculerCouverturePiece(ref.partId, total, premiereDate);
+      resultat.stockCouverture = calculerCouverturePiece(ref.partId, total, premiereDate, premiereDateEstimee);
     }
     return resultat;
   });
@@ -333,15 +336,19 @@ function listePreparation(machines, jours, maintenant) {
 // pièce, ou sans échéance calendaire pour la porter, aucune date de
 // commande n'est fabriquée — l'état devient 'inconnu', jamais une date au
 // hasard.
-function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
+function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance, dateEstimee) {
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
   const stockDisponible = (UI.stockItems || [])
     .filter((it) => String(it.part_id) === String(partId) && statutLigneStock(it) === 'libere')
     .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
   const solde = stockDisponible - besoinTotal;
   let commanderAvantLe = null;
-  if (premiereDateEcheance && piece && piece.avg_lead_time_days != null) {
-    commanderAvantLe = addDaysIso(premiereDateEcheance, -Number(piece.avg_lead_time_days));
+  // Date retenue : la VRAIE échéance (calendaire) ; à défaut, ou si elle est plus tardive, la date ESTIMÉE d'après le rythme d'utilisation (tâche au compteur).
+  let dateRetenue = premiereDateEcheance || null;
+  let estimee = false;
+  if (dateEstimee && (!dateRetenue || dateEstimee < dateRetenue)) { dateRetenue = dateEstimee; estimee = true; }
+  if (dateRetenue && piece && piece.avg_lead_time_days != null) {
+    commanderAvantLe = addDaysIso(dateRetenue, -Number(piece.avg_lead_time_days));
   }
   let state = 'ok';
   if (solde < 0) {
@@ -363,6 +370,7 @@ function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
     state,
     // Pourquoi « inconnu » : le délai d'appro de la pièce manque (à renseigner dans sa fiche), OU la pièce a son délai mais la tâche n'a pas de
     // date d'échéance (entretien suivi au compteur : heures/km, voir listePreparation) — deux situations à ne pas confondre à l'écran.
+    estimee,
     raisonInconnue: state === 'inconnu' ? (piece && piece.avg_lead_time_days != null ? 'echeance' : 'delai') : null,
   };
 }
@@ -370,7 +378,7 @@ function calculerCouverturePiece(partId, besoinTotal, premiereDateEcheance) {
 // (son repli « Plan à définir » n'a pas de sens pour une pièce en manque
 // sans délai d'appro connu).
 function libelleCouverturePiece(state, raison) {
-  if (state === 'inconnu') return raison === 'echeance' ? trad('Échéance inconnue (suivi au compteur)') : trad('Délai d\'appro non renseigné');
+  if (state === 'inconnu') return raison === 'echeance' ? trad('Échéance inconnue : rythme d\'utilisation à établir') : trad('Délai d\'appro non renseigné');
   return badgeLabel(state);
 }
 
@@ -786,7 +794,7 @@ function preparationCompleteAgendaHtml() {
     // d'échéance existant — ce sont deux informations distinctes.
     const couv = produit.stockCouverture;
     const repereCouverture = couv ? `<span class="ui-statut ${classeEtatKit(couv.state)}">${couv.solde < 0
-      ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) : libelleCouverturePiece('inconnu', couv.raisonInconnue))
+      ? (couv.commanderAvantLe ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) + (couv.estimee ? ' ' + trad('(estimé)') : '') : libelleCouverturePiece('inconnu', couv.raisonInconnue))
       : tR('Stock {n}/{b}', { n: texteAvecSeparateurs(couv.stockDisponible), b: texteAvecSeparateurs(couv.besoin) })
     }</span>` : '';
     const classeBesoin = classeEtatKit(String(etat.classe || '').replace('alert', 'late'));

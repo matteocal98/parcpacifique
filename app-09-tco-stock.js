@@ -2459,7 +2459,7 @@ function ouvrirEditionKit(kit) {
 function ligneBesoinRisqueHtml(produit) {
   const couv = produit.stockCouverture;
   const texteEtat = couv.commanderAvantLe
-    ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) })
+    ? tR('Commander avant le {date}', { date: formatShortDate(couv.commanderAvantLe) }) + (couv.estimee ? ' ' + trad('(estimé)') : '')
     : libelleCouverturePiece(couv.state, couv.raisonInconnue);
   const classeEtat = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[couv.state] || '';
   return `

@@ -982,6 +982,54 @@ function uniteCompatiblePlan(unite, plan, machine) {
 // L'unité du SECOND compteur de la machine (voir SCHEMA.hasCounter2) : une
 // tâche de genre compteur qui n'est PAS dans l'unité du suivi principal peut
 // quand même être réellement suivie si elle correspond à ce second relevé.
+// ── RYTHME D'UTILISATION ET DATE ESTIMÉE D'UNE TÂCHE AU COMPTEUR ─────────────────────────────────────────────────────────────
+// Un entretien suivi aux heures ou aux km n'a pas de date. Avec le RYTHME d'utilisation de la machine (unités par jour, calculé par la
+// fonction SQL rythmes_utilisation() à partir des relevés datés de counter_readings : voir releves-compteur-historique.sql), on peut
+// l'estimer : aujourd'hui + (échéance − compteur actuel) / rythme. Rien n'est inventé : sans rythme connu (machine neuve, pas assez de relevés,
+// fonction absente, hors connexion), la date reste inconnue et l'écran le dit. UI.rythmes : { 'machineId|indexCompteur': unités par jour }.
+async function chargerRythmesUtilisation() {
+  const rythmes = {};
+  if (!SCHEMA.hasTelemetry) return rythmes; // counter_readings n'existe qu'une fois la migration de télémétrie passée
+  try {
+    const { data, error } = await sb.rpc('rythmes_utilisation');
+    if (error || !Array.isArray(data)) return rythmes;
+    data.forEach((r) => {
+      const v = Number(r.rythme_par_jour);
+      if (r.machine_id && Number.isFinite(v) && v > 0) rythmes[r.machine_id + '|' + (r.counter_index || 1)] = v;
+    });
+  } catch (err) { /* fonction pas encore créée, ou hors connexion : pas d'estimation */ }
+  return rythmes;
+}
+function rythmeUtilisation(machine, index) {
+  if (!machine) return null;
+  const v = (UI.rythmes || {})[machine.id + '|' + (index || 1)];
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+// Date estimée (YYYY-MM-DD) à laquelle une tâche au compteur arrivera à échéance, ou null si on ne peut pas l'estimer honnêtement.
+function dateEstimeeTache(item, plan, machine) {
+  if (!machine) return null;
+  let index = 1;
+  let echeance = null;
+  let courant = null;
+  if (item && item.interval_unite && Number.isFinite(Number(item.due_counter)) && uniteCompatibleCompteur2(item.interval_unite, machine)) {
+    index = 2; // tâche suivie par le SECOND compteur de la machine
+    echeance = Number(item.due_counter);
+    courant = machineCounter2(machine);
+  } else if (planIsCounter(plan)) {
+    const e = echeanceTache(item, plan);
+    echeance = e.genre === 'compteur' ? e.valeur : planNextDueCounter(plan);
+    courant = machineCounter(machine);
+  } else {
+    return null;
+  }
+  if (echeance == null || courant == null || !Number.isFinite(Number(echeance)) || !Number.isFinite(Number(courant))) return null;
+  const rythme = rythmeUtilisation(machine, index);
+  if (!rythme) return null;
+  const reste = Number(echeance) - Number(courant);
+  const jours = reste <= 0 ? 0 : Math.ceil(reste / rythme);
+  if (jours > 730) return null; // au-delà de 2 ans, une extrapolation n'a plus de sens
+  return addDaysIso(todayIso(), jours);
+}
 function uniteCompatibleCompteur2(unite, machine) {
   const u2 = counterUnit2Of(machine);
   return !!u2 && unite === u2;
