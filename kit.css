@@ -1607,7 +1607,10 @@ textarea:not([data-x]),
   .mvt-types{margin-bottom:4px;padding:3px;}
 }
 .etiquettes-modal small{font-size:12px;}
-.modal.a-croix .modal-actions .ui-btn-pastille{background:var(--surface-soft);}
+/* Boutons secondaires des fenêtres : BLANCS sur le fond gris de la fenêtre (charte : « boutons secondaires blancs »). Avant, ils prenaient
+   --surface-soft (4 % d'encre) = presque la couleur du fond : Annuler / Copier / E-mail ne se voyaient pas. Fin mince pour les détacher. */
+.overlay .modal .modal-actions .ui-btn-pastille{background:var(--surface);box-shadow:0 0 0 1px rgba(14,19,51,.14);}
+html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shadow:0 0 0 1px rgba(255,255,255,.18) !important;}
 
 /* écrans très étroits (320 px, ex. certains téléphones) : une ligne dont la zone d'actions compte 3 éléments ou plus
    (prix + étiquette + crayon + corbeille…) passe sur 2 étages au lieu d'écraser le nom de la pièce lettre par lettre */
@@ -3150,6 +3153,7 @@ html[data-theme="dark"] .fo-pied{border-top:1px solid rgba(255,255,255,0.08)}
 html[data-theme="dark"] .stock-onglet.is-actif{background:#5B52DF}
 @media (max-width:899px){html[data-theme="dark"] .stock-onglet.is-actif{background:#5B52DF}}
 html[data-theme="dark"] .mvt-type:has(input:checked){background:#5B52DF}
+html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shadow:0 0 0 1px rgba(0,0,0,0.31)}
 html[data-theme="dark"] .achats-groupe{background:rgba(255,255,255,0.06)}
 html[data-theme="dark"] .achats-ligne{background:var(--surface)}
 html[data-theme="dark"] .achats-bon-apercu{background:var(--surface);box-shadow:0 0 0 1px rgba(0,0,0,0.3)}
