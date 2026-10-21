@@ -2205,6 +2205,7 @@ function ligneInventaireStockHtml(it) {
           <span class="ui-chiffre-valeur">${texteAvecSeparateurs(it.quantity)}${SCHEMA.hasStockChamps && piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ` <span class="ui-ligne-sous">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
           ${gerant ? `<span class="ui-ligne-sous">${texteAvecSeparateurs(Number(it.quantity) * Number(it.pump_unit_cost))} ${esc(deviseCourte())}</span>` : ''}
         </div>
+        ${enAlerte && SCHEMA.hasStock && (peutGererMouvementsStock() || peutAcheter()) ? `<button type="button" class="ui-btn ui-btn-teinte" data-stock-commander="${esc(it.part_id)}" title="${esc(trad('Préparer un bon de commande pour cette pièce'))}">${picto('export')}<span>${trad('Commander')}</span></button>` : ''}
         ${SCHEMA.hasStockChamps && peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-icone" data-stock-emplacement="${esc(it.part_id)}|${esc(it.warehouse_id)}" title="${esc(trad('Emplacement et statut'))}" aria-label="${esc(trad('Emplacement et statut'))}">${picto('crayon')}</button>` : ''}
       </div>
     </div>`;
@@ -4577,7 +4578,15 @@ function calculerSuggestionsAchat(params, sorties) {
     const seuil = Number(piece.default_reorder_point) || 0;
     const commande = enCommande.get(id) || 0;
     const manque = demande + seuil - stock - commande;
-    const aCommander = manque > 0 ? Math.ceil(manque) : 0;
+    let aCommander = manque > 0 ? Math.ceil(manque) : 0;
+    // Pièce AU seuil (stock = seuil : « seuil bas » à l'écran, mais manque = 0) dont la commande a été demandée depuis l'état du stock
+    // (commanderPieceDepuisStock) : on la propose pour remonter le stock au double du seuil. La ligne disparaît dès qu'une commande est
+    // enregistrée (enCommande > 0) ou que le stock repasse au-dessus du seuil.
+    const force = (UI.achatsForces || new Map()).get(id);
+    if (!aCommander && force != null && !commande) {
+      const seuilLignes = Math.max(seuil, ...(UI.stockItems || []).filter((it) => String(it.part_id) === id).map((it) => Number(it.reorder_point) || 0));
+      if (stock <= seuilLignes) aCommander = force;
+    }
     if (!aCommander) return;
     const fournisseur = piece.supplier_id ? fournisseurParId(piece.supplier_id) : (piece.supplier_name ? fournisseurParNom(piece.supplier_name) : null);
     const delai = piece.avg_lead_time_days != null ? Number(piece.avg_lead_time_days) : (fournisseur && fournisseur.lead_time_days != null ? Number(fournisseur.lead_time_days) : null);
@@ -4733,6 +4742,44 @@ async function rafraichirAchats(root) {
   zone.innerHTML = (avertissement ? `<div class="ui-aide is-late">${esc(avertissement)}</div>` : '')
     + (lignes.length ? groupesAchat(lignes).map(groupeAchatHtml).join('') : `<div class="ui-aide">${trad('Rien à commander avec ces réglages.')}</div>`);
   majTotauxAchats(root, lignes);
+}
+// « Commander » depuis l'état du stock (pièce en seuil bas) : bascule sur l'onglet Commandes, repère la pièce dans le bon suggéré, l'inclut,
+// puis ouvre le bon de commande de SON fournisseur pour CETTE pièce (quantité suggérée par le calcul des achats). Si le calcul ne propose rien
+// (stock total tous magasins suffisant, ou quantité déjà en commande), on l'explique plutôt que d'ouvrir un bon vide.
+async function commanderPieceDepuisStock(root, partId) {
+  if (!root.querySelector('#achats-section')) return;
+  stockAllerOnglet(root, 'achats');
+  if (!root._lignesAchats) await rafraichirAchats(root); // le calcul est asynchrone (rythme de sortie) : on attend qu'il soit prêt
+  let lignes = root._lignesAchats || [];
+  let ligne = lignes.find((l) => String(l.piece.id) === String(partId));
+  if (!ligne) {
+    // Seuil atteint mais pas franchi (stock = seuil), ou seuil propre à la ligne de stock : le calcul des achats ne propose rien, alors que
+    // l'écran dit « seuil bas ». On propose de remonter le stock au double du seuil (quantité modifiable dans l'onglet Commandes).
+    const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+    const libres = (UI.stockItems || []).filter((it) => String(it.part_id) === String(partId) && statutLigneStock(it) === 'libere');
+    const stock = libres.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+    const seuil = Math.max(Number(piece && piece.default_reorder_point) || 0, ...libres.map((it) => Number(it.reorder_point) || 0));
+    const dejaEnCommande = SCHEMA.hasCommandes ? (quantitesEnCommande().get(String(partId)) || 0) : 0;
+    if (piece && seuil > 0 && stock <= seuil && !dejaEnCommande) {
+      UI.achatsForces = UI.achatsForces || new Map();
+      UI.achatsForces.set(String(partId), Math.max(1, Math.ceil(2 * seuil - stock)));
+      await rafraichirAchats(root);
+      lignes = root._lignesAchats || [];
+      ligne = lignes.find((l) => String(l.piece.id) === String(partId));
+    }
+    if (!ligne) {
+      showToast(dejaEnCommande ? trad('Cette pièce est déjà en commande (voir la liste des commandes).') : trad('Rien à commander pour cette pièce : le stock total (tous magasins) est suffisant.'));
+      return;
+    }
+  }
+  if (UI.achatsExclus) UI.achatsExclus.delete(ligne.id); // un clic sur « Commander » vaut intention de la commander
+  const caseEl = root.querySelector(`[data-achats-inclure="${CSS.escape(ligne.id)}"]`);
+  const ligneEl = root.querySelector(`[data-achats-ligne="${CSS.escape(ligne.id)}"]`);
+  if (caseEl) caseEl.checked = true;
+  if (ligneEl) { ligneEl.classList.remove('is-exclue'); ligneEl.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  majTotauxAchats(root, lignes);
+  const groupe = groupesAchat(lignes).find((x) => x.lignes.includes(ligne));
+  if (groupe) ouvrirBonDeCommande({ ...groupe, lignes: [ligne] });
 }
 function cablerAchats(root) {
   if (!root.querySelector('#achats-section')) return;
@@ -5520,6 +5567,8 @@ VIEWS.stock = {
     root.querySelector('#stock-emplacement-ajouter')?.addEventListener('click', () => ouvrirModaleEmplacementStock());
     root.querySelector('#stock-etiquettes-ouvrir')?.addEventListener('click', ouvrirModaleEtiquettes);
     root.querySelector('#stock-inventaire-liste')?.addEventListener('click', (e) => {
+      const commander = e.target.closest('[data-stock-commander]');
+      if (commander) { commanderPieceDepuisStock(root, commander.getAttribute('data-stock-commander')); return; }
       const bouton = e.target.closest('[data-stock-emplacement]');
       if (!bouton) return;
       const [partId, magasinId] = bouton.getAttribute('data-stock-emplacement').split('|');

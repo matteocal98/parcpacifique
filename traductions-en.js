@@ -6,6 +6,13 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Cette pièce est déjà en commande (voir la liste des commandes).":"This part is already on order (see the orders list).",
+"Rien à commander pour cette pièce : le stock total (tous magasins) est suffisant.":"Nothing to order for this part: the total stock (all warehouses) is sufficient.",
+
+"Commander":"Order",
+"Préparer un bon de commande pour cette pièce":"Prepare a purchase order for this part",
+"Rien à commander pour cette pièce : le stock total (tous magasins) est suffisant, ou la quantité nécessaire est déjà en commande.":"Nothing to order for this part: the total stock (all warehouses) is sufficient, or the quantity needed is already on order.",
+
 "Préparation du message…":"Preparing the message…",
 "Veuillez trouver ci-joint notre bon de commande {ref}.":"Please find attached our purchase order {ref}.",
 "Cordialement,":"Kind regards,",
