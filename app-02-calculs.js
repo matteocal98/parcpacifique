@@ -1003,7 +1003,11 @@ async function chargerRythmesUtilisation() {
 function rythmeUtilisation(machine, index) {
   if (!machine) return null;
   const v = (UI.rythmes || {})[machine.id + '|' + (index || 1)];
-  return Number.isFinite(v) && v > 0 ? v : null;
+  if (!(Number.isFinite(v) && v > 0)) return null;
+  // Garde-fou (même seuil que la fonction SQL) : plus de 24 h par jour ou 2 000 km par jour est impossible → on n'estime pas.
+  const unite = (index || 1) === 2 ? counterUnit2Of(machine) : counterUnitOf(machine);
+  if ((unite === 'km' && v > 2000) || (unite === 'hours' && v > 24)) return null;
+  return v;
 }
 // Date estimée (YYYY-MM-DD) à laquelle une tâche au compteur arrivera à échéance, ou null si on ne peut pas l'estimer honnêtement.
 function dateEstimeeTache(item, plan, machine) {
