@@ -38,6 +38,17 @@ export const ORGANISATION = {
   },
 };
 
+// Données structurées de l'application (SoftwareApplication) : lien Google Play, captures (adresses sous kalea.pro), fonctions.
+export const APPLICATION = {
+  googlePlay: 'https://play.google.com/store/apps/details?id=pro.kalea.app',
+  captures: ['/captures-app/tableau-de-bord-v2.png', '/captures-app/plan-entretien.png', '/captures-app/stock.png', '/captures-app/tco.png', '/captures-app/agenda.png', '/captures-app/fiche-machine.png'],
+  fonctions: {
+    fr: ['Plans d\'entretien générés à partir des manuels constructeur', 'Suivi aux heures, au kilomètre ou au calendrier', 'Rappels avant panne par notification', 'Stock de pièces détachées et commandes fournisseurs', 'Coût de possession (TCO) par machine', 'QR codes sur les machines', 'Application mobile Android'],
+    en: ['Maintenance plans built from manufacturer manuals', 'Tracking by hours, kilometres or calendar', 'Breakdown-prevention reminders by notification', 'Spare-parts stock and supplier orders', 'Total cost of ownership (TCO) per machine', 'QR codes on machines', 'Android mobile app'],
+  },
+  zones: ['NC', 'FR', 'PF', 'WF', 'VU'],
+};
+
 // Offres affichées sur le site (prix en euros par mois) : à tenir d'accord avec la section « Tarifs » de la page d'accueil.
 export const OFFRES = [
   { nom: 'Gratuit', prix: 0 },

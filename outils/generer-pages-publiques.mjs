@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { SITE, RESEAUX, IMAGE_PARTAGE, ACCUEIL, ORGANISATION, OFFRES } from './seo-config.mjs';
+import { SITE, RESEAUX, IMAGE_PARTAGE, ACCUEIL, ORGANISATION, OFFRES, APPLICATION } from './seo-config.mjs';
 import { PAGES } from './pages-contenu.mjs';
 
 const require = createRequire(import.meta.url);
@@ -30,22 +30,29 @@ const LIB = {
 };
 
 // ───────────────────────────── balises SEO
-function jsonLdAccueil(lg) {
+function jsonLdAccueil(lg, faq = []) {
   const org = SITE + '/#organisation';
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'Organization', '@id': org, name: ORGANISATION.nom, url: SITE + '/', logo: SITE + ORGANISATION.logo, email: ORGANISATION.email,
-        description: ORGANISATION.description[lg], sameAs: [RESEAUX.facebook, RESEAUX.linkedin],
+        description: ORGANISATION.description[lg], sameAs: [RESEAUX.facebook, RESEAUX.linkedin, APPLICATION.googlePlay],
+        areaServed: APPLICATION.zones,
+        contactPoint: { '@type': 'ContactPoint', contactType: lg === 'fr' ? 'assistance' : 'customer support', email: ORGANISATION.email, availableLanguage: ['fr', 'en'] },
         address: { '@type': 'PostalAddress', addressLocality: ORGANISATION.adresse.ville, postalCode: ORGANISATION.adresse.codePostal, addressCountry: ORGANISATION.adresse.pays },
       },
       { '@type': 'WebSite', '@id': SITE + '/#site', url: SITE + '/', name: 'KALEA', publisher: { '@id': org }, inLanguage: ['fr', 'en'] },
       {
         '@type': 'SoftwareApplication', name: 'KALEA', url: URL_ACCUEIL[lg], applicationCategory: 'BusinessApplication', operatingSystem: 'Web, Android',
         description: ACCUEIL[lg].description, inLanguage: lg, publisher: { '@id': org },
-        offers: OFFRES.map((o) => ({ '@type': 'Offer', name: o.nom, price: String(o.prix), priceCurrency: 'EUR', description: lg === 'fr' ? 'Prix par mois, toutes taxes comprises' : 'Price per month, taxes included' })),
+        downloadUrl: APPLICATION.googlePlay, installUrl: APPLICATION.googlePlay, screenshot: APPLICATION.captures.map((c) => SITE + c), featureList: APPLICATION.fonctions[lg],
+        offers: OFFRES.map((o) => ({ '@type': 'Offer', name: o.nom, price: String(o.prix), priceCurrency: 'EUR', description: lg === 'fr' ? 'Prix par mois, toutes taxes comprises' : 'Price per month, taxes included', url: URL_ACCUEIL[lg] + '#tarifs', availability: 'https://schema.org/InStock' })),
       },
+      ...(faq.length ? [{
+        '@type': 'FAQPage', '@id': URL_ACCUEIL[lg] + '#faq', inLanguage: lg,
+        mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.r } })),
+      }] : []),
     ],
   };
 }
@@ -98,6 +105,23 @@ function balisesSeo({ lg, titre, description, canonique, alternates, jsonld }) {
   ].join('\n');
 }
 
+// Questions/réponses VISIBLES de la page (section #faq) : Google exige que le contenu du FAQPage soit affiché.
+function texteDe(n) { let s = ''; parcourir(n, (x) => { if (x.nodeName === '#text' && !/^(script|style)$/.test(x.parentNode.nodeName)) s += x.value; }); return norm(s); }
+function faqDepuisHtml(html) {
+  const doc = parse(html); const sortie = [];
+  parcourir(doc, (n) => {
+    if (n.nodeName !== 'section' || (attr(n, 'id') || {}).value !== 'faq') return;
+    parcourir(n, (d) => {
+      if (d.nodeName !== 'details') return;
+      const resume = d.childNodes.find((c) => c.nodeName === 'summary'); const rep = d.childNodes.find((c) => c.nodeName === 'p');
+      if (!resume || !rep) return;
+      const q = texteDe({ childNodes: resume.childNodes }); const r = texteDe({ childNodes: rep.childNodes });
+      if (q && r) sortie.push({ q, r });
+    });
+  });
+  return sortie;
+}
+
 // ───────────────────────────── blocs insérés dans la page (entre marqueurs)
 function selecteurLangue(actif, urlFr, urlEn) {
   const classe = (on) => 'text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors ' + (on ? 'bg-brand-ink text-white' : 'text-slate-600 hover:text-brand-primary');
@@ -145,7 +169,7 @@ function preparerSourceFrancaise() {
   h = h.replace('href="./decouvrir.html"', 'href="./"');   // le logo mène à la racine, pas à la copie decouvrir.html
   h = remplacerEntreMarqueurs(h, 'SEO', balisesSeo({
     lg: 'fr', titre: ACCUEIL.fr.titre, description: ACCUEIL.fr.description, canonique: URL_ACCUEIL.fr,
-    alternates: { fr: URL_ACCUEIL.fr, en: URL_ACCUEIL.en, 'x-default': URL_ACCUEIL.fr }, jsonld: jsonLdAccueil('fr'),
+    alternates: { fr: URL_ACCUEIL.fr, en: URL_ACCUEIL.en, 'x-default': URL_ACCUEIL.fr }, jsonld: jsonLdAccueil('fr', faqDepuisHtml(h)),
   }));
   h = remplacerEntreMarqueurs(h, 'LANGUE', selecteurLangue('fr', '/', '/en/'));
   h = remplacerEntreMarqueurs(h, 'RESSOURCES', liensRessources('fr'));
@@ -208,12 +232,16 @@ function versAnglais(htmlFr, rapport) {
 
 function sourceAnglaise(htmlFr, rapport) {
   let h = htmlFr.replace(/<title>[\s\S]*?<\/title>/, `<title>${echapper(ACCUEIL.en.titre)}</title>`);
-  h = remplacerEntreMarqueurs(h, 'SEO', balisesSeo({
+  const seoEn = (faq) => balisesSeo({
     lg: 'en', titre: ACCUEIL.en.titre, description: ACCUEIL.en.description, canonique: URL_ACCUEIL.en,
-    alternates: { fr: URL_ACCUEIL.fr, en: URL_ACCUEIL.en, 'x-default': URL_ACCUEIL.fr }, jsonld: jsonLdAccueil('en'),
-  }));
+    alternates: { fr: URL_ACCUEIL.fr, en: URL_ACCUEIL.en, 'x-default': URL_ACCUEIL.fr }, jsonld: jsonLdAccueil('en', faq),
+  });
+  h = remplacerEntreMarqueurs(h, 'SEO', seoEn([]));
   h = remplacerEntreMarqueurs(h, 'LANGUE', selecteurLangue('en', '/', '/en/'));
   h = remplacerEntreMarqueurs(h, 'RESSOURCES', liensRessources('en'));
+  // 1re passe : traduction ; on lit les questions anglaises de la page traduite, puis on les met dans les données structurées
+  const faqEn = faqDepuisHtml(versAnglais(h, {}));
+  h = remplacerEntreMarqueurs(h, 'SEO', seoEn(faqEn));
   return versAnglais(h, rapport);
 }
 
@@ -242,7 +270,7 @@ function pageContenu(p, lg, parties, htmlFrSource) {
   const seo = balisesSeo({ lg, titre: l.titre, description: l.description, canonique: urlPage(p, lg), alternates: alt, jsonld: jsonLdPage(p, lg) });
   const header = remplacerEntreMarqueurs(parties.header, 'LANGUE', selecteurLangue(lg, lg === 'fr' ? cheminPage(p, 'fr') : cheminPage(p, 'fr'), cheminPage(p, 'en')));
   const style = extraire(htmlFrSource, /<style data-purpose="custom-typography-and-helpers">[\s\S]*?<\/style>/, 'style');
-  const polices = (htmlFrSource.match(/<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>/g) || []).join('\n');
+  const polices = (htmlFrSource.match(/<link[^>]*(fonts\.(googleapis|gstatic)\.com|\/polices\/)[^>]*>/g) || []).join('\n');
   const base = lg === 'fr' ? '/' : '/en/';
   const p1 = (t) => resoudre(t, lg);
   const sections = l.sections.map((s) => `<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink">

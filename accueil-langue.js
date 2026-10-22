@@ -31,8 +31,8 @@
     // En-tête
     [`LECTURE AUTOMATIQUE DES MANUELS — DISPONIBLE`, `AUTOMATIC MANUAL READING — AVAILABLE`],
     [`LA JUSTE MESURE DE VOTRE PARC`, `THE RIGHT MEASURE OF YOUR FLEET`],
-    [`La seule plateforme qui`, `The only platform that`],
-    [`transforme vos manuels en actions sur le terrain`, `turns your manuals into action in the field`],
+    [`Logiciel de maintenance pour engins et véhicules :`, `Maintenance software for equipment and vehicles:`],
+    [`entretiens, pièces et coûts sous contrôle`, `servicing, parts and costs under control`],
     [`Confiez vos manuels constructeur à KALEA et laissez l'algorithme générer vos plannings. Avec des compteurs qui se mettent à jour tout seuls et des checklists d'intervention précises, vos équipes savent toujours quoi faire, au bon moment.`, `Hand your manufacturer manuals to KALEA and let the algorithm build your schedules. With counters that update themselves and precise job checklists, your teams always know what to do, at the right time.`],
     [`Commencer gratuitement`, `Start for free`],
     [`Voir comment ça marche`, `See how it works`],
@@ -313,6 +313,7 @@
   // Attributs lus par les lecteurs d'écran : même principe, mêmes règles.
   var ATTRIBUTS = [
     [`Accueil KALEA`, `KALEA home`],
+    [`Tableau de bord KALEA : machines, entretiens à venir et alertes`, `KALEA dashboard: machines, upcoming maintenance and alerts`],
     [`Tableau de bord KALEA`, `KALEA dashboard`],
     [`Engrenage industriel usé nécessitant réparation`, `Worn industrial gear needing repair`],
     [`Pelleteuse de chantier en panne examinée par un mécanicien`, `Broken-down excavator being examined by a mechanic`],
