@@ -1268,11 +1268,14 @@ function agendaTooltipHtml(iso, evenements) {
   const reste = evenements.length - visibles.length;
   const lignes = visibles.map(({ m, info, programme }) => {
     const tache = programme ? (programme.label || trad('Entretien programmé')) : nextTaskLabel(m);
+    const photo = safeUrl(m.image_url);
     return `
       <div class="agenda-tooltip-ligne">
-        <span class="agenda-tooltip-dot is-${info.state}"></span>
-        <span class="agenda-tooltip-nom">${esc(m.name)}</span>
-        <span class="agenda-tooltip-tache">${esc(tache)}</span>
+        <span class="agenda-tooltip-photo">${photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : picto('boite')}</span>
+        <span class="agenda-tooltip-texte">
+          <span class="agenda-tooltip-nom"><span class="agenda-tooltip-dot is-${info.state}"></span>${esc(m.name)}</span>
+          <span class="agenda-tooltip-tache">${esc(tache)}</span>
+        </span>
       </div>`;
   }).join('');
   return `
