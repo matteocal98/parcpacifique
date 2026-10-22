@@ -4,7 +4,7 @@
 export const SITE = 'https://kalea.pro';
 
 export const RESEAUX = {
-  facebook: 'https://www.facebook.com/profile.php?id=61595294425802',
+  facebook: 'https://www.facebook.com/kalea.pro',
   linkedin: 'https://www.linkedin.com/company/kalea-software/',
 };
 
