@@ -6,6 +6,16 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Pièces utilisées hors stock":"Parts used outside stock",
+"Sur les {n} derniers jours : pièces suivies en stock, utilisées dans une intervention sans sortie de stock":"Last {n} days: stock-tracked parts used in a work order without a stock-out",
+"Quantité : {n}":"Quantity: {n}",
+"Stock actuel : {n}":"Current stock: {n}",
+"Régulariser":"Fix",
+"Ignorer":"Ignore",
+"Cette pièce a vraiment été prise ailleurs : rien à corriger":"This part really came from elsewhere: nothing to fix",
+"« Régulariser » retire la pièce du stock (sortie pré-remplie). « Ignorer » : la pièce vient d'ailleurs, rien à corriger (mémorisé sur cet appareil).":"“Fix” takes the part out of stock (pre-filled stock-out). “Ignore”: the part came from elsewhere, nothing to fix (remembered on this device).",
+"Régularisation — intervention du {date} sur {machine}":"Correction — work order of {date} on {machine}",
+
 "Stock : {avant} → {apres}":"Stock: {avant} → {apres}",
 "stock non modifié":"stock unchanged",
 "Quantité supérieure au stock de ce magasin ({n}) : sortie décochée":"Quantity above this warehouse stock ({n}): stock-out unticked",

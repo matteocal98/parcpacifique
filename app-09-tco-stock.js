@@ -2257,6 +2257,83 @@ function ligneMouvementStockHtml(m) {
       <div class="ui-ligne-action"><span class="ui-chiffre-valeur ${classeStatut}">${negatif ? '−' : '+'}${texteAvecSeparateurs(Math.abs(Number(m.quantity)))}</span></div>
     </div>`;
 }
+// ── PIÈCES UTILISÉES HORS STOCK ───────────────────────────────────────────────────────────────────────────────
+// Une pièce que KALEA suit en stock, déclarée utilisée dans une intervention SANS sortie de stock : c'est l'origine des écarts
+// entre stock réel et stock affiché (entrée pas encore saisie, case décochée par erreur…). Sur les 30 derniers jours.
+// Détection sans rien changer en base : une ligne de pièce (intervention_parts) n'a pas de sortie de stock (stock_movements.intervention_id)
+// pour la même pièce. « Régulariser » ouvre une sortie pré-remplie, dont le motif porte [#identifiant] : c'est ce repère qui la retire
+// ensuite de la liste, sur tous les appareils. « Ignorer » (pièce réellement prise ailleurs) est mémorisé sur CET appareil.
+const HORS_STOCK_JOURS = 30;
+function horsStockIgnores() {
+  try { return new Set(JSON.parse(localStorage.getItem('kalea.horsStockIgnores:' + UI.companyId) || '[]')); } catch (e) { return new Set(); }
+}
+function horsStockIgnorer(id) {
+  const s = horsStockIgnores(); s.add(String(id));
+  try { localStorage.setItem('kalea.horsStockIgnores:' + UI.companyId, JSON.stringify([...s].slice(-500))); } catch (e) { /* mémoire locale indisponible : l'élément réapparaîtra */ }
+}
+async function chargerPiecesHorsStock() {
+  const ids = (UI.machines || []).map((m) => m.id);
+  if (!ids.length) return [];
+  const depuis = new Date(Date.now() - HORS_STOCK_JOURS * 86400000).toISOString();
+  const tranches = (liste, n) => { const r = []; for (let i = 0; i < liste.length; i += n) r.push(liste.slice(i, i + n)); return r; };
+  const interventions = [];
+  for (const t of tranches(ids, 80)) {
+    const { data, error } = await sb.from('interventions').select('id, machine_id, performed_at').in('machine_id', t).gte('performed_at', depuis).limit(2000);
+    if (error) throw error;
+    interventions.push(...(data || []));
+  }
+  if (!interventions.length) return [];
+  const parInter = new Map(interventions.map((i) => [String(i.id), i]));
+  const lignes = [];
+  for (const t of tranches([...parInter.keys()], 80)) {
+    const { data, error } = await sb.from('intervention_parts').select('id, intervention_id, part_id, designation, quantity').in('intervention_id', t).not('part_id', 'is', null);
+    if (error) throw error;
+    lignes.push(...(data || []));
+  }
+  const { data: sorties, error: errS } = await sb.from('stock_movements').select('intervention_id, part_id, reason')
+    .eq('company_id', UI.companyId).eq('type', 'sortie').gte('performed_at', new Date(Date.now() - (HORS_STOCK_JOURS + 5) * 86400000).toISOString()).limit(5000);
+  if (errS) throw errS;
+  const sortiesLiees = new Set((sorties || []).filter((m) => m.intervention_id).map((m) => m.intervention_id + '|' + m.part_id));
+  const motifs = (sorties || []).map((m) => String(m.reason || '')).filter((r) => r.includes('[#'));
+  const suivies = new Set((UI.stockItems || []).map((it) => String(it.part_id)));
+  const ignores = horsStockIgnores();
+  return lignes
+    .filter((l) => suivies.has(String(l.part_id)))
+    .filter((l) => !sortiesLiees.has(l.intervention_id + '|' + l.part_id))
+    .filter((l) => !ignores.has(String(l.id)))
+    .filter((l) => !motifs.some((r) => r.includes('[#' + String(l.id).slice(0, 8) + ']')))
+    .map((l) => ({ ...l, intervention: parInter.get(String(l.intervention_id)) }))
+    .sort((a, b) => String(b.intervention?.performed_at || '').localeCompare(String(a.intervention?.performed_at || '')));
+}
+function ligneHorsStockHtml(l) {
+  const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
+  const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+  return `
+    <div class="ui-ligne is-deux" data-hors-stock="${esc(l.id)}">
+      <div class="ui-ligne-id">
+        <div class="ui-ligne-icone is-ambre">${picto('alerte')}</div>
+        <div class="ui-ligne-textes">
+          <span class="ui-ligne-nom">${esc(l.designation || designationPiece(l.part_id))}</span>
+          <span class="ui-ligne-sous">${esc(formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)))} · ${esc(machine ? machine.name : '')} · ${esc(tR('Quantité : {n}', { n: texteAvecSeparateurs(l.quantity) }))} · ${esc(tR('Stock actuel : {n}', { n: texteAvecSeparateurs(enStock) }))}</span>
+        </div>
+      </div>
+      <div class="ui-ligne-action">
+        <button type="button" class="ui-btn ui-btn-pastille" data-hors-stock-regulariser="${esc(l.id)}">${trad('Régulariser')}</button>
+        <button type="button" class="ui-btn ui-btn-teinte" data-hors-stock-ignorer="${esc(l.id)}" title="${esc(trad('Cette pièce a vraiment été prise ailleurs : rien à corriger'))}">${trad('Ignorer')}</button>
+      </div>
+    </div>`;
+}
+function blocHorsStockHtml() {
+  if (!peutGererMouvementsStock()) return '';
+  return `
+    <section class="ui-section" id="stock-horsstock-section" hidden>
+      ${teteSectionKit('alerte', trad('Pièces utilisées hors stock'), tR('Sur les {n} derniers jours : pièces suivies en stock, utilisées dans une intervention sans sortie de stock', { n: HORS_STOCK_JOURS }))}
+      <div class="ui-section-corps">
+        <div class="ui-liste" id="stock-horsstock-liste"></div>
+        <p class="ui-aide">${trad('« Régulariser » retire la pièce du stock (sortie pré-remplie). « Ignorer » : la pièce vient d\'ailleurs, rien à corriger (mémorisé sur cet appareil).')}</p>
+      </div>
+    </section>`;
+}
 function blocMouvementsStockHtml() {
   const peut = peutGererMouvementsStock();
   return `
@@ -3057,7 +3134,8 @@ function exporterInventaireStockCsv() {
 // keeva-redesign-project, « choix de fréquence parfois jamais enregistré »).
 // TOUTE la logique PUMP/verrouillage vit dans la RPC enregistrer_mouvement_stock
 // — ce code ne fait que collecter les champs et interpréter l'erreur.
-function ouvrirNouveauMouvementModal() {
+// prefill (régularisation d'une pièce utilisée hors stock) : { type, partId, quantity, reason, onSaved }
+function ouvrirNouveauMouvementModal(prefill) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay stock-mouvement-modal';
   document.body.appendChild(overlay);
@@ -3143,6 +3221,17 @@ function ouvrirNouveauMouvementModal() {
     overlay.querySelector('#mvt-magasin-label').textContent = type === 'transfert' ? trad('Magasin source') : trad('Magasin');
   };
   overlay.querySelectorAll('input[name="mvt-type"]').forEach((r) => r.addEventListener('change', majSelonType));
+  if (prefill) {
+    const radio = overlay.querySelector(`input[name="mvt-type"][value="${prefill.type || 'sortie'}"]`);
+    if (radio) radio.checked = true;
+    if (prefill.partId) overlay.querySelector('#mvt-piece').value = String(prefill.partId);
+    // magasin proposé : celui qui a le plus de stock de cette pièce
+    const garni = (UI.stockItems || []).filter((it) => String(it.part_id) === String(prefill.partId) && Number(it.quantity) > 0)
+      .sort((a, b) => Number(b.quantity) - Number(a.quantity))[0];
+    if (garni && overlay.querySelector(`#mvt-magasin option[value="${garni.warehouse_id}"]`)) overlay.querySelector('#mvt-magasin').value = String(garni.warehouse_id);
+    if (prefill.quantity != null) overlay.querySelector('#mvt-quantite').value = texteAvecSeparateurs(prefill.quantity);
+    if (prefill.reason) overlay.querySelector('#mvt-motif').value = prefill.reason;
+  }
   majSelonType();
 
   overlay.querySelector('#mvt-fermer').addEventListener('click', () => overlay.remove());
@@ -3207,6 +3296,7 @@ function ouvrirNouveauMouvementModal() {
       UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
       showToast(trad('Mouvement enregistré'));
       overlay.remove();
+      if (prefill && typeof prefill.onSaved === 'function') prefill.onSaved();
       renderApp();
     } catch (err) {
       dire(trad('Erreur :') + ' ' + (err.message || err), true);
@@ -5475,7 +5565,7 @@ VIEWS.stock = {
           </div>
           <div class="stock-pieces-vue" data-stock-pieces-bloc="stock"${piecesActives === 'stock' ? '' : ' hidden'}>${blocInventaireStockHtml()}</div>
           <div class="stock-pieces-vue" data-stock-pieces-bloc="catalogue"${piecesActives === 'catalogue' ? '' : ' hidden'}>${blocCatalogueTcoHtml()}</div>`)}
-        ${panneau('mouvements', blocMouvementsStockHtml())}
+        ${panneau('mouvements', blocHorsStockHtml() + blocMouvementsStockHtml())}
         ${onglets.some((o) => o.id === 'achats') ? panneau('achats', blocAchatsHtml()) : ''}
         ${inventairePhysiquePossible() ? panneau('inventaire', blocInventairePhysiqueHtml()) : ''}
         ${panneau('organisation', `
@@ -5787,6 +5877,47 @@ VIEWS.stock = {
       limiteMouvements += MOUVEMENTS_PAGE_SIZE;
       rafraichirMouvements();
     });
+
+    // ── Pièces utilisées hors stock : chargé en asynchrone, le bloc n'apparaît que s'il y a quelque chose à corriger. ──
+    let horsStock = [];
+    const rafraichirHorsStock = () => {
+      const section = root.querySelector('#stock-horsstock-section');
+      if (!section) return;
+      section.hidden = !horsStock.length;
+      root.querySelector('#stock-horsstock-liste').innerHTML = horsStock.map(ligneHorsStockHtml).join('');
+      // pastille de compte sur l'onglet Mouvements
+      const onglet = root.querySelector('#stock-onglet-mouvements');
+      if (onglet) {
+        onglet.querySelector('.stock-onglet-alerte')?.remove();
+        if (horsStock.length) onglet.insertAdjacentHTML('beforeend', `<span class="ui-tag stock-onglet-alerte" title="${esc(trad('Pièces utilisées hors stock'))}">${horsStock.length}</span>`);
+      }
+    };
+    if (root.querySelector('#stock-horsstock-section')) {
+      chargerPiecesHorsStock().then((liste) => {
+        if (!root.isConnected) return;
+        horsStock = liste;
+        rafraichirHorsStock();
+      }).catch((err) => console.warn('Pièces hors stock non chargées :', err && err.message));
+      root.querySelector('#stock-horsstock-liste')?.addEventListener('click', (e) => {
+        const reg = e.target.closest('[data-hors-stock-regulariser]');
+        const ign = e.target.closest('[data-hors-stock-ignorer]');
+        if (ign) {
+          horsStockIgnorer(ign.dataset.horsStockIgnorer);
+          horsStock = horsStock.filter((l) => String(l.id) !== ign.dataset.horsStockIgnorer);
+          rafraichirHorsStock();
+          return;
+        }
+        if (!reg) return;
+        const l = horsStock.find((x) => String(x.id) === reg.dataset.horsStockRegulariser);
+        if (!l) return;
+        const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
+        ouvrirNouveauMouvementModal({
+          type: 'sortie', partId: l.part_id, quantity: Number(l.quantity) || 1,
+          reason: tR('Régularisation — intervention du {date} sur {machine}', { date: formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)), machine: machine ? machine.name : '' }) + ' [#' + String(l.id).slice(0, 8) + ']',
+          onSaved: () => { horsStock = horsStock.filter((x) => String(x.id) !== String(l.id)); },
+        });
+      });
+    }
     root.querySelector('#stock-mouvements-nouveau')?.addEventListener('click', () => ouvrirNouveauMouvementModal());
     root.querySelector('#stock-mouvements-importer')?.addEventListener('click', () => ouvrirImportMouvementsStock());
   },
