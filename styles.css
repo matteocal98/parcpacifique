@@ -2021,6 +2021,13 @@
      d'autres blocs de la modale (carnet déjà enregistré, case "second
      suivi", bouton Annuler) qui doivent garder leur teinte d'origine. */
   .machine-modal-edit .mmod-tco-panel{background:#F2F4F8;}
+  /* Champs « Acquisition & TCO » : sur tablette (≈800 px) 5 colonnes étroites + libellés qui passent sur 2 lignes (texte agrandi
+     dans les réglages Android) décalaient les champs. Désormais : autant de colonnes que la place le permet (≥150 px chacune),
+     et dans une même rangée les champs sont alignés par le BAS, quelle que soit la hauteur du libellé. */
+  .machine-modal-edit .mmod-tco-panel > .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end;}
+  .machine-modal-edit .mmod-tco-panel > .grid > div{grid-column:auto;justify-content:flex-end;min-width:0;}
+  .machine-modal-edit .mmod-tco-panel > .grid label{line-height:1.25;}
+  .machine-modal-edit .mmod-tco-panel > .grid input{width:100%;min-width:0;max-width:100%;box-sizing:border-box;}
   .machine-modal-edit .mmod-photo-panel{background:#F2F4F8;}
   /* Cadre photo (#photo-preview, id unique dans tout app.html — sûr à cibler
      directement) : fond passé au blanc (au lieu de bg-surface-container,
