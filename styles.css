@@ -5896,6 +5896,12 @@
   .piece-ligne-catalogue.is-choisie .piece-radio{border-color:var(--primary-dark);}
   .piece-radio .point{width:9px;height:9px;border-radius:50%;background:var(--primary-dark);display:none;}
   .piece-ligne-catalogue.is-choisie .piece-radio .point{display:block;}
+  /* Sélection MULTIPLE (« + Ajouter une pièce ») : cases carrées au lieu de ronds */
+  .piece-liste.is-multi .piece-radio{border-radius:6px;}
+  .piece-liste.is-multi .piece-radio .point{border-radius:3px;}
+  .piece-mobile-liste.is-multi .piece-mobile-radio{border-radius:6px;}
+  .piece-mobile-liste.is-multi .piece-mobile-radio .point{border-radius:3px;}
+  #piece-valider:disabled,#piece-m-valider:disabled{opacity:.5;cursor:not-allowed;}
   .piece-vide{padding:32px 16px;text-align:center;}
   .piece-vide .card-ico{width:40px;height:40px;border-radius:50%;background:var(--surface-soft);color:var(--ink-3);margin:0 auto 10px;}
   .piece-vide .card-ico svg{width:18px;height:18px;}

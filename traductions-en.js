@@ -6,6 +6,16 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Pièces du catalogue":"Catalogue parts",
+"Touche une ou plusieurs pièces, puis ajoute-les à l'intervention.":"Tap one or more parts, then add them to the work order.",
+"Touche plusieurs pièces":"Tap several parts",
+"{n} pièce(s) sélectionnée(s)":"{n} part(s) selected",
+"Aucune pièce sélectionnée":"No part selected",
+"Ajouter {n} pièce(s)":"Add {n} part(s)",
+"Choisis au moins une pièce":"Pick at least one part",
+"Ligne libre (hors catalogue)":"Free line (not in catalogue)",
+"{n} pièce(s) ajoutée(s)":"{n} part(s) added",
+
 "Ouvrir la fiche de la machine":"Open the machine sheet",
 "Ouvrir la fiche de {nom}":"Open the sheet of {nom}",
 

@@ -1535,11 +1535,15 @@ function abrevFournisseur(nom) {
 // choisi (ou '') ; `onChoisi(piece|null)` appelé UNIQUEMENT sur
 // « Valider », jamais sur un simple clic dans la liste — piece est `null`
 // pour l'option « Aucune pièce spécifique ».
-function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
+// options.multiple (ajout de pièces dans une intervention) : on coche PLUSIEURS pièces, « Ajouter » rappelle
+// onChoisi([pièces]) en une fois ; options.onLigneLibre ajoute une ligne vide (pièce hors catalogue).
+function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay piece-modal';
   document.body.appendChild(overlay);
   const pieces = UI.partsCatalog || [];
+  const multiple = !!options.multiple;
+  const choisis = new Set();
   let choisiId = valeurActuelle || '';
   let filtreFournisseur = 'all';
   let tri = 'pertinence';
@@ -1558,7 +1562,24 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
     return liste;
   };
 
+  const rendreResumeMulti = () => {
+    const resume = overlay.querySelector('#piece-resume');
+    const bouton = overlay.querySelector('#piece-valider');
+    const liste = pieces.filter((p) => choisis.has(String(p.id)));
+    const total = liste.reduce((s, p) => s + (Number(p.unit_price) || 0), 0);
+    resume.innerHTML = `<div class="piece-resume-gauche">
+        <span class="piece-resume-icone">${picto('coche')}</span>
+        <div><div class="piece-resume-titre">${trad('Sélection')}</div><div class="piece-resume-nom">${liste.length ? tR('{n} pièce(s) sélectionnée(s)', { n: liste.length }) : trad('Aucune pièce sélectionnée')}</div></div>
+      </div>
+      <div class="piece-resume-droite"><span class="piece-resume-mot">${trad('Total estimé')}</span><div class="piece-resume-prix">${liste.length ? texteAvecSeparateurs(total) : '—'} <span style="font-size:11px;color:var(--ink-3);">${liste.length ? esc(deviseCourte()) : ''}</span></div></div>`;
+    if (bouton) {
+      bouton.disabled = !liste.length;
+      bouton.querySelector('span').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisis au moins une pièce');
+    }
+  };
+
   const rendreResume = (piece) => {
+    if (multiple) { rendreResumeMulti(); return; }
     const resume = overlay.querySelector('#piece-resume');
     if (!piece) {
       resume.innerHTML = `<div class="piece-resume-gauche">
@@ -1579,7 +1600,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
     const liste = piecesTriees();
     const zone = overlay.querySelector('#piece-liste');
     const boutonValider = overlay.querySelector('#piece-valider');
-    const ligneAucune = `<button type="button" class="piece-ligne-catalogue${!choisiId ? ' is-choisie' : ''}" data-id="">
+    const ligneAucune = multiple ? '' : `<button type="button" class="piece-ligne-catalogue${!choisiId ? ' is-choisie' : ''}" data-id="">
         <span class="piece-ligne-gauche">
           <span class="piece-ligne-icone">${picto('fermer')}</span>
           <span><span class="piece-ligne-titre"><span class="piece-ligne-nom">${trad('— Choisir une pièce du catalogue —')}</span></span>
@@ -1597,7 +1618,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
       zone.innerHTML = ligneAucune + liste.map((p) => {
         const meta = [p.supplier_name ? tR('Fournisseur : {nom}', { nom: p.supplier_name }) : '', p.reference ? tR('Réf : {ref}', { ref: p.reference }) : ''].filter(Boolean).join(' · ');
         const delai = p.avg_lead_time_days != null ? `<span class="piece-ligne-delai">${picto('sablier')}${tR('Délai moyen : {n} j', { n: p.avg_lead_time_days })}</span>` : '';
-        return `<button type="button" class="piece-ligne-catalogue${choisiId === String(p.id) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
+        return `<button type="button" class="piece-ligne-catalogue${(multiple ? choisis.has(String(p.id)) : choisiId === String(p.id)) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
           <span class="piece-ligne-gauche">
             <span class="piece-ligne-icone">${abrevFournisseur(p.supplier_name) || picto('boite')}</span>
             <span>
@@ -1614,6 +1635,13 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
     }
     zone.querySelectorAll('.piece-ligne-catalogue').forEach((ligne) => {
       ligne.addEventListener('click', () => {
+        if (multiple) {
+          const id = ligne.dataset.id || '';
+          if (choisis.has(id)) choisis.delete(id); else choisis.add(id);
+          ligne.classList.toggle('is-choisie', choisis.has(id));
+          rendreResumeMulti();
+          return;
+        }
         choisiId = ligne.dataset.id || '';
         zone.querySelectorAll('.piece-ligne-catalogue').forEach((l) => l.classList.toggle('is-choisie', l === ligne));
         const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
@@ -1628,7 +1656,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
   overlay.innerHTML = `<div class="modal">
     <div class="support-tete">
       <div class="piece-tete-gauche">
-        <div><h2>${trad('Pièce du catalogue')}</h2><p class="sub">${trad('Sélectionne une pièce pour cette intervention.')}</p></div>
+        <div><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p class="sub">${multiple ? trad('Touche une ou plusieurs pièces, puis ajoute-les à l\'intervention.') : trad('Sélectionne une pièce pour cette intervention.')}</p></div>
       </div>
       <button type="button" class="mform-close" id="piece-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
     </div>
@@ -1650,10 +1678,11 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
       <button type="button" class="piece-fournisseur-chip is-actif" data-fournisseur="all">${tR('Tous les fournisseurs ({n})', { n: pieces.length })}</button>
       ${fournisseurs.map((f) => `<button type="button" class="piece-fournisseur-chip" data-fournisseur="${esc(f)}">${esc(f)}</button>`).join('')}
     </div>` : ''}
-    <div class="piece-liste" id="piece-liste"></div>
+    <div class="piece-liste${multiple ? ' is-multi' : ''}" id="piece-liste"></div>
     <div class="piece-resume" id="piece-resume"></div>
     <div class="modal-actions">
-      <button type="button" class="primary" id="piece-valider"><span>${trad('Valider la pièce sélectionnée')}</span></button>
+      <button type="button" class="primary" id="piece-valider"><span>${multiple ? trad('Choisis au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
+      ${multiple && options.onLigneLibre ? `<button type="button" class="secondary" id="piece-libre">${trad('Ligne libre (hors catalogue)')}</button>` : ''}
       <button type="button" class="secondary" id="piece-annuler">${trad('Annuler')}</button>
     </div>
   </div>`;
@@ -1671,7 +1700,15 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi) {
       rendreListe();
     });
   });
+  overlay.querySelector('#piece-libre')?.addEventListener('click', () => { overlay.remove(); options.onLigneLibre(); });
   overlay.querySelector('#piece-valider').addEventListener('click', () => {
+    if (multiple) {
+      const liste = pieces.filter((p) => choisis.has(String(p.id)));
+      if (!liste.length) return;
+      overlay.remove();
+      onChoisi(liste);
+      return;
+    }
     const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
     overlay.remove();
     onChoisi(piece);
@@ -1726,11 +1763,13 @@ function habillerSelectPieceCatalogue(select) {
 // modale centrée, voir le bloc CSS ★ PIÈCE DU CATALOGUE — VERSION
 // SMARTPHONE pour ce qui n'a délibérément pas été repris. Même contrat
 // `onChoisi(piece|null)` que la version bureau (ouvrirChoixPieceCatalogue).
-function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
+function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {}) {
   const overlay = document.createElement('div');
   overlay.className = 'piece-mobile-overlay';
   document.body.appendChild(overlay);
   const pieces = UI.partsCatalog || [];
+  const multiple = !!options.multiple;
+  const choisis = new Set();
   let choisiId = valeurActuelle || '';
   let filtreFournisseur = 'all';
   let tri = 'pertinence';
@@ -1749,7 +1788,18 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
     return liste;
   };
 
+  const rendreResumeMulti = () => {
+    const resume = overlay.querySelector('#piece-m-resume');
+    const bouton = overlay.querySelector('#piece-m-valider');
+    const liste = pieces.filter((p) => choisis.has(String(p.id)));
+    const total = liste.reduce((s, p) => s + (Number(p.unit_price) || 0), 0);
+    resume.innerHTML = `<div class="piece-mobile-resume-titre-ligne"><span class="dot"></span><span class="piece-mobile-resume-nom">${liste.length ? tR('{n} pièce(s) sélectionnée(s)', { n: liste.length }) + ' · ' + texteAvecSeparateurs(total) + ' ' + esc(deviseCourte()) : trad('Aucune pièce sélectionnée')}</span></div>`;
+    bouton.disabled = !liste.length;
+    bouton.querySelector('span:last-child').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisis au moins une pièce');
+  };
+
   const rendreResume = (piece) => {
+    if (multiple) { rendreResumeMulti(); return; }
     const resume = overlay.querySelector('#piece-m-resume');
     const bouton = overlay.querySelector('#piece-m-valider');
     if (!piece) {
@@ -1764,7 +1814,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
   const rendreListe = () => {
     const liste = piecesTriees();
     const zone = overlay.querySelector('#piece-m-liste');
-    const carteAucune = `<label class="piece-mobile-carte${!choisiId ? ' is-choisie' : ''}" data-id="">
+    const carteAucune = multiple ? '' : `<label class="piece-mobile-carte${!choisiId ? ' is-choisie' : ''}" data-id="">
         <div class="piece-mobile-carte-ligne">
           <span class="piece-mobile-radio"><span class="point"></span></span>
           <div class="piece-mobile-carte-corps">
@@ -1783,7 +1833,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
       zone.innerHTML = carteAucune + liste.map((p) => {
         const delai = p.avg_lead_time_days != null ? `<span class="piece-mobile-delai">${picto('sablier')}${tR('{n} j', { n: p.avg_lead_time_days })}</span>` : '';
         const meta = [p.reference, p.supplier_name].filter(Boolean).map(esc).join(' · ');
-        return `<label class="piece-mobile-carte${choisiId === String(p.id) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
+        return `<label class="piece-mobile-carte${(multiple ? choisis.has(String(p.id)) : choisiId === String(p.id)) ? ' is-choisie' : ''}" data-id="${esc(p.id)}">
           <div class="piece-mobile-carte-ligne">
             <span class="piece-mobile-radio"><span class="point"></span></span>
             <div class="piece-mobile-carte-corps">
@@ -1799,6 +1849,14 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
     }
     zone.querySelectorAll('.piece-mobile-carte').forEach((carte) => {
       carte.addEventListener('click', () => {
+        if (multiple) {
+          const id = carte.dataset.id || '';
+          if (choisis.has(id)) choisis.delete(id); else choisis.add(id);
+          carte.classList.toggle('is-choisie', choisis.has(id));
+          rendreResumeMulti();
+          if (navigator.vibrate) { try { navigator.vibrate(15); } catch (err) { /* vibration indisponible, sans conséquence */ } }
+          return;
+        }
         choisiId = carte.dataset.id || '';
         zone.querySelectorAll('.piece-mobile-carte').forEach((c) => c.classList.toggle('is-choisie', c === carte));
         rendreResume(choisiId ? pieces.find((p) => String(p.id) === choisiId) : null);
@@ -1810,7 +1868,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
   overlay.innerHTML = `
     <div class="piece-mobile-tete">
       <button type="button" class="piece-mobile-fermer" id="piece-m-fermer" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      <div class="piece-mobile-titre-bloc"><h2>${trad('Pièce du catalogue')}</h2><p>${trad('Atelier & chantier')}</p></div>
+      <div class="piece-mobile-titre-bloc"><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p>${multiple ? trad('Touche plusieurs pièces') : trad('Atelier & chantier')}</p></div>
       <span style="width:44px;flex:0 0 auto;" aria-hidden="true"></span>
     </div>
     <div class="piece-mobile-corps">
@@ -1831,13 +1889,14 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
         <button type="button" class="piece-fournisseur-chip is-actif" data-fournisseur="all">${tR('Tous {n}', { n: pieces.length })}</button>
         ${fournisseurs.map((f) => `<button type="button" class="piece-fournisseur-chip" data-fournisseur="${esc(f)}">${esc(f)}</button>`).join('')}
       </div>` : ''}
-      <div class="piece-mobile-liste" id="piece-m-liste"></div>
+      <div class="piece-mobile-liste${multiple ? ' is-multi' : ''}" id="piece-m-liste"></div>
     </div>
     <div class="piece-mobile-pied">
       <div class="piece-mobile-resume" id="piece-m-resume"></div>
+      ${multiple && options.onLigneLibre ? `<button type="button" class="piece-mobile-annuler" id="piece-m-libre" style="width:100%;margin-bottom:8px;">${trad('Ligne libre (hors catalogue)')}</button>` : ''}
       <div class="piece-mobile-actions">
         <button type="button" class="piece-mobile-annuler" id="piece-m-annuler">${trad('Annuler')}</button>
-        <button type="button" class="primary piece-mobile-valider" id="piece-m-valider"><span class="card-ico">${picto('coche')}</span><span>${trad('Valider la pièce sélectionnée')}</span></button>
+        <button type="button" class="primary piece-mobile-valider" id="piece-m-valider"><span class="card-ico">${picto('coche')}</span><span>${multiple ? trad('Choisis au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
       </div>
     </div>`;
 
@@ -1858,7 +1917,15 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi) {
       rendreListe();
     });
   });
+  overlay.querySelector('#piece-m-libre')?.addEventListener('click', () => { overlay.remove(); options.onLigneLibre(); });
   overlay.querySelector('#piece-m-valider').addEventListener('click', () => {
+    if (multiple) {
+      const liste = pieces.filter((p) => choisis.has(String(p.id)));
+      if (!liste.length) return;
+      overlay.remove();
+      onChoisi(liste);
+      return;
+    }
     const piece = choisiId ? pieces.find((p) => String(p.id) === choisiId) : null;
     overlay.remove();
     onChoisi(piece);
@@ -2727,13 +2794,45 @@ function openLogInterventionModal(machine, tache) {
       totalPiecesChamp.value = texteAvecSeparateurs(total || 0);
       majTotalFooter();
     };
-    overlay.querySelector('#log-piece-ajouter')?.addEventListener('click', () => {
+    // Ligne vide : pièce hors catalogue (on saisit quantité et prix à la main) — ou catalogue vide.
+    const ajouterLigneLibre = () => {
       if (!piecesListe) return;
       pieceIdx += 1;
       piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
       const nouvelleLigne = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
       activerSeparateurMilliers(nouvelleLigne?.querySelector('.log-piece-prix'));
       habillerSelectPieceCatalogue(nouvelleLigne?.querySelector('.log-piece-select'));
+    };
+    // Pièce du catalogue ajoutée en bas : si elle y est déjà, sa quantité augmente d'une unité (comme au scan de QR).
+    const ajouterPieceCatalogue = (piece) => {
+      const existante = Array.from(piecesListe.querySelectorAll('.log-piece-ligne'))
+        .find((l) => l.querySelector('.log-piece-select')?.value === String(piece.id));
+      if (existante) {
+        const champQte = existante.querySelector('.log-piece-qte');
+        champQte.value = String((Number(champQte.value) || 0) + 1);
+        return;
+      }
+      pieceIdx += 1;
+      piecesListe.insertAdjacentHTML('beforeend', ligneLogPieceHtml(pieceIdx));
+      const nouvelle = piecesListe.querySelector(`[data-piece-ligne="${pieceIdx}"]`);
+      activerSeparateurMilliers(nouvelle?.querySelector('.log-piece-prix'));
+      const sel = nouvelle.querySelector('.log-piece-select');
+      habillerSelectPieceCatalogue(sel);
+      sel.value = String(piece.id);
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      if (typeof sel.__majBouton === 'function') sel.__majBouton();
+    };
+    // « + Ajouter une pièce » ouvre DIRECTEMENT le catalogue, en sélection multiple : on touche toutes les pièces voulues,
+    // « Ajouter » les met d'un coup en bas. Catalogue vide → on retombe sur une ligne vide, comme avant.
+    overlay.querySelector('#log-piece-ajouter')?.addEventListener('click', () => {
+      if (!piecesListe) return;
+      if (!(UI.partsCatalog || []).length) { ajouterLigneLibre(); return; }
+      const ouvrir = window.innerWidth < 900 ? ouvrirChoixPieceCatalogueMobile : ouvrirChoixPieceCatalogue;
+      ouvrir('', (choisies) => {
+        choisies.forEach(ajouterPieceCatalogue);
+        recalcTotalPieces();
+        showToast(tR('{n} pièce(s) ajoutée(s)', { n: choisies.length }));
+      }, { multiple: true, onLigneLibre: ajouterLigneLibre });
     });
     // Scan d'une étiquette de stock : la pièce est ajoutée à l'intervention (ou sa quantité augmente d'une unité si
     // elle y est déjà). Le prix du catalogue se propose comme pour une pièce choisie à la main.
