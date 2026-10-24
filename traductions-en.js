@@ -6,6 +6,10 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Stock : {avant} → {apres}":"Stock: {avant} → {apres}",
+"stock non modifié":"stock unchanged",
+"Quantité supérieure au stock de ce magasin ({n}) : sortie décochée":"Quantity above this warehouse stock ({n}): stock-out unticked",
+
 "rien à sortir":"nothing to take out",
 
 "Pièces du catalogue":"Catalogue parts",

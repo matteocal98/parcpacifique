@@ -1974,12 +1974,43 @@ function majStockLigneLog(ligne, magasinPrefere, cocher) {
   }
   caseSortie.disabled = false;
   sel.hidden = false;
-  info.textContent = tR('Stock : {n}', { n: texteAvecSeparateurs(dispo.reduce((s, it) => s + (Number(it.quantity) || 0), 0)) + unite });
   const avant = sel.value;
   sel.innerHTML = dispo.map((it) => `<option value="${esc(it.warehouse_id)}">${esc(nomMagasin(it.warehouse_id))} (${esc(texteAvecSeparateurs(it.quantity))}${esc(unite)})</option>`).join('');
+  // Magasin proposé : celui demandé (QR scanné), sinon le précédent, sinon celui qui a le PLUS de stock.
+  const plusGarni = dispo.slice().sort((a, b) => Number(b.quantity) - Number(a.quantity))[0];
   const voulu = magasinPrefere || avant;
-  if (voulu && dispo.some((it) => String(it.warehouse_id) === String(voulu))) sel.value = voulu;
+  sel.value = voulu && dispo.some((it) => String(it.warehouse_id) === String(voulu)) ? String(voulu) : String(plusGarni.warehouse_id);
+  // Sortie cochée D'OFFICE (choix du 2026-10-25) : une pièce déclarée utilisée et présente en stock doit en sortir, sinon le
+  // stock s'écarte de la réalité par simple oubli. On décoche seulement si la pièce vient d'ailleurs (achetée hors stock).
   if (cocher) caseSortie.checked = true;
+  majInfoStockLigne(ligne, true);
+}
+// Texte d'information d'une ligne de pièce : ce que la sortie fera au stock du magasin choisi, ou « non modifié » si
+// la case est décochée. verifierQuantite : si la quantité dépasse le stock du magasin, la case se décoche et on le dit.
+function majInfoStockLigne(ligne, verifierQuantite) {
+  const bloc = ligne?.querySelector('.log-piece-stock');
+  const partId = ligne?.querySelector('.log-piece-select')?.value;
+  if (!bloc || !partId) return;
+  const caseSortie = bloc.querySelector('.log-piece-sortie');
+  const sel = bloc.querySelector('.log-piece-magasin');
+  const info = bloc.querySelector('.log-piece-stock-info');
+  if (caseSortie.disabled) return;
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ' ' + libelleUniteMesure(piece.unit_of_measure) : '';
+  const lignesStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(partId) && statutLigneStock(it) === 'libere');
+  const total = lignesStock.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+  const dansMagasin = lignesStock.filter((it) => String(it.warehouse_id) === String(sel.value)).reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+  const qte = Number(ligne.querySelector('.log-piece-qte')?.value) || 0;
+  if (caseSortie.checked && qte > dansMagasin && verifierQuantite) {
+    caseSortie.checked = false;
+    info.textContent = tR('Quantité supérieure au stock de ce magasin ({n}) : sortie décochée', { n: texteAvecSeparateurs(dansMagasin) + unite });
+    return;
+  }
+  if (caseSortie.checked) {
+    info.textContent = tR('Stock : {avant} → {apres}', { avant: texteAvecSeparateurs(dansMagasin) + unite, apres: texteAvecSeparateurs(Math.max(0, dansMagasin - qte)) + unite });
+  } else {
+    info.textContent = tR('Stock : {n}', { n: texteAvecSeparateurs(total) + unite }) + ' — ' + trad('stock non modifié');
+  }
 }
 
 function ligneLogPieceHtml(idx) {
@@ -2876,11 +2907,17 @@ function openLogInterventionModal(machine, tache) {
         // Le prix du catalogue se PROPOSE dans la ligne — il reste un champ
         // normal, modifiable ensuite (remise, prix négocié ce jour-là…).
         if (prixChamp && option && option.dataset.prix !== undefined) prixChamp.value = texteAvecSeparateurs(option.dataset.prix);
-        majStockLigneLog(ligne, null, false);
+        majStockLigneLog(ligne, null, true);
+      }
+      if (e.target.classList.contains('log-piece-sortie') || e.target.classList.contains('log-piece-magasin')) {
+        majInfoStockLigne(e.target.closest('.log-piece-ligne'), true);
       }
       recalcTotalPieces();
     });
-    piecesListe?.addEventListener('input', recalcTotalPieces);
+    piecesListe?.addEventListener('input', (e) => {
+      if (e.target.classList.contains('log-piece-qte')) majInfoStockLigne(e.target.closest('.log-piece-ligne'), true);
+      recalcTotalPieces();
+    });
     piecesListe?.addEventListener('click', (e) => {
       const retirer = e.target.closest('.log-piece-retirer');
       if (!retirer) return;
