@@ -644,6 +644,23 @@ function libelleUniteMesure(code) {
 }
 const STATUTS_STOCK = [['libere', 'Libéré'], ['quarantaine', 'Quarantaine'], ['rebut', 'Rebut']];
 function statutLigneStock(it) { return (it && it.status) || 'libere'; }
+// Quantité EN STOCK d'une pièce du catalogue : somme des lignes « libérées » de tous les magasins. null = on ne l'affiche pas
+// (module Stock inactif ou hors offre, rôle sans accès au stock, stock pas chargé) : mieux vaut rien qu'un « 0 » faux.
+function stockDisponiblePiece(partId) {
+  const actif = SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock() && UI.role !== 'chauffeur' && Array.isArray(UI.stockItems);
+  if (!actif) return null;
+  return UI.stockItems
+    .filter((it) => String(it.part_id) === String(partId) && statutLigneStock(it) === 'libere')
+    .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+}
+// Pastille « Stock : N » affichée partout où une pièce détachée est montrée (catalogue, choix de pièces).
+function badgeStockPieceHtml(partId) {
+  const n = stockDisponiblePiece(partId);
+  if (n === null) return '';
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
+  const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ' ' + libelleUniteMesure(piece.unit_of_measure) : '';
+  return `<span class="piece-stock-badge ${n > 0 ? 'is-ok' : 'is-vide'}">${esc(tR('Stock : {n}', { n: texteAvecSeparateurs(n) + unite }))}</span>`;
+}
 function libelleStatutStock(code) {
   const s = STATUTS_STOCK.find(([c]) => c === code);
   return trad(s ? s[1] : 'Libéré');

@@ -738,7 +738,7 @@ function ligneCatalogueTcoHtml(piece) {
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone">${picto('boite')}</div>
         <div class="ui-ligne-textes">
-          <span class="ui-ligne-nom">${esc(piece.designation)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? `<span class="ui-tag">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
+          <span class="ui-ligne-nom">${esc(piece.designation)}${badgeStockPieceHtml(piece.id)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? `<span class="ui-tag">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
           <span class="ui-ligne-sous">${esc(refEtDelai)}</span>
           ${piece.default_reorder_point != null ? `<span class="ui-ligne-sous">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
         </div>

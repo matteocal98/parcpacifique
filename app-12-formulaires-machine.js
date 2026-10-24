@@ -1622,7 +1622,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
           <span class="piece-ligne-gauche">
             <span class="piece-ligne-icone">${abrevFournisseur(p.supplier_name) || picto('boite')}</span>
             <span>
-              <span class="piece-ligne-titre"><span class="piece-ligne-nom">${esc(p.designation)}</span>${delai}</span>
+              <span class="piece-ligne-titre"><span class="piece-ligne-nom">${esc(p.designation)}</span>${delai}${badgeStockPieceHtml(p.id)}</span>
               ${meta ? `<div class="piece-ligne-meta">${esc(meta)}</div>` : ''}
             </span>
           </span>
@@ -1841,7 +1841,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {})
                 <div class="piece-mobile-carte-nom">${esc(p.designation)}</div>
                 <span class="piece-mobile-prix"><span class="montant">${texteAvecSeparateurs(p.unit_price)}</span><span class="devise">${esc(deviseCourte())}</span></span>
               </div>
-              <div class="piece-mobile-ligne-meta">${meta}${delai ? ` ${delai}` : ''}</div>
+              <div class="piece-mobile-ligne-meta">${meta}${delai ? ` ${delai}` : ''} ${badgeStockPieceHtml(p.id)}</div>
             </div>
           </div>
         </label>`;
@@ -1969,12 +1969,12 @@ function majStockLigneLog(ligne, magasinPrefere, cocher) {
     sel.hidden = true;
     caseSortie.checked = false;
     caseSortie.disabled = true;
-    info.textContent = trad('Aucun stock disponible pour cette pièce.');
+    info.textContent = tR('Stock : {n}', { n: '0' + unite }) + ' — ' + trad('rien à sortir');
     return;
   }
   caseSortie.disabled = false;
   sel.hidden = false;
-  info.textContent = '';
+  info.textContent = tR('Stock : {n}', { n: texteAvecSeparateurs(dispo.reduce((s, it) => s + (Number(it.quantity) || 0), 0)) + unite });
   const avant = sel.value;
   sel.innerHTML = dispo.map((it) => `<option value="${esc(it.warehouse_id)}">${esc(nomMagasin(it.warehouse_id))} (${esc(texteAvecSeparateurs(it.quantity))}${esc(unite)})</option>`).join('');
   const voulu = magasinPrefere || avant;

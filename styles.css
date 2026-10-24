@@ -6604,3 +6604,8 @@ body:has(.login-box.dans-app){background:var(--surface);}
 @media (min-width:900px){
   .piece-liste.is-multi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-content:start;}
 }
+
+/* Pastille « Stock : N » d'une pièce détachée (catalogue, choix de pièces) : verte s'il y en a, rouge à zéro */
+.piece-stock-badge{display:inline-flex;align-items:center;margin-left:6px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap;background:var(--surface);border:1px solid var(--line);}
+.piece-stock-badge.is-ok{color:var(--ok);}
+.piece-stock-badge.is-vide{color:var(--late);}

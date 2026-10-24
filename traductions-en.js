@@ -6,6 +6,8 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"rien à sortir":"nothing to take out",
+
 "Pièces du catalogue":"Catalogue parts",
 "Touche une ou plusieurs pièces, puis ajoute-les à l'intervention.":"Tap one or more parts, then add them to the work order.",
 "Touche plusieurs pièces":"Tap several parts",
