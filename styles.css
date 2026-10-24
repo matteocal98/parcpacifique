@@ -6609,3 +6609,17 @@ body:has(.login-box.dans-app){background:var(--surface);}
 .piece-stock-badge{display:inline-flex;align-items:center;margin-left:6px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap;background:var(--surface);border:1px solid var(--line);}
 .piece-stock-badge.is-ok{color:var(--ok);}
 .piece-stock-badge.is-vide{color:var(--late);}
+
+/* ── CHAMPS DES FENÊTRES (modales) : 14 px au lieu des 16 px de la règle de base (demande du 2026-10-25) ──
+   La règle de base (input,select,textarea / .champ-select, plus haut) fixe 16 px à TOUS les champs. Ici la même spécificité que
+   cette règle de base (le fond :where() ne compte pas), placée après elle : elle gagne sur elle, mais PAS sur une taille propre
+   à un champ précis (gros chiffre du compteur, fenêtres « Plan proposé » pplan-*), qui la gardent.
+   Exception : iPhone/iPad (WebKit iOS) garde 16 px, car sous 16 px Safari zoome la page à chaque saisie dans un champ. */
+:where(.overlay .modal) :is(input,select,textarea){font-size:14px;}
+:where(.overlay .modal) .champ-select{font-size:14px;}
+.overlay .modal .tco-champ-unite input,.overlay .modal .ui-champ-unite .ui-champ{font-size:14px;}
+@supports (-webkit-touch-callout:none){
+  :where(.overlay .modal) :is(input,select,textarea){font-size:16px;}
+  :where(.overlay .modal) .champ-select{font-size:16px;}
+  .overlay .modal .tco-champ-unite input,.overlay .modal .ui-champ-unite .ui-champ{font-size:16px;}
+}
