@@ -217,6 +217,8 @@ function versAnglais(htmlFr, rapport) {
         if (objet && dico.OBJETS_MAIL[objet]) a.value = base + '?subject=' + dico.OBJETS_MAIL[objet];
       }
       // adresses relatives de la racine → absolues (la page est dans /en/)
+      // idem pour les listes d'images (srcset) : « ./images/a.webp 720w, ./images/b.webp 1280w » → adresses absolues
+      if (a.name === 'srcset') a.value = a.value.replace(/(^|,\s*)\.\//g, '$1/');
       if ((a.name === 'href' || a.name === 'src') && a.value.startsWith('./')) a.value = (a.value === './decouvrir.html' || a.value === './') ? '/en/' : '/' + a.value.slice(2);
     }
   });
