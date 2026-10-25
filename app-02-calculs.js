@@ -1049,6 +1049,36 @@ function alertesUsageVisibles() {
     return !(reports[cleAlerteUsage(a)] > Date.now());
   });
 }
+// ── CONTRÔLE À LA SAISIE D'UN RELEVÉ (alerte 3) ──
+// Renvoie la phrase à faire confirmer par la personne qui saisit, ou null si le relevé semble normal. Elle ne bloque jamais :
+// un compteur remplacé, ou une machine restée longtemps sans relevé, sont des cas réels — on demande seulement « sûr ? ».
+//   · baisse    : la valeur est INFÉRIEURE au dernier relevé ;
+//   · saut      : depuis le dernier relevé daté, la valeur implique plus que le maximum possible par jour (24 h / 2 000 km),
+//                 ou plus de 3 fois le rythme habituel de la machine (et au moins 8 h / 100 km, pour ne pas déranger sur du petit).
+// Le rythme et la date du dernier relevé viennent de rythmes_utilisation() ; sans eux, seule la baisse est contrôlée.
+const SAISIE_SAUT_FACTEUR = 3;
+function controleReleveAberrant(machine, valeur, index) {
+  const idx = index || 1;
+  const avant = idx === 2 ? machineCounter2(machine) : machineCounter(machine);
+  if (avant == null || !Number.isFinite(Number(avant)) || !Number.isFinite(valeur)) return null;
+  const unite = idx === 2 ? counterUnit2Of(machine) : counterUnitOf(machine);
+  const fmt = (v) => texteAvecSeparateurs(v) + ' ' + (COUNTER_UNITS[unite] ? COUNTER_UNITS[unite].short : '');
+  if (valeur < Number(avant)) {
+    return tR('Ce relevé ({nouveau}) est inférieur au précédent ({ancien}). Un compteur ne devrait pas reculer, sauf s\'il a été remplacé. Enregistrer quand même ?', { nouveau: fmt(valeur), ancien: fmt(avant) });
+  }
+  const detail = (UI.rythmesDetail || {})[machine.id + '|' + idx];
+  const habituel = (UI.rythmes || {})[machine.id + '|' + idx];
+  if (!detail || !detail.dernier || !Number.isFinite(habituel) || habituel <= 0) return null;
+  const jours = Math.max(1, (Date.now() - new Date(detail.dernier + 'T12:00:00').getTime()) / 86400000);
+  const ecart = valeur - Number(avant);
+  const maxParJour = unite === 'km' ? 2000 : (unite === 'hours' ? 24 : Infinity);
+  const plancher = unite === 'km' ? 100 : 8;
+  const parJour = ecart / jours;
+  if (ecart >= plancher && (parJour > maxParJour || parJour > SAISIE_SAUT_FACTEUR * habituel)) {
+    return tR('Ce relevé ({nouveau}) ajoute {ecart} depuis le précédent, bien plus que d\'habitude (environ {habituel} par jour). Vérifie la valeur saisie. Enregistrer quand même ?', { nouveau: fmt(valeur), ecart: fmt(ecart), habituel: texteRythme(habituel, unite) });
+  }
+  return null;
+}
 function rythmeUtilisation(machine, index) {
   if (!machine) return null;
   const v = (UI.rythmes || {})[machine.id + '|' + (index || 1)];

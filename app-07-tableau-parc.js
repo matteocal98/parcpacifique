@@ -780,6 +780,11 @@ async function enregistrerCompteur(machine, valeurBrute) {
     annoncerCompteur(machine.id, trad('Relevé invalide : un nombre positif est attendu.'), 'late');
     return false;
   }
+  const doute = controleReleveAberrant(machine, valeur, 1);
+  if (doute && !window.confirm(doute)) {
+    annoncerCompteur(machine.id, trad('Relevé non enregistré.'), '');
+    return false;
+  }
   const avant = machineCounter(machine);
   Object.assign(machine, machineCounterPatch(valeur, machine));
   majCacheCompteur(machine);
@@ -810,6 +815,8 @@ async function enregistrerCompteur2(machine, valeurBrute) {
   if (!unite2) return false;
   const valeur = nombreDepuisTexte(valeurBrute);
   if (valeur == null || valeur < 0) { showToast(trad('Relevé invalide : un nombre positif est attendu.')); return false; }
+  const doute2 = controleReleveAberrant(machine, valeur, 2);
+  if (doute2 && !window.confirm(doute2)) { showToast(trad('Relevé non enregistré.')); return false; }
   const avant = machine.counter_value_2;
   machine.counter_value_2 = valeur;
   let echec = null;

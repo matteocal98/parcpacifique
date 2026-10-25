@@ -3067,6 +3067,13 @@ function openLogInterventionModal(machine, tache) {
     const performedAt = overlay.querySelector('#log-date').value;
     const hoursValue = isCounter ? parseFloat(overlay.querySelector('#log-hours').value) : null;
     const hoursValue2 = unit2 ? parseFloat(overlay.querySelector('#log-hours-2').value) : null;
+    // Alerte 3 : relevé qui recule ou saut anormal → confirmation. Une intervention DATÉE D'AVANT AUJOURD'HUI saisie après coup
+    // peut légitimement porter un compteur plus ancien : elle n'est pas contrôlée.
+    if (!performedAt || performedAt >= todayIso()) {
+      const doute = (isCounter && Number.isFinite(hoursValue) ? controleReleveAberrant(machine, hoursValue, 1) : null)
+        || (unit2 && Number.isFinite(hoursValue2) ? controleReleveAberrant(machine, hoursValue2, 2) : null);
+      if (doute && !window.confirm(doute)) return;
+    }
     const checkedItems = kindActif === 'entretien' && items.length
       ? Array.from(overlay.querySelectorAll('.log-checklist input:checked')).map(c => c.value)
       : [];
