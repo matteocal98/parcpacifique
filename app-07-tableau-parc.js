@@ -180,6 +180,17 @@ function calculerVigilance() {
   if (typeof tcoActif === 'function' && tcoActif() && peutVoirCouts()) {
     lignes.push({ id: 'couts', picto: 'argent', court: trad('Coûts élevés'), libelle: trad('Machines au-dessus du seuil de coût'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
+  if (UI.role !== 'achats') {
+    const vis = alertesUsageVisibles();
+    const nReleves = vis.filter((a) => a.type === 'releve_oublie').length;
+    const nRythme = vis.filter((a) => a.type === 'rythme_accelere').length;
+    if (typeAlerteUsageAutorise('releve_oublie') && (UI.alertesUsage || []).length) {
+      lignes.push({ id: 'releves', picto: 'compteur', court: trad('Relevés en retard'), libelle: trad('Relevés de compteur en retard'), n: nReleves, etat: nReleves ? 'soon' : 'ok', aide: nReleves ? trad('Un relevé est à faire') : trad('Relevés à jour') });
+    }
+    if (typeAlerteUsageAutorise('rythme_accelere') && nRythme) {
+      lignes.push({ id: 'rythme', picto: 'alerte', court: trad('Rythme accéléré'), libelle: trad('Machines qui s\'usent plus vite'), n: nRythme, etat: 'soon', aide: trad('Entretien avancé (estimation)') });
+    }
+  }
   // Droit d'achat : le bandeau « Achats et coûts » — pas les retards d'entretien ni les pannes.
   if (UI.role === 'achats') return lignes.filter((l) => ['pieces', 'seuil', 'commandes', 'couts'].includes(l.id));
   return lignes;
@@ -234,6 +245,58 @@ async function chargerVigilanceCommandes(root) {
     majLigneVigilance(root, 'commandes', '—', 'ok', trad('Indisponible'));
   }
 }
+// Alertes d'usage : fenêtre listant les relevés oubliés / rythmes accélérés (type = 'releve_oublie' | 'rythme_accelere').
+function texteAlerteUsage(a) {
+  const d = a.detail || {};
+  const jour = (s) => { const t = new Date(String(s).slice(0, 10) + 'T12:00:00'); return isNaN(t) ? String(s) : t.toLocaleDateString(LANGUE === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short' }); };
+  if (a.type === 'releve_oublie') {
+    return d.mediane_jours
+      ? tR('Aucun relevé depuis {jours} jours (habituellement tous les {n} jours)', { jours: d.jours_depuis, n: Math.round(Number(d.mediane_jours)) })
+      : tR('Aucun relevé depuis {jours} jours', { jours: d.jours_depuis });
+  }
+  return tR('Rythme multiplié par {x} : l\'entretien passe du {avant} au {apres} (estimation)', { x: String(d.ratio).replace('.', LANGUE === 'en' ? '.' : ','), avant: jour(d.date_avant), apres: jour(d.date_apres) });
+}
+function ouvrirAlertesUsage(type) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const titre = type === 'releve_oublie' ? trad('Relevés en retard') : trad('Rythme accéléré');
+  overlay.innerHTML = `
+    <div class="modal export-modal panne-modal panne-liste-modal" role="dialog" aria-modal="true" aria-labelledby="alertes-usage-titre">
+      <h2 id="alertes-usage-titre">${esc(titre)}</h2>
+      <div id="alertes-usage-liste"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  ajouterCroixModale(overlay);
+  const dessiner = () => {
+    const liste = alertesUsageVisibles().filter((a) => a.type === type);
+    overlay.querySelector('#alertes-usage-liste').innerHTML = liste.length ? liste.map((a, i) => {
+      const m = UI.machines.find((x) => String(x.id) === String(a.machine_id)) || {};
+      return `<div class="panne-ligne is-bientot">
+        <div class="panne-ligne-tete"><strong>${esc(m.name || '')}</strong></div>
+        <div class="panne-ligne-desc">${esc(texteAlerteUsage(a))}</div>
+        <div class="panne-ligne-actions">
+          <button type="button" class="ui-btn ui-btn-plein" data-alerte-ouvrir="${i}">${trad('Ouvrir la fiche')}</button>
+          <button type="button" class="ui-btn ui-btn-pastille" data-alerte-reporter="${i}">${tR('Reporter {n} jours', { n: ALERTES_USAGE_REPORT_JOURS })}</button>
+        </div>
+      </div>`;
+    }).join('') : `<div class="ui-aide">${trad('Aucune alerte.')}</div>`;
+    overlay._liste = liste;
+  };
+  dessiner();
+  overlay.addEventListener('click', (e) => {
+    const o = e.target.closest('[data-alerte-ouvrir]');
+    const r = e.target.closest('[data-alerte-reporter]');
+    if (o) {
+      const a = overlay._liste[Number(o.getAttribute('data-alerte-ouvrir'))];
+      const m = a && UI.machines.find((x) => String(x.id) === String(a.machine_id));
+      if (m) { overlay.remove(); openPlanView(m, UI.companyId, UI.categories); }
+    } else if (r) {
+      const a = overlay._liste[Number(r.getAttribute('data-alerte-reporter'))];
+      if (a) { reporterAlerteUsage(a); dessiner(); renderApp(); }
+    }
+  });
+}
 function brancherAccueilRole(root) {
   root.addEventListener('click', (e) => {
     const rapide = e.target.closest('[data-action-rapide]');
@@ -249,7 +312,9 @@ function brancherAccueilRole(root) {
       fleetFilters().status = id;
       fleetFilters().limit = FLEET_PAGE_SIZE;
       goTo('machines');
-    } else if (id === 'pannes') { ouvrirListePannes(); }
+    } else if (id === 'releves') { ouvrirAlertesUsage('releve_oublie'); }
+    else if (id === 'rythme') { ouvrirAlertesUsage('rythme_accelere'); }
+    else if (id === 'pannes') { ouvrirListePannes(); }
     else if (id === 'pieces') { UI.stockOnglet = 'apercu'; goTo('stock'); }
     else if (id === 'seuil') { UI.stockOnglet = 'pieces'; UI.stockPiecesVue = 'stock'; goTo('stock'); }
     else if (id === 'commandes') { UI.stockOnglet = 'achats'; goTo('stock'); }

@@ -1424,6 +1424,7 @@ function afficherDepuisCache(cache) {
   UI.warehouses = cache.warehouses || [];
   UI.stockItems = cache.stockItems || [];
   UI.rythmes = cache.rythmes || {};
+  UI.alertesUsage = cache.alertesUsage || [];
   UI.rythmesDetail = cache.rythmesDetail || {};
   UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
   UI.maintenanceKits = cache.maintenanceKits || [];
@@ -1904,6 +1905,7 @@ async function boot(toastMessage) {
   UI.scheduledMaintenances = scheduledMaintenances;
   // Rythme d'utilisation des machines au compteur (relevés datés) : sert à DATER leurs entretiens. Absent → aucune estimation, rien d'autre ne change.
   await chargerRythmesUtilisation(); // remplit UI.rythmes et UI.rythmesDetail
+  UI.alertesUsage = await chargerAlertesUsage();
   UI.reminders = loadReminders();
   UI.horsLigne = null;
 
@@ -1922,6 +1924,7 @@ async function boot(toastMessage) {
     warehouses: UI.warehouses,
     stockItems: UI.stockItems,
     rythmes: UI.rythmes,
+    alertesUsage: UI.alertesUsage,
     rythmesDetail: UI.rythmesDetail,
     maintenanceKits: UI.maintenanceKits,
     maintenanceKitLines: UI.maintenanceKitLines,

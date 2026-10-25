@@ -1006,6 +1006,49 @@ async function chargerRythmesUtilisation() {
   } catch (err) { /* fonction pas encore créée, ou hors connexion : pas d'estimation */ }
   return rythmes;
 }
+// ── ALERTES D'USAGE (relevé oublié, rythme qui s'accélère) ──
+// Calculées par la fonction SQL alertes_usage() (alertes-usage.sql), sans IA. L'application applique ici l'offre et le rôle :
+//   · « releve_oublie »   : toutes les offres ; gérant, droit de gestion, droit de saisie ;
+//   · « rythme_accelere » : Business et plus ; gérant et droit de gestion.
+// « Reporter » (7 jours) est mémorisé sur CET appareil.
+async function chargerAlertesUsage() {
+  if (!SCHEMA.hasTelemetry) return [];
+  try {
+    const { data, error } = await sb.rpc('alertes_usage');
+    if (error || !Array.isArray(data)) return [];
+    return data.filter((a) => a && a.machine_id && a.type);
+  } catch (err) { return []; }
+}
+const ALERTES_USAGE_REPORT_JOURS = 7;
+function cleAlerteUsage(a) { return a.machine_id + '|' + (a.counter_index || 1) + '|' + a.type; }
+function alertesUsageReportees() {
+  try { return JSON.parse(localStorage.getItem('kalea.alertesUsageReport:' + UI.companyId) || '{}') || {}; } catch (e) { return {}; }
+}
+function reporterAlerteUsage(a) {
+  const memo = alertesUsageReportees();
+  memo[cleAlerteUsage(a)] = Date.now() + ALERTES_USAGE_REPORT_JOURS * 86400000;
+  Object.keys(memo).forEach((k) => { if (memo[k] < Date.now()) delete memo[k]; });
+  try { localStorage.setItem('kalea.alertesUsageReport:' + UI.companyId, JSON.stringify(memo)); } catch (e) { /* alerte réapparaîtra */ }
+}
+function typeAlerteUsageAutorise(type) {
+  const role = UI.role;
+  if (type === 'releve_oublie') return ['gerant', 'mecanicien', 'chauffeur'].includes(role);
+  if (type === 'rythme_accelere') {
+    const offre = offreDeLaGrille(UI.companyPlan || 'free').cle;
+    return ['gerant', 'mecanicien'].includes(role) && ['business', 'enterprise'].includes(offre);
+  }
+  return false;
+}
+function alertesUsageVisibles() {
+  const reports = alertesUsageReportees();
+  return (UI.alertesUsage || []).filter((a) => {
+    const m = (UI.machines || []).find((x) => String(x.id) === String(a.machine_id));
+    if (!m) return false;
+    if (typeof machineCouverte === 'function' && !machineCouverte(m)) return false;
+    if (!typeAlerteUsageAutorise(a.type)) return false;
+    return !(reports[cleAlerteUsage(a)] > Date.now());
+  });
+}
 function rythmeUtilisation(machine, index) {
   if (!machine) return null;
   const v = (UI.rythmes || {})[machine.id + '|' + (index || 1)];

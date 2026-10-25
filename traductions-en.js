@@ -6,6 +6,19 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Relevés en retard":"Overdue readings",
+"Relevés de compteur en retard":"Overdue meter readings",
+"Un relevé est à faire":"A reading is due",
+"Relevés à jour":"Readings up to date",
+"Rythme accéléré":"Faster usage",
+"Machines qui s'usent plus vite":"Machines being used faster",
+"Entretien avancé (estimation)":"Service brought forward (estimate)",
+"Aucun relevé depuis {jours} jours (habituellement tous les {n} jours)":"No reading for {jours} days (usually every {n} days)",
+"Aucun relevé depuis {jours} jours":"No reading for {jours} days",
+"Rythme multiplié par {x} : l'entretien passe du {avant} au {apres} (estimation)":"Usage up by {x}×: service moves from {avant} to {apres} (estimate)",
+"Ouvrir la fiche":"Open the record",
+"Reporter {n} jours":"Snooze {n} days",
+"Aucune alerte.":"No alerts.",
 "Pièces utilisées hors stock":"Parts used outside stock",
 "Sur les {n} derniers jours : pièces suivies en stock, utilisées dans une intervention sans sortie de stock":"Last {n} days: stock-tracked parts used in a work order without a stock-out",
 "Quantité : {n}":"Quantity: {n}",
