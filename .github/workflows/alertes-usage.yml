@@ -1,0 +1,55 @@
+# Alertes d'usage KALEA (relevé oublié, rythme accéléré) — déclencheur quotidien.
+# Même schéma que recap-hebdo.yml : le jeton vit dans les secrets GitHub, l'historique des exécutions sert de contrôle
+# (une exécution en échec est visible et GitHub prévient par e-mail).
+#
+# CE QU'IL FAUT AVOIR POSÉ (une fois) :
+#   1. secret de dépôt  ALERTES_USAGE_TOKEN            = une chaîne aléatoire d'au moins 32 caractères
+#   2. secret de fonction Supabase ALERTES_USAGE_TOKEN = LA MÊME valeur (la fonction refuse tout si elle est absente)
+#   3. le secret de dépôt SUPABASE_ANON_KEY (déjà posé pour recap-hebdo)
+#   4. la fonction déployée : npx supabase functions deploy alertes-usage-quotidien --project-ref tiayvmnodsbygmuemeuy --use-api
+#   5. migrations/alertes-usage.sql PUIS migrations/alertes-usage-envoi.sql exécutés dans Supabase (dépôt kalea-serveur)
+#
+# PREMIER ESSAI : onglet Actions > « Alertes d'usage » > Run workflow, avec « simulation » coché : la fonction calcule et
+# renvoie ce qui partirait, sans rien envoyer ni rien noter.
+
+name: Alertes d'usage
+
+on:
+  schedule:
+    # Tous les jours à 20:00 UTC = 07:00 à Nouméa : l'alerte arrive en début de journée de travail.
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+    inputs:
+      simulation:
+        description: "Simulation : ne rien envoyer, seulement afficher ce qui partirait"
+        type: boolean
+        default: true
+
+jobs:
+  alertes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer les alertes d'usage
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ALERTES_USAGE_TOKEN: ${{ secrets.ALERTES_USAGE_TOKEN }}
+          SIMULATION: ${{ github.event_name == 'workflow_dispatch' && inputs.simulation || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ALERTES_USAGE_TOKEN:-}" ]; then
+            echo "::error::le secret ALERTES_USAGE_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/alertes-usage-quotidien" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "x-alertes-token: ${ALERTES_USAGE_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"simulation\": ${SIMULATION}}")
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::les alertes d'usage n'ont pas été traitées (HTTP $code)"
+            exit 1
+          fi
