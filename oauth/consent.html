@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://tiayvmnodsbygmuemeuy.supabase.co; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>KALEA — Autoriser une connexion</title>
+<style>
+  :root { --ink:#0E1333; --accent:#24B5A8; --late:#DE7A16; --bg:#F2F4F8; --surface:#fff; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; background:var(--bg); color:var(--ink);
+         font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .carte { width:100%; max-width:460px; background:var(--surface); border-radius:16px; padding:28px 24px; box-shadow:0 8px 30px rgba(14,19,51,.12); }
+  h1 { font-size:20px; margin:0 0 6px; }
+  p { line-height:1.5; margin:0 0 12px; font-size:14px; }
+  .marque { font-weight:800; letter-spacing:.04em; margin-bottom:14px; }
+  .client { background:rgba(14,19,51,.05); border-radius:10px; padding:12px 14px; margin:14px 0; font-size:14px; }
+  .client strong { display:block; font-size:16px; margin-bottom:2px; word-break:break-word; }
+  .client small { color:rgba(14,19,51,.7); word-break:break-all; }
+  ul { margin:8px 0 14px; padding-left:20px; font-size:14px; line-height:1.5; }
+  label { display:block; font-size:13px; font-weight:600; margin:10px 0 4px; }
+  input { width:100%; padding:11px 12px; font-size:16px; border:2px solid var(--ink); border-radius:10px; background:#fff; color:var(--ink); }
+  .boutons { display:flex; gap:10px; margin-top:16px; }
+  button { flex:1; padding:13px 10px; font-size:16px; font-weight:700; border-radius:12px; border:0; cursor:pointer; }
+  .oui { background:var(--ink); color:#fff; }
+  .non { background:rgba(14,19,51,.08); color:var(--ink); }
+  button:disabled { opacity:.55; cursor:default; }
+  .msg { font-size:13px; margin-top:12px; min-height:18px; }
+  .msg.err { color:var(--late); }
+  .avert { border-left:4px solid var(--accent); padding:8px 12px; background:rgba(36,181,168,.08); border-radius:6px; font-size:13px; margin:12px 0; }
+</style>
+</head>
+<body>
+<main class="carte" id="carte" aria-live="polite">
+  <div class="marque">KALEA</div>
+  <p id="chargement">Chargement…</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="./consent.js"></script>
+</body>
+</html>
