@@ -6,6 +6,7 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Ces réglages sont réservés au gérant.":"These settings are reserved for the manager.",
 "Ce relevé ({nouveau}) est inférieur au précédent ({ancien}). Un compteur ne devrait pas reculer, sauf s'il a été remplacé. Enregistrer quand même ?":"This reading ({nouveau}) is lower than the previous one ({ancien}). A meter should not go backwards unless it was replaced. Save anyway?",
 "Ce relevé ({nouveau}) ajoute {ecart} depuis le précédent, bien plus que d'habitude (environ {habituel} par jour). Vérifie la valeur saisie. Enregistrer quand même ?":"This reading ({nouveau}) adds {ecart} since the previous one, much more than usual (about {habituel} per day). Please check the value. Save anyway?",
 "Relevé non enregistré.":"Reading not saved.",

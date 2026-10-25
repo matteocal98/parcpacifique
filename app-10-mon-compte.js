@@ -60,7 +60,8 @@ VIEWS.account = {
   subtitle: () => UI.company.name || UI.companyName || trad('Société'),
   render() {
     const c = UI.company;
-    const modifiable = SCHEMA.hasContactNames;
+    // Les coordonnées de la société sont réservées au gérant (update_my_company refuse les autres rôles côté serveur).
+    const modifiable = SCHEMA.hasContactNames && UI.role === 'gerant';
     const bloque = modifiable ? '' : ' disabled';
     // Le palier vient de la société quand elle le porte, sinon de celui que le
     // chargement a déjà retenu : afficher « undefined » à un client qui paie
@@ -212,7 +213,8 @@ VIEWS.account = {
           ${sousBlocPushHtml()}
           <div class="ui-aide" id="acc-contact-msg" role="status" aria-live="polite"></div>
           <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer les coordonnées')}</button></div>
-          ${modifiable ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
+          ${(SCHEMA.hasContactNames && !modifiable) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
+          ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
         </div>
       </section>
 

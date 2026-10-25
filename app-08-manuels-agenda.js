@@ -1871,8 +1871,10 @@ function blocReglagesRappelsHtml() {
   // Colonnes absentes en base (migration-rappels-email.sql non exécutée) : le
   // formulaire est montré, mais désactivé et accompagné de la marche à suivre.
   // Un bouton qui échoue en silence vaut moins qu'un bouton grisé expliqué.
+  // Réglages réservés au gérant (update_my_reminders refuse les autres rôles côté serveur) : les autres voient, sans pouvoir modifier.
   const dispo = SCHEMA.hasReminders !== false;
-  const bloque = dispo ? '' : ' disabled';
+  const reserveGerant = UI.role !== 'gerant';
+  const bloque = (dispo && !reserveGerant) ? '' : ' disabled';
   const actif = rappelsEmailActifs();
   return `
     <section class="ui-section">
@@ -1890,6 +1892,7 @@ function blocReglagesRappelsHtml() {
         <div class="ui-aide">${trad('Laisse l\'adresse vide pour ne plus recevoir de rappel par e-mail. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est proposée.')}</div>
         <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="rap-save"${bloque}>${picto('case')}<span>${trad('Enregistrer les préférences e-mail')}</span></button></div>
+        ${(dispo && reserveGerant) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
         ${dispo ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-rappels-email.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
       </div>
     </section>`;
