@@ -1533,13 +1533,46 @@ function parcVueActive() {
   return UI.parcVue;
 }
 
+// Section repliée « Machines archivées » (D7) : ne s'affiche que s'il y en a. Restaurer = la machine redevient suivie et facturée.
+function blocMachinesArchiveesHtml() {
+  const liste = UI.machinesArchivees || [];
+  if (!liste.length) return '';
+  const gerant = UI.role === 'gerant';
+  return `
+        <section class="ui-section" id="machines-archivees">
+          <details>
+            <summary class="ui-etiquette">${tR('Machines archivées ({n})', { n: liste.length })}</summary>
+            <div class="ui-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé. Tu peux la restaurer à tout moment.')}</div>
+            <div class="ui-liste">
+              ${liste.map((m) => `<div class="ui-ligne">
+                <div class="ui-ligne-textes"><span class="ui-ligne-nom">${esc(m.name)}</span><span class="ui-ligne-sous">${esc(m.brand_model || '')}</span></div>
+                ${gerant ? `<div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" data-restaurer-machine="${esc(m.id)}">${trad('Restaurer')}</button></div>` : ''}
+              </div>`).join('')}
+            </div>
+          </details>
+        </section>`;
+}
+
+// Restauration : un seul écouteur délégué, posé une fois (la vue est redessinée à chaque changement).
+document.addEventListener('click', async (e) => {
+  const bouton = e.target && e.target.closest ? e.target.closest('[data-restaurer-machine]') : null;
+  if (!bouton || UI.role !== 'gerant') return;
+  const machine = (UI.machinesArchivees || []).find((m) => String(m.id) === String(bouton.getAttribute('data-restaurer-machine')));
+  if (!machine) return;
+  bouton.disabled = true;
+  const { error } = await sb.from('machines').update({ archived: false, archived_at: null }).eq('id', machine.id);
+  if (error) { bouton.disabled = false; showToast(trad('Restauration impossible :') + ' ' + error.message); return; }
+  synchroniserMachinesStripe();
+  boot(trad('Machine restaurée'));
+});
+
 VIEWS.machines = {
   fondBlanc: true,
   title: trad('Machines'),
   subtitle: () => `${UI.machines.length} machine${UI.machines.length > 1 ? 's' : ''} · ${UI.companyName}`,
   render() {
     if (!UI.machines.length) {
-      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div></section></div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div></section>${blocMachinesArchiveesHtml()}</div>`;
     }
     const c = UI.counts;
     const f = fleetFilters();
@@ -1580,6 +1613,7 @@ VIEWS.machines = {
             </div>
           </div>
         </section>
+        ${blocMachinesArchiveesHtml()}
       </div>`;
   },
   mount() {

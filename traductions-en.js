@@ -6,6 +6,16 @@
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
 const TEXTES = {"en":{
+"Archiver cette machine":"Archive this machine",
+"Une machine archivée n'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.":"An archived machine is no longer billed or tracked; its history is kept and you can restore it.",
+"Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et tu pourras la restaurer.":"Archive “{nom}”? It will no longer be billed or tracked (due dates, reminders, alerts). Its history is kept and you can restore it.",
+"Archivage impossible :":"Archiving failed:",
+"Machine archivée":"Machine archived",
+"Machines archivées ({n})":"Archived machines ({n})",
+"Une machine archivée n'est plus facturée ni suivie ; son historique est conservé. Tu peux la restaurer à tout moment.":"An archived machine is no longer billed or tracked; its history is kept. You can restore it at any time.",
+"Restaurer":"Restore",
+"Restauration impossible :":"Restore failed:",
+"Machine restaurée":"Machine restored",
 "+ 2 € / machine en plus":"+ €2 / extra machine",
 "+ 1,50 € / machine en plus":"+ €1.50 / extra machine",
 "+ 1 € / machine en plus, dégressif dès 150":"+ €1 / extra machine, sliding scale from 150",

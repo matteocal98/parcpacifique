@@ -670,6 +670,11 @@ function openMachineModal(companyId, categories, existing) {
             <button class="px-space-lg py-2.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container transition-colors" type="button" id="cancel-add">${trad('Annuler')}</button>
             <button class="px-space-xl py-3 rounded-xl bg-inverse-surface text-inverse-on-surface font-label-lg text-label-lg font-bold hover:bg-on-background transition-colors shadow-md flex items-center gap-space-xs" type="submit" id="submit-add"><span class="material-symbols-outlined text-[20px]">save</span>${isEdit ? trad('Enregistrer les modifications') : trad('Enregistrer')}</button>
           </div>
+          ${isEdit && peutArchiverMachine() ? `
+          <div class="flex justify-center pt-space-xs">
+            <button class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" type="button" id="archive-machine"><span class="material-symbols-outlined text-[16px]">inventory_2</span>${trad('Archiver cette machine')}</button>
+          </div>
+          <div class="hint">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.')}</div>` : ''}
           ${isEdit && peutSupprimerMachine() ? `
           <div class="flex justify-center pt-space-xs">
             <button class="text-error hover:text-on-error-container font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 delete-link" type="button" id="delete-machine"><span class="material-symbols-outlined text-[16px]">delete</span><span>${trad('Supprimer cette machine')}</span></button>
@@ -814,6 +819,16 @@ function openMachineModal(companyId, categories, existing) {
     // ⚠️ MÊME RÈGLE : le bouton n'est rendu que pour un gérant. Sans le `?.`, un
     // mécanicien, un chauffeur — ou un rôle encore inconnu — faisait jeter cette
     // ligne, et l'enregistrement de la fiche ne répondait plus du tout.
+    overlay.querySelector('#archive-machine')?.addEventListener('click', async (e) => {
+      if (!window.confirm(tR('Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et tu pourras la restaurer.', { nom: existing.name }))) return;
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const { error } = await sb.from('machines').update({ archived: true, archived_at: new Date().toISOString() }).eq('id', existing.id);
+      if (error) { overlay.querySelector('#f-error').textContent = trad('Archivage impossible :') + ' ' + error.message; btn.disabled = false; return; }
+      synchroniserMachinesStripe();
+      overlay.remove();
+      boot(trad('Machine archivée'));
+    });
     overlay.querySelector('#delete-machine')?.addEventListener('click', async (e) => {
       const ok = confirm(tR('Supprimer définitivement « {nom} » ? Son plan d\'entretien, son historique, ses relevés, son carnet et sa photo seront aussi supprimés. Cette action est irréversible.', { nom: existing.name }));
       if (!ok) return;
@@ -1430,6 +1445,7 @@ function afficherDepuisCache(cache) {
   UI.maintenanceKits = cache.maintenanceKits || [];
   UI.maintenanceKitLines = cache.maintenanceKitLines || [];
   UI.machines = cache.machines || [];
+  UI.machinesArchivees = cache.machinesArchivees || [];
   UI.scheduledMaintenances = cache.scheduledMaintenances || [];
   UI.reminders = loadReminders();
   UI.horsLigne = { depuis: cache.savedAt };
@@ -1664,7 +1680,7 @@ async function boot(toastMessage) {
   // jusqu'au prochain démarrage. Constaté en direct sur un vrai téléphone
   // (c'est la même faille qui faisait disparaître le TCO du tableau de
   // bord — voir keeva-redesign-project).
-  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt] = await Promise.all([
+  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt, hasArchived] = await Promise.all([
     sonderColonne('machines', 'counter_unit'),
     // Second compteur : sondé séparément, la migration peut être appliquée
     // sans que l'autre le soit (voir SCHEMA.hasCounter2).
@@ -1676,6 +1692,8 @@ async function boot(toastMessage) {
     // anciennes restent actives). Sondée comme les autres : une base qui ne
     // l'aurait pas continue de fonctionner, l'ordre se faisant alors par id.
     sonderColonne('machines', 'created_at'),
+    // Machines archivées (levée des plafonds, D7) : colonne ajoutée par levee-des-plafonds.sql ; absente → aucune archive, rien ne change.
+    sonderColonne('machines', 'archived'),
   ]);
   SCHEMA.hasCounter = hasCounter;
   SCHEMA.hasCounter2 = hasCounter2;
@@ -1684,6 +1702,7 @@ async function boot(toastMessage) {
   SCHEMA.hasPlate = hasKindPlate;
   SCHEMA.hasModelYear = hasModelYear;
   SCHEMA.hasCreatedAt = hasCreatedAt;
+  SCHEMA.hasArchived = hasArchived;
 
   const colonnesMachine = [
     'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
@@ -1698,6 +1717,7 @@ async function boot(toastMessage) {
     // L'ordre de création : c'est lui qui décide quelles machines une offre
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
+    ...(SCHEMA.hasArchived ? ['archived', 'archived_at'] : []),
     ...(SCHEMA.hasTelemetry ? ['telemetry_source_id', 'telemetry_ref', 'counter_source', 'telemetry_last_at'] : []),
     ...(SCHEMA.hasGps ? ['position_enabled', 'last_lat', 'last_lon', 'last_position_at'] : []),
     // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco ci-dessus
@@ -1881,11 +1901,15 @@ async function boot(toastMessage) {
   UI.stockCounts = calculerStockCounts(stockItems, partsCatalog);
   UI.maintenanceKits = maintenanceKits;
   UI.maintenanceKitLines = maintenanceKitLines;
-  UI.machines = (machines || []).map(m => ({
+  // Les machines ARCHIVÉES sortent de UI.machines : tout le reste de l'application (échéances, alertes, agenda, coûts du parc, limite
+  // de l'offre) les ignore donc d'emblée. Elles restent listées dans « Machines archivées », d'où on peut les restaurer.
+  const toutesLesMachines = (machines || []).map(m => ({
     ...m,
     plan: Array.isArray(m.plan) ? m.plan[0] : m.plan,
     category: Array.isArray(m.category) ? m.category[0] : m.category,
   }));
+  UI.machinesArchivees = toutesLesMachines.filter((m) => m.archived);
+  UI.machines = toutesLesMachines.filter((m) => !m.archived);
   // À partir d'ici, UI.machines reflète les VRAIES données de la société
   // connectée — voir __appPretePourPush, lu par wirePushEcouteurs().
   __appPretePourPush = true;
@@ -1929,6 +1953,7 @@ async function boot(toastMessage) {
     maintenanceKits: UI.maintenanceKits,
     maintenanceKitLines: UI.maintenanceKitLines,
     machines: UI.machines,
+    machinesArchivees: UI.machinesArchivees,
     scheduledMaintenances: UI.scheduledMaintenances,
   });
 

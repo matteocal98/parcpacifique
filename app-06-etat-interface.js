@@ -30,6 +30,7 @@ const UI = {
   company: {},
   email: '',
   machines: [],
+  machinesArchivees: [], // machines archivées (D7) : hors facturation, hors suivi ; l'historique reste en base
   categories: [],
   components: [],
   reminders: { ...DEFAULT_REMINDERS },
@@ -931,9 +932,20 @@ async function changerOffreAbonnement(cle, bouton, idMessage, overlay) {
   }
 }
 
+// Nombre de machines qui comptent pour la LIMITE de l'offre : seul le Gratuit est limité, et il compte AUSSI les machines archivées
+// (sinon on contournerait la limite de 2 en archivant). Les offres payantes n'ont pas de limite (levée des plafonds, 2026-10-27).
+function nombreMachinesComptees() {
+  return UI.machines.length + (UI.machinesArchivees || []).length;
+}
+
+// L'archivage n'a de sens que pour une offre payante (la machine n'y est plus facturée) et pour le gérant.
+function peutArchiverMachine() {
+  return Boolean(SCHEMA.hasArchived) && UI.role === 'gerant' && PALIERS_PAYANTS.includes(String(UI.companyPlan || '').toLowerCase());
+}
+
 async function handleAddMachine() {
   const limite = LIMITES_OFFRES[UI.companyPlan];
-  if (limite != null && UI.machines.length >= limite) { openUpgradeNotice(UI.companyId); return; }
+  if (limite != null && nombreMachinesComptees() >= limite) { openUpgradeNotice(UI.companyId); return; }
   if (!(await confirmerMachineEnPlus())) return;
   openAddWizard(UI.companyId, UI.categories);
 }
