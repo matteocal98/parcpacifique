@@ -3,8 +3,9 @@
  * Le visiteur indique son nombre de machines, le nombre de personnes qui utiliseront KALEA et ce dont il a besoin ;
  * on calcule le coût de CHAQUE offre et on recommande la moins chère qui convient.
  *
- * ⚠ Les prix et limites ci-dessous reprennent la grille de l'application (OFFRE_GRILLE, LIMITES_OFFRES dans app.html)
- *   et les cartes de la page. S'ils changent, les changer ICI aussi (et regénérer KALEA-grille-tarifaire.pdf).
+ * ⚠ Les prix ci-dessous reprennent la grille de l'application (OFFRE_GRILLE, INCLUSES_OFFRES, SUPPLEMENT_OFFRES, TRANCHES_ENTERPRISE
+ *   dans app-03/app-06) et les cartes de la page. S'ils changent, les changer ICI aussi (et regénérer KALEA-grille-tarifaire.pdf).
+ *   Levée des plafonds (2026-10-27) : plus aucun plafond de machines ni d'utilisateurs en offre payante ; seul le Gratuit reste à 2 machines.
  *
  * Deux langues (FR/EN) : les textes fixes de la section passent par accueil-langue.js ; les résultats, recalculés à
  * chaque saisie, sont écrits ici dans la langue de la page (attribut lang de <html>, posé par accueil-langue.js).
@@ -13,24 +14,36 @@
   'use strict';
 
   // niveau = rang de l'offre dans la grille ; incluses = machines comprises dans le prix de base ;
-  // max = plafond de machines ; extra = prix de chaque machine au-delà des incluses ; utilisateurs = nombre maximal.
+  // max = plafond de machines (seul le Gratuit en a un) ; extra = prix de chaque machine au-delà des incluses ;
+  // tranches = prix dégressif par tranches (Enterprise) : [nombre cumulé de machines en plus, prix] ; utilisateurs = nombre maximal.
   var OFFRES = [
     { cle: 'free', nom: { fr: 'Gratuit', en: 'Free' }, niveau: 0, base: 0, incluses: 2, max: 2, extra: 0, utilisateurs: 1 },
-    { cle: 'starter', nom: { fr: 'Starter', en: 'Starter' }, niveau: 1, base: 12, incluses: 5, max: 10, extra: 2, utilisateurs: 1 },
-    { cle: 'business', nom: { fr: 'Business', en: 'Business' }, niveau: 2, base: 39, incluses: 20, max: 40, extra: 1.5, utilisateurs: 3 },
-    { cle: 'enterprise', nom: { fr: 'Enterprise', en: 'Enterprise' }, niveau: 3, base: 79, incluses: 40, max: 150, extra: 1, utilisateurs: 9999 },
+    { cle: 'starter', nom: { fr: 'Starter', en: 'Starter' }, niveau: 1, base: 12, incluses: 5, max: Infinity, extra: 2, utilisateurs: 1 },
+    { cle: 'business', nom: { fr: 'Business', en: 'Business' }, niveau: 2, base: 39, incluses: 20, max: Infinity, extra: 1.5, utilisateurs: 9999 },
+    { cle: 'enterprise', nom: { fr: 'Enterprise', en: 'Enterprise' }, niveau: 3, base: 79, incluses: 40, max: Infinity, extra: 1, utilisateurs: 9999,
+      tranches: [[110, 1], [460, 0.7], [1960, 0.45], [null, 0.3]] },
   ];
-  var PLAFOND_PUBLIC = 150; // au-delà : offre Grand compte, sur devis
+  var SEUIL_CONTRAT = 2000; // à partir de là, on propose en plus un contrat sur mesure (Grand compte) : ce n'est PAS un plafond
 
   function prixDe(offre, machines) {
-    return offre.base + Math.max(0, machines - offre.incluses) * offre.extra;
+    var enPlus = Math.max(0, machines - offre.incluses);
+    if (!offre.tranches) return offre.base + enPlus * offre.extra;
+    var reste = enPlus; var deja = 0; var total = 0;
+    for (var i = 0; i < offre.tranches.length && reste > 0; i++) {
+      var jusqua = offre.tranches[i][0];
+      var taille = jusqua === null ? reste : Math.min(reste, jusqua - deja);
+      if (taille <= 0) break;
+      total += taille * offre.tranches[i][1];
+      reste -= taille; deja += taille;
+    }
+    return Math.round((offre.base + total) * 100) / 100;
   }
 
   // besoin : 0 l'essentiel, 1 export CSV, 2 QR codes / préparation groupée / Coûts & TCO, 3 Stocks & SAV / télémétrie / support dédié.
   // utilisateurs : nombre de personnes (1, 3 pour « 2 à 3 », 99 pour « 4 ou plus »).
   function simuler(machines, besoin, utilisateurs) {
     var n = Math.max(1, Math.floor(Number(machines) || 1));
-    var grandCompte = n > PLAFOND_PUBLIC;
+    var grandCompte = n > SEUIL_CONTRAT;
     var lignes = OFFRES.map(function (o) {
       var raison = null;
       if (n > o.max) raison = 'machines';
@@ -43,10 +56,10 @@
       if (l.prix === null) return;
       if (reco === null || l.prix < reco.prix) reco = l;
     });
-    return { machines: n, grandCompte: grandCompte, lignes: lignes, reco: grandCompte ? null : reco };
+    return { machines: n, grandCompte: grandCompte, lignes: lignes, reco: reco };
   }
 
-  var api = { OFFRES: OFFRES, PLAFOND_PUBLIC: PLAFOND_PUBLIC, prixDe: prixDe, simuler: simuler };
+  var api = { OFFRES: OFFRES, SEUIL_CONTRAT: SEUIL_CONTRAT, prixDe: prixDe, simuler: simuler };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   racine.simulateurTarifs = api;
 
@@ -60,9 +73,10 @@
       gratuitJusqua: 'Gratuit jusqu\'à {n} machines.',
       inclus: '{base} pour {inc} machines incluses.',
       detail: '{base} pour {inc} machines incluses + {sup} machine{s} en plus × {extra} = {total}',
+      detailTranches: '{base} pour {inc} machines incluses + {sup} machine{s} en plus (tarif dégressif) = {total}',
       raison: { machines: 'limité à {max} machines', fonctions: 'fonctions insuffisantes', utilisateurs: '{u} utilisateur{s} maximum' },
       gcTitre: 'Offre Grand compte',
-      gcTexte: 'Au-delà de 150 machines, nous établissons un devis sur mesure (tarif dégressif, intégrations, accompagnement, contrat annuel).',
+      gcTexte: 'À partir de 2 000 machines, nous vous proposons en plus un contrat sur mesure (région des données dédiée, contrat annuel, intégrations, accompagnement).',
       gcBouton: 'Demander un devis',
       contacter: 'Contacter l\'équipe',
       aucune: 'Aucune offre ne couvre cette combinaison : écrivez-nous, nous trouverons une solution.',
@@ -74,9 +88,10 @@
       gratuitJusqua: 'Free up to {n} machines.',
       inclus: '{base} for {inc} machines included.',
       detail: '{base} for {inc} machines included + {sup} extra machine{s} × {extra} = {total}',
+      detailTranches: '{base} for {inc} machines included + {sup} extra machine{s} (sliding scale) = {total}',
       raison: { machines: 'limited to {max} machines', fonctions: 'not enough features', utilisateurs: '{u} user{s} maximum' },
       gcTitre: 'Key Account plan',
-      gcTexte: 'Beyond 150 machines, we draw up a tailored quote (sliding-scale pricing, integrations, onboarding, annual contract).',
+      gcTexte: 'From 2,000 machines, we also offer a tailored contract (dedicated data region, annual contract, integrations, onboarding).',
       gcBouton: 'Request a quote',
       contacter: 'Contact the team',
       aucune: 'No plan covers this combination: write to us and we will find a solution.',
@@ -110,17 +125,14 @@
     var users = Number(document.getElementById('sim-users').value) || 1;
     var r = simuler(n, besoin, users);
 
-    // ── Grand compte ──
-    if (r.grandCompte) {
-      zone.innerHTML =
-        '<div class="rounded-2xl bg-[#0E1333] text-white p-6 sm:p-8">' +
-        '<div class="text-xs font-bold tracking-wider uppercase text-white/70 mb-2">' + t.recommandee + '</div>' +
-        '<div class="text-3xl sm:text-4xl font-extrabold font-display">' + t.gcTitre + '</div>' +
-        '<p class="mt-3 text-sm sm:text-base text-white/80 leading-relaxed">' + t.gcTexte + '</p>' +
-        '<a href="' + MAIL_GC + '" class="mt-5 inline-flex items-center justify-center rounded-xl bg-white text-[#0E1333] font-bold px-5 py-3 text-sm hover:bg-slate-100 transition-colors">' + t.gcBouton + '</a>' +
-        '</div>';
-      return;
-    }
+    // ── Grand compte : une NOTE en plus de la recommandation (aucun mur de volume) ──
+    var noteGrandCompte = r.grandCompte
+      ? '<div class="mt-4 rounded-2xl bg-[#0E1333] text-white p-5 sm:p-6">' +
+        '<div class="text-xs font-bold tracking-wider uppercase text-white/70 mb-2">' + t.gcTitre + '</div>' +
+        '<p class="text-sm text-white/80 leading-relaxed">' + t.gcTexte + '</p>' +
+        '<a href="' + MAIL_GC + '" class="mt-4 inline-flex items-center justify-center rounded-xl bg-white text-[#0E1333] font-bold px-5 py-3 text-sm hover:bg-slate-100 transition-colors">' + t.gcBouton + '</a>' +
+        '</div>'
+      : '';
 
     var reco = r.reco;
     var blocReco;
@@ -132,6 +144,7 @@
       var detail;
       if (o.cle === 'free') detail = remplir(t.gratuitJusqua, { n: o.max });
       else if (reco.supplement === 0) detail = remplir(t.inclus, { base: montant(o.base, lg), inc: o.incluses });
+      else if (o.tranches && reco.supplement > o.tranches[0][0]) detail = remplir(t.detailTranches, { base: montant(o.base, lg), inc: o.incluses, sup: reco.supplement, s: reco.supplement > 1 ? 's' : '', total: montant(reco.prix, lg) });
       else detail = remplir(t.detail, { base: montant(o.base, lg), inc: o.incluses, sup: reco.supplement, s: reco.supplement > 1 ? 's' : '', extra: montant(o.extra, lg), total: montant(reco.prix, lg) });
       blocReco =
         '<div class="rounded-2xl bg-[#0E1333] text-white p-6 sm:p-8">' +
@@ -160,7 +173,7 @@
         '<div class="text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">' + echapper(l.offre.nom[lg]) + '</div>' + corps + '</div>';
     }).join('');
 
-    zone.innerHTML = blocReco + '<div class="mt-4 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-2 gap-3">' + puces + '</div>';
+    zone.innerHTML = blocReco + '<div class="mt-4 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-2 gap-3">' + puces + '</div>' + noteGrandCompte;
   }
 
   function brancher() {

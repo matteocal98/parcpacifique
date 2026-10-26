@@ -1648,7 +1648,7 @@ function openSignupWizard() {
       </div>
       <div class="callout">
         <span class="card-ico">${picto('info')}</span>
-        <span>${trad('Offre Gratuit : 2 machines. Offre Starter / Artisan : 12 €/mois, 5 machines, puis 2 € par machine jusqu\'à 10. Offre Business / Flotte : 39 €/mois, 20 machines et 3 utilisateurs, puis 1,50 € par machine jusqu\'à 40. Offre Enterprise / Parc : 79 €/mois, 40 machines, puis 1 € par machine jusqu\'à 150. Au-delà : offre Grand compte, sur devis.')}</span>
+        <span>${trad('Offre Gratuit : 2 machines. Offre Starter / Artisan : 12 €/mois, 5 machines, puis 2 € par machine en plus. Offre Business / Flotte : 39 €/mois, 20 machines et utilisateurs illimités, puis 1,50 € par machine en plus. Offre Enterprise / Parc : 79 €/mois, 40 machines, puis 1 € par machine (dégressif dès 150 machines). Aucune limite de machines en offre payante.')}</span>
       </div>
       <form id="signup-form">
         <label>${trad('Type de structure')} <span class="requis">*</span></label>
@@ -2069,7 +2069,7 @@ const OFFRE_GRILLE = [
     cle: 'starter',
     offre: trad('Starter / Artisan'),
     machines: trad('5 machines'),
-    supplement: trad('+ 2 € / machine en plus, jusqu\'à 10'),
+    supplement: trad('+ 2 € / machine en plus'),
     utilisateurs: trad('1 utilisateur'),
     prix: trad('12 €/mois'),
     analyses: trad('20 analyses de carnet'),
@@ -2081,20 +2081,20 @@ const OFFRE_GRILLE = [
     cle: 'business',
     offre: trad('Business / Flotte'),
     machines: trad('20 machines'),
-    supplement: trad('+ 1,50 € / machine en plus, jusqu\'à 40'),
-    utilisateurs: trad('3 utilisateurs'),
+    supplement: trad('+ 1,50 € / machine en plus'),
+    utilisateurs: trad('utilisateurs illimités'),
     prix: trad('39 €/mois'),
     analyses: trad('30 analyses de carnet'),
     lectures: trad('500 lectures de compteur'),
-    inclus: trad('multi-utilisateurs (3), QR codes, préparation groupée, module Coûts & TCO'),
+    inclus: trad('multi-utilisateurs illimités, QR codes, préparation groupée, module Coûts & TCO'),
     recommandee: true,
   },
   {
     cle: 'enterprise',
     offre: trad('Enterprise / Parc'),
     machines: trad('40 machines'),
-    supplement: trad('+ 1 € / machine en plus, jusqu\'à 150'),
-    utilisateurs: trad('rôles d\'équipe'),
+    supplement: trad('+ 1 € / machine en plus, dégressif dès 150'),
+    utilisateurs: trad('utilisateurs illimités'),
     prix: trad('79 €/mois'),
     analyses: trad('5 000 analyses de carnet'),
     lectures: trad('2 000 lectures de compteur'),
@@ -2103,11 +2103,11 @@ const OFFRE_GRILLE = [
   },
 ];
 
-// LA CINQUIÈME CLASSE : « Grand compte », au-delà de 150 machines. Pas de carte ni de lien de paiement : un devis, par e-mail.
+// LA CINQUIÈME CLASSE : « Grand compte » = un contrat sur mesure (région des données dédiée, contrat annuel, intégrations, support), plus un palier de volume. Pas de carte ni de lien de paiement : un devis, par e-mail.
 const OFFRE_GRAND_COMPTE = {
   cle: 'grand_compte',
   offre: trad('Grand compte'),
-  machines: trad('plus de 150 machines'),
+  machines: trad('contrat sur mesure'),
   utilisateurs: trad('sur mesure'),
   prix: trad('sur devis'),
   analyses: trad('quota sur devis'),
@@ -2120,9 +2120,9 @@ const COMPARATIF_OFFRES = {
   colonnes: ['free', 'starter', 'business', 'enterprise', 'grand_compte'],
   lignes: [
     { etiquette: trad('Prix par mois'), valeurs: [trad('0 €'), trad('12 €'), trad('39 €'), trad('79 €'), trad('sur devis')] },
-    { etiquette: trad('Machines incluses'), valeurs: ['2', '5', '20', '40', trad('plus de 150')] },
-    { etiquette: trad('Machines en plus'), valeurs: [false, trad('+ 2 € (jusqu\'à 10)'), trad('+ 1,50 € (jusqu\'à 40)'), trad('+ 1 € (jusqu\'à 150)'), trad('tarif dégressif')] },
-    { etiquette: trad('Utilisateurs'), valeurs: ['1', '1', '3', trad('rôles d\'équipe'), trad('sur mesure')] },
+    { etiquette: trad('Machines incluses'), valeurs: ['2', '5', '20', '40', trad('sur mesure')] },
+    { etiquette: trad('Machines en plus'), valeurs: [false, trad('+ 2 €'), trad('+ 1,50 €'), trad('+ 1 € (dégressif dès 150)'), trad('tarif dégressif')] },
+    { etiquette: trad('Utilisateurs'), valeurs: ['1', '1', trad('illimités'), trad('illimités'), trad('sur mesure')] },
     { etiquette: trad('Consultation, rappels e-mail et notifications'), valeurs: [true, true, true, true, true] },
     { etiquette: trad('Export CSV'), valeurs: [false, true, true, true, true] },
     { etiquette: trad('QR codes, préparation groupée, Coûts & TCO'), valeurs: [false, false, true, true, true] },

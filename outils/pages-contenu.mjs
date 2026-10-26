@@ -32,7 +32,7 @@ export const PAGES = [
           'Pas de paramétrage interminable : <strong>vous importez le manuel, vous relisez le plan proposé, vous validez</strong>. Le plan reste modifiable ; chaque tâche peut avoir sa propre échéance. Si vous ne trouvez pas le carnet de votre modèle, nous pouvons établir le plan à votre place (29 € TTC par plan, sur demande).',
         ] },
         { h2: 'Tarifs', paras: [
-          'Gratuit pour <strong>2 machines</strong>. Ensuite : <strong>Starter 12 €/mois</strong> (5 machines), <strong>Business 39 €/mois</strong> (20 machines, 3 utilisateurs, QR codes, coûts et TCO), <strong>Enterprise 79 €/mois</strong> (40 machines, Stocks &amp; SAV, télémétrie). Prix mensuels toutes taxes comprises, sans engagement, avec des machines supplémentaires facturées à l\'unité selon l\'offre. Le détail et un simulateur sont sur <a href="{{accueil}}#tarifs">la page Tarifs</a>.',
+          'Gratuit pour <strong>2 machines</strong>. Ensuite : <strong>Starter 12 €/mois</strong> (5 machines), <strong>Business 39 €/mois</strong> (20 machines, utilisateurs illimités, QR codes, coûts et TCO), <strong>Enterprise 79 €/mois</strong> (40 machines, Stocks &amp; SAV, télémétrie). Prix mensuels toutes taxes comprises, sans engagement, avec des machines supplémentaires facturées à l\'unité selon l\'offre. Le détail et un simulateur sont sur <a href="{{accueil}}#tarifs">la page Tarifs</a>.',
         ] },
         { h2: 'Conçu et utilisé en Nouvelle-Calédonie', paras: [
           'KALEA est éditée en Nouvelle-Calédonie, avec des parcs réels (engins de chantier, véhicules, outillage motorisé). Les données de votre société ne sont lisibles que par les comptes de votre société, et l\'historique s\'exporte en CSV.',
@@ -70,7 +70,7 @@ export const PAGES = [
           'No endless set-up: <strong>you import the manual, review the proposed plan and validate it</strong>. The plan stays editable, and each task can have its own interval. If you can\'t find the manual for your model, we can build the plan for you (€29 including tax per plan, on request).',
         ] },
         { h2: 'Pricing', paras: [
-          'Free for <strong>2 machines</strong>. Then: <strong>Starter €12/month</strong> (5 machines), <strong>Business €39/month</strong> (20 machines, 3 users, QR codes, costs and TCO), <strong>Enterprise €79/month</strong> (40 machines, Stock &amp; Service, telemetry). Monthly prices include all taxes, with no commitment; extra machines are billed individually depending on the plan. Details and a simulator are on <a href="{{accueil}}#tarifs">the pricing section</a>.',
+          'Free for <strong>2 machines</strong>. Then: <strong>Starter €12/month</strong> (5 machines), <strong>Business €39/month</strong> (20 machines, unlimited users, QR codes, costs and TCO), <strong>Enterprise €79/month</strong> (40 machines, Stock &amp; Service, telemetry). Monthly prices include all taxes, with no commitment; extra machines are billed individually depending on the plan. Details and a simulator are on <a href="{{accueil}}#tarifs">the pricing section</a>.',
         ] },
         { h2: 'Designed and used in New Caledonia', paras: [
           'KALEA is published in New Caledonia and used on real fleets (construction equipment, vehicles, motorised tools). Your company\'s data can only be read by your company\'s accounts, and the history can be exported as CSV.',

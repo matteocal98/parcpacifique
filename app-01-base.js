@@ -253,13 +253,13 @@ const OFFRES_LIBELLES = {
 };
 const LIBELLE_PALIER = {
   free: trad('Gratuit — 2 machines suivies'),
-  starter: 'Starter / Artisan — 12 €/mois, 5 machines suivies (+ 2 € par machine, jusqu\'à 10)',
-  business: 'Business / Flotte — 39 €/mois, 20 machines suivies (+ 1,50 € par machine, jusqu\'à 40) et 3 utilisateurs',
-  enterprise: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (jusqu\'à 150)',
-  eco: 'Starter / Artisan — 12 €/mois, 5 machines suivies (+ 2 € par machine, jusqu\'à 10)',
-  pro: 'Business / Flotte — 39 €/mois, 20 machines suivies (+ 1,50 € par machine, jusqu\'à 40) et 3 utilisateurs',
-  paid: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (jusqu\'à 150)',
-  unlimited: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (jusqu\'à 150)',
+  starter: 'Starter / Artisan — 12 €/mois, 5 machines suivies (+ 2 € par machine en plus)',
+  business: 'Business / Flotte — 39 €/mois, 20 machines suivies (+ 1,50 € par machine en plus) et utilisateurs illimités',
+  enterprise: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (dégressif dès 150)',
+  eco: 'Starter / Artisan — 12 €/mois, 5 machines suivies (+ 2 € par machine en plus)',
+  pro: 'Business / Flotte — 39 €/mois, 20 machines suivies (+ 1,50 € par machine en plus) et utilisateurs illimités',
+  paid: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (dégressif dès 150)',
+  unlimited: 'Enterprise / Parc — 79 €/mois, 40 machines incluses, puis 1 € par machine (dégressif dès 150)',
 };
 // LES PALIERS QUI PAIENT. « free » et « » ne paient pas ; tout le reste paie.
 // C'est ce qui décide si « Mon compte » montre le bloc « Abonnement » et son

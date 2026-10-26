@@ -999,12 +999,11 @@ VIEWS.account = {
       });
     }
 
-    // Les plafonds d'utilisateurs de la grille : 1 / 1 / 3 / illimité. Ce n'est
-    // qu'un AFFICHAGE : le serveur applique la même règle par déclencheur
+    // Les plafonds d'utilisateurs de la grille (levée des plafonds, décision du 2026-10-27) : Gratuit et Starter 1 ; Business et
+    // Enterprise illimités. Ce n'est qu'un AFFICHAGE : le serveur applique la même règle par déclencheur
     // (`verifier_plafond_utilisateurs`), et c'est lui qui a le dernier mot.
     function plafondUtilisateurs(plan) {
-      if (plan === 'business' || plan === 'pro' || plan === 'paid') return 3;
-      if (plan === 'enterprise' || plan === 'unlimited') return null;
+      if (plan === 'business' || plan === 'pro' || plan === 'paid' || plan === 'enterprise' || plan === 'unlimited') return null;
       return 1;
     }
 

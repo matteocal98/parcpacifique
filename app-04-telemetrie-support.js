@@ -983,7 +983,7 @@ function contactFacturationInstitution(offre, companyId) {
 function contactGrandCompte(companyId) {
   const sujet = trad('Offre Grand compte') + ' — ' + trad('demande de devis');
   const corps = [
-    trad('Bonjour, je souhaite un devis pour un parc de plus de 150 machines.'),
+    trad('Bonjour, je souhaite un contrat sur mesure pour un grand parc.'),
     '',
     trad('Nombre de machines (environ) :'),
     trad('Types d\'engins ou de véhicules :'),
@@ -1004,7 +1004,7 @@ function blocGrandCompteHtml(companyId) {
           <h3>${trad('Grand compte')}</h3>
           <span class="offre-service-prix">${trad('sur devis')}</span>
         </div>
-        <p>${trad('Au-delà de 150 machines : tarif dégressif, intégrations sur mesure, accompagnement et contrat annuel. Nous établissons un devis adapté à ton parc.')}</p>
+        <p>${trad('Grand compte : contrat sur mesure (région des données dédiée, contrat annuel, intégrations, support). Nous établissons un devis adapté à ton parc.')}</p>
       </div>
       <a href="${contactGrandCompte(companyId)}" class="offre-bouton is-secondaire">${trad('Demander un devis')}${picto('mail')}</a>
     </div>`;
@@ -1490,11 +1490,11 @@ function openUpgradeNotice(companyId, message) {
       return [trad('Consultation du parc'), trad('Rappels e-mail'), trad('Notifications d\'échéances')];
     }
     if (o.cle === 'starter') {
-      return [trad('5 machines (jusqu\'à 10 avec supplément)'), trad('Export CSV des données')];
+      return [trad('5 machines (puis 2 € par machine, sans limite)'), trad('Export CSV des données')];
     }
     if (o.cle === 'business') {
       return [
-        trad('20 machines (jusqu\'à 40 avec supplément)'),
+        trad('20 machines (puis 1,50 € par machine, sans limite)'),
         trad('Multi-utilisateurs (3 accès)'),
         trad('QR codes équipements'),
         trad('Préparation groupée d\'atelier'),
@@ -1502,7 +1502,7 @@ function openUpgradeNotice(companyId, message) {
       ];
     }
     return [
-      trad('40 machines (jusqu\'à 150 avec supplément)'),
+      trad('40 machines (puis 1 € par machine, dégressif dès 150)'),
       trad('Rôles d\'équipe'),
       trad('Support dédié'),
       trad('Module Stocks & SAV (magasins, mouvements, kits)'),

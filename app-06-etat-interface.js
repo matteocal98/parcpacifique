@@ -736,14 +736,13 @@ async function doLogout() {
 // affiché partout ailleurs — OFFRE_GRILLE, CGU — qui a toujours annoncé 2
 // machines pour l'offre Gratuite). Si le déclencheur de la base applique
 // encore 1, il doit être corrigé pour rester en phase avec cette table.
-// PLAFOND de machines par offre (2026-10-06, nouvelle grille) : le nombre de machines qu'on peut AJOUTER au maximum. C'est plus que le
-// nombre de machines INCLUSES dans le prix (Starter 5, Business 20, Enterprise 40) : les suivantes sont facturées en supplément
-// (+ 2 € / + 1,50 € / + 1 €), jusqu'au plafond. Au-delà : offre supérieure, ou « Grand compte » (sur devis) après 150.
-// Les clés historiques (eco, pro, paid) et les clés de la grille (starter, business, enterprise) ont la même limite. 'unlimited' (compte
-// illimité de l'éditeur) et toute clé inconnue : aucune limite — comme avant.
-// ⚠️ MÊME TABLE dans send-maintenance-reminders et recap-hebdo (kalea-serveur) et dans le déclencheur de la base
-// (limites-machines.sql) : tests/limites-offres.test.mjs (kalea-serveur) vérifie que les trois concordent.
-const LIMITES_OFFRES = { free: 2, eco: 10, starter: 10, pro: 40, business: 40, paid: 150, enterprise: 150 };
+// PLAFOND de machines par offre. LEVÉE DES PLAFONDS (décision du 2026-10-27) : seule l'offre GRATUITE garde une limite (2 machines).
+// Toute offre PAYANTE n'a plus aucun plafond : les machines au-delà de celles incluses (Starter 5, Business 20, Enterprise 40) sont
+// facturées en supplément (+ 2 € / + 1,50 € / Enterprise : 1 € puis des tranches dégressives), sans limite. Une offre absente de cette
+// table (payante, historique ou inconnue) n'a donc aucune limite.
+// ⚠️ MÊME TABLE dans send-maintenance-reminders et recap-hebdo (kalea-serveur) et dans la fonction de la base
+// (limite_machines_par_offre, migration levee-des-plafonds.sql) : tests/limites-offres.test.mjs (kalea-serveur) vérifie qu'elles concordent.
+const LIMITES_OFFRES = { free: 2 };
 
 // ── Couverture par l'offre ────────────────────────────────────────────────────
 // Quand une période payée s'achève et que le compte repasse en gratuit, RIEN
@@ -819,14 +818,35 @@ function refuserSiNonCouverte(machine) {
 const INCLUSES_OFFRES = { eco: 5, starter: 5, pro: 20, business: 20, paid: 40, enterprise: 40 };
 const SUPPLEMENT_OFFRES = { eco: 2, starter: 2, pro: 1.5, business: 1.5, paid: 1, enterprise: 1 };
 
+// Tranches du prix d'une machine EN PLUS pour l'offre Enterprise : [nombre cumulé de machines en plus couvertes, prix par machine].
+// 1 € de la 41e à la 150e machine, 0,70 € de la 151e à la 500e, 0,45 € de la 501e à la 2 000e, 0,30 € au-delà (null = sans fin).
+// Starter et Business : un seul prix (SUPPLEMENT_OFFRES). ⚠️ MÊMES tranches que TRANCHES.paid côté serveur (machines-supplementaires.ts).
+const TRANCHES_ENTERPRISE = [[110, 1], [460, 0.7], [1960, 0.45], [null, 0.3]];
+
 // Combien de machines sont facturées EN PLUS pour un parc de n machines (même formule que le serveur) :
-// min(n, plafond de l'offre) − machines incluses, jamais négatif. 0 pour une offre sans supplément (gratuit, illimité…).
+// n − machines incluses, jamais négatif, SANS plafond. 0 pour une offre sans supplément (gratuit, illimité…).
 function machinesEnPlusFacturees(plan, n) {
   const cle = String(plan || '').toLowerCase();
   const incluses = INCLUSES_OFFRES[cle];
-  const plafond = LIMITES_OFFRES[cle];
-  if (incluses == null || plafond == null) return 0;
-  return Math.max(0, Math.min(Number(n) || 0, plafond) - incluses);
+  if (incluses == null) return 0;
+  return Math.max(0, Math.floor(Number(n) || 0) - incluses);
+}
+
+// Montant mensuel (en euros, hors forfait) de `enPlus` machines en plus, par tranches pour Enterprise.
+function montantMachinesEnPlus(plan, enPlus) {
+  const cle = String(plan || '').toLowerCase();
+  let reste = Math.max(0, Math.floor(Number(enPlus) || 0));
+  if (cle !== 'paid' && cle !== 'enterprise') return reste * (SUPPLEMENT_OFFRES[cle] || 0);
+  let deja = 0;
+  let total = 0;
+  for (const [jusqua, prix] of TRANCHES_ENTERPRISE) {
+    const taille = jusqua === null ? reste : Math.min(reste, jusqua - deja);
+    if (taille <= 0) break;
+    total += taille * prix;
+    reste -= taille;
+    deja += taille;
+  }
+  return Math.round(total * 100) / 100;
 }
 
 function prixEuros(montant) {
@@ -855,7 +875,8 @@ async function confirmerMachineEnPlus() {
   } catch (err) {
     return true;
   }
-  const prix = prixEuros(SUPPLEMENT_OFFRES[String(plan).toLowerCase()]);
+  // Prix de CETTE machine (la suivante) : avec les tranches d'Enterprise, il baisse à mesure que le parc grandit.
+  const prix = prixEuros(montantMachinesEnPlus(plan, apres) - montantMachinesEnPlus(plan, avant));
   return window.confirm(tR('Cette machine dépasse celles incluses dans ton offre : elle est facturée {prix} par mois en plus, au prorata du mois en cours, sur ta prochaine facture. Ajouter la machine ?', { prix }));
 }
 
@@ -866,7 +887,7 @@ function phraseMachinesEnPlus() {
   const enPlus = machinesEnPlusFacturees(plan, UI.machines.length);
   if (enPlus <= 0) return '';
   return tR('{n} machines : {incluses} incluses + {enPlus} en plus (+ {montant} par mois)', {
-    n: UI.machines.length, incluses: INCLUSES_OFFRES[plan], enPlus, montant: prixEuros(enPlus * SUPPLEMENT_OFFRES[plan]),
+    n: UI.machines.length, incluses: INCLUSES_OFFRES[plan], enPlus, montant: prixEuros(montantMachinesEnPlus(plan, enPlus)),
   });
 }
 
@@ -879,15 +900,11 @@ async function changerOffreAbonnement(cle, bouton, idMessage, overlay) {
   const cible = offreDeLaGrille(cle);
   const n = UI.machines.length;
   const enPlus = machinesEnPlusFacturees(cible.cle, n);
-  const plafond = LIMITES_OFFRES[cible.cle];
   let question = tR('Passer à l\'offre {offre} ({prix}) ? Le changement est facturé au prorata sur ta prochaine facture.',
     { offre: trad(cible.offre), prix: trad(cible.prix) });
   if (enPlus > 0) {
     question += ' ' + tR('Avec tes {n} machines, {enPlus} seront facturées en plus ({montant} par mois).',
-      { n, enPlus, montant: prixEuros(enPlus * SUPPLEMENT_OFFRES[cible.cle]) });
-  }
-  if (plafond != null && n > plafond) {
-    question += ' ' + tR('Attention : ton parc ({n} machines) dépasse ce que couvre cette offre ({plafond}) : les machines au-delà passeront en lecture seule.', { n, plafond });
+      { n, enPlus, montant: prixEuros(montantMachinesEnPlus(cible.cle, enPlus)) });
   }
   if (!window.confirm(question)) return;
   dire('');
