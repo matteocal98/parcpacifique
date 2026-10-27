@@ -125,7 +125,7 @@ async function envoyerMouvementStock(args, idOp) {
   if (error) throw error;
 }
 async function fileTraiterStock(op) { await envoyerMouvementStock(op.payload.args, op.payload.idOp); }
-const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne, ordre: fileTraiterOrdre, frais: fileTraiterFrais, stock: fileTraiterStock };
+const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne, ordre: fileTraiterOrdre, frais: fileTraiterFrais, stock: fileTraiterStock, signature: (op) => fileTraiterSignature(op) };   // app-20 est chargé après ce fichier : appel différé
 
 // ── La synchronisation ──
 let __fileEnCours = false;
@@ -214,7 +214,7 @@ function majBandeauFile() {
 function fileLibelleOperation(op) {
   const r = op.resume || {};
   const quand = new Date(op.creeA).toLocaleString(localeActive(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  const quoi = ({ panne: trad('Panne signalée'), ordre: trad('Ordre de travail'), frais: trad('Frais saisi'), stock: trad('Mouvement de stock') })[op.type] || trad('Intervention enregistrée');
+  const quoi = ({ panne: trad('Panne signalée'), ordre: trad('Ordre de travail'), frais: trad('Frais saisi'), stock: trad('Mouvement de stock'), signature: trad('Signature') })[op.type] || trad('Intervention enregistrée');
   return { titre: `${quoi} · ${r.machine || trad('Machine')}`, sous: quand + (r.detail ? ' · ' + r.detail : '') };
 }
 async function ouvrirFileOperations() {

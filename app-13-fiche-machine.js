@@ -1527,7 +1527,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const hidden = historyData.length - shown.length;
     section.insertAdjacentHTML('beforeend', `
       <div class="ref-scroll"><table class="ref-table">
-        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? `<th>${trad('Compteur')}</th>` : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th>${tcoActif() ? `<th>${trad('Coût total')}</th>` : ''}</tr></thead>
+        <thead><tr><th>${trad('Date')}</th>${isCounterMode ? `<th>${trad('Compteur')}</th>` : ''}<th>${trad('Éléments traités')}</th><th>${trad('Opérateur / Atelier')}</th><th>${trad('Remarques')}</th>${tcoActif() ? `<th>${trad('Coût total')}</th>` : ''}${typeof signaturesActif === 'function' && signaturesActif() ? `<th>${trad('Signature')}</th>` : ''}</tr></thead>
         <tbody>
           ${shown.map(h => `
             <tr>
@@ -1537,10 +1537,13 @@ function openPlanView(machine, companyId, categories, options = {}) {
               <td data-label="${esc(trad('Opérateur / Atelier'))}">${nomOperateurTexte(h) ? esc(nomOperateurTexte(h)) : '<span class="muted">—</span>'}</td>
               <td data-label="${esc(trad('Remarques'))}">${h.description ? esc(h.description) : '<span class="muted">—</span>'}</td>
               ${tcoActif() ? `<td data-label="${esc(trad('Coût total'))}">${(h.parts_cost != null || h.labor_cost != null) ? esc(formatMontant((Number(h.parts_cost) || 0) + (Number(h.labor_cost) || 0))) : '<span class="muted">—</span>'}</td>` : ''}
+              ${typeof signaturesActif === 'function' && signaturesActif() ? `<td data-label="${esc(trad('Signature'))}" data-sig-cellule="${esc(h.id)}"></td>` : ''}
             </tr>`).join('')}
         </tbody>
       </table></div>
       ${hidden > 0 ? `<div class="hint">tR('{caches} entretien(s) plus ancien(s) non affiché(s) ici — l\'export CSV contient bien les {total} entretiens.', { caches: hidden, total: historyData.length })</div>` : ''}
       <div class="hint">${tR('{n} entretien(s) enregistré(s).', { n: historyData.length })}</div>`);
+    // Signatures (étape 4) : état « signée / non signée » + bouton « Rapport » par ligne, chargés après l'affichage.
+    if (typeof brancherSignaturesHistorique === 'function') brancherSignaturesHistorique(section, shown);
   })();
 }

@@ -3222,6 +3222,8 @@ function openLogInterventionModal(machine, tache, options = {}) {
       boot(sortiesRefusees
         ? messageEnregistre + ' — ' + tR('{n} sortie(s) de stock refusée(s) : à enregistrer à la main dans Stock.', { n: sortiesRefusees })
         : messageEnregistre);
+      // Signature numérique (étape 4) : demandée seulement si la société l'exige ; ne bloque jamais l'enregistrement déjà fait.
+      if (typeof proposerSignaturesApresIntervention === 'function') proposerSignaturesApresIntervention(machine, idIntervention);
     } catch (err) {
       // Réseau absent ou serveur indisponible : l'action est gardée sur l'appareil et partira toute seule. Impossible si elle demande le réseau
       // (sortie de stock, clôture d'un ordre) : on le dit, et rien n'est perdu — le formulaire reste ouvert.
@@ -3234,6 +3236,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
           overlay.remove();
           renderApp();
           showToast(trad('Intervention enregistrée sur l\'appareil : elle partira dès que le réseau revient.'));
+          if (typeof proposerSignaturesApresIntervention === 'function') proposerSignaturesApresIntervention(machine, idIntervention, true);
           return;
         } catch (errFile) {
           errorEl.textContent = (errFile && errFile.message) || trad('Enregistrement impossible sans réseau.');

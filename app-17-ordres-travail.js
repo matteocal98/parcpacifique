@@ -164,6 +164,7 @@ VIEWS.ordres = {
               <div class="ui-aide">${trad('Désactivé par défaut : un ordre terminé est alors clos tout de suite. Activé, il attend d\'être validé (ou refusé avec un motif) par le gérant ou le droit de gestion.')}</div>
               <div class="ui-aide" id="ot-validation-msg" role="status" aria-live="polite"></div>
             </div>` : ''}
+            ${typeof blocReglageSignatureHtml === 'function' ? blocReglageSignatureHtml() : ''}
           </div>
         </section>
       </div>`;
@@ -219,6 +220,7 @@ VIEWS.ordres = {
         msg.textContent = voulu ? trad('Validation activée : les ordres terminés attendent ta validation.') : trad('Validation désactivée : un ordre terminé est clos tout de suite.');
       });
     }
+    if (typeof brancherReglageSignature === 'function') brancherReglageSignature(root);
     if (UI.ordres) dessiner();   // dernière liste connue pendant le rechargement
     chargerOrdres().then(() => {
       dessiner();
@@ -402,6 +404,8 @@ function ouvrirOrdre(id) {
     if (otEstOuvert(o) && gestion) boutons.push(`<button type="button" class="otm-btn" data-ot-act="modifier">${trad('Modifier')}</button>`);
     if (o.statut === 'en_cours' && gestion) boutons.push(`<button type="button" class="otm-btn" data-ot-act="reouvrir">${trad('Remettre à faire')}</button>`);
     if (otEstOuvert(o) && gestion) boutons.push(`<button type="button" class="otm-btn is-ambre" data-ot-act="annuler">${trad('Annuler l\'ordre')}</button>`);
+    // Signature numérique (étape 4) : l'intervention de l'ordre terminé se signe et se télécharge en rapport PDF.
+    if (o.intervention_id && typeof signaturesActif === 'function' && signaturesActif()) boutons.push(`<button type="button" class="otm-btn" data-ot-act="rapport">${trad('Rapport et signatures')}</button>`);
 
     const faitesN = liste.filter((t) => t.fait).length;
     const pct = liste.length ? Math.round((faitesN / liste.length) * 100) : 0;
@@ -494,6 +498,7 @@ function ouvrirOrdre(id) {
     if (!b) return;
     const o = ordre();
     const act = b.getAttribute('data-ot-act');
+    if (act === 'rapport') { ouvrirRapportIntervention(o.intervention_id); return; }
     if (act === 'demarrer') { if (await appeler('ordre_travail_agir', { p_id: o.id, p_action: 'demarrer', p_note: null }, b)) dessiner(); return; }
     if (act === 'reouvrir') { if (await appeler('ordre_travail_agir', { p_id: o.id, p_action: 'reouvrir', p_note: null }, b)) dessiner(); return; }
     if (act === 'valider') { if (await appeler('ordre_travail_agir', { p_id: o.id, p_action: 'valider', p_note: null }, b)) dessiner(); return; }

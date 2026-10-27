@@ -2733,6 +2733,28 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .file-banniere-actions{display:inline-flex;gap:14px;flex-wrap:wrap;}
 .file-modal .ui-ligne-action{flex-wrap:wrap;justify-content:flex-end;}
 
+/* ── SIGNATURE NUMÉRIQUE (app-20-signatures.js) : zone de tracé, cartes de signature, état d'intégrité, avenants ── */
+.sig-modal{max-width:560px;}
+.sig-signataire{margin:0 0 4px;font-size:14px;font-weight:700;color:var(--ink);}
+.sig-zone{position:relative;margin:10px 0 6px;border-radius:var(--r-md);background:var(--surface);border:2px dashed var(--line-2);height:190px;overflow:hidden;touch-action:none;}
+.sig-zone canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;}
+.sig-ligne{position:absolute;left:14px;bottom:8px;font-size:12px;font-weight:700;color:var(--ink-4);pointer-events:none;text-transform:uppercase;letter-spacing:.04em;}
+.sig-etat{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:var(--r-md);margin-bottom:12px;}
+.sig-etat strong{display:block;font-size:14px;font-weight:800;} .sig-etat span:not(.material-symbols-outlined){display:block;font-size:13px;line-height:18px;}
+.sig-etat .material-symbols-outlined{font-size:24px;}
+.sig-etat.is-ok{background:var(--otm-vert-fond);color:var(--otm-vert);}
+.sig-etat.is-alerte{background:var(--otm-rouge2-fond);color:var(--otm-rouge2);}
+.sig-etat.is-aucune,.sig-etat.is-inconnu{background:var(--otm-gris-fond);color:var(--otm-gris);}
+.sig-carte{display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--r-md);background:var(--surface);margin-top:8px;}
+.sig-image{width:120px;height:56px;object-fit:contain;border-radius:8px;background:#fff;flex:none;}
+.sig-carte-textes{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px;}
+.sig-meta{font-size:12px;color:var(--ink-3);} .sig-hash{font-family:ui-monospace,Consolas,monospace;}
+.sig-avenant{padding:10px 12px;border-radius:var(--r-md);background:var(--surface);margin-top:8px;font-size:13px;}
+.sig-avenant p{margin:4px 0 0;white-space:pre-wrap;}
+.sig-avenant .sig-meta{display:block;}
+.sig-modal .ui-champ-groupe{margin-bottom:10px;}
+@media (max-width:560px){.sig-zone{height:170px;}.sig-image{width:96px;height:48px;}}
+
 /* ── ORDRES DE TRAVAIL : couleurs de la liste (filtres et pastilles), mêmes teintes que la fiche ── */
 .ui-puce[class*="teinte-"]{background:var(--t-fond);color:var(--t-texte);}
 .ui-puce[class*="teinte-"] .ui-compte{background:var(--t-texte);color:var(--surface);}
@@ -3443,6 +3465,7 @@ html[data-theme="dark"] .stat-table td{border-top:1px solid rgba(255,255,255,0.0
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(0,0,0,0.31)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge-vide{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-jauge-piste)):not(:has(.mstrip-jauge-vide))::before{background:rgba(255,255,255,0.19)}
+html[data-theme="dark"] .sig-image{background:var(--surface)}
 html[data-theme="dark"] .ui-puce[class*="teinte-"].is-actif .ui-compte{background:rgba(255,255,255,0.04)}
 html[data-theme="dark"] .overlay .modal.otm{box-shadow:0 25px 60px -15px rgba(0,0,0,0.65)}
 html[data-theme="dark"] .otm-btn{box-shadow:0 1px 2px rgba(0,0,0,0.3)}

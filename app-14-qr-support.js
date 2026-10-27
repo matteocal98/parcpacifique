@@ -1616,7 +1616,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret, aRespect, aOrdres,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret, aRespect, aOrdres, aSignatures,
   ] = await Promise.all([
 
     sonderColonne('companies', 'contact_first_name'),
@@ -1644,6 +1644,8 @@ async function boot(toastMessage) {
     sonderColonne('interventions', 'was_late'),
     // Ordres de travail (étape 2 du plan nouvelles fonctionnalités) : table ajoutée par ordres-de-travail.sql ; absente → ni menu ni bouton.
     sonderColonne('work_orders', 'numero, statut'),
+    // Signature numérique (étape 4) : colonne ajoutée par signatures-interventions.sql ; absente → ni bouton ni fenêtre.
+    sonderColonne('companies', 'signature_requise'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1665,6 +1667,7 @@ async function boot(toastMessage) {
   SCHEMA.hasCommandes = aCommandes && aFournisseurs;
   SCHEMA.hasPannes = aPannes;
   SCHEMA.hasOrdres = aOrdres;
+  SCHEMA.hasSignatures = aSignatures;
   SCHEMA.hasArretCout = aPannes && aArret;
   SCHEMA.hasRespectPlan = aRespect;
 
