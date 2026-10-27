@@ -1572,7 +1572,11 @@ VIEWS.machines = {
   subtitle: () => `${UI.machines.length} machine${UI.machines.length > 1 ? 's' : ''} · ${UI.companyName}`,
   render() {
     if (!UI.machines.length) {
-      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div></section>${blocMachinesArchiveesHtml()}</div>`;
+      // L'import est proposé ICI aussi : c'est là que commence un nouveau client qui a déjà la liste de son parc dans un tableur.
+      const importVide = peutImporterMachines()
+        ? `<div class="ui-aide" style="margin-top:10px">${trad('Tu as déjà la liste de ton parc dans un tableur ?')}</div><div style="margin-top:8px"><button type="button" class="ui-btn ui-btn-pastille" id="fleet-import">${picto('televerser')}<span>${trad('Importer des machines')}</span></button></div>`
+        : '';
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div>${importVide}</section>${blocMachinesArchiveesHtml()}</div>`;
     }
     const c = UI.counts;
     const f = fleetFilters();
@@ -1591,9 +1595,11 @@ VIEWS.machines = {
               <button type="button" data-parc-vue="tuiles" class="${parcVueActive() === 'tuiles' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'tuiles'}">${trad('Tuiles')}</button>
             </div>
             ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
+            ${peutImporterMachines() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-import" aria-label="${esc(trad('Importer des machines'))}" title="${esc(trad('Importer des machines'))}">${picto('televerser')}<span>${trad('Importer')}</span></button>` : ''}
             <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
             <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>`)}
           <div class="ui-section-corps">
+            ${importBandeauHtml()}
             <div class="ui-barre">
               <input id="fleet-search" class="ui-champ" type="search" value="${esc(f.q)}"
                      placeholder="${trad('Rechercher un nom, une marque, un n° de série…')}"
@@ -1627,6 +1633,8 @@ VIEWS.machines = {
     // l'affichage de la liste, qui est l'essentiel de cette vue.
     root.querySelector('#fleet-add')?.addEventListener('click', handleAddMachine);
     root.querySelector('#fleet-export')?.addEventListener('click', ouvrirModaleExport);
+    root.querySelector('#fleet-import')?.addEventListener('click', ouvrirImportMachines);
+    importBrancherBandeau(root);
     // Le scanner n'existe plus en offre Gratuit (bouton absent) ; la garde ci-dessous couvre un changement d'offre en
     // cours de session. Un QR d'une société tierce scanné ici résout silencieusement à rien.
     root.querySelector('#fleet-scanner')?.addEventListener('click', () => {

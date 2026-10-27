@@ -611,7 +611,7 @@ function brancherComposant(overlay) {
 // tracking_mode ∈ {days, hours, km}.
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
-const SCHEMA = { hasArchived: false, hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
+const SCHEMA = { hasImport: false, hasArchived: false, hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
 
 // Fragment `.select()` du catalogue de pièces (parts_catalog), UN SEUL
 // endroit pour les 3 lectures existantes (boot, catalogue TCO, import CSV)

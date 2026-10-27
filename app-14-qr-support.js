@@ -1680,7 +1680,7 @@ async function boot(toastMessage) {
   // jusqu'au prochain démarrage. Constaté en direct sur un vrai téléphone
   // (c'est la même faille qui faisait disparaître le TCO du tableau de
   // bord — voir keeva-redesign-project).
-  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt, hasArchived] = await Promise.all([
+  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt, hasArchived, hasImport] = await Promise.all([
     sonderColonne('machines', 'counter_unit'),
     // Second compteur : sondé séparément, la migration peut être appliquée
     // sans que l'autre le soit (voir SCHEMA.hasCounter2).
@@ -1694,6 +1694,8 @@ async function boot(toastMessage) {
     sonderColonne('machines', 'created_at'),
     // Machines archivées (levée des plafonds, D7) : colonne ajoutée par levee-des-plafonds.sql ; absente → aucune archive, rien ne change.
     sonderColonne('machines', 'archived'),
+    // Import de machines en masse (étape 1 du plan nouvelles fonctionnalités) : colonnes ajoutées par import-machines-journal-audit.sql ; absentes → pas de bouton.
+    sonderColonne('machines', 'external_ref, import_batch_id'),
   ]);
   SCHEMA.hasCounter = hasCounter;
   SCHEMA.hasCounter2 = hasCounter2;
@@ -1703,6 +1705,7 @@ async function boot(toastMessage) {
   SCHEMA.hasModelYear = hasModelYear;
   SCHEMA.hasCreatedAt = hasCreatedAt;
   SCHEMA.hasArchived = hasArchived;
+  SCHEMA.hasImport = hasImport;
 
   const colonnesMachine = [
     'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
@@ -1718,6 +1721,7 @@ async function boot(toastMessage) {
     // couvre quand le compte repasse en gratuit.
     ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
     ...(SCHEMA.hasArchived ? ['archived', 'archived_at'] : []),
+    ...(SCHEMA.hasImport ? ['external_ref'] : []),
     ...(SCHEMA.hasTelemetry ? ['telemetry_source_id', 'telemetry_ref', 'counter_source', 'telemetry_last_at'] : []),
     ...(SCHEMA.hasGps ? ['position_enabled', 'last_lat', 'last_lon', 'last_position_at'] : []),
     // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco ci-dessus

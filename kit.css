@@ -2788,6 +2788,21 @@ html[data-theme="dark"]{
 }
 html[data-theme="dark"] body{background:var(--surface);color:var(--ink);font-weight:500;}   /* écriture un cran plus épaisse en sombre : le texte clair sur fond sombre paraît plus fin */
 
+/* ── IMPORT DE MACHINES EN MASSE (app-16-import-machines.js) — couleurs par jetons : le thème sombre suit tout seul ── */
+.import-resume{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.import-resume .ui-tuile-valeur{font-size:22px;}
+.import-apercu{max-height:300px;overflow:auto;}
+.import-barre-progres{height:10px;border-radius:var(--r-pill);background:var(--surface);overflow:hidden;}
+.import-barre-progres > div{height:100%;background:var(--ok);transition:width .25s ease;}
+.import-modal .ui-segment{display:flex;flex-wrap:wrap;}
+.import-modal .import-csv-terminal-code{white-space:normal;overflow-wrap:anywhere;line-height:1.55;}
+/* La fenêtre est plus haute que l'écran quand le rapport est long : le CORPS défile, le pied (boutons) reste toujours visible. */
+.import-modal .import-csv-modal{display:flex;flex-direction:column;max-height:calc(100dvh - 32px);}
+.import-modal .import-csv-corps{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;}
+.import-modal .import-csv-pied{flex:0 0 auto;flex-wrap:wrap;}
+.import-bandeau-boutons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+@media (max-width:560px){.import-resume{grid-template-columns:repeat(2,minmax(0,1fr));}.import-apercu{max-height:240px;}}
+
 /* SOMBRE-GENERE:DEBUT — produit par outils/generer-theme-sombre.mjs : NE PAS MODIFIER À LA MAIN */
 html[data-theme="dark"] .erreur-globale{box-shadow:0 10px 30px rgba(0,0,0,0.4)}
 html[data-theme="dark"] .offline-banner{font-weight:700}
