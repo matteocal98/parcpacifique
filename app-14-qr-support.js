@@ -61,6 +61,12 @@ function ouvrirFicheDepuisPushSiPresent() {
     __stockDepuisLienNatifEnAttente = null;
     ouvrirFicheStockDepuisLien(lien);
   }
+  if (__ordreIdDepuisPushEnAttente) {
+    const ordreId = __ordreIdDepuisPushEnAttente;
+    __ordreIdDepuisPushEnAttente = null;
+    ouvrirOrdreParId(ordreId);
+    return;
+  }
   if (!__machineIdDepuisPushEnAttente) return;
   const machineId = __machineIdDepuisPushEnAttente;
   __machineIdDepuisPushEnAttente = null;
@@ -1543,7 +1549,7 @@ async function boot(toastMessage) {
   //   - hasTelemetry / hasGps : une sonde sur les colonnes ajoutées à machines suffit.
   const [
     aNomsContact, aRappels, aPushRoles, aPays, aReferences, aTco, aStock, aConditionnement, aKits, aTelemetrie, aGps,
-    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret, aRespect,
+    roleExiste, aStructure, aChampsCatalogue, aChampsLigne, aInventaire, aFournisseurs, aFournisseursComplets, aDocsFournisseurs, aCommandes, aPannes, aArret, aRespect, aOrdres,
   ] = await Promise.all([
 
     sonderColonne('companies', 'contact_first_name'),
@@ -1569,6 +1575,8 @@ async function boot(toastMessage) {
     sonderColonne('machine_breakdowns', 'severity, status, stopped'),
     sonderColonne('machine_breakdowns', 'downtime_hours, downtime_rate, downtime_cost'),
     sonderColonne('interventions', 'was_late'),
+    // Ordres de travail (étape 2 du plan nouvelles fonctionnalités) : table ajoutée par ordres-de-travail.sql ; absente → ni menu ni bouton.
+    sonderColonne('work_orders', 'numero, statut'),
   ]);
   SCHEMA.hasContactNames = aNomsContact;
   SCHEMA.hasReminders = aRappels;
@@ -1589,6 +1597,7 @@ async function boot(toastMessage) {
   SCHEMA.hasSupplierDocs = SCHEMA.hasSuppliersFull && aDocsFournisseurs;
   SCHEMA.hasCommandes = aCommandes && aFournisseurs;
   SCHEMA.hasPannes = aPannes;
+  SCHEMA.hasOrdres = aOrdres;
   SCHEMA.hasArretCout = aPannes && aArret;
   SCHEMA.hasRespectPlan = aRespect;
 
@@ -1895,6 +1904,7 @@ async function boot(toastMessage) {
   initialiserLangueServeur(session); // sans await : ne retarde jamais l'affichage
   UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
+  UI.userId = session.user.id || null;   // sert aux ordres de travail : « assigné à moi »
   UI.categories = categories || [];
   UI.components = composants || [];
   UI.partsCatalog = partsCatalog;

@@ -1191,6 +1191,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
         <button type="button" class="fm-btn fm-btn-secondaire" id="edit-from-plan" aria-label="${esc(trad('Modifier la machine'))}" title="${esc(trad('Modifier la machine'))}"><span class="fm-btn-ico-primary">${picto('crayon')}</span><span>${trad('Modifier la machine')}</span></button>
         ${machine.manual_url ? `<button type="button" class="fm-btn fm-btn-secondaire" id="plan-view-manual" aria-label="${esc(trad('Voir le carnet d\'entretien (PDF)'))}" title="${esc(trad('Voir le carnet d\'entretien (PDF)'))}"><span class="fm-btn-ico-accent">${picto('carnet')}</span><span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
         <button type="button" class="fm-btn fm-btn-secondaire" id="plan-qr-code" aria-label="${esc(trad('QR code'))}" title="${esc(trad('QR code'))}">${picto('qrcode')}<span>${trad('QR code')}</span></button>
+        ${(typeof ordresActif === 'function' && ordresActif() && peutGererOrdres()) ? `<button type="button" class="fm-btn fm-btn-secondaire" id="ordre-from-plan" aria-label="${esc(trad('Créer un ordre de travail'))}" title="${esc(trad('Créer un ordre de travail'))}">${picto('coche')}<span>${trad('Créer un ordre')}</span></button>` : ''}
         <button type="button" class="fm-btn fm-btn-primary" id="log-from-plan"><span class="fm-btn-ico-ok">${picto('entretien')}</span><span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>
       </div>
       ${bandeauHtml}
@@ -1300,6 +1301,10 @@ function openPlanView(machine, companyId, categories, options = {}) {
   overlay.querySelector('#log-from-plan').addEventListener('click', () => {
     overlay.remove();
     openLogInterventionModal(machine);
+  });
+  overlay.querySelector('#ordre-from-plan')?.addEventListener('click', () => {
+    overlay.remove();
+    ouvrirFormOrdre({ machineId: machine.id, plan: Boolean(machine.plan) });   // les tâches du plan sont reprises quand la machine en a un
   });
   overlay.querySelector('#plan-qr-code').addEventListener('click', () => {
     if (!planCouvreQr()) {

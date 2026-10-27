@@ -33,6 +33,12 @@ function actionsRapidesDuRole() {
     id: 'entretien', court: trad('Entretien'), titre: trad('Enregistrer un entretien'), sous: trad('Marquer fait, avec pièces et temps passé'), picto: 'ajuste', teinte: 'is-olive',
     agir: () => choisirMachineRapide(trad('Entretien : quelle machine ?'), (m) => openLogInterventionModal(m)),
   });
+  if (typeof ordresActif === 'function' && ordresActif() && vueAutoriseePourRole('ordres')) {
+    actions.push({
+      id: 'ordres', court: trad('Ordres'), titre: trad('Ordres de travail'), sous: trad('Tâches assignées : démarrer, cocher, terminer'), picto: 'coche', teinte: 'is-olive',
+      agir: () => goTo('ordres'),
+    });
+  }
   if (SCHEMA.hasPannes) {
     actions.push({
       id: 'panne', court: trad('Panne'), titre: trad('Signaler une panne'), sous: trad('Prévient le gérant : machine, gravité, arrêt'), picto: 'alerte', teinte: 'is-amber',

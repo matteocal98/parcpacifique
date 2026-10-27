@@ -1783,6 +1783,12 @@ function wirePushEcouteurs() {
   // établi pour le lien profond QR.
   plugin.addListener('pushNotificationActionPerformed', (action) => {
     const donnees = action && action.notification && action.notification.data;
+    const ordreId = donnees && donnees.type === 'ordre' && donnees.ordre_id;
+    if (ordreId) {
+      if (__appPretePourPush) ouvrirOrdreParId(ordreId);
+      else __ordreIdDepuisPushEnAttente = ordreId;
+      return;
+    }
     const machineId = donnees && donnees.machine_id;
     if (!machineId) return;
     if (__appPretePourPush) ouvrirFicheParId(machineId);

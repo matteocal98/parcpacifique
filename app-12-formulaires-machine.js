@@ -2289,7 +2289,10 @@ function habillerChampDate(input, titre) {
   new MutationObserver(majBouton).observe(input, { attributes: true, attributeFilter: ['disabled'] });
 }
 
-function openLogInterventionModal(machine, tache) {
+// options.ordre = { id, numero, assigneId, remarque } : intervention ouverte depuis la CLÔTURE d'un ordre de travail (tâches déjà cochées, intervenant et
+// remarque préremplis) ; options.onSaved(interventionId) est appelé UNE fois l'intervention enregistrée, avant le rechargement (voir app-17-ordres-travail.js).
+// `tache` peut être un libellé ou une LISTE de libellés à pré-cocher.
+function openLogInterventionModal(machine, tache, options = {}) {
   // « Marquer fait » pré-coche la ligne du bandeau cliqué, toujours sur
   // l'onglet Entretien planifié (seul onglet avec une checklist).
   if (refuserSiNonCouverte(machine)) return;
@@ -2489,7 +2492,7 @@ function openLogInterventionModal(machine, tache) {
                   const teinte = etatTache && (etatTache.state === 'late' || etatTache.state === 'soon') ? etatTache.state : '';
                   return `
                   <label class="log-item-carte${teinte ? ' is-' + teinte : ''}"${teinte ? ` title="${esc(etatTache.label || etatTache.short || '')}"` : ''}>
-                    <input type="checkbox" value="${esc(it.label)}"${it.label === tache ? ' checked' : ''}>
+                    <input type="checkbox" value="${esc(it.label)}"${(Array.isArray(tache) ? tache.includes(it.label) : it.label === tache) ? ' checked' : ''}>
                     <span class="log-item-check">${picto('coche')}</span>
                     <span class="${it.frequency ? 'log-item-colonnes' : 'log-item-corps-pleine'}">
                       <span class="log-item-titre-ligne">
@@ -2605,7 +2608,7 @@ function openLogInterventionModal(machine, tache) {
 
         <div class="log-bloc log-bloc-remarques" id="log-remarques-section">
           <label for="log-notes">${picto('crayon')}${trad('Remarques')}<span class="log-optionnel" style="margin-left:8px;">${trad('Optionnel')}</span></label>
-          <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}"></textarea>
+          <textarea id="log-notes" placeholder="${trad('Ex. Pièce X remplacée, RAS sinon')}">${esc((options.ordre && options.ordre.remarque) || '')}</textarea>
         </div>
         <div class="hint" id="log-error"></div>
 
@@ -2640,6 +2643,7 @@ function openLogInterventionModal(machine, tache) {
       if (!overlay.isConnected) return;
       select.innerHTML = `<option value="">${trad('Non précisé')}</option>`
         + equipe.map(m => `<option value="${esc(m.id)}">${esc(m.nom_affiche)}</option>`).join('');
+      if (options.ordre && options.ordre.assigneId) select.value = options.ordre.assigneId;   // clôture d'un ordre : l'intervenant assigné est proposé
       select.disabled = false;
     } catch (err) {
       select.innerHTML = `<option value="">${trad('Équipe indisponible')}</option>`;
@@ -3259,6 +3263,11 @@ function openLogInterventionModal(machine, tache) {
         }
       }
 
+      // Clôture d'un ordre de travail : l'ordre est lié à l'intervention qui vient d'être enregistrée. Un échec ici ne doit JAMAIS faire perdre
+      // l'intervention (déjà écrite) : l'appelant prévient l'utilisateur lui-même.
+      if (typeof options.onSaved === 'function') {
+        try { await options.onSaved(intervention && intervention.id); } catch (errOrdre) { console.warn('Ordre de travail non terminé :', errOrdre); }
+      }
       overlay.remove();
       const messageEnregistre = (kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré'))
         + (kindActif === 'entretien' && derniereEcheanceTexte ? ' — ' + derniereEcheanceTexte : '');
@@ -3393,7 +3402,7 @@ async function ouvrirListePannes() {
       const quand = new Date(p.reported_at).toLocaleDateString(LANGUE === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short' });
       const classe = p.status === 'resolue' ? 'is-ok' : (p.stopped || p.severity === 'bloquante' ? 'is-retard' : 'is-bientot');
       const actions = peutTraiter ? (p.status === 'ouverte'
-        ? `<button type="button" class="ui-btn ui-btn-pastille" data-panne-statut="prise_en_charge" data-id="${esc(p.id)}">${trad('Prendre en charge')}</button>`
+        ? `<button type="button" class="ui-btn ui-btn-pastille" data-panne-statut="prise_en_charge" data-id="${esc(p.id)}">${trad('Prendre en charge')}</button>${(typeof ordresActif === 'function' && ordresActif()) ? `<button type="button" class="ui-btn ui-btn-pastille" data-panne-ordre="${esc(p.id)}">${trad('Créer un ordre de travail')}</button>` : ''}`
         : (p.status === 'prise_en_charge' ? `<button type="button" class="ui-btn ui-btn-plein" data-panne-statut="resolue" data-id="${esc(p.id)}">${trad('Marquer résolue')}</button>` : '')) : '';
       return `<div class="panne-ligne ${classe}">
         <div class="panne-ligne-tete"><strong>${esc(p.machine_name || '')}</strong>${p.stopped ? `<span class="ui-statut is-retard">${trad('À l\'arrêt')}</span>` : ''}<span class="ui-statut ${classe}">${esc(trad(STATUTS_PANNE[p.status] || p.status))}</span></div>
@@ -3408,6 +3417,12 @@ async function ouvrirListePannes() {
   overlay.addEventListener('click', async (e) => {
     const f = e.target.closest('[data-filtre]');
     if (f) { filtre = f.getAttribute('data-filtre'); dessiner(); return; }
+    const ordrePanne = e.target.closest('[data-panne-ordre]');
+    if (ordrePanne) {
+      const panne = (UI.pannes || []).find((x) => String(x.id) === String(ordrePanne.getAttribute('data-panne-ordre')));
+      if (panne) { overlay.remove(); ouvrirFormOrdre({ machineId: panne.machine_id, panne }); }
+      return;
+    }
     const b = e.target.closest('[data-panne-statut]');
     if (!b) return;
     if (b.getAttribute('data-panne-statut') === 'resolue' && SCHEMA.hasArretCout) {

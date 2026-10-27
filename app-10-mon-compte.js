@@ -1484,6 +1484,7 @@ function openPlusSheet() {
             <span class="plus-sheet-section-accessoire">${trad('Accès rapide')}</span>
           </div>
           ${itemHtml('manuals', 'manuels', 'is-indigo', trad('Plans d\'entretien'), trad('Revues techniques, éclatés & atelier'), nbDocs ? `<span class="plus-sheet-item-compte">${esc(tR('{n} doc(s)', { n: nbDocs }))}</span>` : '')}
+          ${(typeof ordresActif === 'function' && ordresActif() && vueAutoriseePourRole('ordres')) ? itemHtml('ordres', 'ordres', 'is-olive', trad('Ordres de travail'), trad('Tâches assignées, à cocher et à terminer'), '') : ''}
           ${vueAutoriseePourRole('agenda') ? itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '') : ''}
           ${(tcoActif() && vueAutoriseePourRole('tco')) ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
           ${(tcoActif() && vueAutoriseePourRole('stats')) ? itemHtml('stats', 'graphique', 'is-royal', trad('Statistiques'), trad('Dépenses, maintenance et stock en graphiques'), '') : ''}

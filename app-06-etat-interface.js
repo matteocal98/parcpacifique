@@ -42,6 +42,7 @@ const NAV_ITEMS = [
   { id: 'machines', label: trad('Machines'), short: trad('Machines'), icon: 'parc' },
   { id: 'manuals', label: trad('Plan d\'entretien'), short: trad('Plan'), icon: 'manuels' },
   { id: 'agenda', label: trad('Agenda et préparation'), short: trad('Agenda'), icon: 'agenda' },
+  { id: 'ordres', label: trad('Ordres de travail'), short: trad('Ordres'), icon: 'ordres' },
   { id: 'reminders', label: trad('Rappels et notifications'), short: trad('Rappels'), icon: 'rappels' },
   { id: 'tco', label: trad('Coûts & TCO'), short: trad('Coûts'), icon: 'couts' },
   { id: 'stock', label: trad('Stocks & SAV'), short: trad('Stocks'), icon: 'stock' },
@@ -68,7 +69,7 @@ const VUES_MASQUEES_PAR_ROLE = {
   mecanicien: ['tco', 'stats', 'telemetrie'],
   chauffeur: ['agenda', 'stock', 'tco', 'stats', 'telemetrie'],
   // Droit d'achat : stock, fournisseurs, commandes et coûts ; le parc et les plans en lecture ; ni agenda ni télémétrie.
-  achats: ['agenda', 'telemetrie'],
+  achats: ['agenda', 'telemetrie', 'ordres'],
 };
 function vueAutoriseePourRole(id) {
   const masquees = VUES_MASQUEES_PAR_ROLE[UI && UI.role];
@@ -84,6 +85,8 @@ function navItemsVisibles() {
     if (item.id === 'tco') return tcoActif();
     if (item.id === 'stats') return tcoActif();
     if (item.id === 'stock') return SCHEMA.hasStock && planCouvreStock();
+    // Ordres de travail : migration en place (SCHEMA.hasOrdres) ET offre Business ou Enterprise (ordresActif, app-17).
+    if (item.id === 'ordres') return typeof ordresActif === 'function' && ordresActif();
     // Télémétrie : migration en place (SCHEMA) ET offre Enterprise ET gérant — la
     // création des sources et la liaison des machines sont réservées au gérant.
     if (item.id === 'telemetrie') return telemetrieActif() && UI.role === 'gerant';
@@ -98,18 +101,18 @@ function navItemsVisibles() {
 const RUBRIQUES = [
   { id: 'dashboard', label: trad('Tableau de bord'), short: trad('Accueil'), icon: 'accueil', vues: ['dashboard'] },
   { id: 'parc', label: trad('Machines'), short: trad('Machines'), icon: 'parc', vues: ['machines', 'manuals', 'telemetrie'] },
-  { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda'] },
+  { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda', 'ordres'] },
   { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco'] },
   { id: 'stats', label: trad('Statistiques'), short: trad('Stats'), icon: 'graphique', vues: ['stats'] },
   { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
 ];
 const LIBELLE_SOUS_VUE = () => ({
   machines: trad('Machines'), manuals: trad('Plans d\'entretien'), telemetrie: trad('Télémétrie'),
-  agenda: trad('Agenda et préparation'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'), stats: trad('Statistiques'),
+  agenda: trad('Agenda et préparation'), ordres: trad('Ordres de travail'), stock: trad('Stocks & SAV'), tco: trad('Coûts & TCO'), stats: trad('Statistiques'),
   account: trad('Mon compte'), reminders: trad('Rappels et notifications'),
 });
 const LIBELLE_SOUS_VUE_COURT = () => ({
-  manuals: trad('Plans'), agenda: trad('Agenda'), stock: trad('Stock'), tco: trad('Coûts'), stats: trad('Stats'), account: trad('Compte'), reminders: trad('Rappels'),
+  manuals: trad('Plans'), agenda: trad('Agenda'), ordres: trad('Ordres'), stock: trad('Stock'), tco: trad('Coûts'), stats: trad('Stats'), account: trad('Compte'), reminders: trad('Rappels'),
 });
 function rubriqueDe(viewId) { return RUBRIQUES.find((r) => r.vues.includes(viewId)) || null; }
 function rubriquesVisibles() {
@@ -184,6 +187,8 @@ const NAV_ICONES = {
   plus: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   graphique: '<path d="M4 20V13"/><path d="M10.2 20V7.5"/><path d="M16.4 20v-9.5"/><path d="M4 20h16.4"/>',
   agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  // Ordres de travail : une planchette à pince avec une coche (tâche à faire puis faite).
+  ordres: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m8.8 13 2.2 2.2 4.4-4.6"/>',
   rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
   // Coûts & TCO : une pile de pièces (cylindre empilé), lecture immédiate
   // « argent » sans glyphe de police — même grille 24×24 / trait 2px que le

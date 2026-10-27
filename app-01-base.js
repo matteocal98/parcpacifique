@@ -41,6 +41,8 @@ const __stockDepuisQr = __paramsQr.get('stock');
 // ouvrirFicheDepuisPushSiPresent() dans boot() — jamais une deuxième logique
 // de navigation, seulement une deuxième façon d'arriver à ouvrirFicheParId().
 let __machineIdDepuisPushEnAttente = null;
+// Idem pour un tap sur une notification d'ORDRE DE TRAVAIL (données { type:'ordre', ordre_id }) : l'ordre prime sur la machine.
+let __ordreIdDepuisPushEnAttente = null;
 // ⚠️ NE PAS remplacer par `Array.isArray(UI.machines)` : UI.machines vaut
 // `[]` dès la déclaration de UI (bien avant tout chargement réel), donc ce
 // test serait TOUJOURS vrai — un tap au lancement à froid résolvait alors
@@ -611,7 +613,7 @@ function brancherComposant(overlay) {
 // tracking_mode ∈ {days, hours, km}.
 // Tant que la migration n'est pas exécutée, l'application retombe sur les
 // colonnes historiques : elle fonctionne donc AVANT et APRÈS la migration.
-const SCHEMA = { hasImport: false, hasArchived: false, hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
+const SCHEMA = { hasOrdres: false, hasImport: false, hasArchived: false, hasCounter: false, hasBrandModel: false, hasContactNames: false, hasKind: false, hasPlate: false, hasModelYear: false };
 
 // Fragment `.select()` du catalogue de pièces (parts_catalog), UN SEUL
 // endroit pour les 3 lectures existantes (boot, catalogue TCO, import CSV)
