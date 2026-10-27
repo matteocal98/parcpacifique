@@ -5270,17 +5270,23 @@ function classeStatutCommande(statut) {
   return ({ brouillon: '', envoyee: 'is-bientot', partielle: 'is-bientot', recue: 'is-ok', annulee: 'is-retard' })[statut] || '';
 }
 async function chargerCommandes() {
-  const { data, error } = await sb.from('purchase_orders').select('*').eq('company_id', UI.companyId)
-    .order('created_at', { ascending: false }).limit(100);
-  if (error) throw error;
-  UI.commandes = data || [];
-  const ouvertes = UI.commandes.filter((c) => STATUTS_COMMANDE_OUVERTS.includes(c.status)).map((c) => c.id);
-  UI.commandesLignes = [];
-  if (ouvertes.length) {
-    const { data: lignes, error: err2 } = await sb.from('purchase_order_lines').select('*').in('order_id', ouvertes).eq('company_id', UI.companyId);
-    if (err2) throw err2;
-    UI.commandesLignes = lignes || [];
-  }
+  // Sans réseau : les dernières commandes vues (voir lireAvecCopie, app-18). Commandes ET lignes se rangent ensemble, pour rester cohérentes.
+  const lu = await lireAvecCopie('commandes', async () => {
+    const { data, error } = await sb.from('purchase_orders').select('*').eq('company_id', UI.companyId)
+      .order('created_at', { ascending: false }).limit(100);
+    if (error) throw error;
+    const commandes = data || [];
+    const ouvertes = commandes.filter((c) => STATUTS_COMMANDE_OUVERTS.includes(c.status)).map((c) => c.id);
+    let lignes = [];
+    if (ouvertes.length) {
+      const { data: l, error: err2 } = await sb.from('purchase_order_lines').select('*').in('order_id', ouvertes).eq('company_id', UI.companyId);
+      if (err2) throw err2;
+      lignes = l || [];
+    }
+    return { commandes, lignes };
+  });
+  UI.commandes = lu.data.commandes;
+  UI.commandesLignes = lu.data.lignes;
 }
 // Reste à recevoir par pièce, sur les commandes ouvertes : sert à ne pas re-proposer ce qui est déjà commandé.
 function quantitesEnCommande() {

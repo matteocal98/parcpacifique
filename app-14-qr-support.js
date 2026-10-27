@@ -1435,6 +1435,10 @@ function afficherDepuisCache(cache) {
   UI.companyId = cache.companyId;
   UI.companyName = cache.companyName;
   UI.companyPlan = cache.companyPlan;
+  // Le RÔLE et l'identité : sans eux, hors connexion, l'application ne sait pas qui est la personne et retombe sur le droit le plus faible.
+  UI.role = cache.role || '';
+  UI.userId = cache.userId || null;
+  UI.suppliers = cache.suppliers || [];
   UI.company = cache.company || {};
   UI.contactName = cache.contactName || '';
   UI.email = cache.email || '';
@@ -1512,6 +1516,8 @@ async function boot(toastMessage) {
 
   // La copie locale est lue AVANT tout appel réseau : si le réseau manque, on
   // veut pouvoir l'afficher sans attendre l'expiration des délais.
+  await prechargerCopie();   // remplit le miroir en mémoire de la copie (base locale) avant de la lire
+  enregistrerAppliHorsLigne();   // web seulement : la page elle-même restera ouvrable sans réseau (sw.js)
   const cache = lireCache();
   UI.horsLigne = null;
 
@@ -1952,6 +1958,9 @@ async function boot(toastMessage) {
     companyId: UI.companyId,
     companyName: UI.companyName,
     companyPlan: UI.companyPlan,
+    role: UI.role,
+    userId: UI.userId,
+    suppliers: UI.suppliers,
     company: UI.company,
     contactName: UI.contactName,
     email: UI.email,

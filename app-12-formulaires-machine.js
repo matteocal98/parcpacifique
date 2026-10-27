@@ -1517,9 +1517,12 @@ function openNextMaintenanceView(machine) {
 // côté serveur (jamais l'email, le rôle ou le métier) — le strict
 // nécessaire pour un menu déroulant, rien de plus.
 async function equipePourAttribution() {
-  const { data, error } = await sb.rpc('equipe_pour_attribution');
-  if (error) throw error;
-  return Array.isArray(data) ? data : [];
+  const lu = await lireAvecCopie('equipe-attribution', async () => {
+    const { data, error } = await sb.rpc('equipe_pour_attribution');
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  });
+  return lu.data;
 }
 // Trois lettres dérivées du nom réel du fournisseur (jamais un code
 // inventé) : sert juste de pastille visuelle dans le sélecteur de pièce.
@@ -3325,10 +3328,14 @@ const GRAVITES_PANNE = [
 const STATUTS_PANNE = { ouverte: 'Ouverte', prise_en_charge: 'Prise en charge', resolue: 'Résolue' };
 
 async function chargerPannes() {
-  const { data, error } = await sb.from('machine_breakdowns').select('*').eq('company_id', UI.companyId)
-    .order('reported_at', { ascending: false }).limit(200);
-  if (error) throw error;
-  UI.pannes = data || [];
+  // Sans réseau : la dernière liste vue (voir lireAvecCopie, app-18).
+  const lu = await lireAvecCopie('pannes', async () => {
+    const { data, error } = await sb.from('machine_breakdowns').select('*').eq('company_id', UI.companyId)
+      .order('reported_at', { ascending: false }).limit(200);
+    if (error) throw error;
+    return data || [];
+  });
+  UI.pannes = lu.data;
 }
 
 function ouvrirSignalerPanne(machine) {

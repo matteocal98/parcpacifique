@@ -735,7 +735,7 @@ function majCacheCompteur(machine) {
   const cible = (cache.machines || []).find((m) => m && m.id === machine.id);
   if (!cible) return;
   Object.assign(cible, machineCounterPatch(machineCounter(machine), machine));
-  try { localStorage.setItem(CACHE_CLE, JSON.stringify({ ...cache, schema: { ...SCHEMA } })); } catch (err) { /* confort */ }
+  ecrireInstantane({ ...cache, schema: { ...SCHEMA } });   // savedAt conservé : la copie n'est pas plus fraîche
 }
 
 // LE RELEVÉ EST ENREGISTRÉ MÊME HORS CONNEXION. Il part en base quand le réseau
@@ -860,7 +860,7 @@ function majCacheCompteur2(machine) {
   const cible = (cache.machines || []).find((m) => m && m.id === machine.id);
   if (!cible) return;
   cible.counter_value_2 = machine.counter_value_2;
-  try { localStorage.setItem(CACHE_CLE, JSON.stringify({ ...cache, schema: { ...SCHEMA } })); } catch (err) { /* confort */ }
+  ecrireInstantane({ ...cache, schema: { ...SCHEMA } });   // savedAt conservé : la copie n'est pas plus fraîche
 }
 
 // Le message est posé APRÈS le rendu : re-rendre remplace le DOM, et un message

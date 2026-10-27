@@ -46,36 +46,31 @@ function reglerCopieHorsLigne(actif) {
   try {
     if (actif) {
       localStorage.removeItem(HORS_LIGNE_CLE);
+      enregistrerAppliHorsLigne();
     } else {
       localStorage.setItem(HORS_LIGNE_CLE, 'non');
-      localStorage.removeItem(CACHE_CLE);
+      effacerToutesLesCopies();
+      desinscrireAppliHorsLigne();
     }
   } catch (err) { /* stockage indisponible : sans conséquence */ }
 }
 
+// L'instantané du démarrage vit dans la petite base locale (app-18-copie-locale.js), avec un miroir en mémoire : ces trois fonctions restent synchrones.
 function enregistrerCache(donnees) {
   if (!copieHorsLigneActive()) return;
-  try {
-    localStorage.setItem(CACHE_CLE, JSON.stringify({ ...donnees, schema: { ...SCHEMA }, savedAt: Date.now() }));
-  } catch (err) {
-    // Espace plein ou mode privé : ce n'est pas un motif d'échec pour le
-    // chargement, la copie est un confort.
-    console.warn('Copie hors connexion impossible :', err && err.message);
-  }
+  ecrireInstantane({ ...donnees, schema: { ...SCHEMA }, savedAt: Date.now() });
 }
 
 function lireCache() {
   try {
     if (!copieHorsLigneActive()) return null;
-    const brut = localStorage.getItem(CACHE_CLE);
-    if (!brut) return null;
-    const donnees = JSON.parse(brut);
-    const perimee = !donnees
-      || typeof donnees.savedAt !== 'number'
+    const donnees = instantaneBrut();
+    if (!donnees) return null;
+    const perimee = typeof donnees.savedAt !== 'number'
       || Date.now() - donnees.savedAt > CACHE_DUREE_MS;
     if (perimee) {
       // Copie périmée ou illisible : on l'efface plutôt que de la garder.
-      localStorage.removeItem(CACHE_CLE);
+      effacerToutesLesCopies();
       return null;
     }
     // Une copie sans machines n'a aucun intérêt : on la considère comme absente.
@@ -86,7 +81,7 @@ function lireCache() {
 }
 
 function effacerCache() {
-  try { localStorage.removeItem(CACHE_CLE); } catch (err) { /* sans conséquence */ }
+  effacerToutesLesCopies();
 }
 
 // Âge de la copie, en français courant : c'est ce qui indique à l'utilisateur si

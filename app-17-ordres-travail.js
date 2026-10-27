@@ -81,16 +81,25 @@ async function equipeAssignableOrdres(toutes) {
 }
 
 async function chargerOrdres() {
-  const [ordres, equipe, societe] = await Promise.all([
-    sb.from('work_orders').select('*').eq('company_id', UI.companyId).order('numero', { ascending: false }).limit(500),
-    equipePourAttribution().catch(() => []),
-    sb.from('companies').select('ot_validation_requise').eq('id', UI.companyId).maybeSingle(),
-  ]);
-  if (ordres.error) throw ordres.error;
-  UI.ordres = ordres.data || [];
-  UI.equipeOrdres = equipe;                                        // tous les noms (pour AFFICHER « assigné à »)
-  UI.equipeAssignable = await equipeAssignableOrdres(equipe);      // les personnes assignables (pour le CHOIX)
-  UI.validationOrdres = Boolean(societe.data && societe.data.ot_validation_requise);
+  // Sans réseau : les derniers ordres vus (voir lireAvecCopie, app-18). Ordres, équipe, personnes assignables et réglage se rangent ensemble.
+  const lu = await lireAvecCopie('ordres', async () => {
+    const [ordres, equipe, societe] = await Promise.all([
+      sb.from('work_orders').select('*').eq('company_id', UI.companyId).order('numero', { ascending: false }).limit(500),
+      equipePourAttribution().catch(() => []),
+      sb.from('companies').select('ot_validation_requise').eq('id', UI.companyId).maybeSingle(),
+    ]);
+    if (ordres.error) throw ordres.error;
+    return {
+      ordres: ordres.data || [],
+      equipe,                                                              // tous les noms (pour AFFICHER « assigné à »)
+      assignable: await equipeAssignableOrdres(equipe),                    // les personnes assignables (pour le CHOIX)
+      validation: Boolean(societe.data && societe.data.ot_validation_requise),
+    };
+  });
+  UI.ordres = lu.data.ordres;
+  UI.equipeOrdres = lu.data.equipe;
+  UI.equipeAssignable = lu.data.assignable;
+  UI.validationOrdres = lu.data.validation;
 }
 
 function otFiltres() {
