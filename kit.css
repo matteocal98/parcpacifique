@@ -2748,6 +2748,12 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .ui-statut.is-ciel{background:var(--otm-ciel-fond);color:var(--otm-ciel);}
 .ui-statut.is-indigo{background:var(--otm-indigo-fond);color:var(--otm-indigo);}
 
+/* Réglage « Exiger une validation » de la liste des ordres : bloc compact (la case n'a plus la grosse marge des libellés, l'aide se resserre, le message vide ne prend plus de place). */
+.ui-groupe.ot-validation{gap:4px;padding:10px 14px;}
+.ui-groupe.ot-validation .check-row{margin:0;}
+.ui-groupe.ot-validation .ui-aide{margin:0;}
+.ui-groupe.ot-validation .ui-aide:empty{display:none;}
+
 /* ── FENÊTRES D'ORDRE DE TRAVAIL (app-17-ordres-travail.js) — reprise Stitch « Fleet Precision » : choix de la machine (étape 1/2), formulaire (étape 2/2), fiche d'ordre.
    Famille .otm-* dédiée (comme .pplan-*) : ne touche aucune classe partagée. Police Plus Jakarta Sans (déjà chargée par app.html) ; pictogrammes Material Symbols.
    Toutes les couleurs passent par les variables --otm-* ci-dessous : le thème sombre n'a qu'à les redéfinir. ── */

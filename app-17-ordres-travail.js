@@ -159,7 +159,7 @@ VIEWS.ordres = {
             </div>
             <div class="ui-puces" id="ot-puces" role="group" aria-label="${esc(trad('Filtrer par état'))}"></div>
             <div id="ot-liste"><div class="ui-aide">${trad('Chargement…')}</div></div>
-            ${UI.role === 'gerant' ? `<div class="ui-groupe">
+            ${UI.role === 'gerant' ? `<div class="ui-groupe ot-validation">
               <label class="check-row"><input type="checkbox" id="ot-validation" disabled> ${trad('Exiger une validation du gérant une fois l\'ordre terminé')}</label>
               <div class="ui-aide">${trad('Désactivé par défaut : un ordre terminé est alors clos tout de suite. Activé, il attend d\'être validé (ou refusé avec un motif) par le gérant ou le droit de gestion.')}</div>
               <div class="ui-aide" id="ot-validation-msg" role="status" aria-live="polite"></div>
