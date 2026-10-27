@@ -9,7 +9,10 @@
 //   · au rejeu, la machine est RELUE À NEUF sur le serveur : l'échéance du plan est recalculée sur son état réel d'aujourd'hui (jamais écrasée par une photo périmée),
 //     et un compteur ne recule jamais (sauf relevé volontairement plus bas, confirmé à la saisie).
 //
-// CE QUI N'EST PAS (ENCORE) POSSIBLE SANS RÉSEAU, et est dit à l'utilisateur : sortir une pièce du stock (palier 3d), terminer un ordre de travail (3c), les frais.
+// POSSIBLE SANS RÉSEAU : intervention, panne, ordre de travail (démarrer, cocher, terminer), frais, mouvements de stock (sortie, entrée, transfert). Reste en ligne, et c'est dit :
+// annuler / valider / refuser / modifier un ordre, un ajustement de stock, l'import CSV, les inventaires, la réception d'une commande.
+// STOCK : jamais négatif. Si le stock ne suffit plus au retour du réseau, la fonction serveur refuse ; la sortie d'une intervention reste notée dans l'intervention (à régulariser à la main
+// dans Stock, et la personne en est avertie), un mouvement seul reste « en erreur » dans « À envoyer ».
 // ERREUR DÉFINITIVE (machine supprimée, droit retiré…) : l'opération passe « en erreur », reste visible, et l'utilisateur la relance ou l'abandonne. Jamais effacée seule.
 // SANS INDEXEDDB : aucune opération hors-ligne n'est acceptée (une file en mémoire serait perdue à la fermeture : mieux vaut refuser que mentir).
 
@@ -62,7 +65,7 @@ async function fileAjouter(type, payload, resume, etapes) {
 async function fileTraiterIntervention(op) {
   const machine = await chargerMachineFraiche(op.payload.machineId);
   if (!machine) throw new Error(trad('La machine n\'existe plus ou n\'est plus accessible.'));
-  await executerIntervention(machine, op.payload.saisie, { etapes: op.etapes, sauver: () => fileEcrire(op) }, true);
+  return executerIntervention(machine, op.payload.saisie, { etapes: op.etapes, sauver: () => fileEcrire(op) }, true);
 }
 // Rejeu d'une panne : l'identifiant évite le doublon (signaler_panne à 5 arguments) ; avant l'exécution de hors-ligne-idempotence.sql, repli sur l'ancien appel.
 async function envoyerPanne(p) {
@@ -105,7 +108,24 @@ async function envoyerFrais(ligne) {
   if (error && error.code !== '23505') throw error;
 }
 async function fileTraiterFrais(op) { await envoyerFrais(op.payload.ligne); }
-const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne, ordre: fileTraiterOrdre, frais: fileTraiterFrais };
+
+// Mouvement de stock : TOUJOURS par la fonction rejouable (hors-ligne-stock.sql) quand un identifiant est fourni — un renvoi ne sort jamais la pièce deux fois. Avant l'exécution
+// de ce SQL, repli sur la fonction d'origine (le mouvement part, sans protection anti-doublon). Les règles (droits, stock suffisant…) sont celles de la fonction de production :
+// un refus remonte tel quel.
+async function envoyerMouvementStock(args, idOp) {
+  if (!idOp) {
+    const { error } = await sb.rpc('enregistrer_mouvement_stock', args);
+    if (error) throw error;
+    return;
+  }
+  let { error } = await sb.rpc('enregistrer_mouvement_stock_rejouable', { p_client_op_id: idOp, ...args });
+  if (error && (error.code === 'PGRST202' || /could not find the function|schema cache/i.test(String(error.message || '')))) {
+    ({ error } = await sb.rpc('enregistrer_mouvement_stock', args));
+  }
+  if (error) throw error;
+}
+async function fileTraiterStock(op) { await envoyerMouvementStock(op.payload.args, op.payload.idOp); }
+const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne, ordre: fileTraiterOrdre, frais: fileTraiterFrais, stock: fileTraiterStock };
 
 // ── La synchronisation ──
 let __fileEnCours = false;
@@ -114,7 +134,7 @@ let __fileEnCours = false;
 async function fileSynchroniser() {
   if (__fileEnCours) return { occupe: true, envoyees: 0, erreurs: 0 };
   __fileEnCours = true;
-  let envoyees = 0; let erreurs = 0; let interrompu = false;
+  let envoyees = 0; let erreurs = 0; let interrompu = false; let sortiesRefusees = 0;
   try {
     const { data } = await sb.auth.getSession();
     if (!data || !data.session) return { envoyees, erreurs, sansSession: true };
@@ -123,7 +143,8 @@ async function fileSynchroniser() {
       const traitement = FILE_TRAITEMENTS[op.type];
       if (!traitement) { op.etat = 'erreur'; op.erreur = trad('Type d\'action inconnu (application plus ancienne ?)'); await fileEcrire(op); erreurs++; continue; }
       try {
-        await traitement(op);
+        const resultat = await traitement(op);
+        sortiesRefusees += (resultat && resultat.sortiesRefusees) || 0;
         await fileSupprimer(op.id);
         envoyees++;
       } catch (err) {
@@ -138,14 +159,16 @@ async function fileSynchroniser() {
     __fileEnCours = false;
     await fileMajCompte();
   }
-  return { envoyees, erreurs, interrompu };
+  return { envoyees, erreurs, interrompu, sortiesRefusees };
 }
 
 // Synchronise puis, si quelque chose est parti, recharge les données (échéances, compteurs) et le dit.
 async function fileSynchroniserEtRafraichir() {
   const r = await fileSynchroniser();
+  // Une sortie de stock refusée à la synchronisation (stock devenu insuffisant) ne se perd JAMAIS en silence : la pièce reste notée dans l'intervention, et on le dit.
+  const avertissement = r.sortiesRefusees ? ' — ' + tR('{n} sortie(s) de stock refusée(s) (stock insuffisant) : à enregistrer à la main dans Stock.', { n: r.sortiesRefusees }) : '';
   if (r.envoyees > 0) {
-    boot(tR('{n} action(s) envoyée(s) au serveur', { n: r.envoyees }));
+    boot(tR('{n} action(s) envoyée(s) au serveur', { n: r.envoyees }) + avertissement);
   } else if (r.erreurs > 0 && typeof showToast === 'function') {
     showToast(tR('{n} action(s) n\'ont pas pu être envoyées : voir « À envoyer »', { n: r.erreurs }));
   }
@@ -191,7 +214,7 @@ function majBandeauFile() {
 function fileLibelleOperation(op) {
   const r = op.resume || {};
   const quand = new Date(op.creeA).toLocaleString(localeActive(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  const quoi = ({ panne: trad('Panne signalée'), ordre: trad('Ordre de travail'), frais: trad('Frais saisi') })[op.type] || trad('Intervention enregistrée');
+  const quoi = ({ panne: trad('Panne signalée'), ordre: trad('Ordre de travail'), frais: trad('Frais saisi'), stock: trad('Mouvement de stock') })[op.type] || trad('Intervention enregistrée');
   return { titre: `${quoi} · ${r.machine || trad('Machine')}`, sous: quand + (r.detail ? ' · ' + r.detail : '') };
 }
 async function ouvrirFileOperations() {
@@ -350,7 +373,7 @@ async function executerIntervention(machine, s, suivi, differe) {
     await marquer('pieces');
   }
 
-  // 3. Sorties de stock liées à l'intervention (EN LIGNE seulement : jamais mises en file). La fonction serveur écrit la ligne de pièce ET ajoute son coût (PUMP).
+  // 3. Sorties de stock liées à l'intervention (rejouables : identifiant par ligne, voir hors-ligne-stock.sql). La fonction serveur écrit la ligne de pièce ET ajoute son coût (PUMP).
   // Une sortie refusée (stock épuisé entre-temps…) ne fait JAMAIS perdre la pièce : elle est remise dans l'intervention à son prix saisi.
   if (s.lignesSortie.length) {
     const echouees = [];
@@ -359,11 +382,14 @@ async function executerIntervention(machine, s, suivi, differe) {
       const cle = 'sortie' + i;
       if (suivi.etapes[cle] === true) continue;
       if (suivi.etapes[cle] === 'refusee') { echouees.push(l); continue; }
-      const { error: sortieErr } = await sb.rpc('enregistrer_mouvement_stock', {
-        p_type: 'sortie', p_part_id: l.partId, p_warehouse_id: l.magasinId, p_destination_warehouse_id: null,
-        p_quantity: l.quantity, p_unit_cost: null, p_intervention_id: s.idIntervention,
-        p_reason: tR('Intervention sur {machine}', { machine: s.nomMachine }),
-      });
+      let sortieErr = null;
+      try {
+        await envoyerMouvementStock({
+          p_type: 'sortie', p_part_id: l.partId, p_warehouse_id: l.magasinId, p_destination_warehouse_id: null,
+          p_quantity: l.quantity, p_unit_cost: null, p_intervention_id: s.idIntervention,
+          p_reason: tR('Intervention sur {machine}', { machine: s.nomMachine }),
+        }, l.idOp || null);
+      } catch (err) { sortieErr = err; }
       if (sortieErr) {
         if (estErreurTransitoire(sortieErr)) throw sortieErr;
         echouees.push(l); suivi.etapes[cle] = 'refusee'; console.warn('Sortie de stock refusée :', sortieErr.message);
@@ -439,8 +465,45 @@ function appliquerInterventionLocalement(machine, s) {
 async function mettreInterventionEnFile(machine, saisie, etapes) {
   const op = await fileAjouter('intervention', { machineId: machine.id, saisie }, { machine: machine.name, detail: saisie.kind === 'depannage' ? trad('Dépannage') : trad('Entretien') }, etapes);
   appliquerInterventionLocalement(machine, saisie);
+  appliquerSortiesLocalement(saisie.lignesSortie);
   return op;
 }
+// ── Le stock, sans réseau ──
+// Ce que l'écran (et la copie hors connexion) montre tout de suite : le solde bouge, pour qu'on ne puisse pas sortir deux fois la même pièce en local. Le coût moyen n'est
+// recalculé que par le serveur ; les lignes de stock affichent le solde réel dès la prochaine lecture.
+function stockAppliquerLocalement(args) {
+  const q = Number(args.p_quantity) || 0;
+  const lignes = UI.stockItems || (UI.stockItems = []);
+  const bouger = (pieceId, magasinId, delta) => {
+    let it = lignes.find((x) => String(x.part_id) === String(pieceId) && String(x.warehouse_id) === String(magasinId));
+    if (!it) {
+      if (delta <= 0) return;
+      it = { id: null, part_id: pieceId, warehouse_id: magasinId, quantity: 0, pump_unit_cost: Number(args.p_unit_cost) || 0, reorder_point: null, updated_at: new Date().toISOString() };
+      lignes.push(it);
+    }
+    it.quantity = (Number(it.quantity) || 0) + delta;
+  };
+  if (args.p_type === 'sortie') bouger(args.p_part_id, args.p_warehouse_id, -q);
+  else if (args.p_type === 'entree') bouger(args.p_part_id, args.p_warehouse_id, q);
+  else if (args.p_type === 'transfert') { bouger(args.p_part_id, args.p_warehouse_id, -q); bouger(args.p_part_id, args.p_destination_warehouse_id, q); }
+  else if (args.p_type === 'ajustement') bouger(args.p_part_id, args.p_warehouse_id, q);
+  if (typeof calculerStockCounts === 'function') UI.stockCounts = calculerStockCounts(lignes, UI.partsCatalog);
+  const cache = lireCache();
+  if (cache) ecrireInstantane({ ...cache, stockItems: lignes, schema: { ...SCHEMA } });   // savedAt conservé
+}
+async function mettreMouvementStockEnFile(args, idOp) {
+  const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(args.p_part_id));
+  const op = await fileAjouter('stock', { args, idOp }, {
+    machine: piece ? (piece.designation || piece.reference || '') : '',
+    detail: ({ sortie: trad('Sortie'), entree: trad('Entrée'), transfert: trad('Transfert'), ajustement: trad('Ajustement') })[args.p_type] + ' × ' + args.p_quantity,
+  });
+  stockAppliquerLocalement(args);
+  return op;
+}
+function appliquerSortiesLocalement(lignesSortie) {
+  (lignesSortie || []).forEach((l) => stockAppliquerLocalement({ p_type: 'sortie', p_part_id: l.partId, p_warehouse_id: l.magasinId, p_quantity: l.quantity }));
+}
+
 async function mettreFraisEnFile(machine, ligne) {
   return fileAjouter('frais', { machineId: machine.id, ligne }, { machine: machine.name, detail: typeof formatMontant === 'function' ? formatMontant(ligne.amount) : String(ligne.amount) });
 }

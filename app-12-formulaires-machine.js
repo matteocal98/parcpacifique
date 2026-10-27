@@ -2661,6 +2661,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
   // MÊME intervention au lieu d'en créer une seconde ; `suiviEnregistrement` retient les étapes déjà faites (voir executerIntervention, app-19).
   const idIntervention = nouvelIdentifiant();
   const idFrais = nouvelIdentifiant();   // idem pour un frais (onglet « Frais & Carburant »)
+  const idsSorties = {};                 // idem pour chaque sortie de stock (clé = pièce, magasin, quantité, rang : la même ligne garde le même identifiant)
   const suiviEnregistrement = { etapes: {} };
   const panelEls = {
     entretien: overlay.querySelector('#log-panel-entretien'),
@@ -3198,7 +3199,11 @@ function openLogInterventionModal(machine, tache, options = {}) {
       kind: kindActif, avecTypes, composant: componentVal, severite: severiteVal,
       wasLate: (SCHEMA.hasRespectPlan && (!avecTypes || kindActif === 'entretien')) ? infoMachine(machine).state === 'late' : null,
       avecCouts: tcoActif(), partsCost: partsCostEnregistre, laborCost, laborHours,
-      lignesLibres, lignesSortie, nomMachine: machine.name,
+      lignesLibres, nomMachine: machine.name,
+      lignesSortie: lignesSortie.map((l, i) => {
+        const cle = [l.partId, l.magasinId, l.quantity, i].join('|');
+        return { ...l, idOp: idsSorties[cle] || (idsSorties[cle] = nouvelIdentifiant()) };
+      }),
     };
 
     try {
@@ -3221,10 +3226,6 @@ function openLogInterventionModal(machine, tache, options = {}) {
       // Réseau absent ou serveur indisponible : l'action est gardée sur l'appareil et partira toute seule. Impossible si elle demande le réseau
       // (sortie de stock, clôture d'un ordre) : on le dit, et rien n'est perdu — le formulaire reste ouvert.
       if (estErreurTransitoire(err)) {
-        if (lignesSortie.length) {
-          refuserSortie(trad('Sans réseau, « Sortir du stock » est impossible : décoche-le (la pièce sera notée sans sortie de stock) ou attends le réseau.'));
-          return;
-        }
         // Intervention faite pour terminer un ordre de travail : la clôture de l'ordre part avec l'intervention (même opération, dans l'ordre).
         if (options.ordre && options.ordre.id) saisie.ordreId = options.ordre.id;
         try {

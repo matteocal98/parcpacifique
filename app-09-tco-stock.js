@@ -2769,6 +2769,7 @@ function ouvrirFichePieceStock(partId) {
 
 // ── FICHE D'UNE LIGNE DE STOCK (ouverte par le QR) : état de la ligne + sortie / entrée en deux gestes ──────
 function ouvrirFicheLigneStock(partId, warehouseId) {
+  const idOpMouvement = nouvelIdentifiant();   // fixé à l'ouverture : un renvoi (coupure, deuxième clic) ne sort jamais la pièce deux fois
   if (!(SCHEMA.hasStock && planCouvreStock())) {
     showToast(trad('Le module Stock n\'est pas disponible sur cette offre.'));
     return false;
@@ -2849,12 +2850,23 @@ function ouvrirFicheLigneStock(partId, warehouseId) {
     bouton.disabled = true;
     msg.textContent = trad('Enregistrement…');
     try {
-      const { error } = await sb.rpc('enregistrer_mouvement_stock', {
+      const argsMouvement = {
         p_type: type, p_part_id: partId, p_warehouse_id: warehouseId, p_destination_warehouse_id: null,
         p_quantity: qte, p_unit_cost: cout, p_intervention_id: null,
         p_reason: overlay.querySelector('#fiche-motif').value.trim() || null,
-      });
-      if (error) throw error;
+      };
+      try {
+        if (navigator.onLine === false) throw new Error('hors connexion');
+        await envoyerMouvementStock(argsMouvement, idOpMouvement);
+      } catch (errEnvoi) {
+        // Sans réseau : le mouvement est gardé sur l'appareil, le solde bouge déjà à l'écran, et il partira tout seul.
+        if (!estErreurTransitoire(errEnvoi)) throw errEnvoi;
+        await mettreMouvementStockEnFile(argsMouvement, idOpMouvement);
+        showToast(trad('Mouvement enregistré sur l\'appareil : il partira dès que le réseau revient.'));
+        overlay.remove();
+        renderApp();
+        return;
+      }
       const { data: soldes } = await sb.from('stock_items')
         .select('id, part_id, warehouse_id, quantity, pump_unit_cost, reorder_point, updated_at' + colonnesLigneStockEnPlus())
         .eq('company_id', UI.companyId);
@@ -3136,6 +3148,7 @@ function exporterInventaireStockCsv() {
 // — ce code ne fait que collecter les champs et interpréter l'erreur.
 // prefill (régularisation d'une pièce utilisée hors stock) : { type, partId, quantity, reason, onSaved }
 function ouvrirNouveauMouvementModal(prefill) {
+  const idOpMouvement = nouvelIdentifiant();   // fixé à l'ouverture : un renvoi (coupure, deuxième clic) ne sort jamais la pièce deux fois
   const overlay = document.createElement('div');
   overlay.className = 'overlay stock-mouvement-modal';
   document.body.appendChild(overlay);
@@ -3275,7 +3288,7 @@ function ouvrirNouveauMouvementModal(prefill) {
     geler(true);
     dire(trad('Enregistrement…'), false);
     try {
-      const { error } = await sb.rpc('enregistrer_mouvement_stock', {
+      const argsMouvement = {
         p_type: type,
         p_part_id: partId,
         p_warehouse_id: warehouseId,
@@ -3284,8 +3297,21 @@ function ouvrirNouveauMouvementModal(prefill) {
         p_unit_cost: cout,
         p_intervention_id: interventionId,
         p_reason: motif,
-      });
-      if (error) throw error;
+      };
+      try {
+        if (navigator.onLine === false) throw new Error('hors connexion');
+        await envoyerMouvementStock(argsMouvement, idOpMouvement);
+      } catch (errEnvoi) {
+        // Sans réseau : le mouvement est gardé sur l'appareil (sauf un ajustement, qui change la valorisation et demande le réseau).
+        if (!estErreurTransitoire(errEnvoi)) throw errEnvoi;
+        if (type === 'ajustement') { dire(trad('Un ajustement de stock demande le réseau.'), true); geler(false); return; }
+        await mettreMouvementStockEnFile(argsMouvement, idOpMouvement);
+        showToast(trad('Mouvement enregistré sur l\'appareil : il partira dès que le réseau revient.'));
+        overlay.remove();
+        if (prefill && typeof prefill.onSaved === 'function') prefill.onSaved();
+        renderApp();
+        return;
+      }
       // Le solde réel fait foi côté serveur (calcul PUMP/verrouillage dans
       // la RPC) — on le relit plutôt que de reconstruire le calcul en JS,
       // jamais deux implémentations du même calcul qui pourraient diverger.
