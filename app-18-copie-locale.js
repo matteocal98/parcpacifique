@@ -125,6 +125,19 @@ function signalerCopieAffichee(depuis) {
   if (typeof showToast === 'function') showToast(tR('Hors connexion : données du {age}', { age: ageLisible(depuis) }));
 }
 
+// Modifie la copie d'une lecture sur place (sans la rafraîchir : sa date reste celle de la dernière vraie lecture). Sert quand une action faite sans réseau change ce que la
+// copie montre (ex. un ordre démarré hors connexion doit apparaître démarré au prochain affichage hors connexion). Sans copie, ne fait rien.
+function copieModifierLecture(nom, modifier) {
+  // Suivie de bout en bout (lecture ET écriture) : un effacement lancé entre-temps (déconnexion) passe APRÈS, jamais avant.
+  return suivreEcriture((async () => {
+    const cle = cleCopie(nom);
+    const lu = await copieLire(cle);
+    if (!lu || lu.data == null) return;
+    try { modifier(lu.data); } catch (err) { return; }
+    await copieEcrire(cle, { data: lu.data, savedAt: lu.savedAt });
+  })());
+}
+
 // chargeur() : une fonction async qui lit le réseau et RENVOIE les données (ou lance l'erreur de la requête).
 // Rend { data, copie } : copie vaut null quand les données sont fraîches, { depuis } quand on montre la dernière copie.
 async function lireAvecCopie(nom, chargeur) {

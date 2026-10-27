@@ -135,6 +135,7 @@ function otLigneHtml(o) {
       <span class="ui-ligne-sous">${esc(sous)}</span>
     </div></div>
     <div class="ui-ligne-action">
+      ${UI.fileOrdres && UI.fileOrdres.has(o.id) ? `<span class="ui-statut is-bientot">${trad('À envoyer')}</span>` : ''}
       ${o.priorite === 'haute' || o.priorite === 'urgente' ? `<span class="ui-statut ${pc}">${esc(pl)}</span>` : ''}
       <span class="ui-statut ${sc}">${esc(sl)}</span>
     </div>
@@ -341,9 +342,30 @@ function ouvrirOrdre(id) {
     if (overlay.isConnected) dessiner();
   };
 
+  // Ce qui peut se faire SANS réseau : démarrer, cocher une tâche, terminer sans intervention (voir app-19). Le reste (annuler, valider, refuser, remettre à faire,
+  // modifier) demande le réseau, et le dit.
+  const versAction = (nom, args) => {
+    if (nom === 'ordre_travail_cocher') { const t = (ordre().checklist || [])[args.p_index]; return { action: 'cocher', index: args.p_index, fait: args.p_fait, label: t ? t.label : '' }; }
+    if (nom === 'ordre_travail_agir' && args.p_action === 'demarrer') return { action: 'demarrer' };
+    if (nom === 'ordre_travail_terminer' && !args.p_intervention) return { action: 'terminer', interventionId: null };
+    return null;
+  };
   const appeler = async (nom, args, bouton) => {
     if (bouton) bouton.disabled = true;
-    const { data, error } = await sb.rpc(nom, args);
+    const action = versAction(nom, args);
+    let data = null;
+    let error = null;
+    if (navigator.onLine === false) error = action ? { message: 'hors connexion' } : { message: trad('Cette action demande le réseau pour l\'instant.') };
+    else ({ data, error } = await sb.rpc(nom, args));
+    if (error && action && estErreurTransitoire(error)) {
+      try {
+        data = await mettreOrdreEnFile(ordre(), action);
+        error = null;
+        if (action.action !== 'cocher') showToast(trad('Enregistré sur l\'appareil : l\'action partira dès que le réseau revient.'));
+        if (bouton) bouton.disabled = false;
+        return data;
+      } catch (errFile) { error = errFile; }
+    }
     if (error) {
       if (bouton) bouton.disabled = false;
       const msg = overlay.querySelector('#ot-msg');
@@ -393,6 +415,7 @@ function ouvrirOrdre(id) {
               <span class="otm-pastille is-id">OT-${o.numero}</span>
               <span class="otm-pastille is-statut-${esc(o.statut)}"><i class="otm-point"></i>${esc(sl)}</span>
               <span class="otm-pastille is-prio-${esc(o.priorite)}"><i class="otm-point"></i>${esc(pl)}</span>
+              ${UI.fileOrdres && UI.fileOrdres.has(o.id) ? `<span class="otm-pastille is-attente"><i class="otm-point"></i>${trad('À envoyer')}</span>` : ''}
             </div>
             <button type="button" class="otm-fermer" data-otm-fermer aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
           </header>
@@ -512,9 +535,15 @@ function terminerOrdre(o, overlay, appeler) {
     ordre: { id: o.id, numero: o.numero, assigneId: o.assigne_a || null, remarque },
     onSaved: async (interventionId) => {
       const { data, error } = await sb.rpc('ordre_travail_terminer', { p_id: o.id, p_intervention: interventionId || null });
+      if (error && estErreurTransitoire(error)) {
+        // L'intervention est écrite, mais le réseau a lâché avant la clôture : la clôture part avec le reste, à son tour.
+        try { await mettreOrdreEnFile(o, { action: 'terminer', interventionId: interventionId || null }); showToast(trad('Enregistré sur l\'appareil : l\'action partira dès que le réseau revient.')); return; } catch (errFile) { /* message ci-dessous */ }
+      }
       if (error) { showToast(tR('Intervention enregistrée, mais l\'ordre OT-{n} n\'a pas pu être terminé : {e}', { n: o.numero, e: error.message || '' })); return; }
       otMettreAJour(data);
     },
+    // Intervention mise en file (sans réseau) : la clôture de l'ordre est INCLUSE dans cette opération ; on montre déjà l'ordre terminé.
+    apresMiseEnFile: (interventionId) => ordreAppliquerLocalement(o, { action: 'terminer', interventionId }),
   });
 }
 

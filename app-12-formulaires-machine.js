@@ -2660,6 +2660,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
   // Identifiant de l'intervention, fixé UNE fois à l'ouverture de la fenêtre : un deuxième clic sur « Enregistrer » (après une erreur, une coupure) retombe sur la
   // MÊME intervention au lieu d'en créer une seconde ; `suiviEnregistrement` retient les étapes déjà faites (voir executerIntervention, app-19).
   const idIntervention = nouvelIdentifiant();
+  const idFrais = nouvelIdentifiant();   // idem pour un frais (onglet « Frais & Carburant »)
   const suiviEnregistrement = { etapes: {} };
   const panelEls = {
     entretien: overlay.querySelector('#log-panel-entretien'),
@@ -3048,20 +3049,38 @@ function openLogInterventionModal(machine, tache, options = {}) {
         if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
         return;
       }
+      const note = [infoNature?.libelle, noteLibre].filter(Boolean).join(' — ');
+      // Identifiant fourni par l'appareil (fixé à l'ouverture de la fenêtre) : un renvoi ne crée jamais un deuxième frais.
+      const ligneFrais = {
+        id: idFrais,
+        machine_id: machine.id,
+        kind: infoNature?.kind || 'other',
+        amount: montant,
+        incurred_at: incurredAt || todayIso(),
+        notes: note || null,
+      };
       try {
-        const note = [infoNature?.libelle, noteLibre].filter(Boolean).join(' — ');
-        const { error } = await sb.from('operating_costs').insert({
-          machine_id: machine.id,
-          kind: infoNature?.kind || 'other',
-          amount: montant,
-          incurred_at: incurredAt || todayIso(),
-          notes: note || null,
-        });
-        if (error) throw error;
+        if (navigator.onLine === false) throw new Error('hors connexion');
+        await envoyerFrais(ligneFrais);
         overlay.remove();
         boot(trad('Frais enregistré'));
       } catch (err) {
-        errorEl.textContent = trad('Erreur :') + " " + err.message;
+        // Sans réseau : le frais est gardé sur l'appareil et partira tout seul.
+        if (estErreurTransitoire(err)) {
+          try {
+            await mettreFraisEnFile(machine, ligneFrais);
+            overlay.remove();
+            renderApp();
+            showToast(trad('Frais enregistré sur l\'appareil : il partira dès que le réseau revient.'));
+            return;
+          } catch (errFile) {
+            errorEl.textContent = (errFile && errFile.message) || trad('Enregistrement impossible sans réseau.');
+            submitBtn.disabled = false;
+            if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
+            return;
+          }
+        }
+        errorEl.textContent = trad('Erreur :') + " " + ((err && err.message) || err);
         submitBtn.disabled = false;
         if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
       }
@@ -3206,12 +3225,11 @@ function openLogInterventionModal(machine, tache, options = {}) {
           refuserSortie(trad('Sans réseau, « Sortir du stock » est impossible : décoche-le (la pièce sera notée sans sortie de stock) ou attends le réseau.'));
           return;
         }
-        if (typeof options.onSaved === 'function') {
-          refuserSortie(trad('Terminer un ordre de travail demande le réseau pour l\'instant : réessaie avec du réseau.'));
-          return;
-        }
+        // Intervention faite pour terminer un ordre de travail : la clôture de l'ordre part avec l'intervention (même opération, dans l'ordre).
+        if (options.ordre && options.ordre.id) saisie.ordreId = options.ordre.id;
         try {
           await mettreInterventionEnFile(machine, saisie, suiviEnregistrement.etapes);
+          if (typeof options.apresMiseEnFile === 'function') options.apresMiseEnFile(idIntervention);
           overlay.remove();
           renderApp();
           showToast(trad('Intervention enregistrée sur l\'appareil : elle partira dès que le réseau revient.'));

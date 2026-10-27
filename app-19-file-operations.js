@@ -74,7 +74,38 @@ async function envoyerPanne(p) {
   if (error) throw error;
 }
 async function fileTraiterPanne(op) { await envoyerPanne(op.payload); }
-const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne };
+// Rejeu d'une action sur un ordre : démarrer, cocher une tâche, terminer SANS intervention (ou après une intervention déjà écrite). Les fonctions serveur sont rejouables
+// (le même démarrage ou la même case cochée deux fois ne change rien). Cocher se fait par POSITION : on vérifie d'abord que la tâche est toujours à la même place.
+async function fileTraiterOrdre(op) {
+  const p = op.payload;
+  if (p.action === 'cocher') {
+    const { data, error } = await sb.from('work_orders').select('checklist').eq('id', p.ordreId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error(trad('L\'ordre n\'existe plus ou n\'est plus accessible.'));
+    const tache = (data.checklist || [])[p.index];
+    if (!tache || tache.label !== p.label) throw new Error(tR('L\'ordre a été modifié entre-temps : la tâche « {t} » n\'est plus à la même place.', { t: p.label }));
+    const { error: e1 } = await sb.rpc('ordre_travail_cocher', { p_id: p.ordreId, p_index: p.index, p_fait: p.fait });
+    if (e1) throw e1;
+  } else if (p.action === 'demarrer') {
+    const { error } = await sb.rpc('ordre_travail_agir', { p_id: p.ordreId, p_action: 'demarrer', p_note: null });
+    if (error) throw error;
+  } else if (p.action === 'terminer') {
+    const { error } = await sb.rpc('ordre_travail_terminer', { p_id: p.ordreId, p_intervention: p.interventionId || null });
+    if (error) throw error;
+  } else throw new Error(trad('Type d\'action inconnu (application plus ancienne ?)'));
+}
+// Frais (carburant, transport, contrôle…) : une ligne ajoutée à operating_costs. Identifiant fourni par l'appareil ; si la table ne l'accepte pas, repli sur l'insertion
+// simple (sans protection contre un renvoi après réponse perdue).
+async function envoyerFrais(ligne) {
+  let { error } = await sb.from('operating_costs').insert(ligne);
+  if (error && /generated|non-DEFAULT|428C9|22P02|invalid input syntax|PGRST204|could not find the .* column/i.test(String(error.message || '') + String(error.code || ''))) {
+    const { id: _ignore, ...sansId } = ligne;
+    ({ error } = await sb.from('operating_costs').insert(sansId));
+  }
+  if (error && error.code !== '23505') throw error;
+}
+async function fileTraiterFrais(op) { await envoyerFrais(op.payload.ligne); }
+const FILE_TRAITEMENTS = { intervention: fileTraiterIntervention, panne: fileTraiterPanne, ordre: fileTraiterOrdre, frais: fileTraiterFrais };
 
 // ── La synchronisation ──
 let __fileEnCours = false;
@@ -126,6 +157,8 @@ async function fileMajCompte() {
   const miennes = await fileMiennes();
   UI.fileEnAttente = miennes.filter((o) => o.etat !== 'erreur').length;
   UI.fileEnErreur = miennes.filter((o) => o.etat === 'erreur').length;
+  // Les ordres qui ont une action en attente d'envoi (affichés « À envoyer » dans la liste et la fiche).
+  UI.fileOrdres = new Set(miennes.map((o) => (o.type === 'ordre' ? o.payload.ordreId : (o.type === 'intervention' ? (o.payload.saisie || {}).ordreId : null))).filter(Boolean));
   majBandeauFile();
 }
 function bandeauFileHtml() {
@@ -158,7 +191,7 @@ function majBandeauFile() {
 function fileLibelleOperation(op) {
   const r = op.resume || {};
   const quand = new Date(op.creeA).toLocaleString(localeActive(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  const quoi = op.type === 'panne' ? trad('Panne signalée') : trad('Intervention enregistrée');
+  const quoi = ({ panne: trad('Panne signalée'), ordre: trad('Ordre de travail'), frais: trad('Frais saisi') })[op.type] || trad('Intervention enregistrée');
   return { titre: `${quoi} · ${r.machine || trad('Machine')}`, sous: quand + (r.detail ? ' · ' + r.detail : '') };
 }
 async function ouvrirFileOperations() {
@@ -377,6 +410,12 @@ async function executerIntervention(machine, s, suivi, differe) {
     }
     await marquer('plan');
   }
+  // 6. Clôture de l'ordre de travail, SEULEMENT pour une intervention mise en file (saisie.ordreId) : en ligne, c'est la fenêtre de l'ordre qui s'en charge (onSaved).
+  if (s.ordreId && !fait('ordre')) {
+    const { error: ordreErr } = await sb.rpc('ordre_travail_terminer', { p_id: s.ordreId, p_intervention: s.idIntervention });
+    if (ordreErr) throw ordreErr;
+    await marquer('ordre');
+  }
   return { sortiesRefusees };
 }
 
@@ -402,6 +441,39 @@ async function mettreInterventionEnFile(machine, saisie, etapes) {
   appliquerInterventionLocalement(machine, saisie);
   return op;
 }
+async function mettreFraisEnFile(machine, ligne) {
+  return fileAjouter('frais', { machineId: machine.id, ligne }, { machine: machine.name, detail: typeof formatMontant === 'function' ? formatMontant(ligne.amount) : String(ligne.amount) });
+}
+
+// ── Les ordres de travail, sans réseau ──
+// L'ordre tel qu'il est APRÈS l'action (ce que l'écran montre tout de suite, et ce que la copie hors connexion montrera).
+function ordreApresActionLocale(o, a) {
+  const maintenant = new Date().toISOString();
+  const demarre = o.statut === 'a_faire' ? { statut: 'en_cours', demarre_a: o.demarre_a || maintenant } : {};
+  if (a.action === 'demarrer') return { ...o, ...demarre };
+  if (a.action === 'cocher') return { ...o, ...demarre, checklist: (o.checklist || []).map((t, i) => (i === a.index ? { ...t, fait: a.fait } : t)) };
+  if (a.action === 'terminer') return { ...o, statut: 'termine', termine_a: maintenant, intervention_id: a.interventionId || o.intervention_id || null };
+  return o;
+}
+function ordreAppliquerLocalement(o, a) {
+  const neuf = ordreApresActionLocale(o, a);
+  if (typeof otMettreAJour === 'function') otMettreAJour(neuf);
+  copieModifierLecture('ordres', (d) => { const i = (d.ordres || []).findIndex((x) => x.id === neuf.id); if (i >= 0) d.ordres[i] = neuf; });
+  return neuf;
+}
+// Met l'action en file ; renvoie l'ordre mis à jour localement. Cocher : une seule opération par tâche (le dernier clic gagne), pas dix lignes pour dix clics.
+async function mettreOrdreEnFile(o, a) {
+  const memes = (await fileMiennes()).filter((op) => op.type === 'ordre' && op.etat === 'attente' && op.payload.ordreId === o.id);
+  const doublon = memes.find((op) => op.payload.action === a.action && (a.action !== 'cocher' || op.payload.index === a.index));
+  if (doublon && a.action === 'cocher') { doublon.payload.fait = a.fait; await fileEcrire(doublon); await fileMajCompte(); }
+  else if (!doublon) {
+    const m = (UI.machines || []).find((x) => String(x.id) === String(o.machine_id));
+    const detail = { demarrer: trad('Démarrer'), cocher: trad('Tâche cochée'), terminer: trad('Terminer') }[a.action] || a.action;
+    await fileAjouter('ordre', { ordreId: o.id, ...a }, { machine: m ? m.name : '', detail: `OT-${o.numero} · ${detail}` });
+  }
+  return ordreAppliquerLocalement(o, a);
+}
+
 async function mettrePanneEnFile(machine, panne) {
   return fileAjouter('panne', { machineId: machine.id, ...panne }, { machine: machine.name, detail: panne.description.slice(0, 60) });
 }
