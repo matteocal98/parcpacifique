@@ -180,6 +180,9 @@ function calculerVigilance() {
   if (SCHEMA.hasPannes) {
     lignes.push({ id: 'pannes', picto: 'retard', court: trad('Pannes'), libelle: trad('Pannes signalées'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
+  if (typeof ordresActif === 'function' && ordresActif() && UI.role === 'gerant') {
+    lignes.push({ id: 'ordres', picto: 'coche', court: trad('Ordres'), libelle: trad('Ordres de travail ouverts'), n: null, etat: 'ok', aide: trad('Chargement…') });
+  }
   if (stockVisible && SCHEMA.hasCommandes) {
     lignes.push({ id: 'commandes', picto: 'export', court: trad('Commandes'), libelle: trad('Commandes en cours'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
@@ -321,12 +324,14 @@ function brancherAccueilRole(root) {
     } else if (id === 'releves') { ouvrirAlertesUsage('releve_oublie'); }
     else if (id === 'rythme') { ouvrirAlertesUsage('rythme_accelere'); }
     else if (id === 'pannes') { ouvrirListePannes(); }
+    else if (id === 'ordres') { goTo('ordres'); }
     else if (id === 'pieces') { UI.stockOnglet = 'apercu'; goTo('stock'); }
     else if (id === 'seuil') { UI.stockOnglet = 'pieces'; UI.stockPiecesVue = 'stock'; goTo('stock'); }
     else if (id === 'commandes') { UI.stockOnglet = 'achats'; goTo('stock'); }
     else if (id === 'couts') goTo('tco');
   });
   if (!estRoleTerrain()) { chargerVigilanceCommandes(root); chargerVigilancePannes(root); }
+  if (typeof chargerAccueilOrdres === 'function') chargerAccueilOrdres(root);
 }
 
 VIEWS.dashboard = {
@@ -362,6 +367,7 @@ VIEWS.dashboard = {
     return `
       <div class="ui-page accueil-page${estRoleTerrain() ? ' accueil-terrain' : ''}">
         ${estRoleTerrain() ? actionsRapidesSectionHtml() : vigilanceHtml()}
+        ${estRoleTerrain() && typeof ordresActif === 'function' && ordresActif() ? '<section class="ui-section" id="accueil-mes-ordres" hidden></section>' : ''}
         ${retards.length
           ? prioritiesHtml(retards)
           : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}

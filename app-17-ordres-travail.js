@@ -225,6 +225,51 @@ function otMettreAJour(ligne) {
   if (typeof UI.redessinerOrdres === 'function' && document.getElementById('ot-liste')) UI.redessinerOrdres();
 }
 
+// ── Accueil ──
+// Terrain (droit de gestion et de saisie) : « Mes ordres » = les ordres ouverts qui leur sont assignés, en retard d'abord.
+// Gérant : la tuile « Ordres » des points de vigilance (ouverts, en retard, à valider). Chargement APRÈS l'affichage : l'accueil n'attend jamais le réseau.
+function otOrdresOuvertsTries(liste) {
+  const aujourdhui = todayIso();
+  const cle = (o) => [o.echeance && o.echeance < aujourdhui ? 0 : 1, o.echeance || '9999-12-31', o.numero];
+  return liste.filter(otEstOuvert).sort((a, b) => {
+    const x = cle(a); const y = cle(b);
+    return x[0] - y[0] || (x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0) || x[2] - y[2];
+  });
+}
+async function chargerAccueilOrdres(root) {
+  if (!ordresActif()) return;
+  const zone = root.querySelector('#accueil-mes-ordres');
+  const tuile = root.querySelector('#vig-ordres');
+  if (!zone && !tuile) return;
+  try { await chargerOrdres(); } catch (err) {
+    if (tuile && typeof majLigneVigilance === 'function') majLigneVigilance(root, 'ordres', '—', 'ok', trad('Indisponible'));
+    return;
+  }
+  const tous = UI.ordres || [];
+  if (tuile && typeof majLigneVigilance === 'function') {
+    const ouverts = tous.filter(otEstOuvert);
+    const retard = ouverts.filter((o) => o.echeance && o.echeance < todayIso()).length;
+    const aValider = UI.validationOrdres === true ? tous.filter((o) => o.statut === 'termine').length : 0;
+    majLigneVigilance(root, 'ordres', ouverts.length, retard ? 'late' : (aValider ? 'soon' : 'ok'),
+      retard ? tR('{n} en retard', { n: retard }) : (aValider ? tR('{n} à valider', { n: aValider }) : (ouverts.length ? trad('Tout est dans les temps') : trad('Aucun ordre ouvert'))));
+  }
+  if (zone) {
+    const miens = otOrdresOuvertsTries(tous.filter(otEstAssigne));
+    if (!miens.length) { zone.hidden = true; zone.innerHTML = ''; return; }
+    const montres = miens.slice(0, 4);
+    zone.innerHTML = `
+      ${teteSectionKit('coche', trad('Mes ordres'), '',
+        `<span class="ui-tag">${miens.length}</span><button type="button" class="ui-btn ui-btn-pastille" data-ot-tout>${trad('Tout voir')} →</button>`)}
+      <div class="ui-section-corps"><div class="ui-liste">${montres.map(otLigneHtml).join('')}</div></div>`;
+    zone.hidden = false;
+    zone.onclick = (e) => {
+      if (e.target.closest('[data-ot-tout]')) { OT_FILTRES.moi = true; goTo('ordres'); return; }
+      const l = e.target.closest('[data-ot]');
+      if (l) ouvrirOrdre(l.getAttribute('data-ot'));
+    };
+  }
+}
+
 // Tap sur une notification d'ordre (push) : ouvre la fiche, en rechargeant la liste si l'ordre n'y est pas encore (lancement à froid, ordre tout neuf).
 async function ouvrirOrdreParId(id) {
   if (!id || !ordresActif()) return;
@@ -233,6 +278,36 @@ async function ouvrirOrdreParId(id) {
   } catch (err) { /* la liste reste vide : on tombe sur le message ci-dessous */ }
   if ((UI.ordres || []).some((o) => String(o.id) === String(id))) ouvrirOrdre(id);
   else showToast(trad('Ordre de travail introuvable ou non accessible.'));
+}
+
+// ── L'historique d'un ordre : une phrase par ligne du journal (« Gérant G a assigné l'ordre à Méca M »), la plus récente d'abord ──
+function otPhraseHistorique(h) {
+  const p = h.personne && h.personne !== '—' ? h.personne : trad('Quelqu\'un');
+  const d = h.details || {};
+  switch (h.action) {
+    case 'ot_cree': return tR('{p} a créé l\'ordre', { p });
+    case 'ot_modifie': return tR('{p} a modifié l\'ordre', { p });
+    case 'ot_assigne': return d.a ? tR('{p} a assigné l\'ordre à {n}', { p, n: otNomEquipe(d.a) }) : tR('{p} a retiré l\'assignation', { p });
+    case 'ot_demarrer': return tR('{p} a démarré l\'ordre', { p });
+    case 'ot_reouvrir': return tR('{p} a remis l\'ordre à faire', { p });
+    case 'ot_annuler': return tR('{p} a annulé l\'ordre', { p });
+    case 'ot_valider': return tR('{p} a validé l\'ordre', { p });
+    case 'ot_refuser': return tR('{p} a refusé l\'ordre', { p });
+    case 'ot_termine': return d.taches_total != null
+      ? tR('{p} a terminé l\'ordre ({f}/{t} tâches faites)', { p, f: d.taches_faites ?? 0, t: d.taches_total })
+      : tR('{p} a terminé l\'ordre', { p });
+    default: return tR('{p} : {a}', { p, a: String(h.action || '').replace(/^ot_/, '') });
+  }
+}
+function otHistoriqueHtml(histo) {
+  if (histo === 'chargement' || histo === null) return `<p class="ui-aide">${trad('Chargement…')}</p>`;
+  if (histo === 'indisponible') return `<p class="ui-aide">${trad('Historique indisponible pour le moment.')}</p>`;
+  if (!histo.length) return `<p class="ui-aide">${trad('Aucun événement enregistré.')}</p>`;
+  return `<ul class="otm-histo-liste">${histo.map((h) => {
+    const t = new Date(h.quand);
+    const quand = isNaN(t) ? '' : t.toLocaleString(localeActive(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `<li><span>${esc(otPhraseHistorique(h))}</span><time datetime="${esc(h.quand)}">${esc(quand)}</time></li>`;
+  }).join('')}</ul>`;
 }
 
 // ── La fiche d'un ordre ──
@@ -244,6 +319,19 @@ function ouvrirOrdre(id) {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 
+  // Historique : chargé SEULEMENT quand on l'ouvre (null = pas encore lu, 'chargement', 'indisponible', ou la liste).
+  let histo = null;
+  let histoOuvert = false;
+  const chargerHisto = async () => {
+    histo = 'chargement';
+    dessiner();
+    try {
+      const { data, error } = await sb.rpc('ordre_travail_historique', { p_id: id });
+      histo = error ? 'indisponible' : (Array.isArray(data) ? data : []);
+    } catch (err) { histo = 'indisponible'; }
+    if (overlay.isConnected) dessiner();
+  };
+
   const appeler = async (nom, args, bouton) => {
     if (bouton) bouton.disabled = true;
     const { data, error } = await sb.rpc(nom, args);
@@ -254,6 +342,8 @@ function ouvrirOrdre(id) {
       return null;
     }
     otMettreAJour(data);
+    histo = null;                       // l'action vient d'ajouter une ligne au journal : on relira l'historique
+    if (histoOuvert) setTimeout(() => { if (overlay.isConnected) chargerHisto(); }, 0);
     return data;
   };
 
@@ -339,6 +429,10 @@ function ouvrirOrdre(id) {
               </label>`).join('')}</div>
           </section>` : ''}
           ${o.statut === 'termine' || o.statut === 'valide' ? `<div class="ui-encadre">${picto('coche')}<p>${o.statut === 'valide' ? trad('Ordre terminé et validé.') : (exigeValidation ? trad('Ordre terminé : en attente de validation.') : trad('Ordre terminé.'))}${o.intervention_id ? ' ' + trad('L\'intervention est enregistrée dans l\'historique de la machine.') : ''}</p></div>` : ''}
+          <section class="otm-histo">
+            <button type="button" class="otm-histo-bouton" data-ot-histo aria-expanded="${histoOuvert}">${otSymbole('history')}<span>${trad('Historique')}</span>${otSymbole(histoOuvert ? 'expand_less' : 'expand_more')}</button>
+            ${histoOuvert ? otHistoriqueHtml(histo) : ''}
+          </section>
           <div id="ot-msg" class="ui-aide" role="status" aria-live="polite"></div>
           ${boutons.length ? `<footer class="otm-actions">${boutons.join('')}</footer>` : ''}
         </div>
@@ -357,6 +451,11 @@ function ouvrirOrdre(id) {
   });
   overlay.addEventListener('click', async (e) => {
     if (e.target.closest('[data-otm-fermer]')) { overlay.remove(); return; }
+    if (e.target.closest('[data-ot-histo]')) {
+      histoOuvert = !histoOuvert;
+      if (histoOuvert && histo === null) chargerHisto(); else dessiner();
+      return;
+    }
     const b = e.target.closest('[data-ot-act]');
     if (!b) return;
     const o = ordre();
