@@ -727,10 +727,18 @@ async function chargerCarteTcoDashboard(root) {
 function etiquettesCataloguePossibles() {
   return !!(SCHEMA.hasStockChamps && SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock());
 }
+// Dans le catalogue de pièces, certaines informations relèvent du MODULE STOCK : seuil bas, conditionnement, code-barres EAN, unité de mesure. Une société qui n'a pas le module Stock
+// (offre Business : le catalogue vit alors dans « Barèmes ») ne les voit ni dans la liste, ni dans le formulaire, ni dans l'import CSV. Les valeurs déjà enregistrées (par exemple pendant
+// une période Enterprise) ne sont JAMAIS effacées : une colonne n'est écrite que si son champ est affiché.
+function catalogueAvecStock() { return !!(SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock()); }
+const colConditionnement = () => !!(SCHEMA.hasStockPackaging && catalogueAvecStock());
+const colSeuil = () => catalogueAvecStock();
+const colChampsStock = () => !!(SCHEMA.hasStockChamps && catalogueAvecStock());
+
 function ligneCatalogueTcoHtml(piece) {
   const refEtDelai = [
     piece.reference || trad('Sans référence'),
-    piece.ean ? `EAN ${piece.ean}` : '',
+    piece.ean && colChampsStock() ? `EAN ${piece.ean}` : '',
     [piece.supplier_name || '', piece.avg_lead_time_days != null ? tR('{n} j', { n: piece.avg_lead_time_days }) : ''].filter(Boolean).join(' - '),
   ].filter(Boolean).join(' · ');
   return `
@@ -738,9 +746,9 @@ function ligneCatalogueTcoHtml(piece) {
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone">${picto('boite')}</div>
         <div class="ui-ligne-textes">
-          <span class="ui-ligne-nom">${esc(piece.designation)}${badgeStockPieceHtml(piece.id)}${piece.packaging ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? `<span class="ui-tag">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
+          <span class="ui-ligne-nom">${esc(piece.designation)}${badgeStockPieceHtml(piece.id)}${piece.packaging && colConditionnement() ? `<span class="ui-tag">${esc(piece.packaging)}</span>` : ''}${colChampsStock() && piece.unit_of_measure && piece.unit_of_measure !== 'piece' ? `<span class="ui-tag">${esc(libelleUniteMesure(piece.unit_of_measure))}</span>` : ''}</span>
           <span class="ui-ligne-sous">${esc(refEtDelai)}</span>
-          ${piece.default_reorder_point != null ? `<span class="ui-ligne-sous">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
+          ${colSeuil() && piece.default_reorder_point != null ? `<span class="ui-ligne-sous">${tR('Seuil bas : {n}', { n: texteAvecSeparateurs(piece.default_reorder_point) })}</span>` : ''}
         </div>
       </div>
       <div class="ui-ligne-action">
@@ -809,20 +817,20 @@ function blocCatalogueTcoHtml() {
                 </div>
               </div>
             </div>
-            ${SCHEMA.hasStockPackaging || SCHEMA.hasStock ? `
+            ${colConditionnement() || colSeuil() ? `
             <div class="ui-grille">
-              ${SCHEMA.hasStockPackaging ? `
+              ${colConditionnement() ? `
               <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-conditionnement">${trad('Conditionnement')}</label>
                 <input id="tco-piece-conditionnement" class="ui-champ" placeholder="${trad('Conditionnement (optionnel)')}">
               </div>` : ''}
-              ${SCHEMA.hasStock ? `
+              ${colSeuil() ? `
               <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-seuil">${trad('Seuil de réapprovisionnement')}</label>
                 <input id="tco-piece-seuil" class="ui-champ" type="text" inputmode="decimal" placeholder="${trad('Seuil bas (optionnel)')}">
               </div>` : ''}
             </div>` : ''}
-            ${SCHEMA.hasStockChamps ? `
+            ${colChampsStock() ? `
             <div class="ui-grille">
               <div class="ui-champ-groupe">
                 <label class="sr-only" for="tco-piece-ean">${trad('Code-barres EAN')}</label>
@@ -859,9 +867,9 @@ function blocCatalogueTcoHtml() {
 // durable d'une société à l'autre.
 function enteteCsvPieces() {
   const entete = ['Référence', 'Désignation', 'Prix unitaire', 'Fournisseur', 'Délai moyen (jours)'];
-  if (SCHEMA.hasStockPackaging) entete.push('Conditionnement');
-  if (SCHEMA.hasStock) entete.push('Seuil de réapprovisionnement');
-  if (SCHEMA.hasStockChamps) entete.push('EAN', 'Unité de mesure');
+  if (colConditionnement()) entete.push('Conditionnement');
+  if (colSeuil()) entete.push('Seuil de réapprovisionnement');
+  if (colChampsStock()) entete.push('EAN', 'Unité de mesure');
   return entete;
 }
 
@@ -902,10 +910,10 @@ function analyserCsvCatalogue(texte) {
   const entete = analyserLigneCsv(lignesBrutes[0]).map((c) => c.trim());
   const enteteAttendu = enteteCsvPieces();
   // Un fichier de l'ANCIEN modèle (sans les colonnes EAN / Unité de mesure) reste accepté tel quel.
-  const enteteAncien = SCHEMA.hasStockChamps ? enteteAttendu.slice(0, -2) : enteteAttendu;
+  const enteteAncien = colChampsStock() ? enteteAttendu.slice(0, -2) : enteteAttendu;
   const memeEntete = (attendu) => entete.length === attendu.length
     && entete.every((c, i) => c.toLowerCase() === attendu[i].toLowerCase());
-  const avecChamps = SCHEMA.hasStockChamps && memeEntete(enteteAttendu);
+  const avecChamps = colChampsStock() && memeEntete(enteteAttendu);
   const enteteOk = avecChamps || memeEntete(enteteAncien);
   if (!enteteOk) {
     return {
@@ -937,11 +945,11 @@ function analyserCsvCatalogue(texte) {
       avg_lead_time_days: delai != null ? Math.round(delai) : null,
     };
     let idxReste = 0;
-    if (SCHEMA.hasStockPackaging) {
+    if (colConditionnement()) {
       const conditionnement = reste[idxReste++];
       ligne.packaging = conditionnement ? conditionnement : null;
     }
-    if (SCHEMA.hasStock) {
+    if (colSeuil()) {
       const seuilTexte = reste[idxReste++];
       const seuil = seuilTexte ? nombreDepuisTexte(seuilTexte) : null;
       ligne.default_reorder_point = seuil != null ? seuil : null;
@@ -979,9 +987,9 @@ async function lireTexteFichier(file) {
 
 function modeleCsvCatalogue() {
   const exemple = ['FLT-0142', 'Filtre à huile moteur', '24.90', 'Motoculture Pacifique', '5'];
-  if (SCHEMA.hasStockPackaging) exemple.push('Boîte de 12');
-  if (SCHEMA.hasStock) exemple.push('3');
-  if (SCHEMA.hasStockChamps) exemple.push('3760123456789', 'Pièce');
+  if (colConditionnement()) exemple.push('Boîte de 12');
+  if (colSeuil()) exemple.push('3');
+  if (colChampsStock()) exemple.push('3760123456789', 'Pièce');
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   return [enteteCsvPieces(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
@@ -1004,8 +1012,8 @@ function ouvrirImportCatalogue() {
     { icone: 'info', teinte: 'is-bleu', titre: trad('Référence et Fournisseur :'), texte: trad('facultatifs, peuvent rester vides.') },
     { icone: 'devise', teinte: 'is-vert', titre: trad('Prix unitaire :'), texte: trad('nombre (virgule ou point décimal accepté).') },
     { icone: 'bientot', teinte: 'is-ambre', titre: trad('Délai moyen (jours) :'), texte: trad('nombre entier, facultatif.') },
-    ...(SCHEMA.hasStockPackaging ? [{ icone: 'boite', teinte: 'is-bleu', titre: trad('Conditionnement :'), texte: trad('texte libre (ex : « Boîte de 12 »), facultatif.') }] : []),
-    ...(SCHEMA.hasStock ? [{ icone: 'alerte', teinte: 'is-ambre', titre: trad('Seuil de réapprovisionnement :'), texte: trad('quantité en dessous de laquelle une alerte se déclenche, facultatif.') }] : []),
+    ...(colConditionnement() ? [{ icone: 'boite', teinte: 'is-bleu', titre: trad('Conditionnement :'), texte: trad('texte libre (ex : « Boîte de 12 »), facultatif.') }] : []),
+    ...(colSeuil() ? [{ icone: 'alerte', teinte: 'is-ambre', titre: trad('Seuil de réapprovisionnement :'), texte: trad('quantité en dessous de laquelle une alerte se déclenche, facultatif.') }] : []),
   ];
 
   overlay.innerHTML = `
@@ -1292,9 +1300,9 @@ function cablerCatalogueTco(root) {
     btn.disabled = true;
     if (boutonAjouterLabel) boutonAjouterLabel.textContent = pieceEnEdition ? trad('Enregistrement…') : trad('Ajout…');
     const champsOptionnels = {
-      ...(SCHEMA.hasStockPackaging ? { packaging: conditionnement || null } : {}),
-      ...(SCHEMA.hasStock ? { default_reorder_point: seuil } : {}),
-      ...(SCHEMA.hasStockChamps ? { ean: ean || null, unit_of_measure: unite || 'piece' } : {}),
+      ...(SCHEMA.hasStockPackaging && champConditionnement ? { packaging: conditionnement || null } : {}),
+      ...(SCHEMA.hasStock && champSeuil ? { default_reorder_point: seuil } : {}),
+      ...(SCHEMA.hasStockChamps && champEan && champUnite ? { ean: ean || null, unit_of_measure: unite || 'piece' } : {}),
     };
     try {
       if (pieceEnEdition) {
