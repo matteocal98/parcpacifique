@@ -625,6 +625,7 @@ function renderApp() {
         <div class="content">
           <div class="view">
             ${bandeauHorsLigneHtml()}
+            ${bandeauFileHtml()}
             ${sousNavHtml()}
             <div class="page-head" data-view="${esc(UI.view)}">${pageHeadHtml()}</div>
             <main id="view-root" data-view="${esc(UI.view)}">${view.render()}</main>
@@ -724,6 +725,8 @@ function wireShell() {
 }
 
 async function doLogout() {
+  // Ce qui attend d'être envoyé (actions faites sans réseau) serait PERDU : on demande avant, jamais en silence.
+  if (!(await fileConfirmerDeconnexion())) return;
   // La copie locale contient les données de la société : elle ne doit pas
   // survivre à une déconnexion, surtout sur un appareil partagé.
   effacerCache();

@@ -1460,6 +1460,7 @@ function afficherDepuisCache(cache) {
   UI.reminders = loadReminders();
   UI.horsLigne = { depuis: cache.savedAt };
   renderApp();
+  fileInitialiser();   // les actions faites sans réseau restent comptées et visibles (bandeau « À envoyer »)
 }
 
 // ── Mode support (« Se connecter en tant que » depuis admin.html) ───────
@@ -1502,6 +1503,66 @@ function afficherBandeauSupportSiActif() {
     window.close();
     setTimeout(() => { location.href = 'about:blank'; }, 200);
   });
+}
+
+// Les colonnes lues pour une machine (avec sa catégorie et son plan) : ne dépendent que de SCHEMA. Partagées par boot() et par le rejeu hors-ligne (chargerMachineFraiche).
+function colonnesMachineLues() {
+  const colonnesMachine = [
+    'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
+    'service_date', 'image_url',
+    SCHEMA.hasCounter ? 'counter_unit' : 'current_hours',
+    ...(SCHEMA.hasCounter ? ['counter_value'] : []),
+    ...(SCHEMA.hasCounter2 ? ['counter_value_2', 'counter_unit_2'] : []),
+    ...(SCHEMA.hasBrandModel ? ['brand', 'model'] : []),
+    ...(SCHEMA.hasKind ? ['kind'] : []),
+    ...(SCHEMA.hasPlate ? ['plate'] : []),
+    ...(SCHEMA.hasModelYear ? ['model_year'] : []),
+    // L'ordre de création : c'est lui qui décide quelles machines une offre
+    // couvre quand le compte repasse en gratuit.
+    ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
+    ...(SCHEMA.hasArchived ? ['archived', 'archived_at'] : []),
+    ...(SCHEMA.hasImport ? ['external_ref'] : []),
+    ...(SCHEMA.hasTelemetry ? ['telemetry_source_id', 'telemetry_ref', 'counter_source', 'telemetry_last_at'] : []),
+    ...(SCHEMA.hasGps ? ['position_enabled', 'last_lat', 'last_lon', 'last_position_at'] : []),
+    // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco ci-dessus
+    // (UI.companyPlan pas encore prêt à ce stade du boot).
+    ...(SCHEMA.hasTco
+      ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
+      : []),
+    ...(SCHEMA.hasArretCout ? ['downtime_hourly_cost'] : []),
+  ].join(', ');
+  return colonnesMachine;
+}
+function colonnesPlanLues() {
+  const colonnesPlan = [
+    'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
+    'next_due_at', 'tracking_mode',
+    ...(SCHEMA.hasCounter
+      ? ['interval_counter', 'next_due_counter', 'reminder_counter_before']
+      : ['interval_hours', 'next_due_hours', 'reminder_hours_before']),
+    ...(SCHEMA.hasCounter2
+      ? ['interval_counter_2', 'next_due_counter_2', 'reminder_counter_before_2',
+         'interval_days_2', 'next_due_at_2', 'reminder_days_before_2']
+      : []),
+  ].join(', ');
+
+  return colonnesPlan;
+}
+function colonnesCategorieMachine() {
+  // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
+  // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco plus haut
+  // (UI.companyPlan pas encore prêt à ce stade du boot).
+  return (SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name') + (SCHEMA.hasArretCout ? ', downtime_hourly_cost' : '');
+}
+function selectMachineComplete() {
+  return `${colonnesMachineLues()}, category:machine_categories(${colonnesCategorieMachine()}), plan:maintenance_plans(${colonnesPlanLues()})`;
+}
+// Une machine relue à neuf depuis le serveur, dans la même forme que celles de UI.machines (plan et catégorie dépliés). null si elle n'existe plus.
+async function chargerMachineFraiche(machineId) {
+  const { data, error } = await sb.from('machines').select(selectMachineComplete()).eq('id', machineId).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return { ...data, plan: Array.isArray(data.plan) ? data.plan[0] : data.plan, category: Array.isArray(data.category) ? data.category[0] : data.category };
 }
 
 async function boot(toastMessage) {
@@ -1722,49 +1783,10 @@ async function boot(toastMessage) {
   SCHEMA.hasArchived = hasArchived;
   SCHEMA.hasImport = hasImport;
 
-  const colonnesMachine = [
-    'id', 'name', 'brand_model', 'serial_number', 'status', 'manual_url',
-    'service_date', 'image_url',
-    SCHEMA.hasCounter ? 'counter_unit' : 'current_hours',
-    ...(SCHEMA.hasCounter ? ['counter_value'] : []),
-    ...(SCHEMA.hasCounter2 ? ['counter_value_2', 'counter_unit_2'] : []),
-    ...(SCHEMA.hasBrandModel ? ['brand', 'model'] : []),
-    ...(SCHEMA.hasKind ? ['kind'] : []),
-    ...(SCHEMA.hasPlate ? ['plate'] : []),
-    ...(SCHEMA.hasModelYear ? ['model_year'] : []),
-    // L'ordre de création : c'est lui qui décide quelles machines une offre
-    // couvre quand le compte repasse en gratuit.
-    ...(SCHEMA.hasCreatedAt ? ['created_at'] : []),
-    ...(SCHEMA.hasArchived ? ['archived', 'archived_at'] : []),
-    ...(SCHEMA.hasImport ? ['external_ref'] : []),
-    ...(SCHEMA.hasTelemetry ? ['telemetry_source_id', 'telemetry_ref', 'counter_source', 'telemetry_last_at'] : []),
-    ...(SCHEMA.hasGps ? ['position_enabled', 'last_lat', 'last_lon', 'last_position_at'] : []),
-    // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco ci-dessus
-    // (UI.companyPlan pas encore prêt à ce stade du boot).
-    ...(SCHEMA.hasTco
-      ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
-      : []),
-    ...(SCHEMA.hasArretCout ? ['downtime_hourly_cost'] : []),
-  ].join(', ');
-  const colonnesPlan = [
-    'id', 'interval_days', 'tasks', 'items', 'notes', 'reminder_days_before',
-    'next_due_at', 'tracking_mode',
-    ...(SCHEMA.hasCounter
-      ? ['interval_counter', 'next_due_counter', 'reminder_counter_before']
-      : ['interval_hours', 'next_due_hours', 'reminder_hours_before']),
-    ...(SCHEMA.hasCounter2
-      ? ['interval_counter_2', 'next_due_counter_2', 'reminder_counter_before_2',
-         'interval_days_2', 'next_due_at_2', 'reminder_days_before_2']
-      : []),
-  ].join(', ');
-
-  // category:machine_categories(...) — target_hourly_cost (phase 3, §5) est
-  // SCHEMA.hasTco, pas tcoActif() : même raison que colonnesTco plus haut
-  // (UI.companyPlan pas encore prêt à ce stade du boot).
-  const colonnesCategorie = (SCHEMA.hasTco ? 'id, name, target_hourly_cost' : 'id, name') + (SCHEMA.hasArretCout ? ', downtime_hourly_cost' : '');
+  const colonnesCategorie = colonnesCategorieMachine();
   const { data: machines, error: machinesErr } = await sb
     .from('machines')
-    .select(`${colonnesMachine}, category:machine_categories(${colonnesCategorie}), plan:maintenance_plans(${colonnesPlan})`)
+    .select(selectMachineComplete())
     .eq('company_id', profile.company_id)
     .order('name');
 
@@ -2005,6 +2027,9 @@ async function boot(toastMessage) {
 
   // Le téléphone ré-annonce son jeton de notification au serveur (voir resynchroniserJetonPush) — sans bloquer l'ouverture.
   resynchroniserJetonPush();
+
+  // Actions faites sans réseau : compte des opérations en attente, bandeau, et envoi dès que possible (voir app-19-file-operations.js).
+  fileInitialiser();
 
   // Reprogrammation des rappels à chaque ouverture, sans réclamer
   // l'autorisation : celle-ci n'est demandée que sur action de l'utilisateur.

@@ -2657,6 +2657,10 @@ function openLogInterventionModal(machine, tache, options = {}) {
   // en tête de fonction. Absent quand !tcoActif() : kindActif reste
   // 'entretien' pour toujours, comportement identique à avant ce chantier.
   let kindActif = 'entretien';
+  // Identifiant de l'intervention, fixé UNE fois à l'ouverture de la fenêtre : un deuxième clic sur « Enregistrer » (après une erreur, une coupure) retombe sur la
+  // MÊME intervention au lieu d'en créer une seconde ; `suiviEnregistrement` retient les étapes déjà faites (voir executerIntervention, app-19).
+  const idIntervention = nouvelIdentifiant();
+  const suiviEnregistrement = { etapes: {} };
   const panelEls = {
     entretien: overlay.querySelector('#log-panel-entretien'),
     depannage: overlay.querySelector('#log-panel-depannage'),
@@ -3072,14 +3076,22 @@ function openLogInterventionModal(machine, tache, options = {}) {
     // pas — un dépannage sur un organe hors-plan ne doit pas remettre à
     // zéro le compteur d'entretien préventif.
     const performedAt = overlay.querySelector('#log-date').value;
-    const hoursValue = isCounter ? parseFloat(overlay.querySelector('#log-hours').value) : null;
-    const hoursValue2 = unit2 ? parseFloat(overlay.querySelector('#log-hours-2').value) : null;
+    // NaN (champ vide) devient « pas de valeur » : c'est ce qui sera gardé sur l'appareil et rejoué.
+    const nombreOuNul = (v) => (Number.isFinite(v) ? v : null);
+    const hoursValue = isCounter ? nombreOuNul(parseFloat(overlay.querySelector('#log-hours').value)) : null;
+    const hoursValue2 = unit2 ? nombreOuNul(parseFloat(overlay.querySelector('#log-hours-2').value)) : null;
+    let releveRecule = false;   // relevé plus bas que le dernier, CONFIRMÉ par la personne : au rejeu, il ne sera pas bloqué par la règle « un compteur ne recule jamais »
     // Alerte 3 : relevé qui recule ou saut anormal → confirmation. Une intervention DATÉE D'AVANT AUJOURD'HUI saisie après coup
     // peut légitimement porter un compteur plus ancien : elle n'est pas contrôlée.
     if (!performedAt || performedAt >= todayIso()) {
       const doute = (isCounter && Number.isFinite(hoursValue) ? controleReleveAberrant(machine, hoursValue, 1) : null)
         || (unit2 && Number.isFinite(hoursValue2) ? controleReleveAberrant(machine, hoursValue2, 2) : null);
-      if (doute && !window.confirm(doute)) return;
+      if (doute && !window.confirm(doute)) {
+        submitBtn.disabled = false;
+        if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
+        return;
+      }
+      if (doute) releveRecule = true;
     }
     const checkedItems = kindActif === 'entretien' && items.length
       ? Array.from(overlay.querySelectorAll('.log-checklist input:checked')).map(c => c.value)
@@ -3158,118 +3170,27 @@ function openLogInterventionModal(machine, tache, options = {}) {
       } catch (err) { /* référentiel non critique */ }
     }
 
+
+    // Tout ce qu'il faut pour écrire — et pour RÉÉCRIRE plus tard, sans réseau : des VALEURS, jamais le formulaire (voir app-19-file-operations.js).
+    const saisie = {
+      idIntervention,
+      performedAt, hoursValue, hoursValue2, avecCompteur2: Boolean(unit2), unite2: unit2 || null, releveRecule,
+      checkedItems, operateur, notes,
+      kind: kindActif, avecTypes, composant: componentVal, severite: severiteVal,
+      wasLate: (SCHEMA.hasRespectPlan && (!avecTypes || kindActif === 'entretien')) ? infoMachine(machine).state === 'late' : null,
+      avecCouts: tcoActif(), partsCost: partsCostEnregistre, laborCost, laborHours,
+      lignesLibres, lignesSortie, nomMachine: machine.name,
+    };
+
     try {
-      const { data: intervention, error: logErr } = await sb.from('interventions').insert({
-        machine_id: machine.id,
-        plan_id: machine.plan?.id || null,
-        performed_at: performedAt,
-        hours_at_intervention: hoursValue,
-        ...(unit2 ? { hours_at_intervention_2: hoursValue2 } : {}),
-        description: notes || null,
-        items_done: checkedItems.length ? checkedItems : null,
-        performed_by: operateur,
-        ...(avecTypes ? { kind: kindActif, component: componentVal, severity: severiteVal } : {}),
-        // Respect du plan : l'état de la machine AVANT cette saisie (la fiche n'est pas encore mise à jour) — seulement pour un entretien planifié.
-        ...(SCHEMA.hasRespectPlan && (!avecTypes || kindActif === 'entretien') ? { was_late: infoMachine(machine).state === 'late' } : {}),
-        ...(tcoActif() ? { parts_cost: partsCostEnregistre, labor_cost: laborCost, labor_hours: laborHours } : {}),
-      }).select('id').single();
-      if (logErr) throw logErr;
-
-      if (tcoActif() && lignesLibres.length && intervention?.id) {
-        // Détail des pièces : jamais bloquant pour l'enregistrement de
-        // l'intervention elle-même — une erreur ici est signalée, pas fatale.
-        const { error: piecesErr } = await sb.from('intervention_parts').insert(
-          lignesLibres.map((l) => ({
-            intervention_id: intervention.id,
-            part_id: l.partId,
-            designation: l.designation,
-            quantity: l.quantity,
-            unit_price: l.unitPrice,
-          }))
-        );
-        if (piecesErr) console.warn('Détail des pièces non enregistré :', piecesErr.message);
-      }
-
-      // Sorties de stock liées à l'intervention : la fonction serveur écrit la ligne de pièce ET ajoute son coût (PUMP).
-      // Une sortie refusée (stock épuisé entre-temps…) ne fait JAMAIS perdre la pièce : elle est remise dans
-      // l'intervention à son prix saisi, et l'utilisateur est prévenu de la faire à la main dans Stock.
-      let sortiesRefusees = 0;
-      if (lignesSortie.length && intervention?.id) {
-        const echouees = [];
-        for (const l of lignesSortie) {
-          const { error: sortieErr } = await sb.rpc('enregistrer_mouvement_stock', {
-            p_type: 'sortie', p_part_id: l.partId, p_warehouse_id: l.magasinId, p_destination_warehouse_id: null,
-            p_quantity: l.quantity, p_unit_cost: null, p_intervention_id: intervention.id,
-            p_reason: tR('Intervention sur {machine}', { machine: machine.name }),
-          });
-          if (sortieErr) { echouees.push(l); console.warn('Sortie de stock refusée :', sortieErr.message); }
-        }
-        sortiesRefusees = echouees.length;
-        if (echouees.length) {
-          await sb.from('intervention_parts').insert(echouees.map((l) => ({
-            intervention_id: intervention.id, part_id: l.partId, designation: l.designation, quantity: l.quantity, unit_price: l.unitPrice,
-          })));
-          const { data: courant } = await sb.from('interventions').select('parts_cost').eq('id', intervention.id).single();
-          const supplement = echouees.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
-          await sb.from('interventions').update({ parts_cost: (Number(courant?.parts_cost) || 0) + supplement }).eq('id', intervention.id);
-        }
-      }
-
-      if (isCounter && hoursValue != null) {
-        const { error: machErr } = await sb.from('machines').update(machineCounterPatch(hoursValue, machine)).eq('id', machine.id);
-        if (machErr) throw machErr;
-      }
-      if (unit2 && hoursValue2 != null) {
-        const { error: mach2Err } = await sb.from('machines').update(machineCounter2Patch(hoursValue2, unit2)).eq('id', machine.id);
-        if (mach2Err) throw mach2Err;
-      }
-
-      if (machine.plan?.id) {
-        const planUpdate = {};
-        // UNE ÉCHÉANCE PAR TÂCHE. Cas réel : l'huile était due à 20 h et le
-        // compteur est à 22 h (donc « en retard de 2 h ») ; un graissage saisi à
-        // 25 h effaçait ce retard alors que la vidange n'avait jamais été faite.
-        // Désormais seules les tâches cochées avancent, et l'échéance du plan est
-        // le MINIMUM de ses tâches comparables — y compris quand ce minimum vaut
-        // « aucune » : un plan dont toutes les tâches sont des points de contrôle
-        // ou des échéances d'une autre unité n'a plus d'échéance générale, et
-        // garder l'ancienne valeur en ferait un vestige qui rend la machine « en
-        // retard » à tort (cas réel : « Vehicule du PDG », 1 470 km fantômes).
-        const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursValue, performedAt, hoursValue2);
-        if (suivi) {
-          planUpdate.items = suivi.items;
-          Object.assign(planUpdate, echeancePlanPatch(suivi.echeance, machine.plan));
-          // Même règle pour le second suivi, s'il existe : son échéance suit
-          // aussi le minimum de SES tâches, et disparaît si aucune ne la porte.
-          // echeancePlanPatch2 écrit la bonne colonne selon son genre (date ou
-          // compteur) — planNextDueCounter2Patch écrivait TOUJOURS dans la
-          // colonne compteur, même pour un second suivi calendaire, qui ne
-          // se mettait donc jamais à jour après un entretien (signalé le
-          // 23/09, sur la Peugeot 208 après un entretien complet). ⚠️ `unit2`
-          // (utilisé plus haut pour LE CHAMP DE RELEVÉ) est volontairement
-          // restreint au compteur — il vaut null pour un second suivi
-          // calendaire, ce qui empêchait CE correctif même de s'exécuter :
-          // c'est modeSecondaireDe(machine) qu'il faut lire ici.
-          if (modeSecondaireDe(machine)) Object.assign(planUpdate, echeancePlanPatch2(suivi.echeanceSecondaire, machine));
-        } else if (journalAvanceEcheance(items, checkedItems)) {
-          // Plan sans élément détaillé : comportement d'avant, inchangé.
-          if (isCounter) {
-            const interval = planIntervalCounter(machine.plan) || FALLBACK_INTERVAL_HOURS;
-            Object.assign(planUpdate, planNextDueCounterPatch((hoursValue || 0) + interval));
-          } else {
-            planUpdate.next_due_at = addDaysIso(performedAt, machine.plan.interval_days || FALLBACK_INTERVAL_DAYS);
-          }
-        }
-        if (Object.keys(planUpdate).length) {
-          const { error: planErr } = await sb.from('maintenance_plans').update(planUpdate).eq('id', machine.plan.id);
-          if (planErr) throw planErr;
-        }
-      }
+      // Sans réseau : on ne tente même pas l'envoi, l'action est gardée sur l'appareil (voir plus bas).
+      if (navigator.onLine === false) throw new Error('hors connexion');
+      const { sortiesRefusees } = await executerIntervention(machine, saisie, suiviEnregistrement, false);
 
       // Clôture d'un ordre de travail : l'ordre est lié à l'intervention qui vient d'être enregistrée. Un échec ici ne doit JAMAIS faire perdre
       // l'intervention (déjà écrite) : l'appelant prévient l'utilisateur lui-même.
       if (typeof options.onSaved === 'function') {
-        try { await options.onSaved(intervention && intervention.id); } catch (errOrdre) { console.warn('Ordre de travail non terminé :', errOrdre); }
+        try { await options.onSaved(idIntervention); } catch (errOrdre) { console.warn('Ordre de travail non terminé :', errOrdre); }
       }
       overlay.remove();
       const messageEnregistre = (kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré'))
@@ -3278,7 +3199,31 @@ function openLogInterventionModal(machine, tache, options = {}) {
         ? messageEnregistre + ' — ' + tR('{n} sortie(s) de stock refusée(s) : à enregistrer à la main dans Stock.', { n: sortiesRefusees })
         : messageEnregistre);
     } catch (err) {
-      errorEl.textContent = trad('Erreur :') + " " + err.message;
+      // Réseau absent ou serveur indisponible : l'action est gardée sur l'appareil et partira toute seule. Impossible si elle demande le réseau
+      // (sortie de stock, clôture d'un ordre) : on le dit, et rien n'est perdu — le formulaire reste ouvert.
+      if (estErreurTransitoire(err)) {
+        if (lignesSortie.length) {
+          refuserSortie(trad('Sans réseau, « Sortir du stock » est impossible : décoche-le (la pièce sera notée sans sortie de stock) ou attends le réseau.'));
+          return;
+        }
+        if (typeof options.onSaved === 'function') {
+          refuserSortie(trad('Terminer un ordre de travail demande le réseau pour l\'instant : réessaie avec du réseau.'));
+          return;
+        }
+        try {
+          await mettreInterventionEnFile(machine, saisie, suiviEnregistrement.etapes);
+          overlay.remove();
+          renderApp();
+          showToast(trad('Intervention enregistrée sur l\'appareil : elle partira dès que le réseau revient.'));
+          return;
+        } catch (errFile) {
+          errorEl.textContent = (errFile && errFile.message) || trad('Enregistrement impossible sans réseau.');
+          submitBtn.disabled = false;
+          if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
+          return;
+        }
+      }
+      errorEl.textContent = trad('Erreur :') + " " + ((err && err.message) || err);
       submitBtn.disabled = false;
       if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
     }
@@ -3339,6 +3284,7 @@ async function chargerPannes() {
 }
 
 function ouvrirSignalerPanne(machine) {
+  const idPanne = nouvelIdentifiant();   // fixé à l'ouverture : un renvoi (coupure, deuxième clic) retombe sur la MÊME panne, jamais un doublon
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
@@ -3370,13 +3316,34 @@ function ouvrirSignalerPanne(machine) {
     if (!description) { showToast(trad('Décris la panne en quelques mots.')); q('#panne-desc').focus(); return; }
     const bouton = q('#panne-envoyer');
     bouton.disabled = true;
-    const { error } = await sb.rpc('signaler_panne', {
-      p_machine_id: machine.id,
-      p_description: description,
-      p_severity: (overlay.querySelector('input[name="panne-gravite"]:checked') || {}).value || 'importante',
-      p_stopped: q('#panne-arret').checked,
-    });
-    if (error) { bouton.disabled = false; showToast(error.message || trad('Envoi impossible. Réessaie.')); return; }
+    const panne = {
+      id: idPanne,
+      description,
+      severity: (overlay.querySelector('input[name="panne-gravite"]:checked') || {}).value || 'importante',
+      stopped: q('#panne-arret').checked,
+    };
+    try {
+      if (navigator.onLine === false) throw new Error('hors connexion');
+      await envoyerPanne({ machineId: machine.id, ...panne });
+    } catch (error) {
+      // Sans réseau (ou serveur indisponible) : la panne est gardée sur l'appareil et partira toute seule — le gérant sera prévenu à ce moment-là.
+      if (estErreurTransitoire(error)) {
+        try {
+          await mettrePanneEnFile(machine, panne);
+          overlay.remove();
+          renderApp();
+          showToast(trad('Panne enregistrée sur l\'appareil : le gérant sera prévenu dès que le réseau revient.'));
+          return;
+        } catch (errFile) {
+          bouton.disabled = false;
+          showToast((errFile && errFile.message) || trad('Envoi impossible. Réessaie.'));
+          return;
+        }
+      }
+      bouton.disabled = false;
+      showToast((error && error.message) || trad('Envoi impossible. Réessaie.'));
+      return;
+    }
     overlay.remove();
     showToast(trad('Panne signalée. Le gérant est prévenu dans l\'application.'));
     const racine = document.getElementById('view-root');

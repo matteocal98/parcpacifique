@@ -14,6 +14,7 @@
 
 const COPIE_BASE = 'kalea-copie';
 const COPIE_MAGASIN = 'lignes';
+const FILE_MAGASIN = 'file';                 // la FILE D'OPÉRATIONS (app-19) : actions faites sans réseau, en attente d'envoi. Jamais effacée par un nettoyage de copies.
 const COPIE_INSTANTANE = 'instantane';
 let __copieBase = null;                       // promesse de la base (une seule ouverture)
 const __copieSecours = new Map();             // si IndexedDB est indisponible
@@ -25,8 +26,12 @@ function copieBase() {
     try {
       const idb = typeof indexedDB !== 'undefined' ? indexedDB : null;
       if (!idb) { resolve(null); return; }
-      const req = idb.open(COPIE_BASE, 1);
-      req.onupgradeneeded = () => { try { req.result.createObjectStore(COPIE_MAGASIN); } catch (err) { /* déjà créé */ } };
+      const req = idb.open(COPIE_BASE, 2);       // version 2 : ajout du magasin « file »
+      req.onupgradeneeded = () => {
+        const base = req.result;
+        try { if (!base.objectStoreNames.contains(COPIE_MAGASIN)) base.createObjectStore(COPIE_MAGASIN); } catch (err) { /* déjà créé */ }
+        try { if (!base.objectStoreNames.contains(FILE_MAGASIN)) base.createObjectStore(FILE_MAGASIN, { keyPath: 'id' }); } catch (err) { /* déjà créé */ }
+      };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => resolve(null);
       req.onblocked = () => resolve(null);
@@ -36,13 +41,13 @@ function copieBase() {
 }
 
 // Une opération sur le magasin ; résout toujours (undefined en cas d'échec) : la copie est un confort, jamais une cause d'erreur.
-async function copieOperation(mode, action) {
+async function copieOperation(mode, action, magasin = COPIE_MAGASIN) {
   const base = await copieBase();
   if (!base) return { secours: true };
   return new Promise((resolve) => {
     try {
-      const tx = base.transaction(COPIE_MAGASIN, mode);
-      const req = action(tx.objectStore(COPIE_MAGASIN));
+      const tx = base.transaction(magasin, mode);
+      const req = action(tx.objectStore(magasin));
       tx.oncomplete = () => resolve({ ok: true, valeur: req ? req.result : undefined });
       tx.onerror = () => resolve({ ok: false });
       tx.onabort = () => resolve({ ok: false });
