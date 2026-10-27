@@ -2734,15 +2734,20 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .file-modal .ui-ligne-action{flex-wrap:wrap;justify-content:flex-end;}
 
 /* ── MODALE « MODIFIER UNE MACHINE » : Archiver / Supprimer, deux boutons distincts sous Annuler / Enregistrer (app-14-qr-support.js) ── */
-.machine-actions-sous{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
-.machine-action-ligne{display:flex;align-items:center;gap:8px;}
+.machine-actions-sous{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:6px;}
+.machine-action-ligne{display:flex;align-items:center;gap:8px;flex:1 1 calc(50% - 5px);min-width:0;order:1;}
+.machine-actions-sous > .machine-action{box-sizing:border-box;flex:1 1 calc(50% - 5px);min-width:0;order:2;width:auto;}
 .machine-action,.machine-action.delete-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin:0;padding:0 16px;border:none;border-radius:var(--r-md);font-family:inherit;font-size:13px;line-height:18px;font-weight:700;text-decoration:none;cursor:pointer;transition:filter .15s,transform .1s;}
 .machine-action:hover:not(:disabled){filter:brightness(.96);text-decoration:none;}
 .machine-action:active:not(:disabled){transform:scale(.98);}
 .machine-action .material-symbols-outlined{font-size:18px;}
 .machine-action-archiver{flex:1 1 auto;background:rgba(14,19,51,.06);color:var(--ink);}
-.machine-action-supprimer,.machine-action.machine-action-supprimer.delete-link{background:var(--late-bg);color:var(--late-ink);}
-.machine-archive-aide{margin:0;}
+.machine-action-supprimer,.machine-action.machine-action-supprimer.delete-link{background:#C2410C;color:#fff;}
+.machine-action-supprimer:hover:not(:disabled){background:#9A3412;filter:none;}
+.machine-archive-aide{margin:0;flex:1 1 100%;order:3;}
+@media (max-width:700px){.machine-modal-edit .machine-actions-sous .machine-action{white-space:normal;padding:6px 8px;gap:6px;min-height:48px;font-size:12.5px;line-height:15px;text-align:center;}.machine-action .material-symbols-outlined{flex:none;}}
+/* « Annuler » à la même hauteur que « Enregistrer » */
+.machine-modal-edit #cancel-add{min-height:44px;padding:0 24px;}
 @media (min-width:701px){.machine-archive-aide{display:none !important;}}   /* ordinateur : l'explication est l'info-bulle du bouton ; téléphone : pastille « i » */
 
 /* ── SIGNATURE NUMÉRIQUE (app-20-signatures.js) : zone de tracé, cartes de signature, état d'intégrité, avenants ── */
