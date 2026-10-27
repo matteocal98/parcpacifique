@@ -247,6 +247,27 @@ VIEWS.account = {
         </div>
       </section>
 
+      ${planCouvreTco() ? `
+      <!-- ── CONNECTEUR IA (Claude…) : interrupteur de la société, ÉTEINT par défaut, réservé au gérant ; journal sans contenu. -->
+      <section class="ui-section" id="acc-connecteur">
+        ${tete('reglages', trad('Connecteur IA'), trad('Consulter KALEA depuis Claude ou un autre assistant IA, en lecture seule.'))}
+        <div class="ui-section-corps">
+          <div class="ui-groupe">
+            <label class="check-row">
+              <input type="checkbox" id="acc-connecteur-actif" disabled>
+              ${trad('Autoriser la connexion d\'un assistant IA à KALEA')}
+            </label>
+            <div class="ui-aide">${trad('Éteint par défaut. Une fois activé, chaque personne de la société peut relier son propre assistant IA : il ne voit que ce que cette personne a le droit de voir dans KALEA, en lecture seule — rien n\'est jamais modifié. Éteindre coupe l\'accès aussitôt.')}</div>
+            <div class="ui-aide" id="acc-connecteur-msg" role="status" aria-live="polite"></div>
+          </div>
+          <div class="ui-groupe" id="acc-connecteur-journal-bloc" hidden>
+            <span class="ui-etiquette">${trad('Dernières utilisations')}</span>
+            <div id="acc-connecteur-journal"></div>
+            <div class="ui-aide">${trad('Seuls la personne, l\'outil et l\'heure sont notés — jamais les questions ni les réponses. Conservé 90 jours.')}</div>
+          </div>
+        </div>
+      </section>` : ''}
+
       <section class="ui-section">
         ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
         <div class="ui-section-corps">
@@ -362,6 +383,7 @@ VIEWS.account = {
     habillerSelect(root.querySelector('#acc-membre-role'), trad('Ce qu\'il peut faire dans l\'application'));
     habillerSelect(root.querySelector('#acc-invite-role'), trad('Droit d\'accès'));
     preparerCarteEquipe(root);
+    brancherConnecteurIA(root);
 
     // ── CE QUE CHAQUE RÔLE PEUT FAIRE, ET CE QU'ON EN DIT ────────────────────
     // Les droits sont ceux de `migration-roles-equipe.sql` : ce tableau n'est
@@ -1228,6 +1250,59 @@ VIEWS.account = {
 // découvrir après coup qu'il a perdu un mois payé — ni continuer d'être débité
 // pour un compte qui n'existe plus. C'est le serveur qui résilie, et s'il
 // n'y arrive pas, RIEN n'est supprimé.
+// ── CONNECTEUR IA : interrupteur de la société (éteint par défaut) et journal des utilisations ─────────────────────────────────
+// Réglé UNIQUEMENT par le gérant, par la fonction `definir_connecteur_societe` (migrations/connecteur-durcissement.sql) ; le journal est lu par
+// `connecteur_journal_recent` (gérant seulement) et ne contient jamais le contenu des échanges. Tant que le SQL n'est pas exécuté, la lecture
+// de la colonne échoue et la rubrique reste masquée : rien ne casse.
+function brancherConnecteurIA(root) {
+  const section = root.querySelector('#acc-connecteur');
+  if (!section) return;
+  const caseActif = section.querySelector('#acc-connecteur-actif');
+  const msg = section.querySelector('#acc-connecteur-msg');
+  const blocJournal = section.querySelector('#acc-connecteur-journal-bloc');
+  const listeJournal = section.querySelector('#acc-connecteur-journal');
+  const gerant = UI.role === 'gerant';
+  const libelleStatut = (s) => ({
+    ok: trad('Accepté'), interrupteur: trad('Refusé : connecteur désactivé'), limite: trad('Refusé : trop de requêtes'), offre: trad('Refusé : offre'),
+  })[s] || esc(s);
+
+  const rafraichirJournal = async () => {
+    if (!gerant) return;
+    const { data, error } = await sb.rpc('connecteur_journal_recent', { p_limite: 10 });
+    if (error) return;
+    blocJournal.hidden = false;
+    listeJournal.innerHTML = !(data || []).length
+      ? `<p class="ui-aide">${trad('Aucune utilisation pour le moment.')}</p>`
+      : `<div class="ui-liste">${data.map((l) => `
+        <div class="ui-ligne is-deux">
+          <div class="ui-ligne-id"><div class="ui-ligne-textes">
+            <span class="ui-ligne-nom">${esc(l.personne)} · ${esc(l.outil)}</span>
+            <span class="ui-ligne-sous">${esc(formatDateHeureMouvement(l.quand))}</span>
+          </div></div>
+          <div class="ui-ligne-action"><span class="ui-statut ${l.statut === 'ok' ? 'is-ok' : 'is-retard'}">${libelleStatut(l.statut)}</span></div>
+        </div>`).join('')}</div>`;
+  };
+
+  sb.from('companies').select('connecteur_actif').eq('id', UI.companyId).maybeSingle().then(({ data, error }) => {
+    if (error || !data) { section.hidden = true; return; }   // colonne absente : SQL pas encore exécuté
+    caseActif.checked = data.connecteur_actif === true;
+    caseActif.disabled = !gerant;
+    if (!gerant) msg.textContent = trad('Réservé au gérant.');
+    rafraichirJournal();
+  });
+
+  caseActif.addEventListener('change', async () => {
+    const voulu = caseActif.checked;
+    caseActif.disabled = true;
+    msg.textContent = '';
+    const { error } = await sb.rpc('definir_connecteur_societe', { p_actif: voulu });
+    caseActif.disabled = false;
+    if (error) { caseActif.checked = !voulu; msg.textContent = trad('Réglage impossible pour le moment.'); return; }
+    msg.textContent = voulu ? trad('Connecteur activé.') : trad('Connecteur désactivé : les accès sont coupés.');
+    rafraichirJournal();
+  });
+}
+
 function brancherSuppressionCompte(root) {
   const bouton = root.querySelector('#acc-supprimer');
   const message = root.querySelector('#acc-supprimer-msg');
