@@ -2733,6 +2733,18 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .file-banniere-actions{display:inline-flex;gap:14px;flex-wrap:wrap;}
 .file-modal .ui-ligne-action{flex-wrap:wrap;justify-content:flex-end;}
 
+/* ── MODALE « MODIFIER UNE MACHINE » : Archiver / Supprimer, deux boutons distincts sous Annuler / Enregistrer (app-14-qr-support.js) ── */
+.machine-actions-sous{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+.machine-action-ligne{display:flex;align-items:center;gap:8px;}
+.machine-action,.machine-action.delete-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin:0;padding:0 16px;border:none;border-radius:var(--r-md);font-family:inherit;font-size:13px;line-height:18px;font-weight:700;text-decoration:none;cursor:pointer;transition:filter .15s,transform .1s;}
+.machine-action:hover:not(:disabled){filter:brightness(.96);text-decoration:none;}
+.machine-action:active:not(:disabled){transform:scale(.98);}
+.machine-action .material-symbols-outlined{font-size:18px;}
+.machine-action-archiver{flex:1 1 auto;background:rgba(14,19,51,.06);color:var(--ink);}
+.machine-action-supprimer,.machine-action.machine-action-supprimer.delete-link{background:var(--late-bg);color:var(--late-ink);}
+.machine-archive-aide{margin:0;}
+@media (min-width:701px){.machine-archive-aide{display:none !important;}}   /* ordinateur : l'explication est l'info-bulle du bouton ; téléphone : pastille « i » */
+
 /* ── SIGNATURE NUMÉRIQUE (app-20-signatures.js) : zone de tracé, cartes de signature, état d'intégrité, avenants ── */
 .sig-modal{max-width:560px;}
 .sig-signataire{margin:0 0 4px;font-size:14px;font-weight:700;color:var(--ink);}
@@ -3465,6 +3477,7 @@ html[data-theme="dark"] .stat-table td{border-top:1px solid rgba(255,255,255,0.0
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(0,0,0,0.31)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge-vide{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-jauge-piste)):not(:has(.mstrip-jauge-vide))::before{background:rgba(255,255,255,0.19)}
+html[data-theme="dark"] .machine-action-archiver{background:rgba(255,255,255,0.1)}
 html[data-theme="dark"] .sig-image{background:var(--surface)}
 html[data-theme="dark"] .ui-puce[class*="teinte-"].is-actif .ui-compte{background:rgba(255,255,255,0.04)}
 html[data-theme="dark"] .overlay .modal.otm{box-shadow:0 25px 60px -15px rgba(0,0,0,0.65)}

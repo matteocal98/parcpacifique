@@ -676,14 +676,14 @@ function openMachineModal(companyId, categories, existing) {
             <button class="px-space-lg py-2.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container transition-colors" type="button" id="cancel-add">${trad('Annuler')}</button>
             <button class="px-space-xl py-3 rounded-xl bg-inverse-surface text-inverse-on-surface font-label-lg text-label-lg font-bold hover:bg-on-background transition-colors shadow-md flex items-center gap-space-xs" type="submit" id="submit-add"><span class="material-symbols-outlined text-[20px]">save</span>${isEdit ? trad('Enregistrer les modifications') : trad('Enregistrer')}</button>
           </div>
-          ${isEdit && peutArchiverMachine() ? `
-          <div class="flex justify-center pt-space-xs">
-            <button class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" type="button" id="archive-machine"><span class="material-symbols-outlined text-[16px]">inventory_2</span>${trad('Archiver cette machine')}</button>
-          </div>
-          <div class="hint">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.')}</div>` : ''}
-          ${isEdit && peutSupprimerMachine() ? `
-          <div class="flex justify-center pt-space-xs">
-            <button class="text-error hover:text-on-error-container font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 delete-link" type="button" id="delete-machine"><span class="material-symbols-outlined text-[16px]">delete</span><span>${trad('Supprimer cette machine')}</span></button>
+          ${isEdit && (peutArchiverMachine() || peutSupprimerMachine()) ? `
+          <div class="machine-actions-sous">
+            ${peutArchiverMachine() ? `<div class="machine-action-ligne">
+              <button class="machine-action machine-action-archiver" type="button" id="archive-machine" title="${esc(trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.'))}"><span class="material-symbols-outlined">inventory_2</span><span class="machine-action-libelle">${trad('Archiver cette machine')}</span></button>
+              <button type="button" class="ui-info-btn" id="archive-info" aria-label="${esc(trad('Afficher l\'explication'))}" aria-expanded="false">i</button>
+            </div>
+            <div class="hint info-bulle-texte machine-archive-aide" id="archive-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.')}</div>` : ''}
+            ${peutSupprimerMachine() ? `<button class="machine-action machine-action-supprimer delete-link" type="button" id="delete-machine"><span class="material-symbols-outlined">delete</span><span class="machine-action-libelle">${trad('Supprimer cette machine')}</span></button>` : ''}
           </div>` : ''}
           ${isEdit && !peutSupprimerMachine() ? `<div class="hint" id="machine-suppr-refus">${trad('Seul le gérant peut supprimer une machine : tu peux la modifier, pas l\'effacer.')}</div>` : ''}
         </div>
@@ -825,6 +825,9 @@ function openMachineModal(companyId, categories, existing) {
     // ⚠️ MÊME RÈGLE : le bouton n'est rendu que pour un gérant. Sans le `?.`, un
     // mécanicien, un chauffeur — ou un rôle encore inconnu — faisait jeter cette
     // ligne, et l'enregistrement de la fiche ne répondait plus du tout.
+    // Pastille « i » (téléphone seulement) : déplie l'explication de l'archivage ; sur ordinateur, l'explication est dans l'info-bulle du bouton.
+    const pastilleArchive = overlay.querySelector('#archive-info');
+    if (pastilleArchive) pastilleArchive._cible = overlay.querySelector('#archive-aide');
     overlay.querySelector('#archive-machine')?.addEventListener('click', async (e) => {
       if (!window.confirm(tR('Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et tu pourras la restaurer.', { nom: existing.name }))) return;
       const btn = e.currentTarget;
@@ -838,9 +841,10 @@ function openMachineModal(companyId, categories, existing) {
     overlay.querySelector('#delete-machine')?.addEventListener('click', async (e) => {
       const ok = confirm(tR('Supprimer définitivement « {nom} » ? Son plan d\'entretien, son historique, ses relevés, son carnet et sa photo seront aussi supprimés. Cette action est irréversible.', { nom: existing.name }));
       if (!ok) return;
-      const btn = e.target;
+      const btn = e.currentTarget;
+      const libelle = btn.querySelector('.machine-action-libelle');
       btn.disabled = true;
-      btn.textContent = trad('Suppression…');
+      if (libelle) libelle.textContent = trad('Suppression…');
       try {
         // ★ LES DONNÉES LIÉES PARTENT AVEC LA MACHINE, ET C'EST FAIT ICI.
         //   Une cascade de base n'est PAS garantie (le schéma d'origine n'en
@@ -878,7 +882,7 @@ function openMachineModal(companyId, categories, existing) {
       } catch (err) {
         overlay.querySelector('#f-error').textContent = trad('Erreur à la suppression :') + " " + err.message;
         btn.disabled = false;
-        btn.textContent = trad('Supprimer cette machine');
+        if (libelle) libelle.textContent = trad('Supprimer cette machine');
       }
     });
   }
