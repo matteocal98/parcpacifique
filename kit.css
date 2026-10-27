@@ -2733,6 +2733,21 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .file-banniere-actions{display:inline-flex;gap:14px;flex-wrap:wrap;}
 .file-modal .ui-ligne-action{flex-wrap:wrap;justify-content:flex-end;}
 
+/* ── ORDRES DE TRAVAIL : couleurs de la liste (filtres et pastilles), mêmes teintes que la fiche ── */
+.ui-puce[class*="teinte-"]{background:var(--t-fond);color:var(--t-texte);}
+.ui-puce[class*="teinte-"] .ui-compte{background:var(--t-texte);color:var(--surface);}
+.ui-puce[class*="teinte-"]:hover{filter:brightness(.97);}
+.ui-puce[class*="teinte-"].is-actif{background:var(--t-plein);color:#fff;}
+.ui-puce[class*="teinte-"].is-actif .ui-compte{background:rgba(255,255,255,.28);color:#fff;}
+.ui-puce.teinte-indigo{--t-fond:var(--otm-indigo-fond);--t-texte:var(--otm-indigo);--t-plein:#4F46E5;}
+.ui-puce.teinte-ciel{--t-fond:var(--otm-ciel-fond);--t-texte:var(--otm-ciel);--t-plein:#0284C7;}
+.ui-puce.teinte-ambre{--t-fond:var(--otm-ambre2-fond);--t-texte:var(--otm-ambre2);--t-plein:#D97706;}
+.ui-puce.teinte-vert{--t-fond:var(--otm-vert-fond);--t-texte:var(--otm-vert);--t-plein:#059669;}
+.ui-puce.teinte-ardoise{--t-fond:var(--otm-gris-fond);--t-texte:var(--otm-gris);--t-plein:#475569;}
+.ui-puce.teinte-bleu{--t-fond:var(--otm-bleu-fond);--t-texte:var(--otm-bleu);--t-plein:#006591;}
+.ui-statut.is-ciel{background:var(--otm-ciel-fond);color:var(--otm-ciel);}
+.ui-statut.is-indigo{background:var(--otm-indigo-fond);color:var(--otm-indigo);}
+
 /* ── FENÊTRES D'ORDRE DE TRAVAIL (app-17-ordres-travail.js) — reprise Stitch « Fleet Precision » : choix de la machine (étape 1/2), formulaire (étape 2/2), fiche d'ordre.
    Famille .otm-* dédiée (comme .pplan-*) : ne touche aucune classe partagée. Police Plus Jakarta Sans (déjà chargée par app.html) ; pictogrammes Material Symbols.
    Toutes les couleurs passent par les variables --otm-* ci-dessous : le thème sombre n'a qu'à les redéfinir. ── */
@@ -3422,6 +3437,7 @@ html[data-theme="dark"] .stat-table td{border-top:1px solid rgba(255,255,255,0.0
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(0,0,0,0.31)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge-vide{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-jauge-piste)):not(:has(.mstrip-jauge-vide))::before{background:rgba(255,255,255,0.19)}
+html[data-theme="dark"] .ui-puce[class*="teinte-"].is-actif .ui-compte{background:rgba(255,255,255,0.04)}
 html[data-theme="dark"] .overlay .modal.otm{box-shadow:0 25px 60px -15px rgba(0,0,0,0.65)}
 html[data-theme="dark"] .otm-btn{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .otm-btn.is-plein{background:#5B52DF;box-shadow:0 6px 14px -4px rgba(0,0,0,0.65)}

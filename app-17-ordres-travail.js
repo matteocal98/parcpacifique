@@ -27,11 +27,11 @@ function peutGererOrdres() {
 }
 
 const otStatut = () => ({
-  a_faire: [trad('À faire'), ''], en_cours: [trad('En cours'), 'is-bientot'], termine: [trad('Terminé'), 'is-ok'],
+  a_faire: [trad('À faire'), 'is-ciel'], en_cours: [trad('En cours'), 'is-bientot'], termine: [trad('Terminé'), 'is-ok'],
   valide: [trad('Validé'), 'is-ok'], annule: [trad('Annulé'), ''],
 });
 const otPriorite = () => ({
-  basse: [trad('Basse'), ''], normale: [trad('Normale'), ''], haute: [trad('Haute'), 'is-bientot'], urgente: [trad('Urgente'), 'is-retard'],
+  basse: [trad('Basse'), ''], normale: [trad('Normale'), ''], haute: [trad('Haute'), 'is-indigo'], urgente: [trad('Urgente'), 'is-retard'],
 });
 const otEstOuvert = (o) => o.statut === 'a_faire' || o.statut === 'en_cours';
 
@@ -181,8 +181,10 @@ VIEWS.ordres = {
         ['termines', trad('Terminés'), compte((o) => o.statut === 'termine' || o.statut === 'valide')],
         ['tous', trad('Tous'), tous.length],
       ];
-      root.querySelector('#ot-puces').innerHTML = puces.map(([id, l, n]) => `<button type="button" class="ui-puce${OT_FILTRES.statut === id ? ' is-actif' : ''}" data-ot-statut="${id}"><span>${esc(l)}</span><span class="ui-compte">${n}</span></button>`).join('')
-        + (peutGererOrdres() ? `<button type="button" class="ui-puce${OT_FILTRES.moi ? ' is-actif' : ''}" data-ot-moi="1"><span>${trad('Mes ordres')}</span></button>` : '');
+      // Une teinte par filtre, les mêmes que les pastilles d'état de la fiche : à faire = bleu ciel, en cours = ambre, terminés = vert, en cours et à faire = indigo.
+      const TEINTES = { actifs: 'indigo', a_faire: 'ciel', en_cours: 'ambre', termines: 'vert', tous: 'ardoise' };
+      root.querySelector('#ot-puces').innerHTML = puces.map(([id, l, n]) => `<button type="button" class="ui-puce teinte-${TEINTES[id]}${OT_FILTRES.statut === id ? ' is-actif' : ''}" data-ot-statut="${id}"><span>${esc(l)}</span><span class="ui-compte">${n}</span></button>`).join('')
+        + (peutGererOrdres() ? `<button type="button" class="ui-puce teinte-bleu${OT_FILTRES.moi ? ' is-actif' : ''}" data-ot-moi="1"><span>${trad('Mes ordres')}</span></button>` : '');
       const liste = otFiltres();
       root.querySelector('#ot-compte').textContent = tR('{n} ordre(s)', { n: tous.length });
       root.querySelector('#ot-liste').innerHTML = liste.length
