@@ -98,7 +98,7 @@ async function habChargerGestion() {
 
 // ── La fenêtre « Qualifications et habilitations » (gérant) ──
 async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
-  if (!habilitationsActif() || UI.role !== 'gerant') return;
+  if (!habilitationsActif() || !estGerant()) return;
   const overlay = document.createElement('div');
   overlay.className = 'overlay otm-overlay';
   overlay.innerHTML = `
@@ -256,7 +256,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
 
 // ── « Qui est habilité » pour UNE machine (gérant) : ce que la machine exige, puis chaque membre avec son verdict ──
 async function ouvrirHabilitesMachine(machine) {
-  if (!habilitationsActif() || UI.role !== 'gerant' || !machine) return;
+  if (!habilitationsActif() || !estGerant() || !machine) return;
   const overlay = document.createElement('div');
   overlay.className = 'overlay otm-overlay';
   overlay.innerHTML = `
@@ -335,13 +335,13 @@ async function ouvrirMesHabilitations() {
 function blocHabilitationsHtml() {
   if (!habilitationsActif()) return '';
   return `<div class="ui-groupe ot-validation" id="hab-entree">
-    <button type="button" class="ui-btn ui-btn-pastille" data-hab-ouvrir>${UI.role === 'gerant' ? trad('Qualifications et habilitations') : trad('Mes habilitations')}</button>
-    <div class="ui-aide">${UI.role === 'gerant' ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Tes qualifications et leur date de validité.')}</div>
+    <button type="button" class="ui-btn ui-btn-pastille" data-hab-ouvrir>${estGerant() ? trad('Qualifications et habilitations') : trad('Mes habilitations')}</button>
+    <div class="ui-aide">${estGerant() ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Tes qualifications et leur date de validité.')}</div>
   </div>`;
 }
 function brancherHabilitations(root) {
   const b = root && root.querySelector('[data-hab-ouvrir]');
-  if (b) b.addEventListener('click', () => { if (UI.role === 'gerant') ouvrirGestionHabilitations(); else ouvrirMesHabilitations(); });
+  if (b) b.addEventListener('click', () => { if (estGerant()) ouvrirGestionHabilitations(); else ouvrirMesHabilitations(); });
 }
 
 // ── À l'assignation d'un ordre : ce qui manque à la personne choisie pour cette machine ──

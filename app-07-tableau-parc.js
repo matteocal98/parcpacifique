@@ -26,7 +26,7 @@ function actionsRapidesDuRole() {
   const stockOk = !!(SCHEMA.hasStock && typeof planCouvreStock === 'function' && planCouvreStock()
     && vueAutoriseePourRole('stock') && typeof peutGererMouvementsStock === 'function' && peutGererMouvementsStock());
   const actions = [];
-  if (UI.role === 'gerant' || !UI.role) {
+  if (estGerant() || !UI.role) {
     actions.push({ id: 'machine', titre: trad('Ajouter une machine'), sous: trad('Nouvelle machine dans le parc'), picto: 'plusCercle', teinte: 'is-signature', agir: () => handleAddMachine() });
   }
   if (UI.role !== 'achats') actions.push({
@@ -45,7 +45,7 @@ function actionsRapidesDuRole() {
       agir: () => choisirMachineRapide(trad('Panne : quelle machine ?'), (m) => ouvrirSignalerPanne(m)),
     });
   }
-  if (SCHEMA.hasPannes && (UI.role === 'gerant' || UI.role === 'mecanicien')) {
+  if (SCHEMA.hasPannes && (estGerant() || UI.role === 'mecanicien')) {
     actions.push({
       id: 'pannes', court: trad('Suivi'), titre: trad('Pannes signalées'), sous: trad('Voir et traiter les signalements'), picto: 'retard', teinte: 'is-royal',
       agir: () => ouvrirListePannes(),
@@ -180,7 +180,7 @@ function calculerVigilance() {
   if (SCHEMA.hasPannes) {
     lignes.push({ id: 'pannes', picto: 'retard', court: trad('Pannes'), libelle: trad('Pannes signalées'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
-  if (typeof ordresActif === 'function' && ordresActif() && UI.role === 'gerant') {
+  if (typeof ordresActif === 'function' && ordresActif() && estGerant()) {
     lignes.push({ id: 'ordres', picto: 'coche', court: trad('Ordres'), libelle: trad('Ordres de travail ouverts'), n: null, etat: 'ok', aide: trad('Chargement…') });
   }
   if (stockVisible && SCHEMA.hasCommandes) {
@@ -1549,7 +1549,7 @@ function parcVueActive() {
 function blocMachinesArchiveesHtml() {
   const liste = UI.machinesArchivees || [];
   if (!liste.length) return '';
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();
   return `
         <section class="ui-section" id="machines-archivees">
           <details>
@@ -1568,7 +1568,7 @@ function blocMachinesArchiveesHtml() {
 // Restauration : un seul écouteur délégué, posé une fois (la vue est redessinée à chaque changement).
 document.addEventListener('click', async (e) => {
   const bouton = e.target && e.target.closest ? e.target.closest('[data-restaurer-machine]') : null;
-  if (!bouton || UI.role !== 'gerant') return;
+  if (!bouton || !estGerant()) return;
   const machine = (UI.machinesArchivees || []).find((m) => String(m.id) === String(bouton.getAttribute('data-restaurer-machine')));
   if (!machine) return;
   bouton.disabled = true;

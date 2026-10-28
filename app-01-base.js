@@ -168,7 +168,7 @@ async function memoriserLangueServeur(code) {
     const { data } = await sb.auth.getSession();
     if (!data || !data.session) return;
     const taches = [sb.auth.updateUser({ data: { langue: code } })];
-    if (typeof UI !== 'undefined' && UI && UI.role === 'gerant') {
+    if (typeof UI !== 'undefined' && UI && estGerant()) {
       taches.push(sb.rpc('definir_langue_societe', { p_langue: code }));
     }
     await Promise.race([Promise.allSettled(taches), new Promise((ok) => setTimeout(ok, 2500))]);
@@ -184,7 +184,7 @@ async function initialiserLangueServeur(session) {
   try {
     const meta = session && session.user && session.user.user_metadata;
     if (!meta || !meta.langue) await sb.auth.updateUser({ data: { langue: LANGUE } });
-    if (UI.role !== 'gerant' || !UI.companyId) return;
+    if (!estGerant() || !UI.companyId) return;
     const { data, error } = await sb.from('companies').select('langue').eq('id', UI.companyId).maybeSingle();
     if (error || !data || data.langue) return;
     await sb.rpc('definir_langue_societe', { p_langue: LANGUE });
@@ -942,6 +942,15 @@ function contactFullName(first, last, secours = '') {
 }
 // « jean-pierre » → « Jean-Pierre », « georges » → « Georges » : une capitale à chaque partie d'un prénom (le reste est laissé tel que saisi).
 // Les identifiants de connexion (matteocal…) ne passent PAS par ici : seul un prénom saisi comme tel est mis en forme.
+// ── LES RÔLES DE GESTION : UN SEUL ENDROIT ──────────────────────────────────────────────────────────────────
+// En base, le rôle « gerant » est l'ADMINISTRATEUR (le propriétaire, un seul par société) et « direction » un compte de Direction
+// (autant qu'on veut). La Direction fait tout le quotidien comme l'administrateur ; l'administrateur seul gère l'abonnement, les comptes Direction,
+// l'identité légale de la société, le connecteur IA et la suppression de la société. Ce n'est qu'un REFLET d'affichage : le serveur applique
+// les mêmes règles (est_gerant() / est_administrateur(), migrations/role-direction.sql) et a le dernier mot.
+function estGerantRole(role) { return role === 'gerant' || role === 'direction'; }
+function estGerant() { return estGerantRole(typeof UI !== 'undefined' && UI ? UI.role : ''); }              // Administrateur OU Direction
+function estAdministrateur() { return typeof UI !== 'undefined' && !!UI && UI.role === 'gerant'; }          // l'administrateur seul
+function estDirection() { return typeof UI !== 'undefined' && !!UI && UI.role === 'direction'; }
 function prenomPropre(p) {
   return String(p || '').trim().replace(/(^|[\s'’-])(\p{L})/gu, (m, sep, lettre) => sep + lettre.toLocaleUpperCase());
 }

@@ -60,9 +60,12 @@ VIEWS.account = {
   subtitle: () => UI.company.name || UI.companyName || trad('Société'),
   render() {
     const c = UI.company;
-    // Les coordonnées de la société sont réservées au gérant (update_my_company refuse les autres rôles côté serveur).
-    const modifiable = SCHEMA.hasContactNames && UI.role === 'gerant';
+    // Les coordonnées de la société sont réservées à la gestion — administrateur et Direction (update_my_company refuse les autres rôles côté serveur).
+    const modifiable = SCHEMA.hasContactNames && estGerant();
     const bloque = modifiable ? '' : ' disabled';
+    // L'identité légale (raison sociale, immatriculation), le pays, la devise et l'abonnement : l'administrateur seul. La Direction règle tout le reste.
+    const admin = estAdministrateur();
+    const bloqueAdmin = (modifiable && admin) ? '' : ' disabled';
     // Le palier vient de la société quand elle le porte, sinon de celui que le
     // chargement a déjà retenu : afficher « undefined » à un client qui paie
     // serait le pire des deux mondes.
@@ -83,7 +86,7 @@ VIEWS.account = {
           <div class="ui-grille is-3">
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-name">${trad('Raison sociale')}</label>
-              <input id="acc-name" class="ui-champ" required value="${esc(c.name || UI.companyName || '')}"${bloque}>
+              <input id="acc-name" class="ui-champ" required value="${esc(c.name || UI.companyName || '')}"${bloqueAdmin}>
             </div>
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-activity">${trad('Activité principale')}</label>
@@ -96,19 +99,19 @@ VIEWS.account = {
             ${SCHEMA.hasCountry ? `
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-pays">${trad('Pays')}</label>
-              <select id="acc-pays" class="ui-selecteur is-plein"${bloque}>${optionsPaysSocieteHtml(c.country)}</select>
+              <select id="acc-pays" class="ui-selecteur is-plein"${bloqueAdmin}>${optionsPaysSocieteHtml(c.country)}</select>
             </div>` : ''}
             ${SCHEMA.hasTco ? `
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-devise">${trad('Devise')}</label>
-              <select id="acc-devise" class="ui-selecteur is-plein"${bloque}>
+              <select id="acc-devise" class="ui-selecteur is-plein"${bloqueAdmin}>
                 <option value="XPF"${c.currency === 'XPF' ? ' selected' : ''}>${esc(libelleDevise('XPF'))}</option>
                 <option value="EUR"${c.currency !== 'XPF' ? ' selected' : ''}>${esc(libelleDevise('EUR'))}</option>
               </select>
             </div>` : ''}
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-reg" id="acc-reg-etiquette">${libelleRegistre(c.country)}</label>
-              <input id="acc-reg" class="ui-champ" value="${esc(c.registrationNumber || '')}"${bloque}>
+              <input id="acc-reg" class="ui-champ" value="${esc(c.registrationNumber || '')}"${bloqueAdmin}>
             </div>
           </div>
           ${SCHEMA.hasTco ? `
@@ -116,13 +119,14 @@ VIEWS.account = {
             ${picto('alerte')}
             <div>
               <p><strong>${trad('Devise non appliquée.')}</strong> ${trad('Changer de devise convertit TOUS les montants déjà enregistrés (coûts, seuils, prix des machines, catalogue de pièces), au taux fixe 1 € = 119,3317 XPF. Ce n\'est pas annulable d\'un clic : l\'enregistrement du pays ci-dessus ne la change jamais.')}</p>
-              <button type="button" class="ui-btn ui-btn-pastille" id="acc-devise-appliquer"${bloque}>${trad('Convertir les montants')}</button>
+              <button type="button" class="ui-btn ui-btn-pastille" id="acc-devise-appliquer"${bloqueAdmin}>${trad('Convertir les montants')}</button>
             </div>
           </div>` : ''}
           <div class="ui-encadre">
             ${picto('case')}
             <p>${trad('Version KALEA déployée :')} <strong id="version-application" title="${esc(empreinteCourte())}">${esc(versionAffichee())}</strong> — ${trad('système à jour.')}</p>
           </div>
+          ${(modifiable && !admin) ? `<div class="ui-aide">${trad('La raison sociale, le numéro d\'immatriculation, le pays et la devise ne sont modifiables que par l\'administrateur.')}</div>` : ''}
           <div class="ui-aide" id="acc-societe-msg" role="status" aria-live="polite"></div>
           <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-societe"${bloque}>${trad('Enregistrer les modifications')}</button></div>
           <div class="ui-liste">
@@ -135,7 +139,7 @@ VIEWS.account = {
                 ${phraseMachinesEnPlus() ? `<span class="ui-aide">${esc(phraseMachinesEnPlus())}</span>` : ''}
               </div>
             </div>
-            ${estAppliIOS() ? '' : `<div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="account-upgrade">${trad('Changer d\'offre')}</button></div>`}
+            ${estAppliIOS() ? '' : (admin ? `<div class="ui-ligne-action"><button type="button" class="ui-btn ui-btn-pastille" id="account-upgrade">${trad('Changer d\'offre')}</button></div>` : `<div class="ui-ligne-action"><span class="ui-aide">${trad('Géré par l\'administrateur')}</span></div>`)}
           </div>
           ${estInstitution() ? `
           <div class="ui-ligne is-deux">
@@ -146,7 +150,7 @@ VIEWS.account = {
               </div>
             </div>
           </div>` : ''}
-          ${(PALIERS_PAYANTS.indexOf(plan) !== -1 && !estInstitution() && !estAppliIOS()) ? `
+          ${(admin && PALIERS_PAYANTS.indexOf(plan) !== -1 && !estInstitution() && !estAppliIOS()) ? `
           <div class="ui-ligne is-deux">
             <div class="ui-ligne-id">
               <div class="ui-ligne-textes">
@@ -402,7 +406,8 @@ VIEWS.account = {
     // qu'un REFLET. Si le serveur et lui divergent, c'est le serveur qui gagne —
     // et le message d'erreur affiché est le SIEN, jamais une phrase inventée ici.
     const ROLE_DROITS = {
-      gerant: { libelle: 'Gérant', invite: true, change: true, retire: true, nouveauMotDePasse: true },
+      gerant: { libelle: 'Administrateur', invite: true, change: true, retire: true, nouveauMotDePasse: true },
+      direction: { libelle: 'Direction', invite: true, change: true, retire: true, nouveauMotDePasse: true },
       mecanicien: { libelle: 'Droit de gestion', invite: false, change: false, retire: false },
       chauffeur: { libelle: 'Droit de saisie', invite: false, change: false, retire: false },
       achats: { libelle: 'Droit d\'achat', invite: false, change: false, retire: false },
@@ -490,7 +495,7 @@ VIEWS.account = {
         //   jetait « Cannot access 'roleDe' before initialization ». `ROLE_DROITS`,
         //   lui, est déclaré avant la fonction — on s'en sert directement.
         const monLibelle = trad((ROLE_DROITS[UI.role] || {}).libelle || UI.role || '');
-        const mesDroits = UI.role === 'gerant'
+        const mesDroits = estGerant()
           ? trad('Tout, y compris l\'équipe et l\'abonnement')
           : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : (UI.role === 'achats' ? trad('Le stock, les fournisseurs et les commandes') : trad('Les compteurs')));
         liste.innerHTML = `<p class="ui-aide">${tR('Ton accès : {role}. {droits}', {
@@ -532,6 +537,7 @@ VIEWS.account = {
       //    s'afficherait vide pour tout le monde.
       const ROLE_DESCRIPTIONS = {
         gerant: trad('Tout : le parc, les plans, l\'équipe et l\'abonnement.'),
+        direction: trad('Tout le quotidien comme l\'administrateur (parc, ordres de travail, équipe, stock, coûts…), sauf l\'abonnement, les comptes Direction et l\'identité légale.'),
         mecanicien: trad('Le parc et les entretiens : il ajoute, modifie et marque fait. Il ne gère pas l\'équipe.'),
         chauffeur: trad('Il consulte le parc, relève le compteur et prend la photo de sa machine. Il ne modifie rien d\'autre.'),
         achats: trad('Le stock, les fournisseurs et les commandes. Il voit les coûts, consulte le parc et ne modifie ni les machines ni les entretiens.'),
@@ -558,13 +564,14 @@ VIEWS.account = {
       //    (« non conservé ») et on propose le seul geste qui existe : en générer
       //    un nouveau, qui s'affiche alors UNE fois, dans la zone « Accès ».
       const LIBELLES = {
-        gerant: trad('Gérant'),
+        gerant: trad('Administrateur'),
+        direction: trad('Direction'),
         mecanicien: trad('Droit de gestion'),
         chauffeur: trad('Droit de saisie'),
         achats: trad('Droit d\'achat'),
         autre: trad('Autre'),
       };
-      const ORDRE = ['gerant', 'mecanicien', 'chauffeur', 'achats', 'autre'];
+      const ORDRE = ['gerant', 'direction', 'mecanicien', 'chauffeur', 'achats', 'autre'];
       const libelleDe = (role) => LIBELLES[role] || roleDe(role);
       // Le nom affiché : `prenom`/`nom` quand la base les porte, le login ou
       // l'adresse sinon. Les sièges créés AVANT la migration n'ont pas encore
@@ -579,8 +586,10 @@ VIEWS.account = {
         if (role === 'chauffeur') return trad('Les compteurs, ses ordres de travail et les pannes');
         if (role === 'achats') return trad('Le stock, les fournisseurs et les commandes');
         if (role === 'gerant') return trad('Tout, y compris l\'équipe et l\'abonnement');
+        if (role === 'direction') return trad('Tout, sauf l\'abonnement et les comptes Direction');
         return trad('À confirmer');
       };
+      const peutAgirSur = (m) => peutGererEquipe() && !m.est_moi && m.role !== 'gerant' && (m.role !== 'direction' || estAdministrateur());
       const ligneMembre = (m) => {
         const { prenom, nom } = morceauxDe(m);
         // LE NOM DE FAMILLE EN MAJUSCULES — demandé, et appliqué ici AUSSI : la
@@ -602,20 +611,20 @@ VIEWS.account = {
         const role = m.role || '';
         const acces = estMembreCree(m) ? identiteDe(m) : String(m.email || trad('Invitation en attente'));
         const metier = String(m.metier || '').trim();
-        const actions = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
+        const actions = peutAgirSur(m) ? `
               <button type="button" class="ui-btn ui-btn-teinte" data-pw-reset="${esc(m.id)}"><span class="material-symbols-outlined" aria-hidden="true">key</span>${trad('Nouveau mot de passe')}</button>
               <button type="button" class="ui-btn ui-btn-teinte" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>${trad('Changer le droit')}</button>
               <button type="button" class="ui-btn ui-btn-teinte is-danger equipe-retirer" data-equipe-retirer="${esc(m.id)}"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span>${trad('Retirer')}</button>` : '';
         // Personne n'a de bouton sur SA PROPRE ligne : on ne se rétrograde pas
         // soi-même, et le retrait de son propre compte est un autre sujet.
-        const motDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `<span class="ui-ligne-sous">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</span>` : '';
+        const motDePasse = peutAgirSur(m) ? `<span class="ui-ligne-sous">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</span>` : '';
         // Une couleur par rôle, reprise des teintes déjà en usage ailleurs sur
         // cet écran (encre pour le gérant, indigo pour le mécanicien, teal pour
         // le chauffeur) — aucune couleur nouvelle.
-        const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : (role === 'achats' ? 'achats' : 'mecanicien'));
+        const teinteRole = (role === 'gerant' || role === 'direction') ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : (role === 'achats' ? 'achats' : 'mecanicien'));
         const ouvert = racine._equipeOuvert === m.id;
         const ligneFiche = (icone, libelle, valeur) => `<span class="equipe-etiquette"><span class="material-symbols-outlined" aria-hidden="true">${icone}</span>${libelle}</span><span class="equipe-valeur">${valeur}</span>`;
-        const peutVoirMotDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant';
+        const peutVoirMotDePasse = peutAgirSur(m);
         const details = `<div class="equipe-fiche">
                   ${ligneFiche('verified_user', trad('Peut faire'), esc(droitsResumes(role)))}
                   ${ligneFiche('person', trad('Login'), `<code class="equipe-login">${esc(acces)}</code><button type="button" class="equipe-copier" data-equipe-copier="${esc(acces)}" aria-label="${esc(trad('Copier le login'))}" title="${esc(trad('Copier le login'))}"><span class="material-symbols-outlined" aria-hidden="true">content_copy</span></button>`)}
@@ -637,7 +646,7 @@ VIEWS.account = {
 
       // La liste, la recherche et les filtres sont redessinés SANS relire le serveur (un clic sur une ligne, une frappe, un filtre).
       // Recherche et filtres n'apparaissent qu'à partir de 7 personnes ; en dessous, la liste reste simple.
-      const FILTRES = [['tous', trad('Tous')], ['gerant', trad('Gérant')], ['mecanicien', trad('Gestion')], ['chauffeur', trad('Saisie')], ['achats', trad('Achat')]];
+      const FILTRES = [['tous', trad('Tous')], ['gerant', trad('Administrateur')], ['direction', trad('Direction')], ['mecanicien', trad('Gestion')], ['chauffeur', trad('Saisie')], ['achats', trad('Achat')]];
       const dessinerListe = () => {
         const q = String(racine._equipeRecherche || '').trim().toLocaleLowerCase();
         const filtre = racine._equipeFiltre || 'tous';
@@ -792,8 +801,10 @@ VIEWS.account = {
                 <option value="mecanicien">${trad('Droit de gestion')}</option>
                 <option value="chauffeur">${trad('Droit de saisie')}</option>
                 <option value="achats">${trad('Droit d\'achat')}</option>
+                ${estAdministrateur() ? `<option value="direction">${trad('Direction')}</option>` : ''}
               </select>
             </div>
+            ${estAdministrateur() ? `<div class="ui-aide">${trad('Direction : fait tout le quotidien comme toi (ordres de travail, équipe, stock, coûts…), mais ne gère ni l\'abonnement ni les comptes Direction.')}</div>` : ''}
             <div class="ui-aide">${trad('Droit de gestion : tient le parc, les entretiens, les ordres de travail et les pannes. Droit de saisie : consulte le parc, relève le compteur, prend la photo de sa machine, signale une panne et traite les ordres qui lui sont assignés. Droit d\'achat : gère le stock, les fournisseurs et les commandes, voit les coûts. Aucun des trois ne gère l\'équipe.')}</div>
             <div><button type="button" class="ui-btn ui-btn-plein" id="acc-membre-creer">${trad('Créer le membre')}</button></div>
           </div>
@@ -831,6 +842,7 @@ VIEWS.account = {
               <option value="mecanicien">${trad('Droit de gestion')}</option>
               <option value="chauffeur">${trad('Droit de saisie')}</option>
               <option value="achats">${trad('Droit d\'achat')}</option>
+              ${estAdministrateur() ? `<option value="direction">${trad('Direction')}</option>` : ''}
             </select>
           </div>
         </div>
@@ -1031,7 +1043,7 @@ VIEWS.account = {
         const actuel = bouton.getAttribute('data-role-actuel');
         const ligne = bouton.closest('[data-membre]');
         const qui = ligne && ligne.querySelector('.equipe-nom') ? ligne.querySelector('.equipe-nom').textContent.trim() : '';
-        const droits = ['mecanicien', 'chauffeur', 'achats'];
+        const droits = estAdministrateur() ? ['direction', 'mecanicien', 'chauffeur', 'achats'] : ['mecanicien', 'chauffeur', 'achats'];
         if (typeof habMiniFormulaire !== 'function') { dire(trad('Fenêtre de choix indisponible : recharge la page.'), true); return; }
         const choix = await habMiniFormulaire({
           titre: trad('Changer le droit'), sousTitre: qui, symbole: 'manage_accounts', etape: trad('Équipe'), bouton: trad('Enregistrer'),
@@ -1152,30 +1164,33 @@ VIEWS.account = {
     root.querySelector('#acc-save-societe')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const msg = root.querySelector('#acc-societe-msg');
+      const admin = estAdministrateur();                      // la Direction ne touche ni au nom, ni à l'immatriculation, ni au pays
       const nom = root.querySelector('#acc-name').value.trim();
       const activite = root.querySelector('#acc-activity').value;
       const rcs = root.querySelector('#acc-reg').value.trim();
       btn.disabled = true;
       btn.textContent = trad('Enregistrement…');
       try {
-        if (!nom) throw new Error(trad('Le nom de la société ne peut pas être vide.'));
+        if (admin && !nom) throw new Error(trad('Le nom de la société ne peut pas être vide.'));
         const { error } = await sb.rpc('update_my_company', {
-          p_name: nom,
+          p_name: admin ? nom : null,
           p_activity: activite || '',
-          p_registration_number: rcs || '',
+          p_registration_number: admin ? (rcs || '') : null,
         });
         if (error) throw error;
-        const pays = root.querySelector('#acc-pays')?.value;
+        const pays = admin ? root.querySelector('#acc-pays')?.value : null;
         if (pays && SCHEMA.hasCountry) {
           const { error: errPays } = await sb.rpc('update_my_country', { p_country: pays });
           if (errPays) throw errPays;
           UI.company.country = pays;
         }
 
-        UI.company.name = nom;
+        if (admin) {
+          UI.company.name = nom;
+          UI.company.registrationNumber = rcs || null;
+          UI.companyName = nom;
+        }
         UI.company.activity = activite || null;
-        UI.company.registrationNumber = rcs || null;
-        UI.companyName = nom;
         showToast(trad('Société mise à jour'));
         renderApp();
       } catch (err) {
@@ -1348,7 +1363,8 @@ function brancherConnecteurIA(root) {
   const msg = section.querySelector('#acc-connecteur-msg');
   const blocJournal = section.querySelector('#acc-connecteur-journal-bloc');
   const listeJournal = section.querySelector('#acc-connecteur-journal');
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();               // lit le journal
+  const admin = estAdministrateur();        // allume / éteint
   const libelleStatut = (s) => ({
     ok: trad('Accepté'), interrupteur: trad('Refusé : connecteur désactivé'), limite: trad('Refusé : trop de requêtes'), offre: trad('Refusé : offre'),
   })[s] || esc(s);
@@ -1374,8 +1390,8 @@ function brancherConnecteurIA(root) {
   sb.from('companies').select('connecteur_actif').eq('id', UI.companyId).maybeSingle().then(({ data, error }) => {
     if (error || !data) { section.hidden = true; return; }   // colonne absente : SQL pas encore exécuté
     caseActif.checked = data.connecteur_actif === true;
-    caseActif.disabled = !gerant;
-    if (!gerant) msg.textContent = trad('Réservé au gérant.');
+    caseActif.disabled = !admin;
+    if (!admin) msg.textContent = trad('Réservé à l\'administrateur.');
     if (gerant) blocJournal.hidden = false;      // visible mais replié : le détail se charge à l'ouverture
   });
   blocJournal.addEventListener('toggle', () => { if (blocJournal.open) rafraichirJournal(); });
@@ -1577,7 +1593,7 @@ function openPlusSheet() {
           ${vueAutoriseePourRole('agenda') ? itemHtml('agenda', 'agenda', 'is-signature', trad('Agenda & Échéances'), trad('Planning vidanges, contrôles et visites'), '') : ''}
           ${(tcoActif() && vueAutoriseePourRole('tco')) ? itemHtml('tco', 'couts', 'is-royal', trad('Coûts & TCO'), trad('Dépenses carburant, pièces & rentabilité'), '') : ''}
           ${(tcoActif() && vueAutoriseePourRole('stats')) ? itemHtml('stats', 'graphique', 'is-royal', trad('Statistiques'), trad('Dépenses, maintenance et stock en graphiques'), '') : ''}
-          ${(telemetrieActif() && UI.role === 'gerant') ? itemHtml('telemetrie', 'telemetrie', 'is-indigo', trad('Télémétrie'), trad('Compteurs automatiques des machines'), '') : ''}
+          ${(telemetrieActif() && estGerant()) ? itemHtml('telemetrie', 'telemetrie', 'is-indigo', trad('Télémétrie'), trad('Compteurs automatiques des machines'), '') : ''}
           ${(SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) ? itemHtml('stock', 'stock', 'is-olive', trad('Stocks & SAV'), trad('Magasins, mouvements & alertes de seuil'), (UI.stockCounts?.seuilBas || 0) > 0 ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '') : ''}
         </div>
         <div class="plus-sheet-separateur"></div>

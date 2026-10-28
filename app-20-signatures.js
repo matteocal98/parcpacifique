@@ -423,7 +423,7 @@ async function brancherSignaturesHistorique(section, interventions) {
 
 // ── Le réglage « Exiger la signature » (page Ordres de travail, gérant, Enterprise) ──
 function blocReglageSignatureHtml() {
-  if (!signaturesActif() || UI.role !== 'gerant') return '';
+  if (!signaturesActif() || !estGerant()) return '';
   return `<div class="ui-groupe ot-validation" id="sig-reglage">
     <label class="check-row"><input type="checkbox" id="sig-requise" ${UI.signatureRequise ? 'checked' : ''} disabled> ${trad('Exiger la signature de l\'exécutant après chaque intervention')}</label>
     <div class="ui-aide">${trad('Désactivé par défaut. Activé, la fenêtre de signature s\'ouvre juste après chaque intervention enregistrée ; sinon on signe à la demande depuis l\'historique de la machine.')}</div>

@@ -295,7 +295,7 @@ async function ouvrirScannerQr(options = {}) {
 //   Sans rôle connu, on n'accorde rien : un écran qui refuse à tort se voit et
 //   se corrige, un écran qui propose à tort fait cliquer dans le vide.
 function peutSupprimerMachine() {
-  return UI.role === 'gerant';
+  return estGerant();
 }
 
 function openMachineModal(companyId, categories, existing) {

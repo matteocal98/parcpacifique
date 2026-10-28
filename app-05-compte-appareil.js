@@ -456,6 +456,7 @@ async function ouvrirPortailAbonnement(idMessage, idBouton) {
 function messagePortail(erreur) {
   const statut = erreur && erreur.context && erreur.context.status;
   if (statut === 409) return trad("Aucun abonnement n'est rattaché à ce compte.");
+  if (statut === 403) return trad("Seul l'administrateur peut gérer l'abonnement.");
   return trad('Le portail est indisponible pour le moment. Réessaie dans un instant, ou écris à support@kalea.pro.');
 }
 

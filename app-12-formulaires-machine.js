@@ -3411,7 +3411,7 @@ async function ouvrirListePannes() {
     </div>`;
   document.body.appendChild(overlay);
   ajouterCroixModale(overlay);
-  const peutTraiter = UI.role === 'gerant' || UI.role === 'mecanicien';
+  const peutTraiter = estGerant() || UI.role === 'mecanicien';
   let filtre = 'ouvertes';
   const dessiner = () => {
     const toutes = UI.pannes || [];

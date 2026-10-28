@@ -1873,7 +1873,7 @@ function blocReglagesRappelsHtml() {
   // Un bouton qui échoue en silence vaut moins qu'un bouton grisé expliqué.
   // Réglages réservés au gérant (update_my_reminders refuse les autres rôles côté serveur) : les autres voient, sans pouvoir modifier.
   const dispo = SCHEMA.hasReminders !== false;
-  const reserveGerant = UI.role !== 'gerant';
+  const reserveGerant = !estGerant();
   const bloque = (dispo && !reserveGerant) ? '' : ' disabled';
   const actif = rappelsEmailActifs();
   return `
@@ -1918,7 +1918,7 @@ function blocPushHtml() {
 }
 
 // Ciblage par rôle, réservé au gérant — même idiome que blocParametresTcoHtml
-// (UI.role === 'gerant') : visible à tous pour que chacun sache que le
+// (estGerant()) : visible à tous pour que chacun sache que le
 // réglage existe, contrôles désactivés pour un non-gérant (la vraie barrière
 // est côté serveur, dans update_reminder_roles, comme peutGererEquipe()
 // ailleurs). Un délai d'anticipation par rôle, EN PLUS de celui déjà réglé
@@ -1942,12 +1942,13 @@ function majIndicateursPushSociete(root) {
 function blocCiblagePushHtml() {
   const c = UI.company || {};
   const dispo = SCHEMA.hasPushRoles !== false;
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();
   const bloque = (gerant && dispo) ? '' : ' disabled';
   const roles = (c.reminders_push_roles && typeof c.reminders_push_roles === 'object') ? c.reminders_push_roles : {};
   const actif = !!c.reminders_push;
   const ROLES_CIBLE = [
-    { id: 'gerant', label: trad('Gérant') },
+    { id: 'gerant', label: trad('Administrateur') },
+    { id: 'direction', label: trad('Direction') },
     { id: 'mecanicien', label: trad('Droit de gestion') },
     { id: 'chauffeur', label: trad('Droit de saisie') },
   ];
@@ -2023,7 +2024,7 @@ function wireCiblagePush(root) {
     const actif = !!root.querySelector('#push-cible-actif')?.checked;
     const roles = {};
     const existants = (UI.company && UI.company.reminders_push_roles && typeof UI.company.reminders_push_roles === 'object') ? UI.company.reminders_push_roles : {};
-    ['gerant', 'mecanicien', 'chauffeur'].forEach((id) => {
+    ['gerant', 'direction', 'mecanicien', 'chauffeur'].forEach((id) => {
       const caseRole = root.querySelector(`#push-role-${id}`);
       // Ligne non affichée (offre à un seul utilisateur) : on ne touche pas à ce qui était déjà enregistré.
       if (!caseRole) { if (existants[id]) roles[id] = existants[id]; return; }

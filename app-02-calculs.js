@@ -1032,10 +1032,10 @@ function reporterAlerteUsage(a) {
 }
 function typeAlerteUsageAutorise(type) {
   const role = UI.role;
-  if (type === 'releve_oublie') return ['gerant', 'mecanicien', 'chauffeur'].includes(role);
+  if (type === 'releve_oublie') return ['gerant', 'direction', 'mecanicien', 'chauffeur'].includes(role);
   if (type === 'rythme_accelere') {
     const offre = offreDeLaGrille(UI.companyPlan || 'free').cle;
-    return ['gerant', 'mecanicien'].includes(role) && ['business', 'enterprise'].includes(offre);
+    return ['gerant', 'direction', 'mecanicien'].includes(role) && ['business', 'enterprise'].includes(offre);
   }
   return false;
 }

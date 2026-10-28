@@ -160,7 +160,7 @@ function machinesLocalisees() {
 }
 
 function carteGpsHtml() {
-  if (!telemetrieActif() || !SCHEMA.hasGps || UI.role !== 'gerant') return '';
+  if (!telemetrieActif() || !SCHEMA.hasGps || !estGerant()) return '';
   return `
     <section class="ui-section tele-carte-gps" id="tele-carte-gps">
       ${teteSectionKit('monde', trad('Carte des machines'), '', '<span class="ui-tag" id="tele-carte-compte"></span>')}
@@ -447,7 +447,7 @@ async function preparerCarteGps(racine) {
 }
 
 function telemetrieCarteHtml() {
-  if (!telemetrieActif() || UI.role !== 'gerant') return '';
+  if (!telemetrieActif() || !estGerant()) return '';
   return `
       <!-- ── TÉLÉMÉTRIE ───────────────────────────────────────────────
            Sources de relevés automatiques + liaison machine ↔ boîtier. Le jeton
@@ -890,18 +890,18 @@ function planCouvreStock() {
 // barrière est côté serveur (RPC enregistrer_mouvement_stock + RLS), comme
 // peutSupprimerMachine()/peutGererEquipe() ailleurs dans ce fichier.
 function peutGererMouvementsStock() {
-  return UI.role === 'gerant' || UI.role === 'mecanicien';
+  return estGerant() || UI.role === 'mecanicien';
 }
 function peutGererParametresStock() {
-  return UI.role === 'gerant';
+  return estGerant();
 }
 // Rôle « Droit d'achat » (role-achats-a/b.sql) : fournisseurs, RIB, documents, commandes, réception — avec le gérant.
 function peutAcheter() {
-  return UI.role === 'gerant' || UI.role === 'achats';
+  return estGerant() || UI.role === 'achats';
 }
 // Valeur du stock, coût moyen (PUMP) : le gérant et l'acheteur les voient.
 function peutVoirValeursStock() {
-  return UI.role === 'gerant' || UI.role === 'achats';
+  return estGerant() || UI.role === 'achats';
 }
 
 // La ligne affichée pour une offre payante : son nom puis son parc. Le prix est
@@ -1556,6 +1556,12 @@ function openUpgradeNotice(companyId, message) {
       if (o.cle === 'free') return '';
       const classeInst = o.recommandee ? 'offre-bouton is-primaire' : 'offre-bouton is-accent';
       return `<a href="${contactFacturationInstitution(o, companyId)}" class="${classeInst}">${trad('Demander la facturation mensuelle')}${picto('mail')}</a>`;
+    }
+    // L'abonnement est l'affaire de l'administrateur : une Direction voit les offres, sans bouton pour en changer (le serveur le refuserait aussi).
+    if (estDirection()) {
+      return estActuelle
+        ? `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`
+        : (o.cle === 'free' ? '' : `<div class="ui-aide">${trad('Géré par l\'administrateur')}</div>`);
     }
     if (estActuelle) {
       // Sur SA PROPRE carte : un vrai accès au portail plutôt qu'un bouton

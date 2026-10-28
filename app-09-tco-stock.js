@@ -65,7 +65,7 @@ function tcoKpiGridHtml() {
 }
 function blocParametresTcoHtml() {
   const c = UI.company || {};
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();
   const bloque = gerant ? '' : ' disabled';
   const dv = c.currency === 'XPF' ? 'XPF' : '€';
   const champ = (id, libelle, valeur, unite, uniteId, note) => `
@@ -173,7 +173,7 @@ function repereIndisponibleTexte(categorieId) {
 // comme donnée réelle — remplacé par le nombre réel de machines suivies
 // dans cette catégorie.
 function blocSeuilsCategorieTcoHtml() {
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();
   const bloque = gerant ? '' : ' disabled';
   // Les catégories du SUIVI : celles que portent réellement les machines du parc (pas les catégories restées en base
   // sans machine). Le nom et le seuil viennent de la liste des catégories quand elle la connaît, de la machine sinon.
@@ -252,7 +252,7 @@ function blocSeuilsCategorieTcoHtml() {
 // Coût par heure d'arrêt d'une machine, par catégorie (surchargeable machine par machine dans sa fiche) + heures d'une
 // journée ouvrée de la société. Le coût d'une panne « à l'arrêt » est calculé et figé à sa résolution.
 function blocCoutArretTcoHtml() {
-  const gerant = UI.role === 'gerant';
+  const gerant = estGerant();
   const bloque = gerant ? '' : ' disabled';
   const parId = new Map();
   (UI.machines || []).forEach((m) => {

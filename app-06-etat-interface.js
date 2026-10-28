@@ -89,7 +89,7 @@ function navItemsVisibles() {
     if (item.id === 'ordres') return typeof ordresActif === 'function' && ordresActif();
     // Télémétrie : migration en place (SCHEMA) ET offre Enterprise ET gérant — la
     // création des sources et la liaison des machines sont réservées au gérant.
-    if (item.id === 'telemetrie') return telemetrieActif() && UI.role === 'gerant';
+    if (item.id === 'telemetrie') return telemetrieActif() && estGerant();
     return true;
   });
 }
@@ -156,7 +156,7 @@ const TABS = [
 // (droit de gestion, droit de saisie) a le SCANNER au centre — le geste le plus fréquent d'un technicien — si
 // l'offre le permet ; sinon la barre se passe de bouton central. Le détail « Saisir » viendra à la phase 3.
 function tabsPourRole() {
-  if (UI.role === 'gerant') return [TABS[0], TABS[1], TABS[2], { id: 'agenda', short: trad('Planning'), icon: 'agenda' }, TABS[4]];
+  if (estGerant()) return [TABS[0], TABS[1], TABS[2], { id: 'agenda', short: trad('Planning'), icon: 'agenda' }, TABS[4]];
   if (UI.role === 'achats') return [TABS[0], TABS[1], { id: 'stock', short: trad('Stock'), icon: 'stock' }, { id: 'tco', short: trad('Coûts'), icon: 'couts' }, TABS[4]];
   if (UI.role !== 'mecanicien' && UI.role !== 'chauffeur') return TABS;
   const accueil = TABS[0];
@@ -924,7 +924,7 @@ async function changerOffreAbonnement(cle, bouton, idMessage, overlay) {
     if (error) {
       try { reponse = await error.context.json(); } catch (err) { reponse = null; }
       const statut = error.context && error.context.status;
-      if (statut === 403) { dire(trad('Seul le gérant peut changer l\'offre.')); return; }
+      if (statut === 403) { dire(trad('Seul l\'administrateur peut changer l\'offre.')); return; }
     }
     if (reponse && reponse.statut === 'ok') {
       if (overlay) overlay.remove();
@@ -948,7 +948,7 @@ function nombreMachinesComptees() {
 
 // L'archivage n'a de sens que pour une offre payante (la machine n'y est plus facturée) et pour le gérant.
 function peutArchiverMachine() {
-  return Boolean(SCHEMA.hasArchived) && UI.role === 'gerant' && PALIERS_PAYANTS.includes(String(UI.companyPlan || '').toLowerCase());
+  return Boolean(SCHEMA.hasArchived) && estGerant() && PALIERS_PAYANTS.includes(String(UI.companyPlan || '').toLowerCase());
 }
 
 async function handleAddMachine() {

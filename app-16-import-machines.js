@@ -291,7 +291,7 @@ function importPlanifier(analyse, politique) {
 
 // ── Écran ──
 function peutImporterMachines() {
-  return Boolean(SCHEMA.hasImport) && UI.role === 'gerant';
+  return Boolean(SCHEMA.hasImport) && estGerant();
 }
 
 // ── Le dernier lot reste ANNULABLE pendant 24 h, même après avoir fermé la fenêtre ──
