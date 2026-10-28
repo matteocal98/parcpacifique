@@ -3211,15 +3211,17 @@ function openLogInterventionModal(machine, tache, options = {}) {
       if (navigator.onLine === false) throw new Error('hors connexion');
       const { sortiesRefusees } = await executerIntervention(machine, saisie, suiviEnregistrement, false);
 
+      // L'intervention est écrite : la fenêtre se ferme TOUT DE SUITE (sinon, pendant la clôture de l'ordre, on a l'impression que rien n'a été pris en compte).
+      overlay.remove();
       // Clôture d'un ordre de travail : l'ordre est lié à l'intervention qui vient d'être enregistrée. Un échec ici ne doit JAMAIS faire perdre
       // l'intervention (déjà écrite) : l'appelant prévient l'utilisateur lui-même.
+      let ordreEnEchec = false;   // l'appelant a déjà prévenu (message d'erreur) : on ne le recouvre pas par « Entretien enregistré »
       if (typeof options.onSaved === 'function') {
-        try { await options.onSaved(idIntervention); } catch (errOrdre) { console.warn('Ordre de travail non terminé :', errOrdre); }
+        try { ordreEnEchec = (await options.onSaved(idIntervention)) === false; } catch (errOrdre) { ordreEnEchec = true; console.warn('Ordre de travail non terminé :', errOrdre); }
       }
-      overlay.remove();
       const messageEnregistre = (kindActif === 'depannage' ? trad('Dépannage enregistré') : trad('Entretien enregistré'))
         + (kindActif === 'entretien' && derniereEcheanceTexte ? ' — ' + derniereEcheanceTexte : '');
-      boot(sortiesRefusees
+      boot(ordreEnEchec ? undefined : sortiesRefusees
         ? messageEnregistre + ' — ' + tR('{n} sortie(s) de stock refusée(s) : à enregistrer à la main dans Stock.', { n: sortiesRefusees })
         : messageEnregistre);
       // Signature numérique (étape 4) : demandée seulement si la société l'exige ; ne bloque jamais l'enregistrement déjà fait.

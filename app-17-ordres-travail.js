@@ -237,6 +237,7 @@ function otMettreAJour(ligne) {
   const i = (UI.ordres || []).findIndex((o) => String(o.id) === String(ligne.id));
   if (i >= 0) UI.ordres[i] = ligne; else UI.ordres = [ligne, ...(UI.ordres || [])];
   if (typeof UI.redessinerOrdres === 'function' && document.getElementById('ot-liste')) UI.redessinerOrdres();
+  majAccueilOrdres(document);   // « Mes ordres » et la tuile de vigilance de l'accueil : un ordre terminé n'y reste pas
 }
 
 // ── Accueil ──
@@ -259,6 +260,14 @@ async function chargerAccueilOrdres(root) {
     if (tuile && typeof majLigneVigilance === 'function') majLigneVigilance(root, 'ordres', '—', 'ok', trad('Indisponible'));
     return;
   }
+  majAccueilOrdres(root);
+}
+// Dessine « Mes ordres » et la tuile de vigilance à partir des ordres déjà en mémoire (aucun appel réseau) : sert au chargement ET à chaque changement d'ordre.
+function majAccueilOrdres(root) {
+  if (!ordresActif()) return;
+  const zone = root.querySelector('#accueil-mes-ordres');
+  const tuile = root.querySelector('#vig-ordres');
+  if (!zone && !tuile) return;
   const tous = UI.ordres || [];
   if (tuile && typeof majLigneVigilance === 'function') {
     const ouverts = tous.filter(otEstOuvert);
@@ -546,7 +555,7 @@ function terminerOrdre(o, overlay, appeler) {
         // L'intervention est écrite, mais le réseau a lâché avant la clôture : la clôture part avec le reste, à son tour.
         try { await mettreOrdreEnFile(o, { action: 'terminer', interventionId: interventionId || null }); showToast(trad('Enregistré sur l\'appareil : l\'action partira dès que le réseau revient.')); return; } catch (errFile) { /* message ci-dessous */ }
       }
-      if (error) { showToast(tR('Intervention enregistrée, mais l\'ordre OT-{n} n\'a pas pu être terminé : {e}', { n: o.numero, e: error.message || '' })); return; }
+      if (error) { showToast(tR('Intervention enregistrée, mais l\'ordre OT-{n} n\'a pas pu être terminé : {e}', { n: o.numero, e: error.message || '' })); return false; }
       otMettreAJour(data);
     },
     // Intervention mise en file (sans réseau) : la clôture de l'ordre est INCLUSE dans cette opération ; on montre déjà l'ordre terminé.
