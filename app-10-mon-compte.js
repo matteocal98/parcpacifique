@@ -298,11 +298,12 @@ VIEWS.account = {
             <div class="ui-aide">${trad('Éteint par défaut. Une fois activé, chaque personne de la société peut relier son propre assistant IA : il ne voit que ce que cette personne a le droit de voir dans KALEA, en lecture seule — rien n\'est jamais modifié. Éteindre coupe l\'accès aussitôt.')}</div>
             <div class="ui-aide" id="acc-connecteur-msg" role="status" aria-live="polite"></div>
           </div>
-          <div class="ui-groupe" id="acc-connecteur-journal-bloc" hidden>
-            <span class="ui-etiquette">${trad('Dernières utilisations')}</span>
+          <!-- Le détail des dernières utilisations est REPLIÉ : on ne le charge qu'à l'ouverture (rien n'est demandé au serveur tant qu'on ne le déroule pas). -->
+          <details class="ui-groupe bio-detail" id="acc-connecteur-journal-bloc" hidden>
+            <summary>${trad('Dernières utilisations')}</summary>
             <div id="acc-connecteur-journal"></div>
             <div class="ui-aide">${trad('Seuls la personne, l\'outil et l\'heure sont notés — jamais les questions ni les réponses. Conservé 90 jours.')}</div>
-          </div>
+          </details>
         </div>
       </section>` : ''}
 
@@ -1320,8 +1321,9 @@ function brancherConnecteurIA(root) {
     caseActif.checked = data.connecteur_actif === true;
     caseActif.disabled = !gerant;
     if (!gerant) msg.textContent = trad('Réservé au gérant.');
-    rafraichirJournal();
+    if (gerant) blocJournal.hidden = false;      // visible mais replié : le détail se charge à l'ouverture
   });
+  blocJournal.addEventListener('toggle', () => { if (blocJournal.open) rafraichirJournal(); });
 
   caseActif.addEventListener('change', async () => {
     const voulu = caseActif.checked;
@@ -1331,7 +1333,7 @@ function brancherConnecteurIA(root) {
     caseActif.disabled = false;
     if (error) { caseActif.checked = !voulu; msg.textContent = trad('Réglage impossible pour le moment.'); return; }
     msg.textContent = voulu ? trad('Connecteur activé.') : trad('Connecteur désactivé : les accès sont coupés.');
-    rafraichirJournal();
+    if (blocJournal.open) rafraichirJournal();
   });
 }
 
