@@ -54,12 +54,17 @@ function habMiniFormulaire({ titre, sousTitre, symbole = 'workspace_premium', ch
     overlay.querySelectorAll('select.ui-selecteur').forEach((s) => { if (typeof habillerSelect === 'function') habillerSelect(s, s.closest('.ui-champ-groupe')?.querySelector('label')?.textContent || ''); });
     overlay.querySelectorAll('input[type=date]').forEach((d) => { if (typeof habillerChampDate === 'function') habillerChampDate(d, d.closest('.ui-champ-groupe')?.querySelector('label')?.textContent || ''); });
     const fin = (v) => { overlay.remove(); resolve(v); };
+    // Champs conditionnels (`visibleSi: [champ, valeur]`) : un champ qui ne s'applique pas au choix fait est caché (et n'est ni exigé, ni lu).
+    const estVisible = (c) => !c.visibleSi || (overlay.querySelector('#hab-' + c.visibleSi[0]) || {}).value === c.visibleSi[1];
+    const majVisibilite = () => champs.forEach((c) => { if (!c.visibleSi) return; const g = overlay.querySelector('#hab-' + c.id).closest('.ui-champ-groupe'); if (g) g.hidden = !estVisible(c); });
+    overlay.addEventListener('change', majVisibilite);
+    majVisibilite();
     overlay.querySelectorAll('[data-hab-annuler]').forEach((b) => b.addEventListener('click', () => fin(null)));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) fin(null); });
     overlay.querySelector('#hab-valider').addEventListener('click', async () => {
       const valeurs = {};
       champs.forEach((c) => { const el = overlay.querySelector('#hab-' + c.id); valeurs[c.id] = c.type === 'case' ? el.checked : el.value.trim(); });
-      const manque = champs.find((c) => c.obligatoire && !valeurs[c.id]);
+      const manque = champs.find((c) => c.obligatoire && estVisible(c) && !valeurs[c.id]);
       const msg = overlay.querySelector('#hab-msg');
       if (manque) { msg.textContent = tR('« {champ} » est obligatoire.', { champ: manque.etiquette }); return; }
       const bouton2 = overlay.querySelector('#hab-valider');
@@ -200,15 +205,20 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
     if (r) await recharger();
   };
   const formExigence = async () => {
-    const cats = (UI.categories || []).map((c) => [c.id, c.name]);
-    const machines = (UI.machines || []).map((m) => [m.id, m.name]);
+    const parNom = (a, b) => String(a[1]).localeCompare(String(b[1]), undefined, { sensitivity: 'base' });
+    const cats = (UI.categories || []).map((c) => [c.id, c.name]).sort(parNom);
+    const machines = (UI.machines || []).map((m) => [m.id, m.name]).sort(parNom);
+    // Seuls les choix possibles sont proposés : sans catégorie, on ne propose que « une machine » ; sans machine, que « une catégorie ».
+    const cibles = [...(cats.length ? [['categorie', trad('Une catégorie de machines')]] : []), ...(machines.length ? [['machine', trad('Une machine')]] : [])];
+    if (!cibles.length) { dire(trad('Aucune machine ni catégorie : ajoute d\'abord une machine.')); return; }
     const r = await habMiniFormulaire({
       titre: trad('Nouvelle exigence'), symbole: 'rule', bouton: trad('Ajouter'),
       champs: [
         { id: 'qual', etiquette: trad('Qualification'), type: 'liste', options: optsQual(), valeur: (optsQual()[0] || [''])[0], obligatoire: true },
-        { id: 'type', etiquette: trad('S\'applique à'), type: 'liste', options: [['categorie', trad('Une catégorie de machines')], ['machine', trad('Une machine')]], valeur: cats.length ? 'categorie' : 'machine' },
-        { id: 'cat', etiquette: trad('Catégorie'), type: 'liste', options: cats.length ? cats : [['', trad('Aucune catégorie')]], valeur: (cats[0] || [''])[0] },
-        { id: 'machine', etiquette: trad('Machine'), type: 'liste', options: machines.length ? machines : [['', trad('Aucune machine')]], valeur: (machines[0] || [''])[0] },
+        { id: 'type', etiquette: trad('S\'applique à'), type: 'liste', options: cibles, valeur: cibles[0][0] },
+        // Un seul des deux choix s'affiche, selon « S'applique à » : les catégories OU les machines, jamais les deux.
+        { id: 'cat', etiquette: trad('Catégorie'), type: 'liste', options: cats.length ? cats : [['', '']], valeur: (cats[0] || [''])[0], visibleSi: ['type', 'categorie'], obligatoire: true },
+        { id: 'machine', etiquette: trad('Machine'), type: 'liste', options: machines.length ? machines : [['', '']], valeur: (machines[0] || [''])[0], visibleSi: ['type', 'machine'], obligatoire: true },
         { id: 'niveau', etiquette: trad('Niveau'), type: 'liste', options: [['obligatoire', trad('Obligatoire')], ['recommandee', trad('Recommandée')]], valeur: 'obligatoire' },
       ],
       valider: async (v) => {
