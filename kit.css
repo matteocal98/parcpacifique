@@ -1752,6 +1752,7 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
   .accueil-terrain .ui-section-icone{width:30px;height:30px;}
   .accueil-terrain .ui-section-titre{font-size:16px;}
   .tuiles-compactes{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px;}
+  .tuiles-compactes > .ui-tuile:last-child:nth-child(odd){grid-column:auto;}   /* 3 tuiles = 3 colonnes : la 3e ne s'étale pas sur toute la ligne (règle « dernière tuile impaire » des grilles à 2 colonnes) */
   .tuiles-compactes .ui-tuile{padding:8px 8px 8px 10px;gap:2px;}
   .tuiles-compactes .ui-tuile-etiquette{font-size:12px;letter-spacing:.03em;}
   .tuiles-compactes .ui-tuile-valeur{font-size:24px;}
