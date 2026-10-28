@@ -2768,6 +2768,33 @@ html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F
 .compte-page .ui-groupe:has(> .check-row){gap:6px;padding:12px 16px;}
 .compte-page .ui-groupe > .ui-aide[role="status"]:empty{display:none;}
 
+/* ÉQUIPE (Mon compte) : une ligne par personne, détail déroulable, recherche et filtres, ajout dans une fenêtre. Le rond de couleur (initiales) et le droit gardent la teinte de leur rôle. */
+.equipe-barre{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.equipe-barre > div{flex:1 1 auto;min-width:0;}
+.equipe-barre #acc-equipe-ajouter{margin-left:auto;flex:none;}
+.equipe-liste{gap:6px;}
+.equipe-ligne{background:var(--surface);border-radius:var(--r-md);overflow:hidden;}
+.equipe-tete{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:6px 12px;border:0;background:transparent;font:inherit;text-align:left;cursor:pointer;color:var(--ink);}
+.equipe-tete:hover{background:rgba(14,19,51,.03);}
+.equipe-tete .ui-ligne-icone{width:32px;height:32px;flex:none;font-size:12px;}
+.equipe-nom{flex:1 1 auto;min-width:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.equipe-toi{font-weight:600;color:var(--ink-3);font-size:12px;}
+.equipe-chevron{width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);margin:0 4px 3px 2px;transition:transform .15s;flex:none;}
+.equipe-ligne.is-ouvert .equipe-chevron{transform:rotate(-135deg);margin-bottom:-3px;}
+.equipe-detail{padding:2px 12px 12px 54px;display:flex;flex-direction:column;gap:8px;}
+.equipe-detail .ui-ligne-textes{display:flex;flex-direction:column;gap:2px;}
+.equipe-droit{flex:none;}
+.equipe-droit.is-droit-gerant{background:rgba(14,19,51,.12);color:var(--ink);}
+.equipe-droit.is-droit-mecanicien{background:color-mix(in srgb,var(--primary-dark) 14%,transparent);color:var(--primary-dark);}
+.equipe-droit.is-droit-chauffeur{background:color-mix(in srgb,var(--ok) 20%,transparent);color:color-mix(in srgb,var(--ok) 55%,#000);}
+.equipe-droit.is-droit-achats{background:color-mix(in srgb,#B45309 14%,transparent);color:#B45309;}
+.equipe-ajout.overlay{align-items:flex-start;}
+.equipe-ajout .modal{max-width:560px;width:100%;}
+.equipe-ajout-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.equipe-ajout-tete h2{margin:0;font-size:18px;}
+.overlay[hidden]{display:none !important;}
+@media (max-width:560px){.equipe-detail{padding-left:12px;}}
+
 /* Colonne « Signature » de l'historique : état et bouton « Rapport » séparés, sur une ligne quand il y a la place */
 .sig-cellule{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:2px 0;}
 .sig-cellule .ui-btn-pastille{height:36px;padding:0 14px;}
@@ -3514,6 +3541,10 @@ html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 1
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge-vide{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-jauge-piste)):not(:has(.mstrip-jauge-vide))::before{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .machine-action-archiver{background:rgba(255,255,255,0.1)}
+html[data-theme="dark"] .equipe-tete:hover{background:rgba(255,255,255,0.05)}
+html[data-theme="dark"] .equipe-toi{font-weight:700}
+html[data-theme="dark"] .equipe-droit.is-droit-gerant{background:rgba(255,255,255,0.19)}
+html[data-theme="dark"] .equipe-droit.is-droit-achats{color:rgba(221,178,144,1)}
 html[data-theme="dark"] .sig-image{background:var(--surface)}
 html[data-theme="dark"] .ui-puce[class*="teinte-"].is-actif .ui-compte{background:rgba(255,255,255,0.04)}
 html[data-theme="dark"] .overlay .modal.otm{box-shadow:0 25px 60px -15px rgba(0,0,0,0.65)}

@@ -275,13 +275,24 @@ VIEWS.account = {
         ${tete('equipe', trad('Gestion de l\'équipe'), trad('Attribution des accès terrain et des autorisations d\'atelier.'), '<span class="ui-tag" id="acc-equipe-compte"></span>')}
         <div class="ui-section-corps">
           <div class="ui-aide" id="acc-equipe-msg" role="status" aria-live="polite"></div>
+          <!-- Une ligne par personne (détail déroulable), recherche et filtres dès 7 personnes ; l'AJOUT (création directe + invitation) est dans une fenêtre. -->
+          <div id="acc-equipe-barre" class="equipe-barre" hidden>
+            <div id="acc-equipe-recherche-bloc" hidden><input id="acc-equipe-recherche" class="ui-champ" type="search" autocomplete="off" placeholder="${esc(trad('Chercher une personne'))}" aria-label="${esc(trad('Chercher une personne'))}"></div>
+            <button type="button" class="ui-btn ui-btn-pastille" id="acc-equipe-ajouter">${picto('ajoutPersonne')}<span>${trad('Ajouter')}</span></button>
+          </div>
+          <div id="acc-equipe-filtres" class="ui-puces" hidden></div>
           <div id="acc-equipe-liste" class="ui-section-corps">${trad('Chargement de l\'équipe…')}</div>
-          <div id="acc-equipe-creation" class="ui-section-corps"></div>
-          <details id="acc-equipe-invitation-bloc" class="ui-groupe">
-            <summary>${trad('Inviter par e-mail')}</summary>
-            <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un membre d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
-            <div id="acc-equipe-invitation" class="ui-section-corps"></div>
-          </details>
+          <div id="acc-equipe-ajout" class="overlay equipe-ajout" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="acc-equipe-ajout-titre">
+              <div class="equipe-ajout-tete"><h2 id="acc-equipe-ajout-titre">${trad('Ajouter un membre')}</h2><button type="button" class="ui-btn ui-btn-pastille" data-equipe-fermer-ajout>${trad('Fermer')}</button></div>
+              <div id="acc-equipe-creation" class="ui-section-corps"></div>
+            <details id="acc-equipe-invitation-bloc" class="ui-groupe">
+              <summary>${trad('Inviter par e-mail')}</summary>
+              <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un membre d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
+              <div id="acc-equipe-invitation" class="ui-section-corps"></div>
+            </details>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -602,41 +613,53 @@ VIEWS.account = {
         // cet écran (encre pour le gérant, indigo pour le mécanicien, teal pour
         // le chauffeur) — aucune couleur nouvelle.
         const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : (role === 'achats' ? 'achats' : 'mecanicien'));
-        return `
-            <div class="ui-ligne is-texte-long" data-membre="${esc(m.id)}">
-              <div class="ui-ligne-id">
-                <div class="ui-ligne-icone is-initiales is-${teinteRole}" aria-hidden="true">${esc(initialsFrom(titre))}</div>
-                <div class="ui-ligne-textes">
-                  <span class="ui-ligne-nom">${esc(titre)}</span>
+        const ouvert = racine._equipeOuvert === m.id;
+        const details = `
                   <span class="ui-ligne-sous">${trad('Ce qu\'il a le droit de faire :')} ${esc(droitsResumes(role))}</span>
                   <span class="ui-ligne-sous">${trad('Login :')} ${esc(acces)}</span>
                   ${metier ? `<span class="ui-ligne-sous">${trad('Métier :')} ${esc(metier)}</span>` : ''}
                   ${estInvitation(m) ? `<span class="ui-ligne-sous">${trad('Invitation en attente : cette personne n\'a pas encore créé son compte.')}</span>` : ''}
-                  ${motDePasse}
-                </div>
-              </div>
-              <div class="ui-ligne-info">
-                ${m.est_moi ? `<span class="ui-tag">${trad('Toi')}</span>` : ''}
-                ${role ? `<span class="ui-tag">${esc(roleDe(role))}</span>` : ''}
-              </div>
-              <div class="ui-ligne-action is-etiquettes">${actions}</div>
+                  ${motDePasse}`;
+        return `
+            <div class="equipe-ligne${ouvert ? ' is-ouvert' : ''}" data-membre="${esc(m.id)}">
+              <button type="button" class="equipe-tete" data-equipe-ouvrir="${esc(m.id)}" aria-expanded="${ouvert ? 'true' : 'false'}">
+                <span class="ui-ligne-icone is-initiales is-${teinteRole}" aria-hidden="true">${esc(initialsFrom(titre))}</span>
+                <span class="equipe-nom">${esc(titre)}${m.est_moi ? ` <span class="equipe-toi">(${trad('toi')})</span>` : ''}</span>
+                <span class="ui-tag equipe-droit is-droit-${teinteRole}">${esc(libelleDe(role || 'autre'))}</span>
+                <span class="equipe-chevron" aria-hidden="true"></span>
+              </button>
+              ${ouvert ? `<div class="equipe-detail"><div class="ui-ligne-textes">${details}</div>${actions ? `<div class="ui-ligne-action is-etiquettes">${actions}</div>` : ''}</div>` : ''}
             </div>`;
       };
-      const sections = ORDRE
-        .map((role) => {
-          const duGroupe = membres.filter((m) => (m.role || 'autre') === role);
-          if (!duGroupe.length) return '';
-          const titre = role === 'autre'
-            ? tR('Autre rôle ({n})', { n: duGroupe.length })
-            : tR('{role} ({n})', { role: libelleDe(role), n: duGroupe.length });
-          return `
-        <div class="ui-champ-groupe" data-groupe="${esc(role)}">
-          <span class="ui-etiquette">${esc(titre)}</span>
-          <div class="ui-liste">${duGroupe.map(ligneMembre).join('')}</div>
-        </div>`;
-        })
-        .join('');
-      liste.innerHTML = sections || `<p class="ui-aide">${trad('Personne pour l\'instant : ajoute un membre ci-dessous, ou invite-le par e-mail.')}</p>`;
+
+      // La liste, la recherche et les filtres sont redessinés SANS relire le serveur (un clic sur une ligne, une frappe, un filtre).
+      // Recherche et filtres n'apparaissent qu'à partir de 7 personnes ; en dessous, la liste reste simple.
+      const FILTRES = [['tous', trad('Tous')], ['gerant', trad('Gérant')], ['mecanicien', trad('Gestion')], ['chauffeur', trad('Saisie')], ['achats', trad('Achat')]];
+      const dessinerListe = () => {
+        const q = String(racine._equipeRecherche || '').trim().toLocaleLowerCase();
+        const filtre = racine._equipeFiltre || 'tous';
+        const plusieurs = membres.length > 6;
+        const barre = racine.querySelector('#acc-equipe-barre');
+        if (barre) barre.hidden = !peutGererEquipe();
+        const blocRecherche = racine.querySelector('#acc-equipe-recherche-bloc');
+        if (blocRecherche) blocRecherche.hidden = !plusieurs;
+        const zoneFiltres = racine.querySelector('#acc-equipe-filtres');
+        if (zoneFiltres) {
+          zoneFiltres.hidden = !plusieurs;
+          zoneFiltres.innerHTML = FILTRES.filter(([k]) => k === 'tous' || membres.some((m) => (m.role || 'autre') === k))
+            .map(([k, l]) => `<button type="button" class="ui-puce${filtre === k ? ' is-actif' : ''}" data-equipe-filtre="${k}">${esc(l)}</button>`).join('');
+        }
+        const texteDe = (m) => { const { prenom, nom } = morceauxDe(m); return [prenom, nom, identiteDe(m), m.metier].join(' ').toLocaleLowerCase(); };
+        const visibles = membres
+          .filter((m) => (filtre === 'tous' || (m.role || 'autre') === filtre) && (!q || texteDe(m).includes(q)))
+          .sort((a, b) => (ORDRE.indexOf(a.role || 'autre') - ORDRE.indexOf(b.role || 'autre')) || texteDe(a).localeCompare(texteDe(b)));
+        liste.innerHTML = visibles.length
+          ? `<div class="ui-liste equipe-liste">${visibles.map(ligneMembre).join('')}</div>${(q || filtre !== 'tous') ? `<div class="ui-aide">${tR('{n} personne(s) sur {total}', { n: visibles.length, total: membres.length })}</div>` : ''}`
+          : (membres.length
+            ? `<p class="ui-aide">${trad('Personne ne correspond.')}</p>`
+            : `<p class="ui-aide">${trad('Personne pour l\'instant : clique sur « Ajouter » pour créer un accès ou inviter quelqu\'un.')}</p>`);
+      };
+      dessinerListe();
 
       // ★ LES BOUTONS SONT ÉCOUTÉS SUR LEUR ZONE, JAMAIS UN PAR UN.
       //
@@ -690,10 +713,32 @@ VIEWS.account = {
       // jamais laisser passer une action que l'écran vient de retirer.
       cabler(liste, '_equipeListeCablee', 'button', (bouton) => {
         if (!peutGererEquipe()) return;
+        if (bouton.hasAttribute('data-equipe-ouvrir')) {
+          const id = bouton.getAttribute('data-equipe-ouvrir');
+          racine._equipeOuvert = racine._equipeOuvert === id ? null : id;     // une seule ligne ouverte à la fois
+          dessinerListe();
+          return;
+        }
         if (bouton.hasAttribute('data-pw-reset')) relancerLeMotDePasse.call(bouton);
         else if (bouton.hasAttribute('data-equipe-role')) changerLeRole.call(bouton);
         else if (bouton.hasAttribute('data-equipe-retirer')) retirerLeMembre.call(bouton);
       });
+
+      // Filtres par droit, recherche, et fenêtre d'ajout : mêmes principes — on écoute la ZONE, jamais un bouton qui sera réécrit.
+      const ajout = racine.querySelector('#acc-equipe-ajout');
+      const ouvrirAjout = () => { if (ajout) ajout.hidden = false; };
+      cabler(racine.querySelector('#acc-equipe-filtres'), '_equipeFiltresCables', 'button', (b) => {
+        racine._equipeFiltre = b.getAttribute('data-equipe-filtre') || 'tous';
+        racine._equipeOuvert = null;
+        dessinerListe();
+      });
+      cabler(racine.querySelector('#acc-equipe-recherche-bloc'), '_equipeRechercheCablee', 'input', (champ) => {
+        racine._equipeRecherche = champ.value;
+        racine._equipeOuvert = null;
+        dessinerListe();
+      }, 'input');
+      cabler(racine.querySelector('#acc-equipe-barre'), '_equipeAjouterCable', 'button', () => { if (peutGererEquipe()) ouvrirAjout(); });
+      cabler(ajout, '_equipeAjoutFermerCable', 'button', (b) => { if (b.hasAttribute('data-equipe-fermer-ajout')) ajout.hidden = true; });
 
       // ── LA CRÉATION DIRECTE, EN PREMIER ───────────────────────────────────
       //    Un mécanicien d'atelier n'a pas d'e-mail : l'invitation par lien est
@@ -882,13 +927,14 @@ VIEWS.account = {
           const zone = racine.querySelector('#acc-membre-acces');
           if (zone) {
             afficherIdentifiants(zone, data, tR('Nouveau mot de passe de {login}', { login: data.login || '' }));
+            ouvrirAjout();          // la zone des identifiants est dans la fenêtre d'ajout : on l'ouvre pour que le gérant le lise
           }
           // Le rappel, DANS la ligne du membre : le gérant voit tout de suite de
           // qui l'on parle. Il ne contient PAS le mot de passe — celui-ci n'est
           // écrit qu'une fois, dans la zone ci-dessus.
           const ligneVive = racine.querySelector(`[data-membre="${membre}"]`);
           if (ligneVive) {
-            ligneVive.innerHTML = `<p class="ui-aide">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans « Accès » ci-dessous.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
+            ligneVive.innerHTML = `<p class="ui-aide">${tR('Nouveau mot de passe généré pour {login} : il est affiché dans la fenêtre « Accès » qui vient de s\'ouvrir.', { login: esc(identiteDe({ login: data.login })) })}</p>`;
           }
         } catch (err) {
           await preparerCarteEquipe(racine);
@@ -975,7 +1021,7 @@ VIEWS.account = {
         const profil = bouton.getAttribute('data-equipe-role');
         const actuel = bouton.getAttribute('data-role-actuel');
         const ligne = bouton.closest('[data-membre]');
-        const qui = ligne && ligne.querySelector('.ui-ligne-nom') ? ligne.querySelector('.ui-ligne-nom').textContent.trim() : '';
+        const qui = ligne && ligne.querySelector('.equipe-nom') ? ligne.querySelector('.equipe-nom').textContent.trim() : '';
         const droits = ['mecanicien', 'chauffeur', 'achats'];
         if (typeof habMiniFormulaire !== 'function') { dire(trad('Fenêtre de choix indisponible : recharge la page.'), true); return; }
         const choix = await habMiniFormulaire({
