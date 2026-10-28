@@ -165,6 +165,7 @@ VIEWS.ordres = {
               <div class="ui-aide" id="ot-validation-msg" role="status" aria-live="polite"></div>
             </div>` : ''}
             ${typeof blocReglageSignatureHtml === 'function' ? blocReglageSignatureHtml() : ''}
+            ${typeof blocHabilitationsHtml === 'function' ? blocHabilitationsHtml() : ''}
           </div>
         </section>
       </div>`;
@@ -221,6 +222,7 @@ VIEWS.ordres = {
       });
     }
     if (typeof brancherReglageSignature === 'function') brancherReglageSignature(root);
+    if (typeof brancherHabilitations === 'function') brancherHabilitations(root);
     if (UI.ordres) dessiner();   // dernière liste connue pendant le rechargement
     chargerOrdres().then(() => {
       dessiner();
@@ -762,6 +764,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="otf-assigne">${trad('Assigné à')}</label>
               <select id="otf-assigne" class="ui-selecteur is-plein"><option value="">${trad('Non assigné')}</option>${assignables.map((m) => `<option value="${esc(m.id)}"${ordre && String(ordre.assigne_a) === String(m.id) ? ' selected' : ''}>${esc(m.nom_affiche)}</option>`).join('')}</select>
+              <p class="ui-aide" id="otf-habilitation" role="status" aria-live="polite" hidden></p>
               ${assigneInvalide ? `<p class="ui-aide" id="otf-assigne-alerte" style="color:var(--danger,#c0392b)">${tR('{n} n\'a pas accès aux ordres de travail (droit d\'achat) : choisis quelqu\'un d\'autre.', { n: esc(otNomEquipe(ordre.assigne_a)) })}</p>` : ''}
             </div>
             <div class="ui-champ-groupe">
@@ -791,6 +794,23 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
   habillerSelect(q('#otf-priorite'), trad('Priorité'));
   habillerSelect(q('#otf-assigne'), trad('Assigné à'));
   habillerChampDate(q('#otf-echeance'), trad('Échéance'));
+  // Habilitations (étape 5) : ce qui manque à la personne choisie pour cette machine, dit tout de suite (le serveur refuse en plus en mode « bloquer »).
+  const verifierHabilitation = async () => {
+    const zone = q('#otf-habilitation');
+    const profil = q('#otf-assigne').value;
+    if (!zone) return;
+    zone.hidden = true; zone.textContent = '';
+    if (!profil || typeof controleHabilitationAssignation !== 'function') return;
+    const c = await controleHabilitationAssignation(profil, q('#otf-machine').value);
+    if (profil !== q('#otf-assigne').value) return;          // une autre personne a été choisie entre-temps
+    const m = messageHabilitationAssignation(c, otNomEquipe(profil));
+    if (!m) return;
+    zone.textContent = m.texte;
+    zone.style.color = m.bloquant ? 'var(--danger,#c0392b)' : 'var(--late,#B45309)';
+    zone.hidden = false;
+  };
+  q('#otf-assigne').addEventListener('change', verifierHabilitation);
+  if (q('#otf-assigne').value) verifierHabilitation();
 
   const machineChoisie = () => otMachine(q('#otf-machine').value);
   let elementsCourants = [];

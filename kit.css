@@ -2751,6 +2751,20 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .machine-modal-edit #cancel-add{min-height:44px;padding:0 24px;}
 @media (min-width:701px){.machine-archive-aide{display:none !important;}}   /* ordinateur : l'explication est l'info-bulle du bouton ; téléphone : pastille « i » */
 
+/* ── HABILITATIONS (app-21-habilitations.js) : lignes de personnes / qualifications, onglets, règle de la société ── */
+.hab-modal{max-width:640px;}
+.hab-onglets{margin-bottom:12px;}
+.hab-tete{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.hab-tete .otm-bloc-titre{margin:0;}
+.hab-ligne{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface);margin-top:8px;flex-wrap:wrap;}
+.hab-ligne > div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 160px;font-size:13px;}
+.hab-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.hab-actions .ui-btn-pastille{height:36px;padding:0 12px;}
+.hab-mode{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.hab-mode .ui-etiquette{margin:0;}
+.hab-mode-aide{margin:0;flex:1 1 100%;}
+#hab-pied.otm-pied{flex-wrap:wrap;}
+
 /* ── SIGNATURE NUMÉRIQUE (app-20-signatures.js) : zone de tracé, cartes de signature, état d'intégrité, avenants ── */
 .sig-modal{max-width:560px;}
 .sig-signataire{margin:0 0 4px;font-size:14px;font-weight:700;color:var(--ink);}
@@ -3510,6 +3524,7 @@ html[data-theme="dark"] [style*="color:#6366F1" i]:not([style*="background-color
 html[data-theme="dark"] [style*="color:#6864DF" i]:not([style*="background-color:#6864DF" i]),html[data-theme="dark"] [style*="color: #6864DF" i]:not([style*="background-color: #6864DF" i]){color:rgba(187,185,241,1) !important}
 html[data-theme="dark"] [style*="background:#ACC" i],html[data-theme="dark"] [style*="background: #ACC" i],html[data-theme="dark"] [style*="background-color:#ACC" i]{background:rgba(170,204,204,0.2) !important}
 html[data-theme="dark"] [style*="background:#ADD" i],html[data-theme="dark"] [style*="background: #ADD" i],html[data-theme="dark"] [style*="background-color:#ADD" i]{background:rgba(170,221,221,0.2) !important}
+html[data-theme="dark"] [style*="color:#B45309" i]:not([style*="background-color:#B45309" i]),html[data-theme="dark"] [style*="color: #B45309" i]:not([style*="background-color: #B45309" i]){color:rgba(221,178,144,1) !important}
 html[data-theme="dark"] [style*="color:#BA1A1A" i]:not([style*="background-color:#BA1A1A" i]),html[data-theme="dark"] [style*="color: #BA1A1A" i]:not([style*="background-color: #BA1A1A" i]){color:rgba(224,152,152,1) !important}
 html[data-theme="dark"] [style*="color:#C0392B" i]:not([style*="background-color:#C0392B" i]),html[data-theme="dark"] [style*="color: #C0392B" i]:not([style*="background-color: #C0392B" i]){color:rgba(227,166,160,1) !important}
 html[data-theme="dark"] [style*="background:#C7CAD9" i],html[data-theme="dark"] [style*="background: #C7CAD9" i],html[data-theme="dark"] [style*="background-color:#C7CAD9" i]{background:var(--surface-soft) !important}
