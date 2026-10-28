@@ -2751,6 +2751,11 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .machine-modal-edit #cancel-add{min-height:44px;padding:0 24px;}
 @media (min-width:701px){.machine-archive-aide{display:none !important;}}   /* ordinateur : l'explication est l'info-bulle du bouton ; téléphone : pastille « i » */
 
+/* Fiche d'un ordre : comme les autres fenêtres, un fond gris (rgb(0 0 0 / 0.1)) sous des cartes et des tâches BLANCHES (thème clair seulement) */
+.otm-fiche .otm-fiche-corps{background:var(--otm-fond);}
+html:not([data-theme="dark"]) .otm-fiche .otm-carte,html:not([data-theme="dark"]) .otm-fiche .otm-tache,html:not([data-theme="dark"]) .otm-fiche .otm-progres{background:var(--surface);}
+html:not([data-theme="dark"]) .otm-fiche .otm-tache:hover{background:var(--otm-bleu-fond);}
+
 /* Le calendrier (choix d'une date) garde son fond clair d'origine, même si le fond des autres fenêtres passe au gris 10 % */
 html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F8;}
 
@@ -3128,7 +3133,6 @@ html[data-theme="dark"] .pages-utiles .credit-clair{box-shadow:0 1px 2px rgba(0,
 html[data-theme="dark"] .pages-utiles .credit-rassurance{font-weight:700}
 html[data-theme="dark"] .pages-utiles .ajout-page input{border:1px solid rgba(255,255,255,0.15)}
 html[data-theme="dark"] .modal{box-shadow:0 24px 60px rgba(0,0,0,0.53)}
-html[data-theme="dark"] .plan-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .fm-btn{box-shadow:0 2px 8px -2px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .fm-btn-primary{background:#5B52DF;box-shadow:0 4px 14px rgba(0,0,0,0.48)}
 html[data-theme="dark"] .fm-card{box-shadow:0 8px 24px -4px rgba(0,0,0,0.3),0 3px 8px -2px rgba(0,0,0,0.3)}
@@ -3179,7 +3183,6 @@ html[data-theme="dark"] .fm2-bloc-pct-horaire{color:rgba(170,165,231,1)}
 html[data-theme="dark"] .fm2-bloc-pct-calendaire{color:rgba(147,193,190,1)}
 html[data-theme="dark"] .fm2-mini-carte-o2{background:var(--surface)}
 html[data-theme="dark"] .fm2-mini-valeur-o2{color:var(--ink)}
-html[data-theme="dark"] .machine-modal-edit .modal{background:var(--surface)}
 html[data-theme="dark"] .machine-modal-edit .mform-card{background:var(--surface);box-shadow:0 1px 2px 0 rgba(0,0,0,0.3)}
 html[data-theme="dark"] .machine-modal-edit .mform-card:hover{background:rgba(220,233,255,0.2)}
 html[data-theme="dark"] .machine-modal-edit .mform-card-ico{background:var(--surface);color:rgba(140,186,206,1)}
@@ -3266,7 +3269,6 @@ html[data-theme="dark"] .machine-modal-add .focus\:ring-2:focus{box-shadow:var(-
 html[data-theme="dark"] .machine-modal-add :is(.group:hover .group-hover\:text-primary){color:rgba(140,186,206,1)}
 html[data-theme="dark"] .fm-kpi-card{background:var(--surface);box-shadow:0 2px 8px -2px rgba(0,0,0,0.3),0 1px 3px rgba(0,0,0,0.3)}
 html[data-theme="dark"] .offre-plan{background:var(--surface-soft)}
-html[data-theme="dark"] .signup-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .requis{color:rgba(238,161,155,1)}
 html[data-theme="dark"] .log-chip-machine{background:#5B52DF}
 html[data-theme="dark"] .log-modal label{font-weight:700}
@@ -3280,21 +3282,15 @@ html[data-theme="dark"] .log-info-titre{font-weight:700}
 html[data-theme="dark"] .log-type-texte{font-weight:600}
 html[data-theme="dark"] .analyse-progress{border:1px solid rgba(255,255,255,0.05)}
 html[data-theme="dark"] .choix-info-box{background:var(--surface-soft)}
-html[data-theme="dark"] .kit-tache-modal .modal{background:var(--surface)}
-html[data-theme="dark"] .programme-actions-modal .modal{background:var(--surface)}
-html[data-theme="dark"] .second-compteur-modal .modal{background:var(--surface)}
-html[data-theme="dark"] .choix-frequence-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .mform-num{background:#5B52DF}
 html[data-theme="dark"] .error{font-weight:700}
 html[data-theme="dark"] button.primary{background:#5B52DF}
-html[data-theme="dark"] .suppr-compte-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .login-box{box-shadow:0 24px 60px rgba(0,0,0,0.35)}
 html[data-theme="dark"] .champ-entete .link-inline{font-weight:700}
 html[data-theme="dark"] .step-back{font-weight:700}
 html[data-theme="dark"] .opt-sub{font-weight:600}
 html[data-theme="dark"] .checklist label{font-weight:700}
 html[data-theme="dark"] .track-mode-choice label{font-weight:600}
-html[data-theme="dark"] .offres-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .offres-eyebrow.is-restreint{color:rgba(227,166,160,1)}
 html[data-theme="dark"] .offre-carte.is-recommandee{box-shadow:0 10px 28px rgba(0,0,0,0.48)}
 html[data-theme="dark"] .offre-carte-prix .devise{font-weight:700}
@@ -3389,9 +3385,7 @@ html[data-theme="dark"] .prep-besoin-qte{font-weight:700}
 html[data-theme="dark"] .agenda-jour.is-aujourdhui .agenda-jour-num{background:#5B52DF}
 html[data-theme="dark"] .agenda-legende-item{font-weight:700}
 html[data-theme="dark"] .agenda-tooltip{box-shadow:var(--shadow-soft),0 8px 24px rgba(0,0,0,0.3)}
-html[data-theme="dark"] .agenda-planifier-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .pe-machine-icone{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
-html[data-theme="dark"] .agenda-jour-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .jm-carte-telemetrie-gauche{font-weight:700}
 html[data-theme="dark"] .card-ico-plein{background:#5B52DF}
 html[data-theme="dark"] .callout .card-ico{color:rgba(156,190,241,1)}
@@ -3427,11 +3421,7 @@ html[data-theme="dark"] .piece-mobile-carte-meta-ligne .mot{font-weight:700}
 html[data-theme="dark"] .piece-mobile-carte-meta-ligne .val{font-weight:700}
 html[data-theme="dark"] .piece-mobile-vide p.muted-text{font-weight:600}
 html[data-theme="dark"] .piece-mobile-pied{background:var(--surface);box-shadow:0 -6px 20px rgba(0,0,0,0.3)}
-html[data-theme="dark"] .rapport-tco-modal .modal{background:var(--surface)}
-html[data-theme="dark"] .next-entretien-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .stock-btn-outline{box-shadow:0 1px 2px rgba(0,0,0,0.3)}
-html[data-theme="dark"] .stock-kit-modal .modal{background:var(--surface)}
-html[data-theme="dark"] .stock-mouvement-modal .modal{background:var(--surface)}
 html[data-theme="dark"] .tco-champ-unite input{font-weight:700}
 html[data-theme="dark"] .tco-quick-add input{background:var(--surface)}
 html[data-theme="dark"] .tco-dash-legende{font-weight:700}

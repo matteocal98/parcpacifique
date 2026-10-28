@@ -1667,7 +1667,7 @@
   /* Couleur EXACTE du mockup (#F2F4F8, pas le token --bg de l'app — beaucoup
      trop subtil, quasiment invisible une fois posé derrière des cartes
      blanches : signalé par l'utilisateur, « je n'ai même pas de fond »). */
-  .plan-modal .modal{max-width:1180px;background:#F2F4F8;}
+  .plan-modal .modal{max-width:1180px;background:var(--fond-modale,#E6E6E6);}
   /* Fil d'Ariane, au-dessus de tout : « Retour au parc » ferme la modale,
      comme le bouton Fermer — il n'y a pas d'autre page à revenir. */
   .plan-fil-ariane{
@@ -1911,7 +1911,7 @@
      propre bg-surface-container-lowest (blanc) en dur dans le HTML ; ils
      ont été retirés pour laisser transparaître ce fond unique sur toute
      la hauteur (voir openMachineModal). */
-  .machine-modal-edit .modal{max-width:56rem;width:100%;padding:0;border:none;overflow:hidden;display:flex;flex-direction:column;max-height:88vh;box-sizing:border-box;background:#F2F4F8;}
+  .machine-modal-edit .modal{max-width:56rem;width:100%;padding:0;border:none;overflow:hidden;display:flex;flex-direction:column;max-height:88vh;box-sizing:border-box;background:var(--fond-modale,#E6E6E6);}
   .machine-modal-edit .modal>form{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
   /* Preflight de Tailwind est désactivé (il resterait global, hors de
      portée de l'option "important" — seules les utilitaires le sont) :
@@ -2764,7 +2764,7 @@
 
   /* ══════════════════════════════════════════════════════════════════════
      ★ CRÉER UN COMPTE (Stitch « modale_création_de_compte ») */
-  .signup-modal .modal{max-width:760px;background:#F2F4F8;}
+  .signup-modal .modal{max-width:760px;background:var(--fond-modale,#E6E6E6);}
   /* Un libellé avec une annotation courte à droite (« MAJUSCULES »,
      « Min. 6 car. ») : toujours une règle RÉELLE du champ, jamais une
      décoration — le contact prend la casse forcée, le mot de passe a
@@ -3203,7 +3203,7 @@
      select natif #kit-tache-select reste un <select> visible tel quel ;
      #kit-tache-piece-select est habillé par habillerSelectPieceCatalogue
      en un bouton .champ-select (le select natif devient invisible). */
-  .kit-tache-modal .modal{background:#F2F4F8;}
+  .kit-tache-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .kit-tache-modal #kit-tache-select,
   .kit-tache-modal .champ-select,
   .kit-tache-modal #kit-tache-piece-qte{background:var(--surface);}
@@ -3211,10 +3211,10 @@
   /* Fond de modale #F2F4F8 (même règle qu'ailleurs) — modales utilitaires
      restantes, chacune scopée séparément sans toucher .choix-modal (les
      4 modales partagent cette classe de base, revues une par une). */
-  .programme-actions-modal .modal{background:#F2F4F8;}
+  .programme-actions-modal .modal{background:var(--fond-modale,#E6E6E6);}
   /* avertirSecondCompteurManquant : .mform-card est déjà blanche par
      défaut (var(--surface)) — seul le champ numérique doit être corrigé. */
-  .second-compteur-modal .modal{background:#F2F4F8;}
+  .second-compteur-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .second-compteur-modal #second-compteur-valeur{background:var(--surface);}
   /* openChoixFrequence / ouvrirChoixFrequenceApercu (même modale, deux
      appelants) : .choix-carte est déjà blanche, .choix-bloc-carnet/-libre
@@ -3222,7 +3222,7 @@
      seuls le champ #choix-valeur, le select #choix-unite habillé en
      .champ-select, et le sous-bloc .choix-bloc-controle (gris neutre,
      invisible sur #F2F4F8 sans correction) doivent passer en blanc. */
-  .choix-frequence-modal .modal{background:#F2F4F8;}
+  .choix-frequence-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .choix-frequence-modal #choix-valeur,
   .choix-frequence-modal .champ-select,
   .choix-frequence-modal .choix-bloc-controle{background:var(--surface);}
@@ -3373,7 +3373,7 @@
      "tape SUPPRIMER") héritait du fond teinté par défaut sur un .modal
      blanc, l'inverse de la règle — d'autant plus important ici qu'un
      champ qui ressort clairement compte pour une action irréversible. */
-  .suppr-compte-modal .modal{background:#F2F4F8;}
+  .suppr-compte-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .suppr-compte-modal #suppr-mot{background:var(--surface);}
   .suppr-liste{margin:10px 0 14px;padding-left:20px;}
   .suppr-liste li{font-size:14px;color:var(--ink);margin-bottom:4px;}
@@ -3621,7 +3621,7 @@
      Enterprise — les 3 existent déjà comme variables), plutôt qu'une seule
      teinte partout, pour retrouver le caractère coloré de la maquette
      d'origine sans dépendre d'aucun CDN. */
-  .offres-modal .modal{max-width:1080px;font-family:'Hanken Grotesk',sans-serif;background:#F2F4F8;}
+  .offres-modal .modal{max-width:1080px;font-family:'Hanken Grotesk',sans-serif;background:var(--fond-modale,#E6E6E6);}
   .offres-modal .offre-carte-nom,.offres-modal .offre-carte-prix,
   .offres-modal .offre-service-titre-ligne h3,.offres-modal .offre-service-prix{font-family:'Space Grotesk',sans-serif;}
   .offres-entete{margin-bottom:20px;}
@@ -5266,7 +5266,7 @@
      modales Agenda, sans repasser par un nouveau mockup Stitch) : override
      scopé du .modal générique — jamais touché à la source, partagée par
      toutes les autres modales de l'app. */
-  .agenda-planifier-modal .modal{background:#F2F4F8;}
+  .agenda-planifier-modal .modal{background:var(--fond-modale,#E6E6E6);}
   /* Champs de saisie (date, recherche) et lignes machine sélectionnables :
      passés en blanc plein pour qu'ils se détachent du nouveau fond teinté —
      avant cette règle, ils étaient DÉJÀ teintés (--surface-soft) sur un
@@ -5354,7 +5354,7 @@
      ci-dessus) : override scopé du .modal générique. .jm-carte est déjà
      blanche (var(--surface)) — elle se détache correctement sans rien
      changer d'autre. */
-  .agenda-jour-modal .modal{background:#F2F4F8;}
+  .agenda-jour-modal .modal{background:var(--fond-modale,#E6E6E6);}
   /* ══════════════════════════════════════════════════════════════════════════
      ★ Reprise Stitch « modale_agenda_v_nements_du_jour_keeva » — la fenêtre
      qui s'ouvre au clic sur une case du calendrier (ouvrirJourAgenda). Une
@@ -6085,13 +6085,13 @@
   /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : #rapport-tco-email
      héritait du fond teinté par défaut sur un .modal blanc, l'inverse de
      la règle. */
-  .rapport-tco-modal .modal{background:#F2F4F8;}
+  .rapport-tco-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .rapport-tco-modal #rapport-tco-email{background:var(--surface);}
   /* Fond de modale #F2F4F8 (même règle qu'ailleurs) : aucun champ de saisie
      ici (modale de lecture seule), mais .plan-field/.due-hero flottaient
      sans support visuel sur un fond blanc plat — sur fond teinté, ce même
      sous-bloc doit se détacher en blanc pour rester lisible. */
-  .next-entretien-modal .modal{background:#F2F4F8;}
+  .next-entretien-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .next-entretien-modal .plan-field{background:var(--surface);border-radius:var(--r-chip);padding:10px 12px;}
   /* Les blocs de la page (bandeau, tuiles KPI, classement flotte, grille
      Paramètres/Catalogue) sont des enfants directs de .vue-couts-tco sans
@@ -6151,11 +6151,11 @@
      panel, déjà blanc sur ce fond soft) — ils héritaient donc du fond
      teinté PAR DÉFAUT (input,select,textarea{background:var(--surface-
      soft)}, styles.css ~ligne 2600), l'inverse de la règle demandée. */
-  .stock-kit-modal .modal{background:#F2F4F8;}
+  .stock-kit-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .stock-kit-modal #kit-nom,.stock-kit-modal #kit-note,
   .stock-kit-modal .stock-field-row[data-kit-ligne] .champ-select,
   .stock-kit-modal .stock-field-row[data-kit-ligne] input{background:var(--surface);}
-  .stock-mouvement-modal .modal{background:#F2F4F8;}
+  .stock-mouvement-modal .modal{background:var(--fond-modale,#E6E6E6);}
   .stock-mouvement-modal #mvt-piece,.stock-mouvement-modal #mvt-magasin,
   .stock-mouvement-modal #mvt-destination,.stock-mouvement-modal #mvt-quantite,
   .stock-mouvement-modal #mvt-cout,.stock-mouvement-modal #mvt-machine,
