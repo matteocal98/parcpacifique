@@ -217,52 +217,6 @@ VIEWS.account = {
           ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
         </div>
       </section>
-
-      <section class="ui-section">
-        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
-        <div class="ui-section-corps">
-          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
-          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
-        </div>
-      </section>
-
-      <section class="ui-section">
-        ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
-        <div class="ui-section-corps">
-          <div class="ui-groupe">
-            <label class="check-row">
-              <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
-              ${trad('Garder une copie pour la consultation hors connexion')}
-            </label>
-            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
-            <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
-          </div>
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
-            ${basculeLangueHtml()}
-          </div>
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Thème de l\'interface')}</span>
-            <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
-              ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
-            </div>
-            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
-          </div>
-          ${dansApplication() ? `
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
-            <p class="ui-aide" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
-            <div id="acc-bio-corps"></div>
-            <p class="ui-aide" id="acc-acces-etat"></p>
-            <div id="acc-acces-corps"></div>
-            <div class="ui-aide" id="acc-bio-msg" role="status" aria-live="polite"></div>
-            <details class="bio-detail">
-              <summary>${trad('Détail technique')}</summary>
-              <p class="ui-aide" id="acc-bio-detail"></p>
-            </details>
-          </div>` : ''}
-        </div>
-      </section>
       </div>
       <div class="ui-colonne">
 
@@ -318,6 +272,52 @@ VIEWS.account = {
         </div>
       </section>` : ''}
 
+
+      <section class="ui-section">
+        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
+        <div class="ui-section-corps">
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
+          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
+        </div>
+      </section>
+
+      <section class="ui-section">
+        ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
+        <div class="ui-section-corps">
+          <div class="ui-groupe">
+            <label class="check-row">
+              <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
+              ${trad('Garder une copie pour la consultation hors connexion')}
+            </label>
+            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
+            <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
+          </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
+            ${basculeLangueHtml()}
+          </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Thème de l\'interface')}</span>
+            <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
+              ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
+            </div>
+            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
+          </div>
+          ${dansApplication() ? `
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
+            <p class="ui-aide" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
+            <div id="acc-bio-corps"></div>
+            <p class="ui-aide" id="acc-acces-etat"></p>
+            <div id="acc-acces-corps"></div>
+            <div class="ui-aide" id="acc-bio-msg" role="status" aria-live="polite"></div>
+            <details class="bio-detail">
+              <summary>${trad('Détail technique')}</summary>
+              <p class="ui-aide" id="acc-bio-detail"></p>
+            </details>
+          </div>` : ''}
+        </div>
+      </section>
 
       <section class="ui-section">
         ${tete('alerte', trad('Zone sensible'), trad('Clôture d\'entreprise et suppression.'))}
