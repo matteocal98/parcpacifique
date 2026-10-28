@@ -2759,6 +2759,10 @@ html:not([data-theme="dark"]) .otm-fiche .otm-tache:hover{background:var(--otm-b
 /* Le calendrier (choix d'une date) garde son fond clair d'origine, même si le fond des autres fenêtres passe au gris 10 % */
 html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F8;}
 
+/* Colonne « Signature » de l'historique : état et bouton « Rapport » séparés, sur une ligne quand il y a la place */
+.sig-cellule{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:2px 0;}
+.sig-cellule .ui-btn-pastille{height:36px;padding:0 14px;}
+
 /* ── HABILITATIONS (app-21-habilitations.js) : lignes de personnes / qualifications, onglets, règle de la société ── */
 .hab-modal{max-width:640px;}
 .hab-onglets{margin-bottom:12px;}

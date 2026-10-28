@@ -413,7 +413,7 @@ async function brancherSignaturesHistorique(section, interventions) {
     const id = cellule.getAttribute('data-sig-cellule');
     const roles = parInter.get(id) || [];
     const etat = roles.length ? `<span class="ui-statut is-ok">${roles.length > 1 ? trad('Signée ×2') : trad('Signée')}</span>` : `<span class="ui-statut">${trad('Non signée')}</span>`;
-    cellule.innerHTML = `${etat} <button type="button" class="ui-btn ui-btn-pastille" data-sig-rapport="${esc(id)}">${trad('Rapport')}</button>`;
+    cellule.innerHTML = `<div class="sig-cellule">${etat}<button type="button" class="ui-btn ui-btn-pastille" data-sig-rapport="${esc(id)}">${trad('Rapport')}</button></div>`;
   });
   if (!section.__sigBranche) {
     section.__sigBranche = true;
