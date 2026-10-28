@@ -893,10 +893,8 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
     otMettreAJour(reponse.data);
     overlay.remove();
     showToast(edition ? trad('Ordre modifié') : tR('Ordre OT-{n} créé', { n: reponse.data.numero }));
-    if (!edition) {
-      if (UI.view !== 'ordres') goTo('ordres');
-      ouvrirOrdre(reponse.data.id);
-    }
+    // Après une création : on montre la liste des ordres, SANS ouvrir la fiche (elle prêtait à confusion et on la fermait à chaque fois).
+    if (!edition && UI.view !== 'ordres') goTo('ordres');
   });
   // Priorité proposée pour une panne : une panne bloquante est urgente.
   if (panne && !edition) {
