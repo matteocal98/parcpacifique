@@ -3030,6 +3030,14 @@ function openLogInterventionModal(machine, tache, options = {}) {
     const submitVerbeEl = overlay.querySelector('#log-submit-verbe');
     const verbeRepos = libelleValidationIntervention();
     const errorEl = overlay.querySelector('#log-error');
+    // L'erreur est en bas du formulaire défilant alors que le bouton « Valider » est dans le pied fixe : sans cela, une erreur du serveur passait INAPERÇUE
+    // (la fenêtre ne se ferme pas, rien n'est dit). On la montre donc aussi dans une notification et on fait défiler jusqu'à elle.
+    const montrerErreur = (texte) => {
+      errorEl.textContent = texte;
+      errorEl.style.color = 'var(--danger,#c0392b)';
+      try { errorEl.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (errDefil) { /* sans conséquence */ }
+      showToast(texte);
+    };
     submitBtn.disabled = true;
     if (submitVerbeEl) submitVerbeEl.textContent = trad('Enregistrement…');
 
@@ -3045,7 +3053,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
       const noteLibre = overlay.querySelector('#log-notes').value.trim();
       const incurredAt = overlay.querySelector('#log-date').value;
       if (!montant || montant <= 0) {
-        errorEl.textContent = trad('Le montant doit être supérieur à 0.');
+        montrerErreur(trad('Le montant doit être supérieur à 0.'));
         submitBtn.disabled = false;
         if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
         return;
@@ -3075,13 +3083,13 @@ function openLogInterventionModal(machine, tache, options = {}) {
             showToast(trad('Frais enregistré sur l\'appareil : il partira dès que le réseau revient.'));
             return;
           } catch (errFile) {
-            errorEl.textContent = (errFile && errFile.message) || trad('Enregistrement impossible sans réseau.');
+            montrerErreur((errFile && errFile.message) || trad('Enregistrement impossible sans réseau.'));
             submitBtn.disabled = false;
             if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
             return;
           }
         }
-        errorEl.textContent = trad('Erreur :') + " " + ((err && err.message) || err);
+        montrerErreur(trad('Erreur :') + " " + ((err && err.message) || err));
         submitBtn.disabled = false;
         if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
       }
@@ -3148,7 +3156,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
     const lignesSortie = pieceLignes.filter((l) => l.sortie);
     const lignesLibres = pieceLignes.filter((l) => !l.sortie);
     const refuserSortie = (texte) => {
-      errorEl.textContent = texte;
+      montrerErreur(texte);
       submitBtn.disabled = false;
       if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
     };
@@ -3209,7 +3217,15 @@ function openLogInterventionModal(machine, tache, options = {}) {
     try {
       // Sans réseau : on ne tente même pas l'envoi, l'action est gardée sur l'appareil (voir plus bas).
       if (navigator.onLine === false) throw new Error('hors connexion');
-      const { sortiesRefusees } = await executerIntervention(machine, saisie, suiviEnregistrement, false);
+      // Garde-fou : un serveur qui ne répond jamais laissait la fenêtre figée sans rien dire. Après 40 s on le dit et on rend la main ; un nouvel essai ne crée
+      // aucun doublon (identifiants fournis par l'appareil, étapes déjà faites retenues dans suiviEnregistrement).
+      let minuterie = null;
+      const tropLong = new Promise((resolve, reject) => {
+        minuterie = setTimeout(() => reject(new Error(trad('Le serveur ne répond pas. Rien n\'est dupliqué : appuie de nouveau sur Valider dans un instant.'))), 40000);
+      });
+      let resultatEnvoi;
+      try { resultatEnvoi = await Promise.race([executerIntervention(machine, saisie, suiviEnregistrement, false), tropLong]); } finally { clearTimeout(minuterie); }
+      const { sortiesRefusees } = resultatEnvoi;
 
       // L'intervention est écrite : la fenêtre se ferme TOUT DE SUITE (sinon, pendant la clôture de l'ordre, on a l'impression que rien n'a été pris en compte).
       overlay.remove();
@@ -3241,13 +3257,13 @@ function openLogInterventionModal(machine, tache, options = {}) {
           if (typeof proposerSignaturesApresIntervention === 'function') proposerSignaturesApresIntervention(machine, idIntervention, true);
           return;
         } catch (errFile) {
-          errorEl.textContent = (errFile && errFile.message) || trad('Enregistrement impossible sans réseau.');
+          montrerErreur((errFile && errFile.message) || trad('Enregistrement impossible sans réseau.'));
           submitBtn.disabled = false;
           if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
           return;
         }
       }
-      errorEl.textContent = trad('Erreur :') + " " + ((err && err.message) || err);
+      montrerErreur(trad('Erreur :') + " " + ((err && err.message) || err));
       submitBtn.disabled = false;
       if (submitVerbeEl) submitVerbeEl.textContent = verbeRepos;
     }
