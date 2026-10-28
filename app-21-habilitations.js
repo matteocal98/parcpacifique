@@ -127,7 +127,9 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
     if (!d.qualifications.length) return exp + `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Commence par le catalogue : ajoute les qualifications utiles à ta société, puis reviens saisir les habilitations des personnes.')}</p></div>`;
     return exp + d.equipe.map((m) => {
       const lignes = d.habilitations.filter((h) => h.profil_id === m.id);
-      return `<section class="otm-bloc"><div class="hab-tete"><h3 class="otm-bloc-titre">${otSymbole('person')}<span>${esc(m.nom)}</span></h3>
+      // Une personne sans habilitation tient sur UNE ligne (nom, mention discrète, bouton) ; avec des habilitations, le nom puis une ligne par habilitation.
+      return `<section class="otm-bloc hab-personne${lignes.length ? '' : ' is-vide'}"><div class="hab-tete"><h3 class="otm-bloc-titre">${otSymbole('person')}<span>${esc(m.nom)}</span></h3>
+        ${lignes.length ? '' : `<span class="sig-meta hab-vide">${trad('Aucune habilitation enregistrée.')}</span>`}
         <button type="button" class="ui-btn ui-btn-pastille" data-hab-ajout="${esc(m.id)}">${trad('Ajouter')}</button></div>
         ${lignes.length ? lignes.map((h) => { const [cl, tx] = habEtat(h); return `
           <div class="hab-ligne"><div><strong>${esc(nomQual(h.qualification_id))}</strong><span class="sig-meta">${tR('Obtenue le {date}', { date: habDate(h.obtenue_le) })}${h.verifie_a ? ' · ' + trad('Vérifiée') : ''}</span></div>
@@ -135,7 +137,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
               ${h.verifie_a ? '' : `<button type="button" class="ui-btn ui-btn-pastille" data-hab-verifier="${esc(h.id)}">${trad('Vérifier')}</button>`}
               <button type="button" class="ui-btn ui-btn-pastille" data-hab-modifier="${esc(h.id)}">${trad('Modifier')}</button>
               <button type="button" class="ui-btn ui-btn-pastille" data-hab-suppr="${esc(h.id)}">${trad('Retirer')}</button></div></div>`; }).join('')
-          : `<p class="ui-aide">${trad('Aucune habilitation enregistrée.')}</p>`}</section>`;
+          : ''}</section>`;
     }).join('');
   };
   const vueCatalogue = () => `<section class="otm-bloc"><div class="hab-tete"><h3 class="otm-bloc-titre">${otSymbole('list_alt')}<span>${trad('Catalogue de la société')}</span></h3>

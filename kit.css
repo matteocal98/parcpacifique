@@ -2751,6 +2751,9 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .machine-modal-edit #cancel-add{min-height:44px;padding:0 24px;}
 @media (min-width:701px){.machine-archive-aide{display:none !important;}}   /* ordinateur : l'explication est l'info-bulle du bouton ; téléphone : pastille « i » */
 
+/* Le calendrier (choix d'une date) garde son fond clair d'origine, même si le fond des autres fenêtres passe au gris 10 % */
+html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F8;}
+
 /* ── HABILITATIONS (app-21-habilitations.js) : lignes de personnes / qualifications, onglets, règle de la société ── */
 .hab-modal{max-width:640px;}
 .hab-onglets{margin-bottom:12px;}
@@ -2760,6 +2763,16 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .hab-ligne > div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 160px;font-size:13px;}
 .hab-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
 .hab-actions .ui-btn-pastille{height:36px;padding:0 12px;}
+/* Lignes séparées et plus basses : un espace entre chaque personne, une personne sans habilitation sur une seule ligne */
+.hab-modal #hab-corps{display:flex;flex-direction:column;gap:8px;}
+.hab-modal .otm-bloc{padding:8px 12px;}
+.hab-modal .hab-tete{margin-bottom:0;gap:8px;}
+.hab-modal .hab-tete .otm-bloc-titre{font-size:14px;flex:1 1 auto;min-width:0;}
+.hab-modal .hab-tete .ui-btn-pastille{height:32px;padding:0 12px;flex:none;}
+.hab-modal .hab-vide{flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hab-modal .hab-ligne{padding:6px 10px;margin-top:6px;}
+.hab-modal .hab-personne.is-vide .hab-tete .otm-bloc-titre{flex:0 1 auto;}
+.hab-modal .hab-personne.is-vide .hab-vide{flex:1 1 auto;text-align:right;}
 .hab-mode{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .hab-mode .ui-etiquette{margin:0;}
 .hab-mode-aide{margin:0;flex:1 1 100%;}

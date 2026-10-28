@@ -2173,7 +2173,7 @@ function ouvrirChoixDate(titre, valeurActuelle, onChoisi) {
   // ce même overlay plutôt qu'un second overlay empilé.
   let modeAnnee = false;
   const overlay = document.createElement('div');
-  overlay.className = 'overlay';
+  overlay.className = 'overlay choix-date-modal';
   document.body.appendChild(overlay);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
