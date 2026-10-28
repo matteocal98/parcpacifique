@@ -1,0 +1,55 @@
+# Alertes d'expiration des habilitations KALEA (60, 30, 7 jours avant, puis « expirée ») — déclencheur quotidien.
+# Même schéma que alertes-usage.yml : le jeton vit dans les secrets GitHub, l'historique des exécutions sert de contrôle
+# (une exécution en échec est visible et GitHub prévient par e-mail).
+#
+# CE QU'IL FAUT AVOIR (RIEN DE NOUVEAU CÔTÉ SECRETS : le jeton des alertes d'usage est réutilisé) :
+#   1. secret de dépôt  ALERTES_USAGE_TOKEN            (déjà posé pour alertes-usage.yml)
+#   2. secret de fonction Supabase ALERTES_USAGE_TOKEN (déjà posé : la même valeur)
+#   3. le secret de dépôt SUPABASE_ANON_KEY (déjà posé)
+#   4. migrations/habilitations.sql PUIS migrations/habilitations-alertes.sql exécutés dans Supabase (dépôt kalea-serveur)
+#   5. la fonction déployée : npx supabase functions deploy alertes-habilitations-quotidien --project-ref tiayvmnodsbygmuemeuy --use-api
+#
+# PREMIER ESSAI : onglet Actions > « Alertes d'habilitations » > Run workflow, avec « simulation » coché : la fonction calcule et
+# renvoie ce qui partirait, sans rien envoyer ni rien noter.
+
+name: Alertes d'habilitations
+
+on:
+  schedule:
+    # Tous les jours à 20:10 UTC = 07:10 à Nouméa (10 minutes après les alertes d'usage : un message à la fois).
+    - cron: '10 20 * * *'
+  workflow_dispatch:
+    inputs:
+      simulation:
+        description: "Simulation : ne rien envoyer, seulement afficher ce qui partirait"
+        type: boolean
+        default: true
+
+jobs:
+  alertes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer les alertes d'habilitations
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ALERTES_USAGE_TOKEN: ${{ secrets.ALERTES_USAGE_TOKEN }}
+          SIMULATION: ${{ github.event_name == 'workflow_dispatch' && inputs.simulation || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ALERTES_USAGE_TOKEN:-}" ]; then
+            echo "::error::le secret ALERTES_USAGE_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/alertes-habilitations-quotidien" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "x-alertes-token: ${ALERTES_USAGE_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"simulation\": ${SIMULATION}}")
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::les alertes d'habilitations n'ont pas été traitées (HTTP $code)"
+            exit 1
+          fi
