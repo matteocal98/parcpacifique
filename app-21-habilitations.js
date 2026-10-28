@@ -254,6 +254,55 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
   });
 }
 
+// ── « Qui est habilité » pour UNE machine (gérant) : ce que la machine exige, puis chaque membre avec son verdict ──
+async function ouvrirHabilitesMachine(machine) {
+  if (!habilitationsActif() || UI.role !== 'gerant' || !machine) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay otm-overlay';
+  overlay.innerHTML = `
+    <div class="modal otm sig-modal" role="dialog" aria-modal="true" aria-labelledby="hab-q-titre">
+      <header class="otm-tete"><div class="otm-tuile">${otSymbole('workspace_premium')}</div>
+        <div class="otm-tete-textes"><div class="otm-tete-ligne"><span class="otm-etape">${trad('Habilitations')}</span><span class="otm-marque">GMAO KALEA</span></div>
+          <h2 id="hab-q-titre">${trad('Qui est habilité')}</h2><p>${esc(machine.name)}</p></div>
+        <button type="button" class="otm-fermer" data-hab-fermer aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button></header>
+      <div class="otm-form-corps" id="hab-q-corps"><p class="ui-aide">${trad('Chargement…')}</p></div>
+      <footer class="otm-pied"><span></span><div class="otm-pied-actions"><button type="button" class="otm-btn" data-hab-gerer>${trad('Gérer les habilitations')}</button></div></footer>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.closest('[data-hab-fermer]')) overlay.remove();
+    else if (e.target.closest('[data-hab-gerer]')) { overlay.remove(); ouvrirGestionHabilitations(); }
+  });
+  try {
+    const [eq, ex, qs] = await Promise.all([
+      sb.rpc('habilitations_equipe_machine', { p_machine: machine.id }),
+      sb.from('exigences_qualification').select('qualification_id, machine_id, category_id, niveau'),
+      sb.from('qualifications').select('id, nom'),
+    ]);
+    if (eq.error) throw eq.error;
+    const noms = new Map((qs.data || []).map((q) => [q.id, q.nom]));
+    // Les exigences qui s'appliquent à CETTE machine : la sienne, ou celle de sa catégorie.
+    const catId = machine.category_id || (machine.category && machine.category.id) || null;
+    const exigences = (ex.data || []).filter((e) => e.machine_id === machine.id || (catId && e.category_id === catId));
+    const equipe = eq.data || [];
+    const exigHtml = exigences.length
+      ? `<section class="otm-bloc"><h3 class="otm-bloc-titre">${otSymbole('rule')}<span>${trad('Exigences de cette machine')}</span></h3>
+          ${exigences.map((e) => `<div class="hab-ligne"><div><strong>${esc(noms.get(e.qualification_id) || '—')}</strong><span class="sig-meta">${e.machine_id ? trad('Cette machine') : trad('Sa catégorie')}</span></div>
+            <span class="ui-statut ${e.niveau === 'obligatoire' ? 'is-retard' : 'is-bientot'}">${e.niveau === 'obligatoire' ? trad('Obligatoire') : trad('Recommandée')}</span></div>`).join('')}</section>`
+      : `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Aucune exigence pour cette machine : tout le monde peut intervenir. Ajoute-en depuis « Qualifications et habilitations ».')}</p></div>`;
+    const lignes = equipe.map((m) => {
+      const manquantes = Array.isArray(m.manquantes) ? m.manquantes : [];
+      const detail = manquantes.length
+        ? manquantes.map((x) => `${x.nom} (${x.etat === 'expiree' ? tR('expirée le {date}', { date: habDate(x.expire_le) }) : trad('absente')})`).join(', ')
+        : '';
+      return `<div class="hab-ligne"><div><strong>${esc(m.nom_affiche)}</strong>${detail ? `<span class="sig-meta">${esc(detail)}</span>` : ''}</div>
+        <span class="ui-statut ${m.ok ? (manquantes.length ? 'is-bientot' : 'is-ok') : 'is-retard'}">${m.ok ? (manquantes.length ? trad('Habilité (recommandée manquante)') : trad('Habilité')) : trad('Non habilité')}</span></div>`;
+    }).join('');
+    overlay.querySelector('#hab-q-corps').innerHTML = `${exigHtml}
+      <section class="otm-bloc"><h3 class="otm-bloc-titre">${otSymbole('groups')}<span>${trad('Équipe')}</span></h3>${lignes || `<p class="ui-aide">${trad('Aucun membre.')}</p>`}</section>`;
+  } catch (err) { overlay.querySelector('#hab-q-corps').innerHTML = `<p class="ui-aide" style="color:var(--danger,#c0392b)">${esc((err && err.message) || trad('Chargement impossible.'))}</p>`; }
+}
+
 // ── « Mes habilitations » : chacun consulte les siennes (la politique du serveur ne lui montre rien d'autre) ──
 async function ouvrirMesHabilitations() {
   if (!habilitationsActif()) return;
