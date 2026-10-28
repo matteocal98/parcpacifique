@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ddWLfFHAC3wLEhyivOJ2wX+KBdF9RBTYsqKZTHyUVI4=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-5x7MODSy0OAMsM0w/kwBo6k9gcd5GEf4FfqPPTB8c5Y=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -338,6 +338,63 @@
             <div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-[24px]">task_alt</span></div>
           </div>
         </div>
+
+        <!-- ── Assistant IA de support : interrupteur général, options, consommation. ÉTEINT par défaut : éteint = aucun appel, aucune dépense. ── -->
+        <section id="asup-carte" class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-md">
+          <div class="flex items-start justify-between gap-space-md">
+            <div class="flex items-center gap-space-sm min-w-0">
+              <div class="w-12 h-12 rounded-lg bg-primary-fixed/50 flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-[24px]">smart_toy</span></div>
+              <div class="min-w-0">
+                <h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Assistant IA de support</h2>
+                <p id="asup-resume" class="font-body-sm text-body-sm text-on-surface-variant">Chargement…</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0" for="asup-interrupteur" title="Allumer ou éteindre l'assistant">
+              <input type="checkbox" id="asup-interrupteur" class="sr-only peer" disabled aria-label="Assistant IA de support : allumé ou éteint">
+              <span class="block w-14 h-8 rounded-full bg-outline-variant peer-checked:bg-primary transition-colors"></span>
+              <span class="absolute left-1 top-1 w-6 h-6 rounded-full bg-surface-container-lowest shadow transition-transform peer-checked:translate-x-6"></span>
+            </label>
+          </div>
+          <div id="asup-detail" class="hidden flex flex-col gap-space-md">
+            <div id="asup-etat" class="flex flex-wrap gap-space-xs"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+              <label class="flex items-start gap-3 bg-surface-container-low rounded-lg p-space-sm cursor-pointer">
+                <input type="checkbox" id="asup-accuse" class="mt-1 w-5 h-5 shrink-0 accent-primary">
+                <span><span class="block font-label-md text-label-md text-on-surface font-semibold">Accusé de réception automatique</span><span class="block font-body-sm text-body-sm text-on-surface-variant">Reformule la demande du client et lui dit qu'elle est prise en compte. Jamais de conseil technique.</span></span>
+              </label>
+              <label class="flex items-start gap-3 bg-surface-container-low rounded-lg p-space-sm cursor-pointer">
+                <input type="checkbox" id="asup-brouillons" class="mt-1 w-5 h-5 shrink-0 accent-primary">
+                <span><span class="block font-label-md text-label-md text-on-surface font-semibold">Brouillons pour validation</span><span class="block font-body-sm text-body-sm text-on-surface-variant">Prépare une réponse et une note interne, invisibles du client. C'est toi qui envoies.</span></span>
+              </label>
+            </div>
+            <div class="flex flex-col gap-space-xs">
+              <div class="flex items-baseline justify-between gap-space-sm">
+                <span class="font-label-md text-label-md text-on-surface font-semibold">Consommation du mois</span>
+                <span id="asup-conso-texte" class="font-body-sm text-body-sm text-on-surface-variant">—</span>
+              </div>
+              <div class="h-2 rounded-full bg-surface-container overflow-hidden"><div id="asup-jauge" class="h-2 rounded-full bg-primary transition-all"></div></div>
+              <p id="asup-conso-detail" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+            </div>
+            <details class="bg-surface-container-low rounded-lg">
+              <summary class="px-space-sm py-space-xs cursor-pointer font-label-md text-label-md text-on-surface font-semibold min-h-[44px] flex items-center">Réglages avancés</summary>
+              <div class="p-space-sm flex flex-col gap-space-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Plafond mensuel ($)</span><input id="asup-plafond" type="number" min="0" max="1000" step="1" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface"></label>
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Messages IA par ticket</span><input id="asup-par-ticket" type="number" min="1" max="20" step="1" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface"></label>
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Tickets par jour et par société</span><input id="asup-par-jour" type="number" min="1" max="200" step="1" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface"></label>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Modèle de l'accusé et du classement</span><input id="asup-modele-accuse" type="text" maxlength="60" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface font-mono"></label>
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Modèle des brouillons</span><input id="asup-modele-brouillon" type="text" maxlength="60" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface font-mono"></label>
+                  <label class="flex flex-col gap-1"><span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Niveau de réflexion</span><select id="asup-effort" class="h-11 rounded-lg bg-surface-container-lowest border border-outline-variant px-3 text-on-surface"><option value="low">Bas (le moins cher)</option><option value="medium">Moyen</option><option value="high">Élevé</option></select></label>
+                </div>
+                <div><button type="button" id="asup-enregistrer" class="inline-flex items-center justify-center h-11 px-space-md rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold">Enregistrer les réglages</button></div>
+              </div>
+            </details>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Éteint : aucun appel à l'IA, aucune dépense, le support fonctionne comme avant. Les demandes de remboursement, de suppression de données, de sécurité, les clients mécontents et toute tentative de détournement ne reçoivent qu'un accusé neutre : ils te sont toujours escaladés.</p>
+            <p id="asup-message" role="status" aria-live="polite" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+          </div>
+        </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
           <div class="lg:col-span-7 flex flex-col gap-space-md">
@@ -1138,6 +1195,7 @@ async function demarrer() {
   el('ia-mois')?.addEventListener('change', () => chargerIa());
   el('ia-recherche')?.addEventListener('input', () => rendreIaSocietes());
   el('stock-recherche')?.addEventListener('input', () => rendreTableauStock());
+  brancherAssistantSupport();
 
   sb.auth.onAuthStateChange((_event, session) => {
     if (session?.user) verifierAccesEtCharger(session.user.id);
@@ -1186,7 +1244,7 @@ async function verifierAccesEtCharger(userId) {
   el('ecran-refuse').classList.add('hidden');
   el('console').classList.remove('hidden');
   el('staff-nom').textContent = profil.full_name || profil.login;
-  await Promise.all([chargerSocietes(), chargerTickets()]);
+  await Promise.all([chargerSocietes(), chargerTickets(), chargerAssistantSupport()]);
   allerA('clients');
   activerNotificationsAdmin(); // seulement dans l'application Android « KALEA Admin » ; sans effet dans un navigateur
   chargerInfra(true); // silencieux : ne sert qu'à allumer la pastille du menu si un plafond approche
@@ -1432,11 +1490,204 @@ async function connecterEnTantQue(societe) {
   window.open(url.toString(), '_blank');
 }
 
+// ── Assistant IA de support ──────────────────────────────────────────────
+// Interrupteur général, options, consommation du mois, brouillons. TOUT passe par des fonctions réservées au personnel (support_ia_*) :
+// la page ne modifie jamais les tables directement. Éteint (par défaut) : aucun appel à l'IA, aucune dépense.
+const ASUP_CATEGORIES = {
+  connexion: 'Connexion', machines: 'Machines', plans_echeances: 'Plans et échéances', compteurs: 'Compteurs', rappels: 'Rappels', equipe_droits: 'Équipe et droits',
+  facturation: 'Facturation et offres', modules: 'Modules', donnees_rgpd: 'Données / RGPD', panne: 'Panne', bug: 'Bug', evolution: 'Évolution', autre: 'Autre',
+};
+const ASUP_STATUTS = { utilise: 'utilisé', modifie: 'modifié puis envoyé', rejete: 'rejeté', obsolete: 'remplacé par un plus récent' };
+let ASUP = { reglages: null, conso: null, cle: null, fonction: null };
+let ASUP_BROUILLON = null; // { id, ticketId, original, utilise, retour }
+
+function asupBadge(texte, ton) {
+  const classes = { erreur: 'bg-error-container text-error', attention: 'bg-secondary-fixed text-secondary', neutre: 'bg-surface-container text-on-surface-variant', ok: 'bg-surface-container-highest text-tertiary' };
+  return `<span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium whitespace-nowrap ${classes[ton] || classes.neutre}">${echapper(texte)}</span>`;
+}
+function asupDollars(n) { return Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $'; }
+function asupDire(texte, erreur) {
+  const p = el('asup-message');
+  if (!p) return;
+  p.textContent = texte || '';
+  p.className = 'font-body-sm text-body-sm ' + (erreur ? 'text-error' : 'text-on-surface-variant');
+}
+
+async function chargerAssistantSupport() {
+  if (!el('asup-carte')) return;
+  try {
+    const [reg, conso, etat] = await Promise.all([
+      sb.from('support_ia_reglages').select('*').maybeSingle(),
+      sb.rpc('support_ia_conso_mois'),
+      Promise.resolve(sb.functions.invoke('assistant-support', { body: { action: 'etat' } })).catch((e) => ({ data: null, error: e })),
+    ]);
+    ASUP.reglages = reg.error ? null : reg.data;
+    ASUP.conso = conso.error ? null : (Array.isArray(conso.data) ? conso.data[0] : conso.data);
+    ASUP.fonction = !etat.error && !!etat.data;
+    ASUP.cle = ASUP.fonction ? etat.data.cle_presente === true : false;
+  } catch (err) {
+    ASUP.reglages = null;
+  }
+  rendreAssistantSupport();
+}
+
+function rendreAssistantSupport() {
+  const r = ASUP.reglages;
+  const interrupteur = el('asup-interrupteur');
+  if (!r) {
+    el('asup-resume').textContent = 'Réglages indisponibles : le fichier support-ia.sql n\'est pas (ou pas entièrement) exécuté.';
+    interrupteur.disabled = true; interrupteur.checked = false;
+    el('asup-detail').classList.add('hidden');
+    return;
+  }
+  el('asup-detail').classList.remove('hidden');
+  interrupteur.disabled = false;
+  interrupteur.checked = r.actif === true;
+  el('asup-resume').textContent = r.actif
+    ? (ASUP.cle ? 'Allumé : les nouveaux messages de clients sont traités selon les options ci-dessous.' : 'Allumé, mais la clé n\'est pas posée : rien ne part vers l\'IA tant qu\'elle manque.')
+    : 'Éteint : aucun appel à l\'IA, aucune dépense. Le support fonctionne comme avant.';
+  el('asup-etat').innerHTML = [
+    ASUP.cle ? asupBadge('Clé d\'API posée', 'ok') : asupBadge('Clé d\'API non posée : l\'assistant ne peut pas répondre', 'attention'),
+    ASUP.fonction ? asupBadge('Fonction serveur déployée', 'ok') : asupBadge('Fonction serveur non déployée', 'attention'),
+  ].join('');
+  el('asup-accuse').checked = r.accuse_auto === true;
+  el('asup-brouillons').checked = r.brouillons === true;
+  const c = ASUP.conso || { cout_usd: 0, appels: 0, accuses: 0, brouillons: 0, erreurs: 0 };
+  const plafond = Number(r.plafond_mensuel_usd || 0);
+  const cout = Number(c.cout_usd || 0);
+  const part = plafond > 0 ? Math.min(100, (cout / plafond) * 100) : (cout > 0 ? 100 : 0);
+  el('asup-conso-texte').textContent = `${asupDollars(cout)} sur ${asupDollars(plafond)}`;
+  const jauge = el('asup-jauge');
+  jauge.style.width = part + '%';
+  jauge.className = 'h-2 rounded-full transition-all ' + (part >= 100 ? 'bg-error' : part >= 80 ? 'bg-secondary' : 'bg-primary');
+  el('asup-conso-detail').textContent = `${c.appels} appel(s) · ${c.accuses} accusé(s) · ${c.brouillons} brouillon(s) · ${c.erreurs} erreur(s)` +
+    (cout >= plafond && plafond > 0 ? ' — plafond atteint : l\'assistant ne fait plus que l\'accusé de réception.' : '');
+  el('asup-plafond').value = r.plafond_mensuel_usd;
+  el('asup-par-ticket').value = r.plafond_messages_par_ticket;
+  el('asup-par-jour').value = r.plafond_tickets_par_jour_societe;
+  el('asup-modele-accuse').value = r.modele_accuse;
+  el('asup-modele-brouillon').value = r.modele_brouillon;
+  el('asup-effort').value = r.effort;
+}
+
+async function asupDefinir(parametres, messageOk) {
+  asupDire('Enregistrement…');
+  const { error } = await sb.rpc('support_ia_definir_reglages', parametres);
+  if (error) asupDire('Erreur : ' + error.message, true);
+  await chargerAssistantSupport();
+  if (!error) asupDire(messageOk || 'Réglage enregistré.');
+}
+
+function brancherAssistantSupport() {
+  el('asup-interrupteur')?.addEventListener('change', async (ev) => {
+    const allumer = ev.target.checked;
+    if (allumer) {
+      const r = ASUP.reglages || {};
+      const options = [r.accuse_auto ? 'accusé de réception automatique' : null, r.brouillons ? 'brouillons pour ta validation' : null].filter(Boolean);
+      const consigne = 'Allumer l\'assistant IA de support ?\n\n' +
+        (options.length ? 'Il traitera les NOUVEAUX messages des clients : ' + options.join(' et ') + '.' : 'Aucune option n\'est cochée : il ne fera rien tant que tu n\'en coches pas une.') +
+        (ASUP.cle ? '\n\nChaque traitement a un coût (plafond du mois : ' + asupDollars(r.plafond_mensuel_usd) + ').' : '\n\nLa clé d\'API n\'est pas posée : rien ne partira vers l\'IA.');
+      if (!window.confirm(consigne)) { ev.target.checked = false; return; }
+    }
+    await asupDefinir({ p_actif: allumer }, allumer ? 'Assistant allumé.' : 'Assistant éteint.');
+  });
+  el('asup-accuse')?.addEventListener('change', (ev) => asupDefinir({ p_accuse_auto: ev.target.checked }));
+  el('asup-brouillons')?.addEventListener('change', (ev) => asupDefinir({ p_brouillons: ev.target.checked }));
+  el('asup-enregistrer')?.addEventListener('click', () => asupDefinir({
+    p_plafond_mensuel_usd: Number(el('asup-plafond').value),
+    p_plafond_messages_par_ticket: parseInt(el('asup-par-ticket').value, 10),
+    p_plafond_tickets_par_jour: parseInt(el('asup-par-jour').value, 10),
+    p_modele_accuse: el('asup-modele-accuse').value.trim(),
+    p_modele_brouillon: el('asup-modele-brouillon').value.trim(),
+    p_effort: el('asup-effort').value,
+  }, 'Réglages enregistrés.'));
+}
+
+// Le bloc « Brouillon de l'assistant » dans le panneau d'un ticket : relire, utiliser, rejeter. Rien ne part tout seul.
+async function rendreBrouillonAssistant(ticketId, panneau) {
+  const zone = panneau.querySelector('#asup-brouillon-zone');
+  if (!zone) return;
+  const { data, error } = await sb.from('support_ia_brouillons')
+    .select('id, brouillon, note_interne, categorie, priorite_conseillee, escalade, escalade_motif, confiance, suspect, statut, created_at')
+    .eq('ticket_id', ticketId).order('created_at', { ascending: false }).limit(1);
+  if (error || !data || !data.length) { zone.innerHTML = ''; return; }
+  const b = data[0];
+  const carte = 'bg-surface-container-lowest rounded-xl shadow-sm';
+  if (b.statut !== 'a_relire') {
+    zone.innerHTML = `<p class="${carte} px-space-md py-space-sm font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">smart_toy</span>Dernier brouillon de l'assistant : ${echapper(ASUP_STATUTS[b.statut] || b.statut)} (${ilYA(b.created_at)}).</p>`;
+    return;
+  }
+  const confiance = { faible: ['Confiance faible', 'attention'], moyen: ['Confiance moyenne', 'neutre'], eleve: ['Confiance élevée', 'ok'] }[b.confiance] || ['Confiance ?', 'neutre'];
+  zone.innerHTML = `
+    <section class="${carte} border border-primary/30 p-space-md flex flex-col gap-space-sm">
+      <div class="flex flex-wrap items-center gap-2 justify-between">
+        <h3 class="font-display font-bold text-encre flex items-center gap-2"><span class="material-symbols-outlined text-[20px] text-primary">smart_toy</span>Brouillon de l'assistant IA</h3>
+        <div class="flex flex-wrap gap-space-xs">
+          ${b.suspect ? asupBadge('Tentative suspecte', 'erreur') : ''}
+          ${asupBadge(confiance[0], confiance[1])}
+          ${b.categorie ? asupBadge(ASUP_CATEGORIES[b.categorie] || b.categorie, 'neutre') : ''}
+        </div>
+      </div>
+      ${b.escalade ? `<div class="bg-error-container text-error rounded-lg p-space-sm font-body-sm text-body-sm"><strong>Escalade conseillée</strong>${b.escalade_motif ? ' : ' + echapper(b.escalade_motif) : ''}.</div>` : ''}
+      <div class="flex flex-col gap-1">
+        <span class="text-xs uppercase tracking-wider font-semibold text-ardoise">Note interne — invisible du client</span>
+        <div class="bg-surface-container-low rounded-lg p-space-sm text-[14px] leading-relaxed whitespace-pre-wrap break-words">${echapper(b.note_interne || '—')}</div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs uppercase tracking-wider font-semibold text-ardoise">Réponse proposée</span>
+        ${b.brouillon
+          ? `<div class="bg-surface-container-low rounded-lg p-space-sm text-[14px] leading-relaxed whitespace-pre-wrap break-words">${echapper(b.brouillon)}</div>`
+          : '<div class="bg-surface-container-low rounded-lg p-space-sm text-[14px] text-on-surface-variant">Aucun brouillon rédigé : à traiter à la main.</div>'}
+      </div>
+      <div class="flex flex-wrap items-center gap-space-xs">
+        ${b.brouillon ? '<button type="button" id="asup-utiliser" class="inline-flex items-center gap-2 h-11 px-space-md rounded-lg bg-primary text-on-primary font-label-md text-label-md font-semibold"><span class="material-symbols-outlined text-[18px]">edit_note</span>Utiliser ce brouillon</button>' : ''}
+        <button type="button" id="asup-rejeter" class="inline-flex items-center gap-2 h-11 px-space-md rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-semibold"><span class="material-symbols-outlined text-[18px]">close</span>Rejeter</button>
+        <span class="ml-auto flex items-center gap-1" title="Ce retour sert à mesurer la qualité de l'assistant">
+          <button type="button" id="asup-pouce-haut" aria-pressed="false" class="asup-pouce w-11 h-11 rounded-lg bg-surface-container text-on-surface flex items-center justify-center" aria-label="Brouillon utile"><span class="material-symbols-outlined text-[20px]">thumb_up</span></button>
+          <button type="button" id="asup-pouce-bas" aria-pressed="false" class="asup-pouce w-11 h-11 rounded-lg bg-surface-container text-on-surface flex items-center justify-center" aria-label="Brouillon à côté de la plaque"><span class="material-symbols-outlined text-[20px]">thumb_down</span></button>
+        </span>
+      </div>
+    </section>`;
+  ASUP_BROUILLON = { id: b.id, ticketId, original: b.brouillon || '', utilise: false, retour: null };
+  const pouces = { 'asup-pouce-haut': 'pouce_haut', 'asup-pouce-bas': 'pouce_bas' };
+  Object.keys(pouces).forEach((idBouton) => zone.querySelector('#' + idBouton).addEventListener('click', () => {
+    ASUP_BROUILLON.retour = ASUP_BROUILLON.retour === pouces[idBouton] ? null : pouces[idBouton];
+    Object.keys(pouces).forEach((i2) => {
+      const actif = ASUP_BROUILLON.retour === pouces[i2];
+      const bouton = zone.querySelector('#' + i2);
+      bouton.setAttribute('aria-pressed', String(actif));
+      bouton.className = 'asup-pouce w-11 h-11 rounded-lg flex items-center justify-center ' + (actif ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface');
+    });
+  }));
+  zone.querySelector('#asup-utiliser')?.addEventListener('click', () => {
+    const champ = panneau.querySelector('#reponse-texte');
+    if (!champ) return;
+    champ.value = ASUP_BROUILLON.original;
+    ASUP_BROUILLON.utilise = true;
+    champ.focus();
+    champ.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  zone.querySelector('#asup-rejeter').addEventListener('click', async () => {
+    const { error: err } = await sb.rpc('support_ia_traiter_brouillon', { p_id: b.id, p_statut: 'rejete', p_retour: ASUP_BROUILLON.retour });
+    if (err) { alert('Erreur : ' + err.message); return; }
+    ASUP_BROUILLON = null;
+    rendreBrouillonAssistant(ticketId, panneau);
+  });
+}
+// Après l'envoi d'une réponse : si le brouillon a été utilisé, on note s'il est parti tel quel ou corrigé.
+async function asupApresEnvoi(ticketId, texteEnvoye) {
+  const b = ASUP_BROUILLON;
+  if (!b || b.ticketId !== ticketId || !b.utilise) return;
+  const statut = String(texteEnvoye).trim() === String(b.original).trim() ? 'utilise' : 'modifie';
+  await sb.rpc('support_ia_traiter_brouillon', { p_id: b.id, p_statut: statut, p_retour: b.retour });
+  ASUP_BROUILLON = null;
+}
+
 // ── Support & Tickets ────────────────────────────────────────────────────
 async function chargerTickets() {
   const { data, error } = await sb
     .from('support_tickets')
-    .select('id, company_id, subject, priority, status, created_at, assigned_to, machine_id, companies(name), created_by_profile:profiles!support_tickets_created_by_fkey(full_name,login), machines(name,brand,model,serial_number,plate)')
+    .select('id, company_id, subject, priority, status, created_at, assigned_to, machine_id, categorie_ia, ia_escalade, humain_demande, companies(name), created_by_profile:profiles!support_tickets_created_by_fkey(full_name,login), machines(name,brand,model,serial_number,plate)')
     .order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
   TICKETS = data || [];
@@ -1478,6 +1729,10 @@ function rendreListeTickets() {
         <span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap shrink-0 pt-1">${ilYA(t.created_at)}</span>
       </div>
       <div class="font-label-md text-label-md text-on-surface font-semibold">${echapper(t.subject)}</div>
+      ${(t.humain_demande || t.ia_escalade || t.categorie_ia) ? `<div class="flex flex-wrap gap-space-xs">${[
+        t.humain_demande ? asupBadge('Humain demandé', 'erreur') : (t.ia_escalade ? asupBadge('Escalade IA', 'attention') : ''),
+        t.categorie_ia ? asupBadge(ASUP_CATEGORIES[t.categorie_ia] || t.categorie_ia, 'neutre') : '',
+      ].join('')}</div>` : ''}
       <div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
         <span>Créé par : ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
         <span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium ${t.status === 'resolu' ? 'bg-surface-container-highest text-tertiary' : t.status === 'en_cours' ? 'bg-secondary-fixed text-secondary' : 'bg-error-container text-error'}">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'}</span>
@@ -1519,7 +1774,7 @@ async function ouvrirTicket(ticketId) {
   if (window.innerWidth < 1024) panneau.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
-    .select('id, body, created_at, author_id, profiles(full_name, login, is_staff)')
+    .select('id, body, created_at, author_id, ia, profiles(full_name, login, is_staff)')
     .eq('ticket_id', ticketId)
     .order('created_at', { ascending: true });
   if (error) { panneau.innerHTML = `<p class="font-body-sm text-body-sm text-error">Erreur : ${echapper(error.message)}</p>`; return; }
@@ -1587,6 +1842,7 @@ async function ouvrirTicket(ticketId) {
       <h3 class="font-display font-bold text-encre px-space-md py-3 border-b border-outline-variant/60">Conversation</h3>
       <div id="fil-messages" class="flex flex-col gap-space-md max-h-[480px] overflow-y-auto p-space-md bg-white"></div>
     </section>
+    <div id="asup-brouillon-zone"></div>
     <form id="form-reponse" class="${carte} p-space-md flex flex-col gap-space-sm">
       <span class="${etiquette}">Ta réponse</span>
       <textarea id="reponse-texte" rows="4" placeholder="Écris ta réponse…" class="w-full bg-surface-card rounded-xl border border-outline-variant px-4 py-3 font-body text-[15px] text-on-surface placeholder:text-ardoise focus:outline-none focus:border-signature-en focus:ring-2 focus:ring-signature-en/20 resize-none"></textarea>
@@ -1606,6 +1862,19 @@ async function ouvrirTicket(ticketId) {
       separateur.className = 'flex items-center justify-center';
       separateur.innerHTML = `<span class="text-[11px] font-mono uppercase tracking-wider text-ardoise bg-surface-card px-3 py-1 rounded-full border border-outline-variant/60 shadow-2xs">${echapper(jour)}</span>`;
       fil.appendChild(separateur);
+    }
+    // Un message de l'assistant IA est écrit SOUS LE PROFIL DU PERSONNEL (la colonne auteur est obligatoire) : on teste `ia` AVANT « Toi », sinon il s'afficherait comme ton propre message.
+    if (msg.ia === true) {
+      const ligneIa = document.createElement('div');
+      ligneIa.className = 'flex items-end gap-2';
+      ligneIa.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-display font-bold text-[9px] shrink-0 mb-4">IA</div>
+        <div class="flex flex-col items-start gap-1 max-w-[85%]">
+          <div class="flex items-center gap-1.5 text-xs text-ardoise ml-1"><span class="font-semibold text-encre">Assistant IA KALEA</span><span>·</span><span>${ilYA(msg.created_at)}</span></div>
+          <div class="bg-surface-container text-on-surface border border-dashed border-outline-variant px-4 py-3 rounded-2xl shadow-sm text-[14.5px] leading-relaxed whitespace-pre-wrap break-words">${echapper(msg.body)}</div>
+        </div>`;
+      fil.appendChild(ligneIa);
+      return;
     }
     const deMoi = msg.author_id === MOI.id;
     // « Toi » l'emporte toujours sur le nom réel : un compte staff qui a AUSSI
@@ -1629,6 +1898,7 @@ async function ouvrirTicket(ticketId) {
     fil.appendChild(ligne);
   });
   fil.scrollTop = fil.scrollHeight;
+  rendreBrouillonAssistant(ticketId, panneau);
 
   panneau.querySelector('#ticket-statut').addEventListener('change', async (ev) => {
     const nouveauStatut = ev.target.value;
@@ -1644,6 +1914,7 @@ async function ouvrirTicket(ticketId) {
     if (!texte) return;
     const { error: errMsg } = await sb.from('support_ticket_messages').insert({ ticket_id: ticketId, author_id: MOI.id, body: texte });
     if (errMsg) { alert('Erreur : ' + errMsg.message); return; }
+    await asupApresEnvoi(ticketId, texte);
     if (t?.status === 'ouvert') await sb.from('support_tickets').update({ status: 'en_cours', assigned_to: MOI.id }).eq('id', ticketId);
     await chargerTickets();
     ouvrirTicket(ticketId);

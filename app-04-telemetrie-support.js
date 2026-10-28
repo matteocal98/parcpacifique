@@ -1344,7 +1344,7 @@ function afficherNouveauTicket(overlay, moi) {
 async function afficherFilTicket(overlay, moi, ticketId) {
   const { data: ticket } = await sb
     .from('support_tickets')
-    .select('id, subject, status, machine_id, created_at')
+    .select('id, subject, status, machine_id, created_at, humain_demande')
     .eq('id', ticketId).single();
   const m = machineDuTicket(ticket?.machine_id);
   const sousTitre = [ticket?.subject, libelleMachineCourt(m)].filter(Boolean).join(' · ');
@@ -1372,6 +1372,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       <textarea id="support-reponse" rows="2"></textarea>
       <div class="ui-aide" id="support-fil-msg" role="status" aria-live="polite"></div>
       <div class="support-compositeur-actions">
+        <button type="button" class="secondary support-humain" id="support-humain" hidden>${trad('Parler à un humain')}</button>
         <button type="button" class="secondary" id="support-retour-bas">${trad('Retour')}</button>
         <button type="submit" class="primary" id="support-repondre"><span>${trad('Envoyer')}</span><span class="card-ico">${picto('envoyer')}</span></button>
       </div>
@@ -1382,14 +1383,21 @@ async function afficherFilTicket(overlay, moi, ticketId) {
 
   const { data: messages, error } = await sb
     .from('support_ticket_messages')
-    .select('id, body, created_at, author_id, profiles(full_name, login, is_staff)')
+    .select('id, body, created_at, author_id, ia, profiles(full_name, login, is_staff)')
     .eq('ticket_id', ticketId)
     .order('created_at', { ascending: true });
   const fil = overlay.querySelector('#support-fil');
   if (error || !fil) {
     if (fil) fil.innerHTML = `<div class="hint is-late">${trad('Impossible de charger ce ticket.')}</div>`;
   } else {
+    // Les messages de l'assistant IA sont écrits sous un profil du personnel, marqués `ia` : ils s'affichent « Assistant IA KALEA », jamais « Toi » ni « Support KALEA ».
     fil.innerHTML = (messages || []).map((m2) => {
+      if (m2.ia === true) {
+        return `<div class="support-bulle-ligne is-ia">
+          <span class="support-bulle-auteur"><span class="avatar is-ia">IA</span><span class="nom">${esc(trad('Assistant IA KALEA'))}</span><span>· ${ilYaSupport(m2.created_at)}</span></span>
+          <div class="support-bulle">${esc(m2.body)}</div>
+        </div>`;
+      }
       const deMoi = m2.author_id === moi;
       // « Toi » l'emporte TOUJOURS sur « Support KALEA » : un compte staff qui
       // écrit depuis SON PROPRE espace client (cas réel sur ce compte, gérant
@@ -1403,6 +1411,26 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       </div>`;
     }).join('') || `<div class="ui-aide">${trad('Aucun message.')}</div>`;
     fil.scrollTop = fil.scrollHeight;
+    // « Parler à un humain » : proposé dès que l'assistant IA a écrit sur ce ticket, tant que le client ne l'a pas déjà demandé.
+    const boutonHumain = overlay.querySelector('#support-humain');
+    const annonceHumain = overlay.querySelector('#support-fil-msg');
+    const asEcrit = (messages || []).some((m2) => m2.ia === true);
+    if (ticket && ticket.humain_demande === true) {
+      if (annonceHumain) annonceHumain.textContent = trad('Tu as demandé à parler à un humain : l\'équipe te répondra ici.');
+    } else if (boutonHumain && asEcrit) {
+      boutonHumain.hidden = false;
+      boutonHumain.addEventListener('click', async () => {
+        boutonHumain.disabled = true;
+        const { error: erreurHumain } = await sb.rpc('support_demander_humain', { p_ticket: ticketId });
+        if (erreurHumain) {
+          boutonHumain.disabled = false;
+          if (annonceHumain) { annonceHumain.textContent = trad('La demande a échoué. Réessaie dans un instant.'); annonceHumain.className = 'hint is-late'; }
+          return;
+        }
+        showToast(trad('Un membre de l\'équipe reprendra ta demande.'));
+        afficherFilTicket(overlay, moi, ticketId);
+      });
+    }
   }
 
   const envoyerReponseClient = async () => {
