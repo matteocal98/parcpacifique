@@ -1522,7 +1522,14 @@ async function equipePourAttribution() {
     if (error) throw error;
     return Array.isArray(data) ? data : [];
   });
-  return lu.data;
+  // Mise en forme à l'affichage : « georges MOUSTAKI » → « Georges MOUSTAKI » ; et le gérant (connecté) sous le nom de sa société plutôt que sous son identifiant.
+  const contact = UI.company ? [prenomPropre(companyFirstName(UI.company)), String(companyLastName(UI.company) || '').toLocaleUpperCase()].filter(Boolean).join(' ') : '';
+  return (lu.data || []).map((m) => {
+    if (!m) return m;
+    if (contact && UI.userId && String(m.id) === String(UI.userId) && /^[a-z0-9._-]+$/.test(String(m.nom_affiche || ''))) return { ...m, nom_affiche: contact };
+    const joli = String(m.nom_affiche || '').replace(/^(\p{Ll}[\p{L}'’-]*)(\s+\p{Lu}[\p{Lu}'’ -]+)$/u, (t, p, n) => prenomPropre(p) + n);
+    return joli === m.nom_affiche ? m : { ...m, nom_affiche: joli };
+  });
 }
 // Trois lettres dérivées du nom réel du fournisseur (jamais un code
 // inventé) : sert juste de pastille visuelle dans le sélecteur de pièce.

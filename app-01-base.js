@@ -940,6 +940,11 @@ function contactFullName(first, last, secours = '') {
   const parts = [first, last].filter(Boolean);
   return parts.length ? parts.join(' ') : (secours || '');
 }
+// « jean-pierre » → « Jean-Pierre », « georges » → « Georges » : une capitale à chaque partie d'un prénom (le reste est laissé tel que saisi).
+// Les identifiants de connexion (matteocal…) ne passent PAS par ici : seul un prénom saisi comme tel est mis en forme.
+function prenomPropre(p) {
+  return String(p || '').trim().replace(/(^|[\s'’-])(\p{L})/gu, (m, sep, lettre) => sep + lettre.toLocaleUpperCase());
+}
 function companyFirstName(c) {
   if (!c) return '';
   if (SCHEMA.hasContactNames && c.contact_first_name) return c.contact_first_name;

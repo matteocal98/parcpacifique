@@ -1951,7 +1951,8 @@ VIEWS.tco = {
 // Sous-bloc teinté « e-mail de notification des rappels », reposé dans la
 // carte « Contact & Alertes » : reprend TEL QUEL le réglage de l'écran
 // « Rappels » (mêmes id, donc wireReglagesRappelsEmail() suffit aux deux).
-function sousBlocEmailRappelsHtml() {
+// options.masquerBouton : « Mon compte » n'a qu'UN bouton d'enregistrement (celui des coordonnées), qui déclenche aussi celui-ci ; il reste dans la page, caché, car son écouteur y est accroché.
+function sousBlocEmailRappelsHtml(options = {}) {
   const dispo = SCHEMA.hasReminders !== false;
   const bloque = dispo ? '' : ' disabled';
   const actif = rappelsEmailActifs();
@@ -1965,7 +1966,7 @@ function sousBlocEmailRappelsHtml() {
       <input id="rap-email" class="ui-champ" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
       <label class="check-row" for="rap-par-email"><input type="checkbox" id="rap-par-email"${rappelsEmailCoches() ? ' checked' : ''}${bloque}> ${trad('Recevoir les rappels par e-mail')}</label>
       <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
-      <div><button type="button" class="ui-btn ui-btn-pastille" id="rap-save"${bloque}>${trad('Enregistrer les préférences e-mail')}</button></div>
+      <div${options.masquerBouton ? ' hidden' : ''}><button type="button" class="ui-btn ui-btn-pastille" id="rap-save"${bloque}>${trad('Enregistrer les préférences e-mail')}</button></div>
     </div>`;
 }
 

@@ -209,10 +209,10 @@ VIEWS.account = {
               kit: true,
             })}
           </div>
-          ${sousBlocEmailRappelsHtml()}
+          ${sousBlocEmailRappelsHtml({ masquerBouton: true })}
           ${sousBlocPushHtml()}
           <div class="ui-aide" id="acc-contact-msg" role="status" aria-live="polite"></div>
-          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer les coordonnées')}</button></div>
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer')}</button></div>
           ${(SCHEMA.hasContactNames && !modifiable) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
           ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
         </div>
@@ -223,6 +223,44 @@ VIEWS.account = {
         <div class="ui-section-corps">
           <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
           <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
+        </div>
+      </section>
+
+      <section class="ui-section">
+        ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
+        <div class="ui-section-corps">
+          <div class="ui-groupe">
+            <label class="check-row">
+              <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
+              ${trad('Garder une copie pour la consultation hors connexion')}
+            </label>
+            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
+            <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
+          </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
+            ${basculeLangueHtml()}
+          </div>
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Thème de l\'interface')}</span>
+            <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
+              ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
+            </div>
+            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
+          </div>
+          ${dansApplication() ? `
+          <div class="ui-groupe">
+            <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
+            <p class="ui-aide" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
+            <div id="acc-bio-corps"></div>
+            <p class="ui-aide" id="acc-acces-etat"></p>
+            <div id="acc-acces-corps"></div>
+            <div class="ui-aide" id="acc-bio-msg" role="status" aria-live="polite"></div>
+            <details class="bio-detail">
+              <summary>${trad('Détail technique')}</summary>
+              <p class="ui-aide" id="acc-bio-detail"></p>
+            </details>
+          </div>` : ''}
         </div>
       </section>
       </div>
@@ -267,44 +305,6 @@ VIEWS.account = {
           </div>
         </div>
       </section>` : ''}
-
-      <section class="ui-section">
-        ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
-        <div class="ui-section-corps">
-          <div class="ui-groupe">
-            <label class="check-row">
-              <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
-              ${trad('Garder une copie pour la consultation hors connexion')}
-            </label>
-            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
-            <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
-          </div>
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Langue de l\'interface')}</span>
-            ${basculeLangueHtml()}
-          </div>
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Thème de l\'interface')}</span>
-            <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
-              ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
-            </div>
-            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
-          </div>
-          ${dansApplication() ? `
-          <div class="ui-groupe">
-            <span class="ui-etiquette">${trad('Verrouillage et reconnexion')}</span>
-            <p class="ui-aide" id="acc-bio-etat">${trad('Vérification de ce que ce téléphone sait faire…')}</p>
-            <div id="acc-bio-corps"></div>
-            <p class="ui-aide" id="acc-acces-etat"></p>
-            <div id="acc-acces-corps"></div>
-            <div class="ui-aide" id="acc-bio-msg" role="status" aria-live="polite"></div>
-            <details class="bio-detail">
-              <summary>${trad('Détail technique')}</summary>
-              <p class="ui-aide" id="acc-bio-detail"></p>
-            </details>
-          </div>` : ''}
-        </div>
-      </section>
 
 
       <section class="ui-section">
@@ -563,8 +563,8 @@ VIEWS.account = {
       });
       const estInvitation = (m) => m.invitation_en_attente === true;
       const droitsResumes = (role) => {
-        if (role === 'mecanicien') return trad('Le parc et les compteurs');
-        if (role === 'chauffeur') return trad('Les compteurs');
+        if (role === 'mecanicien') return trad('Le parc, les entretiens, les ordres de travail et les pannes');
+        if (role === 'chauffeur') return trad('Les compteurs, ses ordres de travail et les pannes');
         if (role === 'achats') return trad('Le stock, les fournisseurs et les commandes');
         if (role === 'gerant') return trad('Tout, y compris l\'équipe et l\'abonnement');
         return trad('À confirmer');
@@ -579,8 +579,14 @@ VIEWS.account = {
         //   cette variable. `documentElement.lang` est posé par `changerLangue()`,
         //   il vaut « fr » par défaut, et il ne dépend de rien.
         const langueCourante = (document.documentElement && document.documentElement.lang) || 'fr';
-        const titre = [prenom, nom.toLocaleUpperCase(langueCourante === 'en' ? 'en' : 'fr')].filter(Boolean).join(' ')
-          || nomAffiche(m);
+        const prenomOk = (p) => (typeof prenomPropre === 'function' ? prenomPropre(p) : p);
+        const enMajuscules = (n) => String(n || '').toLocaleUpperCase(langueCourante === 'en' ? 'en' : 'fr');
+        const titrePropre = [prenomOk(prenom), enMajuscules(nom)].filter(Boolean).join(' ');
+        // Le gérant n'a souvent ni prénom ni nom sur sa ligne : on reprend ceux de la société (« Contact & Alertes ») plutôt que son identifiant.
+        const societeLue = UI.company || {};
+        const nomDuContact = m.est_moi && typeof companyFirstName === 'function'
+          ? [prenomOk(companyFirstName(societeLue)), enMajuscules(companyLastName(societeLue))].filter(Boolean).join(' ') : '';
+        const titre = titrePropre || nomDuContact || nomAffiche(m);
         const role = m.role || '';
         const acces = estMembreCree(m) ? identiteDe(m) : String(m.email || trad('Invitation en attente'));
         const metier = String(m.metier || '').trim();
@@ -733,7 +739,7 @@ VIEWS.account = {
                 <option value="achats">${trad('Droit d\'achat')}</option>
               </select>
             </div>
-            <div class="ui-aide">${trad('Droit de gestion : tient le parc et les entretiens. Droit de saisie : consulte le parc, relève le compteur et prend la photo de sa machine. Droit d\'achat : gère le stock, les fournisseurs et les commandes, voit les coûts. Aucun des trois ne gère l\'équipe.')}</div>
+            <div class="ui-aide">${trad('Droit de gestion : tient le parc, les entretiens, les ordres de travail et les pannes. Droit de saisie : consulte le parc, relève le compteur, prend la photo de sa machine, signale une panne et traite les ordres qui lui sont assignés. Droit d\'achat : gère le stock, les fournisseurs et les commandes, voit les coûts. Aucun des trois ne gère l\'équipe.')}</div>
             <div><button type="button" class="ui-btn ui-btn-plein" id="acc-membre-creer">${trad('Créer le membre')}</button></div>
           </div>
           <div id="acc-membre-acces"></div>` : '';
@@ -782,7 +788,7 @@ VIEWS.account = {
       //    relisibles ensuite. La liste est ensuite RELUE DEPUIS LE SERVEUR —
       //    jamais recomposée à la main à partir de ce qu'on croit avoir créé.
       async function creerLeMembre() {
-        const prenom = (racine.querySelector('#acc-membre-prenom')?.value || '').trim();
+        const prenom = (typeof prenomPropre === 'function' ? prenomPropre : (p) => p)((racine.querySelector('#acc-membre-prenom')?.value || '').trim());
         // LE NOM DE FAMILLE PART EN MAJUSCULES. Le champ les affiche déjà
         // (`class="majuscules"`), mais une valeur COLLÉE dans le champ ne passe
         // par aucune frappe : la normalisation se fait donc ici, à l'envoi, comme
@@ -961,20 +967,30 @@ VIEWS.account = {
         }
       }
 
-      // Changer un rôle : on demande le nouveau rôle, on appelle le serveur, on redit la liste.
+      // Changer un droit : une fenêtre propose les trois droits (le droit actuel est coché), puis le serveur applique le choix et la liste est relue.
+      // Avant, le bouton faisait passer la personne au droit SUIVANT sans rien demander : on ne savait ni lequel, ni pourquoi.
       async function changerLeRole() {
         const bouton = this;
         const profil = bouton.getAttribute('data-equipe-role');
         const actuel = bouton.getAttribute('data-role-actuel');
-        const cycle = ['mecanicien', 'chauffeur', 'achats'];
-        const nouveau = cycle[(cycle.indexOf(actuel) + 1) % cycle.length];
-        dire(trad('Enregistrement…'));
-        try {
-          const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: nouveau });
-          if (error) throw error;
-          dire(trad('Droit modifié.'));
-          await preparerCarteEquipe(racine);
-        } catch (err) { dire(String((err && err.message) || err), true); }
+        const ligne = bouton.closest('[data-membre]');
+        const qui = ligne && ligne.querySelector('.ui-ligne-nom') ? ligne.querySelector('.ui-ligne-nom').textContent.trim() : '';
+        const droits = ['mecanicien', 'chauffeur', 'achats'];
+        if (typeof habMiniFormulaire !== 'function') { dire(trad('Fenêtre de choix indisponible : recharge la page.'), true); return; }
+        const choix = await habMiniFormulaire({
+          titre: trad('Changer le droit'), sousTitre: qui, symbole: 'manage_accounts', etape: trad('Équipe'), bouton: trad('Enregistrer'),
+          champs: [{ id: 'droit', etiquette: trad('Droit d\'accès'), type: 'liste', options: droits.map((r) => [r, libelleDe(r)]), valeur: droits.includes(actuel) ? actuel : 'mecanicien',
+            aide: trad('Droit de gestion : parc, entretiens, ordres de travail et pannes. Droit de saisie : compteurs, ses ordres et les pannes. Droit d\'achat : stock, fournisseurs, commandes et coûts.') }],
+          valider: async (v) => {
+            if (v.droit === actuel) return trad('C\'est déjà son droit : choisis-en un autre.');
+            const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: v.droit });
+            return error ? String(error.message || error) : null;
+          },
+        });
+        if (!choix) return;
+        dire(trad('Droit modifié.'));
+        showToast(trad('Droit modifié.'));
+        await preparerCarteEquipe(racine);
       }
 
       // Retirer : DEUX confirmations, comme la suppression d'une machine — et on
@@ -1173,6 +1189,8 @@ VIEWS.account = {
         UI.contactFirstName = prenom;
         UI.contactName = contactFullName(prenom, nom, UI.contactName);
         showToast(trad('Coordonnées enregistrées'));
+        // Les préférences e-mail de rappels ont leur propre enregistrement (bouton caché, partagé avec la page « Rappels ») : on le déclenche ici.
+        root.querySelector('#rap-save')?.click();
         renderApp();
       } catch (err) {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
@@ -1250,6 +1268,19 @@ VIEWS.account = {
 // découvrir après coup qu'il a perdu un mois payé — ni continuer d'être débité
 // pour un compte qui n'existe plus. C'est le serveur qui résilie, et s'il
 // n'y arrive pas, RIEN n'est supprimé.
+// Regroupe les lignes du journal : même personne, même outil, même résultat et moins d'une minute d'écart avec la PREMIÈRE de la série → une ligne « ×N ».
+// `lignes` : de la plus récente à la plus ancienne (ordre rendu par le serveur).
+function regrouperJournalConnecteur(lignes) {
+  const groupes = [];
+  for (const l of lignes) {
+    const g = groupes[groupes.length - 1];
+    const t = new Date(l.quand).getTime();
+    if (g && g.personne === l.personne && g.outil === l.outil && g.statut === l.statut && Math.abs(g.t - t) <= 60000) { g.fois += 1; continue; }
+    groupes.push({ ...l, fois: 1, t });
+  }
+  return groupes;
+}
+
 // ── CONNECTEUR IA : interrupteur de la société (éteint par défaut) et journal des utilisations ─────────────────────────────────
 // Réglé UNIQUEMENT par le gérant, par la fonction `definir_connecteur_societe` (migrations/connecteur-durcissement.sql) ; le journal est lu par
 // `connecteur_journal_recent` (gérant seulement) et ne contient jamais le contenu des échanges. Tant que le SQL n'est pas exécuté, la lecture
@@ -1268,15 +1299,16 @@ function brancherConnecteurIA(root) {
 
   const rafraichirJournal = async () => {
     if (!gerant) return;
-    const { data, error } = await sb.rpc('connecteur_journal_recent', { p_limite: 10 });
+    const { data: brut, error } = await sb.rpc('connecteur_journal_recent', { p_limite: 40 });
     if (error) return;
+    const data = regrouperJournalConnecteur(brut || []).slice(0, 10);
     blocJournal.hidden = false;
     listeJournal.innerHTML = !(data || []).length
       ? `<p class="ui-aide">${trad('Aucune utilisation pour le moment.')}</p>`
       : `<div class="ui-liste">${data.map((l) => `
         <div class="ui-ligne is-deux">
           <div class="ui-ligne-id"><div class="ui-ligne-textes">
-            <span class="ui-ligne-nom">${esc(l.personne)} · ${esc(l.outil)}</span>
+            <span class="ui-ligne-nom">${esc(l.personne)} · ${esc(l.outil)}${l.fois > 1 ? ` <span class="ui-tag">×${l.fois}</span>` : ''}</span>
             <span class="ui-ligne-sous">${esc(formatDateHeureMouvement(l.quand))}</span>
           </div></div>
           <div class="ui-ligne-action"><span class="ui-statut ${l.statut === 'ok' ? 'is-ok' : 'is-retard'}">${libelleStatut(l.statut)}</span></div>

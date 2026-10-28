@@ -28,7 +28,7 @@ function habEtat(h) {
 
 // ── Une petite fenêtre de saisie générique : champs [{id, etiquette, type: 'texte'|'nombre'|'date'|'liste'|'case', valeur, options: [[valeur, libellé]], aide, obligatoire}] ──
 // Rend les valeurs saisies, ou null si on renonce. `valider(valeurs)` peut rendre un message d'erreur (la fenêtre reste ouverte) ou rien (elle se ferme).
-function habMiniFormulaire({ titre, sousTitre, symbole = 'workspace_premium', champs, bouton, valider }) {
+function habMiniFormulaire({ titre, sousTitre, symbole = 'workspace_premium', etape, champs, bouton, valider }) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'overlay otm-overlay';
@@ -43,7 +43,7 @@ function habMiniFormulaire({ titre, sousTitre, symbole = 'workspace_premium', ch
       <div class="modal otm sig-modal" role="dialog" aria-modal="true" aria-labelledby="hab-titre">
         <header class="otm-tete">
           <div class="otm-tuile">${otSymbole(symbole)}</div>
-          <div class="otm-tete-textes"><div class="otm-tete-ligne"><span class="otm-etape">${trad('Habilitations')}</span><span class="otm-marque">GMAO KALEA</span></div>
+          <div class="otm-tete-textes"><div class="otm-tete-ligne"><span class="otm-etape">${esc(etape || trad('Habilitations'))}</span><span class="otm-marque">GMAO KALEA</span></div>
             <h2 id="hab-titre">${esc(titre)}</h2>${sousTitre ? `<p>${esc(sousTitre)}</p>` : ''}</div>
           <button type="button" class="otm-fermer" data-hab-annuler aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
         </header>
