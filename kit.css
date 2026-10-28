@@ -2782,7 +2782,18 @@ html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F
 .equipe-chevron{width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);margin:0 4px 3px 2px;transition:transform .15s;flex:none;}
 .equipe-ligne.is-ouvert .equipe-chevron{transform:rotate(-135deg);margin-bottom:-3px;}
 .equipe-detail{padding:2px 12px 12px 54px;display:flex;flex-direction:column;gap:8px;}
-.equipe-detail .ui-ligne-textes{display:flex;flex-direction:column;gap:2px;}
+.equipe-fiche{display:grid;grid-template-columns:116px minmax(0,1fr);gap:8px 12px;align-items:center;font-size:13px;}
+.equipe-etiquette{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--primary-dark);}
+.equipe-etiquette .material-symbols-outlined{font-size:15px;}
+.equipe-valeur{display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);overflow-wrap:anywhere;}
+.equipe-login{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:var(--surface-soft);padding:2px 8px;border-radius:6px;}
+.equipe-copier{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--ink-3);cursor:pointer;padding:0;}
+.equipe-copier:hover{background:var(--surface-soft);color:var(--ink);}
+.equipe-copier .material-symbols-outlined{font-size:16px;}
+.equipe-discret{color:var(--ink-3);}
+.equipe-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;padding-top:12px;border-top:1px solid rgba(14,19,51,.08);}
+.equipe-actions .ui-btn .material-symbols-outlined{font-size:16px;}
+.equipe-actions .equipe-retirer{margin-left:auto;}
 .equipe-droit{flex:none;}
 .equipe-droit.is-droit-gerant{background:rgba(14,19,51,.12);color:var(--ink);}
 .equipe-droit.is-droit-mecanicien{background:color-mix(in srgb,var(--primary-dark) 14%,transparent);color:var(--primary-dark);}
@@ -2793,7 +2804,7 @@ html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F
 .equipe-ajout-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
 .equipe-ajout-tete h2{margin:0;font-size:18px;}
 .overlay[hidden]{display:none !important;}
-@media (max-width:560px){.equipe-detail{padding-left:12px;}}
+@media (max-width:560px){.equipe-detail{padding-left:12px;}.equipe-fiche{grid-template-columns:96px minmax(0,1fr);}.equipe-actions .equipe-retirer{margin-left:0;}}
 
 /* Colonne « Signature » de l'historique : état et bouton « Rapport » séparés, sur une ligne quand il y a la place */
 .sig-cellule{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:2px 0;}
@@ -3543,6 +3554,7 @@ html[data-theme="dark"] .mstrip-liste.is-tuiles .mstrip-jauge:not(:has(.mstrip-j
 html[data-theme="dark"] .machine-action-archiver{background:rgba(255,255,255,0.1)}
 html[data-theme="dark"] .equipe-tete:hover{background:rgba(255,255,255,0.05)}
 html[data-theme="dark"] .equipe-toi{font-weight:700}
+html[data-theme="dark"] .equipe-actions{border-top:1px solid rgba(255,255,255,0.08)}
 html[data-theme="dark"] .equipe-droit.is-droit-gerant{background:rgba(255,255,255,0.19)}
 html[data-theme="dark"] .equipe-droit.is-droit-achats{color:rgba(221,178,144,1)}
 html[data-theme="dark"] .sig-image{background:var(--surface)}

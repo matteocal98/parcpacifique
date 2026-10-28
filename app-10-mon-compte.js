@@ -603,9 +603,9 @@ VIEWS.account = {
         const acces = estMembreCree(m) ? identiteDe(m) : String(m.email || trad('Invitation en attente'));
         const metier = String(m.metier || '').trim();
         const actions = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `
-              <button type="button" class="ui-btn ui-btn-teinte" data-pw-reset="${esc(m.id)}">${trad('Générer un nouveau mot de passe')}</button>
-              <button type="button" class="ui-btn ui-btn-teinte" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}">${trad('Changer le droit')}</button>
-              <button type="button" class="ui-btn ui-btn-teinte" data-equipe-retirer="${esc(m.id)}">${trad('Retirer')}</button>` : '';
+              <button type="button" class="ui-btn ui-btn-teinte" data-pw-reset="${esc(m.id)}"><span class="material-symbols-outlined" aria-hidden="true">key</span>${trad('Nouveau mot de passe')}</button>
+              <button type="button" class="ui-btn ui-btn-teinte" data-equipe-role="${esc(m.id)}" data-role-actuel="${esc(role)}"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>${trad('Changer le droit')}</button>
+              <button type="button" class="ui-btn ui-btn-teinte is-danger equipe-retirer" data-equipe-retirer="${esc(m.id)}"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span>${trad('Retirer')}</button>` : '';
         // Personne n'a de bouton sur SA PROPRE ligne : on ne se rétrograde pas
         // soi-même, et le retrait de son propre compte est un autre sujet.
         const motDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant' ? `<span class="ui-ligne-sous">${trad('Mot de passe : non conservé — il n\'est affiché qu\'une fois, à sa création.')}</span>` : '';
@@ -614,12 +614,15 @@ VIEWS.account = {
         // le chauffeur) — aucune couleur nouvelle.
         const teinteRole = role === 'gerant' ? 'gerant' : (role === 'chauffeur' ? 'chauffeur' : (role === 'achats' ? 'achats' : 'mecanicien'));
         const ouvert = racine._equipeOuvert === m.id;
-        const details = `
-                  <span class="ui-ligne-sous">${trad('Ce qu\'il a le droit de faire :')} ${esc(droitsResumes(role))}</span>
-                  <span class="ui-ligne-sous">${trad('Login :')} ${esc(acces)}</span>
-                  ${metier ? `<span class="ui-ligne-sous">${trad('Métier :')} ${esc(metier)}</span>` : ''}
-                  ${estInvitation(m) ? `<span class="ui-ligne-sous">${trad('Invitation en attente : cette personne n\'a pas encore créé son compte.')}</span>` : ''}
-                  ${motDePasse}`;
+        const ligneFiche = (icone, libelle, valeur) => `<span class="equipe-etiquette"><span class="material-symbols-outlined" aria-hidden="true">${icone}</span>${libelle}</span><span class="equipe-valeur">${valeur}</span>`;
+        const peutVoirMotDePasse = peutGererEquipe() && !m.est_moi && role !== 'gerant';
+        const details = `<div class="equipe-fiche">
+                  ${ligneFiche('verified_user', trad('Peut faire'), esc(droitsResumes(role)))}
+                  ${ligneFiche('person', trad('Login'), `<code class="equipe-login">${esc(acces)}</code><button type="button" class="equipe-copier" data-equipe-copier="${esc(acces)}" aria-label="${esc(trad('Copier le login'))}" title="${esc(trad('Copier le login'))}"><span class="material-symbols-outlined" aria-hidden="true">content_copy</span></button>`)}
+                  ${metier ? ligneFiche('work', trad('Métier'), esc(metier)) : ''}
+                  ${peutVoirMotDePasse ? ligneFiche('lock', trad('Mot de passe'), `<span class="equipe-discret">${trad('Non conservé : affiché une seule fois, à la création')}</span>`) : ''}
+                  ${estInvitation(m) ? ligneFiche('mail', trad('Invitation'), `<span class="equipe-discret">${trad('en attente : cette personne n\'a pas encore créé son compte.')}</span>`) : ''}
+                </div>`;
         return `
             <div class="equipe-ligne${ouvert ? ' is-ouvert' : ''}" data-membre="${esc(m.id)}">
               <button type="button" class="equipe-tete" data-equipe-ouvrir="${esc(m.id)}" aria-expanded="${ouvert ? 'true' : 'false'}">
@@ -628,7 +631,7 @@ VIEWS.account = {
                 <span class="ui-tag equipe-droit is-droit-${teinteRole}">${esc(libelleDe(role || 'autre'))}</span>
                 <span class="equipe-chevron" aria-hidden="true"></span>
               </button>
-              ${ouvert ? `<div class="equipe-detail"><div class="ui-ligne-textes">${details}</div>${actions ? `<div class="ui-ligne-action is-etiquettes">${actions}</div>` : ''}</div>` : ''}
+              ${ouvert ? `<div class="equipe-detail">${details}${actions ? `<div class="equipe-actions">${actions}</div>` : ''}</div>` : ''}
             </div>`;
       };
 
@@ -713,6 +716,12 @@ VIEWS.account = {
       // jamais laisser passer une action que l'écran vient de retirer.
       cabler(liste, '_equipeListeCablee', 'button', (bouton) => {
         if (!peutGererEquipe()) return;
+        if (bouton.hasAttribute('data-equipe-copier')) {
+          const login = bouton.getAttribute('data-equipe-copier') || '';
+          const copie = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(login) : Promise.reject(new Error('copie indisponible'));
+          copie.then(() => showToast(trad('Login copié')), () => showToast(trad('Copie impossible : sélectionne le login et copie-le.')));
+          return;
+        }
         if (bouton.hasAttribute('data-equipe-ouvrir')) {
           const id = bouton.getAttribute('data-equipe-ouvrir');
           racine._equipeOuvert = racine._equipeOuvert === id ? null : id;     // une seule ligne ouverte à la fois
