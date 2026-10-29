@@ -1402,7 +1402,8 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       // « Toi » l'emporte TOUJOURS sur « Support KALEA » : un compte staff qui
       // écrit depuis SON PROPRE espace client (cas réel sur ce compte, gérant
       // ET superviseur à la fois) doit se voir lui-même, pas son autre rôle.
-      const estStaff = !!m2.profiles?.is_staff;
+      // Un client ne peut pas lire le profil d'un membre du personnel : la jointure revient vide (null). Un auteur qui n'est pas « moi » et dont le profil est illisible EST donc le support.
+      const estStaff = !!m2.profiles?.is_staff || (!deMoi && !m2.profiles);
       const auteur = deMoi ? trad('Toi') : (estStaff ? trad('Support KALEA') : (m2.profiles?.full_name || m2.profiles?.login || '?'));
       const avatar = deMoi ? '' : `<span class="avatar">${estStaff ? 'KV' : esc(initialesSupport(auteur))}</span>`;
       return `<div class="support-bulle-ligne ${deMoi ? 'is-moi' : 'is-autre'}">
