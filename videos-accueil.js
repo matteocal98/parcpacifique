@@ -20,7 +20,7 @@
   // la première vidéo est mise en avant (grande).
   var VIDEOS = [
     { cle: 'pub-gerant', fr: 'x6PZWVd4xbc', en: '9Ys0-SM1fe4',
-      titre: { fr: "Plus jamais de chantier à l'arrêt", en: 'No more stopped job sites' } },
+      titre: { fr: "Évitez les chantiers à l'arrêt faute d'un suivi efficace", en: 'Avoid stopped job sites caused by weak maintenance tracking' } },
     { cle: 'creer-un-compte', fr: '_IQxOjrFtGQ', en: 'YulRg_u4uV4',
       titre: { fr: 'Créer son compte en 1 minute', en: 'Create your account in 1 minute' } },
     { cle: 'enregistrer-une-machine', fr: 'SZ6NosEhJ1M', en: '3AkB5HeQSos',
