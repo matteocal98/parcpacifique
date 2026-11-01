@@ -25,8 +25,8 @@ const URL_ACCUEIL = { fr: SITE + '/', en: SITE + '/en/' };
 const urlPage = (p, lg) => SITE + '/' + p[lg].fichier;
 const cheminPage = (p, lg) => '/' + p[lg].fichier;
 const LIB = {
-  fr: { accueil: 'Accueil', essai: 'Essai gratuit', tarifs: 'Voir les tarifs', langue: 'Langue / Language', ressources: 'Guides', suivez: 'Suivez KALEA', fil: 'Fil d\'Ariane', liees: 'À lire aussi', faq: 'Questions fréquentes', bandeauTitre: 'Essayez KALEA gratuitement', bandeauTexte: 'Gratuit pour 2 machines, sans carte bancaire. Déposez un manuel et voyez le plan d\'entretien se construire.' },
-  en: { accueil: 'Home', essai: 'Free trial', tarifs: 'See pricing', langue: 'Langue / Language', ressources: 'Guides', suivez: 'Follow KALEA', fil: 'Breadcrumb', liees: 'Read next', faq: 'Frequently asked questions', bandeauTitre: 'Try KALEA for free', bandeauTexte: 'Free for 2 machines, no credit card. Upload a manual and watch the maintenance plan build itself.' },
+  fr: { accueil: 'Accueil', essai: "S'inscrire", tarifs: 'Voir les tarifs', langue: 'Langue / Language', ressources: 'Guides', suivez: 'Suivez KALEA', fil: 'Fil d\'Ariane', liees: 'À lire aussi', faq: 'Questions fréquentes', bandeauTitre: 'Essayez KALEA gratuitement', bandeauTexte: 'Gratuit pour 2 machines, sans carte bancaire. Déposez un manuel et voyez le plan d\'entretien se construire.' },
+  en: { accueil: 'Home', essai: 'Sign up', tarifs: 'See pricing', langue: 'Langue / Language', ressources: 'Guides', suivez: 'Follow KALEA', fil: 'Breadcrumb', liees: 'Read next', faq: 'Frequently asked questions', bandeauTitre: 'Try KALEA for free', bandeauTexte: 'Free for 2 machines, no credit card. Upload a manual and watch the maintenance plan build itself.' },
 };
 
 // ───────────────────────────── balises SEO

@@ -26,7 +26,7 @@
     [`Tarifs`, `Pricing`],
     [`FAQ`, `FAQ`],
     [`Se connecter`, `Log in`],
-    [`Essai gratuit`, `Free trial`],
+    [`S'inscrire`, `Sign up`],
 
     // En-tête
     [`LECTURE AUTOMATIQUE DES MANUELS — DISPONIBLE`, `AUTOMATIC MANUAL READING — AVAILABLE`],
@@ -98,7 +98,7 @@
     // KALEA en action (vidéos)
     [`KALEA EN ACTION`, `KALEA IN ACTION`],
     [`Voyez KALEA fonctionner, en quelques minutes`, `See KALEA at work, in a few minutes`],
-    [`Un témoignage de gérant et des démonstrations courtes, pas à pas.`, `A manager's story and short step-by-step demos.`],
+    [`Une vidéo de présentation avec un personnage fictif généré par IA, et des démonstrations courtes, pas à pas.`, `A presentation video with a fictional AI-generated character, and short step-by-step demos.`],
     [`Toutes nos vidéos sur la chaîne YouTube KALEA`, `All our videos on the KALEA YouTube channel`],
     [`— la vidéo ne se charge qu'au clic (aucun cookie publicitaire).`, `— the video only loads when you click (no advertising cookies).`],
 
