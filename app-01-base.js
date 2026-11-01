@@ -52,6 +52,15 @@ let __ordreIdDepuisPushEnAttente = null;
 let __appPretePourPush = false;
 const SUPABASE_URL = "https://tiayvmnodsbygmuemeuy.supabase.co";
 const SUPABASE_KEY = "sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg";
+// ORIGINE MARKETING de l'inscription (lien suivi utm_*, site d'où l'on vient). Lue ICI, une seule fois, au tout premier chargement : l'appli réécrit
+// ensuite l'adresse (history.replaceState) sans ces paramètres. Gardée en MÉMOIRE seulement — rien n'est écrit dans le navigateur. Elle n'est utilisée
+// qu'une fois, juste après la création de la société (noterOrigineInscription) ; sans lien suivi (appli Android, accès direct) l'origine sera « direct ».
+const ORIGINE_MARKETING = (() => {
+  try {
+    const p = new URLSearchParams(location.search);
+    return { source: p.get('utm_source') || '', medium: p.get('utm_medium') || '', campagne: p.get('utm_campaign') || '', referent: p.get('ref') || document.referrer || '' };
+  } catch (err) { return { source: '', medium: '', campagne: '', referent: '' }; }
+})();
 // Numéro de version affiché à l'utilisateur (feuille « Plus ») — à tenir à
 // jour avec le champ "version" de version.json (distinct de son champ
 // "empreinte", qui sert lui au contrôle de fraîcheur, voir empreintePage()).

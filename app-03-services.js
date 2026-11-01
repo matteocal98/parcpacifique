@@ -1182,6 +1182,17 @@ async function creerSocieteEtProfil(nom, activite, user) {
   return companyId;
 }
 
+// Note d'où vient cette société (lien suivi, site d'origine) : UNE fois, juste après sa création, côté serveur (marketing_noter_origine, jamais
+// écrasée). Tolérée absente (base pas encore migrée) et JAMAIS bloquante : un échec ne doit rien changer à l'inscription.
+async function noterOrigineInscription() {
+  try {
+    await sb.rpc('marketing_noter_origine', {
+      p_source: ORIGINE_MARKETING.source || null, p_medium: ORIGINE_MARKETING.medium || null,
+      p_campagne: ORIGINE_MARKETING.campagne || null, p_referent: ORIGINE_MARKETING.referent || null,
+    });
+  } catch (err) { /* sans conséquence */ }
+}
+
 // `motif` : la raison pour laquelle cet écran s'affiche, quand la lecture du
 // compte a ÉCHOUÉ (et non « rien trouvé »). On la montre discrètement : elle ne
 // bloque rien, mais elle évite de faire croire à un compte neuf quand ce n'est
@@ -1239,6 +1250,7 @@ function renderSocieteManquante(user, motif) {
         if (!fonctionAbsente(error)) throw error;
         await creerSocieteEtProfil(nom, activite, user);
       }
+      noterOrigineInscription();
       // Les colonnes prénom/nom du contact n'existent qu'après migration : on ne
       // les envoie que si elles sont là, comme à l'inscription.
       const { error: sonde } = await sb.from('companies').select('contact_first_name').limit(1);
@@ -1960,6 +1972,7 @@ function openSignupWizard() {
         });
         if (creationErr && !fonctionAbsente(creationErr)) throw creationErr;
         if (creationErr) await creerSocieteEtProfil(state.name, state.activity, data.user);
+        noterOrigineInscription();
 
         // Les informations qui ne servent PAS à créer la société (registre,
         // téléphone, contact) passent par le chemin d'écriture déjà sanctionné —

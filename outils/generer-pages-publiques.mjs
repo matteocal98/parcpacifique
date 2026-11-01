@@ -326,6 +326,7 @@ ${faq}
 ${parties.footer}
 <script src="/selecteur-langue.js"></script>
 <script src="/bouton-theme.js"></script>
+<script src="/mesure.js"></script>
 </body>
 </html>
 `;

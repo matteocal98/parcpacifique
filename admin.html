@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-McyHMy6ZZsoIGkVOjgfAY0uNan9g42g1G32OdEh1Afs=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g1g9qdMrS2KY/5e7MN3eG6Wk9UQgUGXwRPK4lmS0fdE=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -165,6 +165,9 @@
       </a>
       <a data-path="ia" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-label-md text-label-md">Consommation IA</span>
+      </a>
+      <a data-path="marketing" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
+        <span class="material-symbols-outlined text-[20px]">campaign</span><span class="font-label-md text-label-md">Marketing</span>
       </a>
       <a data-path="infra" href="#" class="nav-lien flex items-center gap-space-sm px-space-sm py-space-sm min-h-[44px] rounded text-inverse-on-surface/80 hover:bg-surface-variant/20 hover:text-surface-bright transition-colors">
         <span class="material-symbols-outlined text-[20px]">dns</span><span class="font-label-md text-label-md">Infrastructure</span>
@@ -958,6 +961,150 @@
         </div>
       </section>
 
+      <!-- ═══════ VUE : Marketing (audience du site, origine des inscrits, suivi des contacts) ═══════ -->
+      <section id="vue-marketing" class="hidden flex flex-col gap-space-lg">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+          <div>
+            <div class="flex items-center gap-space-xs text-primary font-code-sm text-code-sm uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">campaign</span><span>Développement de KALEA</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Marketing</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">D'où viennent les visites et les inscrits, et où en sont les personnes qu'on contacte. Aucun cookie : une visite est comptée sans identifiant durable. Avant de publier ou de promouvoir quoi que ce soit, on contrôle sa pertinence et sa cohérence.</p>
+          </div>
+          <div class="flex items-center gap-space-sm self-start md:self-auto">
+            <select id="mk-periode" class="h-11 px-space-sm rounded bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm">
+              <option value="7">7 derniers jours</option>
+              <option value="30" selected>30 derniers jours</option>
+              <option value="90">90 derniers jours</option>
+              <option value="365">12 derniers mois</option>
+            </select>
+            <button id="mk-rafraichir" type="button" class="h-11 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm flex items-center gap-space-xs transition-colors">
+              <span class="material-symbols-outlined text-[18px]">sync</span><span>Actualiser</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-space-xs bg-surface-container-low p-space-xs rounded-lg shadow-sm self-start">
+          <button id="mk-onglet-audience" type="button" data-onglet="audience" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Audience et inscrits</button>
+          <button id="mk-onglet-contacts" type="button" data-onglet="contacts" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contacts</button>
+        </div>
+
+        <!-- Audience -->
+        <div id="mk-panneau-audience" class="flex flex-col gap-space-lg">
+          <div id="mk-alerte" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Pages vues</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">visibility</span></div>
+              <span id="mk-kpi-visites" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Visiteurs par jour</span><span class="p-1.5 rounded-lg bg-surface-container-low text-secondary material-symbols-outlined text-[20px]">group</span></div>
+              <span id="mk-kpi-visiteurs" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Un visiteur qui revient un autre jour compte à nouveau.</span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Sociétés inscrites</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">how_to_reg</span></div>
+              <span id="mk-kpi-inscrits" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Avec une machine</span><span class="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant material-symbols-outlined text-[20px]">agriculture</span></div>
+              <span id="mk-kpi-machine" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Offre payante</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">payments</span></div>
+              <span id="mk-kpi-payants" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+            </div>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <div class="p-space-lg">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Des visites aux abonnements, par origine</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">L'origine est notée à l'inscription (lien suivi ou site d'où la personne vient) ; « direct » = ni lien suivi ni site d'origine, ou appli installée depuis le Play Store. Ne compte que les sociétés inscrites après la mise en service de la mesure.</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left font-body-sm text-body-sm">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                    <th class="py-3 px-space-md">Origine</th>
+                    <th class="py-3 px-space-md text-right">Visiteurs par jour</th>
+                    <th class="py-3 px-space-md text-right">Inscrits</th>
+                    <th class="py-3 px-space-md text-right">Inscrits / visiteurs</th>
+                    <th class="py-3 px-space-md text-right">Avec machine</th>
+                    <th class="py-3 px-space-md text-right">Avec plan</th>
+                    <th class="py-3 px-space-md text-right">Payants</th>
+                  </tr>
+                </thead>
+                <tbody id="mk-tab-entonnoir" class="divide-y divide-surface-container-low"></tbody>
+              </table>
+            </div>
+            <p id="mk-vide-entonnoir" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-space-lg">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div class="p-space-lg"><h2 class="font-headline-md text-headline-md text-on-surface">Origine des visites</h2></div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-body-sm text-body-sm">
+                  <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                    <th class="py-3 px-space-md">Origine</th><th class="py-3 px-space-md">Support</th><th class="py-3 px-space-md text-right">Pages vues</th><th class="py-3 px-space-md text-right">Visiteurs par jour</th>
+                  </tr></thead>
+                  <tbody id="mk-tab-sources" class="divide-y divide-surface-container-low"></tbody>
+                </table>
+              </div>
+              <p id="mk-vide-sources" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div class="p-space-lg"><h2 class="font-headline-md text-headline-md text-on-surface">Pages les plus vues</h2></div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-body-sm text-body-sm">
+                  <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                    <th class="py-3 px-space-md">Page</th><th class="py-3 px-space-md text-right">Pages vues</th><th class="py-3 px-space-md text-right">Visiteurs par jour</th>
+                  </tr></thead>
+                  <tbody id="mk-tab-pages" class="divide-y divide-surface-container-low"></tbody>
+                </table>
+              </div>
+              <p id="mk-vide-pages" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contacts -->
+        <div id="mk-panneau-contacts" class="hidden flex flex-col gap-space-lg">
+          <div id="mk-alerte-contacts" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <div id="mk-a-faire" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-primary-container text-on-primary"></div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <div class="p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+              <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface">Contacts de prospection</h2>
+                <p id="mk-compte" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></p>
+              </div>
+              <div class="flex flex-wrap items-center gap-space-sm">
+                <input id="mk-recherche" class="h-10 px-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant rounded" placeholder="Nom, entreprise, adresse…">
+                <select id="mk-filtre-statut" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"></select>
+                <button id="mk-importer" type="button" class="h-10 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">upload_file</span><span>Importer</span></button>
+                <button id="mk-nouveau" type="button" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">person_add</span><span>Nouveau contact</span></button>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left font-body-sm text-body-sm">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                    <th class="py-3 px-space-md">Contact</th>
+                    <th class="py-3 px-space-md">Fonction</th>
+                    <th class="py-3 px-space-md">Pays</th>
+                    <th class="py-3 px-space-md">Statut</th>
+                    <th class="py-3 px-space-md">Dernier contact</th>
+                    <th class="py-3 px-space-md">Prochaine action</th>
+                  </tr>
+                </thead>
+                <tbody id="mk-liste-contacts" class="divide-y divide-surface-container-low"></tbody>
+              </table>
+            </div>
+            <p id="mk-vide-contacts" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════ VUE : Bientôt disponible ═══════ -->
       <section id="vue-bientot" class="hidden flex flex-col items-center justify-center gap-3 p-space-xl rounded-lg bg-surface-container-lowest shadow-sm text-center">
         <span class="material-symbols-outlined text-4xl text-on-surface-variant">construction</span>
@@ -1016,6 +1163,10 @@
      Destructif et IRRÉVERSIBLE : le nom de la société doit être retapé. Tout passe par l'Edge Function
      admin-supprimer-societe (is_staff relu côté serveur, abonnement résilié avant, données supprimées en une
      transaction). -->
+<!-- Marketing : fiche d'un contact et import de contacts (même fenêtre, contenu rempli par ouvrirContact / ouvrirImport) -->
+<div id="mk-overlay" class="hidden fixed inset-0 z-[150] bg-inverse-surface/60 backdrop-blur-sm flex items-stretch sm:items-center justify-center sm:p-space-md" role="dialog" aria-modal="true" aria-labelledby="mk-modale-titre">
+  <div id="mk-modale" class="bg-surface-container-lowest w-full sm:max-w-3xl sm:rounded-2xl shadow-xl flex flex-col h-full sm:h-[92vh] overflow-hidden"></div>
+</div>
 <!-- Conversation d'un ticket : modale (en-tête fixe, corps qui défile, réponse en bas) -->
 <div id="ticket-overlay" class="hidden fixed inset-0 z-[150] bg-inverse-surface/60 backdrop-blur-sm flex items-stretch sm:items-center justify-center sm:p-space-md" role="dialog" aria-modal="true" aria-labelledby="ticket-modale-titre">
   <div id="ticket-modale" class="bg-surface-container-lowest w-full sm:max-w-3xl sm:rounded-2xl shadow-xl flex flex-col h-full sm:h-[92vh] overflow-hidden"></div>
@@ -1311,7 +1462,7 @@ function allerA(chemin, depuisHistorique = false) {
   }
   el('console').classList.remove('menu-ouvert'); // téléphone : le tiroir se referme après le choix
   document.querySelectorAll('main > div > section[id^="vue-"]').forEach((s) => s.classList.add('hidden'));
-  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : chemin === 'infra' ? 'vue-infra' : 'vue-bientot';
+  const cible = chemin === 'clients' ? 'vue-clients' : chemin === 'support' ? 'vue-support' : chemin === 'parc' ? 'vue-parc' : chemin === 'tco' ? 'vue-tco' : chemin === 'ocr' ? 'vue-ocr' : chemin === 'stock' ? 'vue-stock' : chemin === 'telemetrie' ? 'vue-telemetrie' : chemin === 'ia' ? 'vue-ia' : chemin === 'infra' ? 'vue-infra' : chemin === 'marketing' ? 'vue-marketing' : 'vue-bientot';
   el(cible).classList.remove('hidden');
   if (chemin === 'parc') chargerParc();
   if (chemin === 'tco') chargerTco();
@@ -1320,6 +1471,7 @@ function allerA(chemin, depuisHistorique = false) {
   if (chemin === 'telemetrie') chargerTelemetrie();
   if (chemin === 'ia') chargerIa();
   if (chemin === 'infra') chargerInfra();
+  if (chemin === 'marketing') chargerMarketing();
 }
 
 // ── Infrastructure : consommation Supabase face aux plafonds du plan gratuit ─────────────────
@@ -2300,6 +2452,429 @@ async function chargerTelemetrie() {
         <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full font-code-sm text-code-sm font-bold min-w-[28px] ${Number(t.releves_suspects_7j) > 0 ? 'bg-error-container text-error' : 'bg-surface-container-low text-on-surface-variant'}">${t.releves_suspects_7j}</span>
       </td>
     </tr>`).join('');
+}
+
+// ── Marketing : audience du site, origine des inscrits, suivi des contacts ───────────────────────────
+// Tables et fonctions : migration marketing-mesure-et-contacts.sql. Tout est réservé au personnel par la sécurité de la base (is_staff()) :
+// un compte client qui ouvrirait cette page ne recevrait rien. Aucun contenu de message n'est stocké ici : seulement le suivi.
+const MK_STATUTS = { prospect: 'Prospect', contacte: 'Contacté', repondu: 'A répondu', essai: 'En essai', pilote: 'Pilote', client: 'Client', perdu: 'Perdu' };
+const MK_TYPES = { email_envoye: 'E-mail envoyé', reponse: 'Réponse reçue', appel: 'Appel', linkedin: 'Message LinkedIn', rencontre: 'Rencontre', note: 'Note' };
+const MK_LANGUES = { fr: 'Français', en: 'Anglais', autre: 'Autre' };
+let MK_CONTACTS = [];
+let MK_CONTACT_OUVERT = null;
+let MK_ONGLET = 'audience';
+let MK_BRANCHE = false;
+let MK_IMPORT = [];
+
+function mkJour(decalageJours = 0) {
+  const d = new Date(Date.now() + decalageJours * 86400000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function mkDate(iso) { return iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '—'; }
+function mkNorm(s) { return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function mkAbsent(err) {
+  return !!err && (['PGRST202', 'PGRST205', '42883', '42P01'].includes(err.code) || /could not find|does not exist/i.test(err.message || ''));
+}
+const MK_ABSENT_TEXTE = "La mesure n'est pas encore installée dans la base : il manque le script marketing-mesure-et-contacts.sql.";
+
+async function chargerMarketing() {
+  if (!MK_BRANCHE) { brancherMarketing(); MK_BRANCHE = true; }
+  afficherOngletMarketing(MK_ONGLET);
+  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else await chargerAudienceMk();
+}
+
+function brancherMarketing() {
+  document.querySelectorAll('.mk-onglet').forEach((b) => b.addEventListener('click', () => { MK_ONGLET = b.dataset.onglet; chargerMarketing(); }));
+  el('mk-periode').addEventListener('change', chargerAudienceMk);
+  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else chargerAudienceMk(); });
+  el('mk-filtre-statut').innerHTML = `<option value="">Tous les statuts</option>` + Object.entries(MK_STATUTS).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('')
+    + `<option value="desinscrit">Désinscrits</option>`;
+  el('mk-recherche').addEventListener('input', rendreContactsMk);
+  el('mk-filtre-statut').addEventListener('change', rendreContactsMk);
+  el('mk-nouveau').addEventListener('click', () => ouvrirContactMk(null));
+  el('mk-importer').addEventListener('click', ouvrirImportMk);
+  el('mk-liste-contacts').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContactMk(tr.dataset.id); });
+  el('mk-overlay').addEventListener('click', (ev) => { if (ev.target === el('mk-overlay')) fermerMk(); });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !el('mk-overlay').classList.contains('hidden')) fermerMk(); });
+}
+
+function afficherOngletMarketing(nom) {
+  ['audience', 'contacts'].forEach((n) => {
+    el('mk-panneau-' + n).classList.toggle('hidden', n !== nom);
+    const b = el('mk-onglet-' + n);
+    b.classList.toggle('bg-surface-container-lowest', n === nom);
+    b.classList.toggle('shadow-sm', n === nom);
+    b.classList.toggle('text-on-surface', n === nom);
+    b.classList.toggle('text-on-surface-variant', n !== nom);
+  });
+  el('mk-periode').classList.toggle('hidden', nom !== 'audience');
+}
+
+// ── Audience et inscrits ──────────────────────────────────────────────────────────────
+async function chargerAudienceMk() {
+  const alerte = el('mk-alerte');
+  alerte.classList.add('hidden');
+  const depuis = mkJour(-(Number(el('mk-periode').value) || 30));
+  const [src, pages, ent] = await Promise.all([
+    sb.rpc('marketing_visites_par_source', { p_depuis: depuis }),
+    sb.rpc('marketing_pages_vues', { p_depuis: depuis }),
+    sb.rpc('marketing_entonnoir', { p_depuis: depuis }),
+  ]);
+  const erreur = src.error || pages.error || ent.error;
+  if (erreur) {
+    alerte.textContent = mkAbsent(erreur) ? MK_ABSENT_TEXTE : 'Lecture impossible : ' + erreur.message;
+    alerte.classList.remove('hidden');
+    return;
+  }
+  const sources = src.data || [], lignesPages = pages.data || [], entonnoir = ent.data || [];
+
+  // Visiteurs par jour, regroupés par origine (le support — social, e-mail… — est détaillé dans l'autre tableau)
+  const visiteursParOrigine = new Map();
+  sources.forEach((s) => visiteursParOrigine.set(s.source, (visiteursParOrigine.get(s.source) || 0) + Number(s.visiteurs_jours)));
+  const somme = (liste, cle) => liste.reduce((t, x) => t + (Number(x[cle]) || 0), 0);
+  el('mk-kpi-visites').textContent = nbFr(somme(sources, 'visites'));
+  el('mk-kpi-visiteurs').textContent = nbFr(somme(sources, 'visiteurs_jours'));
+  el('mk-kpi-inscrits').textContent = nbFr(somme(entonnoir, 'inscrits'));
+  el('mk-kpi-machine').textContent = nbFr(somme(entonnoir, 'avec_machine'));
+  el('mk-kpi-payants').textContent = nbFr(somme(entonnoir, 'payants'));
+
+  // L'entonnoir : toutes les origines vues, avec ou sans inscrit
+  const parOrigine = new Map(entonnoir.map((e) => [e.source, e]));
+  const origines = [...new Set([...entonnoir.map((e) => e.source), ...visiteursParOrigine.keys()])];
+  origines.sort((a, b) => ((parOrigine.get(b)?.inscrits || 0) - (parOrigine.get(a)?.inscrits || 0)) || ((visiteursParOrigine.get(b) || 0) - (visiteursParOrigine.get(a) || 0)));
+  el('mk-tab-entonnoir').innerHTML = origines.map((o) => {
+    const e = parOrigine.get(o) || {}, vis = visiteursParOrigine.get(o) || 0, ins = Number(e.inscrits) || 0;
+    const taux = vis > 0 ? (ins / vis * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %' : '—';
+    return `<tr><td class="py-3 px-space-md font-semibold text-on-surface">${echapper(o)}</td>
+      <td class="py-3 px-space-md text-right">${nbFr(vis)}</td><td class="py-3 px-space-md text-right">${nbFr(ins)}</td><td class="py-3 px-space-md text-right">${taux}</td>
+      <td class="py-3 px-space-md text-right">${nbFr(Number(e.avec_machine) || 0)}</td><td class="py-3 px-space-md text-right">${nbFr(Number(e.avec_plan) || 0)}</td><td class="py-3 px-space-md text-right">${nbFr(Number(e.payants) || 0)}</td></tr>`;
+  }).join('');
+  mkVide('mk-vide-entonnoir', !origines.length, "Aucune visite ni inscription sur la période. La mesure compte à partir de la mise en ligne du site et de l'application mis à jour.");
+
+  el('mk-tab-sources').innerHTML = sources.map((s) => `<tr><td class="py-3 px-space-md font-semibold text-on-surface">${echapper(s.source)}</td>
+      <td class="py-3 px-space-md">${echapper(s.medium || '—')}</td><td class="py-3 px-space-md text-right">${nbFr(s.visites)}</td><td class="py-3 px-space-md text-right">${nbFr(s.visiteurs_jours)}</td></tr>`).join('');
+  mkVide('mk-vide-sources', !sources.length, 'Aucune visite sur la période.');
+  el('mk-tab-pages').innerHTML = lignesPages.map((p) => `<tr><td class="py-3 px-space-md font-code-sm text-code-sm text-on-surface">${echapper(p.page)}</td>
+      <td class="py-3 px-space-md text-right">${nbFr(p.visites)}</td><td class="py-3 px-space-md text-right">${nbFr(p.visiteurs_jours)}</td></tr>`).join('');
+  mkVide('mk-vide-pages', !lignesPages.length, 'Aucune page vue sur la période.');
+}
+function mkVide(id, vide, texte) { const p = el(id); p.textContent = texte; p.classList.toggle('hidden', !vide); }
+
+// ── Contacts ──────────────────────────────────────────────────────────────────────────
+async function chargerContactsMk() {
+  const alerte = el('mk-alerte-contacts');
+  alerte.classList.add('hidden');
+  const { data, error } = await sb.from('marketing_contacts').select('*').order('updated_at', { ascending: false }).limit(2000);
+  if (error) {
+    alerte.textContent = mkAbsent(error) ? MK_ABSENT_TEXTE : 'Lecture impossible : ' + error.message;
+    alerte.classList.remove('hidden');
+    return;
+  }
+  MK_CONTACTS = data || [];
+  rendreContactsMk();
+}
+
+function mkAFaire(c) {
+  return !c.desinscrit && c.prochaine_action_le && c.prochaine_action_le <= mkJour() && !['client', 'perdu'].includes(c.statut);
+}
+function mkBadgeStatut(c) {
+  if (c.desinscrit) return `<span class="px-2 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm">Désinscrit</span>`;
+  const style = c.statut === 'client' || c.statut === 'pilote' ? 'bg-primary-container text-on-primary' : c.statut === 'perdu' ? 'bg-surface-container text-on-surface-variant' : 'bg-surface-container-low text-on-surface';
+  return `<span class="px-2 py-0.5 rounded-full ${style} font-label-sm text-label-sm">${echapper(MK_STATUTS[c.statut] || c.statut)}</span>`;
+}
+
+function rendreContactsMk() {
+  const q = mkNorm(el('mk-recherche').value.trim());
+  const statut = el('mk-filtre-statut').value;
+  const liste = MK_CONTACTS.filter((c) => {
+    if (statut === 'desinscrit') { if (!c.desinscrit) return false; } else if (statut && c.statut !== statut) return false;
+    return !q || mkNorm([c.nom, c.entreprise, c.email, c.fonction, c.pays, c.segment].join(' ')).includes(q);
+  }).sort((a, b) => (mkAFaire(b) - mkAFaire(a)) || String(a.prochaine_action_le || '9999').localeCompare(String(b.prochaine_action_le || '9999')) || String(b.updated_at).localeCompare(String(a.updated_at)));
+  const aFaire = MK_CONTACTS.filter(mkAFaire);
+  const bandeau = el('mk-a-faire');
+  bandeau.classList.toggle('hidden', !aFaire.length);
+  if (aFaire.length) bandeau.textContent = `${aFaire.length} action${aFaire.length > 1 ? 's' : ''} à faire aujourd'hui ou en retard : ` + aFaire.slice(0, 5).map((c) => c.nom).join(', ') + (aFaire.length > 5 ? '…' : '');
+  el('mk-compte').textContent = `${nbFr(liste.length)} contact${liste.length > 1 ? 's' : ''} affiché${liste.length > 1 ? 's' : ''} sur ${nbFr(MK_CONTACTS.length)}`;
+  el('mk-liste-contacts').innerHTML = liste.map((c) => `<tr data-id="${echapper(c.id)}" class="cursor-pointer hover:bg-surface-container-low transition-colors">
+      <td class="py-3 px-space-md"><div class="font-semibold text-on-surface">${echapper(c.nom)}</div><div class="text-on-surface-variant">${echapper(c.entreprise || '')}</div></td>
+      <td class="py-3 px-space-md">${echapper(c.fonction || '—')}</td>
+      <td class="py-3 px-space-md">${echapper(c.pays || '—')}</td>
+      <td class="py-3 px-space-md">${mkBadgeStatut(c)}</td>
+      <td class="py-3 px-space-md">${mkDate(c.dernier_contact)}</td>
+      <td class="py-3 px-space-md ${mkAFaire(c) ? 'text-error font-semibold' : ''}">${c.prochaine_action_le ? mkDate(c.prochaine_action_le) + ' · ' : ''}${echapper(c.prochaine_action || (c.prochaine_action_le ? '' : '—'))}</td></tr>`).join('');
+  mkVide('mk-vide-contacts', !liste.length, MK_CONTACTS.length ? 'Aucun contact ne correspond à la recherche.' : 'Aucun contact pour l\'instant. Ajoutez-en un, ou importez un fichier (export Apollo, liste de salon).');
+}
+
+function fermerMk() {
+  el('mk-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+  MK_CONTACT_OUVERT = null;
+}
+function ouvrirMk() {
+  el('mk-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function mkEntete(titre, sousTitre) {
+  return `<div class="shrink-0 px-space-lg py-space-md flex items-start justify-between gap-space-md bg-surface-container-low">
+    <div class="min-w-0"><h3 id="mk-modale-titre" class="font-headline-sm text-headline-sm text-on-surface truncate">${echapper(titre)}</h3>${sousTitre ? `<p class="font-body-sm text-body-sm text-on-surface-variant">${echapper(sousTitre)}</p>` : ''}</div>
+    <button type="button" id="mk-fermer" aria-label="Fermer" class="shrink-0 w-10 h-10 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container"><span class="material-symbols-outlined">close</span></button></div>`;
+}
+const MK_CLASSE_CHAMP = 'w-full h-10 px-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded';
+function mkChamp(libelle, id, valeur, type = 'text', extra = '') {
+  return `<label class="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">${libelle}
+    <input id="${id}" type="${type}" value="${echapper(valeur ?? '')}" class="${MK_CLASSE_CHAMP} normal-case tracking-normal" ${extra}></label>`;
+}
+function mkSelect(libelle, id, options, valeur) {
+  return `<label class="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">${libelle}
+    <select id="${id}" class="${MK_CLASSE_CHAMP} normal-case tracking-normal">${Object.entries(options).map(([k, v]) => `<option value="${k}" ${k === valeur ? 'selected' : ''}>${echapper(v)}</option>`).join('')}</select></label>`;
+}
+
+async function ouvrirContactMk(id) {
+  const c = id ? MK_CONTACTS.find((x) => x.id === id) : null;
+  if (id && !c) return;
+  MK_CONTACT_OUVERT = c || { id: null };
+  const f = c || { nom: '', langue: 'fr', source: 'autre', statut: 'prospect' };
+  el('mk-modale').innerHTML = `${mkEntete(c ? c.nom : 'Nouveau contact', c ? [c.fonction, c.entreprise].filter(Boolean).join(' · ') : 'Fichier de prospection')}
+    <div id="mk-corps" class="grow overflow-y-auto px-space-lg py-space-md flex flex-col gap-space-md">
+      ${c && c.desinscrit ? `<div class="rounded-xl p-space-sm bg-error-container text-on-error-container font-body-sm text-body-sm">Désinscrit le ${mkDate(c.desinscrit_le)}. Cette personne ne doit plus jamais être contactée.</div>` : ''}
+      <form id="mk-form" class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        ${mkChamp('Nom *', 'mkf-nom', f.nom, 'text', 'required maxlength="120"')}
+        ${mkChamp('Entreprise', 'mkf-entreprise', f.entreprise, 'text', 'maxlength="160"')}
+        ${mkChamp('Fonction', 'mkf-fonction', f.fonction, 'text', 'maxlength="160"')}
+        ${mkChamp('Adresse e-mail', 'mkf-email', f.email, 'email', 'maxlength="200"')}
+        ${mkChamp('Pays', 'mkf-pays', f.pays, 'text', 'maxlength="60"')}
+        ${mkSelect('Langue', 'mkf-langue', MK_LANGUES, f.langue)}
+        ${mkChamp('Segment (btp, location, transport…)', 'mkf-segment', f.segment, 'text', 'maxlength="60"')}
+        ${mkChamp('Source (apollo, linkedin, salon…)', 'mkf-source', f.source, 'text', 'maxlength="60"')}
+        ${mkSelect('Statut', 'mkf-statut', MK_STATUTS, f.statut)}
+        ${mkChamp('Dernier contact', 'mkf-dernier', f.dernier_contact, 'date')}
+        ${mkChamp('Prochaine action', 'mkf-prochaine', f.prochaine_action, 'text', 'maxlength="300"')}
+        ${mkChamp('Pour le', 'mkf-prochaine-date', f.prochaine_action_le, 'date')}
+        <label class="sm:col-span-2 flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Notes
+          <textarea id="mkf-notes" rows="3" maxlength="4000" class="w-full px-space-sm py-space-xs bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded normal-case tracking-normal">${echapper(f.notes || '')}</textarea></label>
+        ${c ? `<p class="sm:col-span-2 font-body-sm text-body-sm text-on-surface-variant">Données conservées jusqu'au ${mkDate(c.conserver_jusqu_au)} (3 ans après le dernier contact). Source de la donnée : ${echapper(c.source_donnee || 'non précisée')}.</p>` : ''}
+      </form>
+      ${c ? `<section class="flex flex-col gap-space-sm">
+        <h4 class="font-headline-sm text-headline-sm text-on-surface">Historique</h4>
+        <form id="mk-form-echange" class="grid grid-cols-1 sm:grid-cols-4 gap-space-sm items-end">
+          ${mkSelect('Type', 'mke-type', MK_TYPES, 'email_envoye')}
+          ${mkSelect('Sens', 'mke-sens', { sortant: 'Envoyé', entrant: 'Reçu' }, 'sortant')}
+          <div class="sm:col-span-2">${mkChamp('Objet', 'mke-objet', '', 'text', 'maxlength="200"')}</div>
+          <label class="sm:col-span-3 flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Résumé
+            <textarea id="mke-resume" rows="2" maxlength="4000" class="w-full px-space-sm py-space-xs bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded normal-case tracking-normal"></textarea></label>
+          <button type="submit" class="h-10 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md">Ajouter</button>
+        </form>
+        <ul id="mk-echanges" class="flex flex-col gap-space-xs"></ul>
+      </section>` : ''}
+      <p id="mk-modale-msg" class="hidden font-body-sm text-body-sm"></p>
+    </div>
+    <div class="shrink-0 px-space-lg py-space-md flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-low">
+      <div>${c && !c.desinscrit ? `<button type="button" id="mk-desinscrire" class="h-10 px-space-md rounded text-error hover:bg-error-container font-label-md text-label-md">Marquer comme désinscrit</button>` : ''}</div>
+      <div class="flex gap-space-sm">
+        <button type="button" id="mk-annuler" class="h-10 px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md">Fermer</button>
+        <button type="submit" form="mk-form" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md">Enregistrer</button>
+      </div>
+    </div>`;
+  el('mk-fermer').addEventListener('click', fermerMk);
+  el('mk-annuler').addEventListener('click', fermerMk);
+  el('mk-form').addEventListener('submit', enregistrerContactMk);
+  if (c) {
+    el('mk-form-echange').addEventListener('submit', ajouterEchangeMk);
+    el('mk-desinscrire')?.addEventListener('click', desinscrireContactMk);
+    chargerEchangesMk();
+  }
+  ouvrirMk();
+}
+
+function mkMessage(texte, erreur) {
+  const p = el('mk-modale-msg');
+  if (!p) return;
+  p.textContent = texte;
+  p.className = 'font-body-sm text-body-sm ' + (erreur ? 'text-error' : 'text-on-surface-variant');
+}
+
+async function enregistrerContactMk(ev) {
+  ev.preventDefault();
+  const v = (id) => (el(id).value || '').trim();
+  const fiche = {
+    nom: v('mkf-nom'), entreprise: v('mkf-entreprise') || null, fonction: v('mkf-fonction') || null, email: v('mkf-email') || null, pays: v('mkf-pays') || null,
+    langue: v('mkf-langue'), segment: v('mkf-segment') || null, source: v('mkf-source') || 'autre', statut: v('mkf-statut'),
+    dernier_contact: v('mkf-dernier') || null, prochaine_action: v('mkf-prochaine') || null, prochaine_action_le: v('mkf-prochaine-date') || null, notes: v('mkf-notes') || null,
+  };
+  if (!fiche.nom) { mkMessage('Le nom est obligatoire.', true); return; }
+  const existant = MK_CONTACT_OUVERT && MK_CONTACT_OUVERT.id;
+  const res = existant
+    ? await sb.from('marketing_contacts').update(fiche).eq('id', existant).select().single()
+    : await sb.from('marketing_contacts').insert({ ...fiche, created_by: MOI ? MOI.id : null }).select().single();
+  if (res.error) {
+    mkMessage(res.error.code === '23505' ? 'Un contact avec cette adresse e-mail existe déjà.'
+      : res.error.code === '23514' ? "Une valeur n'est pas acceptée (adresse e-mail mal formée ?)." : 'Enregistrement impossible : ' + res.error.message, true);
+    return;
+  }
+  const i = MK_CONTACTS.findIndex((x) => x.id === res.data.id);
+  if (i >= 0) MK_CONTACTS[i] = res.data; else MK_CONTACTS.unshift(res.data);
+  rendreContactsMk();
+  fermerMk();
+}
+
+async function desinscrireContactMk() {
+  const c = MK_CONTACT_OUVERT;
+  if (!c || !c.id) return;
+  if (!window.confirm(`Marquer ${c.nom} comme désinscrit(e) ?\n\nCette personne ne devra plus jamais être contactée. Depuis la console, cette action ne peut pas être annulée.`)) return;
+  const { data, error } = await sb.from('marketing_contacts').update({ desinscrit: true }).eq('id', c.id).select().single();
+  if (error) { mkMessage('Impossible : ' + error.message, true); return; }
+  const i = MK_CONTACTS.findIndex((x) => x.id === data.id);
+  if (i >= 0) MK_CONTACTS[i] = data;
+  rendreContactsMk();
+  ouvrirContactMk(data.id);
+}
+
+async function chargerEchangesMk() {
+  const c = MK_CONTACT_OUVERT;
+  if (!c || !c.id) return;
+  const { data, error } = await sb.from('marketing_echanges').select('*').eq('contact_id', c.id).order('le', { ascending: false });
+  const ul = el('mk-echanges');
+  if (!ul) return;
+  if (error) { ul.innerHTML = `<li class="text-error font-body-sm text-body-sm">Historique illisible : ${echapper(error.message)}</li>`; return; }
+  ul.innerHTML = (data || []).length ? data.map((e) => `<li class="rounded-xl p-space-sm bg-surface-container-low font-body-sm text-body-sm">
+      <div class="flex justify-between gap-space-sm text-on-surface-variant"><span class="font-semibold text-on-surface">${echapper(MK_TYPES[e.type] || e.type)} ${e.sens === 'entrant' ? '← reçu' : '→ envoyé'}</span><span>${mkDate(e.le)}</span></div>
+      ${e.objet ? `<div class="text-on-surface">${echapper(e.objet)}</div>` : ''}${e.resume ? `<div class="text-on-surface-variant whitespace-pre-line">${echapper(e.resume)}</div>` : ''}</li>`).join('')
+    : `<li class="font-body-sm text-body-sm text-on-surface-variant">Aucun échange noté pour l'instant.</li>`;
+}
+
+async function ajouterEchangeMk(ev) {
+  ev.preventDefault();
+  const c = MK_CONTACT_OUVERT;
+  if (!c || !c.id) return;
+  const type = el('mke-type').value, sens = el('mke-sens').value;
+  const objet = el('mke-objet').value.trim(), resume = el('mke-resume').value.trim();
+  if (!objet && !resume) { mkMessage("Écrivez au moins un objet ou un résumé.", true); return; }
+  const { error } = await sb.from('marketing_echanges').insert({ contact_id: c.id, type, sens, objet: objet || null, resume: resume || null, created_by: MOI ? MOI.id : null });
+  if (error) { mkMessage('Impossible : ' + error.message, true); return; }
+  // Le suivi avance avec l'historique : dernier contact = aujourd'hui ; un premier message passe « prospect » à « contacté », une réponse à « a répondu ».
+  const fiche = MK_CONTACTS.find((x) => x.id === c.id) || c;
+  const maj = { dernier_contact: mkJour() };
+  if (sens === 'entrant' && ['prospect', 'contacte'].includes(fiche.statut)) maj.statut = 'repondu';
+  else if (sens === 'sortant' && type !== 'note' && fiche.statut === 'prospect') maj.statut = 'contacte';
+  const { data } = await sb.from('marketing_contacts').update(maj).eq('id', c.id).select().single();
+  if (data) {
+    const i = MK_CONTACTS.findIndex((x) => x.id === data.id);
+    if (i >= 0) MK_CONTACTS[i] = data;
+    MK_CONTACT_OUVERT = data;
+    if (el('mkf-dernier')) el('mkf-dernier').value = data.dernier_contact || '';
+    if (el('mkf-statut')) el('mkf-statut').value = data.statut;
+    rendreContactsMk();
+  }
+  el('mke-objet').value = '';
+  el('mke-resume').value = '';
+  mkMessage('Ajouté à l\'historique.', false);
+  chargerEchangesMk();
+}
+
+// ── Import d'un fichier de contacts (CSV : export Apollo, liste de salon…) ──────────────────────────────
+function analyserCsvMk(texte) {
+  const t = String(texte || '').replace(/^﻿/, '');
+  const premiere = t.split(/\r?\n/, 1)[0] || '';
+  const delim = [',', ';', '\t'].map((d) => [d, premiere.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const lignes = [];
+  let champ = '', ligne = [], guillemets = false;
+  const finLigne = () => { ligne.push(champ); champ = ''; if (ligne.some((x) => x.trim() !== '')) lignes.push(ligne); ligne = []; };
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (guillemets) {
+      if (ch === '"') { if (t[i + 1] === '"') { champ += '"'; i++; } else guillemets = false; } else champ += ch;
+    } else if (ch === '"') guillemets = true;
+    else if (ch === delim) { ligne.push(champ); champ = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && t[i + 1] === '\n') i++; finLigne(); }
+    else champ += ch;
+  }
+  if (champ !== '' || ligne.length) finLigne();
+  if (lignes.length < 2) return [];
+  const cles = lignes[0].map((h) => mkNorm(h).replace(/[^a-z0-9]/g, ''));
+  return lignes.slice(1).map((l) => { const o = {}; cles.forEach((k, i) => { if (k && o[k] === undefined) o[k] = String(l[i] || '').trim(); }); return o; });
+}
+function mkContactDepuisLigne(l, d) {
+  const prends = (cles) => { for (const k of cles) if (l[k]) return l[k]; return ''; };
+  const prenom = prends(['prenom', 'firstname']), famille = prends(['lastname', 'nomdefamille', 'surname', 'nom']);
+  const complet = prends(['fullname', 'nomcomplet', 'name']);
+  return {
+    nom: complet || [prenom, famille].filter(Boolean).join(' '),
+    email: prends(['email', 'emailaddress', 'courriel', 'mail', 'workemail']),
+    entreprise: prends(['company', 'companyname', 'entreprise', 'societe', 'organization', 'organisation', 'accountname']),
+    fonction: prends(['title', 'jobtitle', 'fonction', 'titre', 'poste']),
+    pays: prends(['country', 'pays', 'personcountry', 'companycountry']),
+    langue: d.langue, segment: d.segment, source: d.source, source_donnee: d.sourceDonnee,
+  };
+}
+
+function ouvrirImportMk() {
+  MK_IMPORT = [];
+  el('mk-modale').innerHTML = `${mkEntete('Importer des contacts', 'Fichier CSV : export Apollo, liste de salon…')}
+    <div class="grow overflow-y-auto px-space-lg py-space-md flex flex-col gap-space-md">
+      <p class="font-body-sm text-body-sm text-on-surface-variant">Colonnes reconnues : nom (ou prénom + nom), e-mail, entreprise, fonction, pays. Les adresses déjà présentes sont ignorées, et celles déjà désinscrites ne sont jamais réimportées. 500 contacts au plus par envoi, plusieurs envois à la suite si le fichier est plus grand.</p>
+      <label class="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Fichier
+        <input id="mki-fichier" type="file" accept=".csv,.txt,text/csv" class="${MK_CLASSE_CHAMP} normal-case tracking-normal py-1.5 h-auto"></label>
+      <label class="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">…ou collez le contenu
+        <textarea id="mki-texte" rows="4" class="w-full px-space-sm py-space-xs bg-surface-container-low text-on-surface font-code-sm text-code-sm rounded normal-case tracking-normal"></textarea></label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        ${mkSelect('Langue des contacts', 'mki-langue', MK_LANGUES, 'fr')}
+        ${mkChamp('Segment (btp, location, transport…)', 'mki-segment', '', 'text', 'maxlength="60"')}
+        ${mkChamp('Source', 'mki-source', 'apollo', 'text', 'maxlength="60"')}
+        ${mkChamp('Origine de la donnée (obligatoire)', 'mki-source-donnee', 'Apollo', 'text', 'maxlength="120" required')}
+      </div>
+      <div class="flex flex-wrap gap-space-sm">
+        <button type="button" id="mki-analyser" class="h-10 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md">Analyser</button>
+        <button type="button" id="mki-envoyer" disabled class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md disabled:opacity-40">Importer</button>
+      </div>
+      <p id="mki-resultat" class="font-body-sm text-body-sm text-on-surface-variant whitespace-pre-line"></p>
+    </div>
+    <div class="shrink-0 px-space-lg py-space-md flex justify-end bg-surface-container-low">
+      <button type="button" id="mk-annuler" class="h-10 px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md">Fermer</button>
+    </div>`;
+  el('mk-fermer').addEventListener('click', fermerMk);
+  el('mk-annuler').addEventListener('click', fermerMk);
+  el('mki-fichier').addEventListener('change', async (ev) => { const f = ev.target.files[0]; if (f) { el('mki-texte').value = await f.text(); analyserImportMk(); } });
+  el('mki-analyser').addEventListener('click', analyserImportMk);
+  el('mki-envoyer').addEventListener('click', envoyerImportMk);
+  ouvrirMk();
+}
+
+function defautsImportMk() {
+  return { langue: el('mki-langue').value, segment: el('mki-segment').value.trim() || null, source: el('mki-source').value.trim() || 'import', sourceDonnee: el('mki-source-donnee').value.trim() };
+}
+function analyserImportMk() {
+  const d = defautsImportMk();
+  const lignes = analyserCsvMk(el('mki-texte').value).map((l) => mkContactDepuisLigne(l, d));
+  const valides = lignes.filter((c) => c.nom);
+  MK_IMPORT = valides.slice(0, 5000);
+  const avecMail = MK_IMPORT.filter((c) => c.email).length;
+  el('mki-resultat').textContent = lignes.length
+    ? `${nbFr(lignes.length)} ligne(s) lue(s) : ${nbFr(valides.length)} avec un nom, dont ${nbFr(avecMail)} avec une adresse e-mail.` + (lignes.length - valides.length ? `\n${nbFr(lignes.length - valides.length)} ligne(s) sans nom seront ignorée(s).` : '') + (valides.length > 5000 ? '\nSeuls les 5 000 premiers contacts seront importés.' : '')
+    : "Aucun contact reconnu : vérifiez que la première ligne contient les noms de colonnes.";
+  el('mki-envoyer').disabled = !MK_IMPORT.length;
+  el('mki-envoyer').textContent = MK_IMPORT.length ? `Importer ${nbFr(MK_IMPORT.length)} contact${MK_IMPORT.length > 1 ? 's' : ''}` : 'Importer';
+}
+async function envoyerImportMk() {
+  const d = defautsImportMk();
+  if (!d.sourceDonnee) { el('mki-resultat').textContent = "Indiquez l'origine de la donnée (par exemple Apollo) : elle sera conservée sur chaque fiche."; return; }
+  const bouton = el('mki-envoyer');
+  bouton.disabled = true;
+  const total = { ajoutes: 0, doublons: 0, desinscrits: 0, invalides: 0 };
+  for (let i = 0; i < MK_IMPORT.length; i += 500) {
+    const { data, error } = await sb.rpc('marketing_importer_contacts', { p_lignes: MK_IMPORT.slice(i, i + 500).map((c) => ({ ...c, source_donnee: d.sourceDonnee })) });
+    if (error) {
+      el('mki-resultat').textContent = (mkAbsent(error) ? MK_ABSENT_TEXTE : 'Import interrompu : ' + error.message) + `\nDéjà importés avant l'erreur : ${total.ajoutes}.`;
+      bouton.disabled = false;
+      chargerContactsMk();
+      return;
+    }
+    Object.keys(total).forEach((k) => { total[k] += Number(data[k]) || 0; });
+    el('mki-resultat').textContent = `Import en cours… ${Math.min(i + 500, MK_IMPORT.length)} / ${MK_IMPORT.length}`;
+  }
+  el('mki-resultat').textContent = `Terminé : ${total.ajoutes} ajouté(s), ${total.doublons} déjà présent(s), ${total.desinscrits} désinscrit(s) ignoré(s), ${total.invalides} invalide(s).`;
+  MK_IMPORT = [];
+  bouton.textContent = 'Importer';
+  chargerContactsMk();
 }
 
 // ── Consommation de l'IA ─────────────────────────────────────────────────
