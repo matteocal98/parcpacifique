@@ -20,11 +20,12 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ss4rPvCbc1HHbqwfHHt9dVQqGSpoIQU7GdiN5BplKFM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-4CbN13RUNbyy1RHOjSnqvL96lTxP7XMAgjIGpCpIlkc=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
 <script src="./marketing-controle.js"></script>
+<script src="./marketing-tri.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
@@ -1116,6 +1117,10 @@
               <div class="flex flex-wrap items-center gap-space-sm">
                 <input id="mk-recherche" class="h-10 px-space-sm bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant rounded" placeholder="Nom, entreprise, adresse…">
                 <select id="mk-filtre-statut" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"></select>
+                <select id="mk-filtre-qualite" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm" title="Filtrer par niveau du tri"></select>
+                <label class="flex items-center gap-1 font-body-sm text-body-sm text-on-surface" title="Ne garde que le contact le mieux classé de chaque entreprise"><input id="mk-un-par-entreprise" type="checkbox"> Un par entreprise</label>
+                <button id="mk-qualifier" type="button" class="h-10 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md flex items-center gap-space-xs transition-colors" title="Classe tous les contacts par règles (taille, fonction, secteur)"><span class="material-symbols-outlined text-[18px]">filter_alt</span><span>Qualifier</span></button>
+                <span id="mk-retour-tri" class="font-body-sm text-body-sm text-on-surface-variant"></span>
                 <button id="mk-importer" type="button" class="h-10 px-space-md rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">upload_file</span><span>Importer</span></button>
                 <button id="mk-nouveau" type="button" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">person_add</span><span>Nouveau contact</span></button>
               </div>
@@ -1127,6 +1132,7 @@
                     <th class="py-3 px-space-md">Contact</th>
                     <th class="py-3 px-space-md">Fonction</th>
                     <th class="py-3 px-space-md">Pays</th>
+                    <th class="py-3 px-space-md" title="Niveau du tri par règles : A priorité, B bon, C en réserve, X ne pas contacter. Survolez le badge pour lire les raisons.">Qualité</th>
                     <th class="py-3 px-space-md">Statut</th>
                     <th class="py-3 px-space-md">Dernier contact</th>
                     <th class="py-3 px-space-md">Prochaine action</th>
@@ -2549,6 +2555,10 @@ function brancherMarketing() {
     + `<option value="desinscrit">Désinscrits</option>`;
   el('mk-recherche').addEventListener('input', rendreContactsMk);
   el('mk-filtre-statut').addEventListener('change', rendreContactsMk);
+  el('mk-filtre-qualite').innerHTML = '<option value="">Toutes qualités</option><option value="AB">A et B</option><option value="A">A — priorité</option><option value="B">B — bon contact</option><option value="C">C — en réserve</option><option value="X">X — ne pas contacter</option><option value="non">Non qualifiés</option>';
+  el('mk-filtre-qualite').addEventListener('change', rendreContactsMk);
+  el('mk-un-par-entreprise').addEventListener('change', rendreContactsMk);
+  el('mk-qualifier').addEventListener('click', lancerQualificationMk);
   el('mk-nouveau').addEventListener('click', () => ouvrirContactMk(null));
   el('mk-importer').addEventListener('click', ouvrirImportMk);
   el('mk-filtre-contenus').innerHTML = '<option value="">Tous les statuts</option>' + Object.entries(MK_STATUTS_CONTENU).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('');
@@ -2648,10 +2658,14 @@ function mkBadgeStatut(c) {
 function rendreContactsMk() {
   const q = mkNorm(el('mk-recherche').value.trim());
   const statut = el('mk-filtre-statut').value;
+  const qualite = el('mk-filtre-qualite').value;
+  const uniques = el('mk-un-par-entreprise').checked && window.marketingTri ? window.marketingTri.meilleurParEntreprise(MK_CONTACTS) : null;
   const liste = MK_CONTACTS.filter((c) => {
+    if (qualite === 'non' ? !!c.score_niveau : qualite === 'AB' ? !['A', 'B'].includes(c.score_niveau) : !!qualite && c.score_niveau !== qualite) return false;
+    if (uniques && !uniques.has(c.id)) return false;
     if (statut === 'desinscrit') { if (!c.desinscrit) return false; } else if (statut && c.statut !== statut) return false;
     return !q || mkNorm([c.nom, c.entreprise, c.email, c.fonction, c.pays, c.segment].join(' ')).includes(q);
-  }).sort((a, b) => (mkAFaire(b) - mkAFaire(a)) || String(a.prochaine_action_le || '9999').localeCompare(String(b.prochaine_action_le || '9999')) || String(b.updated_at).localeCompare(String(a.updated_at)));
+  }).sort((a, b) => (mkAFaire(b) - mkAFaire(a)) || String(a.prochaine_action_le || '9999').localeCompare(String(b.prochaine_action_le || '9999')) || ((b.score_points ?? -99) - (a.score_points ?? -99)) || String(b.updated_at).localeCompare(String(a.updated_at)));
   const aFaire = MK_CONTACTS.filter(mkAFaire);
   const bandeau = el('mk-a-faire');
   bandeau.classList.toggle('hidden', !aFaire.length);
@@ -2661,6 +2675,7 @@ function rendreContactsMk() {
       <td class="py-3 px-space-md"><div class="font-semibold text-on-surface">${echapper(c.nom)}</div><div class="text-on-surface-variant">${echapper(c.entreprise || '')}</div></td>
       <td class="py-3 px-space-md">${echapper(c.fonction || '—')}</td>
       <td class="py-3 px-space-md">${echapper(c.pays || '—')}</td>
+      <td class="py-3 px-space-md whitespace-nowrap">${mkBadgeQualite(c)}</td>
       <td class="py-3 px-space-md">${mkBadgeStatut(c)}</td>
       <td class="py-3 px-space-md">${mkDate(c.dernier_contact)}</td>
       <td class="py-3 px-space-md ${mkAFaire(c) ? 'text-error font-semibold' : ''}">${c.prochaine_action_le ? mkDate(c.prochaine_action_le) + ' · ' : ''}${echapper(c.prochaine_action || (c.prochaine_action_le ? '' : '—'))}</td></tr>`).join('');
@@ -2705,6 +2720,9 @@ async function ouvrirContactMk(id) {
         ${mkChamp('Fonction', 'mkf-fonction', f.fonction, 'text', 'maxlength="160"')}
         ${mkChamp('Adresse e-mail', 'mkf-email', f.email, 'email', 'maxlength="200"')}
         ${mkChamp('Pays', 'mkf-pays', f.pays, 'text', 'maxlength="60"')}
+        ${mkChamp("Effectif de l'entreprise", 'mkf-effectif', f.effectif, 'number', 'min="0" max="10000000"')}
+        ${mkChamp('Secteur (secteur d\'activité, mots-clés)', 'mkf-secteur', f.secteur, 'text', 'maxlength="300"')}
+        ${c && c.score_niveau ? `<div class="sm:col-span-2 rounded-xl p-space-sm bg-surface-container-low font-body-sm text-body-sm"><p class="font-label-md text-label-md text-on-surface">Qualité : ${mkBadgeQualite(c)}</p>${(Array.isArray(c.score_raisons) ? c.score_raisons : []).map((r) => `<p class="text-on-surface-variant">${echapper(r)}</p>`).join('')}</div>` : ''}
         ${mkSelect('Langue', 'mkf-langue', MK_LANGUES, f.langue)}
         ${mkChamp('Segment (btp, location, transport…)', 'mkf-segment', f.segment, 'text', 'maxlength="60"')}
         ${mkChamp('Source (apollo, linkedin, salon…)', 'mkf-source', f.source, 'text', 'maxlength="60"')}
@@ -2760,10 +2778,13 @@ async function enregistrerContactMk(ev) {
   const v = (id) => (el(id).value || '').trim();
   const fiche = {
     nom: v('mkf-nom'), entreprise: v('mkf-entreprise') || null, fonction: v('mkf-fonction') || null, email: v('mkf-email') || null, pays: v('mkf-pays') || null,
+    effectif: mkEntier(v('mkf-effectif')), secteur: v('mkf-secteur') || null,
     langue: v('mkf-langue'), segment: v('mkf-segment') || null, source: v('mkf-source') || 'autre', statut: v('mkf-statut'),
     dernier_contact: v('mkf-dernier') || null, prochaine_action: v('mkf-prochaine') || null, prochaine_action_le: v('mkf-prochaine-date') || null, notes: v('mkf-notes') || null,
   };
   if (!fiche.nom) { mkMessage('Le nom est obligatoire.', true); return; }
+  const tri = mkTri(fiche);   // la qualité suit la fiche : fonction, entreprise, effectif ou secteur modifiés → niveau recalculé
+  if (tri) Object.assign(fiche, { score_niveau: tri.niveau, score_points: tri.points, score_raisons: tri.raisons, score_le: new Date().toISOString() });
   const existant = MK_CONTACT_OUVERT && MK_CONTACT_OUVERT.id;
   const res = existant
     ? await sb.from('marketing_contacts').update(fiche).eq('id', existant).select().single()
@@ -2865,6 +2886,8 @@ function mkContactDepuisLigne(l, d) {
     entreprise: prends(['company', 'companyname', 'entreprise', 'societe', 'organization', 'organisation', 'accountname']),
     fonction: prends(['title', 'jobtitle', 'fonction', 'titre', 'poste']),
     pays: prends(['country', 'pays', 'personcountry', 'companycountry']),
+    effectif: mkEntier(prends(['employees', 'numberofemployees', 'employeecount', 'companyemployeecount', 'companyemployees', 'effectif', 'nombredemployes', 'nbdemployes', 'companysize', 'size'])),
+    secteur: [prends(['industry', 'industries', 'companyindustry', 'secteur', 'secteurdactivite', 'sector']), prends(['keywords', 'companykeywords'])].filter(Boolean).join(' · ').slice(0, 300) || null,
     langue: d.langue, segment: d.segment, source: d.source, source_donnee: d.sourceDonnee,
   };
 }
@@ -2936,7 +2959,52 @@ async function envoyerImportMk() {
   el('mki-resultat').textContent = `Terminé : ${total.ajoutes} ajouté(s), ${total.doublons} déjà présent(s), ${total.desinscrits} désinscrit(s) ignoré(s), ${total.invalides} invalide(s).`;
   MK_IMPORT = [];
   bouton.textContent = 'Importer';
-  chargerContactsMk();
+  await chargerContactsMk();
+  const nTri = await qualifierContactsMk(true);   // les contacts importés sont classés tout de suite
+  if (nTri) el('mki-resultat').textContent += `\nTri : ${nTri} contact${nTri > 1 ? 's' : ''} qualifié${nTri > 1 ? 's' : ''}.`;
+}
+
+// ── Marketing : tri des contacts par règles (migration marketing-tri-contacts.sql ; règles dans marketing-tri.js, généré depuis la source du serveur) ──
+// Le tri ne dit pas « contactez » : il classe (A à traiter en priorité, B bon contact, C en réserve, X ne pas contacter) et explique chaque niveau par ses raisons
+// (survol du badge). Aucune donnée n'est envoyée à un tiers : tout se calcule ici, dans le navigateur, avec des règles écrites et testées.
+function mkEntier(texte) {
+  // « 51-200 » → 200 ; « 10 000+ » → 10000 ; « 1,001-5,000 » → 5000
+  const propre = String(texte ?? '').replace(/(\d)[\s .,](?=\d{3}(?!\d))/g, '$1');
+  const nombres = propre.match(/\d+/g);
+  return nombres ? Math.min(Number(nombres[nombres.length - 1]), 10000000) : null;
+}
+function mkTri(c) { return window.marketingTri ? window.marketingTri.evaluerContact(c) : null; }
+function mkBadgeQualite(c) {
+  if (!c.score_niveau) return '<span class="text-on-surface-variant" title="Pas encore qualifié">—</span>';
+  const style = { A: 'bg-primary-container text-on-primary', B: 'bg-surface-container-high text-on-surface', C: 'bg-surface-container-low text-on-surface-variant', X: 'bg-error-container text-error' }[c.score_niveau] || '';
+  const raisons = (Array.isArray(c.score_raisons) ? c.score_raisons : []).join('\n');
+  return `<span title="${echapper(raisons)}" class="px-2 py-0.5 rounded-full ${style} font-label-sm text-label-sm cursor-help">${echapper(c.score_niveau)}</span> <span class="text-on-surface-variant">${c.score_points ?? ''}</span>`;
+}
+// seulementNonEvalues : true = ne qualifier que les contacts qui n'ont pas encore de niveau (après un import) ; false = tout recalculer (règles modifiées, fiches corrigées).
+async function qualifierContactsMk(seulementNonEvalues) {
+  const alerte = el('mk-alerte-contacts');
+  if (!window.marketingTri) { alerte.textContent = "Le tri n'est pas chargé (marketing-tri.js)."; alerte.classList.remove('hidden'); return 0; }
+  const cibles = MK_CONTACTS.filter((c) => !seulementNonEvalues || !c.score_niveau);
+  let total = 0;
+  for (let i = 0; i < cibles.length; i += 500) {
+    const lot = cibles.slice(i, i + 500).map((c) => { const r = mkTri(c); return { id: c.id, niveau: r.niveau, points: r.points, raisons: r.raisons }; });
+    const { error } = await sb.rpc('marketing_enregistrer_scores', { p_scores: lot });
+    if (error) {
+      alerte.textContent = mkAbsent(error) ? "Le tri n'est pas encore installé dans la base : il manque le script marketing-tri-contacts.sql." : 'Tri impossible : ' + error.message;
+      alerte.classList.remove('hidden');
+      break;
+    }
+    lot.forEach((r) => { const c = MK_CONTACTS.find((x) => x.id === r.id); if (c) Object.assign(c, { score_niveau: r.niveau, score_points: r.points, score_raisons: r.raisons, score_le: new Date().toISOString() }); });
+    total += lot.length;
+  }
+  if (cibles.length) rendreContactsMk();
+  return total;
+}
+async function lancerQualificationMk() {
+  const retour = el('mk-retour-tri');
+  retour.textContent = 'Tri en cours…';
+  const n = await qualifierContactsMk(false);
+  retour.textContent = n ? `${nbFr(n)} contact${n > 1 ? 's' : ''} qualifié${n > 1 ? 's' : ''}.` : '';
 }
 
 // ── Marketing : calendrier des contenus (migration marketing-contenus.sql) ─────────────────────────────────
