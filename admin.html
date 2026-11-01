@@ -20,10 +20,11 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-g1g9qdMrS2KY/5e7MN3eG6Wk9UQgUGXwRPK4lmS0fdE=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-mbPr1Ecxrgx2E2umKhVW5ug5eQyx1oktSlPP/eZgZh0=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
+<script src="./marketing-controle.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
@@ -987,6 +988,7 @@
         <div class="flex flex-wrap items-center gap-space-xs bg-surface-container-low p-space-xs rounded-lg shadow-sm self-start">
           <button id="mk-onglet-audience" type="button" data-onglet="audience" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Audience et inscrits</button>
           <button id="mk-onglet-contacts" type="button" data-onglet="contacts" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contacts</button>
+          <button id="mk-onglet-contenus" type="button" data-onglet="contenus" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contenus</button>
         </div>
 
         <!-- Audience -->
@@ -1065,6 +1067,39 @@
               </div>
               <p id="mk-vide-pages" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
             </div>
+          </div>
+        </div>
+
+        <!-- Contenus : calendrier des publications -->
+        <div id="mk-panneau-contenus" class="hidden flex flex-col gap-space-lg">
+          <div id="mk-alerte-contenus" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <div class="p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+              <div>
+                <h2 class="font-headline-md text-headline-md text-on-surface">Calendrier des contenus</h2>
+                <p id="mk-contenus-compte" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Rien ne passe à « validé » ni à « publié » sans une fiche de contrôle sans point bloquant : la base de données le refuse. Rien ne se publie tout seul : on copie le texte validé, on le publie à la main, puis on marque « publié ».</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-space-sm">
+                <select id="mk-filtre-contenus" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"></select>
+                <button id="mk-nouveau-contenu" type="button" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md flex items-center gap-space-xs transition-colors"><span class="material-symbols-outlined text-[18px]">edit_note</span><span>Nouveau contenu</span></button>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left font-body-sm text-body-sm">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm">
+                    <th class="py-3 px-space-md">Prévu le</th>
+                    <th class="py-3 px-space-md">Contenu</th>
+                    <th class="py-3 px-space-md">Canal</th>
+                    <th class="py-3 px-space-md">Statut</th>
+                    <th class="py-3 px-space-md">Contrôle</th>
+                  </tr>
+                </thead>
+                <tbody id="mk-liste-contenus" class="divide-y divide-surface-container-low"></tbody>
+              </table>
+            </div>
+            <p id="mk-vide-contenus" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
           </div>
         </div>
 
@@ -2480,26 +2515,30 @@ const MK_ABSENT_TEXTE = "La mesure n'est pas encore installée dans la base : il
 async function chargerMarketing() {
   if (!MK_BRANCHE) { brancherMarketing(); MK_BRANCHE = true; }
   afficherOngletMarketing(MK_ONGLET);
-  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else await chargerAudienceMk();
+  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else await chargerAudienceMk();
 }
 
 function brancherMarketing() {
   document.querySelectorAll('.mk-onglet').forEach((b) => b.addEventListener('click', () => { MK_ONGLET = b.dataset.onglet; chargerMarketing(); }));
   el('mk-periode').addEventListener('change', chargerAudienceMk);
-  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else chargerAudienceMk(); });
+  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else chargerAudienceMk(); });
   el('mk-filtre-statut').innerHTML = `<option value="">Tous les statuts</option>` + Object.entries(MK_STATUTS).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('')
     + `<option value="desinscrit">Désinscrits</option>`;
   el('mk-recherche').addEventListener('input', rendreContactsMk);
   el('mk-filtre-statut').addEventListener('change', rendreContactsMk);
   el('mk-nouveau').addEventListener('click', () => ouvrirContactMk(null));
   el('mk-importer').addEventListener('click', ouvrirImportMk);
+  el('mk-filtre-contenus').innerHTML = '<option value="">Tous les statuts</option>' + Object.entries(MK_STATUTS_CONTENU).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('');
+  el('mk-filtre-contenus').addEventListener('change', rendreContenusMk);
+  el('mk-nouveau-contenu').addEventListener('click', () => ouvrirContenuMk(null));
+  el('mk-liste-contenus').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContenuMk(tr.dataset.id); });
   el('mk-liste-contacts').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContactMk(tr.dataset.id); });
   el('mk-overlay').addEventListener('click', (ev) => { if (ev.target === el('mk-overlay')) fermerMk(); });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !el('mk-overlay').classList.contains('hidden')) fermerMk(); });
 }
 
 function afficherOngletMarketing(nom) {
-  ['audience', 'contacts'].forEach((n) => {
+  ['audience', 'contacts', 'contenus'].forEach((n) => {
     el('mk-panneau-' + n).classList.toggle('hidden', n !== nom);
     const b = el('mk-onglet-' + n);
     b.classList.toggle('bg-surface-container-lowest', n === nom);
@@ -2875,6 +2914,199 @@ async function envoyerImportMk() {
   MK_IMPORT = [];
   bouton.textContent = 'Importer';
   chargerContactsMk();
+}
+
+// ── Marketing : calendrier des contenus (migration marketing-contenus.sql) ─────────────────────────────────
+// Un contenu ne devient « validé » ou « publié » QUE si sa fiche de contrôle (marketing-controle.js, généré depuis la même source que le serveur) n'a
+// aucun point bloquant, ET si le texte validé est exactement celui qui a été contrôlé : la base le vérifie par empreinte, elle refuse le reste.
+const MK_CANAUX = { linkedin: 'LinkedIn', facebook: 'Facebook', email_froid: 'E-mail de prospection', email_inscrits: 'E-mail aux inscrits', page_site: 'Page du site', video_script: 'Script de vidéo', note: 'Note interne' };
+const MK_STATUTS_CONTENU = { brouillon: 'Brouillon', a_relire: 'À relire', valide: 'Validé', publie: 'Publié', abandonne: 'Abandonné' };
+let MK_CONTENUS = [];
+let MK_CONTENU_OUVERT = null;
+let MK_CONTENU_MINUTEUR = null;
+
+function mkControler(texte, langue, canal, faits) {
+  if (!window.marketingControle) return null;
+  return window.marketingControle.controlerPublication({ texte, langue, canal, faits_cites: faits });
+}
+async function mkSha256(texte) {
+  const octets = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texte));
+  return [...new Uint8Array(octets)].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+function mkBadgeControle(f) {
+  if (!f) return '<span class="text-on-surface-variant">—</span>';
+  if (!f.publiable) return `<span class="px-2 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm">Bloqué (${f.bloquants})</span>`;
+  return f.avertissements
+    ? `<span class="px-2 py-0.5 rounded-full bg-surface-container-low text-[#9A5A0A] font-label-sm text-label-sm">À lire (${f.avertissements})</span>`
+    : '<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm">Publiable</span>';
+}
+function mkBadgeStatutContenu(s) {
+  const style = s === 'publie' ? 'bg-primary-container text-on-primary' : s === 'valide' ? 'bg-surface-container-high text-on-surface' : s === 'abandonne' ? 'bg-surface-container text-on-surface-variant' : 'bg-surface-container-low text-on-surface';
+  return `<span class="px-2 py-0.5 rounded-full ${style} font-label-sm text-label-sm">${echapper(MK_STATUTS_CONTENU[s] || s)}</span>`;
+}
+function mkFicheHtml(f) {
+  if (!f) return `<p class="font-body-sm text-body-sm text-error">Le contrôleur n'est pas chargé (marketing-controle.js) : impossible de contrôler ce texte.</p>`;
+  const style = { bloquant: 'text-error', avertissement: 'text-[#9A5A0A]', ok: 'text-on-surface-variant' };
+  const icone = { bloquant: '✘', avertissement: '!', ok: '✔' };
+  const axes = { pertinence: 'pertinence', coherence: 'cohérence', droit: 'droit' };
+  const titre = f.publiable ? (f.avertissements ? 'Publiable sous réserve de relecture' : 'Publiable') : 'Bloqué — à corriger';
+  return `<p class="font-label-md text-label-md ${f.publiable ? 'text-on-surface' : 'text-error'}">${titre}</p>` + f.controles.map((x) => `<p class="font-body-sm text-body-sm ${style[x.niveau]}">${icone[x.niveau]} <span class="uppercase font-label-sm text-label-sm">${axes[x.axe]}</span> — ${echapper(x.message)}</p>`).join('');
+}
+
+async function chargerContenusMk() {
+  const alerte = el('mk-alerte-contenus');
+  alerte.classList.add('hidden');
+  const { data, error } = await sb.from('marketing_contenus').select('*').order('prevu_le', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false }).limit(1000);
+  if (error) {
+    alerte.textContent = mkAbsent(error) ? "Le calendrier n'est pas encore installé dans la base : il manque le script marketing-contenus.sql." : 'Lecture impossible : ' + error.message;
+    alerte.classList.remove('hidden');
+    return;
+  }
+  MK_CONTENUS = data || [];
+  rendreContenusMk();
+}
+
+function rendreContenusMk() {
+  const statut = el('mk-filtre-contenus').value;
+  const liste = MK_CONTENUS.filter((c) => !statut || c.statut === statut);
+  el('mk-contenus-compte').textContent = `${nbFr(liste.length)} contenu${liste.length > 1 ? 's' : ''} affiché${liste.length > 1 ? 's' : ''} sur ${nbFr(MK_CONTENUS.length)}`;
+  el('mk-liste-contenus').innerHTML = liste.map((c) => {
+    const f = ['publie', 'abandonne'].includes(c.statut) ? null : mkControler(c.texte, c.langue, c.canal, c.faits_cites || []);
+    const retard = c.prevu_le && c.prevu_le < mkJour() && !['publie', 'abandonne'].includes(c.statut);
+    return `<tr data-id="${echapper(c.id)}" class="cursor-pointer hover:bg-surface-container-low transition-colors">
+      <td class="py-3 px-space-md whitespace-nowrap ${retard ? 'text-error font-semibold' : ''}">${c.prevu_le ? mkDate(c.prevu_le) : '—'}</td>
+      <td class="py-3 px-space-md"><div class="font-semibold text-on-surface">${echapper(c.titre)}</div><div class="text-on-surface-variant">${echapper(String(c.texte).replace(/\s+/g, ' ').slice(0, 90))}…</div></td>
+      <td class="py-3 px-space-md">${echapper(MK_CANAUX[c.canal] || c.canal)} · ${c.langue.toUpperCase()}</td>
+      <td class="py-3 px-space-md">${mkBadgeStatutContenu(c.statut)}</td>
+      <td class="py-3 px-space-md">${mkBadgeControle(f)}</td></tr>`;
+  }).join('');
+  mkVide('mk-vide-contenus', !liste.length, MK_CONTENUS.length ? 'Aucun contenu avec ce statut.' : 'Aucun contenu pour l\'instant. Créez-en un, ou chargez la première série fournie.');
+}
+
+function ouvrirContenuMk(id) {
+  const c = id ? MK_CONTENUS.find((x) => x.id === id) : null;
+  if (id && !c) return;
+  MK_CONTENU_OUVERT = c || { id: null, statut: 'brouillon' };
+  const f = c || { titre: '', canal: 'linkedin', langue: 'fr', texte: '', faits_cites: [], campagne: '', prevu_le: '', notes: '', statut: 'brouillon' };
+  const verifies = window.marketingControle ? window.marketingControle.FAITS.filter((x) => x.statut === 'verifie') : [];
+  const fige = ['valide', 'publie'].includes(f.statut);
+  el('mk-modale').innerHTML = `${mkEntete(c ? c.titre : 'Nouveau contenu', c ? `${MK_STATUTS_CONTENU[c.statut]}${c.valide_le ? ' le ' + mkDate(c.valide_le) : ''}` : 'Calendrier des contenus')}
+    <div id="mk-corps" class="grow overflow-y-auto px-space-lg py-space-md flex flex-col gap-space-md">
+      <form id="mkc-form" class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div class="sm:col-span-2">${mkChamp('Titre *', 'mkc-titre', f.titre, 'text', 'required maxlength="160"')}</div>
+        ${mkSelect('Canal', 'mkc-canal', MK_CANAUX, f.canal)}
+        ${mkSelect('Langue', 'mkc-langue', { fr: 'Français', en: 'Anglais' }, f.langue)}
+        ${mkChamp('Prévu le', 'mkc-prevu', f.prevu_le, 'date')}
+        ${mkChamp('Campagne (utm_campaign)', 'mkc-campagne', f.campagne, 'text', 'maxlength="60" placeholder="lancement-2026-11"')}
+        <label class="sm:col-span-2 flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Texte *
+          <textarea id="mkc-texte" rows="10" maxlength="8000" required class="w-full px-space-sm py-space-xs bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded normal-case tracking-normal">${echapper(f.texte)}</textarea></label>
+        <div class="sm:col-span-2 flex flex-wrap items-center gap-space-sm">
+          <button type="button" id="mkc-lien-suivi" class="h-9 px-space-sm rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md">Ajouter le lien suivi</button>
+          <button type="button" id="mkc-copier" class="h-9 px-space-sm rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md">Copier le texte</button>
+          <span id="mkc-longueur" class="font-body-sm text-body-sm text-on-surface-variant"></span>
+        </div>
+        <fieldset class="sm:col-span-2 flex flex-col gap-1">
+          <legend class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide mb-1">Faits cités (uniquement des faits vérifiés)</legend>
+          ${verifies.map((x) => `<label class="flex items-start gap-space-xs font-body-sm text-body-sm text-on-surface"><input type="checkbox" class="mkc-fait mt-1" value="${echapper(x.id)}" ${(f.faits_cites || []).includes(x.id) ? 'checked' : ''}><span><span class="font-code-sm text-code-sm text-on-surface-variant">${echapper(x.id)}</span> — ${echapper(x.fr)}</span></label>`).join('') || '<p class="font-body-sm text-body-sm text-error">Base de faits indisponible.</p>'}
+        </fieldset>
+        <label class="sm:col-span-2 flex flex-col gap-1 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Notes
+          <textarea id="mkc-notes" rows="2" maxlength="2000" class="w-full px-space-sm py-space-xs bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded normal-case tracking-normal">${echapper(f.notes || '')}</textarea></label>
+        ${c && fige ? mkChamp('Lien de la publication (une fois publiée)', 'mkc-lien', c.lien_publication || '', 'url', 'maxlength="500" placeholder="https://…"') : ''}
+      </form>
+      <section class="rounded-xl p-space-md bg-surface-container-low flex flex-col gap-1" aria-live="polite">
+        <h4 class="font-headline-sm text-headline-sm text-on-surface">Fiche de contrôle</h4>
+        <div id="mkc-fiche"></div>
+      </section>
+      ${fige ? `<p class="font-body-sm text-body-sm text-on-surface-variant">Ce contenu est ${c.statut === 'publie' ? 'publié' : 'validé'}. Si vous modifiez son texte, il repasse automatiquement « à relire » et doit être recontrôlé.</p>` : ''}
+      <p id="mk-modale-msg" class="hidden font-body-sm text-body-sm"></p>
+    </div>
+    <div class="shrink-0 px-space-lg py-space-md flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-low">
+      <div class="flex gap-space-sm">${c && !['publie', 'abandonne'].includes(c.statut) ? `<button type="button" id="mkc-abandonner" class="h-10 px-space-md rounded text-error hover:bg-error-container font-label-md text-label-md">Abandonner</button>` : ''}${c && c.statut === 'abandonne' ? `<button type="button" id="mkc-rouvrir" class="h-10 px-space-md rounded bg-surface-container text-on-surface font-label-md text-label-md">Rouvrir en brouillon</button>` : ''}</div>
+      <div class="flex flex-wrap gap-space-sm">
+        <button type="button" id="mk-annuler" class="h-10 px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md">Fermer</button>
+        ${!c || c.statut === 'brouillon' ? `<button type="button" id="mkc-relire" class="h-10 px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md">Envoyer en relecture</button>` : ''}
+        ${!c || ['brouillon', 'a_relire'].includes(c.statut) ? `<button type="button" id="mkc-valider" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md disabled:opacity-40">Valider</button>` : ''}
+        ${c && c.statut === 'valide' ? `<button type="button" id="mkc-publier" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md">Marquer publié</button>` : ''}
+        <button type="submit" form="mkc-form" class="h-10 px-space-md rounded bg-surface-container-high text-on-surface hover:bg-surface-container font-label-md text-label-md">Enregistrer</button>
+      </div>
+    </div>`;
+  el('mk-fermer').addEventListener('click', fermerMk);
+  el('mk-annuler').addEventListener('click', fermerMk);
+  el('mkc-form').addEventListener('submit', (ev) => { ev.preventDefault(); enregistrerContenuMk(null); });
+  ['mkc-texte', 'mkc-canal', 'mkc-langue'].forEach((id) => el(id).addEventListener('input', majFicheContenuMk));
+  document.querySelectorAll('.mkc-fait').forEach((b) => b.addEventListener('change', majFicheContenuMk));
+  el('mkc-lien-suivi').addEventListener('click', ajouterLienSuiviMk);
+  el('mkc-copier').addEventListener('click', copierContenuMk);
+  el('mkc-relire')?.addEventListener('click', () => enregistrerContenuMk('a_relire'));
+  el('mkc-valider')?.addEventListener('click', () => { if (window.confirm('Valider ce texte ?\n\nIl ne pourra être publié que tel quel : toute modification le renverra « à relire ».')) enregistrerContenuMk('valide'); });
+  el('mkc-publier')?.addEventListener('click', () => enregistrerContenuMk('publie'));
+  el('mkc-abandonner')?.addEventListener('click', () => enregistrerContenuMk('abandonne'));
+  el('mkc-rouvrir')?.addEventListener('click', () => enregistrerContenuMk('brouillon'));
+  majFicheContenuMk();
+  ouvrirMk();
+}
+
+function lireContenuMk() {
+  return {
+    titre: el('mkc-titre').value.trim(), canal: el('mkc-canal').value, langue: el('mkc-langue').value, texte: el('mkc-texte').value.replace(/\r\n/g, '\n').trim(),
+    prevu_le: el('mkc-prevu').value || null, campagne: el('mkc-campagne').value.trim() || null, notes: el('mkc-notes').value.trim() || null,
+    faits_cites: [...document.querySelectorAll('.mkc-fait:checked')].map((b) => b.value),
+  };
+}
+function majFicheContenuMk() {
+  clearTimeout(MK_CONTENU_MINUTEUR);
+  MK_CONTENU_MINUTEUR = setTimeout(() => {
+    if (!el('mkc-texte')) return;
+    const c = lireContenuMk();
+    const f = mkControler(c.texte, c.langue, c.canal, c.faits_cites);
+    el('mkc-fiche').innerHTML = mkFicheHtml(f);
+    el('mkc-longueur').textContent = `${c.texte.length} caractères`;
+    const bouton = el('mkc-valider');
+    if (bouton) bouton.disabled = !f || !f.publiable;
+  }, 200);
+}
+function ajouterLienSuiviMk() {
+  const c = lireContenuMk();
+  if (!c.campagne) { mkMessage("Renseignez d'abord la campagne (utm_campaign) pour fabriquer le lien suivi.", true); return; }
+  const medium = c.canal.startsWith('email') ? 'email' : 'social';
+  const source = c.canal === 'email_froid' ? 'email' : c.canal === 'email_inscrits' ? 'inscrits' : c.canal.replace(/_.*/, '');
+  const lien = `https://kalea.pro/${c.langue === 'en' ? 'en/' : ''}?utm_source=${encodeURIComponent(source)}&utm_medium=${medium}&utm_campaign=${encodeURIComponent(c.campagne)}`;
+  const zone = el('mkc-texte');
+  zone.value = zone.value.replace(/\s+$/, '') + '\n\n' + lien;
+  majFicheContenuMk();
+}
+async function copierContenuMk() {
+  try { await navigator.clipboard.writeText(el('mkc-texte').value); mkMessage('Texte copié.', false); }
+  catch (err) { mkMessage('Copie impossible : sélectionnez le texte et copiez-le à la main.', true); }
+}
+
+// statut : null = garder le statut actuel (brouillon pour un nouveau contenu) ; sinon le statut demandé.
+async function enregistrerContenuMk(statut) {
+  const c = lireContenuMk();
+  if (!c.titre || !c.texte) { mkMessage('Le titre et le texte sont obligatoires.', true); return; }
+  const f = mkControler(c.texte, c.langue, c.canal, c.faits_cites);
+  const actuel = MK_CONTENU_OUVERT && MK_CONTENU_OUVERT.id ? MK_CONTENU_OUVERT : null;
+  const cible = statut || (actuel ? actuel.statut : 'brouillon');
+  if (statut === 'publie' && actuel && c.texte !== String(actuel.texte).trim()) { mkMessage("Le texte a été modifié depuis la validation : enregistrez-le d'abord (il repassera « à relire » et devra être revalidé).", true); return; }
+  const fiche = { ...c, statut: cible };   // publier ne recontrôle pas : la fiche et l'empreinte validées restent celles de la base
+  if (statut !== 'publie') {
+    fiche.fiche = f ? { publiable: f.publiable, bloquants: f.bloquants, avertissements: f.avertissements, controles: f.controles } : null;
+    fiche.fiche_publiable = !!(f && f.publiable);
+    fiche.controle_hash = await mkSha256(c.texte);
+    fiche.controle_le = new Date().toISOString();
+  } else {
+    fiche.lien_publication = (el('mkc-lien') && el('mkc-lien').value.trim()) || null;
+    delete fiche.texte;
+  }
+  if (cible === 'valide' && !(f && f.publiable)) { mkMessage('Le contrôle est bloquant : corrigez le texte avant de valider.', true); return; }
+  const res = actuel
+    ? await sb.from('marketing_contenus').update(fiche).eq('id', actuel.id).select().single()
+    : await sb.from('marketing_contenus').insert({ ...fiche, created_by: MOI ? MOI.id : null }).select().single();
+  if (res.error) { mkMessage('Refusé : ' + res.error.message, true); return; }
+  const i = MK_CONTENUS.findIndex((x) => x.id === res.data.id);
+  if (i >= 0) MK_CONTENUS[i] = res.data; else MK_CONTENUS.unshift(res.data);
+  rendreContenusMk();
+  if (statut) fermerMk(); else ouvrirContenuMk(res.data.id);
 }
 
 // ── Consommation de l'IA ─────────────────────────────────────────────────
