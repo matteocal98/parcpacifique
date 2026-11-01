@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-mbPr1Ecxrgx2E2umKhVW5ug5eQyx1oktSlPP/eZgZh0=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-Ss4rPvCbc1HHbqwfHHt9dVQqGSpoIQU7GdiN5BplKFM=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -1384,13 +1384,36 @@ async function demarrer() {
   el('ticket-overlay')?.addEventListener('click', (ev) => { if (ev.target === el('ticket-overlay')) fermerTicket(); });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && TICKET_OUVERT) fermerTicket(); });
 
-  sb.auth.onAuthStateChange((_event, session) => {
-    if (session?.user) verifierAccesEtCharger(session.user.id);
-    else afficherConnexion();
-  });
+  sb.auth.onAuthStateChange(surChangementSession);
+  document.addEventListener('visibilitychange', surRetourSurOnglet);
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) verifierAccesEtCharger(session.user.id);
   else afficherConnexion();
+}
+
+// Supabase rappelle « SIGNED_IN » à CHAQUE retour sur l'onglet (et « TOKEN_REFRESHED » à chaque renouvellement du jeton), pour la même personne.
+// Recharger la console à ces moments-là ramenait toujours à l'écran d'accueil. On ne (re)charge donc que si la personne connectée CHANGE
+// (ou si la console n'est pas encore chargée) ; une déconnexion, elle, est toujours prise en compte.
+let CHARGEMENT_SESSION_POUR = null;
+function surChangementSession(_event, session) {
+  if (!session?.user) { CHARGEMENT_SESSION_POUR = null; afficherConnexion(); return; }
+  const id = session.user.id;
+  if ((MOI && MOI.id === id) || CHARGEMENT_SESSION_POUR === id) return;
+  CHARGEMENT_SESSION_POUR = id;
+  Promise.resolve(verifierAccesEtCharger(id)).finally(() => { if (CHARGEMENT_SESSION_POUR === id) CHARGEMENT_SESSION_POUR = null; });
+}
+
+// Le retour sur l'onglet ne change plus d'écran, mais les listes (clients, tickets) restent fraîches : après plus de 2 minutes d'absence,
+// on les relit sans bruit — jamais pendant qu'une fenêtre (ticket, marketing) est ouverte, pour ne pas la déranger.
+let ONGLET_CACHE_DEPUIS = 0;
+function surRetourSurOnglet() {
+  if (document.visibilityState === 'hidden') { ONGLET_CACHE_DEPUIS = Date.now(); return; }
+  const absentMs = ONGLET_CACHE_DEPUIS ? Date.now() - ONGLET_CACHE_DEPUIS : 0;
+  ONGLET_CACHE_DEPUIS = 0;
+  if (!MOI || absentMs < 120000) return;
+  if (TICKET_OUVERT || !el('mk-overlay')?.classList.contains('hidden')) return;
+  chargerSocietes();
+  chargerTickets();
 }
 
 function afficherConnexion() {
