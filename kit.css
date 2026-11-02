@@ -1642,7 +1642,7 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
    elle-même et sa barre de boutons reste collée en bas, toujours atteignable sans chercher */
 .modal.a-croix:not(.fournisseur-modal){max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow-y:auto;}
 .modal.a-croix:not(.fournisseur-modal) > .modal-actions{position:sticky;bottom:0;z-index:3;margin-top:12px;padding:10px 0 2px;background:linear-gradient(to bottom,transparent,var(--fond-modale,#fff) 22%);}
-.stock-mouvement-modal .modal.a-croix > .modal-actions{background:linear-gradient(to bottom,rgba(242,244,248,0),#F2F4F8 22%);}
+.stock-mouvement-modal .modal.a-croix > .modal-actions{background:linear-gradient(to bottom,transparent,var(--fond-modale,#E6E6E6) 22%);}
 /* la fiche fournisseur reste en colonne (en-tête, corps qui défile, pied) même quand la règle « fenêtres d'export » du paysage s'applique */
 .modal.fournisseur-modal.export-modal{display:flex;flex-direction:column;align-items:stretch;gap:0;grid-template-columns:none;}
 @media (orientation:landscape) and (max-height:520px) and (max-width:899px){
@@ -2378,8 +2378,9 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
   .machine-modal-add .text-sm.font-bold,.machine-modal-edit .text-sm.font-bold{font-size:12px !important;}
 }
 /* ── Ajout / édition d'une machine : mêmes fonds que les autres fenêtres du Stock et de l'intervention ──
-   fond de la fenêtre blanc, blocs en teinte légère rgba(14,19,51,.04), champs et cartes blancs posés dessus, pas d'ombre. */
-.machine-modal-add .modal,.machine-modal-edit .modal,.machine-modal-add .bg-modal-bg,.machine-modal-edit .bg-modal-bg{background:#fff !important;}
+   fond de la fenêtre = le fond COMMUN des fenêtres (--fond-modale), blocs en teinte légère rgba(14,19,51,.04), champs et cartes blancs posés dessus, pas d'ombre.
+   (Avant le 2026-11-02 : blanc forcé, seule fenêtre à part avec « choix de date ».) */
+.machine-modal-add .modal,.machine-modal-edit .modal,.machine-modal-add .bg-modal-bg,.machine-modal-edit .bg-modal-bg{background:var(--fond-modale) !important;}
 .machine-modal-add section > [class*="bg-surface-container-low"],.machine-modal-edit section > [class*="bg-surface-container-low"]{background:rgba(14,19,51,.04) !important;box-shadow:none !important;}
 .machine-modal-add [class*="bg-surface-container-low"] label[class*="bg-surface-container"],.machine-modal-edit [class*="bg-surface-container-low"] label[class*="bg-surface-container"]:not(:has(input:checked)){background:#fff;}
 .machine-modal-add [class*="mform-close"]:focus,.machine-modal-edit [class*="mform-close"]:focus,.machine-modal-add button[aria-label="Fermer"]:focus,.machine-modal-edit button[aria-label="Fermer"]:focus{outline:none;box-shadow:none;}
@@ -2757,7 +2758,7 @@ html:not([data-theme="dark"]) .otm-fiche .otm-carte,html:not([data-theme="dark"]
 html:not([data-theme="dark"]) .otm-fiche .otm-tache:hover{background:var(--otm-bleu-fond);}
 
 /* Le calendrier (choix d'une date) garde son fond clair d'origine, même si le fond des autres fenêtres passe au gris 10 % */
-html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:#F2F4F8;}
+html:not([data-theme="dark"]) .overlay.choix-date-modal .modal{background:var(--fond-modale);}
 
 /* Mon compte : boutons sur les niveaux de la charte (« Afficher » et boutons de langue au niveau compact 32 / 13, comme le choix du thème) et champs à la même police */
 .compte-page .toggle-pw-btn{min-height:32px;padding:0 12px;font-size:13px;font-weight:700;}
