@@ -51,10 +51,21 @@
     html[data-lang="en"] .lang-fr { display: none !important; }
 
     /* Custom Gradients */
-    /* Accroches tournantes : toutes empilées dans la même cellule, donc la hauteur est celle de la plus longue (aucun saut de page quand le texte change). */
+    /* Accroches tournantes — effet « tourbillon » (swirl) : chaque lettre du titre, puis chaque mot du sous-titre, bascule en 3D autour de l'axe horizontal, l'un après l'autre
+       (même mouvement que le titre animé d'Elementor de type « swirl » : 0,4 s, arrivée à 90°, léger dépassement à -10°, sortie de l'autre côté). Le découpage est fait par accroches.js.
+       Les accroches sont empilées dans la même cellule de grille : la hauteur est celle de la plus longue, la page ne saute jamais. */
     .accroches { display: grid; }
-    .accroche { grid-area: 1 / 1; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .55s ease, transform .55s ease, visibility 0s linear .55s; }
-    .accroche.is-actif { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+    .accroche { grid-area: 1 / 1; visibility: hidden; }
+    .accroche.is-actif { visibility: visible; }
+    .accroche .mot { display: inline-block; white-space: nowrap; }
+    .accroche.lettrise .lettre, .accroche.lettrise .mot-anim { display: inline-block; backface-visibility: hidden; opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); }
+    .accroche.lettrise .lettre.entre, .accroche.lettrise .mot-anim.entre { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); }
+    .accroche.lettrise .entre-anim { animation: acc-swirl-in .4s ease forwards; }
+    .accroche.lettrise .sort-anim { animation: acc-swirl-out .4s ease forwards; }
+    /* Le dégradé de marque ne peut pas suivre des lettres qui basculent : accroches.js colore chaque lettre (même dégradé, lettre par lettre). */
+    .accroche.lettrise .brand-gradient-text { background: none; -webkit-text-fill-color: currentColor; }
+    @keyframes acc-swirl-in { 0% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); } 60% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(-10deg); } 100% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } }
+    @keyframes acc-swirl-out { 0% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } 60% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-100deg); } 100% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-90deg); } }
     .accroches-pilote { display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px; }
     .accroches-pilote button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 9999px; }
     .accroches-pilote button:focus-visible { outline: 2px solid #236FE0; outline-offset: 2px; }
@@ -63,7 +74,7 @@
     .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
     .accroches-pilote .accroche-pause:hover { opacity: 1; }
     .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
-    @media (prefers-reduced-motion: reduce) { .accroche { transition: none; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .accroche.lettrise .entre-anim, .accroche.lettrise .sort-anim { animation: none; } }
     .brand-gradient-text {
       background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
       -webkit-background-clip: text;

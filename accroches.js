@@ -1,13 +1,16 @@
-/* KALEA — page d'accueil : accroches tournantes (titre + sous-titre qui changent).
+/* KALEA — page d'accueil : accroches tournantes, en « tourbillon » (swirl).
  *
  * Le HTML contient toutes les accroches, empilées dans la même cellule ; la première est le <h1> de la page (lu par les moteurs de recherche et par les visiteurs sans
- * JavaScript). Ce script fait défiler les autres, en fondu, et ajoute les commandes : un point par accroche, et un bouton pause.
+ * JavaScript). Ce script découpe chaque titre en LETTRES et chaque sous-titre en MOTS, puis les fait basculer en 3D l'un après l'autre : le texte qui part se retourne lettre par
+ * lettre, puis le suivant arrive de la même façon (même mouvement que le titre animé d'Elementor « swirl », réécrit ici). Il ajoute aussi les commandes : un point par accroche
+ * et un bouton pause.
  *
  * Accessibilité :
- *   · un seul titre de niveau 1 est exposé aux lecteurs d'écran à la fois (les accroches masquées portent aria-hidden) ;
+ *   · un seul titre de niveau 1 est exposé aux lecteurs d'écran à la fois (les accroches masquées portent aria-hidden) ; les lettres découpées sont cachées aux lecteurs d'écran
+ *     et le titre porte son texte complet dans aria-label (aucun « A-n-t-i-c-i-p-e-z » épelé) ;
  *   · le défilement s'arrête au survol, quand le clavier est dans la zone, quand l'onglet est caché, et à la demande (bouton pause : une animation automatique qui dure plus de
  *     5 secondes doit pouvoir être arrêtée) ;
- *   · si l'appareil demande moins d'animations (prefers-reduced-motion), rien ne défile tout seul : la première accroche reste, les points restent utilisables.
+ *   · si l'appareil demande moins d'animations (prefers-reduced-motion), rien ne défile tout seul et les changements sont instantanés.
  * Les textes anglais ne sont pas ici : la page anglaise est générée avec les mêmes accroches traduites (outils/generer-pages-publiques.mjs).
  */
 (function () {
@@ -24,11 +27,15 @@
     ? { groupe: 'Headlines', point: function (i, n) { return 'Headline ' + (i + 1) + ' of ' + n; }, pause: 'Pause the headlines', lecture: 'Resume the headlines' }
     : { groupe: 'Accroches', point: function (i, n) { return 'Accroche ' + (i + 1) + ' sur ' + n; }, pause: 'Mettre les accroches en pause', lecture: 'Relancer les accroches' };
 
-  var DUREE = 7000;
+  var ATTENTE = 6500;                 // temps de lecture, une fois l'accroche entièrement affichée
+  var DEBUT = [0x18, 0x68, 0xDB];     // dégradé de marque (#1868DB → #20AFA1), appliqué lettre par lettre : un dégradé CSS ne suit pas les lettres qui basculent en 3D
+  var FIN = [0x20, 0xAF, 0xA1];
+
   var reduit = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var courant = 0;
-  var minuteur = null;
-  var enPause = reduit;   // qui demande moins d'animations ne voit rien défiler tout seul
+  var attente = null;                 // minuteur du temps de lecture
+  var enCours = [];                   // minuteurs de l'animation en cours (pour pouvoir l'interrompre)
+  var enPause = reduit;               // qui demande moins d'animations ne voit rien défiler tout seul
   var survol = false;
   var points = [];
   var boutonPause = null;
@@ -36,27 +43,138 @@
   var ICONE_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
   var ICONE_LECTURE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
 
-  function afficher(i) {
+  // ── Découpage : titre en lettres (groupées par mot, pour que les retours à la ligne se fassent entre les mots), sous-titre en mots ──
+  function lettriser(noeud, cible, lettres, degrade) {
+    Array.prototype.slice.call(noeud.childNodes).forEach(function (n) {
+      if (n.nodeType === 3) {
+        n.nodeValue.split(/(\s+)/).forEach(function (morceau) {
+          if (!morceau) return;
+          if (/^\s+$/.test(morceau)) { cible.appendChild(document.createTextNode(' ')); return; }
+          var mot = document.createElement('span');
+          mot.className = 'mot';
+          morceau.split('').forEach(function (c) {
+            var l = document.createElement('span');
+            l.className = 'lettre';
+            l.textContent = c;
+            mot.appendChild(l);
+            lettres.push({ el: l, degrade: degrade });
+          });
+          cible.appendChild(mot);
+        });
+      } else if (n.nodeType === 1) {
+        var copie = n.cloneNode(false);
+        cible.appendChild(copie);
+        lettriser(n, copie, lettres, degrade || n.classList.contains('brand-gradient-text'));
+      }
+    });
+  }
+  function colorer(lettres) {
+    var cibles = lettres.filter(function (l) { return l.degrade; });
+    cibles.forEach(function (l, i) {
+      var t = cibles.length > 1 ? i / (cibles.length - 1) : 0;
+      l.el.style.color = 'rgb(' + [0, 1, 2].map(function (k) { return Math.round(DEBUT[k] + (FIN[k] - DEBUT[k]) * t); }).join(',') + ')';
+    });
+  }
+  function preparer(slide) {
+    var titre = slide.querySelector('[data-titre]');
+    var sous = titre && titre.nextElementSibling;
+    var lettres = [];
+    var plein = titre.textContent.replace(/\s+/g, ' ').trim();
+    var visuel = document.createElement('span');
+    visuel.className = 'acc-visuel';
+    visuel.setAttribute('aria-hidden', 'true');
+    lettriser(titre, visuel, lettres, false);
+    titre.textContent = '';
+    titre.appendChild(visuel);
+    titre.setAttribute('data-plein', plein);   // le texte complet : donné aux lecteurs d'écran (aria-label) quand ce titre est celui qui s'affiche
+    colorer(lettres);
+    var mots = [];
+    var texteSous = sous ? sous.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (sous) {
+      sous.textContent = '';
+      texteSous.split(' ').forEach(function (m, i) {
+        if (i) sous.appendChild(document.createTextNode(' '));
+        var e = document.createElement('span');
+        e.className = 'mot-anim';
+        e.textContent = m;
+        sous.appendChild(e);
+        mots.push(e);
+      });
+    }
+    slide._lettres = lettres.map(function (l) { return l.el; });
+    slide._mots = mots;
+    slide.classList.add('lettrise');
+  }
+
+  // ── États, sans animation ──
+  function etat(slide, visible) {
+    slide._lettres.concat(slide._mots).forEach(function (e) {
+      e.classList.remove('entre-anim', 'sort-anim');
+      e.classList.toggle('entre', visible);
+    });
+  }
+  function exposer(i) {
     slides.forEach(function (s, k) {
       var actif = k === i;
       s.classList.toggle('is-actif', actif);
       if (actif) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true');
-      // La 1re accroche est un vrai <h1> ; les autres sont des paragraphes qui ne deviennent « titre de niveau 1 » que le temps où elles sont affichées.
       var titre = s.querySelector('[data-titre]');
-      if (titre && k !== 0) {
+      if (!titre) return;
+      // La 1re accroche est un vrai <h1> ; les autres sont des paragraphes qui ne deviennent « titre de niveau 1 » que le temps où elles sont affichées.
+      if (k !== 0) {
         if (actif) { titre.setAttribute('role', 'heading'); titre.setAttribute('aria-level', '1'); }
         else { titre.removeAttribute('role'); titre.removeAttribute('aria-level'); }
       }
+      if (actif) titre.setAttribute('aria-label', titre.getAttribute('data-plein') || ''); else titre.removeAttribute('aria-label');
     });
     points.forEach(function (p, k) { p.setAttribute('aria-current', k === i ? 'true' : 'false'); });
     courant = i;
   }
+  function toutStatique(i) {
+    annuler();
+    slides.forEach(function (s, k) { etat(s, k === i); });
+    exposer(i);
+    planifier();
+  }
 
-  function arreter() { if (minuteur) { clearTimeout(minuteur); minuteur = null; } }
+  // ── Animation : les lettres, puis les mots, l'un après l'autre ──
+  function plan(fn, ms) { enCours.push(setTimeout(fn, ms)); }
+  function annuler() { enCours.forEach(clearTimeout); enCours = []; }
+  function jouer(slide, classe, pasLettre, pasMot, decalageMots, fini) {
+    var L = slide._lettres, M = slide._mots;
+    L.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, i * pasLettre); });
+    M.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, decalageMots + i * pasMot); });
+    var duree = Math.max(L.length * pasLettre, decalageMots + M.length * pasMot) + 450;   // + la durée d'un mouvement (0,4 s)
+    plan(fini, duree);
+  }
+  function entree(slide, fini) {
+    var L = slide._lettres.length || 1, M = slide._mots.length || 1;
+    jouer(slide, 'entre-anim', Math.min(42, 1100 / L), Math.min(34, 900 / M), 260, fini);
+  }
+  function sortie(slide, fini) {
+    var L = slide._lettres.length || 1, M = slide._mots.length || 1;
+    jouer(slide, 'sort-anim', Math.min(22, 600 / L), Math.min(18, 450 / M), 0, fini);
+  }
+  function aller(vers) {
+    annuler();
+    clearTimeout(attente); attente = null;
+    var de = courant;
+    if (reduit || de === vers) { toutStatique(vers); return; }
+    sortie(slides[de], function () {
+      etat(slides[de], false);
+      slides[de].classList.remove('is-actif');
+      exposer(vers);
+      etat(slides[vers], false);
+      entree(slides[vers], function () { planifier(); });
+    });
+  }
+
+  // ── Défilement automatique (le temps de lecture ne démarre qu'une fois l'accroche entièrement affichée) ──
+  function arreter() { if (attente) { clearTimeout(attente); attente = null; } }
   function planifier() {
     arreter();
     if (enPause || survol || document.hidden) return;
-    minuteur = setTimeout(function () { afficher((courant + 1) % slides.length); planifier(); }, DUREE);
+    attente = setTimeout(function () { aller((courant + 1) % slides.length); }, ATTENTE);
   }
 
   function majBoutonPause() {
@@ -74,26 +192,27 @@
       b.type = 'button';
       b.setAttribute('aria-label', T.point(i, slides.length));
       b.innerHTML = '<span class="accroche-point"></span>';
-      b.addEventListener('click', function () { afficher(i); planifier(); });
+      b.addEventListener('click', function () { if (i !== courant) aller(i); });
       pilote.appendChild(b);
       points.push(b);
     });
     boutonPause = document.createElement('button');
     boutonPause.type = 'button';
     boutonPause.className = 'accroche-pause';
-    boutonPause.addEventListener('click', function () { enPause = !enPause; majBoutonPause(); planifier(); });
+    boutonPause.addEventListener('click', function () { enPause = !enPause; majBoutonPause(); if (enPause) arreter(); else if (!enCours.length) planifier(); });
     pilote.appendChild(boutonPause);
     majBoutonPause();
   }
 
-  // Pause au survol et quand le clavier est dans la zone ; reprise à la sortie.
+  // Pause au survol et quand le clavier est dans la zone ; reprise à la sortie (une animation déjà commencée va jusqu'au bout).
   var zone = conteneur.parentElement || conteneur;
   zone.addEventListener('mouseenter', function () { survol = true; arreter(); });
-  zone.addEventListener('mouseleave', function () { survol = false; planifier(); });
+  zone.addEventListener('mouseleave', function () { survol = false; if (!enCours.length) planifier(); });
   zone.addEventListener('focusin', function () { survol = true; arreter(); });
-  zone.addEventListener('focusout', function () { survol = false; planifier(); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) arreter(); else planifier(); });
+  zone.addEventListener('focusout', function () { survol = false; if (!enCours.length) planifier(); });
+  // Onglet caché : les animations du navigateur se figent ; au retour on repart d'un état propre plutôt que d'un texte à moitié retourné.
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { arreter(); } else { toutStatique(courant); } });
 
-  afficher(0);
-  planifier();
+  slides.forEach(preparer);
+  toutStatique(0);
 }());
