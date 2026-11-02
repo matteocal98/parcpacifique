@@ -1893,7 +1893,7 @@ function blocReglagesRappelsHtml() {
         <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="rap-save"${bloque}>${picto('case')}<span>${trad('Enregistrer les préférences e-mail')}</span></button></div>
         ${(dispo && reserveGerant) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
-        ${dispo ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-rappels-email.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
+        ${dispo ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>`}
       </div>
     </section>`;
 }
@@ -1980,7 +1980,7 @@ function blocCiblagePushHtml() {
         <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
         ${rolesAffiches.map(ligneRole).join('')}
         ${multi ? '' : `<div class="ui-aide">${trad('Ciblage par rôle : disponible avec plusieurs utilisateurs (offre Business).')}</div>`}
-        ${!dispo ? `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-push-notifications.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>` : (!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : '')}
+        ${!dispo ? `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>` : (!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : '')}
         <div class="ui-aide" id="push-cible-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="push-cible-save"${bloque}>${picto('case')}<span>${trad('Enregistrer le ciblage')}</span></button></div>
       </div>

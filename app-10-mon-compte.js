@@ -246,7 +246,7 @@ VIEWS.account = {
           <div class="ui-aide" id="acc-contact-msg" role="status" aria-live="polite"></div>
           <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer')}</button></div>
           ${(SCHEMA.hasContactNames && !modifiable) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
-          ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Mise à jour indisponible : exécute')} <strong>migration-compte.sql</strong> ${trad('dans le SQL Editor de Supabase.')}</div>`}
+          ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>`}
         </div>
       </section>
       </div>
