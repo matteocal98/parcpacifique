@@ -1,9 +1,9 @@
 /* KALEA — page d'accueil : accroches tournantes, en « tourbillon » (swirl).
  *
  * Le HTML contient toutes les accroches, empilées dans la même cellule ; la première est le <h1> de la page (lu par les moteurs de recherche et par les visiteurs sans
- * JavaScript). Ce script découpe chaque titre en LETTRES et chaque sous-titre en MOTS, puis les fait basculer en 3D l'un après l'autre : le texte qui part se retourne lettre par
- * lettre, puis le suivant arrive de la même façon (même mouvement que le titre animé d'Elementor « swirl », réécrit ici). Il ajoute aussi les commandes : un point par accroche
- * et un bouton pause.
+ * JavaScript). Ce script découpe chaque titre en LETTRES et chaque sous-titre en MOTS, puis les fait basculer en 3D : l'ancien texte et le nouveau sont empilés au même endroit et
+ * jouent EN MÊME TEMPS (la lettre n de l'ancien se retourne pendant que la lettre n du nouveau arrive, une lettre toutes les 40 ms) — même déroulé que le titre animé
+ * d'Elementor « swirl », réécrit ici. Il ajoute aussi les commandes : un point par accroche et un bouton pause.
  *
  * Accessibilité :
  *   · un seul titre de niveau 1 est exposé aux lecteurs d'écran à la fois (les accroches masquées portent aria-hidden) ; les lettres découpées sont cachées aux lecteurs d'écran
@@ -132,7 +132,7 @@
   }
   function toutStatique(i) {
     annuler();
-    slides.forEach(function (s, k) { etat(s, k === i); });
+    slides.forEach(function (s, k) { s.classList.remove('is-sortant'); etat(s, k === i); });
     exposer(i);
     planifier();
   }
@@ -140,33 +140,35 @@
   // ── Animation : les lettres, puis les mots, l'un après l'autre ──
   function plan(fn, ms) { enCours.push(setTimeout(fn, ms)); }
   function annuler() { enCours.forEach(clearTimeout); enCours = []; }
-  function jouer(slide, classe, pasLettre, pasMot, decalageMots, fini) {
+  // Même déroulé que le titre animé d'Elementor « swirl » (relevé dans son code) : l'ancien texte et le nouveau sont EMPILÉS au même endroit et jouent EN MÊME TEMPS.
+  // Toutes les 40 ms, la lettre n de l'ancien se retourne et sort pendant que la lettre n du nouveau arrive ; chaque mouvement dure 0,4 s. Le titre ne dépasse pas ≈ 1,6 s.
+  var PAS_LETTRE = 40, DUREE_TITRE_MAX = 1600, PAS_MOT = 30, DUREE_SOUSTITRE_MAX = 900, DECALAGE_SOUSTITRE = 200, DUREE_MOUVEMENT = 450;
+  function jouer(slide, classe) {
     var L = slide._lettres, M = slide._mots;
-    L.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, i * pasLettre); });
-    M.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, decalageMots + i * pasMot); });
-    var duree = Math.max(L.length * pasLettre, decalageMots + M.length * pasMot) + 450;   // + la durée d'un mouvement (0,4 s)
-    plan(fini, duree);
-  }
-  function entree(slide, fini) {
-    var L = slide._lettres.length || 1, M = slide._mots.length || 1;
-    jouer(slide, 'entre-anim', Math.min(42, 1100 / L), Math.min(34, 900 / M), 260, fini);
-  }
-  function sortie(slide, fini) {
-    var L = slide._lettres.length || 1, M = slide._mots.length || 1;
-    jouer(slide, 'sort-anim', Math.min(22, 600 / L), Math.min(18, 450 / M), 0, fini);
+    var pasL = Math.min(PAS_LETTRE, DUREE_TITRE_MAX / (L.length || 1));
+    var pasM = Math.min(PAS_MOT, DUREE_SOUSTITRE_MAX / (M.length || 1));
+    L.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, i * pasL); });
+    M.forEach(function (e, i) { plan(function () { e.classList.add(classe); }, DECALAGE_SOUSTITRE + i * pasM); });
+    return Math.max(L.length * pasL, DECALAGE_SOUSTITRE + M.length * pasM) + DUREE_MOUVEMENT;
   }
   function aller(vers) {
+    var enMouvement = enCours.length > 0;
     annuler();
     clearTimeout(attente); attente = null;
     var de = courant;
-    if (reduit || de === vers) { toutStatique(vers); return; }
-    sortie(slides[de], function () {
-      etat(slides[de], false);
-      slides[de].classList.remove('is-actif');
-      exposer(vers);
-      etat(slides[vers], false);
-      entree(slides[vers], function () { planifier(); });
-    });
+    if (reduit || de === vers || enMouvement) { toutStatique(vers); return; }   // un clic en plein mouvement : on va directement à l'arrivée
+    var vieux = slides[de], neuf = slides[vers];
+    vieux.classList.add('is-sortant');   // l'ancien reste affiché le temps de sa sortie, sous le nouveau
+    exposer(vers);
+    etat(neuf, false);
+    var dureeSortie = jouer(vieux, 'sort-anim');
+    var dureeEntree = jouer(neuf, 'entre-anim');
+    plan(function () {
+      vieux.classList.remove('is-sortant');
+      etat(vieux, false);
+      etat(neuf, true);
+      planifier();
+    }, Math.max(dureeSortie, dureeEntree));
   }
 
   // ── Défilement automatique (le temps de lecture ne démarre qu'une fois l'accroche entièrement affichée) ──

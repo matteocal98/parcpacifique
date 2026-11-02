@@ -54,7 +54,7 @@
        Les accroches sont empilées dans la même cellule de grille : la hauteur est celle de la plus longue, la page ne saute jamais. */
     .accroches { display: grid; }
     .accroche { grid-area: 1 / 1; visibility: hidden; }
-    .accroche.is-actif { visibility: visible; }
+    .accroche.is-actif, .accroche.is-sortant { visibility: visible; }
     .accroche .mot { display: inline-block; white-space: nowrap; }
     .accroche.lettrise .lettre, .accroche.lettrise .mot-anim { display: inline-block; backface-visibility: hidden; opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); }
     .accroche.lettrise .lettre.entre, .accroche.lettrise .mot-anim.entre { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); }
