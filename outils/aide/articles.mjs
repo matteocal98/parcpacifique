@@ -9,34 +9,50 @@
 
 export const SITE = 'https://kalea.pro';
 
+import { ARTICLES_DEMARRER } from './articles-demarrer.mjs';
+import { ARTICLES_MACHINES } from './articles-machines.mjs';
+import { ARTICLES_ENTRETIEN } from './articles-entretien.mjs';
+import { ARTICLES_ORDRES } from './articles-ordres.mjs';
+import { ARTICLES_STOCK } from './articles-stock.mjs';
+
+// L'ordre ci-dessous est celui de la page d'accueil de l'aide.
 export const THEMES = {
+  demarrer: { fr: 'Démarrer avec KALEA', en: 'Getting started' },
+  compte: { fr: 'Compte, notifications et offre', en: 'Account, notifications and plan' },
   machines: { fr: 'Machines et fiches', en: 'Machines and records' },
   plans: { fr: 'Plans d\'entretien et carnets', en: 'Maintenance plans and manuals' },
   compteurs: { fr: 'Compteurs', en: 'Meters' },
+  interventions: { fr: 'Interventions, agenda et rappels', en: 'Interventions, calendar and reminders' },
+  ordres: { fr: 'Ordres de travail', en: 'Work orders' },
+  equipe: { fr: 'Équipe, droits et hors-ligne', en: 'Team, permissions and offline' },
+  stock: { fr: 'Stock & SAV', en: 'Stock & service' },
+  couts: { fr: 'Coûts et TCO', en: 'Costs and TCO' },
+  telemetrie: { fr: 'Télémétrie', en: 'Telemetry' },
+  support: { fr: 'Aide & support', en: 'Help & support' },
 };
 
 export const HUB = {
   fr: {
     fichier: 'aide/index.html',
-    titre: 'Aide KALEA : procédures pas à pas, avec captures d\'écran',
-    description: 'Modifier une machine, déposer un carnet d\'entretien, corriger un compteur… les procédures de KALEA expliquées pas à pas, avec des captures d\'écran.',
+    titre: 'Aide KALEA : procédures pas à pas pour votre parc et vos équipes',
+    description: 'Démarrer, machines, entretien, ordres de travail, stock, coûts, équipe et droits : les procédures de KALEA expliquées pas à pas, avec les noms exacts des boutons.',
     h1: 'Aide KALEA',
-    intro: 'Des procédures courtes, pas à pas, avec des captures d\'écran annotées. Chaque article reprend les noms exacts des boutons de l\'application.',
+    intro: 'Des procédures courtes, pas à pas, et les réponses aux questions les plus fréquentes (« je ne vois pas tel bouton », « pourquoi… »). Chaque article reprend les noms exacts des boutons de l\'application ; certains sont illustrés de captures d\'écran annotées. Cherchez un mot, ou parcourez les thèmes.',
     contact: 'Vous ne trouvez pas la réponse ? Dans l\'application, ouvrez {{ui:Aide & support}} et écrivez-nous : l\'équipe vous répond dans le même écran. Vous pouvez aussi écrire à <a href="mailto:support@kalea.pro">support@kalea.pro</a>.',
     fil: 'Aide',
   },
   en: {
     fichier: 'en/help/index.html',
-    titre: 'KALEA Help: step-by-step guides with screenshots',
-    description: 'Edit a machine, upload a maintenance manual, correct a meter reading… KALEA procedures explained step by step, with annotated screenshots.',
+    titre: 'KALEA Help: step-by-step guides for your fleet and your teams',
+    description: 'Getting started, machines, maintenance, work orders, stock, costs, team and permissions: KALEA procedures explained step by step, with the exact button names.',
     h1: 'KALEA Help',
-    intro: 'Short, step-by-step guides with annotated screenshots. Each article uses the exact button names you see in the app.',
+    intro: 'Short, step-by-step guides, and answers to the most common questions ("I can\'t see a button", "why…"). Each article uses the exact button names you see in the app; some come with annotated screenshots. Search for a word, or browse the topics.',
     contact: 'Can\'t find the answer? In the app, open {{ui:Aide & support}} and write to us: the team replies in the same screen. You can also email <a href="mailto:support@kalea.pro">support@kalea.pro</a>.',
     fil: 'Help',
   },
 };
 
-export const ARTICLES = [
+const ARTICLES_BASE = [
   // ───────────────────────────────────────────────────────── 1. Modifier une machine
   {
     id: 'modifier-machine', theme: 'machines', scenario: 'modifier-machine',
@@ -286,3 +302,6 @@ export const ARTICLES = [
     },
   },
 ];
+
+// Les articles écrits par lots thématiques (chaque lot a son préfixe d'identifiant : dem-, mac-, ent-, ord-, stk-/cout-/tele-/sup-).
+export const ARTICLES = [...ARTICLES_BASE, ...ARTICLES_DEMARRER, ...ARTICLES_MACHINES, ...ARTICLES_ENTRETIEN, ...ARTICLES_ORDRES, ...ARTICLES_STOCK];

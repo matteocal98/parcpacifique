@@ -116,16 +116,28 @@ function corpsHub(lg) {
   const groupes = Object.entries(THEMES).map(([cle, t]) => {
     const liste = ARTICLES.filter((a) => a.theme === cle);
     if (!liste.length) return '';
-    return `<section class="mt-12"><h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">${esc(t[lg])}</h2><ul class="mt-4 grid gap-3 sm:grid-cols-2">${liste.map((a) => `<li><a href="${chemin(a[lg].fichier)}" class="block h-full rounded-2xl border border-brand-borderMuted bg-white p-5 hover:border-brand-primary"><span class="block font-display font-bold text-brand-ink">${esc(a[lg].h1)}</span><span class="mt-2 block text-sm text-slate-600 leading-relaxed">${esc(a[lg].description)}</span></a></li>`).join('')}</ul></section>`;
+    // data-recherche : titre + description sans accents ni majuscules, lu par aide-recherche.js (le filtre de la page).
+    const recherche = (a) => `${a[lg].h1} ${a[lg].description} ${a[lg].fil}`.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    return `<section id="theme-${cle}" data-theme-aide class="mt-12 scroll-mt-24"><h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">${esc(t[lg])}</h2><ul class="mt-4 grid gap-3 sm:grid-cols-2">${liste.map((a) => `<li data-recherche="${esc(recherche(a))}"><a href="${chemin(a[lg].fichier)}" class="block h-full rounded-2xl border border-brand-borderMuted bg-white p-5 hover:border-brand-primary"><span class="block font-display font-bold text-brand-ink">${esc(a[lg].h1)}</span><span class="mt-2 block text-sm text-slate-600 leading-relaxed">${esc(a[lg].description)}</span></a></li>`).join('')}</ul></section>`;
   }).join('\n');
+  // Raccourcis vers chaque thème (sans JavaScript) et champ de recherche (affiché par aide-recherche.js).
+  const themes = Object.entries(THEMES).filter(([cle]) => ARTICLES.some((a) => a.theme === cle));
+  const puces = themes.map(([cle, t]) => `<li><a href="#theme-${cle}" class="inline-block rounded-full border border-brand-borderMuted bg-white px-3 py-1.5 text-sm font-semibold text-brand-ink hover:border-brand-primary">${esc(t[lg])}</a></li>`).join('');
+  const R = lg === 'fr'
+    ? { etiquette: 'Rechercher dans l\'aide', exemple: 'Ex. : compteur, rappel, droits, import…', vide: 'Aucun article ne correspond. Essayez un autre mot, ou écrivez-nous depuis Aide & support.', themes: 'Par thème' }
+    : { etiquette: 'Search the help', exemple: 'E.g. meter, reminder, permissions, import…', vide: 'No article matches. Try another word, or write to us from Aide & support.', themes: 'By topic' };
+  const outils = `<div id="aide-recherche-boite" hidden class="mt-8"><label for="aide-recherche" class="block text-sm font-semibold text-brand-ink">${R.etiquette}</label><input id="aide-recherche" type="search" autocomplete="off" placeholder="${esc(R.exemple)}" class="mt-2 w-full rounded-2xl border border-brand-borderMuted bg-white px-4 py-3 text-base text-brand-ink focus:border-brand-primary focus:outline-none"><p id="aide-recherche-etat" role="status" aria-live="polite" class="mt-2 text-sm text-slate-500"></p><p id="aide-recherche-vide" hidden class="mt-4 rounded-2xl bg-slate-50 p-5 text-slate-600">${esc(R.vide)}</p></div>
+<nav aria-label="${R.themes}" class="mt-8"><h2 class="sr-only">${R.themes}</h2><ul class="flex flex-wrap gap-2">${puces}</ul></nav>`;
   return `<main class="flex-1">
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
 ${fil(lg, null)}
 <h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">${esc(h.h1)}</h1>
 <p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">${esc(h.intro)}</p>
+${outils}
 ${groupes}
 ${blocContact(lg)}
 </div>
+<script src="/aide-recherche.js" defer></script>
 </main>`;
 }
 

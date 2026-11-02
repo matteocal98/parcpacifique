@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ajouter des pièces et des coûts à une intervention | Aide KALEA</title>
+<!-- SEO:DEBUT (généré par outils/generer-pages-publiques.mjs : ne pas modifier à la main) -->
+<meta name="description" content="Noter la main d'œuvre, les pièces et une facture sur une intervention dans KALEA, et sortir une pièce du stock si votre offre le permet.">
+<link rel="canonical" href="https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html">
+<link rel="alternate" hreflang="fr" href="https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html">
+<link rel="alternate" hreflang="en" href="https://kalea.pro/en/help/add-parts-and-costs-to-an-intervention.html">
+<link rel="alternate" hreflang="x-default" href="https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0E1333">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icones/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KALEA">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Ajouter des pièces et des coûts à une intervention | Aide KALEA">
+<meta property="og:description" content="Noter la main d'œuvre, les pièces et une facture sur une intervention dans KALEA, et sortir une pièce du stock si votre offre le permet.">
+<meta property="og:url" content="https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html">
+<meta property="og:image" content="https://kalea.pro/partage-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KALEA : suivi d'entretien de parc, du manuel constructeur au plan d'entretien">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ajouter des pièces et des coûts à une intervention | Aide KALEA">
+<meta name="twitter:description" content="Noter la main d'œuvre, les pièces et une facture sur une intervention dans KALEA, et sortir une pièce du stock si votre offre le permet.">
+<meta name="twitter:image" content="https://kalea.pro/partage-og.jpg">
+<!-- SEO:FIN -->
+<link rel="preload" href="/polices/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/polices/polices-site.css">
+<style data-purpose="custom-typography-and-helpers">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFBFC;
+      color: #0E1333;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Bilingual Switcher Classes */
+    html[data-lang="fr"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-fr { display: none !important; }
+
+    /* Custom Gradients */
+    /* Accroches tournantes — effet « tourbillon » (swirl) : chaque lettre du titre, puis chaque mot du sous-titre, bascule en 3D autour de l'axe horizontal, l'un après l'autre
+       (même mouvement que le titre animé d'Elementor de type « swirl » : 0,4 s, arrivée à 90°, léger dépassement à -10°, sortie de l'autre côté). Le découpage est fait par accroches.js.
+       Les accroches sont empilées dans la même cellule de grille. Sans JavaScript, la hauteur est celle de la plus longue ; avec, accroches.js règle la hauteur du bloc sur l'accroche affichée
+       (elle grandit tout de suite, rétrécit une fois la sortie terminée) : plus de vide sous les textes courts. */
+    .accroches { display: grid; transition: height .45s ease; }
+    .accroche { grid-area: 1 / 1; align-self: start; visibility: hidden; }
+    .accroche.is-actif, .accroche.is-sortant { visibility: visible; }
+    .accroche .mot { display: inline-block; white-space: nowrap; }
+    .accroche.lettrise .lettre, .accroche.lettrise .mot-anim { display: inline-block; backface-visibility: hidden; opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); }
+    .accroche.lettrise .lettre.entre, .accroche.lettrise .mot-anim.entre { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); }
+    .accroche.lettrise .entre-anim { animation: acc-swirl-in .4s ease forwards; }
+    .accroche.lettrise .sort-anim { animation: acc-swirl-out .4s ease forwards; }
+    /* Le dégradé de marque ne peut pas suivre des lettres qui basculent : accroches.js colore chaque lettre (même dégradé, lettre par lettre). */
+    .accroche.lettrise .brand-gradient-text { background: none; -webkit-text-fill-color: currentColor; }
+    @keyframes acc-swirl-in { 0% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); } 60% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(-10deg); } 100% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } }
+    @keyframes acc-swirl-out { 0% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } 60% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-100deg); } 100% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-90deg); } }
+    .accroches-pilote { display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px; }
+    .accroches-pilote button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 9999px; }
+    .accroches-pilote button:focus-visible { outline: 2px solid #236FE0; outline-offset: 2px; }
+    .accroches-pilote .accroche-point { display: block; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; opacity: .25; transition: opacity .2s, transform .2s; }
+    .accroches-pilote button[aria-current="true"] .accroche-point { opacity: .9; transform: scale(1.25); }
+    .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
+    .accroches-pilote .accroche-pause:hover { opacity: 1; }
+    .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
+    @media (prefers-reduced-motion: reduce) { .accroches { transition: none; } .accroche.lettrise .entre-anim, .accroche.lettrise .sort-anim { animation: none; } }
+    .brand-gradient-text {
+      background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-glow {
+      background: radial-gradient(circle at 80% 20%, rgba(36, 181, 168, 0.08) 0%, rgba(35, 111, 224, 0.04) 40%, transparent 70%);
+    }
+
+
+    /* Accordion transitions */
+    details > summary svg {
+      transition: transform 0.25s ease-in-out;
+    }
+    details[open] > summary svg {
+      transform: rotate(180deg);
+    }
+  
+    /* Impression du tableau comparatif : seule la section « comparatif-offres » sort, en paysage. */
+    @media print {
+      @page { size: A4 landscape; margin: 10mm; }
+      body > *:not(main), main > *:not(#comparatif-offres) { display: none !important; }
+      body { display: block !important; min-height: 0 !important; background: #fff !important; }
+      #comparatif-offres { background: #fff; padding: 0; }
+      #comparatif-offres > div { max-width: 1300px; margin: 0 auto; padding: 0; }
+      #comparatif-offres tr { break-inside: avoid; }
+      #comparatif-offres [onclick], #comparatif-offres a[download], #comparatif-offres tfoot { display: none !important; }
+      #comparatif-offres #simulateur { display: none !important; }
+      #comparatif-offres > div > div { display: block !important; }
+    }
+  </style>
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/site-sombre.css">
+<script src="/theme.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","@id":"https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html#page","url":"https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html","name":"Ajouter des pièces et des coûts à une intervention | Aide KALEA","description":"Noter la main d'œuvre, les pièces et une facture sur une intervention dans KALEA, et sortir une pièce du stock si votre offre le permet.","inLanguage":"fr","datePublished":"2026-11-02","dateModified":"2026-11-02","isPartOf":{"@id":"https://kalea.pro/#site"},"publisher":{"@id":"https://kalea.pro/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://kalea.pro/"},{"@type":"ListItem","position":2,"name":"Aide","item":"https://kalea.pro/aide/"},{"@type":"ListItem","position":3,"name":"Pièces et coûts","item":"https://kalea.pro/aide/ajouter-pieces-et-couts-a-une-intervention.html"}]}]}</script>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
+<svg aria-hidden="true" height="0" style="position:absolute" width="0">
+<defs>
+<symbol id="picto-keeva" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#FFFFFF" stroke="#6864DF" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#18183A"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#6864DF"></circle></symbol>
+<symbol id="picto-keeva-nuit" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#18183A" stroke="#8F8FCB" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#FFFFFF"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#8F8FCB"></circle></symbol>
+</defs>
+</svg>
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-borderMuted">
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Brand Logo -->
+<a aria-label="Accueil KALEA" class="flex items-center gap-3 group" href="./"><div class="w-16 h-16 group-hover:scale-105 transition-transform"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-brand-ink">KALEA</span></a>
+<!-- Desktop Navigation Menu -->
+<nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+<a class="hover:text-brand-primary transition-colors" href="/#fonctionnalites">
+<span class="lang-fr">Fonctionnalités</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#comment-ca-marche">
+<span class="lang-fr">Comment ça marche</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#vos-donnees">
+<span class="lang-fr">Vos données</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#tarifs">
+<span class="lang-fr">Tarifs</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#simulateur">
+<span class="lang-fr">Simulateur</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#faq">
+<span class="lang-fr">FAQ</span>
+
+</a>
+</nav>
+<!-- Language Switcher & Action CTA -->
+<div class="flex items-center gap-4">
+<!-- LANGUE:DEBUT -->
+<div role="group" aria-label="Langue / Language" data-sans-traduction class="flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-200 bg-white p-0.5 ml-2 shrink-0">
+<a href="/plan-entretien-automatique.html" data-langue="fr" lang="fr" hreflang="fr" title="Français" aria-current="true" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors bg-brand-ink text-white">FR</a>
+<a href="/en/automatic-maintenance-plan.html" data-langue="en" lang="en" hreflang="en" title="English" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors text-slate-600 hover:text-brand-primary">EN</a>
+</div>
+<!-- LANGUE:FIN -->
+
+<a class="hidden sm:inline-block text-sm font-semibold text-slate-700 hover:text-brand-primary transition-colors px-2 py-1" href="./app.html">
+<span class="lang-fr">Se connecter</span>
+
+</a>
+<a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow-md" href="./app.html?inscription=1">
+<span class="lang-fr">S'inscrire</span>
+
+</a>
+</div>
+</div>
+</header>
+<main class="flex-1">
+<article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+<nav aria-label="Fil d'Ariane" class="text-xs text-slate-500 mb-6"><a href="/" class="hover:text-brand-primary">Accueil</a> <span aria-hidden="true">›</span> <a href="/aide/" class="hover:text-brand-primary">Aide</a> <span aria-hidden="true">›</span> <span>Pièces et coûts</span></nav>
+<h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">Ajouter des pièces et des coûts à une intervention</h1>
+<p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed [&_strong]:text-brand-ink">Quand votre offre inclut le suivi des coûts, la fenêtre d'intervention contient un bloc facultatif, <strong>«&nbsp;Coûts d'intervention &amp; TCO&nbsp;»</strong>. Il sert à noter ce que l'entretien a coûté : main d'œuvre, pièces, consommables.</p>
+<ol class="mt-10 space-y-10"><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">1</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Étape 1 : </span>Trouvez le bloc des coûts</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Ouvrez <strong>«&nbsp;Enregistrer une intervention&nbsp;»</strong> (voir <a href="/aide/enregistrer-une-intervention.html">enregistrer une intervention</a>) et descendez jusqu'à <strong>«&nbsp;Coûts d'intervention &amp; TCO&nbsp;»</strong>. Il est marqué <strong>«&nbsp;Optionnel&nbsp;»</strong> : vous pouvez l'ignorer.</p></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">2</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Étape 2 : </span>Notez la main d'œuvre</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Indiquez <strong>«&nbsp;Heures de main d'œuvre&nbsp;»</strong>. Si un taux horaire est enregistré pour votre société, le coût est proposé : vous pouvez le corriger. Touchez ensuite <strong>«&nbsp;Ajouter&nbsp;»</strong> : le montant s'ajoute au total des pièces et consommables, et les deux champs repassent à vide. Vous pouvez recommencer pour un second intervenant.</p></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">3</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Étape 3 : </span>Ajoutez les pièces</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Touchez <strong>«&nbsp;+ Ajouter une pièce&nbsp;»</strong> : le catalogue s'ouvre, vous cochez les pièces utilisées puis vous validez. Sans catalogue, une ligne libre s'ajoute. Pour chaque ligne, corrigez la quantité et le prix unitaire (le prix du catalogue n'est qu'une proposition). <strong>«&nbsp;Retirer cette pièce&nbsp;»</strong> supprime une ligne.</p></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">4</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Étape 4 : </span>Ou lisez une facture en photo</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Touchez <strong>«&nbsp;Scanner une facture&nbsp;»</strong> (<strong>«&nbsp;OCR IA&nbsp;»</strong>) et photographiez la facture. KALEA lit le montant et l'ajoute au total : « Montant lu : … — vérifie avant d'enregistrer. » Vérifiez toujours. La lecture demande une connexion ; sinon, saisissez le montant à la main.</p></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">5</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Étape 5 : </span>Sortez la pièce du stock (si disponible) et validez</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Si le module de stock est inclus dans votre offre et que vous en avez le droit, une case <strong>«&nbsp;Sortir du stock&nbsp;»</strong> apparaît sur chaque ligne de pièce du catalogue : cochez-la et choisissez le <strong>«&nbsp;Magasin&nbsp;»</strong>. KALEA vérifie que le stock suffit. Le total est modifiable. Cliquez enfin sur le bouton de validation : le total s'affiche à côté.</p></div></li></ol>
+
+<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink"><h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Bon à savoir</h2><ul class="mt-4 space-y-3 text-slate-600 leading-relaxed list-disc pl-5 marker:text-brand-teal"><li>Le total <strong>«&nbsp;Total pièces &amp; consommables&nbsp;»</strong> se recalcule à chaque ligne, mais vous pouvez aussi l'écrire directement (par exemple pour une facture globale).</li><li>Si le stock manque au moment d'enregistrer, la sortie est refusée mais la pièce n'est pas perdue : elle reste dans l'intervention avec son prix. KALEA indique alors qu'il faut enregistrer la sortie à la main dans le stock.</li><li>La sortie de stock est proposée à <strong>«&nbsp;Administrateur&nbsp;»</strong>, à <strong>«&nbsp;Direction&nbsp;»</strong> et à <strong>«&nbsp;Droit de gestion&nbsp;»</strong>.</li><li>Si le bouton <strong>«&nbsp;Scanner une pièce&nbsp;»</strong> est présent, il lit le QR code de l'étiquette de stock et ajoute la pièce.</li></ul></section>
+<section class="mt-14 rounded-3xl bg-brand-ink text-white p-8 sm:p-10 [&_a]:underline [&_a]:font-semibold"><h2 class="font-display font-bold text-2xl tracking-tight">Une question ?</h2><p class="mt-2 text-slate-300 leading-relaxed">Vous ne trouvez pas la réponse ? Dans l'application, ouvrez <strong>«&nbsp;Aide &amp; support&nbsp;»</strong> et écrivez-nous : l'équipe vous répond dans le même écran. Vous pouvez aussi écrire à <a href="mailto:support@kalea.pro">support@kalea.pro</a>.</p></section>
+<nav aria-label="À lire aussi" class="mt-12"><h2 class="font-display font-bold text-lg text-brand-ink">À lire aussi</h2><ul class="mt-3 space-y-2"><li><a class="font-semibold text-brand-primary hover:underline" href="/aide/enregistrer-une-intervention.html">Enregistrer une intervention</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/aide/enregistrer-un-depannage-ou-un-frais.html">Dépannage et frais</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/aide/historique-des-interventions-d-une-machine.html">Historique des interventions</a></li></ul></nav>
+</article>
+</main>
+<footer class="bg-brand-dark text-white border-t border-slate-800 pt-12 pb-8">
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800/80">
+<!-- Column 1: Brand details -->
+<div class="md:col-span-4 space-y-4">
+<div class="flex items-center gap-3"><div class="w-16 h-16"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva-nuit"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-white">KALEA</span></div>
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
+
+</p>
+<p class="text-[11px] text-slate-500 pt-2">
+<span class="lang-fr">Édité par Matthieu COURTOIS, entrepreneur individuel — Nouvelle-Calédonie.</span>
+
+</p>
+</div>
+<!-- Column 2: Produit -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">PRODUIT</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="/#fonctionnalites">Fonctionnalités</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#vos-donnees">Vos données</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#tarifs">Tarification</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#faq">FAQ</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./app.html">Se connecter</a></li>
+<!-- RESSOURCES:DEBUT -->
+<li class=""><a class="hover:text-white transition-colors" href="/logiciel-gmao-parc-engins.html" data-sans-traduction="">Logiciel GMAO</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/plan-entretien-automatique.html" data-sans-traduction="">Plan d'entretien automatique</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/suivi-engins-chantier.html" data-sans-traduction="">Suivi des engins de chantier</a></li>
+<!-- RESSOURCES:FIN -->
+</ul>
+</div>
+<!-- Column 3: Légal -->
+<div class="md:col-span-2 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">LÉGAL</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="./mentions-legales.html">Mentions légales</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./cgu.html">CGU</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./politique-confidentialite.html">Confidentialité</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./suppression-compte.html">Suppression du compte</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./supprimer-mes-donnees.html">Supprimer mes données</a></li>
+</ul>
+</div>
+<!-- Column 4: Contact -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">CONTACT</span>
+
+</p>
+<p class="text-xs">support@kalea.pro</p>
+<!-- RESEAUX:DEBUT -->
+<p class="text-xs text-slate-400 flex items-center gap-4"><a class="hover:text-white transition-colors" href="https://www.linkedin.com/company/kalea-software/" rel="me noopener" target="_blank" data-sans-traduction="">LinkedIn</a><a class="hover:text-white transition-colors" href="https://www.facebook.com/kalea.pro" rel="me noopener" target="_blank" data-sans-traduction="">Facebook</a></p>
+<!-- RESEAUX:FIN -->
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Une question, un manuel qui résiste ? Écrivez-nous.</span>
+
+</p>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+<p class="">© <span class="" id="year-placeholder">2026</span> KALEA. Tous droits réservés.</p>
+<div class="flex items-center gap-6">
+<a class="hover:text-slate-300" href="./politique-confidentialite.html">Politique de confidentialité</a>
+<a class="hover:text-slate-300" href="./cgu.html">Conditions générales</a>
+</div>
+</div>
+</div>
+</footer>
+<script src="/selecteur-langue.js"></script>
+<script src="/bouton-theme.js"></script>
+<script src="/mesure.js"></script>
+</body>
+</html>
