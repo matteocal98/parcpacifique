@@ -918,7 +918,7 @@ export const ARTICLES_DEMARRER = [
         { titre: `Ouvrez le réglage`, texte: `Dans {{ui:Mon compte}}, ouvrez la section {{ui:Données locales & Sécurité}} puis le bloc {{ui:Verrouillage et reconnexion}}. KALEA y décrit ce que votre téléphone sait faire.` },
         { titre: `Activez le verrou`, texte: `Cochez {{ui:Verrouiller l'application}}.` },
         { titre: `Vérifiez votre identité`, texte: `Le téléphone vous demande votre empreinte, votre visage ou votre code. Le verrou ne s'active que si cette vérification réussit.` },
-        { titre: `Lisez la confirmation`, texte: `KALEA affiche {{ui:Verrouillage activé : ton identité sera demandée à chaque ouverture.}} Votre identité sera aussi redemandée quand vous revenez dans l'application après un court moment en arrière-plan.` },
+        { titre: `Lisez la confirmation`, texte: `KALEA affiche {{ui:Verrouillage activé : ton identité sera demandée à chaque ouverture.}} Votre identité sera aussi redemandée quand vous revenez dans l'application après 30 secondes en arrière-plan.` },
         { titre: `Au besoin, activez la reconnexion automatique`, texte: `Cochez {{ui:Reconnexion automatique par jeton enregistré}} pour éviter de retaper le mot de passe quand la session expire. Aucun mot de passe n'est enregistré : KALEA garde un jeton de session.` },
       ],
       notes: [
@@ -940,7 +940,7 @@ export const ARTICLES_DEMARRER = [
         { titre: `Open the setting`, texte: `In {{ui:Mon compte}}, open the {{ui:Données locales & Sécurité}} section then the {{ui:Verrouillage et reconnexion}} block. KALEA describes there what your phone can do.` },
         { titre: `Turn on the lock`, texte: `Tick {{ui:Verrouiller l'application}}.` },
         { titre: `Check your identity`, texte: `The phone asks for your fingerprint, face or code. The lock only turns on if this check succeeds.` },
-        { titre: `Read the confirmation`, texte: `KALEA shows {{ui:Verrouillage activé : ton identité sera demandée à chaque ouverture.}} Your identity will also be asked again when you return to the app after a short time in the background.` },
+        { titre: `Read the confirmation`, texte: `KALEA shows {{ui:Verrouillage activé : ton identité sera demandée à chaque ouverture.}} Your identity will also be asked again when you return to the app after 30 seconds in the background.` },
         { titre: `If needed, turn on automatic reconnect`, texte: `Tick {{ui:Reconnexion automatique par jeton enregistré}} to avoid retyping the password when the session expires. No password is saved: KALEA keeps a session token.` },
       ],
       notes: [
@@ -966,7 +966,7 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Ouvrez la zone sensible`, texte: `Dans {{ui:Mon compte}}, descendez jusqu'à la section {{ui:Zone sensible}}, tout en bas.` },
         { titre: `Lancez la suppression`, texte: `Cliquez sur {{ui:Supprimer mon compte}}. Une fenêtre du même nom s'ouvre.` },
-        { titre: `Lisez ce qui sera effacé`, texte: `La fenêtre liste les machines, leurs plans d'entretien, l'historique, les photos, les carnets, les catégories, les rappels, et votre compte. Si un abonnement est en cours, un avertissement précise que la suppression le résilie immédiatement, sans remboursement au prorata : la période déjà payée est perdue.` },
+        { titre: `Lisez ce qui sera effacé`, texte: `La fenêtre liste les machines, leurs plans d'entretien, l'historique, les photos, les carnets, les catégories, les rappels, et votre compte. Si un abonnement est en cours, un avertissement précise que la suppression le résilie immédiatement, sans remboursement au prorata : la période déjà payée est perdue. Si d'autres membres utilisent la société, la fenêtre l'indique : elle ne liste alors que votre compte et ne parle pas d'abonnement, car seul votre compte est supprimé.` },
         { titre: `Tapez le mot de confirmation`, texte: `Tapez {{ui:SUPPRIMER}} dans le champ prévu. Le bouton de suppression reste grisé tant que le mot n'est pas exact.` },
         { titre: `Confirmez`, texte: `Cliquez sur {{ui:Supprimer définitivement}}. KALEA affiche {{ui:Compte supprimé.}}` },
       ],
@@ -989,7 +989,7 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Open the sensitive area`, texte: `In {{ui:Mon compte}}, scroll down to the {{ui:Zone sensible}} section, at the very bottom.` },
         { titre: `Start the deletion`, texte: `Click {{ui:Supprimer mon compte}}. A window with the same name opens.` },
-        { titre: `Read what will be erased`, texte: `The window lists the machines, their maintenance plans, the history, the photos, the manuals, the categories, the reminders, and your account. If a subscription is running, a warning says the deletion cancels it immediately, with no pro-rata refund: the period already paid is lost.` },
+        { titre: `Read what will be erased`, texte: `The window lists the machines, their maintenance plans, the history, the photos, the manuals, the categories, the reminders, and your account. If a subscription is running, a warning says the deletion cancels it immediately, with no pro-rata refund: the period already paid is lost. If other members use the company, the window says so: it then lists only your account and does not mention a subscription, because only your account is deleted.` },
         { titre: `Type the confirmation word`, texte: `Type {{ui:SUPPRIMER}} in the field. The delete button stays greyed out until the word is exact.` },
         { titre: `Confirm`, texte: `Click {{ui:Supprimer définitivement}}. KALEA shows {{ui:Compte supprimé.}}` },
       ],

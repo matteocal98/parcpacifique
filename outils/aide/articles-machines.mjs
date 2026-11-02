@@ -409,12 +409,12 @@ export const ARTICLES_MACHINES = [
       etapes: [
         { titre: `Ouvrez la modification de la machine`, texte: `Touchez l'icône en forme de roue sur la carte de la machine (voir <a href="{{lien:modifier-machine}}">modifier une machine</a>).` },
         { titre: `Cliquez sur Supprimer`, texte: `Tout en bas de la fenêtre {{ui:Modifier une machine}}, cliquez sur {{ui:Supprimer cette machine}}.` },
-        { titre: `Lisez la confirmation`, texte: `Une fenêtre vous prévient que le plan d'entretien, l'historique, les relevés, le carnet et la photo seront aussi supprimés, et que l'action est irréversible. Si vous n'êtes pas sûr, annulez.` },
+        { titre: `Lisez la confirmation`, texte: `Une fenêtre vous prévient que le plan d'entretien, l'historique, les relevés, les ordres de travail, le carnet et la photo seront aussi supprimés, et que l'action est irréversible. Si vous n'êtes pas sûr, annulez.` },
         { titre: `Confirmez`, texte: `Pendant la suppression, le bouton affiche « Suppression… ». Le message {{ui:Machine supprimée}} s'affiche ensuite, et la machine disparaît de la liste.` },
       ],
       notes: [
         `Seul le gérant (Administrateur ou Direction) peut supprimer une machine. Le {{ui:Droit de gestion}} peut ouvrir la fiche de modification, mais y voit un message qui explique qu'il ne peut pas l'effacer ; les droits de saisie et d'achat n'ont pas l'icône de modification sur la carte de la machine.`,
-        `Les ordres de travail de la machine sont supprimés eux aussi, même si la fenêtre de confirmation ne les cite pas.`,
+        `Les ordres de travail de la machine sont supprimés eux aussi : la fenêtre de confirmation les cite.`,
         `Si vous hésitez, archivez : voir <a href="{{lien:mac-archiver-restaurer}}">archiver ou restaurer une machine</a>.`,
         `Les pannes déjà signalées sur cette machine restent lisibles : le nom de la machine est conservé sur chaque signalement.`,
         `Si une erreur survient, un message rouge s'affiche dans la fenêtre et le bouton redevient utilisable. Vérifiez alors la machine avant de réessayer : son historique et son plan sont effacés avant la fiche elle-même, donc une partie a pu l'être déjà.`,
@@ -431,12 +431,12 @@ export const ARTICLES_MACHINES = [
       etapes: [
         { titre: `Open the machine editor`, texte: `Tap the cog-shaped icon on the machine's card (see <a href="{{lien:modifier-machine}}">edit a machine</a>).` },
         { titre: `Click Delete`, texte: `At the very bottom of the {{ui:Modifier une machine}} window, click {{ui:Supprimer cette machine}}.` },
-        { titre: `Read the confirmation`, texte: `A window warns you that the maintenance plan, the history, the readings, the manual and the photo will also be deleted, and that the action cannot be undone. If you are not sure, cancel.` },
+        { titre: `Read the confirmation`, texte: `A window warns you that the maintenance plan, the history, the readings, the work orders, the manual and the photo will also be deleted, and that the action cannot be undone. If you are not sure, cancel.` },
         { titre: `Confirm`, texte: `While the deletion runs, the button shows “Deleting…”. The {{ui:Machine supprimée}} message then appears, and the machine disappears from the list.` },
       ],
       notes: [
         `Only the manager (Administrator or Director) can delete a machine. The {{ui:Droit de gestion}} level can open the edit window, but sees a message explaining that it cannot erase the machine; the entry and purchasing levels do not have the edit icon on the machine's card.`,
-        `The machine's work orders are deleted too, even though the confirmation window does not mention them.`,
+        `The machine's work orders are deleted too: the confirmation window mentions them.`,
         `If you hesitate, archive instead: see <a href="{{lien:mac-archiver-restaurer}}">archive or restore a machine</a>.`,
         `Faults already reported on this machine remain readable: the machine's name is kept on each report.`,
         `If an error occurs, a red message appears in the window and the button becomes usable again. Check the machine before trying again: its history and plan are erased before the machine record itself, so part of it may already be gone.`,
