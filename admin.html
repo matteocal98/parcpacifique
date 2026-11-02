@@ -20,13 +20,14 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xrkrLDMslpyt0pc5Ian75EDh5C7Ty69blkA2BCZxMSg=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l+Rf0I0Ze6n7Sy/ALRSG8Wa3HpY9RYKPjSWkk5Gi668=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
 <script src="./marketing-controle.js"></script>
 <script src="./marketing-tri.js"></script>
 <script src="./marketing-sequences.js"></script>
+<script src="./marketing-semaine.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
@@ -988,10 +989,53 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-space-xs bg-surface-container-low p-space-xs rounded-lg shadow-sm self-start">
+          <button id="mk-onglet-semaine" type="button" data-onglet="semaine" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Semaine</button>
           <button id="mk-onglet-audience" type="button" data-onglet="audience" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Audience et inscrits</button>
           <button id="mk-onglet-contacts" type="button" data-onglet="contacts" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contacts</button>
           <button id="mk-onglet-contenus" type="button" data-onglet="contenus" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contenus</button>
           <button id="mk-onglet-sequences" type="button" data-onglet="sequences" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Séquences</button>
+        </div>
+
+        <!-- Semaine : l'essentiel, ce qui ne va pas, ce qu'il y a à faire -->
+        <div id="mk-panneau-semaine" class="flex flex-col gap-space-lg">
+          <div id="mk-alerte-semaine" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <h2 id="mk-semaine-titre" class="font-headline-md text-headline-md text-on-surface"></h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Pages vues</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">visibility</span></div>
+              <span id="mk-s-pages" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-s-pages-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Sociétés inscrites</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">how_to_reg</span></div>
+              <span id="mk-s-inscrits" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-s-inscrits-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Contacts</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">forum</span></div>
+              <span id="mk-s-contacts" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-s-contacts-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Contenus publiés</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">campaign</span></div>
+              <span id="mk-s-publies" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-s-publies-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-space-lg">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+              <h3 class="font-headline-sm text-headline-sm text-error mb-space-xs">Ce qui ne va pas</h3>
+              <ul id="mk-s-alertes" class="list-disc pl-5 flex flex-col gap-1 font-body-sm text-body-sm text-on-surface"></ul>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">La semaine</h3>
+              <ul id="mk-s-points" class="list-disc pl-5 flex flex-col gap-1 font-body-sm text-body-sm text-on-surface"></ul>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">À faire</h3>
+              <ul id="mk-s-afaire" class="list-disc pl-5 flex flex-col gap-1 font-body-sm text-body-sm text-on-surface"></ul>
+            </div>
+          </div>
         </div>
 
         <!-- Audience -->
@@ -2560,7 +2604,8 @@ const MK_TYPES = { email_envoye: 'E-mail envoyé', reponse: 'Réponse reçue', a
 const MK_LANGUES = { fr: 'Français', en: 'Anglais', autre: 'Autre' };
 let MK_CONTACTS = [];
 let MK_CONTACT_OUVERT = null;
-let MK_ONGLET = 'audience';
+let MK_ONGLET = 'semaine';
+const MK_PERIODES = { semaine: '7', audience: '30' };   // la période choisie est mémorisée PAR onglet (la semaine s'ouvre sur 7 jours, l'audience sur 30)
 let MK_BRANCHE = false;
 let MK_IMPORT = [];
 
@@ -2578,13 +2623,13 @@ const MK_ABSENT_TEXTE = "La mesure n'est pas encore installée dans la base : il
 async function chargerMarketing() {
   if (!MK_BRANCHE) { brancherMarketing(); MK_BRANCHE = true; }
   afficherOngletMarketing(MK_ONGLET);
-  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else if (MK_ONGLET === 'sequences') await chargerSequencesMk(); else await chargerAudienceMk();
+  if (MK_ONGLET === 'semaine') await chargerSemaineMk(); else if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else if (MK_ONGLET === 'sequences') await chargerSequencesMk(); else await chargerAudienceMk();
 }
 
 function brancherMarketing() {
   document.querySelectorAll('.mk-onglet').forEach((b) => b.addEventListener('click', () => { MK_ONGLET = b.dataset.onglet; chargerMarketing(); }));
-  el('mk-periode').addEventListener('change', chargerAudienceMk);
-  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else if (MK_ONGLET === 'sequences') chargerSequencesMk(); else chargerAudienceMk(); });
+  el('mk-periode').addEventListener('change', () => { MK_PERIODES[MK_ONGLET] = el('mk-periode').value; if (MK_ONGLET === 'semaine') chargerSemaineMk(); else chargerAudienceMk(); });
+  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'semaine') chargerSemaineMk(); else if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else if (MK_ONGLET === 'sequences') chargerSequencesMk(); else chargerAudienceMk(); });
   el('mk-filtre-statut').innerHTML = `<option value="">Tous les statuts</option>` + Object.entries(MK_STATUTS).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('')
     + `<option value="desinscrit">Désinscrits</option>`;
   el('mk-recherche').addEventListener('input', rendreContactsMk);
@@ -2608,7 +2653,8 @@ function brancherMarketing() {
 }
 
 function afficherOngletMarketing(nom) {
-  ['audience', 'contacts', 'contenus', 'sequences'].forEach((n) => {
+  if (MK_PERIODES[nom]) el('mk-periode').value = MK_PERIODES[nom];
+  ['semaine', 'audience', 'contacts', 'contenus', 'sequences'].forEach((n) => {
     el('mk-panneau-' + n).classList.toggle('hidden', n !== nom);
     const b = el('mk-onglet-' + n);
     b.classList.toggle('bg-surface-container-lowest', n === nom);
@@ -2616,7 +2662,7 @@ function afficherOngletMarketing(nom) {
     b.classList.toggle('text-on-surface', n === nom);
     b.classList.toggle('text-on-surface-variant', n !== nom);
   });
-  el('mk-periode').classList.toggle('hidden', nom !== 'audience');
+  el('mk-periode').classList.toggle('hidden', nom !== 'audience' && nom !== 'semaine');
 }
 
 // ── Audience et inscrits ──────────────────────────────────────────────────────────────
@@ -3091,6 +3137,32 @@ function apercuSequenceMk() {
   zone.innerHTML = `<p class="font-label-md text-label-md text-on-surface-variant">Objet</p><p class="font-body-md text-body-md text-on-surface font-semibold mb-space-xs">${echapper(message.sujet)}</p>`
     + message.corps.map((l) => `<p class="font-body-sm text-body-sm text-on-surface">${echapper(l)}</p>`).join('')
     + `<hr class="my-space-xs border-surface-container-high">` + pied.map((l) => `<p class="font-body-sm text-body-sm text-on-surface-variant">${echapper(l)}</p>`).join('');
+}
+
+// ── Marketing : la semaine en clair (migration marketing-semaine.sql ; mots : marketing-semaine.js, généré depuis la source du serveur — les MÊMES que dans l'e-mail du lundi) ──
+async function chargerSemaineMk() {
+  const alerte = el('mk-alerte-semaine');
+  alerte.classList.add('hidden');
+  const jours = Number(el('mk-periode').value) || 7;
+  const { data, error } = await sb.rpc('marketing_semaine', { p_jours: jours });
+  if (error) {
+    alerte.textContent = mkAbsent(error) ? "La semaine n'est pas encore installée dans la base : il manque le script marketing-semaine.sql." : 'Lecture impossible : ' + error.message;
+    alerte.classList.remove('hidden');
+    return;
+  }
+  if (!window.marketingSemaine) { alerte.textContent = "Le résumé n'est pas chargé (marketing-semaine.js)."; alerte.classList.remove('hidden'); return; }
+  const m = window.marketingSemaine, s = m.synthese(data);
+  const v = data.visites, i = data.inscrits, k = data.contacts, c = data.contenus;
+  el('mk-semaine-titre').textContent = m.titreSemaine(data);
+  const carte = (id, valeur, sous) => { el(id).textContent = valeur; el(id + '-sous').textContent = sous; };
+  carte('mk-s-pages', nbFr(v.pages), `${nbFr(v.visiteurs_jours)} visiteurs par jour · avant : ${nbFr(v.precedent.pages)}`);
+  carte('mk-s-inscrits', nbFr(i.total), `${nbFr(i.avec_machine)} avec une machine · avant : ${nbFr(i.precedent)}`);
+  carte('mk-s-contacts', `${nbFr(k.contactes)} / ${nbFr(k.reponses)}`, `sollicités / réponses · ${nbFr(k.a_relancer)} relance(s) à faire`);
+  carte('mk-s-publies', nbFr(c.publies), `${nbFr(c.a_relire)} à relire · ${nbFr(c.en_retard)} en retard`);
+  const liste = (id, lignes, vide) => { el(id).innerHTML = lignes.length ? lignes.map((l) => `<li>${echapper(l)}</li>`).join('') : `<li class="list-none -ml-5 text-on-surface-variant">${echapper(vide)}</li>`; };
+  liste('mk-s-alertes', s.alertes, 'Rien à signaler.');
+  liste('mk-s-points', s.points, '');
+  liste('mk-s-afaire', s.afaire, 'Rien de prévu.');
 }
 
 // ── Marketing : calendrier des contenus (migration marketing-contenus.sql) ─────────────────────────────────

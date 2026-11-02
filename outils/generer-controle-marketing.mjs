@@ -42,10 +42,17 @@ export function genererSequencesNavigateur(ts) {
     'Séquence de démarrage des nouvelles sociétés (étapes, conditions, textes FR/EN), utilisée pour l\'aperçu dans la page Marketing de la console.');
 }
 
+export function genererSemaineNavigateur(ts) {
+  return generer(ts, 'marketing-semaine-contenu.ts', 'marketingSemaine',
+    ['synthese', 'lignesTexte', 'blocHtml', 'titreSemaine', 'variation', 'jourCourt'],
+    'La semaine marketing en clair (points, alertes, à faire), utilisée par l\'onglet Semaine de la console : les mêmes mots que dans le récapitulatif envoyé par e-mail.');
+}
+
 export const SORTIES = [
   { source: path.join(PARTAGE, 'marketing-controle.ts'), sortie: path.join(RACINE, 'marketing-controle.js'), generer: genererControleNavigateur },
   { source: path.join(PARTAGE, 'marketing-tri.ts'), sortie: path.join(RACINE, 'marketing-tri.js'), generer: genererTriNavigateur },
   { source: path.join(PARTAGE, 'marketing-sequences-contenu.ts'), sortie: path.join(RACINE, 'marketing-sequences.js'), generer: genererSequencesNavigateur },
+  { source: path.join(PARTAGE, 'marketing-semaine-contenu.ts'), sortie: path.join(RACINE, 'marketing-semaine.js'), generer: genererSemaineNavigateur },
 ];
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
