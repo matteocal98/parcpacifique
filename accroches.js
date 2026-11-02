@@ -27,7 +27,7 @@
     ? { groupe: 'Headlines', point: function (i, n) { return 'Headline ' + (i + 1) + ' of ' + n; }, pause: 'Pause the headlines', lecture: 'Resume the headlines' }
     : { groupe: 'Accroches', point: function (i, n) { return 'Accroche ' + (i + 1) + ' sur ' + n; }, pause: 'Mettre les accroches en pause', lecture: 'Relancer les accroches' };
 
-  var ATTENTE = 6500;                 // temps de lecture, une fois l'accroche entièrement affichée
+  var ATTENTE = 3000;                 // temps de lecture, une fois l'accroche entièrement affichée
   var DEBUT = [0x18, 0x68, 0xDB];     // dégradé de marque (#1868DB → #20AFA1), appliqué lettre par lettre : un dégradé CSS ne suit pas les lettres qui basculent en 3D
   var FIN = [0x20, 0xAF, 0xA1];
 
@@ -35,6 +35,7 @@
   var courant = 0;
   var attente = null;                 // minuteur du temps de lecture
   var enCours = [];                   // minuteurs de l'animation en cours (pour pouvoir l'interrompre)
+  var enMouvement = false;            // vrai pendant un changement d'accroche (enCours garde les minuteurs déjà échus : il ne dit pas si ça bouge)
   var enPause = reduit;               // qui demande moins d'animations ne voit rien défiler tout seul
   var survol = false;
   var points = [];
@@ -134,12 +135,15 @@
     annuler();
     slides.forEach(function (s, k) { s.classList.remove('is-sortant'); etat(s, k === i); });
     exposer(i);
+    ajusterHauteur(i);
     planifier();
   }
+  // Le bloc prend la hauteur de l'accroche affichée (chacune est alignée en haut de la cellule et garde sa propre hauteur) : pas de vide sous un texte court.
+  function ajusterHauteur(i) { conteneur.style.height = slides[i].offsetHeight + 'px'; }
 
   // ── Animation : les lettres, puis les mots, l'un après l'autre ──
   function plan(fn, ms) { enCours.push(setTimeout(fn, ms)); }
-  function annuler() { enCours.forEach(clearTimeout); enCours = []; }
+  function annuler() { enCours.forEach(clearTimeout); enCours = []; enMouvement = false; }
   // Même déroulé que le titre animé d'Elementor « swirl » (relevé dans son code) : l'ancien texte et le nouveau sont EMPILÉS au même endroit et jouent EN MÊME TEMPS.
   // Toutes les 40 ms, la lettre n de l'ancien se retourne et sort pendant que la lettre n du nouveau arrive ; chaque mouvement dure 0,4 s. Le titre ne dépasse pas ≈ 1,6 s.
   var PAS_LETTRE = 40, DUREE_TITRE_MAX = 1600, PAS_MOT = 30, DUREE_SOUSTITRE_MAX = 900, DECALAGE_SOUSTITRE = 200, DUREE_MOUVEMENT = 450;
@@ -152,21 +156,25 @@
     return Math.max(L.length * pasL, DECALAGE_SOUSTITRE + M.length * pasM) + DUREE_MOUVEMENT;
   }
   function aller(vers) {
-    var enMouvement = enCours.length > 0;
+    var interrompu = enMouvement;
     annuler();
     clearTimeout(attente); attente = null;
     var de = courant;
-    if (reduit || de === vers || enMouvement) { toutStatique(vers); return; }   // un clic en plein mouvement : on va directement à l'arrivée
+    if (reduit || de === vers || interrompu) { toutStatique(vers); return; }   // un clic en plein mouvement : on va directement à l'arrivée
     var vieux = slides[de], neuf = slides[vers];
     vieux.classList.add('is-sortant');   // l'ancien reste affiché le temps de sa sortie, sous le nouveau
     exposer(vers);
     etat(neuf, false);
+    if (neuf.offsetHeight >= vieux.offsetHeight) ajusterHauteur(vers);   // plus grand : la place est faite tout de suite ; plus petit : on rétrécit après la sortie
+    enMouvement = true;
     var dureeSortie = jouer(vieux, 'sort-anim');
     var dureeEntree = jouer(neuf, 'entre-anim');
     plan(function () {
       vieux.classList.remove('is-sortant');
       etat(vieux, false);
       etat(neuf, true);
+      enMouvement = false;
+      ajusterHauteur(vers);
       planifier();
     }, Math.max(dureeSortie, dureeEntree));
   }
@@ -201,7 +209,7 @@
     boutonPause = document.createElement('button');
     boutonPause.type = 'button';
     boutonPause.className = 'accroche-pause';
-    boutonPause.addEventListener('click', function () { enPause = !enPause; majBoutonPause(); if (enPause) arreter(); else if (!enCours.length) planifier(); });
+    boutonPause.addEventListener('click', function () { enPause = !enPause; majBoutonPause(); if (enPause) arreter(); else if (!enMouvement) planifier(); });
     pilote.appendChild(boutonPause);
     majBoutonPause();
   }
@@ -209,11 +217,15 @@
   // Pause au survol et quand le clavier est dans la zone ; reprise à la sortie (une animation déjà commencée va jusqu'au bout).
   var zone = conteneur.parentElement || conteneur;
   zone.addEventListener('mouseenter', function () { survol = true; arreter(); });
-  zone.addEventListener('mouseleave', function () { survol = false; if (!enCours.length) planifier(); });
+  zone.addEventListener('mouseleave', function () { survol = false; if (!enMouvement) planifier(); });
   zone.addEventListener('focusin', function () { survol = true; arreter(); });
-  zone.addEventListener('focusout', function () { survol = false; if (!enCours.length) planifier(); });
+  zone.addEventListener('focusout', function () { survol = false; if (!enMouvement) planifier(); });
   // Onglet caché : les animations du navigateur se figent ; au retour on repart d'un état propre plutôt que d'un texte à moitié retourné.
   document.addEventListener('visibilitychange', function () { if (document.hidden) { arreter(); } else { toutStatique(courant); } });
+
+  // Largeur de fenêtre ou polices qui changent : la hauteur des textes change, on la recalcule (sauf en plein mouvement).
+  window.addEventListener('resize', function () { if (!enMouvement) ajusterHauteur(courant); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!enMouvement) ajusterHauteur(courant); });
 
   slides.forEach(preparer);
   toutStatique(0);
