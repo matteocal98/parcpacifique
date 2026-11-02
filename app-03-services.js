@@ -2171,6 +2171,17 @@ function planPermetScannerQr() {
   return offreDeLaGrille(UI.companyPlan || 'free').cle !== 'free';
 }
 
+// L'EXPORT CSV (liste des machines, historique d'une machine et son partage par e-mail, qui joint ce fichier) est réservé à Starter et plus : c'est la ligne
+// « Export CSV » de la grille des offres (COMPARATIF_OFFRES). Gratuit voit le bouton et reçoit l'invitation à changer d'offre, comme pour le scanner de QR codes.
+function planPermetExportCsv() {
+  return offreDeLaGrille(UI.companyPlan || 'free').cle !== 'free';
+}
+function exportCsvAutorise() {
+  if (planPermetExportCsv()) return true;
+  openUpgradeNotice(UI.companyId, trad('L\'export CSV est inclus à partir de l\'offre Starter.'));
+  return false;
+}
+
 // Plusieurs utilisateurs (rôles Droit de gestion / Droit de saisie) : à partir de Business. Gratuit et Starter n'ont qu'un
 // utilisateur — le gérant — d'après la grille des offres ; personne ne peut donc occuper les autres rôles.
 function planMultiUtilisateurs() {

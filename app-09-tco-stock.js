@@ -510,6 +510,7 @@ async function exporterInterventionsCsv(jours) {
 // Fenêtre « Exporter » : choix du contenu (machines affichées / tout le parc / interventions + période)
 // et du format de fichier (Excel UTF-16 / universel UTF-8, mémorisé par appareil).
 function ouvrirModaleExport() {
+  if (!exportCsvAutorise()) return;
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);

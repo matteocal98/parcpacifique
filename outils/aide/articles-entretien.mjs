@@ -118,6 +118,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'Exportez la liste', texte: 'Touchez {{ui:Exporter en CSV}} : un fichier « historique_nom-de-la-machine.csv » est téléchargé, que vous ouvrez dans un tableur.' },
       ],
       notes: [
+        `L'export CSV n'est pas inclus dans l'offre Gratuit : KALEA propose alors de changer d'offre (voir la page des offres).`,
         'La colonne {{ui:Opérateur / Atelier}} affiche la personne choisie dans le champ {{ui:Intervenant assigné}} au moment de l\'intervention ; elle reste vide si vous aviez laissé {{ui:Non précisé}}.',
         'Sans intervention enregistrée, la carte indique {{ui:Aucun entretien enregistré pour l\'instant.}}',
         'Un dépannage est une ligne de l\'historique : son diagnostic se lit dans la colonne {{ui:Remarques}}. Un frais n\'y figure pas : il se lit dans la carte {{ui:Coûts d\'exploitation}}.',
@@ -139,6 +140,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'Export the list', texte: 'Tap {{ui:Exporter en CSV}}: a file named “historique_machine-name.csv” is downloaded, which you open in a spreadsheet.' },
       ],
       notes: [
+        `CSV export is not included in the Free plan: KALEA then offers to change plan (see the plans page).`,
         'The {{ui:Opérateur / Atelier}} column shows the person chosen in the {{ui:Intervenant assigné}} field at the time of the intervention; it stays empty if you had left {{ui:Non précisé}}.',
         'With no intervention logged, the card says {{ui:Aucun entretien enregistré pour l\'instant.}}',
         'A breakdown is a line of the history: its diagnosis is read in the {{ui:Remarques}} column. An expense is not there: it is read in the {{ui:Coûts d\'exploitation}} card.',

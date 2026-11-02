@@ -910,6 +910,7 @@ export const ARTICLES_MACHINES = [
         { titre: `Téléchargez`, texte: `Cliquez sur {{ui:Télécharger}}. Le fichier est enregistré sur votre appareil.` },
       ],
       notes: [
+        `L'export CSV n'est pas inclus dans l'offre Gratuit : KALEA propose alors de changer d'offre (voir la page des offres).`,
         `Le fichier des machines s'appelle parc_machines suivi de la date. Il contient notamment le nom, la catégorie, la marque et le modèle, l'identifiant, l'état, le compteur, l'échéance et la présence d'un carnet.`,
         `S'il n'y a aucune intervention sur la période choisie, KALEA l'indique au lieu de créer un fichier vide.`,
         `Votre choix de format est mémorisé sur l'appareil.`,
@@ -932,6 +933,7 @@ export const ARTICLES_MACHINES = [
         { titre: `Download`, texte: `Click {{ui:Télécharger}}. The file is saved on your device.` },
       ],
       notes: [
+        `CSV export is not included in the Free plan: KALEA then offers to change plan (see the plans page).`,
         `The machines file is called parc_machines followed by the date. It contains in particular the name, category, make and model, identifier, status, meter, due date and whether a manual is attached.`,
         `If there is no intervention in the chosen period, KALEA says so instead of creating an empty file.`,
         `Your format choice is remembered on the device.`,

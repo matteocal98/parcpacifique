@@ -214,9 +214,14 @@ function ligneVigilanceHtml(l) {
     </button>`;
 }
 function vigilanceHtml() {
+  // Sur ordinateur, ces rôles n'ont ni la barre « + » du téléphone ni les tuiles du terrain : sans ce bouton, aucun chemin direct pour signaler une panne
+  // (administrateur, direction, droit d'achat). Il réutilise l'action rapide « panne » : même choix de machine, même fenêtre.
+  const signaler = SCHEMA.hasPannes
+    ? `<button type="button" class="ui-btn ui-btn-pastille" data-action-rapide="panne">${picto('alerte')}<span>${trad('Signaler une panne')}</span></button>`
+    : '';
   return `
     <section class="ui-section" id="accueil-vigilance">
-      ${teteSectionKit('alerte', trad('Points de vigilance'), '')}
+      ${teteSectionKit('alerte', trad('Points de vigilance'), '', signaler)}
       <div class="ui-section-corps"><div class="vig-liste">${calculerVigilance().map(ligneVigilanceHtml).join('')}</div></div>
     </section>`;
 }

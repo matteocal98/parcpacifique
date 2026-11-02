@@ -1464,10 +1464,12 @@ function openPlanView(machine, companyId, categories, options = {}) {
   };
 
   overlay.querySelector('#export-history-csv').addEventListener('click', () => {
+    if (!exportCsvAutorise()) return;
     telechargerCsv(`historique_${machine.name.replace(/[^a-z0-9]+/gi, '_')}.csv`, buildHistoryCsv());
   });
 
   overlay.querySelector('#share-history-email').addEventListener('click', async () => {
+    if (!exportCsvAutorise()) return;
     const filename = `historique_${machine.name.replace(/[^a-z0-9]+/gi, '_')}.csv`;
     const file = new File([csvEnOctets(buildHistoryCsv())], filename, { type: 'text/csv' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
