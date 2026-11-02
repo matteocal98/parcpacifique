@@ -1472,15 +1472,15 @@ function openPlanView(machine, companyId, categories, options = {}) {
     const file = new File([csvEnOctets(buildHistoryCsv())], filename, { type: 'text/csv' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: `tR('Historique entretien — {machine}', { machine: machine.name })`, text: `tR('Historique des entretiens pour {machine}', { machine: machine.name })` });
+        await navigator.share({ files: [file], title: tR('Historique entretien — {machine}', { machine: machine.name }), text: tR('Historique des entretiens pour {machine}', { machine: machine.name }) });
         return;
       } catch (err) {
         if (err.name === 'AbortError') return;
       }
     }
-    const subject = encodeURIComponent(`tR('Historique entretien — {machine}', { machine: machine.name })`);
+    const subject = encodeURIComponent(tR('Historique entretien — {machine}', { machine: machine.name }));
     const bodyLines = historyData.slice(0, 20).map(h => `${h.performed_at} — ${h.hours_at_intervention != null ? h.hours_at_intervention + trad('h') : ''} — ${(h.items_done || []).join(', ')}${nomOperateurTexte(h) ? ' — ' + nomOperateurTexte(h) : ''} — ${h.description || ''}`);
-    const body = encodeURIComponent(`tR('Historique des entretiens pour {machine}', { machine: machine.name }) :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si tu veux le joindre en pièce jointe.)')}`);
+    const body = encodeURIComponent(`${tR('Historique des entretiens pour {machine}', { machine: machine.name })} :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si tu veux le joindre en pièce jointe.)')}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   });
 
@@ -1544,7 +1544,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
             </tr>`).join('')}
         </tbody>
       </table></div>
-      ${hidden > 0 ? `<div class="hint">tR('{caches} entretien(s) plus ancien(s) non affiché(s) ici — l\'export CSV contient bien les {total} entretiens.', { caches: hidden, total: historyData.length })</div>` : ''}
+      ${hidden > 0 ? `<div class="hint">${tR('{caches} entretien(s) plus ancien(s) non affiché(s) ici — l\'export CSV contient bien les {total} entretiens.', { caches: hidden, total: historyData.length })}</div>` : ''}
       <div class="hint">${tR('{n} entretien(s) enregistré(s).', { n: historyData.length })}</div>`);
     // Signatures (étape 4) : état « signée / non signée » + bouton « Rapport » par ligne, chargés après l'affichage.
     if (typeof brancherSignaturesHistorique === 'function') brancherSignaturesHistorique(section, shown);
