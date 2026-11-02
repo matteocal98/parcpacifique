@@ -845,7 +845,7 @@ function openMachineModal(companyId, categories, existing) {
       boot(trad('Machine archivée'));
     });
     overlay.querySelector('#delete-machine')?.addEventListener('click', async (e) => {
-      const ok = confirm(tR('Supprimer définitivement « {nom} » ? Son plan d\'entretien, son historique, ses relevés, son carnet et sa photo seront aussi supprimés. Cette action est irréversible.', { nom: existing.name }));
+      const ok = confirm(tR('Supprimer définitivement « {nom} » ? Son plan d\'entretien, son historique, ses relevés, ses ordres de travail, son carnet et sa photo seront aussi supprimés. Cette action est irréversible.', { nom: existing.name }));
       if (!ok) return;
       const btn = e.currentTarget;
       const libelle = btn.querySelector('.machine-action-libelle');

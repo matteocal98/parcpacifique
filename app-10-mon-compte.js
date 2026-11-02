@@ -1467,7 +1467,16 @@ async function ouvrirSuppressionCompte(messageEcran) {
     // Colonne absente sur une base plus ancienne : le palier fait foi.
     abonnementId = '';
   }
-  const payant = !!abonnementId || (offre && offre !== 'free');
+  // Y a-t-il d'AUTRES membres ? Le serveur ne supprime alors que ce compte-ci : la société, ses données et son abonnement restent. On lit l'équipe EN DIRECT
+  // (jamais la copie locale, qui pourrait être périmée) ; si la lecture échoue, on annonce le pire cas, comme avant.
+  let resteDesMembres = false;
+  try {
+    const { data: equipe, error: erreurEquipe } = await sb.rpc('equipe_pour_attribution');
+    if (!erreurEquipe && Array.isArray(equipe)) resteDesMembres = equipe.some((m) => m && String(m.id) !== String(UI.userId));
+  } catch (err) {
+    resteDesMembres = false;
+  }
+  const payant = !resteDesMembres && (!!abonnementId || (offre && offre !== 'free'));
   const motConfirmation = trad('SUPPRIMER');
 
   const overlay = document.createElement('div');
@@ -1475,15 +1484,15 @@ async function ouvrirSuppressionCompte(messageEcran) {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="suppr-titre">
       <h2 id="suppr-titre">${trad('Supprimer mon compte')}</h2>
-      <p class="sub">${trad('Cette action est irréversible. Voici ce qui sera définitivement effacé :')}</p>
+      <p class="sub">${resteDesMembres ? trad('Cette action est irréversible. Seul ton compte sera supprimé : la société, ses machines et son abonnement restent en place pour les autres membres.') : trad('Cette action est irréversible. Voici ce qui sera définitivement effacé :')}</p>
       <ul class="suppr-liste">
-        ${resume.lignes.map((l) => `<li>${esc(l)}</li>`).join('')}
+        ${(resteDesMembres ? resume.lignes.slice(-1) : resume.lignes).map((l) => `<li>${esc(l)}</li>`).join('')}
       </ul>
       ${payant ? `
         <div class="suppr-alerte" role="alert">
           <strong>${trad('Ton abonnement en cours sera résilié immédiatement, sans remboursement au prorata (CGU §12) : la période déjà payée est perdue.')}</strong>
         </div>` : ''}
-      <p class="hint">${trad('Si d\'autres membres utilisent cette société, elle n\'est PAS supprimée : seul ton compte disparaît.')}</p>
+      ${resteDesMembres ? '' : `<p class="hint">${trad('Si d\'autres membres utilisent cette société, elle n\'est PAS supprimée : seul ton compte disparaît.')}</p>`}
       <label for="suppr-mot">${tR('Pour confirmer, tape {mot} ci-dessous.', { mot: motConfirmation })}</label>
       <input id="suppr-mot" autocomplete="off" placeholder="${esc(motConfirmation)}">
       <div class="hint" id="suppr-erreur" role="status" aria-live="polite"></div>

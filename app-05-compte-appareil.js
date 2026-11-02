@@ -1231,14 +1231,14 @@ async function preparerCarteBiometrie(root) {
     } else if (etat.mode === 'code') {
       etatBloc.textContent = trad('Ce téléphone n\'annonce pas de biométrie utilisable : c\'est ton code de déverrouillage qui servira.');
     } else if (verrouille) {
-      etatBloc.textContent = trad('Verrouillage activé : ton identité est demandée à chaque ouverture, et de nouveau après une minute en arrière-plan.');
+      etatBloc.textContent = trad('Verrouillage activé : ton identité est demandée à chaque ouverture, et de nouveau après 30 secondes en arrière-plan.');
     } else {
       etatBloc.textContent = trad('Ce téléphone peut vérifier ton identité : tu peux verrouiller l\'application ci-dessous.');
     }
     if (corps) {
       corps.innerHTML = `
         <label class="check-row" for="acc-verrou"><input type="checkbox" id="acc-verrou"${verrouille ? ' checked' : ''}> ${trad('Verrouiller l\'application')}</label>
-        <p class="ui-aide">${trad('Le verrou ne demande rien au trousseau : il fonctionne même si ce téléphone refuse d\'enregistrer quoi que ce soit. L\'empreinte, le visage ou le code de l\'appareil sont demandés à chaque ouverture, et de nouveau après une minute en arrière-plan.')}</p>`;
+        <p class="ui-aide">${trad('Le verrou ne demande rien au trousseau : il fonctionne même si ce téléphone refuse d\'enregistrer quoi que ce soit. L\'empreinte, le visage ou le code de l\'appareil sont demandés à chaque ouverture, et de nouveau après 30 secondes en arrière-plan.')}</p>`;
     }
     // 2. État de la RECONNEXION AUTOMATIQUE (option séparée).
     if (etatAcces) {
