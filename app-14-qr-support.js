@@ -852,24 +852,10 @@ function openMachineModal(companyId, categories, existing) {
       btn.disabled = true;
       if (libelle) libelle.textContent = trad('Suppression…');
       try {
-        // ★ LES DONNÉES LIÉES PARTENT AVEC LA MACHINE, ET C'EST FAIT ICI.
-        //   Une cascade de base n'est PAS garantie (le schéma d'origine n'en
-        //   déclare pas) : sans ces suppressions, le plan, les entretiens et les
-        //   relevés restaient en base — invisibles dans l'application, donc
-        //   conservés alors qu'on annonce leur suppression. Les plans sont lus
-        //   AVANT d'être supprimés : les journaux de rappels s'y rattachent.
-        const { data: plansLies, error: plansLusErr } = await sb
-          .from('maintenance_plans').select('id').eq('machine_id', existing.id);
-        if (plansLusErr) throw plansLusErr;
-        const idsPlans = (plansLies || []).map((p) => p.id);
-        const { error: interventionsErr } = await sb.from('interventions').delete().eq('machine_id', existing.id);
-        if (interventionsErr) throw interventionsErr;
-        const { error: plansErr } = await sb.from('maintenance_plans').delete().eq('machine_id', existing.id);
-        if (plansErr) throw plansErr;
-        for (const idPlan of idsPlans) {
-          const { error: journalErr } = await sb.from('notifications_log').delete().eq('plan_id', idPlan);
-          if (journalErr) console.warn('Journal de rappels non supprimé :', journalErr.message);
-        }
+        // ★ LA BASE D'ABORD, EN UNE SEULE TRANSACTION, PUIS LES FICHIERS.
+        //   supprimerMachineEnBase() supprime la machine ET ce qui s'y rattache (entretiens, plans, journal des rappels ; les ordres de travail partent par cascade) :
+        //   tout part, ou rien. Les fichiers (carnet PDF, photo) ne sont effacés qu'une fois la base faite : si la suppression échoue, la machine garde son carnet et sa photo.
+        await supprimerMachineEnBase(existing.id);
 
         // Nettoyage des fichiers attachés : le carnet PDF et la photo.
         // Un échec ici ne doit pas empêcher la suppression de la fiche.
@@ -880,8 +866,6 @@ function openMachineModal(companyId, categories, existing) {
         const { error: photoRmErr } = await sb.storage.from('machine-photos').remove([`${companyId}/${existing.id}.jpg`]);
         if (photoRmErr) console.warn('Suppression de la photo impossible :', photoRmErr.message);
 
-        const { error: delErr } = await sb.from('machines').delete().eq('id', existing.id);
-        if (delErr) throw delErr;
         synchroniserMachinesStripe();
         overlay.remove();
         boot(trad('Machine supprimée'));
@@ -2053,4 +2037,30 @@ async function boot(toastMessage) {
   // Hors connexion, l'appel échoue sans conséquence — les rappels déjà
   // programmés restent valides.
   programmerRappels({ demander: false });
+}
+
+// Supprime une machine et ce qui s'y rattache. Chemin normal : la fonction SQL supprimer_machine() (kalea-serveur/migrations/supprimer-machine-atomique.sql), une seule
+// transaction. Tant qu'elle n'est pas installée sur la base, repli sur l'ancienne suite d'appels — NON atomique (une coupure au milieu laisse une machine à moitié supprimée) :
+// c'est précisément pourquoi la fonction existe. Toute autre erreur de la fonction (droit insuffisant, introuvable…) est remontée telle quelle : rien n'a été supprimé.
+async function supprimerMachineEnBase(machineId) {
+  const { error } = await sb.rpc('supprimer_machine', { p_machine: machineId });
+  if (!error) return;
+  const absente = error.code === 'PGRST202' || error.code === '42883' || /could not find the function|function .* does not exist/i.test(error.message || '');
+  if (!absente) throw error;
+
+  // ── Repli (fonction non installée) : l'ancienne suite d'appels. ──
+  // Une cascade de base n'est PAS garantie pour ces tables (le schéma d'origine n'en déclare pas). Les plans sont lus AVANT d'être supprimés : les journaux de rappels s'y rattachent.
+  const { data: plansLies, error: plansLusErr } = await sb.from('maintenance_plans').select('id').eq('machine_id', machineId);
+  if (plansLusErr) throw plansLusErr;
+  const idsPlans = (plansLies || []).map((p) => p.id);
+  const { error: interventionsErr } = await sb.from('interventions').delete().eq('machine_id', machineId);
+  if (interventionsErr) throw interventionsErr;
+  const { error: plansErr } = await sb.from('maintenance_plans').delete().eq('machine_id', machineId);
+  if (plansErr) throw plansErr;
+  for (const idPlan of idsPlans) {
+    const { error: journalErr } = await sb.from('notifications_log').delete().eq('plan_id', idPlan);
+    if (journalErr) console.warn('Journal de rappels non supprimé :', journalErr.message);
+  }
+  const { error: delErr } = await sb.from('machines').delete().eq('id', machineId);
+  if (delErr) throw delErr;
 }
