@@ -20,12 +20,13 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-4CbN13RUNbyy1RHOjSnqvL96lTxP7XMAgjIGpCpIlkc=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-xrkrLDMslpyt0pc5Ian75EDh5C7Ty69blkA2BCZxMSg=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
 <script src="./marketing-controle.js"></script>
 <script src="./marketing-tri.js"></script>
+<script src="./marketing-sequences.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
@@ -990,6 +991,7 @@
           <button id="mk-onglet-audience" type="button" data-onglet="audience" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Audience et inscrits</button>
           <button id="mk-onglet-contacts" type="button" data-onglet="contacts" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contacts</button>
           <button id="mk-onglet-contenus" type="button" data-onglet="contenus" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contenus</button>
+          <button id="mk-onglet-sequences" type="button" data-onglet="sequences" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Séquences</button>
         </div>
 
         <!-- Audience -->
@@ -1067,6 +1069,38 @@
                 </table>
               </div>
               <p id="mk-vide-pages" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Séquences : messages de démarrage aux nouvelles sociétés -->
+        <div id="mk-panneau-sequences" class="hidden flex flex-col gap-space-lg">
+          <div id="mk-alerte-sequences" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+              <div class="max-w-3xl">
+                <h2 class="font-headline-md text-headline-md text-on-surface">Séquence de démarrage</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Trois messages au plus à une société qui vient de s'inscrire, uniquement tant qu'elle n'a pas avancé : <strong>J+1</strong> si elle n'a aucune machine, <strong>J+3</strong> si elle a une machine mais aucun plan d'entretien, <strong>J+14</strong> si elle n'a toujours aucun plan (on demande ce qui a manqué ; la réponse arrive à l'équipe). Jamais deux messages à moins de 2 jours, jamais aux comptes du personnel, jamais après un désabonnement. Chaque message se termine par un lien de désabonnement, et ses textes sont contrôlés comme toute publication.</p>
+              </div>
+              <button id="mk-seq-bascule" type="button" class="h-11 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md shrink-0">Allumer la séquence</button>
+            </div>
+            <p id="mk-seq-etat" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+          </div>
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-space-lg">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div class="p-space-lg"><h2 class="font-headline-md text-headline-md text-on-surface">Messages envoyés</h2></div>
+              <table class="w-full text-left font-body-sm text-body-sm">
+                <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm"><th class="py-3 px-space-md">Étape</th><th class="py-3 px-space-md text-right">Envoyés</th></tr></thead>
+                <tbody id="mk-seq-bilan" class="divide-y divide-surface-container-low"></tbody>
+              </table>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-sm">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Aperçu des messages</h2>
+              <div class="flex flex-wrap gap-space-sm">
+                <select id="mk-seq-etape" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"><option value="premiere-machine">Première machine</option><option value="premier-plan">Premier plan</option><option value="un-mot">Un mot</option></select>
+                <select id="mk-seq-langue" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"><option value="fr">Français</option><option value="en">Anglais</option></select>
+              </div>
+              <div id="mk-seq-apercu" class="rounded-xl p-space-md bg-surface-container-low flex flex-col gap-1"></div>
             </div>
           </div>
         </div>
@@ -2544,13 +2578,13 @@ const MK_ABSENT_TEXTE = "La mesure n'est pas encore installée dans la base : il
 async function chargerMarketing() {
   if (!MK_BRANCHE) { brancherMarketing(); MK_BRANCHE = true; }
   afficherOngletMarketing(MK_ONGLET);
-  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else await chargerAudienceMk();
+  if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else if (MK_ONGLET === 'sequences') await chargerSequencesMk(); else await chargerAudienceMk();
 }
 
 function brancherMarketing() {
   document.querySelectorAll('.mk-onglet').forEach((b) => b.addEventListener('click', () => { MK_ONGLET = b.dataset.onglet; chargerMarketing(); }));
   el('mk-periode').addEventListener('change', chargerAudienceMk);
-  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else chargerAudienceMk(); });
+  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else if (MK_ONGLET === 'sequences') chargerSequencesMk(); else chargerAudienceMk(); });
   el('mk-filtre-statut').innerHTML = `<option value="">Tous les statuts</option>` + Object.entries(MK_STATUTS).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('')
     + `<option value="desinscrit">Désinscrits</option>`;
   el('mk-recherche').addEventListener('input', rendreContactsMk);
@@ -2564,6 +2598,9 @@ function brancherMarketing() {
   el('mk-filtre-contenus').innerHTML = '<option value="">Tous les statuts</option>' + Object.entries(MK_STATUTS_CONTENU).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('');
   el('mk-filtre-contenus').addEventListener('change', rendreContenusMk);
   el('mk-nouveau-contenu').addEventListener('click', () => ouvrirContenuMk(null));
+  el('mk-seq-bascule').addEventListener('click', basculerSequencesMk);
+  el('mk-seq-etape').addEventListener('change', apercuSequenceMk);
+  el('mk-seq-langue').addEventListener('change', apercuSequenceMk);
   el('mk-liste-contenus').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContenuMk(tr.dataset.id); });
   el('mk-liste-contacts').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContactMk(tr.dataset.id); });
   el('mk-overlay').addEventListener('click', (ev) => { if (ev.target === el('mk-overlay')) fermerMk(); });
@@ -2571,7 +2608,7 @@ function brancherMarketing() {
 }
 
 function afficherOngletMarketing(nom) {
-  ['audience', 'contacts', 'contenus'].forEach((n) => {
+  ['audience', 'contacts', 'contenus', 'sequences'].forEach((n) => {
     el('mk-panneau-' + n).classList.toggle('hidden', n !== nom);
     const b = el('mk-onglet-' + n);
     b.classList.toggle('bg-surface-container-lowest', n === nom);
@@ -3005,6 +3042,55 @@ async function lancerQualificationMk() {
   retour.textContent = 'Tri en cours…';
   const n = await qualifierContactsMk(false);
   retour.textContent = n ? `${nbFr(n)} contact${n > 1 ? 's' : ''} qualifié${n > 1 ? 's' : ''}.` : '';
+}
+
+// ── Marketing : séquence de démarrage des nouvelles sociétés (migration marketing-sequences.sql ; textes : marketing-sequences.js, généré depuis la source du serveur) ──
+// Interrupteur général ÉTEINT par défaut. En l'allumant, seules les sociétés créées À PARTIR DE CET INSTANT reçoivent des messages : jamais les clients existants.
+const MK_SEQ_ETAPES = { 'premiere-machine': 'Première machine (J+1, si aucune machine)', 'premier-plan': 'Premier plan (J+3, si une machine et aucun plan)', 'un-mot': 'Un mot (J+14, si toujours aucun plan)' };
+let MK_SEQ_ACTIF = false;
+
+async function chargerSequencesMk() {
+  const alerte = el('mk-alerte-sequences');
+  alerte.classList.add('hidden');
+  const { data, error } = await sb.rpc('marketing_sequences_bilan');
+  if (error) {
+    alerte.textContent = mkAbsent(error) ? "La séquence n'est pas encore installée dans la base : il manque le script marketing-sequences.sql." : 'Lecture impossible : ' + error.message;
+    alerte.classList.remove('hidden');
+    return;
+  }
+  MK_SEQ_ACTIF = !!data.actif;
+  el('mk-seq-etat').textContent = MK_SEQ_ACTIF
+    ? `Allumée${data.depuis ? ' depuis le ' + mkDate(data.depuis) : ''} : les sociétés créées depuis cet instant reçoivent la séquence (si la fonction d'envoi est déployée).`
+    : 'Éteinte : aucun message ne part.';
+  el('mk-seq-etat').className = 'font-body-sm text-body-sm ' + (MK_SEQ_ACTIF ? 'text-on-surface font-semibold' : 'text-on-surface-variant');
+  el('mk-seq-bascule').textContent = MK_SEQ_ACTIF ? 'Éteindre la séquence' : 'Allumer la séquence';
+  const envois = new Map((data.envois || []).map((e) => [e.etape, e.n]));
+  el('mk-seq-bilan').innerHTML = Object.entries(MK_SEQ_ETAPES).map(([id, nom]) => `<tr><td class="py-3 px-space-md">${echapper(nom)}</td><td class="py-3 px-space-md text-right">${nbFr(envois.get(id) || 0)}</td></tr>`).join('')
+    + `<tr><td class="py-3 px-space-md font-semibold">Désabonnés</td><td class="py-3 px-space-md text-right font-semibold">${nbFr(data.desabonnes || 0)}</td></tr>`;
+  apercuSequenceMk();
+}
+
+async function basculerSequencesMk() {
+  const allumer = !MK_SEQ_ACTIF;
+  const question = allumer
+    ? "Allumer la séquence de démarrage ?\n\nSeules les sociétés créées à partir de maintenant recevront des messages (jamais les clients existants). Les messages partent chaque matin, par la fonction d'envoi, si elle est déployée. Chaque message se termine par un lien de désabonnement."
+    : "Éteindre la séquence de démarrage ?\n\nAucun message ne partira plus. Les envois déjà faits sont conservés.";
+  if (!window.confirm(question)) return;
+  const { error } = await sb.rpc('marketing_sequences_definir_reglages', { p_actif: allumer });
+  if (error) { const a = el('mk-alerte-sequences'); a.textContent = 'Impossible : ' + error.message; a.classList.remove('hidden'); return; }
+  chargerSequencesMk();
+}
+
+function apercuSequenceMk() {
+  const zone = el('mk-seq-apercu');
+  if (!window.marketingSequences) { zone.innerHTML = '<p class="text-error font-body-sm text-body-sm">Les textes ne sont pas chargés (marketing-sequences.js).</p>'; return; }
+  const m = window.marketingSequences;
+  const langue = el('mk-seq-langue').value, etape = el('mk-seq-etape').value;
+  const message = m.construireMessage(etape, langue);
+  const pied = m.pied(langue, m.lienDesabonnement('00000000-0000-0000-0000-000000000000', langue));
+  zone.innerHTML = `<p class="font-label-md text-label-md text-on-surface-variant">Objet</p><p class="font-body-md text-body-md text-on-surface font-semibold mb-space-xs">${echapper(message.sujet)}</p>`
+    + message.corps.map((l) => `<p class="font-body-sm text-body-sm text-on-surface">${echapper(l)}</p>`).join('')
+    + `<hr class="my-space-xs border-surface-container-high">` + pied.map((l) => `<p class="font-body-sm text-body-sm text-on-surface-variant">${echapper(l)}</p>`).join('');
 }
 
 // ── Marketing : calendrier des contenus (migration marketing-contenus.sql) ─────────────────────────────────

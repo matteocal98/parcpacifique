@@ -36,9 +36,16 @@ export function genererTriNavigateur(ts) {
     'Tri des contacts de prospection par règles (taille, fonction, secteur), utilisé par la page Marketing de la console.');
 }
 
+export function genererSequencesNavigateur(ts) {
+  return generer(ts, 'marketing-sequences-contenu.ts', 'marketingSequences',
+    ['ETAPES', 'FENETRE_JOURS', 'ESPACEMENT_JOURS', 'etapeDue', 'construireMessage', 'texteAControler', 'pied', 'lienDesabonnement', 'construireHtml'],
+    'Séquence de démarrage des nouvelles sociétés (étapes, conditions, textes FR/EN), utilisée pour l\'aperçu dans la page Marketing de la console.');
+}
+
 export const SORTIES = [
   { source: path.join(PARTAGE, 'marketing-controle.ts'), sortie: path.join(RACINE, 'marketing-controle.js'), generer: genererControleNavigateur },
   { source: path.join(PARTAGE, 'marketing-tri.ts'), sortie: path.join(RACINE, 'marketing-tri.js'), generer: genererTriNavigateur },
+  { source: path.join(PARTAGE, 'marketing-sequences-contenu.ts'), sortie: path.join(RACINE, 'marketing-sequences.js'), generer: genererSequencesNavigateur },
 ];
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

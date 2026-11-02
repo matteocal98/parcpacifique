@@ -1,0 +1,58 @@
+# Séquence de démarrage KALEA (marketing, module 5) — déclencheur quotidien.
+# Même schéma que alertes-usage.yml : le jeton vit dans les secrets GitHub, l'historique des exécutions sert de contrôle.
+#
+# CE QU'IL FAUT AVOIR POSÉ (une fois) :
+#   1. secret de dépôt  MARKETING_SEQUENCES_TOKEN            = une chaîne aléatoire d'au moins 32 caractères
+#   2. secret de fonction Supabase MARKETING_SEQUENCES_TOKEN = LA MÊME valeur (la fonction refuse tout si elle est absente)
+#   3. le secret de dépôt SUPABASE_ANON_KEY (déjà posé pour recap-hebdo et alertes-usage)
+#   4. la fonction déployée : npx supabase functions deploy marketing-sequences --project-ref tiayvmnodsbygmuemeuy --use-api
+#   5. migrations/marketing-sequences.sql exécuté dans Supabase (dépôt kalea-serveur)
+#   6. la page de désabonnement publiée : desabonnement.html (dépôt parcpacifique)
+#
+# L'INTERRUPTEUR GÉNÉRAL est éteint par défaut (console, Marketing > Séquences). Tant qu'il est éteint, la fonction ne trouve aucun destinataire : ce workflow peut
+# donc tourner sans danger. En l'allumant, seules les sociétés créées APRÈS comptent.
+#
+# PREMIER ESSAI : onglet Actions > « Séquence de démarrage » > Run workflow, avec « simulation » coché : la fonction calcule et renvoie ce qui partirait, sans rien
+# envoyer ni rien noter.
+
+name: Séquence de démarrage
+
+on:
+  schedule:
+    # Tous les jours à 21:00 UTC = 08:00 à Nouméa : le message arrive en début de journée de travail.
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      simulation:
+        description: "Simulation : ne rien envoyer, seulement afficher ce qui partirait"
+        type: boolean
+        default: true
+
+jobs:
+  sequences:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer la séquence de démarrage
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          MARKETING_SEQUENCES_TOKEN: ${{ secrets.MARKETING_SEQUENCES_TOKEN }}
+          SIMULATION: ${{ github.event_name == 'workflow_dispatch' && inputs.simulation || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${MARKETING_SEQUENCES_TOKEN:-}" ]; then
+            echo "::error::le secret MARKETING_SEQUENCES_TOKEN n'est pas posé sur le dépôt"
+            exit 1
+          fi
+          code=$(curl -sS -o reponse.json -w '%{http_code}' \
+            -X POST "https://tiayvmnodsbygmuemeuy.supabase.co/functions/v1/marketing-sequences" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "x-marketing-token: ${MARKETING_SEQUENCES_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"simulation\": ${SIMULATION}}")
+          echo "HTTP $code"
+          cat reponse.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::la séquence de démarrage n'a pas été traitée (HTTP $code)"
+            exit 1
+          fi

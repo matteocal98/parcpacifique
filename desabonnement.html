@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Désabonnement — KALEA</title>
+<meta name="description" content="Se désabonner des conseils de démarrage KALEA.">
+<link rel="canonical" href="https://kalea.pro/desabonnement.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<meta name="theme-color" content="#0D1424">
+<style>
+  /* POLICES AUTO-HÉBERGÉES — Inter (sous-ensemble latin), servies depuis NOTRE
+     domaine dans `polices/`. Ni CDN, ni base64 : un `<link>` vers Google ferait
+     transmettre l'adresse IP du visiteur, et la base64 alourdissait chaque page de
+     64 ko sans être mise en cache d'une page à l'autre. Ces fichiers le sont. */
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:400;src:url(./polices/inter-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:700;src:url(./polices/inter-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Inter';font-style:normal;font-display:swap;font-weight:800;src:url(./polices/inter-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+
+  :root{
+    /* Jetons de la charte KALEA. Les surfaces et les bordures sont ces mêmes
+       teintes en transparence : aucune autre couleur n'est employée. */
+    --bg:#FFFFFF; --surface:#FFFFFF; --ink:#0E1333; --ink-soft:rgba(14,19,51,.74);
+    --line:rgba(14,19,51,.14); --primary:#6366F1; --primary-dark:#5B52DF; --r-lg:22px; --r-sm:10px;
+    --shadow-lg:0 24px 60px rgba(13,20,36,.16);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.6;}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 90px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px;}
+  a.back{display:inline-block;margin-bottom:18px;color:var(--primary);font-weight:700;text-decoration:none;font-size:14px;}
+  a.back:hover{text-decoration:underline;}
+  h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .updated{color:var(--ink-soft);font-size:13px;margin-bottom:28px;}
+  h2{font-size:17px;font-weight:800;color:var(--primary-dark);margin:28px 0 8px;}
+  p, li{font-size:15px;color:var(--ink);}
+  ul{padding-left:20px;}
+  .box{background:rgba(14,19,51,.03);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:10px 0;}
+  .box p{margin:4px 0;}
+
+  /* Sélecteur de langue : même clé de stockage que l'application. */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .top a.back{margin-bottom:0;}
+  .lang-switch{display:flex;gap:8px;}
+  .lang-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  }
+  .lang-btn:hover{border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  .lang-btn.is-active{background:rgba(99,102,241,.10);border-color:rgba(99,102,241,.45);color:var(--primary-dark);}
+  html[lang="fr"] .en,html[lang="en"] .fr{display:none;}
+</style>
+<link rel="stylesheet" href="./legal-sombre.css">
+<script src="./theme.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <a class="back" href="./" id="retour">← kalea.pro</a>
+      <div class="lang-switch" role="group" aria-label="Langue">
+        <button type="button" class="lang-btn" data-langue="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-langue="en">🇬🇧 English</button>
+      </div>
+    </div>
+
+    <section class="fr">
+      <h1>Désabonnement</h1>
+      <div class="box" id="etat-fr" role="status" aria-live="polite"><p>Traitement de votre demande…</p></div>
+      <p>Ce lien vous désabonne des <strong>conseils de démarrage</strong> envoyés après la création d'un compte KALEA. Vous continuerez à recevoir les messages indispensables au fonctionnement du service (code de connexion, réinitialisation de mot de passe, rappels d'entretien que vous avez activés).</p>
+      <p>Une question : <a href="mailto:support@kalea.pro">support@kalea.pro</a>.</p>
+    </section>
+
+    <section class="en">
+      <h1>Unsubscribe</h1>
+      <div class="box" id="etat-en" role="status" aria-live="polite"><p>Processing your request…</p></div>
+      <p>This link unsubscribes you from the <strong>getting-started tips</strong> sent after a KALEA account is created. You will still receive the messages the service needs to work (sign-in codes, password resets, maintenance reminders you have enabled).</p>
+      <p>Questions: <a href="mailto:support@kalea.pro">support@kalea.pro</a>.</p>
+    </section>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var URL_RPC = 'https://tiayvmnodsbygmuemeuy.supabase.co/rest/v1/rpc/marketing_sequences_desabonner';
+  var CLE = 'sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg';   // clé PUBLIQUE : elle ne permet que d'appeler cette fonction avec un jeton secret valide
+  var TEXTES = {
+    fr: { ok: 'C\'est fait : vous ne recevrez plus de conseils de démarrage KALEA.', inconnu: 'Ce lien n\'est pas valide ou a expiré. Écrivez à support@kalea.pro et nous vous désabonnerons à la main.', erreur: 'Le désabonnement n\'a pas pu être enregistré. Réessayez dans un instant, ou écrivez à support@kalea.pro.' },
+    en: { ok: 'Done: you will no longer receive KALEA getting-started tips.', inconnu: 'This link is not valid or has expired. Write to support@kalea.pro and we will unsubscribe you by hand.', erreur: 'The unsubscription could not be recorded. Try again in a moment, or write to support@kalea.pro.' }
+  };
+  var params = new URLSearchParams(location.search);
+  var langue = params.get('l') === 'en' || (!params.get('l') && /^en/i.test(navigator.language || '')) ? 'en' : 'fr';
+  function choisirLangue(l) {
+    document.documentElement.lang = l;
+    Array.prototype.forEach.call(document.querySelectorAll('.lang-btn'), function (b) { b.classList.toggle('is-active', b.getAttribute('data-langue') === l); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.lang-btn'), function (b) { b.addEventListener('click', function () { langue = b.getAttribute('data-langue'); choisirLangue(langue); }); });
+  choisirLangue(langue);
+  function afficher(cle) {
+    ['fr', 'en'].forEach(function (l) { document.getElementById('etat-' + l).innerHTML = '<p>' + TEXTES[l][cle] + '</p>'; });
+  }
+  var jeton = params.get('j') || '';
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jeton)) { afficher('inconnu'); return; }
+  fetch(URL_RPC, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: CLE }, body: JSON.stringify({ p_jeton: jeton }), credentials: 'omit' })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+    .then(function (ok) { afficher(ok === true ? 'ok' : 'inconnu'); })
+    .catch(function () { afficher('erreur'); });
+}());
+</script>
+</body>
+</html>
