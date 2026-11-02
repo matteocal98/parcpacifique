@@ -717,6 +717,7 @@ function bonCommandeHtml() {
 // mockup à l'identique.
 const TEINTES_FAMILLE = ['is-roi', 'is-amber', 'is-ok', 'is-indigo'];
 function preparationResumeHtml() {
+  if (!planCouvrePreparation()) return '';   // hors offre : pas de carte sur l'accueil (l'agenda explique ce qu'est la préparation groupée et à quelle offre elle est incluse)
   const jours = UI.preparationJours || 90;
   const liste = listePreparation(UI.machines, jours);
   const nombre = liste.produits.length;
@@ -779,6 +780,7 @@ function preparationResumeHtml() {
 // (premiereDate, déjà calculée) — jamais un statut inventé pour coller au
 // mockup à l'identique.
 function preparationCompleteAgendaHtml() {
+  if (!planCouvrePreparation()) return preparationHorsOffreHtml();
   const jours = UI.preparationJours || 90;
   const liste = listePreparation(UI.machines, jours);
   const nombre = liste.produits.length;
@@ -879,8 +881,25 @@ function preparationCompleteAgendaHtml() {
     </section>`;
 }
 
+// Hors offre (Gratuit, Starter) : la grille réserve la préparation groupée à Business et Enterprise. On le dit à la place de la carte, sans la calculer.
+// Sur iPhone, aucune invitation à changer d'offre (règle 3.1.1 d'Apple) : seulement l'information, sans bouton.
+function preparationHorsOffreHtml() {
+  return `
+    <section class="ui-section" id="prep-hors-offre">
+      ${teteSectionKit('boite', trad('Préparation des pièces et consommables'), '')}
+      <div class="ui-section-corps">
+        <div class="ui-encadre">
+          ${picto('case')}
+          <p>${trad('La préparation groupée d\'atelier est incluse à partir de l\'offre Business.')}</p>
+        </div>
+        ${estAppliIOS() ? '' : `<div><button type="button" class="ui-btn ui-btn-pastille" id="prep-voir-offres">${picto('export')}<span>${trad('Voir les offres')}</span></button></div>`}
+      </div>
+    </section>`;
+}
+
 function wirePreparation(root) {
   if (!root) return;
+  root.querySelector('#prep-voir-offres')?.addEventListener('click', () => openUpgradeNotice(UI.companyId, trad('La préparation groupée d\'atelier est incluse à partir de l\'offre Business.')));
   root.querySelectorAll('[data-horizon]').forEach((bouton) => {
     bouton.addEventListener('click', () => {
       UI.preparationJours = Number(bouton.dataset.horizon) || 90;

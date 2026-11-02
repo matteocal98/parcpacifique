@@ -512,6 +512,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'Copiez ou exportez la liste', texte: '{{ui:Copier la liste commande}} met le texte dans le presse-papiers (message {{ui:Liste copiée}}), prêt à coller dans un message au fournisseur. {{ui:Export et bon de commande}} déplie {{ui:Exporter la liste (CSV)}} et le {{ui:Bon de commande express}}, avec {{ui:Copier}} et {{ui:Partager}}.' },
       ],
       notes: [
+        `La préparation groupée n'est pas incluse dans toutes les offres : sans elle, l'agenda affiche à la place de la carte un message qui l'indique (voir la page des offres).`,
         'Les quantités viennent du carnet constructeur : {{ui:Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.}}',
         'Un plan sans liste de pièces est signalé à part sous {{ui:Entretiens sans liste de pièces}}.',
         'Pour les pièces reliées à un kit, la liste indique aussi si le stock suffit : voir <a href="{{lien:ent-kits-entretien}}">associer des pièces à une tâche</a>.',
@@ -532,6 +533,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'Copy or export the list', texte: '{{ui:Copier la liste commande}} puts the text on the clipboard (message {{ui:Liste copiée}}), ready to paste into a message to the supplier. {{ui:Export et bon de commande}} unfolds {{ui:Exporter la liste (CSV)}} and the {{ui:Bon de commande express}}, with {{ui:Copier}} and {{ui:Partager}}.' },
       ],
       notes: [
+        `Group preparation is not included in every plan: without it, the calendar shows a message in place of the card (see the plans page).`,
         'Quantities come from the manufacturer\'s manual: {{ui:Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.}}',
         'A plan with no parts list is shown separately under {{ui:Entretiens sans liste de pièces}}.',
         'For parts linked to a kit, the list also shows whether the stock is enough: see <a href="{{lien:ent-kits-entretien}}">link parts to a task</a>.',

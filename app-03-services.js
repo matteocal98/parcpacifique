@@ -2165,6 +2165,12 @@ function planCouvreQr() {
   return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
 }
 
+// La PRÉPARATION GROUPÉE (liste consolidée des pièces et consommables à commander, carte de l'agenda et résumé de l'accueil) est, comme les QR codes et Coûts & TCO,
+// une ligne de la grille des offres réservée à Business et Enterprise (COMPARATIF_OFFRES : « QR codes, préparation groupée, Coûts & TCO »).
+function planCouvrePreparation() {
+  return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
+}
+
 // Le SCANNER de QR codes est retiré de l'offre Gratuit (décision du 2026-10-07) ; il reste disponible dès Starter.
 // La GÉNÉRATION des QR codes, elle, reste réservée à Business et Enterprise (planCouvreQr).
 function planPermetScannerQr() {
