@@ -1089,7 +1089,7 @@ VIEWS.account = {
         await preparerCarteEquipe(racine);
       }
 
-      // Retirer : DEUX confirmations, comme la suppression d'une machine — et on
+      // Retirer : UNE confirmation (la personne garde son compte, rien n'est effacé), qui
       // dit ce qui va se passer, pas seulement « êtes-vous sûr ».
       async function retirerLeMembre() {
         const bouton = this;
