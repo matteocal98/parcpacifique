@@ -20,7 +20,7 @@
   réutilisés partout pour ne rien casser de ce qui était déjà vérifié en
   conditions réelles.
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-l+Rf0I0Ze6n7Sy/ALRSG8Wa3HpY9RYKPjSWkk5Gi668=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-dWrc/DPB01pkcHcEuENuMkhG6Tz5J7c9kamVpXjjck8=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -227,35 +227,37 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
-          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
-            <div class="flex items-center justify-between">
-              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Organisations</span>
-              <span class="p-1.5 bg-surface-container rounded text-primary"><span class="material-symbols-outlined text-[20px]">corporate_fare</span></span>
-            </div>
-            <span id="kpi-organisations" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
-          </div>
-          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
-            <div class="flex items-center justify-between">
-              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Machines suivies</span>
-              <span class="p-1.5 bg-surface-container rounded text-secondary-container"><span class="material-symbols-outlined text-[20px]">precision_manufacturing</span></span>
-            </div>
-            <span id="kpi-machines" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
-          </div>
-          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
-            <div class="flex items-center justify-between">
-              <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Interventions ce mois</span>
-              <span class="p-1.5 bg-surface-container rounded text-primary"><span class="material-symbols-outlined text-[20px]">build_circle</span></span>
-            </div>
-            <span id="kpi-interventions" class="font-telemetry-stat text-telemetry-stat text-on-surface mt-2">—</span>
-          </div>
-          <div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between min-h-[110px]">
-            <div class="flex items-center justify-between">
-              <span class="font-label-md text-label-md text-error uppercase tracking-wider">Tickets ouverts</span>
-              <span class="p-1.5 bg-error-container rounded text-error"><span class="material-symbols-outlined text-[20px]">report_problem</span></span>
-            </div>
-            <span id="kpi-tickets" class="font-telemetry-stat text-telemetry-stat text-error font-bold mt-2">—</span>
-          </div>
+        <!-- Indicateurs : tuiles compactes, chacune ouvre la rubrique qui la concerne (data-kpi-cible = un chemin de allerA, ou « repertoire » = plus bas sur cette page) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-space-sm">
+          <button type="button" data-kpi-cible="repertoire" title="Voir le répertoire des clients" class="kpi-tuile text-left bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex items-center gap-2 min-h-[64px] w-full transition-all hover:shadow-md active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="p-1.5 rounded shrink-0 bg-surface-container text-primary"><span class="material-symbols-outlined text-[22px]">corporate_fare</span></span>
+            <span class="flex flex-col items-start min-w-0">
+              <span id="kpi-organisations" class="font-telemetry-stat text-telemetry-stat leading-none text-on-surface">—</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-tight leading-tight mt-1 break-words text-on-surface-variant">Organisations</span>
+            </span>
+          </button>
+          <button type="button" data-kpi-cible="parc" title="Ouvrir Parc Matériel &amp; Flottes" class="kpi-tuile text-left bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex items-center gap-2 min-h-[64px] w-full transition-all hover:shadow-md active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="p-1.5 rounded shrink-0 bg-surface-container text-primary"><span class="material-symbols-outlined text-[22px]">precision_manufacturing</span></span>
+            <span class="flex flex-col items-start min-w-0">
+              <span id="kpi-machines" class="font-telemetry-stat text-telemetry-stat leading-none text-on-surface">—</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-tight leading-tight mt-1 break-words text-on-surface-variant">Machines suivies</span>
+            </span>
+          </button>
+          <button type="button" data-kpi-cible="tco" title="Ouvrir Audit TCO &amp; Facturation (dépenses du mois)" class="kpi-tuile text-left bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex items-center gap-2 min-h-[64px] w-full transition-all hover:shadow-md active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="p-1.5 rounded shrink-0 bg-surface-container text-primary"><span class="material-symbols-outlined text-[22px]">build_circle</span></span>
+            <span class="flex flex-col items-start min-w-0">
+              <span id="kpi-interventions" class="font-telemetry-stat text-telemetry-stat leading-none text-on-surface">—</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-tight leading-tight mt-1 break-words text-on-surface-variant">Interventions ce mois</span>
+            </span>
+          </button>
+          <button type="button" data-kpi-cible="support" title="Ouvrir Support &amp; Tickets" class="kpi-tuile text-left bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex items-center gap-2 min-h-[64px] w-full transition-all hover:shadow-md active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span class="p-1.5 rounded shrink-0 bg-error-container text-error"><span class="material-symbols-outlined text-[22px]">report_problem</span></span>
+            <span class="flex flex-col items-start min-w-0">
+              <span id="kpi-tickets" class="font-telemetry-stat text-telemetry-stat leading-none text-error font-bold">—</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-tight leading-tight mt-1 break-words text-error">Tickets ouverts</span>
+            </span>
+          </button>
+        </div>
         </div>
 
         <section id="bandeau-incident" class="hidden relative overflow-hidden bg-surface-container-lowest p-space-md lg:p-space-lg rounded-lg shadow-md">
@@ -279,7 +281,7 @@
           </div>
         </section>
 
-        <div class="bloc-repertoire bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden">
+        <div id="repertoire-clients" class="bloc-repertoire scroll-mt-20 bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden">
           <div class="p-space-md lg:p-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md">
             <div class="flex flex-col">
               <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Répertoire Portefeuille Clients</h2>
@@ -1444,6 +1446,10 @@ async function demarrer() {
   document.querySelectorAll('.nav-lien').forEach((a) => a.addEventListener('click', (ev) => {
     ev.preventDefault();
     allerA(a.dataset.path);
+  }));
+  document.querySelectorAll('[data-kpi-cible]').forEach((b) => b.addEventListener('click', () => {
+    if (b.dataset.kpiCible === 'repertoire') el('repertoire-clients').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else allerA(b.dataset.kpiCible);
   }));
   document.querySelectorAll('.onglet-ticket').forEach((btn) => btn.addEventListener('click', () => {
     FILTRE_TICKET = btn.dataset.filtre;

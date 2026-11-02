@@ -5535,7 +5535,7 @@
   .support-liste-sujet{font-weight:800;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .support-liste-ligne.is-active .support-liste-sujet{color:var(--primary-dark);}
   .support-liste-ref{font-size:11px;color:var(--ink-3);font-family:'Space Grotesk',sans-serif;flex:0 0 auto;}
-  .support-liste-sub{font-size:11px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .support-liste-sub{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}   /* block : sur un <span> en ligne, overflow/ellipsis sont ignorés et le texte passait sous le badge de statut */
   .support-statut{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);font-size:11px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
   .support-statut .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
   .support-statut.is-ouvert{background:var(--voile-ambre);color:#8a4a0e;}
@@ -5559,7 +5559,8 @@
   .support-echange-ref{font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;padding:2px 8px;border-radius:6px;background:var(--surface);color:var(--ink-2);}
   .support-echange-sub{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:2px;}
   .support-fil{
-    display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;padding-right:4px;margin-bottom:14px;
+    display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;padding:12px;margin-bottom:14px;
+    background:var(--surface);border-radius:14px;   /* le fil repose sur un bloc BLANC (la fenêtre est teintée) ; les bulles des autres y sont donc teintées */
   }
   .support-fil::-webkit-scrollbar{width:5px;}
   .support-fil::-webkit-scrollbar-track{background:transparent;}
@@ -5574,7 +5575,7 @@
     max-width:86%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.45;font-weight:500;
   }
   .support-bulle-ligne.is-moi .support-bulle{background:var(--primary-dark);color:#fff;border-radius:16px 16px 4px 16px;}
-  .support-bulle-ligne.is-autre .support-bulle{background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:16px 16px 16px 4px;}
+  .support-bulle-ligne.is-autre .support-bulle{background:var(--surface-soft);color:var(--ink);border-radius:16px 16px 16px 4px;}
   .support-bulle-ligne.is-ia{align-items:flex-start;}
   .support-bulle-ligne.is-ia .support-bulle{background:var(--surface-soft);color:var(--ink);border:1px dashed var(--line-2);border-radius:16px 16px 16px 4px;}
   .support-bulle-auteur .avatar.is-ia{background:var(--primary-dark);}
