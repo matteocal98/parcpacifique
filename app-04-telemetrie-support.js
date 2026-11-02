@@ -1669,7 +1669,7 @@ function openUpgradeNotice(companyId, message) {
     if (o.cle === 'business') {
       return [
         trad('20 machines (puis 1,50 € par machine, sans limite)'),
-        trad('Multi-utilisateurs (3 accès)'),
+        trad('Multi-utilisateurs (accès illimités)'),
         trad('QR codes équipements'),
         trad('Préparation groupée d\'atelier'),
         trad('Module Coûts & TCO'),
