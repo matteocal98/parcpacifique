@@ -938,7 +938,7 @@ function intervalleTache(item, plan, machine) {
 // Les tâches de CONTRÔLE (« chaque utilisation », « au besoin », « selon le
 // manuel moteur ») ne sont ni ambiguës ni planifiables : elles restent des
 // points de contrôle, sans échéance, et AUCUN choix ne leur est proposé.
-const UNITES_INTERVALLE = {
+const UNITES_INTERVALLE_BRUT = {
   heures: { mot: trad('heures'), libelle: trad('Heures'), court: trad('h'), genre: 'compteur' },
   km: { mot: trad('km'), libelle: trad('Km'), court: trad('km'), genre: 'compteur' },
   jours: { mot: trad('jours'), libelle: trad('Jours'), court: 'j', genre: 'date' },
@@ -946,6 +946,19 @@ const UNITES_INTERVALLE = {
   mois: { mot: trad('mois'), libelle: trad('Mois'), court: trad('mois'), genre: 'date' },
   ans: { mot: trad('ans'), libelle: trad('Ans'), court: trad('an'), genre: 'date' },
 };
+// Clé française (heures, km, jours, semaines, mois, ans) d'une unité donnée sous n'importe quelle forme : la clé elle-même, son mot dans la langue courante, ou une ancienne valeur
+// enregistrée en anglais. null si inconnue.
+const UNITES_ANGLAIS_ANCIEN = { hours: 'heures', hour: 'heures', days: 'jours', day: 'jours', weeks: 'semaines', week: 'semaines', months: 'mois', month: 'mois', years: 'ans', year: 'ans' };
+function cleUniteIntervalle(unite) {
+  const u = String(unite == null ? '' : unite);
+  if (Object.prototype.hasOwnProperty.call(UNITES_INTERVALLE_BRUT, u)) return u;
+  const parMot = Object.keys(UNITES_INTERVALLE_BRUT).find((k) => UNITES_INTERVALLE_BRUT[k].mot === u);
+  return parMot || UNITES_ANGLAIS_ANCIEN[u.toLowerCase()] || null;
+}
+const UNITES_INTERVALLE = new Proxy(UNITES_INTERVALLE_BRUT, {
+  get(table, cle) { return typeof cle === 'string' ? table[cleUniteIntervalle(cle)] : table[cle]; },
+  has(table, cle) { return typeof cle === 'string' && cleUniteIntervalle(cle) != null; },
+});
 const MOTIFS_CONTROLE = [
   /chaque (utilisation|usage|plein|d[ée]marrage|intervention|fois|saison|journ[ée]e)/,
   /[àa] chaque/,
@@ -961,22 +974,22 @@ function estPointDeControle(frequency) {
 }
 function uniteIntervalleDepuisMot(mot) {
   const m = String(mot || '').toLowerCase();
-  if (/^(heures?|hrs?|hours?|h)$/.test(m)) return trad('heures');
-  if (/^(km|kilom)/.test(m)) return trad('km');
-  if (/^(jours?|journee?s?|days?|day|j|d)$/.test(m)) return trad('jours');
-  if (/^semaines?$|^weeks?$|^sem$/.test(m)) return trad('semaines');
-  if (/^mois$|^months?$/.test(m)) return trad('mois');
-  if (/^(ans?|ann[ée]es?|years?)$/.test(m)) return trad('ans');
+  if (/^(heures?|hrs?|hours?|h)$/.test(m)) return 'heures';
+  if (/^(km|kilom)/.test(m)) return 'km';
+  if (/^(jours?|journee?s?|days?|day|j|d)$/.test(m)) return 'jours';
+  if (/^semaines?$|^weeks?$|^sem$/.test(m)) return 'semaines';
+  if (/^mois$|^months?$/.test(m)) return 'mois';
+  if (/^(ans?|ann[ée]es?|years?)$/.test(m)) return 'ans';
   return null;
 }
 function uniteIntervalleDuPlan(plan, machine) {
-  if (!planIsCounter(plan)) return trad('jours');
-  return (machine && counterUnitOf(machine) === 'km') ? trad('km') : trad('heures');
+  if (!planIsCounter(plan)) return 'jours';
+  return (machine && counterUnitOf(machine) === 'km') ? 'km' : 'heures';
 }
 function uniteCompatiblePlan(unite, plan, machine) {
   const info = UNITES_INTERVALLE[unite];
   if (!info) return false;
-  if (planIsCounter(plan)) return unite === uniteIntervalleDuPlan(plan, machine);
+  if (planIsCounter(plan)) return cleUniteIntervalle(unite) === uniteIntervalleDuPlan(plan, machine);
   return info.genre === 'date';
 }
 // L'unité du SECOND compteur de la machine (voir SCHEMA.hasCounter2) : une
@@ -1239,7 +1252,7 @@ function uniteCompatibleAvecPlanSuivi(contreur, unite, uniteOption) {
   return info.genre === 'compteur' && uniteOption === uniteIntervalleDepuisSuivi(unite);
 }
 function uniteIntervalleDepuisSuivi(unite) {
-  return unite === 'days' ? trad('jours') : (unite === 'hours' ? trad('heures') : (unite || trad('jours')));
+  return unite === 'days' ? 'jours' : (unite === 'hours' ? 'heures' : (unite || 'jours'));
 }
 // Un intervalle lu dans le texte, DANS L'UNITÉ DU PLAN : « tous les 6 mois » et
 // « tous les 2 ans » n'ont de sens que sur un plan calendaire.
@@ -1292,9 +1305,9 @@ function intervalleEnMoisDepuisTexte(frequency) {
     return null;
   };
   const mois = lire(/(\d+(?:\.\d+)?)\s*(?:mois|months?)\b/);
-  if (mois != null) return { interval: mois, unite: trad('mois') };
+  if (mois != null) return { interval: mois, unite: 'mois' };
   const ans = lire(/(\d+(?:\.\d+)?)\s*(?:ans?|ann[ée]es?|years?)\b/);
-  if (ans != null) return { interval: ans, unite: trad('ans') };
+  if (ans != null) return { interval: ans, unite: 'ans' };
   return null;
 }
 // Une tâche attend un choix quand son intervalle n'est pas résolu et que le
@@ -1506,7 +1519,7 @@ function uniteCompatiblePlanTM(unite, plan) {
   const info = UNITES_INTERVALLE[unite];
   if (!info) return false;
   if (!planIsCounter(plan)) return info.genre === 'date';
-  return unite === (plan.tracking_mode === 'km' ? 'km' : 'heures');
+  return cleUniteIntervalle(unite) === (plan.tracking_mode === 'km' ? 'km' : 'heures');
 }
 // Tâches dont l'échéance est exploitable : ce sont les seules qui entrent dans
 // le calcul de la plus proche (et donc dans l'état de la machine). LA MÊME
@@ -1708,11 +1721,11 @@ function classerDepuisStructure(frequence) {
 // contrôle purement conditionnel et perdrait son rythme mensuel.
 function intervalleUnitaireDepuisTexte(texte) {
   const t = String(texte || '').toLowerCase();
-  if (/\b(chaque|tous les|toutes les|par)\s+mois\b|\bmensuel/.test(t)) return { interval: 1, unite: trad('mois') };
-  if (/\b(chaque|tous les|toutes les|par)\s+semaines?\b|\bhebdomadaire/.test(t)) return { interval: 1, unite: trad('semaines') };
-  if (/\b(chaque|tous les|toutes les|par)\s+(ans?|ann[ée]es?)\b|\bannuel/.test(t)) return { interval: 1, unite: trad('ans') };
-  if (/\b(chaque|tous les|toutes les|par)\s+jours?\b|\bquotidien/.test(t)) return { interval: 1, unite: trad('jours') };
-  if (/\b(chaque|tous les|toutes les|par)\s+heures?\b/.test(t)) return { interval: 1, unite: trad('heures') };
+  if (/\b(chaque|tous les|toutes les|par)\s+mois\b|\bmensuel/.test(t)) return { interval: 1, unite: 'mois' };
+  if (/\b(chaque|tous les|toutes les|par)\s+semaines?\b|\bhebdomadaire/.test(t)) return { interval: 1, unite: 'semaines' };
+  if (/\b(chaque|tous les|toutes les|par)\s+(ans?|ann[ée]es?)\b|\bannuel/.test(t)) return { interval: 1, unite: 'ans' };
+  if (/\b(chaque|tous les|toutes les|par)\s+jours?\b|\bquotidien/.test(t)) return { interval: 1, unite: 'jours' };
+  if (/\b(chaque|tous les|toutes les|par)\s+heures?\b/.test(t)) return { interval: 1, unite: 'heures' };
   return null;
 }
 
@@ -1734,9 +1747,9 @@ function classerDepuisTexte(frequency) {
   }
   // 3. Rythme explicite : l'unité écrite dans le carnet fait foi.
   if (enMois) return { nature: 'periodique', interval: enMois.interval, unite: enMois.unite, options: [] };
-  if (enHeures) return { nature: 'periodique', interval: enHeures, unite: trad('heures'), options: [] };
-  if (enKm) return { nature: 'periodique', interval: enKm, unite: trad('km'), options: [] };
-  if (enJours) return { nature: 'periodique', interval: enJours, unite: trad('jours'), options: [] };
+  if (enHeures) return { nature: 'periodique', interval: enHeures, unite: 'heures', options: [] };
+  if (enKm) return { nature: 'periodique', interval: enKm, unite: 'km', options: [] };
+  if (enJours) return { nature: 'periodique', interval: enJours, unite: 'jours', options: [] };
   if (unitaire) return { nature: 'periodique', interval: unitaire.interval, unite: unitaire.unite, options: [] };
   // 4. Rien d'exploitable : ni rythme, ni choix à proposer.
   return classementVide('inconnue');

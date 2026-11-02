@@ -316,9 +316,10 @@ function addMonthsIso(isoDateStr, mois) {
 // Échéance d'une tâche calendaire : jours, semaines, mois ou années.
 function ajouterIntervalleIso(isoDateStr, interval, unite) {
   const n = Number(interval) || 0;
-  if (unite === 'mois') return addMonthsIso(isoDateStr, n);
-  if (unite === 'ans') return addMonthsIso(isoDateStr, n * 12);
-  return addDaysIso(isoDateStr, unite === 'semaines' ? n * 7 : n);
+  const cle = typeof cleUniteIntervalle === 'function' ? (cleUniteIntervalle(unite) || unite) : unite;
+  if (cle === 'mois') return addMonthsIso(isoDateStr, n);
+  if (cle === 'ans') return addMonthsIso(isoDateStr, n * 12);
+  return addDaysIso(isoDateStr, cle === 'semaines' ? n * 7 : n);
 }
 // Nombre de jours entiers entre aujourd'hui (minuit local) et la date visée.
 // 0 = aujourd'hui, -1 = hier. Pas de Math.ceil : plus de « en retard » décalé.
@@ -347,7 +348,13 @@ function normalizeItems(raw) {
   if (!Array.isArray(raw)) return [];
   return raw
     .map(it => (typeof it === 'string' ? { label: it } : (it && typeof it === 'object' ? it : null)))
-    .filter(it => it && (it.label || it.frequency || it.spec || it.qty || it.note));
+    .filter(it => it && (it.label || it.frequency || it.spec || it.qty || it.note))
+    .map((it) => {
+      // Une unité enregistrée en traduction (« hours », « months »…) redevient la clé française (voir cleUniteIntervalle, app-02-calculs.js).
+      if (!it.interval_unite || typeof cleUniteIntervalle !== 'function') return it;
+      const cle = cleUniteIntervalle(it.interval_unite);
+      return cle && cle !== it.interval_unite ? { ...it, interval_unite: cle } : it;
+    });
 }
 
 // ── MAJUSCULES : LA VALEUR, PAS SEULEMENT L'AFFICHAGE ─────────────────
