@@ -5,7 +5,7 @@
 export const ARTICLES_ENTRETIEN = [
   // ───────────────────────────────────────────────────────── 1. Enregistrer une intervention
   {
-    id: 'ent-enregistrer-intervention', theme: 'interventions',
+    id: 'ent-enregistrer-intervention', scenario: 'ent-enregistrer-intervention', theme: 'interventions',
     fr: {
       fichier: 'aide/enregistrer-une-intervention.html',
       titre: 'Enregistrer une intervention d\'entretien | Aide KALEA',
@@ -14,8 +14,10 @@ export const ARTICLES_ENTRETIEN = [
       description: 'Noter un entretien fait sur une machine dans KALEA : date, relevé du compteur, éléments traités, intervenant et remarques. Procédure pas à pas.',
       intro: 'Une <strong>intervention</strong>, c\'est un entretien fait sur une machine : ce que vous avez contrôlé ou remplacé, à quelle date, avec quel relevé de compteur. L\'enregistrer remet le plan d\'entretien à jour.',
       etapes: [
-        { titre: 'Ouvrez la fenêtre d\'intervention', texte: 'Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine (sur un petit écran, le bouton s\'appelle {{ui:Intervention}}). Le même bouton se trouve dans la fiche de la machine. Sur le tableau de bord, {{ui:Marquer fait}} ouvre la même fenêtre, avec la tâche déjà cochée.' },
-        { titre: 'Vérifiez la date et le compteur', texte: 'Contrôlez {{ui:Date de l\'intervention}} : c\'est la date du jour par défaut. Pour une machine suivie au compteur, indiquez {{ui:Compteur relevé}} ; la dernière valeur connue est proposée. Si la machine a un second compteur, un champ pour ce second compteur apparaît aussi.' },
+        { titre: 'Ouvrez la fenêtre d\'intervention', texte: 'Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine (sur un petit écran, le bouton s\'appelle {{ui:Intervention}}). Le même bouton se trouve dans la fiche de la machine. Sur le tableau de bord, {{ui:Marquer fait}} ouvre la même fenêtre, avec la tâche déjà cochée.',
+          image: { nom: 'carte', alt: 'La carte d\'une machine : le bouton Enregistrer une intervention est repéré par le numéro 1.' } },
+        { titre: 'Vérifiez la date et le compteur', texte: 'Contrôlez {{ui:Date de l\'intervention}} : c\'est la date du jour par défaut. Pour une machine suivie au compteur, indiquez {{ui:Compteur relevé}} ; la dernière valeur connue est proposée. Si la machine a un second compteur, un champ pour ce second compteur apparaît aussi.',
+          image: { nom: 'fenetre', alt: 'La fenêtre Enregistrer une intervention : la date et le compteur relevé (2), la liste des éléments à cocher (3), l\'intervenant assigné et les remarques (4), puis le bouton de validation (5).' } },
         { titre: 'Cochez ce qui a été fait', texte: 'Dans {{ui:Éléments traités & opérations}}, cochez chaque poste vérifié ou remplacé. {{ui:Tout cocher}} les coche tous d\'un coup.' },
         { titre: 'Indiquez l\'intervenant et les remarques', texte: 'Dans {{ui:Intervenant assigné}}, choisissez la personne qui a fait l\'entretien (par défaut : {{ui:Non précisé}}). Si besoin, écrivez une précision dans {{ui:Remarques}}.' },
         { titre: 'Validez', texte: 'Cliquez sur le bouton en bas de la fenêtre. Son nom change selon votre offre et votre écran : {{ui:Enregistrer l\'intervention}}, {{ui:Valider et intégrer au TCO}} ou, sur téléphone, {{ui:Valider}}. KALEA confirme par {{ui:Entretien enregistré}} et annonce la prochaine alerte.' },
@@ -37,8 +39,10 @@ export const ARTICLES_ENTRETIEN = [
       description: 'Record a service done on a machine in KALEA: date, meter reading, items done, who did it and remarks. Step-by-step procedure.',
       intro: 'An <strong>intervention</strong> is a service done on a machine: what you checked or replaced, on what date, at what meter reading. Logging it brings the maintenance plan up to date.',
       etapes: [
-        { titre: 'Open the intervention window', texte: 'In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine\'s card (on a small screen the button is called {{ui:Intervention}}). The same button is on the machine\'s page. On the dashboard, {{ui:Marquer fait}} opens the same window with the task already ticked.' },
-        { titre: 'Check the date and the meter', texte: 'Check {{ui:Date de l\'intervention}}: it is today\'s date by default. For a machine tracked by meter, enter {{ui:Compteur relevé}}; the last known value is suggested. If the machine has a second meter, a field for that second meter appears too.' },
+        { titre: 'Open the intervention window', texte: 'In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine\'s card (on a small screen the button is called {{ui:Intervention}}). The same button is on the machine\'s page. On the dashboard, {{ui:Marquer fait}} opens the same window with the task already ticked.',
+          image: { nom: 'carte', alt: 'A machine card: the Log an intervention button is marked with number 1.' } },
+        { titre: 'Check the date and the meter', texte: 'Check {{ui:Date de l\'intervention}}: it is today\'s date by default. For a machine tracked by meter, enter {{ui:Compteur relevé}}; the last known value is suggested. If the machine has a second meter, a field for that second meter appears too.',
+          image: { nom: 'fenetre', alt: 'The Log an intervention window: the date and the counter reading (2), the list of items to tick (3), the assigned operator and the notes (4), then the confirm button (5).' } },
         { titre: 'Tick what was done', texte: 'In {{ui:Éléments traités & opérations}}, tick each item that was checked or replaced. {{ui:Tout cocher}} ticks them all at once.' },
         { titre: 'Say who did it and add remarks', texte: 'In {{ui:Intervenant assigné}}, choose the person who did the service (default: {{ui:Non précisé}}). If needed, write a note in {{ui:Remarques}}.' },
         { titre: 'Confirm', texte: 'Click the button at the bottom of the window. Its name depends on your plan and your screen: {{ui:Enregistrer l\'intervention}}, {{ui:Valider et intégrer au TCO}} or, on a phone, {{ui:Valider}}. KALEA confirms with {{ui:Entretien enregistré}} and announces the next alert.' },
@@ -103,7 +107,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 4. Historique
   {
-    id: 'ent-historique-interventions', theme: 'interventions',
+    id: 'ent-historique-interventions', scenario: 'ent-historique-interventions', theme: 'interventions',
     fr: {
       fichier: 'aide/historique-des-interventions-d-une-machine.html',
       titre: 'Consulter et exporter l\'historique des interventions d\'une machine | Aide KALEA',
@@ -113,7 +117,8 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Chaque intervention enregistrée est gardée dans l\'<strong>historique</strong> de la machine. Il se lit dans la fiche de la machine, sous son plan d\'entretien.',
       etapes: [
         { titre: 'Ouvrez la fiche de la machine', texte: 'Dans {{ui:Machines}}, touchez le bandeau de la machine (son nom et sa photo). La fiche {{ui:Plan d\'entretien & historique}} s\'ouvre. Autre chemin : onglet {{ui:Plans d\'entretien}}, puis {{ui:Voir le plan}} sur la ligne de la machine.' },
-        { titre: 'Descendez jusqu\'à l\'historique', texte: 'La carte {{ui:Historique des entretiens}} se trouve en bas de la fiche. Tant que la liste charge, les boutons d\'export sont grisés.' },
+        { titre: 'Descendez jusqu\'à l\'historique', texte: 'La carte {{ui:Historique des entretiens}} se trouve en bas de la fiche. Tant que la liste charge, les boutons d\'export sont grisés.',
+          image: { nom: 'historique', alt: 'La carte Historique des entretiens (2) : le tableau des interventions (3) et le bouton Exporter en CSV (4).' } },
         { titre: 'Lisez le tableau', texte: 'Colonnes : {{ui:Date}}, {{ui:Compteur}} (machines suivies au compteur), {{ui:Éléments traités}}, {{ui:Opérateur / Atelier}}, {{ui:Remarques}} et, selon votre offre, {{ui:Coût total}}. Les plus récentes sont en haut.' },
         { titre: 'Exportez la liste', texte: 'Touchez {{ui:Exporter en CSV}} : un fichier « historique_nom-de-la-machine.csv » est téléchargé, que vous ouvrez dans un tableur.' },
       ],
@@ -135,7 +140,8 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Every intervention you log is kept in the machine\'s <strong>history</strong>. You read it on the machine\'s page, below its maintenance plan.',
       etapes: [
         { titre: 'Open the machine\'s page', texte: 'In {{ui:Machines}}, tap the machine\'s banner (its name and photo). The {{ui:Plan d\'entretien & historique}} page opens. Another route: the {{ui:Plans d\'entretien}} tab, then {{ui:Voir le plan}} on the machine\'s row.' },
-        { titre: 'Scroll down to the history', texte: 'The {{ui:Historique des entretiens}} card is at the bottom of the page. While the list loads, the export buttons are greyed out.' },
+        { titre: 'Scroll down to the history', texte: 'The {{ui:Historique des entretiens}} card is at the bottom of the page. While the list loads, the export buttons are greyed out.',
+          image: { nom: 'historique', alt: 'The Service history card (2): the table of interventions (3) and the Export as CSV button (4).' } },
         { titre: 'Read the table', texte: 'Columns: {{ui:Date}}, {{ui:Compteur}} (machines tracked by meter), {{ui:Éléments traités}}, {{ui:Opérateur / Atelier}}, {{ui:Remarques}} and, depending on your plan, {{ui:Coût total}}. The most recent are at the top.' },
         { titre: 'Export the list', texte: 'Tap {{ui:Exporter en CSV}}: a file named “historique_machine-name.csv” is downloaded, which you open in a spreadsheet.' },
       ],
@@ -152,7 +158,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 5. Lire le plan d'entretien
   {
-    id: 'ent-lire-plan-entretien', theme: 'plans',
+    id: 'ent-lire-plan-entretien', scenario: 'ent-lire-plan-entretien', theme: 'plans',
     fr: {
       fichier: 'aide/lire-le-plan-d-entretien-d-une-machine.html',
       titre: 'Lire le plan d\'entretien d\'une machine et ses échéances | Aide KALEA',
@@ -162,8 +168,10 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Le <strong>plan d\'entretien</strong> d\'une machine liste ses tâches, leur fréquence et leur prochaine échéance. Tout se lit dans la fiche de la machine.',
       etapes: [
         { titre: 'Ouvrez la fiche de la machine', texte: 'Dans {{ui:Machines}}, touchez le bandeau de la machine. La fiche s\'ouvre sous le titre {{ui:Plan d\'entretien & historique}}.' },
-        { titre: 'Lisez le bandeau du haut', texte: 'Il donne l\'état global ({{ui:En retard}}, {{ui:Bientôt}} ou {{ui:À jour}}) et trois cartes : {{ui:Cadence}} (tous les combien), {{ui:Rappel anticipé}} (combien de temps avant l\'échéance KALEA vous prévient) et {{ui:Mode de suivi}} ({{ui:Calendaire (jours)}}, {{ui:Kilométrage}} ou {{ui:Compteur horaire}}).' },
-        { titre: 'Parcourez le tableau des tâches', texte: 'Le {{ui:Tableau de référence entretien}} liste chaque tâche : {{ui:Élément}}, {{ui:Fréquence}}, {{ui:Échéance}}, {{ui:Huile / graisse / pièce}}, {{ui:Quantité}} et {{ui:Remarque}}. Sur téléphone, chaque tâche est une carte : touchez son titre pour la déplier. Si le plan n\'a pas de détail, vous voyez simplement la liste {{ui:Tâches de maintenance}}.' },
+        { titre: 'Lisez le bandeau du haut', texte: 'Une pastille donne l\'état du plan en une phrase (par exemple « En retard de … », « Échéance dans … » ou « Prochaine échéance dans … »), puis trois cartes : {{ui:Cadence}} (tous les combien), {{ui:Rappel anticipé}} (combien de temps avant l\'échéance KALEA vous prévient) et {{ui:Mode de suivi}} ({{ui:Calendaire (jours)}}, {{ui:Kilométrage}} ou {{ui:Compteur horaire}}).',
+          image: { nom: 'bandeau', alt: 'Le haut de la fiche : le bandeau avec l\'échéance du plan et les cartes Cadence, Rappel anticipé et Mode de suivi (2), et la barre d\'outils avec le bouton Enregistrer une intervention (5).' } },
+        { titre: 'Parcourez le tableau des tâches', texte: 'Le {{ui:Tableau de référence entretien}} liste chaque tâche : {{ui:Élément}}, {{ui:Fréquence}}, {{ui:Échéance}}, {{ui:Huile / graisse / pièce}}, {{ui:Quantité}} et {{ui:Remarque}}. Sur téléphone, chaque tâche est une carte : touchez son titre pour la déplier. Si le plan n\'a pas de détail, vous voyez simplement la liste {{ui:Tâches de maintenance}}.',
+          image: { nom: 'tableau', alt: 'Le Tableau de référence entretien (3), ses boutons de filtre par état et le bouton Choisir d\'une tâche dont la fréquence est à trancher (4).' } },
         { titre: 'Repérez les tâches à traiter', texte: 'Chaque tâche a son état. Quand plusieurs états existent, des boutons de filtre apparaissent en haut du tableau. Une tâche peut aussi demander votre attention : {{ui:Fréquence à choisir}}, {{ui:Intervalle à préciser}} ou {{ui:Point de contrôle}}. Voir <a href="{{lien:ent-choisir-frequence}}">choisir la fréquence d\'une tâche</a>.' },
         { titre: 'Passez à l\'action', texte: 'La barre d\'outils de la fiche contient {{ui:Modifier la machine}}, {{ui:Voir le carnet d\'entretien (PDF)}} (si un carnet est déposé) et {{ui:Enregistrer une intervention}}.' },
       ],
@@ -183,14 +191,16 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'A machine\'s <strong>maintenance plan</strong> lists its tasks, their frequency and their next due date. It is all read on the machine\'s page.',
       etapes: [
         { titre: 'Open the machine\'s page', texte: 'In {{ui:Machines}}, tap the machine\'s banner. The page opens under the title {{ui:Plan d\'entretien & historique}}.' },
-        { titre: 'Read the top banner', texte: 'It shows the overall state ({{ui:En retard}}, {{ui:Bientôt}} or {{ui:À jour}}) and three cards: {{ui:Cadence}} (how often), {{ui:Rappel anticipé}} (how long before the due date KALEA warns you) and {{ui:Mode de suivi}} ({{ui:Calendaire (jours)}}, {{ui:Kilométrage}} or {{ui:Compteur horaire}}).' },
-        { titre: 'Go through the task table', texte: 'The {{ui:Tableau de référence entretien}} lists each task: {{ui:Élément}}, {{ui:Fréquence}}, {{ui:Échéance}}, {{ui:Huile / graisse / pièce}}, {{ui:Quantité}} and {{ui:Remarque}}. On a phone, each task is a card: tap its title to unfold it. If the plan has no detail, you simply see the {{ui:Tâches de maintenance}} list.' },
+        { titre: 'Read the top banner', texte: 'A badge states the plan\'s status in one sentence (for example “Overdue by …”, “Due in …” or “Next due in …”), then three cards: {{ui:Cadence}} (how often), {{ui:Rappel anticipé}} (how long before the due date KALEA warns you) and {{ui:Mode de suivi}} ({{ui:Calendaire (jours)}}, {{ui:Kilométrage}} or {{ui:Compteur horaire}}).',
+          image: { nom: 'bandeau', alt: 'The top of the page: the banner with the plan\'s due date and the Interval, Advance reminder and Tracking mode cards (2), and the toolbar with the Log an intervention button (5).' } },
+        { titre: 'Go through the task table', texte: 'The {{ui:Tableau de référence entretien}} lists each task: {{ui:Élément}}, {{ui:Fréquence}}, {{ui:Échéance}}, {{ui:Huile / graisse / pièce}}, {{ui:Quantité}} and {{ui:Remarque}}. On a phone, each task is a card: tap its title to unfold it. If the plan has no detail, you simply see the {{ui:Tâches de maintenance}} list.',
+          image: { nom: 'tableau', alt: 'The Maintenance reference table (3), its state filter buttons and the Choose button of a task whose frequency has to be settled (4).' } },
         { titre: 'Spot the tasks to deal with', texte: 'Each task has its own state. When several states exist, filter buttons appear above the table. A task may also need your attention: {{ui:Fréquence à choisir}}, {{ui:Intervalle à préciser}} or {{ui:Point de contrôle}}. See <a href="{{lien:ent-choisir-frequence}}">choose a task\'s frequency</a>.' },
         { titre: 'Take action', texte: 'The page\'s toolbar contains {{ui:Modifier la machine}}, {{ui:Voir le carnet d\'entretien (PDF)}} (if a manual is uploaded) and {{ui:Enregistrer une intervention}}.' },
       ],
       notes: [
         'A {{ui:Points d\'attention}} card repeats the remarks read in the manual, when there are any.',
-        'For a machine tracked by meter, the “Utilisation moyenne” line explains the usage rhythm: see <a href="{{lien:ent-rythme-utilisation}}">average use and estimated dates</a>.',
+        'For a machine tracked by meter, the “Average usage” line explains the usage rhythm: see <a href="{{lien:ent-rythme-utilisation}}">average use and estimated dates</a>.',
         'If your plan does not cover the machine, its page stays readable but cannot be edited.',
       ],
       liees: ['ent-choisir-frequence', 'ent-pourquoi-echeance', 'ent-historique-interventions', 'carnet-entretien'],
@@ -250,7 +260,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 7. Valider le plan proposé
   {
-    id: 'ent-valider-plan-propose', theme: 'plans',
+    id: 'ent-valider-plan-propose', scenario: 'ent-valider-plan-propose', theme: 'plans',
     fr: {
       fichier: 'aide/valider-le-plan-propose-par-l-algorithme.html',
       titre: 'Valider le plan d\'entretien proposé par l\'algorithme | Aide KALEA',
@@ -260,9 +270,11 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Quand KALEA a analysé un carnet d\'entretien, il vous montre un plan sous le titre {{ui:Plan proposé par notre algorithme}}. <strong>Rien n\'est activé sans votre accord</strong> : c\'est vous qui validez.',
       etapes: [
         { titre: 'Déposez le carnet', texte: 'Déposez le PDF d\'une machine ou photographiez le tableau (voir <a href="{{lien:carnet-entretien}}">le carnet d\'entretien</a>). Le même écran de plan s\'affiche aussi quand vous ajoutez une nouvelle machine avec son carnet.' },
-        { titre: 'Relisez la proposition', texte: 'L\'écran résume l\'échéance proposée et le nombre d\'échéances trouvées. Le tableau {{ui:Échéances détectées dans le manuel}} donne pour chaque élément sa fréquence et un statut : {{ui:Optimal}} (fréquence claire), {{ui:À choisir}} (plusieurs fréquences possibles) ou {{ui:Point de contrôle}}.' },
+        { titre: 'Relisez la proposition', texte: 'L\'écran résume l\'échéance proposée et le nombre d\'échéances trouvées. Le tableau {{ui:Échéances détectées dans le manuel}} donne pour chaque élément sa fréquence et un statut : {{ui:Optimal}} (fréquence claire), {{ui:À choisir}} (plusieurs fréquences possibles) ou {{ui:Point de contrôle}}.',
+          image: { nom: 'proposition', alt: 'L\'écran Plan proposé par notre algorithme : la ligne d\'échéance proposée et le tableau des échéances détectées avec leur statut (2), puis les trois choix Suivre ce plan, Modifier ce plan et Faire mon propre plan (3).' } },
         { titre: 'Choisissez une des trois voies', texte: '{{ui:Suivre ce plan}} active tel quel l\'intervalle et les tâches. {{ui:Modifier ce plan}} permet d\'ajuster avant d\'activer. {{ui:Faire mon propre plan}} ignore la proposition ; le carnet reste attaché à la machine.' },
-        { titre: 'Si vous modifiez, ajustez les lignes', texte: 'Sur chaque ligne, le crayon {{ui:Modifier l\'étape}} règle la fréquence (voir <a href="{{lien:ent-choisir-frequence}}">choisir la fréquence d\'une tâche</a>) et la corbeille retire une ligne détectée par erreur. {{ui:Ajouter une ligne}} ajoute une tâche manquante : écrivez son nom dans {{ui:Élément à entretenir}}, puis réglez sa fréquence. {{ui:Filtrer}} aide à retrouver une ligne. Vous pouvez aussi changer l\'échéance générale et le champ {{ui:Tâches de maintenance}}.' },
+        { titre: 'Si vous modifiez, ajustez les lignes', texte: 'Sur chaque ligne, le crayon {{ui:Modifier l\'étape}} règle la fréquence (voir <a href="{{lien:ent-choisir-frequence}}">choisir la fréquence d\'une tâche</a>) et la corbeille retire une ligne détectée par erreur. {{ui:Ajouter une ligne}} ajoute une tâche manquante : écrivez son nom dans {{ui:Élément à entretenir}}, puis réglez sa fréquence. {{ui:Filtrer}} aide à retrouver une ligne. Vous pouvez aussi changer l\'échéance générale et le champ {{ui:Tâches de maintenance}}.',
+          image: { nom: 'modifier', alt: 'L\'écran de modification du plan : le crayon Modifier l\'étape et le bouton Ajouter une ligne (4), avec la corbeille et Filtrer également encadrés, puis le bouton Activer le plan (5).' } },
         { titre: 'Activez le plan', texte: 'Cliquez sur {{ui:Activer le plan}}. KALEA confirme par {{ui:Plan activé}} et ouvre la fiche du plan.' },
       ],
       notes: [
@@ -283,9 +295,11 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Once KALEA has analysed a maintenance manual, it shows you a plan titled {{ui:Plan proposé par notre algorithme}}. <strong>Nothing is activated without your agreement</strong>: you are the one who confirms.',
       etapes: [
         { titre: 'Upload the manual', texte: 'Upload a machine\'s PDF or photograph the table (see <a href="{{lien:carnet-entretien}}">the maintenance manual</a>). The same plan screen also appears when you add a new machine with its manual.' },
-        { titre: 'Read the suggestion', texte: 'The screen sums up the suggested due interval and the number of due items found. The {{ui:Échéances détectées dans le manuel}} table gives each item its frequency and a status: {{ui:Optimal}} (clear frequency), {{ui:À choisir}} (several frequencies possible) or {{ui:Point de contrôle}}.' },
+        { titre: 'Read the suggestion', texte: 'The screen sums up the suggested due interval and the number of due items found. The {{ui:Échéances détectées dans le manuel}} table gives each item its frequency and a status: {{ui:Optimal}} (clear frequency), {{ui:À choisir}} (several frequencies possible) or {{ui:Point de contrôle}}.',
+          image: { nom: 'proposition', alt: 'The Plan suggested by our algorithm screen: the suggested interval line and the table of due dates found, with their status (2), then the three choices Follow this plan, Edit this plan and Make my own plan (3).' } },
         { titre: 'Pick one of the three ways', texte: '{{ui:Suivre ce plan}} activates the interval and the tasks as they are. {{ui:Modifier ce plan}} lets you adjust before activating. {{ui:Faire mon propre plan}} ignores the suggestion; the manual stays attached to the machine.' },
-        { titre: 'If you edit, adjust the lines', texte: 'On each line, the pencil {{ui:Modifier l\'étape}} sets the frequency (see <a href="{{lien:ent-choisir-frequence}}">choose a task\'s frequency</a>) and the bin removes a line detected by mistake. {{ui:Ajouter une ligne}} adds a missing task: write its name in {{ui:Élément à entretenir}}, then set its frequency. {{ui:Filtrer}} helps you find a line. You can also change the general due interval and the {{ui:Tâches de maintenance}} field.' },
+        { titre: 'If you edit, adjust the lines', texte: 'On each line, the pencil {{ui:Modifier l\'étape}} sets the frequency (see <a href="{{lien:ent-choisir-frequence}}">choose a task\'s frequency</a>) and the bin removes a line detected by mistake. {{ui:Ajouter une ligne}} adds a missing task: write its name in {{ui:Élément à entretenir}}, then set its frequency. {{ui:Filtrer}} helps you find a line. You can also change the general due interval and the {{ui:Tâches de maintenance}} field.',
+          image: { nom: 'modifier', alt: 'The plan editing screen: the Edit the step pencil and the Add a line button (4), with the bin and Filter also framed, then the Activate the plan button (5).' } },
         { titre: 'Activate the plan', texte: 'Click {{ui:Activer le plan}}. KALEA confirms with {{ui:Plan activé}} and opens the plan page.' },
       ],
       notes: [
@@ -350,7 +364,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 9. Comprendre l'agenda
   {
-    id: 'ent-comprendre-agenda', theme: 'interventions',
+    id: 'ent-comprendre-agenda', scenario: 'ent-comprendre-agenda', theme: 'interventions',
     fr: {
       fichier: 'aide/comprendre-l-agenda.html',
       titre: 'Comprendre l\'agenda des entretiens | Aide KALEA',
@@ -360,10 +374,12 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'L\'<strong>agenda</strong> montre sur un calendrier les échéances d\'entretien qui ont une date. Les machines suivies au compteur (heures ou kilomètres) n\'ont pas de date : elles sont à part.',
       etapes: [
         { titre: 'Ouvrez l\'agenda', texte: 'Dans le menu, ouvrez {{ui:Planning}}, puis l\'onglet {{ui:Agenda et préparation}}. Sur téléphone, touchez l\'onglet {{ui:Planning}} de la barre du bas.' },
-        { titre: 'Choisissez l\'affichage', texte: 'Sous {{ui:Affichage}}, choisissez {{ui:Mois}}, {{ui:Semaine}} ou {{ui:Liste chronologique}}. Les flèches changent de mois ou de semaine et {{ui:Aujourd\'hui}} revient à la date du jour. La semaine commence le lundi.' },
+        { titre: 'Choisissez l\'affichage', texte: 'Sous {{ui:Affichage}}, choisissez {{ui:Mois}}, {{ui:Semaine}} ou {{ui:Liste chronologique}}. Les flèches changent de mois ou de semaine et {{ui:Aujourd\'hui}} revient à la date du jour. La semaine commence le lundi.',
+          image: { nom: 'calendrier', alt: 'L\'agenda en vue Mois : le choix de l\'affichage (2), les boutons de filtre par état avec leur compteur (3), puis une case du calendrier avec sa pastille d\'échéance (4). La légende des couleurs est encadrée en bas.' } },
         { titre: 'Lisez les couleurs et filtrez', texte: 'Chaque pastille est une échéance : {{ui:En retard}}, {{ui:Échéance sous 15 jours}} ou {{ui:À jour}}. Les boutons {{ui:Tous}}, {{ui:En retard}}, {{ui:Bientôt}} et {{ui:À jour}} filtrent le calendrier ; le nombre indique combien de machines sont concernées.' },
         { titre: 'Ouvrez un jour', texte: 'Touchez une case du mois : une fenêtre liste les machines concernées ce jour-là, avec un bouton adapté à leur état ({{ui:Enregistrer l\'entretien}} si elle est en retard, {{ui:Planifier}} si l\'échéance approche, {{ui:Voir}} sinon). Sur ordinateur, passer la souris sur une case affiche aussi un aperçu.' },
-        { titre: 'Retrouvez les machines au compteur', texte: 'Choisissez {{ui:Liste chronologique}} : les entretiens datés sont groupés par mois, puis viennent les machines sous {{ui:Suivi au compteur}}.' },
+        { titre: 'Retrouvez les machines au compteur', texte: 'Choisissez {{ui:Liste chronologique}} : les entretiens datés sont groupés par mois, puis viennent les machines sous {{ui:Suivi au compteur}}.',
+          image: { nom: 'liste', alt: 'La liste chronologique : les entretiens datés groupés par mois, puis le groupe Suivi au compteur (5).' } },
       ],
       notes: [
         'Le calendrier d\'une société qui n\'a que des machines au compteur reste vide : c\'est normal, ces machines sont dans la liste chronologique.',
@@ -382,10 +398,12 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'The <strong>agenda</strong> shows on a calendar the service due dates that have a date. Machines tracked by meter (hours or kilometres) have no date: they are kept apart.',
       etapes: [
         { titre: 'Open the agenda', texte: 'In the menu, open {{ui:Planning}}, then the {{ui:Agenda et préparation}} tab. On a phone, tap the {{ui:Planning}} tab in the bottom bar.' },
-        { titre: 'Choose the display', texte: 'Under {{ui:Affichage}}, choose {{ui:Mois}}, {{ui:Semaine}} or {{ui:Liste chronologique}}. The arrows change month or week and {{ui:Aujourd\'hui}} goes back to today\'s date. The week starts on Monday.' },
+        { titre: 'Choose the display', texte: 'Under {{ui:Affichage}}, choose {{ui:Mois}}, {{ui:Semaine}} or {{ui:Liste chronologique}}. The arrows change month or week and {{ui:Aujourd\'hui}} goes back to today\'s date. The week starts on Monday.',
+          image: { nom: 'calendrier', alt: 'The agenda in Months view: the display choice (2), the state filter buttons with their counts (3), then a calendar cell with its due-date dot (4). The colour legend is framed at the bottom.' } },
         { titre: 'Read the colours and filter', texte: 'Each dot is a due date: {{ui:En retard}}, {{ui:Échéance sous 15 jours}} or {{ui:À jour}}. The {{ui:Tous}}, {{ui:En retard}}, {{ui:Bientôt}} and {{ui:À jour}} buttons filter the calendar; the number shows how many machines are concerned.' },
         { titre: 'Open a day', texte: 'Tap a cell of the month: a window lists the machines concerned that day, with a button that fits their state ({{ui:Enregistrer l\'entretien}} if overdue, {{ui:Planifier}} if the due date is close, {{ui:Voir}} otherwise). On a computer, hovering over a cell also shows a preview.' },
-        { titre: 'Find the meter-tracked machines', texte: 'Choose {{ui:Liste chronologique}}: dated services are grouped by month, then come the machines under {{ui:Suivi au compteur}}.' },
+        { titre: 'Find the meter-tracked machines', texte: 'Choose {{ui:Liste chronologique}}: dated services are grouped by month, then come the machines under {{ui:Suivi au compteur}}.',
+          image: { nom: 'liste', alt: 'The chronological list: dated services grouped by month, then the Counter tracking group (5).' } },
       ],
       notes: [
         'The calendar of a company that has only meter-tracked machines stays empty: that is normal, those machines are in the chronological list.',
@@ -544,7 +562,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 13. Rappels par e-mail
   {
-    id: 'ent-rappels-email', theme: 'interventions',
+    id: 'ent-rappels-email', scenario: 'ent-rappels-email', theme: 'interventions',
     fr: {
       fichier: 'aide/regler-les-rappels-par-e-mail.html',
       titre: 'Régler les rappels d\'entretien par e-mail | Aide KALEA',
@@ -554,7 +572,8 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'KALEA envoie un e-mail quand une échéance approche. Le message part du serveur : il arrive même si l\'application est fermée. Le réglage se fait dans la rubrique des rappels.',
       etapes: [
         { titre: 'Ouvrez les rappels', texte: 'Dans le menu, ouvrez {{ui:Compte}}, puis l\'onglet {{ui:Rappels et notifications}}. Sur téléphone : {{ui:Plus}}, puis {{ui:Rappels et notifications}}. Le bloc s\'appelle {{ui:Recevoir les rappels par e-mail}}.' },
-        { titre: 'Indiquez l\'adresse', texte: 'Écrivez l\'adresse dans {{ui:Adresse de destination des alertes}}. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est seulement proposée dans le champ.' },
+        { titre: 'Indiquez l\'adresse', texte: 'Écrivez l\'adresse dans {{ui:Adresse de destination des alertes}}. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est seulement proposée dans le champ.',
+          image: { nom: 'bloc-email', alt: 'Le bloc Recevoir les rappels par e-mail : le champ Adresse de destination des alertes (2), la case Recevoir les rappels par e-mail (3) et le bouton Enregistrer les préférences e-mail (4). La pastille en haut indique Canal inactif tant que rien n\'est enregistré.' } },
         { titre: 'Activez ou coupez le canal', texte: 'Cochez {{ui:Recevoir les rappels par e-mail}} pour recevoir les rappels. Décochez la case, ou laissez l\'adresse vide, pour ne plus en recevoir.' },
         { titre: 'Enregistrez', texte: 'Touchez {{ui:Enregistrer les préférences e-mail}}, même si l\'adresse proposée vous convient : sans cet enregistrement, le canal reste {{ui:Canal inactif}}. Un message confirme, par exemple {{ui:Réglages enregistrés : les rappels partiront à cette adresse.}}' },
         { titre: 'Réglez le délai d\'avance de chaque machine', texte: 'Le délai se règle machine par machine : dans {{ui:Modifier la machine}}, section {{ui:Mode de suivi & échéances d\'entretien}}, champ « Rappel avant ». KALEA vous prévient quand l\'échéance entre dans cette fenêtre.' },
@@ -577,10 +596,11 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'KALEA sends an email when a due date comes close. The message is sent by the server: it arrives even if the app is closed. The setting is in the reminders section.',
       etapes: [
         { titre: 'Open the reminders', texte: 'In the menu, open {{ui:Compte}}, then the {{ui:Rappels et notifications}} tab. On a phone: {{ui:Plus}}, then {{ui:Rappels et notifications}}. The block is called {{ui:Recevoir les rappels par e-mail}}.' },
-        { titre: 'Enter the address', texte: 'Write the address in {{ui:Adresse de destination des alertes}}. As long as no address of its own is saved, the account\'s address is only suggested in the field.' },
+        { titre: 'Enter the address', texte: 'Write the address in {{ui:Adresse de destination des alertes}}. As long as no address of its own is saved, the account\'s address is only suggested in the field.',
+          image: { nom: 'bloc-email', alt: 'The Receive reminders by email block: the Alert destination address field (2), the Receive reminders by email box (3) and the Save email preferences button (4). The badge at the top says Channel inactive until something is saved.' } },
         { titre: 'Turn the channel on or off', texte: 'Tick {{ui:Recevoir les rappels par e-mail}} to receive reminders. Untick the box, or leave the address empty, to stop receiving them.' },
         { titre: 'Save', texte: 'Tap {{ui:Enregistrer les préférences e-mail}}, even if the suggested address suits you: without this save, the channel stays {{ui:Canal inactif}}. A message confirms it, for example {{ui:Réglages enregistrés : les rappels partiront à cette adresse.}}' },
-        { titre: 'Set each machine\'s advance notice', texte: 'The notice is set machine by machine: in {{ui:Modifier la machine}}, section {{ui:Mode de suivi & échéances d\'entretien}}, the “Rappel avant” field. KALEA warns you when the due date enters that window.' },
+        { titre: 'Set each machine\'s advance notice', texte: 'The notice is set machine by machine: in {{ui:Modifier la machine}}, section {{ui:Mode de suivi & échéances d\'entretien}}, the “Remind … before” field (the unit follows the machine: days, hours or km). KALEA warns you when the due date enters that window.' },
       ],
       notes: [
         'These settings are reserved to the manager (Administrator or Director). For other members, the fields are greyed out and a message says so: {{ui:Ces réglages sont réservés au gérant.}}',
@@ -734,7 +754,7 @@ export const ARTICLES_ENTRETIEN = [
 
   // ───────────────────────────────────────────────────────── 18. Kits d'entretien
   {
-    id: 'ent-kits-entretien', theme: 'interventions',
+    id: 'ent-kits-entretien', scenario: 'ent-kits-entretien', theme: 'interventions',
     fr: {
       fichier: 'aide/associer-des-pieces-a-une-tache.html',
       titre: 'Associer des pièces ou un kit d\'entretien à une tâche | Aide KALEA',
@@ -744,9 +764,12 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'Un <strong>kit d\'entretien</strong> regroupe les pièces nécessaires à une étape d\'entretien (par exemple une vidange). Relié à une tâche, il permet à KALEA d\'anticiper les besoins. Cette fonction fait partie du module {{ui:Stocks & SAV}}, disponible selon votre offre : voir <a href="/#tarifs">la page des offres</a>.',
       etapes: [
         { titre: 'Ouvrez les kits', texte: 'Dans le menu, ouvrez {{ui:Stock & achats}} puis {{ui:Stocks & SAV}}, onglet {{ui:Réglages}}, section {{ui:Kits d\'entretien}}. Seul le gérant (Administrateur ou Direction) peut créer ou modifier un kit.' },
-        { titre: 'Créez le kit', texte: 'Touchez {{ui:Nouveau kit}}. Donnez un {{ui:Nom du kit}}, puis ajoutez les {{ui:Pièces du kit}} : une pièce du catalogue et une quantité par ligne ({{ui:Ajouter une ligne}} pour en ajouter). Touchez {{ui:Enregistrer le kit}} : {{ui:Kit créé}}.' },
-        { titre: 'Ouvrez la fiche du plan', texte: 'Dans {{ui:Machines}}, touchez le bandeau de la machine pour ouvrir la fiche (voir <a href="{{lien:ent-lire-plan-entretien}}">lire le plan d\'entretien</a>). Dans le tableau, la colonne {{ui:Pièces associées}} porte un bouton par tâche.' },
-        { titre: 'Reliez le kit ou une pièce à la tâche', texte: 'Touchez {{ui:Associer des pièces de maintenance}} (sur petit écran : {{ui:Associer des pièces}}). Choisissez un {{ui:Kit d\'entretien}}, ou une {{ui:Pièce seule du catalogue (sans créer de kit)}} avec sa {{ui:Quantité}}. Les deux choix s\'excluent. Touchez {{ui:Enregistrer}}.' },
+        { titre: 'Créez le kit', texte: 'Touchez {{ui:Nouveau kit}}. Donnez un {{ui:Nom du kit}}, puis ajoutez les {{ui:Pièces du kit}} : une pièce du catalogue et une quantité par ligne ({{ui:Ajouter une ligne}} pour en ajouter). Touchez {{ui:Enregistrer le kit}} : {{ui:Kit créé}}.',
+          image: { nom: 'nouveau-kit', alt: 'La fenêtre Nouveau kit d\'entretien : le nom du kit, la liste des pièces du kit et le bouton Enregistrer le kit, tous repérés par le numéro 2.' } },
+        { titre: 'Ouvrez la fiche du plan', texte: 'Dans {{ui:Machines}}, touchez le bandeau de la machine pour ouvrir la fiche (voir <a href="{{lien:ent-lire-plan-entretien}}">lire le plan d\'entretien</a>). Dans le tableau, la colonne {{ui:Pièces associées}} porte un bouton par tâche.',
+          image: { nom: 'colonne', alt: 'Le tableau de la fiche du plan : la colonne Pièces associées (3) et, dans chaque ligne, le bouton Associer des pièces de maintenance (4).' } },
+        { titre: 'Reliez le kit ou une pièce à la tâche', texte: 'Touchez {{ui:Associer des pièces de maintenance}} (sur petit écran : {{ui:Associer des pièces}}). Choisissez un {{ui:Kit d\'entretien}}, ou une {{ui:Pièce seule du catalogue (sans créer de kit)}} avec sa {{ui:Quantité}}. Les deux choix s\'excluent. Touchez {{ui:Enregistrer}}.',
+          image: { nom: 'association', alt: 'La fenêtre Pièces de maintenance associées à cette tâche : la liste Kit d\'entretien, la liste Pièce seule du catalogue et le bouton Enregistrer, repérés par le numéro 4.' } },
         { titre: 'Voyez l\'effet dans la préparation', texte: 'Dans l\'agenda, la carte {{ui:Préparation des pièces et consommables}} indique pour ces pièces si le stock suffit (« Stock » suivi de la quantité disponible et du besoin) ou quand commander (« Commander avant le » suivi d\'une date). Dans {{ui:Stocks & SAV}}, l\'onglet {{ui:Aperçu}} liste les {{ui:Besoins à risque}}.' },
       ],
       notes: [
@@ -766,10 +789,13 @@ export const ARTICLES_ENTRETIEN = [
       intro: 'A <strong>maintenance kit</strong> gathers the parts needed for one service step (for example an oil change). Linked to a task, it lets KALEA anticipate needs. This feature is part of the {{ui:Stocks & SAV}} module, available depending on your plan: see <a href="/en/#tarifs">the plans page</a>.',
       etapes: [
         { titre: 'Open the kits', texte: 'In the menu, open {{ui:Stock & achats}} then {{ui:Stocks & SAV}}, {{ui:Réglages}} tab, {{ui:Kits d\'entretien}} section. Only the manager (Administrator or Director) can create or edit a kit.' },
-        { titre: 'Create the kit', texte: 'Tap {{ui:Nouveau kit}}. Give it a {{ui:Nom du kit}}, then add the {{ui:Pièces du kit}}: one catalogue part and a quantity per line ({{ui:Ajouter une ligne}} to add more). Tap {{ui:Enregistrer le kit}}: {{ui:Kit créé}}.' },
-        { titre: 'Open the plan page', texte: 'In {{ui:Machines}}, tap the machine\'s banner to open its page (see <a href="{{lien:ent-lire-plan-entretien}}">read the maintenance plan</a>). In the table, the {{ui:Pièces associées}} column has a button for each task.' },
-        { titre: 'Link the kit or a part to the task', texte: 'Tap {{ui:Associer des pièces de maintenance}} (on a small screen: {{ui:Associer des pièces}}). Choose a {{ui:Kit d\'entretien}}, or a {{ui:Pièce seule du catalogue (sans créer de kit)}} with its {{ui:Quantité}}. The two choices exclude each other. Tap {{ui:Enregistrer}}.' },
-        { titre: 'See the effect in the preparation', texte: 'In the agenda, the {{ui:Préparation des pièces et consommables}} card shows for these parts whether the stock is enough (« Stock » suivi de la quantité disponible et du besoin) or when to order (« Commander avant le » suivi d\'une date). In {{ui:Stocks & SAV}}, the {{ui:Aperçu}} tab lists the {{ui:Besoins à risque}}.' },
+        { titre: 'Create the kit', texte: 'Tap {{ui:Nouveau kit}}. Give it a {{ui:Nom du kit}}, then add the {{ui:Pièces du kit}}: one catalogue part and a quantity per line ({{ui:Ajouter une ligne}} to add more). Tap {{ui:Enregistrer le kit}}: {{ui:Kit créé}}.',
+          image: { nom: 'nouveau-kit', alt: 'The New maintenance kit window: the kit name, the list of kit parts and the Save the kit button, all marked with number 2.' } },
+        { titre: 'Open the plan page', texte: 'In {{ui:Machines}}, tap the machine\'s banner to open its page (see <a href="{{lien:ent-lire-plan-entretien}}">read the maintenance plan</a>). In the table, the {{ui:Pièces associées}} column has a button for each task.',
+          image: { nom: 'colonne', alt: 'The plan page table: the Linked parts column (3) and, on each row, the Link maintenance parts button (4).' } },
+        { titre: 'Link the kit or a part to the task', texte: 'Tap {{ui:Associer des pièces de maintenance}} (on a small screen: {{ui:Associer des pièces}}). Choose a {{ui:Kit d\'entretien}}, or a {{ui:Pièce seule du catalogue (sans créer de kit)}} with its {{ui:Quantité}}. The two choices exclude each other. Tap {{ui:Enregistrer}}.',
+          image: { nom: 'association', alt: 'The Maintenance parts linked to this task window: the Maintenance kit list, the Single catalogue part list and the Save button, marked with number 4.' } },
+        { titre: 'See the effect in the preparation', texte: 'In the agenda, the {{ui:Préparation des pièces et consommables}} card shows for these parts whether the stock is enough (“Stock” followed by the available quantity and the need) or when to order (“Order before” followed by a date). In {{ui:Stocks & SAV}}, the {{ui:Aperçu}} tab lists the {{ui:Besoins à risque}}.' },
       ],
       notes: [
         'Linking a kit does not change any due date.',

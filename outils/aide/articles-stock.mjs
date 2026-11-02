@@ -92,7 +92,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-ajouter-piece', theme: 'stock',
+    id: 'stk-ajouter-piece', theme: 'stock', scenario: 'stk-ajouter-piece',
     fr: {
       fichier: 'aide/ajouter-une-piece-au-catalogue.html',
       titre: `Ajouter une pièce au catalogue | Aide KALEA`,
@@ -101,8 +101,10 @@ export const ARTICLES_STOCK = [
       description: `Ajouter ou modifier une pièce dans le catalogue de KALEA : désignation, référence, prix, fournisseur, seuil bas, code-barres, unité. Pas à pas.`,
       intro: `Le <strong>catalogue</strong> est la liste de vos références de pièces. On le choisit ensuite dans les interventions, les mouvements de stock et les kits d'entretien.`,
       etapes: [
-        { titre: `Ouvrez le catalogue`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Pièces}}, puis touchez {{ui:Catalogue de pièces}}. Le formulaire d'ajout est à côté de la liste.` },
-        { titre: `Remplissez le formulaire`, texte: `Sous {{ui:Ajouter une pièce au catalogue}}, seule la désignation est obligatoire. Le reste aide à s'y retrouver : la référence, le prix unitaire, le fournisseur et le délai moyen de disponibilité.` },
+        { titre: `Ouvrez le catalogue`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Pièces}}, puis touchez {{ui:Catalogue de pièces}}. Le formulaire d'ajout est à côté de la liste.`,
+          image: { nom: 'catalogue', alt: `L'écran Stocks & SAV : l'onglet Pièces et le bouton Catalogue de pièces, tous deux repérés par le numéro 1, au-dessus du catalogue.` } },
+        { titre: `Remplissez le formulaire`, texte: `Sous {{ui:Ajouter une pièce au catalogue}}, seule la désignation est obligatoire. Le reste aide à s'y retrouver : la référence, le prix unitaire, le fournisseur et le délai moyen de disponibilité.`,
+          image: { nom: 'formulaire', alt: `Le formulaire d'ajout d'une pièce : la désignation (repère 2), le seuil bas (repère 3, étape suivante) et le bouton Ajouter au catalogue (repère 4, dernière étape).` } },
         { titre: `Précisez les champs du stock`, texte: `Si ces champs sont affichés chez vous, renseignez le {{ui:Seuil bas (optionnel)}} (il déclenche l'alerte de stock bas), le {{ui:Conditionnement (optionnel)}}, le {{ui:Code-barres EAN (optionnel)}} et l'{{ui:Unité de mesure}} (pièce, paire, litre, mètre…).` },
         { titre: `Enregistrez la pièce`, texte: `Cliquez sur {{ui:Ajouter au catalogue}}. La pièce apparaît dans la liste.` },
       ],
@@ -123,8 +125,10 @@ export const ARTICLES_STOCK = [
       description: `Add or edit a part in the KALEA catalogue: description, reference, price, supplier, low-stock level, barcode, unit. Step by step.`,
       intro: `The <strong>catalogue</strong> is the list of your part references. You then pick from it in interventions, stock movements and maintenance kits.`,
       etapes: [
-        { titre: `Open the catalogue`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Pièces}} tab, then tap {{ui:Catalogue de pièces}}. The add form is next to the list.` },
-        { titre: `Fill in the form`, texte: `Under {{ui:Ajouter une pièce au catalogue}}, only the description is required. The rest helps you find your way: the reference, the unit price, the supplier and the average availability time.` },
+        { titre: `Open the catalogue`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Pièces}} tab, then tap {{ui:Catalogue de pièces}}. The add form is next to the list.`,
+          image: { nom: 'catalogue', alt: `The Stocks & SAV screen: the Parts tab and the Parts catalogue button, both marked with number 1, above the catalogue.` } },
+        { titre: `Fill in the form`, texte: `Under {{ui:Ajouter une pièce au catalogue}}, only the description is required. The rest helps you find your way: the reference, the unit price, the supplier and the average availability time.`,
+          image: { nom: 'formulaire', alt: `The add-a-part form: the description (marker 2), the low threshold (marker 3, next step) and the Add to catalogue button (marker 4, last step).` } },
         { titre: `Fill in the stock fields`, texte: `If these fields are shown for you, fill in the {{ui:Seuil bas (optionnel)}} (it triggers the low-stock alert), the {{ui:Conditionnement (optionnel)}}, the {{ui:Code-barres EAN (optionnel)}} and the {{ui:Unité de mesure}} (piece, pair, litre, metre…).` },
         { titre: `Save the part`, texte: `Click {{ui:Ajouter au catalogue}}. The part appears in the list.` },
       ],
@@ -188,7 +192,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-mouvement', theme: 'stock',
+    id: 'stk-mouvement', theme: 'stock', scenario: 'stk-mouvement',
     fr: {
       fichier: 'aide/enregistrer-une-entree-sortie-ou-transfert.html',
       titre: `Enregistrer une entrée, une sortie ou un transfert de stock | Aide KALEA`,
@@ -197,8 +201,10 @@ export const ARTICLES_STOCK = [
       description: `Enregistrer l'arrivée, la sortie ou le transfert d'une pièce entre deux magasins dans KALEA, et comprendre le coût moyen du stock.`,
       intro: `Chaque fois qu'une pièce entre, sort ou change de magasin, on le note dans un <strong>mouvement</strong>. Le stock affiché reste ainsi juste, et sa valeur aussi.`,
       etapes: [
-        { titre: `Ouvrez la fenêtre du mouvement`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Mouvements}}, puis touchez {{ui:Nouveau mouvement}}.` },
-        { titre: `Choisissez le type`, texte: `{{ui:Entrée}} : une livraison arrive. {{ui:Sortie}} : une pièce part. {{ui:Transfert}} : une pièce passe d'un magasin à un autre. {{ui:Ajustement}} : corriger une quantité (réservé à l'Administrateur et à la Direction).` },
+        { titre: `Ouvrez la fenêtre du mouvement`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Mouvements}}, puis touchez {{ui:Nouveau mouvement}}.`,
+          image: { nom: 'mouvements', alt: `L'onglet Mouvements et le bouton Nouveau mouvement, repérés par le numéro 1, au-dessus du journal des mouvements.` } },
+        { titre: `Choisissez le type`, texte: `{{ui:Entrée}} : une livraison arrive. {{ui:Sortie}} : une pièce part. {{ui:Transfert}} : une pièce passe d'un magasin à un autre. {{ui:Ajustement}} : corriger une quantité (réservé à l'Administrateur et à la Direction).`,
+          image: { nom: 'fenetre', alt: `La fenêtre Nouveau mouvement de stock : le type de mouvement (repère 2), la pièce, le magasin et la quantité (repère 3), le coût unitaire d'une entrée (repère 4) et le bouton Enregistrer le mouvement (repère 5).` } },
         { titre: `Indiquez la pièce, le magasin et la quantité`, texte: `Choisissez la pièce et le magasin. Pour un transfert, le magasin de départ s'appelle {{ui:Magasin source}} et vous choisissez aussi le {{ui:Magasin de destination}}. Saisissez la {{ui:Quantité}}.` },
         { titre: `Complétez selon le type`, texte: `Une entrée demande le {{ui:Coût unitaire}} : c'est le prix d'achat réel, il sert à calculer le coût moyen du stock. Une sortie peut être rattachée à une machine et à une intervention (facultatif). Vous pouvez ajouter un motif, par exemple un numéro de bon de livraison.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer le mouvement}}. Il apparaît en haut du journal des mouvements.` },
@@ -221,8 +227,10 @@ export const ARTICLES_STOCK = [
       description: `Record a part arriving, leaving or moving between two warehouses in KALEA, and understand the average cost of stock.`,
       intro: `Whenever a part comes in, goes out or changes warehouse, you note it in a <strong>movement</strong>. The stock shown stays right, and so does its value.`,
       etapes: [
-        { titre: `Open the movement window`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Mouvements}} tab, then tap {{ui:Nouveau mouvement}}.` },
-        { titre: `Choose the type`, texte: `{{ui:Entrée}}: a delivery arrives. {{ui:Sortie}}: a part leaves. {{ui:Transfert}}: a part moves from one warehouse to another. {{ui:Ajustement}}: correct a quantity (reserved for the Administrator and Director).` },
+        { titre: `Open the movement window`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Mouvements}} tab, then tap {{ui:Nouveau mouvement}}.`,
+          image: { nom: 'mouvements', alt: `The Movements tab and the New movement button, marked with number 1, above the movement log.` } },
+        { titre: `Choose the type`, texte: `{{ui:Entrée}}: a delivery arrives. {{ui:Sortie}}: a part leaves. {{ui:Transfert}}: a part moves from one warehouse to another. {{ui:Ajustement}}: correct a quantity (reserved for the Administrator and Director).`,
+          image: { nom: 'fenetre', alt: `The New stock movement window: the movement type (marker 2), the part, the warehouse and the quantity (marker 3), the unit cost of a stock-in (marker 4) and the Save movement button (marker 5).` } },
         { titre: `Give the part, the warehouse and the quantity`, texte: `Choose the part and the warehouse. For a transfer, the starting warehouse is called {{ui:Magasin source}} and you also choose the {{ui:Magasin de destination}}. Enter the {{ui:Quantité}}.` },
         { titre: `Complete according to the type`, texte: `A stock-in asks for the {{ui:Coût unitaire}}: it is the real purchase price, used to compute the average cost of stock. A stock-out can be linked to a machine and an intervention (optional). You can add a reason, for example a delivery note number.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer le mouvement}}. It appears at the top of the movement log.` },
@@ -719,7 +727,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-classement', theme: 'couts',
+    id: 'cout-classement', theme: 'couts', scenario: 'cout-classement',
     fr: {
       fichier: 'aide/lire-le-classement-tco-du-parc.html',
       titre: `Lire le classement TCO du parc et filtrer par période | Aide KALEA`,
@@ -728,11 +736,13 @@ export const ARTICLES_STOCK = [
       description: `Comprendre le classement TCO de KALEA : tuiles, filtres de période et de catégorie, tri, état de chaque machine, export CSV.`,
       intro: `Le <strong>classement TCO</strong> compare vos machines selon ce qu'elles coûtent, de la moins rentable à la plus optimisée. Il se règle par période, par catégorie et par tri.`,
       etapes: [
-        { titre: `Ouvrez le classement`, texte: `Dans {{ui:Coûts & TCO}}, ouvrez l'onglet {{ui:Classement}}. Les tuiles du haut résument le parc : {{ui:TCO Moyen Annualisé}}, {{ui:Machines Suivies}} et {{ui:En Alerte}}.` },
+        { titre: `Ouvrez le classement`, texte: `Dans {{ui:Coûts & TCO}}, ouvrez l'onglet {{ui:Classement}}. Les tuiles du haut résument le parc : {{ui:TCO Moyen Annualisé}}, {{ui:Machines Suivies}} et {{ui:En Alerte}}.`,
+          image: { nom: 'classement', alt: `Le classement TCO du parc : l'onglet Classement (repère 1), les trois boutons de période (repère 2), les listes de catégorie et de tri (repère 3) et la première machine du classement (repère 4).` } },
         { titre: `Choisissez la période`, texte: `Trois boutons : {{ui:Depuis mise en service}} (par défaut), {{ui:12 derniers mois}} et {{ui:Année en cours}}. Avec une période, chaque ligne affiche les dépenses sur la période.` },
         { titre: `Filtrez et triez`, texte: `La liste {{ui:Toutes catégories}} limite à une catégorie. La liste de tri propose {{ui:Ratio de dépréciation}}, {{ui:Coût total décroissant}}, {{ui:Coût horaire décroissant}} et {{ui:Heures moteur}}.` },
         { titre: `Lisez une ligne`, texte: `Chaque machine montre son {{ui:Coût horaire}}, son état ({{ui:Optimal}}, {{ui:À surveiller}} ou {{ui:Dérive}}) et un pourcentage dont la base est toujours précisée : « de la dépréciation » ou « du prix d'achat ». Si un seuil de coût est fixé pour la catégorie, l'écart s'affiche, ou {{ui:Sous le seuil}}. Touchez une ligne pour ouvrir la machine.` },
-        { titre: `Exportez si besoin`, texte: `Touchez {{ui:Exporter en CSV}} pour obtenir le classement dans un tableur.` },
+        { titre: `Exportez si besoin`, texte: `Touchez {{ui:Exporter en CSV}} pour obtenir le classement dans un tableur.`,
+          image: { nom: 'export', alt: `Le bas du classement : le bouton Exporter en CSV, repéré par le numéro 5.` } },
       ],
       notes: [
         `Les machines sans prix d'achat ne sont pas dans le classement : un encadré les compte, avec le bouton {{ui:Régulariser les prix}}. Voir <a href="{{lien:cout-prix-achat}}">renseigner le prix d'achat</a>.`,
@@ -751,11 +761,13 @@ export const ARTICLES_STOCK = [
       description: `Understand the KALEA TCO ranking: tiles, period and category filters, sorting, each machine's status, CSV export.`,
       intro: `The <strong>TCO ranking</strong> compares your machines by what they cost, from the least profitable to the most optimised. You can set it by period, category and sort order.`,
       etapes: [
-        { titre: `Open the ranking`, texte: `In {{ui:Coûts & TCO}}, open the {{ui:Classement}} tab. The tiles at the top sum up the fleet: {{ui:TCO Moyen Annualisé}}, {{ui:Machines Suivies}} and {{ui:En Alerte}}.` },
+        { titre: `Open the ranking`, texte: `In {{ui:Coûts & TCO}}, open the {{ui:Classement}} tab. The tiles at the top sum up the fleet: {{ui:TCO Moyen Annualisé}}, {{ui:Machines Suivies}} and {{ui:En Alerte}}.`,
+          image: { nom: 'classement', alt: `The fleet TCO ranking: the Ranking tab (marker 1), the three period buttons (marker 2), the category and sort lists (marker 3) and the first machine in the ranking (marker 4).` } },
         { titre: `Choose the period`, texte: `Three buttons: {{ui:Depuis mise en service}} (default), {{ui:12 derniers mois}} and {{ui:Année en cours}}. With a period, each line shows spending over the period.` },
         { titre: `Filter and sort`, texte: `The {{ui:Toutes catégories}} list limits to one category. The sort list offers {{ui:Ratio de dépréciation}}, {{ui:Coût total décroissant}}, {{ui:Coût horaire décroissant}} and {{ui:Heures moteur}}.` },
         { titre: `Read a line`, texte: `Each machine shows its {{ui:Coût horaire}}, its status ({{ui:Optimal}}, {{ui:À surveiller}} or {{ui:Dérive}}) and a percentage whose base is always stated: "of depreciation" or "of the purchase price". If a cost threshold is set for the category, the gap is shown, or {{ui:Sous le seuil}}. Tap a line to open the machine.` },
-        { titre: `Export if needed`, texte: `Tap {{ui:Exporter en CSV}} to get the ranking in a spreadsheet.` },
+        { titre: `Export if needed`, texte: `Tap {{ui:Exporter en CSV}} to get the ranking in a spreadsheet.`,
+          image: { nom: 'export', alt: `The bottom of the ranking: the Export as CSV button, marked with number 5.` } },
       ],
       notes: [
         `Machines with no purchase price are not in the ranking: a box counts them, with the {{ui:Régulariser les prix}} button. See <a href="{{lien:cout-prix-achat}}">enter the purchase price</a>.`,
@@ -769,7 +781,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-scorecard', theme: 'couts',
+    id: 'cout-scorecard', theme: 'couts', scenario: 'cout-scorecard',
     fr: {
       fichier: 'aide/lire-la-scorecard-tco-d-une-machine.html',
       titre: `Lire la scorecard TCO d'une machine | Aide KALEA`,
@@ -778,8 +790,10 @@ export const ARTICLES_STOCK = [
       description: `Comprendre la scorecard TCO d'une machine dans KALEA : coût de revient, dépenses cumulées, durée de vie consommée, recommandation.`,
       intro: `La <strong>scorecard TCO</strong> résume en quelques chiffres ce que coûte une machine et si elle vaut encore la peine d'être gardée.`,
       etapes: [
-        { titre: `Ouvrez le plan de la machine`, texte: `Dans {{ui:Machines}}, ouvrez l'onglet {{ui:Plans d'entretien}} et touchez {{ui:Voir le plan}} sur la machine.` },
-        { titre: `Repérez la carte`, texte: `Sous les boutons du haut, la carte {{ui:Scorecard TCO}} affiche le prix d'achat initial et, à droite, la recommandation de KALEA.` },
+        { titre: `Ouvrez le plan de la machine`, texte: `Dans {{ui:Machines}}, ouvrez l'onglet {{ui:Plans d'entretien}} et touchez {{ui:Voir le plan}} sur la machine.`,
+          image: { nom: 'plans', alt: `L'écran Plans d'entretien : le bouton Voir le plan, repéré par le numéro 1, sur la ligne de la machine.` } },
+        { titre: `Repérez la carte`, texte: `Sous les boutons du haut, la carte {{ui:Scorecard TCO}} affiche le prix d'achat initial et, à droite, la recommandation de KALEA.`,
+          image: { nom: 'scorecard', alt: `La carte Scorecard TCO : le prix d'achat initial (repère 2), les chiffres de la machine (repère 3) et la recommandation de KALEA (repère 4).` } },
         { titre: `Lisez les chiffres`, texte: `{{ui:Coût de revient effectif}} : le coût par heure ou par kilomètre. {{ui:Dépenses totales cumulées}} : entretien et exploitation. {{ui:Durée de vie consommée}} : la part de vie déjà utilisée. {{ui:Valeur résiduelle estimée}} : la revente estimée. {{ui:Ratio entretien / achat}} : l'entretien rapporté au prix d'achat.` },
         { titre: `Lisez la recommandation`, texte: `Elle prend la forme « Recommandation KALEA : … » avec, selon la base de calcul, {{ui:Rentable}}, {{ui:Point d'inflexion}} ou {{ui:Pensez au remplacement}}, ou une phrase sur la dépréciation annuelle.` },
       ],
@@ -800,8 +814,10 @@ export const ARTICLES_STOCK = [
       description: `Understand a machine's TCO scorecard in KALEA: effective cost, cumulative spending, lifespan used, recommendation.`,
       intro: `The <strong>TCO scorecard</strong> sums up in a few figures what a machine costs and whether it is still worth keeping.`,
       etapes: [
-        { titre: `Open the machine's plan`, texte: `In {{ui:Machines}}, open the {{ui:Plans d'entretien}} tab and tap {{ui:Voir le plan}} on the machine.` },
-        { titre: `Find the card`, texte: `Under the buttons at the top, the {{ui:Scorecard TCO}} card shows the initial purchase price and, on the right, KALEA's recommendation.` },
+        { titre: `Open the machine's plan`, texte: `In {{ui:Machines}}, open the {{ui:Plans d'entretien}} tab and tap {{ui:Voir le plan}} on the machine.`,
+          image: { nom: 'plans', alt: `The maintenance plans screen: the View the plan button, marked with number 1, on the machine's line.` } },
+        { titre: `Find the card`, texte: `Under the buttons at the top, the {{ui:Scorecard TCO}} card shows the initial purchase price and, on the right, KALEA's recommendation.`,
+          image: { nom: 'scorecard', alt: `The TCO scorecard card: the initial purchase price (marker 2), the machine's figures (marker 3) and KALEA's recommendation (marker 4).` } },
         { titre: `Read the figures`, texte: `{{ui:Coût de revient effectif}}: the cost per hour or per kilometre. {{ui:Dépenses totales cumulées}}: maintenance and operating costs. {{ui:Durée de vie consommée}}: the share of life already used. {{ui:Valeur résiduelle estimée}}: the estimated resale value. {{ui:Ratio entretien / achat}}: maintenance relative to the purchase price.` },
         { titre: `Read the recommendation`, texte: `It takes the form "KALEA recommendation: …" with, depending on the calculation base, {{ui:Rentable}}, {{ui:Point d'inflexion}} or {{ui:Pensez au remplacement}}, or a sentence about annual depreciation.` },
       ],
@@ -912,7 +928,7 @@ export const ARTICLES_STOCK = [
 
   // ───────────────────────────────────────────── TÉLÉMÉTRIE
   {
-    id: 'tele-source', theme: 'telemetrie',
+    id: 'tele-source', theme: 'telemetrie', scenario: 'tele-source',
     fr: {
       fichier: 'aide/creer-une-source-de-telemetrie.html',
       titre: `Créer une source de télémétrie et noter son jeton | Aide KALEA`,
@@ -922,7 +938,8 @@ export const ARTICLES_STOCK = [
       intro: `Une <strong>source</strong> est le canal par lequel arrivent les heures ou les kilomètres de vos engins : un boîtier, un autre système, ou le compte de votre constructeur. Vous la créez une fois, puis vous y reliez vos machines.`,
       etapes: [
         { titre: `Ouvrez la télémétrie`, texte: `Dans {{ui:Machines}}, ouvrez l'onglet {{ui:Télémétrie}}. Le bloc {{ui:Compteur automatique (télémétrie)}} liste vos sources. Cet onglet est réservé à l'Administrateur et à la Direction.` },
-        { titre: `Nommez la source et choisissez son type`, texte: `Sous {{ui:Nouvelle source}}, donnez un nom (par exemple « Boîtiers atelier »). Dans {{ui:Type de source}}, choisissez {{ui:Boîtiers via Flespi}}, {{ui:Autre système (API)}} ou {{ui:Compte constructeur (ISO 15143-3)}}.` },
+        { titre: `Nommez la source et choisissez son type`, texte: `Sous {{ui:Nouvelle source}}, donnez un nom (par exemple « Boîtiers atelier »). Dans {{ui:Type de source}}, choisissez {{ui:Boîtiers via Flespi}}, {{ui:Autre système (API)}} ou {{ui:Compte constructeur (ISO 15143-3)}}.`,
+          image: { nom: 'source', alt: `Le formulaire Nouvelle source : le nom et le type de source (repère 2), puis le bouton Créer la source (repère 3).` } },
         { titre: `Créez la source`, texte: `Cliquez sur {{ui:Créer la source}}. Pour un compte constructeur, renseignez d'abord les champs qui apparaissent (adresse de l'API, mode de connexion, identifiants).` },
         { titre: `Copiez le jeton tout de suite`, texte: `Pour les boîtiers et l'autre système, KALEA affiche l'adresse et le jeton (en-tête x-kalea-token) avec le message « Copie ce jeton maintenant : il ne sera plus jamais affiché. ». Touchez {{ui:Copier}} à côté de chacun et gardez-les en lieu sûr.` },
       ],
@@ -945,7 +962,8 @@ export const ARTICLES_STOCK = [
       intro: `A <strong>source</strong> is the channel through which your machines' hours or kilometres arrive: a tracker, another system, or your manufacturer's account. You create it once, then link your machines to it.`,
       etapes: [
         { titre: `Open telemetry`, texte: `In {{ui:Machines}}, open the {{ui:Télémétrie}} tab. The {{ui:Compteur automatique (télémétrie)}} block lists your sources. This tab is reserved for the Administrator and Director.` },
-        { titre: `Name the source and choose its type`, texte: `Under {{ui:Nouvelle source}}, give a name (for example "Workshop trackers"). In {{ui:Type de source}}, choose {{ui:Boîtiers via Flespi}}, {{ui:Autre système (API)}} or {{ui:Compte constructeur (ISO 15143-3)}}.` },
+        { titre: `Name the source and choose its type`, texte: `Under {{ui:Nouvelle source}}, give a name (for example "Workshop trackers"). In {{ui:Type de source}}, choose {{ui:Boîtiers via Flespi}}, {{ui:Autre système (API)}} or {{ui:Compte constructeur (ISO 15143-3)}}.`,
+          image: { nom: 'source', alt: `The New source form: the name and the type of source (marker 2), then the Create source button (marker 3).` } },
         { titre: `Create the source`, texte: `Click {{ui:Créer la source}}. For a manufacturer account, first fill in the fields that appear (API address, sign-in mode, credentials).` },
         { titre: `Copy the token right away`, texte: `For trackers and the other system, KALEA shows the address and the token (x-kalea-token header) with the message "Copy this token now: it will never be shown again." Tap {{ui:Copier}} next to each and keep them safe.` },
       ],
@@ -1057,7 +1075,7 @@ export const ARTICLES_STOCK = [
 
   // ───────────────────────────────────────────── AIDE & SUPPORT
   {
-    id: 'sup-nouveau-ticket', theme: 'support',
+    id: 'sup-nouveau-ticket', theme: 'support', scenario: 'sup-nouveau-ticket',
     fr: {
       fichier: 'aide/ecrire-au-support.html',
       titre: `Écrire au support depuis l'application | Aide KALEA`,
@@ -1067,8 +1085,10 @@ export const ARTICLES_STOCK = [
       intro: `Une question, un blocage : écrivez-nous directement dans l'application. La demande s'appelle un <strong>ticket</strong>, et la réponse arrive dans le même écran.`,
       etapes: [
         { titre: `Ouvrez l'aide`, texte: `Ouvrez {{ui:Aide & support}} : dans le menu de gauche sur ordinateur, sur l'icône d'aide de l'en-tête ou dans le menu {{ui:Plus}} sur téléphone.` },
-        { titre: `Créez un ticket`, texte: `Dans la carte {{ui:Mes demandes}}, touchez {{ui:Nouveau ticket}}.` },
-        { titre: `Décrivez votre demande`, texte: `Écrivez le {{ui:Sujet}} puis le {{ui:Message}}. Si votre question concerne une machine, touchez le champ « Machine concernée » : une liste avec recherche s'ouvre, choisissez la machine puis {{ui:Confirmer la sélection}}. Ce choix est facultatif (« Aucune en particulier »).` },
+        { titre: `Créez un ticket`, texte: `Dans la carte {{ui:Mes demandes}}, touchez {{ui:Nouveau ticket}}.`,
+          image: { nom: 'page', alt: `La page Aide & support : l'entrée du menu de gauche (repère 1) et le bouton Nouveau ticket de la carte Mes demandes (repère 2).` } },
+        { titre: `Décrivez votre demande`, texte: `Écrivez le {{ui:Sujet}} puis le {{ui:Message}}. Si votre question concerne une machine, touchez le champ « Machine concernée » : une liste avec recherche s'ouvre, choisissez la machine puis {{ui:Confirmer la sélection}}. Ce choix est facultatif (« Aucune en particulier »).`,
+          image: { nom: 'fenetre', alt: `La fenêtre Nouveau ticket : le sujet, la machine concernée et le message (repère 3), puis le bouton Envoyer (repère 4).` } },
         { titre: `Envoyez`, texte: `Touchez {{ui:Envoyer}}. Le ticket s'ouvre avec votre message : vous suivez ensuite sa conversation. Voir <a href="{{lien:sup-suivre-reponse}}">suivre un ticket</a>.` },
       ],
       notes: [
@@ -1087,8 +1107,10 @@ export const ARTICLES_STOCK = [
       intro: `A question, a blocker: write to us directly in the app. The request is called a <strong>ticket</strong>, and the reply arrives in the same screen.`,
       etapes: [
         { titre: `Open the help`, texte: `Open {{ui:Aide & support}}: in the left-hand menu on a computer, on the help icon in the header or in the {{ui:Plus}} menu on a phone.` },
-        { titre: `Create a ticket`, texte: `In the {{ui:Mes demandes}} card, tap {{ui:Nouveau ticket}}.` },
-        { titre: `Describe your request`, texte: `Write the {{ui:Sujet}} then the {{ui:Message}}. If your question is about a machine, tap the "Machine concerned" field: a list with search opens, choose the machine then {{ui:Confirmer la sélection}}. This choice is optional ("None in particular").` },
+        { titre: `Create a ticket`, texte: `In the {{ui:Mes demandes}} card, tap {{ui:Nouveau ticket}}.`,
+          image: { nom: 'page', alt: `The Help & support page: the left-hand menu entry (marker 1) and the New ticket button in the My requests card (marker 2).` } },
+        { titre: `Describe your request`, texte: `Write the {{ui:Sujet}} then the {{ui:Message}}. If your question is about a machine, tap the "Machine (optional)" field: a list with search opens, choose the machine then {{ui:Confirmer la sélection}}. This choice is optional ("None in particular").`,
+          image: { nom: 'fenetre', alt: `The New ticket window: the subject, the machine and the message (marker 3), then the Send button (marker 4).` } },
         { titre: `Send`, texte: `Tap {{ui:Envoyer}}. The ticket opens with your message: you then follow its conversation. See <a href="{{lien:sup-suivre-reponse}}">follow a ticket</a>.` },
       ],
       notes: [

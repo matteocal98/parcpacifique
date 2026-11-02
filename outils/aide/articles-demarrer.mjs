@@ -5,7 +5,7 @@
 export const ARTICLES_DEMARRER = [
   // ───────────────────────────────────────────────────────── Créer un compte
   {
-    id: 'dem-creer-compte', theme: 'demarrer',
+    id: 'dem-creer-compte', theme: 'demarrer', scenario: 'dem-creer-compte',
     fr: {
       fichier: 'aide/creer-un-compte.html',
       titre: `Créer un compte KALEA | Aide KALEA`,
@@ -14,11 +14,14 @@ export const ARTICLES_DEMARRER = [
       description: `Créer votre compte KALEA en quelques minutes : type de structure, coordonnées, adresse e-mail, mot de passe et code de vérification reçu par e-mail.`,
       intro: `Pour utiliser KALEA, vous créez un compte pour votre société, votre activité d'indépendant ou votre institution. L'opération se fait en deux temps : vous remplissez un formulaire, puis vous saisissez un code reçu par e-mail.`,
       etapes: [
-        { titre: `Ouvrez le formulaire de création`, texte: `Sur l'écran de connexion de KALEA, cliquez sur {{ui:Créer un compte}}. Une fenêtre du même nom s'ouvre.` },
-        { titre: `Choisissez le type de structure`, texte: `Trois choix : {{ui:Société}}, {{ui:Indépendant / Patenté}} ou {{ui:Institution}}. Pour un indépendant, le champ du nom de la structure disparaît : votre prénom et votre nom en tiennent lieu.` },
+        { titre: `Ouvrez le formulaire de création`, texte: `Sur l'écran de connexion de KALEA, cliquez sur {{ui:Créer un compte}}. Une fenêtre du même nom s'ouvre.`,
+          image: { nom: 'bouton', alt: `L'écran de connexion : le bouton Créer un compte est repéré par le numéro 1.` } },
+        { titre: `Choisissez le type de structure`, texte: `Trois choix : {{ui:Société}}, {{ui:Indépendant / Patenté}} ou {{ui:Institution}}. Pour un indépendant, le champ du nom de la structure disparaît : votre prénom et votre nom en tiennent lieu.`,
+          image: { nom: 'formulaire', alt: `La fenêtre Créer un compte : le type de structure (2), la description de la structure avec le pays et le téléphone (3), puis le contact, l'e-mail, le mot de passe et le bouton Créer le compte (4).` } },
         { titre: `Décrivez votre structure`, texte: `Renseignez {{ui:Nom de la structure}}, {{ui:Activité}} et {{ui:Pays}}. Le numéro d'immatriculation est facultatif : son nom change avec le pays choisi. Indiquez enfin votre {{ui:Numéro de téléphone}} ; l'indicatif suit le pays tant que vous n'y touchez pas.` },
         { titre: `Indiquez le contact et vos identifiants`, texte: `Saisissez {{ui:Prénom du contact}}, {{ui:Nom du contact}}, puis {{ui:Email de connexion}} et {{ui:Mot de passe}} (six caractères au minimum). Le bouton {{ui:Afficher}} permet de relire ce que vous tapez. Cliquez sur {{ui:Créer le compte}}.` },
-        { titre: `Saisissez le code reçu par e-mail`, texte: `L'écran {{ui:Vérifie ton email}} s'ouvre. Ouvrez votre messagerie, relevez le code à 6 chiffres, tapez-le dans {{ui:Code de vérification}} puis cliquez sur {{ui:Valider}}. Votre compte est activé et KALEA s'ouvre sur votre tableau de bord.` },
+        { titre: `Saisissez le code reçu par e-mail`, texte: `L'écran {{ui:Vérifie ton email}} s'ouvre. Ouvrez votre messagerie, relevez le code à 6 chiffres, tapez-le dans {{ui:Code de vérification}} puis cliquez sur {{ui:Valider}}. Votre compte est activé et KALEA s'ouvre sur votre tableau de bord.`,
+          image: { nom: 'code', alt: `L'écran Vérifie ton email : le champ Code de vérification et le bouton Valider (5).` } },
       ],
       notes: [
         `Le code n'arrive pas ? Voir <a href="{{lien:dem-code-non-recu}}">je ne reçois pas le code de vérification</a>.`,
@@ -37,11 +40,14 @@ export const ARTICLES_DEMARRER = [
       description: `Create your KALEA account in a few minutes: type of organisation, contact details, email address, password and the verification code sent by email.`,
       intro: `To use KALEA, you create an account for your company, your sole-trader activity or your institution. It takes two moments: you fill in a form, then you enter a code received by email.`,
       etapes: [
-        { titre: `Open the sign-up form`, texte: `On the KALEA sign-in screen, click {{ui:Créer un compte}}. A window with the same name opens.` },
-        { titre: `Choose the type of organisation`, texte: `There are three choices: {{ui:Société}}, {{ui:Indépendant / Patenté}} or {{ui:Institution}}. For a sole trader, the organisation-name field disappears: your first and last name take its place.` },
+        { titre: `Open the sign-up form`, texte: `On the KALEA sign-in screen, click {{ui:Créer un compte}}. A window with the same name opens.`,
+          image: { nom: 'bouton', alt: `The sign-in screen: the Create an account button is marked with number 1.` } },
+        { titre: `Choose the type of organisation`, texte: `There are three choices: {{ui:Société}}, {{ui:Indépendant / Patenté}} or {{ui:Institution}}. For a sole trader, the organisation-name field disappears: your first and last name take its place.`,
+          image: { nom: 'formulaire', alt: `The Create an account window: the organisation type (2), the description of the organisation with the country and the phone (3), then the contact, the email, the password and the Create account button (4).` } },
         { titre: `Describe your organisation`, texte: `Fill in {{ui:Nom de la structure}}, {{ui:Activité}} and {{ui:Pays}}. The registration number is optional: its name changes with the country you choose. Finally enter your {{ui:Numéro de téléphone}}; the dialling code follows the country as long as you do not change it yourself.` },
         { titre: `Enter the contact and your login details`, texte: `Enter {{ui:Prénom du contact}}, {{ui:Nom du contact}}, then {{ui:Email de connexion}} and {{ui:Mot de passe}} (at least six characters). The {{ui:Afficher}} button lets you check what you typed. Click {{ui:Créer le compte}}.` },
-        { titre: `Enter the code received by email`, texte: `The {{ui:Vérifie ton email}} screen opens. Open your mailbox, find the 6-digit code, type it in {{ui:Code de vérification}} and click {{ui:Valider}}. Your account is activated and KALEA opens on your dashboard.` },
+        { titre: `Enter the code received by email`, texte: `The {{ui:Vérifie ton email}} screen opens. Open your mailbox, find the 6-digit code, type it in {{ui:Code de vérification}} and click {{ui:Valider}}. Your account is activated and KALEA opens on your dashboard.`,
+          image: { nom: 'code', alt: `The Check your email screen: the Verification code field and the Confirm button (5).` } },
       ],
       notes: [
         `The code does not arrive? See <a href="{{lien:dem-code-non-recu}}">I do not receive the verification code</a>.`,
@@ -56,7 +62,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Se connecter
   {
-    id: 'dem-se-connecter', theme: 'demarrer',
+    id: 'dem-se-connecter', theme: 'demarrer', scenario: 'dem-se-connecter',
     fr: {
       fichier: 'aide/se-connecter.html',
       titre: `Se connecter à KALEA | Aide KALEA`,
@@ -66,7 +72,8 @@ export const ARTICLES_DEMARRER = [
       intro: `Vous vous connectez avec une adresse e-mail et un mot de passe. Les membres d'atelier qui n'ont pas d'adresse e-mail utilisent à la place un identifiant court donné par l'administrateur.`,
       etapes: [
         { titre: `Ouvrez KALEA`, texte: `Lancez l'application Android, ou ouvrez la page de connexion de KALEA dans votre navigateur. Si vous êtes déjà connecté, KALEA s'ouvre directement sur votre tableau de bord.` },
-        { titre: `Indiquez votre adresse ou votre identifiant`, texte: `Dans {{ui:E-mail ou identifiant atelier}}, tapez votre adresse e-mail. Un membre d'atelier tape son identifiant court, par exemple prénom.nom : sans le signe @, KALEA comprend qu'il s'agit d'un identifiant.` },
+        { titre: `Indiquez votre adresse ou votre identifiant`, texte: `Dans {{ui:E-mail ou identifiant atelier}}, tapez votre adresse e-mail. Un membre d'atelier tape son identifiant court, par exemple prénom.nom : sans le signe @, KALEA comprend qu'il s'agit d'un identifiant.`,
+          image: { nom: 'connexion', alt: `L'écran de connexion : le champ E-mail ou identifiant atelier (2), le champ Mot de passe avec son bouton Afficher (3) et le bouton Se connecter (4).` } },
         { titre: `Saisissez votre mot de passe`, texte: `Tapez-le dans {{ui:Mot de passe}}. Le bouton {{ui:Afficher}} permet de le relire avant de valider.` },
         { titre: `Validez`, texte: `Cliquez sur {{ui:Se connecter}}. KALEA affiche votre tableau de bord.` },
       ],
@@ -88,7 +95,8 @@ export const ARTICLES_DEMARRER = [
       intro: `You sign in with an email address and a password. Workshop members who have no email address use a short ID given by the administrator instead.`,
       etapes: [
         { titre: `Open KALEA`, texte: `Start the Android app, or open the KALEA sign-in page in your browser. If you are already signed in, KALEA opens straight on your dashboard.` },
-        { titre: `Enter your address or your ID`, texte: `In {{ui:E-mail ou identifiant atelier}}, type your email address. A workshop member types their short ID, for example first.last: without the @ sign, KALEA understands it is an ID.` },
+        { titre: `Enter your address or your ID`, texte: `In {{ui:E-mail ou identifiant atelier}}, type your email address. A workshop member types their short ID, for example first.last: without the @ sign, KALEA understands it is an ID.`,
+          image: { nom: 'connexion', alt: `The sign-in screen: the Email or workshop ID field (2), the Password field with its Show button (3) and the Sign in button (4).` } },
         { titre: `Enter your password`, texte: `Type it in {{ui:Mot de passe}}. The {{ui:Afficher}} button lets you read it back before you confirm.` },
         { titre: `Confirm`, texte: `Click {{ui:Se connecter}}. KALEA shows your dashboard.` },
       ],
@@ -332,7 +340,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Se repérer : menu et rubriques
   {
-    id: 'dem-menu-rubriques', theme: 'demarrer',
+    id: 'dem-menu-rubriques', theme: 'demarrer', scenario: 'dem-menu-rubriques',
     fr: {
       fichier: 'aide/se-reperer-dans-le-menu.html',
       titre: `Se repérer dans KALEA : le menu et les rubriques | Aide KALEA`,
@@ -341,9 +349,12 @@ export const ARTICLES_DEMARRER = [
       description: `Découvrir le menu de KALEA : la barre latérale sur ordinateur, la barre du bas sur téléphone, les rubriques et leurs onglets.`,
       intro: `KALEA regroupe ses écrans en rubriques. Sur ordinateur, elles sont dans une barre à gauche ; sur téléphone, dans une barre en bas et dans le bouton {{ui:Plus}}.`,
       etapes: [
-        { titre: `Sur ordinateur : la barre de gauche`, texte: `Elle liste les rubriques : {{ui:Tableau de bord}}, {{ui:Machines}}, {{ui:Planning}}, {{ui:Stock & achats}}, {{ui:Statistiques}}, {{ui:Aide & support}} et {{ui:Compte}}. En bas se trouvent le numéro de version et le bouton {{ui:Se déconnecter}}.` },
-        { titre: `Ouvrez une rubrique et ses onglets`, texte: `Quand une rubrique contient plusieurs écrans, des onglets apparaissent sous le titre. {{ui:Machines}} : {{ui:Machines}}, {{ui:Plans d'entretien}}, {{ui:Télémétrie}}. {{ui:Planning}} : {{ui:Agenda et préparation}}, {{ui:Ordres de travail}}. {{ui:Stock & achats}} : {{ui:Stocks & SAV}}, {{ui:Coûts & TCO}}. {{ui:Compte}} : {{ui:Mon compte}}, {{ui:Rappels et notifications}}. Un clic sur une rubrique rouvre le dernier écran que vous y avez consulté.` },
-        { titre: `Sur téléphone : la barre du bas`, texte: `Pour l'administrateur et la direction, elle contient {{ui:Accueil}}, {{ui:Machines}}, le bouton rond « + » ({{ui:Actions rapides}}), {{ui:Planning}} et {{ui:Plus}}. Le reste du menu se trouve dans <a href="{{lien:dem-bouton-plus}}">le bouton Plus</a>.` },
+        { titre: `Sur ordinateur : la barre de gauche`, texte: `Elle liste les rubriques : {{ui:Tableau de bord}}, {{ui:Machines}}, {{ui:Planning}}, {{ui:Stock & achats}}, {{ui:Statistiques}}, {{ui:Aide & support}} et {{ui:Compte}}. En bas se trouvent le numéro de version et le bouton {{ui:Se déconnecter}}.`,
+          image: { nom: 'barre', alt: `La barre de gauche : la liste des rubriques (1) et, tout en bas, le bouton Se déconnecter (5).` } },
+        { titre: `Ouvrez une rubrique et ses onglets`, texte: `Quand une rubrique contient plusieurs écrans, des onglets apparaissent sous le titre. {{ui:Machines}} : {{ui:Machines}}, {{ui:Plans d'entretien}}, {{ui:Télémétrie}}. {{ui:Planning}} : {{ui:Agenda et préparation}}, {{ui:Ordres de travail}}. {{ui:Stock & achats}} : {{ui:Stocks & SAV}}, {{ui:Coûts & TCO}}. {{ui:Compte}} : {{ui:Mon compte}}, {{ui:Rappels et notifications}}. Un clic sur une rubrique rouvre le dernier écran que vous y avez consulté.`,
+          image: { nom: 'onglets', alt: `Les onglets sous le titre de la rubrique Machines (2) : Machines, Plans d'entretien et Télémétrie.` } },
+        { titre: `Sur téléphone : la barre du bas`, texte: `Pour l'administrateur et la direction, elle contient {{ui:Accueil}}, {{ui:Machines}}, le bouton rond « + » ({{ui:Actions rapides}}), {{ui:Planning}} et {{ui:Plus}}. Le reste du menu se trouve dans <a href="{{lien:dem-bouton-plus}}">le bouton Plus</a>.`,
+          image: { nom: 'telephone', alt: `L'écran d'un téléphone : la barre du bas (3) et, en haut à droite, les deux icônes Aide & support et Mon compte (4).` } },
         { titre: `Repérez les deux icônes du haut`, texte: `En haut de l'écran du téléphone, la bulle ouvre {{ui:Aide & support}} et l'icône en forme de personne ouvre {{ui:Mon compte}}.` },
         { titre: `Quittez KALEA`, texte: `Sur ordinateur, cliquez sur {{ui:Se déconnecter}} en bas de la barre de gauche ; sur téléphone, ouvrez {{ui:Plus}} puis {{ui:Se déconnecter}}. S'il reste des actions faites sans réseau et pas encore envoyées, KALEA vous demande confirmation avant de vous déconnecter.` },
       ],
@@ -362,9 +373,12 @@ export const ARTICLES_DEMARRER = [
       description: `Discover the KALEA menu: the sidebar on a computer, the bottom bar on a phone, the sections and their tabs.`,
       intro: `KALEA groups its screens into sections. On a computer, they are in a bar on the left; on a phone, in a bar at the bottom and in the {{ui:Plus}} button.`,
       etapes: [
-        { titre: `On a computer: the left-hand bar`, texte: `It lists the sections: {{ui:Tableau de bord}}, {{ui:Machines}}, {{ui:Planning}}, {{ui:Stock & achats}}, {{ui:Statistiques}}, {{ui:Aide & support}} and {{ui:Compte}}. At the bottom you will find the version number and the {{ui:Se déconnecter}} button.` },
-        { titre: `Open a section and its tabs`, texte: `When a section contains several screens, tabs appear under the title. {{ui:Machines}}: {{ui:Machines}}, {{ui:Plans d'entretien}}, {{ui:Télémétrie}}. {{ui:Planning}}: {{ui:Agenda et préparation}}, {{ui:Ordres de travail}}. {{ui:Stock & achats}}: {{ui:Stocks & SAV}}, {{ui:Coûts & TCO}}. {{ui:Compte}}: {{ui:Mon compte}}, {{ui:Rappels et notifications}}. Clicking a section reopens the last screen you viewed in it.` },
-        { titre: `On a phone: the bottom bar`, texte: `For the administrator and the director, it contains {{ui:Accueil}}, {{ui:Machines}}, the round “+” button ({{ui:Actions rapides}}), {{ui:Planning}} and {{ui:Plus}}. The rest of the menu is in <a href="{{lien:dem-bouton-plus}}">the More button</a>.` },
+        { titre: `On a computer: the left-hand bar`, texte: `It lists the sections: {{ui:Tableau de bord}}, {{ui:Machines}}, {{ui:Planning}}, {{ui:Stock & achats}}, {{ui:Statistiques}}, {{ui:Aide & support}} and {{ui:Compte}}. At the bottom you will find the version number and the {{ui:Se déconnecter}} button.`,
+          image: { nom: 'barre', alt: `The left-hand bar: the list of sections (1) and, at the very bottom, the Sign out button (5).` } },
+        { titre: `Open a section and its tabs`, texte: `When a section contains several screens, tabs appear under the title. {{ui:Machines}}: {{ui:Machines}}, {{ui:Plans d'entretien}}, {{ui:Télémétrie}}. {{ui:Planning}}: {{ui:Agenda et préparation}}, {{ui:Ordres de travail}}. {{ui:Stock & achats}}: {{ui:Stocks & SAV}}, {{ui:Coûts & TCO}}. {{ui:Compte}}: {{ui:Mon compte}}, {{ui:Rappels et notifications}}. Clicking a section reopens the last screen you viewed in it.`,
+          image: { nom: 'onglets', alt: `The tabs under the title of the Machines section (2): Machines, Maintenance plans and Telemetry.` } },
+        { titre: `On a phone: the bottom bar`, texte: `For the administrator and the director, it contains {{ui:Accueil}}, {{ui:Machines}}, the round “+” button ({{ui:Actions rapides}}), {{ui:Planning}} and {{ui:Plus}}. The rest of the menu is in <a href="{{lien:dem-bouton-plus}}">the More button</a>.`,
+          image: { nom: 'telephone', alt: `A phone screen: the bottom bar (3) and, at the top right, the two icons Help & support and My account (4).` } },
         { titre: `Find the two icons at the top`, texte: `At the top of the phone screen, the bubble opens {{ui:Aide & support}} and the person-shaped icon opens {{ui:Mon compte}}.` },
         { titre: `Leave KALEA`, texte: `On a computer, click {{ui:Se déconnecter}} at the bottom of the left-hand bar; on a phone, open {{ui:Plus}} then {{ui:Se déconnecter}}. If some actions done without a network have not been sent yet, KALEA asks you to confirm before signing you out.` },
       ],
@@ -379,7 +393,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Le bouton Plus
   {
-    id: 'dem-bouton-plus', theme: 'demarrer',
+    id: 'dem-bouton-plus', theme: 'demarrer', scenario: 'dem-bouton-plus',
     fr: {
       fichier: 'aide/bouton-plus-telephone.html',
       titre: `Le bouton « Plus » du téléphone | Aide KALEA`,
@@ -388,10 +402,13 @@ export const ARTICLES_DEMARRER = [
       description: `À quoi sert le bouton « Plus » de la barre du bas de KALEA sur téléphone : les écrans qu'il ouvre, le compte, les rappels et la déconnexion.`,
       intro: `Sur téléphone, la barre du bas ne peut pas contenir tous les écrans. Le bouton {{ui:Plus}} ouvre une feuille qui donne accès à tout le reste.`,
       etapes: [
-        { titre: `Ouvrez la feuille`, texte: `Touchez {{ui:Plus}}, tout à droite de la barre du bas. Une feuille monte depuis le bas de l'écran.` },
-        { titre: `Lisez l'en-tête`, texte: `Il rappelle votre nom, votre société et le nombre de machines suivies.` },
+        { titre: `Ouvrez la feuille`, texte: `Touchez {{ui:Plus}}, tout à droite de la barre du bas. Une feuille monte depuis le bas de l'écran.`,
+          image: { nom: 'barre', alt: `La barre du bas sur téléphone : le bouton Plus, tout à droite, est repéré par le numéro 1.` } },
+        { titre: `Lisez l'en-tête`, texte: `Il rappelle votre nom, votre société et le nombre de machines suivies.`,
+          image: { nom: 'feuille', alt: `La feuille Plus ouverte : l'en-tête avec votre nom et votre société (2), la section Navigation parc (3) et la croix de fermeture (5).` } },
         { titre: `Choisissez un écran du parc`, texte: `La section {{ui:Navigation parc}} contient {{ui:Plans d'entretien}}, {{ui:Ordres de travail}}, {{ui:Agenda & Échéances}}, {{ui:Coûts & TCO}}, {{ui:Statistiques}}, {{ui:Télémétrie}} et {{ui:Stocks & SAV}}. Touchez une ligne pour ouvrir l'écran.` },
-        { titre: `Choisissez un écran du compte`, texte: `La section {{ui:Compte & organisation}} contient {{ui:Aide & support}}, {{ui:Mon compte}}, {{ui:Rappels et notifications}} et {{ui:Se déconnecter}}.` },
+        { titre: `Choisissez un écran du compte`, texte: `La section {{ui:Compte & organisation}} contient {{ui:Aide & support}}, {{ui:Mon compte}}, {{ui:Rappels et notifications}} et {{ui:Se déconnecter}}.`,
+          image: { nom: 'feuille-compte', alt: `La même feuille défilée vers le bas : la section Compte & organisation (4), de Aide & support jusqu'à Se déconnecter.` } },
         { titre: `Fermez la feuille`, texte: `Touchez la croix ({{ui:Fermer le menu}}) ou la zone grisée au-dessus de la feuille.` },
       ],
       notes: [
@@ -408,10 +425,13 @@ export const ARTICLES_DEMARRER = [
       description: `What the “More” button in the KALEA bottom bar is for on a phone: the screens it opens, the account, the reminders and signing out.`,
       intro: `On a phone, the bottom bar cannot hold every screen. The {{ui:Plus}} button opens a sheet that gives access to everything else.`,
       etapes: [
-        { titre: `Open the sheet`, texte: `Tap {{ui:Plus}}, at the far right of the bottom bar. A sheet rises from the bottom of the screen.` },
-        { titre: `Read the header`, texte: `It reminds you of your name, your company and the number of machines tracked.` },
+        { titre: `Open the sheet`, texte: `Tap {{ui:Plus}}, at the far right of the bottom bar. A sheet rises from the bottom of the screen.`,
+          image: { nom: 'barre', alt: `The bottom bar on a phone: the More button, at the far right, is marked with number 1.` } },
+        { titre: `Read the header`, texte: `It reminds you of your name, your company and the number of machines tracked.`,
+          image: { nom: 'feuille', alt: `The More sheet open: the header with your name and company (2), the Fleet navigation section (3) and the close cross (5).` } },
         { titre: `Choose a fleet screen`, texte: `The {{ui:Navigation parc}} section contains {{ui:Plans d'entretien}}, {{ui:Ordres de travail}}, {{ui:Agenda & Échéances}}, {{ui:Coûts & TCO}}, {{ui:Statistiques}}, {{ui:Télémétrie}} and {{ui:Stocks & SAV}}. Tap a line to open the screen.` },
-        { titre: `Choose an account screen`, texte: `The {{ui:Compte & organisation}} section contains {{ui:Aide & support}}, {{ui:Mon compte}}, {{ui:Rappels et notifications}} and {{ui:Se déconnecter}}.` },
+        { titre: `Choose an account screen`, texte: `The {{ui:Compte & organisation}} section contains {{ui:Aide & support}}, {{ui:Mon compte}}, {{ui:Rappels et notifications}} and {{ui:Se déconnecter}}.`,
+          image: { nom: 'feuille-compte', alt: `The same sheet scrolled down: the Account & organisation section (4), from Help & support to Sign out.` } },
         { titre: `Close the sheet`, texte: `Tap the cross ({{ui:Fermer le menu}}) or the greyed area above the sheet.` },
       ],
       notes: [
@@ -516,7 +536,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Langue
   {
-    id: 'dem-changer-langue', theme: 'compte',
+    id: 'dem-changer-langue', theme: 'compte', scenario: 'dem-changer-langue',
     fr: {
       fichier: 'aide/changer-la-langue.html',
       titre: `Changer la langue de KALEA (français, anglais) | Aide KALEA`,
@@ -526,7 +546,8 @@ export const ARTICLES_DEMARRER = [
       intro: `KALEA existe en français et en anglais. Vous pouvez changer de langue à tout moment, sur l'écran de connexion comme une fois connecté.`,
       etapes: [
         { titre: `Ouvrez le réglage`, texte: `Une fois connecté, ouvrez {{ui:Mon compte}} (rubrique {{ui:Compte}}, ou {{ui:Plus}} sur téléphone) puis la section {{ui:Données locales & Sécurité}}. Sur l'écran de connexion, le sélecteur est déjà visible, en haut de la page ou dans la carte.` },
-        { titre: `Choisissez la langue`, texte: `Sous {{ui:Langue de l'interface}}, touchez Français ou English.` },
+        { titre: `Choisissez la langue`, texte: `Sous {{ui:Langue de l'interface}}, touchez Français ou English.`,
+          image: { nom: 'langue', alt: `La section Données locales & Sécurité de Mon compte (1) et, dedans, les deux boutons Français et English sous Langue de l'interface (2).` } },
         { titre: `Laissez la page se recharger`, texte: `KALEA se recharge pour que tous les libellés passent dans la nouvelle langue. C'est normal.` },
       ],
       notes: [
@@ -546,7 +567,8 @@ export const ARTICLES_DEMARRER = [
       intro: `KALEA is available in French and in English. You can change language at any time, on the sign-in screen as well as once signed in.`,
       etapes: [
         { titre: `Open the setting`, texte: `Once signed in, open {{ui:Mon compte}} ({{ui:Compte}} section, or {{ui:Plus}} on a phone) then the {{ui:Données locales & Sécurité}} section. On the sign-in screen, the selector is already visible, at the top of the page or in the card.` },
-        { titre: `Choose the language`, texte: `Under {{ui:Langue de l'interface}}, tap Français or English.` },
+        { titre: `Choose the language`, texte: `Under {{ui:Langue de l'interface}}, tap Français or English.`,
+          image: { nom: 'langue', alt: `The Local data & Security section of My account (1) and, inside it, the Français and English buttons under Interface language (2).` } },
         { titre: `Let the page reload`, texte: `KALEA reloads so that every label switches to the new language. That is normal.` },
       ],
       notes: [
@@ -561,7 +583,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Thème
   {
-    id: 'dem-theme-sombre', theme: 'compte',
+    id: 'dem-theme-sombre', theme: 'compte', scenario: 'dem-theme-sombre',
     fr: {
       fichier: 'aide/theme-clair-sombre.html',
       titre: `Passer KALEA en thème clair ou sombre | Aide KALEA`,
@@ -572,7 +594,8 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Ouvrez Mon compte`, texte: `Ouvrez {{ui:Mon compte}} : rubrique {{ui:Compte}} sur ordinateur, bouton {{ui:Plus}} puis {{ui:Mon compte}} sur téléphone.` },
         { titre: `Descendez à la section des réglages locaux`, texte: `Ouvrez la section {{ui:Données locales & Sécurité}}. Sur téléphone, touchez son titre pour la déplier.` },
-        { titre: `Choisissez le thème`, texte: `Sous {{ui:Thème de l'interface}}, touchez {{ui:Auto}}, {{ui:Clair}} ou {{ui:Sombre}}. Le changement est immédiat.` },
+        { titre: `Choisissez le thème`, texte: `Sous {{ui:Thème de l'interface}}, touchez {{ui:Auto}}, {{ui:Clair}} ou {{ui:Sombre}}. Le changement est immédiat.`,
+          image: { nom: 'theme', alt: `La section Données locales & Sécurité (2) et les trois boutons Auto, Clair et Sombre sous Thème de l'interface (3), avec le thème sombre appliqué.` } },
       ],
       notes: [
         `Le choix est mémorisé sur l'appareil que vous utilisez : un autre téléphone ou un autre ordinateur garde son propre réglage.`,
@@ -591,7 +614,8 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Open My account`, texte: `Open {{ui:Mon compte}}: {{ui:Compte}} section on a computer, {{ui:Plus}} button then {{ui:Mon compte}} on a phone.` },
         { titre: `Scroll to the local settings section`, texte: `Open the {{ui:Données locales & Sécurité}} section. On a phone, tap its title to unfold it.` },
-        { titre: `Choose the theme`, texte: `Under {{ui:Thème de l'interface}}, tap {{ui:Auto}}, {{ui:Clair}} or {{ui:Sombre}}. The change is immediate.` },
+        { titre: `Choose the theme`, texte: `Under {{ui:Thème de l'interface}}, tap {{ui:Auto}}, {{ui:Clair}} or {{ui:Sombre}}. The change is immediate.`,
+          image: { nom: 'theme', alt: `The Local data & Security section (2) and the three buttons Auto, Light and Dark under Interface theme (3), with the dark theme applied.` } },
       ],
       notes: [
         `The choice is remembered on the device you use: another phone or computer keeps its own setting.`,
@@ -604,7 +628,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Informations de la société
   {
-    id: 'dem-infos-societe', theme: 'compte',
+    id: 'dem-infos-societe', theme: 'compte', scenario: 'dem-infos-societe',
     fr: {
       fichier: 'aide/informations-de-la-societe.html',
       titre: `Compléter ou corriger les informations de votre société | Aide KALEA`,
@@ -614,9 +638,11 @@ export const ARTICLES_DEMARRER = [
       intro: `Les informations de votre société se complètent et se corrigent à tout moment dans {{ui:Mon compte}}, en deux blocs : l'identité de la société, puis le contact.`,
       etapes: [
         { titre: `Ouvrez Mon compte`, texte: `Rubrique {{ui:Compte}} sur ordinateur ; {{ui:Plus}} puis {{ui:Mon compte}} sur téléphone. Sur téléphone, chaque section est repliée : touchez son titre pour la déplier.` },
-        { titre: `Complétez l'identité de la société`, texte: `Dans {{ui:Société & Identité légale}}, modifiez {{ui:Raison sociale}}, {{ui:Activité principale}} et {{ui:Pays}}. Le champ d'immatriculation porte le nom du pays : RIDET en Nouvelle-Calédonie, SIRET en France, par exemple.` },
+        { titre: `Complétez l'identité de la société`, texte: `Dans {{ui:Société & Identité légale}}, modifiez {{ui:Raison sociale}}, {{ui:Activité principale}} et {{ui:Pays}}. Le champ d'immatriculation porte le nom du pays : RIDET en Nouvelle-Calédonie, SIRET en France, par exemple.`,
+          image: { nom: 'identite', alt: `La section Société & Identité légale : les champs à compléter (2) et le bouton Enregistrer les modifications (3).` } },
         { titre: `Enregistrez cette section`, texte: `Cliquez sur {{ui:Enregistrer les modifications}}. KALEA affiche {{ui:Société mise à jour}}.` },
-        { titre: `Complétez le contact`, texte: `Dans {{ui:Contact & Alertes}}, renseignez {{ui:Prénom}}, {{ui:Nom}} et {{ui:Téléphone}}. L'indicatif du téléphone se choisit à gauche du numéro.` },
+        { titre: `Complétez le contact`, texte: `Dans {{ui:Contact & Alertes}}, renseignez {{ui:Prénom}}, {{ui:Nom}} et {{ui:Téléphone}}. L'indicatif du téléphone se choisit à gauche du numéro.`,
+          image: { nom: 'contact', alt: `La section Contact & Alertes : les champs Prénom, Nom et Téléphone (4) et le bouton Enregistrer (5).` } },
         { titre: `Enregistrez le contact`, texte: `Cliquez sur {{ui:Enregistrer}}. KALEA affiche {{ui:Coordonnées enregistrées}}. Le prénom enregistré sert à vous saluer sur le tableau de bord.` },
       ],
       notes: [
@@ -636,9 +662,11 @@ export const ARTICLES_DEMARRER = [
       intro: `Your company details can be completed and corrected at any time in {{ui:Mon compte}}, in two blocks: the company's identity, then the contact.`,
       etapes: [
         { titre: `Open My account`, texte: `{{ui:Compte}} section on a computer; {{ui:Plus}} then {{ui:Mon compte}} on a phone. On a phone, each section is folded: tap its title to unfold it.` },
-        { titre: `Complete the company's identity`, texte: `In {{ui:Société & Identité légale}}, edit {{ui:Raison sociale}}, {{ui:Activité principale}} and {{ui:Pays}}. The registration field is named after the country: RIDET in New Caledonia, SIRET in France, for example.` },
+        { titre: `Complete the company's identity`, texte: `In {{ui:Société & Identité légale}}, edit {{ui:Raison sociale}}, {{ui:Activité principale}} and {{ui:Pays}}. The registration field is named after the country: RIDET in New Caledonia, SIRET in France, for example.`,
+          image: { nom: 'identite', alt: `The Company & legal identity section: the fields to complete (2) and the Save changes button (3).` } },
         { titre: `Save this section`, texte: `Click {{ui:Enregistrer les modifications}}. KALEA shows {{ui:Société mise à jour}}.` },
-        { titre: `Complete the contact`, texte: `In {{ui:Contact & Alertes}}, fill in {{ui:Prénom}}, {{ui:Nom}} and {{ui:Téléphone}}. The phone dialling code is chosen to the left of the number.` },
+        { titre: `Complete the contact`, texte: `In {{ui:Contact & Alertes}}, fill in {{ui:Prénom}}, {{ui:Nom}} and {{ui:Téléphone}}. The phone dialling code is chosen to the left of the number.`,
+          image: { nom: 'contact', alt: `The Contact & Alerts section: the First name, Last name and Phone fields (4) and the Save button (5).` } },
         { titre: `Save the contact`, texte: `Click {{ui:Enregistrer}}. KALEA shows {{ui:Coordonnées enregistrées}}. The saved first name is used to greet you on the dashboard.` },
       ],
       notes: [
@@ -849,7 +877,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Changer d'offre / abonnement
   {
-    id: 'dem-changer-offre', theme: 'compte',
+    id: 'dem-changer-offre', theme: 'compte', scenario: 'dem-changer-offre',
     fr: {
       fichier: 'aide/changer-offre-gerer-abonnement.html',
       titre: `Changer d'offre ou gérer son abonnement | Aide KALEA`,
@@ -858,9 +886,12 @@ export const ARTICLES_DEMARRER = [
       description: `Changer d'offre KALEA, résilier, changer de carte ou télécharger vos factures : où cliquer dans Mon compte, et qui peut le faire.`,
       intro: `L'abonnement est géré par l'administrateur de la société, depuis {{ui:Mon compte}}. Cet article explique où cliquer ; les contenus et les tarifs des offres figurent sur <a href="/#tarifs">la page des offres</a>.`,
       etapes: [
-        { titre: `Ouvrez Mon compte`, texte: `Rubrique {{ui:Compte}} sur ordinateur ; {{ui:Plus}} puis {{ui:Mon compte}} sur téléphone. Dans la section {{ui:Société & Identité légale}}, descendez jusqu'à la ligne qui indique votre offre actuelle.` },
-        { titre: `Ouvrez la fenêtre des offres`, texte: `Cliquez sur {{ui:Changer d'offre}}. La fenêtre {{ui:Les offres KALEA}} s'ouvre, avec le sur-titre {{ui:Choisis ton offre}}. Votre offre est repérée par {{ui:Offre actuelle}}. Si votre offre gratuite est déjà pleine, la fenêtre s'ouvre avec le titre {{ui:Limite de ton offre atteinte}} : on y trouve les mêmes offres.` },
-        { titre: `Choisissez la nouvelle offre`, texte: `Chaque offre a son bouton « Passer à … ». Si vous n'avez pas encore d'abonnement, ce bouton ouvre la page de paiement dans un nouvel onglet. Si vous êtes déjà abonné, KALEA vous montre ce que le changement implique et vous demande de confirmer : le changement se fait sans souscrire un second abonnement.` },
+        { titre: `Ouvrez Mon compte`, texte: `Rubrique {{ui:Compte}} sur ordinateur ; {{ui:Plus}} puis {{ui:Mon compte}} sur téléphone. Dans la section {{ui:Société & Identité légale}}, descendez jusqu'à la ligne qui indique votre offre actuelle.`,
+          image: { nom: 'ligne-offre', alt: `Dans Mon compte, la ligne qui indique l'offre actuelle (1) et son bouton Changer d'offre (2).` } },
+        { titre: `Ouvrez la fenêtre des offres`, texte: `Cliquez sur {{ui:Changer d'offre}}. La fenêtre {{ui:Les offres KALEA}} s'ouvre, avec le sur-titre {{ui:Choisis ton offre}}. Votre offre est repérée par {{ui:Offre actuelle}}. Si votre offre gratuite est déjà pleine, la fenêtre s'ouvre avec le titre {{ui:Limite de ton offre atteinte}} : on y trouve les mêmes offres.`,
+          image: { nom: 'fenetre', alt: `Le haut de la fenêtre Les offres KALEA : le sur-titre Choisis ton offre et, sur la carte de votre offre, le repère Offre actuelle (2).` } },
+        { titre: `Choisissez la nouvelle offre`, texte: `Chaque offre a son bouton « Passer à … ». Si vous n'avez pas encore d'abonnement, ce bouton ouvre la page de paiement dans un nouvel onglet. Si vous êtes déjà abonné, KALEA vous montre ce que le changement implique et vous demande de confirmer : le changement se fait sans souscrire un second abonnement.`,
+          image: { nom: 'boutons', alt: `Le pied des cartes d'offres : sur chaque offre, un bouton Passer à… (3).` } },
         { titre: `Confirmez le résultat`, texte: `Après un changement d'offre, KALEA affiche {{ui:Offre modifiée}}. Après un paiement, une fenêtre avec le bouton {{ui:Continuer vers le parc}} confirme que le forfait est actif ; si elle annonce que l'activation peut prendre une minute, rechargez la page dans un instant.` },
       ],
       variante: {
@@ -884,9 +915,12 @@ export const ARTICLES_DEMARRER = [
       description: `Change your KALEA plan, cancel, change card or download your invoices: where to click in My account, and who can do it.`,
       intro: `The subscription is managed by the company's administrator, from {{ui:Mon compte}}. This article explains where to click; the contents and prices of the plans are on <a href="/en/#tarifs">the plans page</a>.`,
       etapes: [
-        { titre: `Open My account`, texte: `{{ui:Compte}} section on a computer; {{ui:Plus}} then {{ui:Mon compte}} on a phone. In the {{ui:Société & Identité légale}} section, scroll down to the row that shows your current plan.` },
-        { titre: `Open the plans window`, texte: `Click {{ui:Changer d'offre}}. The {{ui:Les offres KALEA}} window opens, with the heading {{ui:Choisis ton offre}}. Your plan is marked {{ui:Offre actuelle}}. If your free plan is already full, the window opens with the title {{ui:Limite de ton offre atteinte}}: the same plans are shown there.` },
-        { titre: `Choose the new plan`, texte: `Each plan has its own “Switch to …” button. If you do not have a subscription yet, this button opens the payment page in a new tab. If you are already subscribed, KALEA shows what the change involves and asks you to confirm: the change is made without taking out a second subscription.` },
+        { titre: `Open My account`, texte: `{{ui:Compte}} section on a computer; {{ui:Plus}} then {{ui:Mon compte}} on a phone. In the {{ui:Société & Identité légale}} section, scroll down to the row that shows your current plan.`,
+          image: { nom: 'ligne-offre', alt: `In My account, the row showing the current plan (1) and its Change plan button (2).` } },
+        { titre: `Open the plans window`, texte: `Click {{ui:Changer d'offre}}. The {{ui:Les offres KALEA}} window opens, with the heading {{ui:Choisis ton offre}}. Your plan is marked {{ui:Offre actuelle}}. If your free plan is already full, the window opens with the title {{ui:Limite de ton offre atteinte}}: the same plans are shown there.`,
+          image: { nom: 'fenetre', alt: `The top of the KALEA plans window: the Choose your plan heading and, on your plan's card, the Current plan marker (2).` } },
+        { titre: `Choose the new plan`, texte: `Each plan has its own “Switch to …” button. If you do not have a subscription yet, this button opens the payment page in a new tab. If you are already subscribed, KALEA shows what the change involves and asks you to confirm: the change is made without taking out a second subscription.`,
+          image: { nom: 'boutons', alt: `The foot of the plan cards: on each plan, a Switch to… button (3).` } },
         { titre: `Check the result`, texte: `After a plan change, KALEA shows {{ui:Offre modifiée}}. After a payment, a window with the {{ui:Continuer vers le parc}} button confirms the plan is active; if it says activation may take a minute, reload the page in a moment.` },
       ],
       variante: {

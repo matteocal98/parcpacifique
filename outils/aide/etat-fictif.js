@@ -30,6 +30,18 @@
       { id: 'm4', name: 'Groupe électrogène 60 kVA', brand: 'VOLTA', model: 'G60', model_year: 2018, serial_number: 'DEMO-G60-2210', kind: 'machine', category_id: 'c4', category: { id: 'c4', name: 'Groupes électrogènes' }, counter_value: 820, counter_unit: 'h', archived: false, created_at: dans(-400), plan: plan('p4', 'hours', 250, 1000, 60) },
     ];
     UI.machinesArchivees = [];
+    // Interface en anglais : les données fictives (société, catégories, machines, tâches) le sont aussi, sinon les captures EN montrent du français dans les données.
+    if (typeof LANGUE !== 'undefined' && LANGUE === 'en') {
+      const cats = { c1: 'Excavators', c2: 'Loaders', c3: 'Trucks', c4: 'Generators' };
+      const noms = { m1: 'Excavator 1.7 t', m2: 'Wheel loader', m3: 'Dump truck', m4: 'Generator 60 kVA' };
+      UI.companyName = 'Demo Company'; UI.company.name = 'Demo Company';
+      UI.categories.forEach((k) => { if (cats[k.id]) k.name = cats[k.id]; });
+      UI.machines.forEach((m) => {
+        if (noms[m.id]) m.name = noms[m.id];
+        if (m.category && cats[m.category.id]) m.category.name = cats[m.category.id];
+        if (m.plan) m.plan.tasks = 'Oil change, greasing, filter check';
+      });
+    }
     document.documentElement.removeAttribute('data-theme');
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     return true;

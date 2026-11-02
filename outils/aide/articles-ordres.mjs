@@ -6,7 +6,7 @@
 export const ARTICLES_ORDRES = [
   // ───────────────────────────────────────────────────────── 1. Créer un ordre de travail
   {
-    id: 'ord-creer-ordre-travail', theme: 'ordres',
+    id: 'ord-creer-ordre-travail', theme: 'ordres', scenario: 'ord-creer-ordre-travail',
     fr: {
       fichier: 'aide/creer-un-ordre-de-travail.html',
       titre: 'Créer un ordre de travail | Aide KALEA',
@@ -15,10 +15,14 @@ export const ARTICLES_ORDRES = [
       description: 'Créer un ordre de travail dans KALEA : choisir la machine, les tâches à faire, la priorité, la personne assignée et l\'échéance.',
       intro: 'Un <strong>ordre de travail</strong> est une tâche de maintenance que vous confiez à quelqu\'un : sur quelle machine, quoi faire, pour quand. La création se fait en deux écrans courts.',
       etapes: [
-        { titre: 'Ouvrez la liste et lancez la création', texte: 'Dans le menu, ouvrez {{ui:Planning}}, puis l\'onglet {{ui:Ordres de travail}}. Cliquez sur {{ui:Nouvel ordre}}.' },
-        { titre: 'Choisissez la machine', texte: 'La fenêtre {{ui:Créer un ordre de travail}} s\'ouvre. Cherchez la machine par son nom, sa marque, son immatriculation ou son numéro de série, ou filtrez par catégorie. Touchez la machine, puis cliquez sur {{ui:Continuer vers les tâches de l\'OT}}.' },
-        { titre: 'Indiquez les tâches à faire', texte: 'Dans la section {{ui:Type de tâche}}, cochez les tâches du plan d\'entretien de la machine. Pour une tâche qui n\'est pas dans le plan, écrivez-la dans le champ {{ui:Autre tâche}} et cliquez sur {{ui:Ajouter}}. Vous pouvez ajouter plusieurs tâches.' },
-        { titre: 'Réglez la planification', texte: 'Choisissez la {{ui:Priorité}} (Basse, Normale, Haute ou Urgente) et la personne dans {{ui:Assigné à}} (ou laissez {{ui:Non assigné}}). Les champs {{ui:Échéance (facultatif)}} et {{ui:Durée estimée en heures (facultatif)}} sont facultatifs.' },
+        { titre: 'Ouvrez la liste et lancez la création', texte: 'Dans le menu, ouvrez {{ui:Planning}}, puis l\'onglet {{ui:Ordres de travail}}. Cliquez sur {{ui:Nouvel ordre}}.',
+          image: { nom: 'liste', alt: 'La liste des ordres de travail : le bouton Nouvel ordre est repéré par le numéro 1.' } },
+        { titre: 'Choisissez la machine', texte: 'La fenêtre {{ui:Créer un ordre de travail}} s\'ouvre. Cherchez la machine par son nom, sa marque, son immatriculation ou son numéro de série, ou filtrez par catégorie. Touchez la machine, puis cliquez sur {{ui:Continuer vers les tâches de l\'OT}}.',
+          image: { nom: 'machine', alt: 'La fenêtre Créer un ordre de travail, étape 1/2 : le champ de recherche (1), la machine touchée dans la liste (2) et le bouton Continuer vers les tâches de l\'OT (3).' } },
+        { titre: 'Indiquez les tâches à faire', texte: 'Dans la section {{ui:Type de tâche}}, cochez les tâches du plan d\'entretien de la machine. Pour une tâche qui n\'est pas dans le plan, écrivez-la dans le champ {{ui:Autre tâche}} et cliquez sur {{ui:Ajouter}}. Vous pouvez ajouter plusieurs tâches.',
+          image: { nom: 'taches', alt: 'La fenêtre Nouvel ordre de travail, étape 2/2 : les tâches du plan d\'entretien à cocher (1), le champ Autre tâche (2) et le bouton Ajouter (3).' } },
+        { titre: 'Réglez la planification', texte: 'Choisissez la {{ui:Priorité}} (Basse, Normale, Haute ou Urgente) et la personne dans {{ui:Assigné à}} (ou laissez {{ui:Non assigné}}). Les champs {{ui:Échéance (facultatif)}} et {{ui:Durée estimée en heures (facultatif)}} sont facultatifs.',
+          image: { nom: 'planification', alt: 'La section Planification : Priorité (1), Assigné à (2), Échéance (3) et Durée estimée en heures (4).' } },
         { titre: 'Créez l\'ordre', texte: 'Cliquez sur {{ui:Créer l\'ordre}}. L\'ordre apparaît dans la liste avec son numéro, de la forme « OT-12 ».' },
       ],
       notes: [
@@ -38,10 +42,14 @@ export const ARTICLES_ORDRES = [
       description: 'Create a work order in KALEA: choose the machine, the tasks to do, the priority, the assigned person and the due date.',
       intro: 'A <strong>work order</strong> is a maintenance task you give to someone: which machine, what to do, by when. Creating one takes two short screens.',
       etapes: [
-        { titre: 'Open the list and start the creation', texte: 'In the menu, open {{ui:Planning}}, then the {{ui:Ordres de travail}} tab. Click {{ui:Nouvel ordre}}.' },
-        { titre: 'Choose the machine', texte: 'The {{ui:Créer un ordre de travail}} window opens. Search for the machine by name, make, registration or serial number, or filter by category. Tap the machine, then click {{ui:Continuer vers les tâches de l\'OT}}.' },
-        { titre: 'List the tasks to do', texte: 'In the {{ui:Type de tâche}} section, tick the tasks from the machine\'s maintenance plan. For a task that is not in the plan, type it in the {{ui:Autre tâche}} field and click {{ui:Ajouter}}. You can add several tasks.' },
-        { titre: 'Set the scheduling', texte: 'Choose the {{ui:Priorité}} (Low, Normal, High or Urgent) and the person in {{ui:Assigné à}} (or leave {{ui:Non assigné}}). The {{ui:Échéance (facultatif)}} and {{ui:Durée estimée en heures (facultatif)}} fields are optional.' },
+        { titre: 'Open the list and start the creation', texte: 'In the menu, open {{ui:Planning}}, then the {{ui:Ordres de travail}} tab. Click {{ui:Nouvel ordre}}.',
+          image: { nom: 'liste', alt: 'The work order list: the New order button is marked with number 1.' } },
+        { titre: 'Choose the machine', texte: 'The {{ui:Créer un ordre de travail}} window opens. Search for the machine by name, make, registration or serial number, or filter by category. Tap the machine, then click {{ui:Continuer vers les tâches de l\'OT}}.',
+          image: { nom: 'machine', alt: 'The Create a work order window, step 1/2: the search field (1), the machine selected in the list (2) and the Continue to the work order tasks button (3).' } },
+        { titre: 'List the tasks to do', texte: 'In the {{ui:Type de tâche}} section, tick the tasks from the machine\'s maintenance plan. For a task that is not in the plan, type it in the {{ui:Autre tâche}} field and click {{ui:Ajouter}}. You can add several tasks.',
+          image: { nom: 'taches', alt: 'The New work order window, step 2/2: the maintenance plan tasks to tick (1), the Other task field (2) and the Add button (3).' } },
+        { titre: 'Set the scheduling', texte: 'Choose the {{ui:Priorité}} (Low, Normal, High or Urgent) and the person in {{ui:Assigné à}} (or leave {{ui:Non assigné}}). The {{ui:Échéance (facultatif)}} and {{ui:Durée estimée en heures (facultatif)}} fields are optional.',
+          image: { nom: 'planification', alt: 'The Scheduling section: Priority (1), Assigned to (2), Due date (3) and Estimated duration in hours (4).' } },
         { titre: 'Create the order', texte: 'Click {{ui:Créer l\'ordre}}. The order appears in the list with its number, like “OT-12”.' },
       ],
       notes: [
@@ -108,7 +116,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 3. Suivre les ordres
   {
-    id: 'ord-suivre-ordres-travail', theme: 'ordres',
+    id: 'ord-suivre-ordres-travail', theme: 'ordres', scenario: 'ord-suivre-ordres-travail',
     fr: {
       fichier: 'aide/suivre-les-ordres-de-travail.html',
       titre: 'Suivre les ordres de travail : filtres, recherche et historique | Aide KALEA',
@@ -117,11 +125,13 @@ export const ARTICLES_ORDRES = [
       description: 'Retrouver un ordre de travail dans KALEA : filtrer par état, chercher par machine ou par personne, lire une ligne et consulter l\'historique d\'un ordre.',
       intro: 'La liste des ordres de travail montre d\'un coup d\'œil ce qui est à faire, en cours ou terminé, et ce qui est en retard.',
       etapes: [
-        { titre: 'Ouvrez la liste', texte: 'Dans le menu, ouvrez {{ui:Planning}}, puis l\'onglet {{ui:Ordres de travail}}. Le nombre d\'ordres s\'affiche en haut de la section.' },
+        { titre: 'Ouvrez la liste', texte: 'Dans le menu, ouvrez {{ui:Planning}}, puis l\'onglet {{ui:Ordres de travail}}. Le nombre d\'ordres s\'affiche en haut de la section.',
+          image: { nom: 'liste', alt: 'La liste des ordres de travail : le nombre d\'ordres (1), les boutons de filtre par état (2), le champ de recherche (3) et une ligne d\'ordre (4).' } },
         { titre: 'Filtrez par état', texte: 'Les boutons de filtre sont {{ui:En cours et à faire}} (affiché au départ), {{ui:À faire}}, {{ui:En cours}}, {{ui:Terminés}} et {{ui:Tous}}. Chacun indique son nombre d\'ordres. Le gérant et le droit de gestion disposent en plus du bouton {{ui:Mes ordres}}, qui ne garde que leurs propres ordres.' },
         { titre: 'Cherchez un ordre', texte: 'Dans le champ de recherche, tapez un numéro, un nom de machine, une tâche ou le nom d\'une personne : la liste se réduit pendant la frappe.' },
         { titre: 'Lisez une ligne', texte: 'Chaque ligne indique le numéro (« OT-12 »), la machine, les tâches, la personne assignée (ou {{ui:Non assigné}}), l\'échéance (« en retard depuis le … » si elle est dépassée) et le nombre de tâches faites, par exemple 2/5. Les priorités Haute et Urgente sont signalées ; l\'état est toujours affiché.' },
-        { titre: 'Ouvrez la fiche et lisez l\'historique', texte: 'Touchez une ligne pour ouvrir la fiche. Dépliez {{ui:Historique}} pour lire, du plus récent au plus ancien, qui a créé, assigné, démarré ou terminé l\'ordre, avec la date et l\'heure.' },
+        { titre: 'Ouvrez la fiche et lisez l\'historique', texte: 'Touchez une ligne pour ouvrir la fiche. Dépliez {{ui:Historique}} pour lire, du plus récent au plus ancien, qui a créé, assigné, démarré ou terminé l\'ordre, avec la date et l\'heure.',
+          image: { nom: 'fiche', alt: 'La fiche d\'un ordre : le bouton Historique, déplié, est repéré par le numéro 1 ; dessous, les événements du plus récent au plus ancien.' } },
       ],
       notes: [
         'Sur l\'accueil, le gérant voit un point de vigilance « Ordres de travail ouverts » : il indique les ordres en retard ou, si la validation est exigée, ceux à valider. Un clic ouvre la liste.',
@@ -139,11 +149,13 @@ export const ARTICLES_ORDRES = [
       description: 'Find a work order in KALEA: filter by status, search by machine or person, read a row and view an order\'s history.',
       intro: 'The work order list shows at a glance what is to do, in progress or completed, and what is late.',
       etapes: [
-        { titre: 'Open the list', texte: 'In the menu, open {{ui:Planning}}, then the {{ui:Ordres de travail}} tab. The number of orders is shown at the top of the section.' },
+        { titre: 'Open the list', texte: 'In the menu, open {{ui:Planning}}, then the {{ui:Ordres de travail}} tab. The number of orders is shown at the top of the section.',
+          image: { nom: 'liste', alt: 'The work order list: the number of orders (1), the status filter buttons (2), the search field (3) and one order row (4).' } },
         { titre: 'Filter by status', texte: 'The filter buttons are {{ui:En cours et à faire}} (shown first), {{ui:À faire}}, {{ui:En cours}}, {{ui:Terminés}} and {{ui:Tous}}. Each shows its number of orders. The manager and management access also have the {{ui:Mes ordres}} button, which keeps only their own orders.' },
         { titre: 'Search for an order', texte: 'In the search field, type a number, a machine name, a task or a person\'s name: the list narrows as you type.' },
         { titre: 'Read a row', texte: 'Each row shows the number (“OT-12”), the machine, the tasks, the assigned person (or {{ui:Non assigné}}), the due date (“late since …” once it has passed) and the number of tasks done, for example 2/5. High and Urgent priorities are flagged; the status is always shown.' },
-        { titre: 'Open the page and read the history', texte: 'Tap a row to open its page. Expand {{ui:Historique}} to read, newest first, who created, assigned, started or completed the order, with the date and time.' },
+        { titre: 'Open the page and read the history', texte: 'Tap a row to open its page. Expand {{ui:Historique}} to read, newest first, who created, assigned, started or completed the order, with the date and time.',
+          image: { nom: 'fiche', alt: 'An order\'s page: the History button, expanded, is marked with number 1; below it, the events from newest to oldest.' } },
       ],
       notes: [
         'On the home screen, the manager sees an “Open work orders” watch point: it shows late orders or, if approval is required, those waiting for approval. One click opens the list.',
@@ -204,7 +216,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 5. Valider ou refuser
   {
-    id: 'ord-valider-refuser-ordre', theme: 'ordres',
+    id: 'ord-valider-refuser-ordre', theme: 'ordres', scenario: 'ord-valider-refuser-ordre',
     fr: {
       fichier: 'aide/valider-refuser-ordre-termine.html',
       titre: 'Valider ou refuser un ordre terminé | Aide KALEA',
@@ -213,10 +225,12 @@ export const ARTICLES_ORDRES = [
       description: 'Exiger une validation du gérant sur les ordres de travail terminés dans KALEA, puis valider un ordre ou le refuser avec un motif.',
       intro: 'Par défaut, un ordre terminé est clos tout de suite. Si vous voulez contrôler le travail, activez la validation : chaque ordre terminé attend alors votre accord.',
       etapes: [
-        { titre: 'Activez la validation', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, descendez en bas de la page. Cochez {{ui:Exiger une validation du gérant une fois l\'ordre terminé}}. KALEA confirme : les ordres terminés attendent désormais votre validation.' },
+        { titre: 'Activez la validation', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, descendez en bas de la page. Cochez {{ui:Exiger une validation du gérant une fois l\'ordre terminé}}. KALEA confirme : les ordres terminés attendent désormais votre validation.',
+          image: { nom: 'reglage', alt: 'Le bas de la page des ordres de travail : la case Exiger une validation du gérant une fois l\'ordre terminé, cochée et repérée par le numéro 1, avec la confirmation de KALEA.' } },
         { titre: 'Repérez les ordres à valider', texte: 'Sur l\'accueil, le point de vigilance des ordres indique « à valider » (si aucun ordre n\'est en retard : le retard passe avant). Dans la liste, filtrez sur {{ui:Terminés}}. La fiche d\'un ordre en attente affiche « Ordre terminé : en attente de validation. ».' },
         { titre: 'Contrôlez le travail', texte: 'Ouvrez l\'ordre : relisez les tâches cochées et, si besoin, l\'{{ui:Historique}}. L\'intervention enregistrée se trouve dans l\'historique de la machine.' },
-        { titre: 'Validez ou refusez', texte: 'Touchez {{ui:Valider}} pour accepter : la fiche affiche « Ordre terminé et validé. ». Touchez {{ui:Refuser}} pour rejeter : le motif est obligatoire. Il s\'affiche ensuite dans la fiche, après « Motif du refus ».' },
+        { titre: 'Validez ou refusez', texte: 'Touchez {{ui:Valider}} pour accepter : la fiche affiche « Ordre terminé et validé. ». Touchez {{ui:Refuser}} pour rejeter : le motif est obligatoire. Il s\'affiche ensuite dans la fiche, après « Motif du refus ».',
+          image: { nom: 'fiche', alt: 'La fiche d\'un ordre terminé quand la validation est exigée : le message en attente de validation (1), le bouton Valider (2) et le bouton Refuser (3).' } },
       ],
       notes: [
         'Le réglage se coche et se décoche à tout moment ; il est réservé à l\'administrateur et à la direction.',
@@ -233,10 +247,12 @@ export const ARTICLES_ORDRES = [
       description: 'Require manager approval of completed work orders in KALEA, then approve an order or reject it with a reason.',
       intro: 'By default, a completed order is closed straight away. If you want to check the work, turn on approval: every completed order then waits for your agreement.',
       etapes: [
-        { titre: 'Turn on approval', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, scroll to the bottom of the page. Tick {{ui:Exiger une validation du gérant une fois l\'ordre terminé}}. KALEA confirms: completed orders now wait for your approval.' },
+        { titre: 'Turn on approval', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, scroll to the bottom of the page. Tick {{ui:Exiger une validation du gérant une fois l\'ordre terminé}}. KALEA confirms: completed orders now wait for your approval.',
+          image: { nom: 'reglage', alt: 'The bottom of the work orders page: the Require manager approval once an order is done box, ticked and marked with number 1, with KALEA\'s confirmation.' } },
         { titre: 'Spot the orders to approve', texte: 'On the home screen, the work-order watch point shows “to validate” (if no order is late: lateness takes priority). In the list, filter on {{ui:Terminés}}. The page of a waiting order shows “Order done: waiting for approval.”.' },
         { titre: 'Check the work', texte: 'Open the order: read through the ticked tasks and, if needed, the {{ui:Historique}}. The logged intervention is in the machine\'s history.' },
-        { titre: 'Approve or reject', texte: 'Tap {{ui:Valider}} to accept: the page shows “Order done and approved.”. Tap {{ui:Refuser}} to reject: the reason is required. It is then shown on the page, after “Reason for rejecting”.' },
+        { titre: 'Approve or reject', texte: 'Tap {{ui:Valider}} to accept: the page shows “Order done and approved.”. Tap {{ui:Refuser}} to reject: the reason is required. It is then shown on the page, after “Reason for rejecting”.',
+          image: { nom: 'fiche', alt: 'The page of a completed order when approval is required: the waiting-for-approval message (1), the Confirm button (2) and the Reject button (3).' } },
       ],
       notes: [
         'The setting can be ticked and unticked at any time; it is reserved for the Administrator and the Director.',
@@ -488,7 +504,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 11. Les droits d'accès
   {
-    id: 'ord-droits-acces', theme: 'equipe',
+    id: 'ord-droits-acces', theme: 'equipe', scenario: 'ord-droits-acces',
     fr: {
       fichier: 'aide/droits-d-acces-qui-peut-faire-quoi.html',
       titre: 'Qui peut faire quoi : les droits d\'accès expliqués | Aide KALEA',
@@ -497,7 +513,8 @@ export const ARTICLES_ORDRES = [
       description: 'Administrateur, Direction, droit de gestion, droit de saisie, droit d\'achat : ce que chaque droit d\'accès permet de voir et de faire dans KALEA.',
       intro: 'Chaque personne de la société a un <strong>droit d\'accès</strong>. Il décide de ce qu\'elle voit et de ce qu\'elle peut modifier. Les noms sont les mêmes partout dans KALEA.',
       etapes: [
-        { titre: 'Retrouvez votre droit', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Si vous n\'êtes ni administrateur ni direction, vous y lisez votre droit sous la forme « Ton accès : … ». Le gérant y voit toute l\'équipe, avec le droit de chacun.' },
+        { titre: 'Retrouvez votre droit', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Si vous n\'êtes ni administrateur ni direction, vous y lisez votre droit sous la forme « Ton accès : … ». Le gérant y voit toute l\'équipe, avec le droit de chacun.',
+          image: { nom: 'equipe', alt: 'La carte Gestion de l\'équipe : la liste des personnes avec le droit de chacune (1) et, sur une ligne dépliée, ce que la personne peut faire (2).' } },
         { titre: 'Administrateur et Direction', texte: '<strong>Administrateur</strong> : tout, c\'est-à-dire le parc, les plans, l\'équipe et l\'abonnement.<br><strong>Direction</strong> : tout le quotidien comme l\'administrateur (parc, ordres de travail, équipe, stock, coûts…), sauf l\'abonnement, les comptes Direction et l\'identité légale.' },
         { titre: 'Droit de gestion', texte: '<strong>Droit de gestion</strong> : le parc, les entretiens, les ordres de travail et les pannes. La personne ajoute, modifie et marque « fait », mais ne gère pas l\'équipe.' },
         { titre: 'Droit de saisie', texte: '<strong>Droit de saisie</strong> : consulter le parc, relever le compteur, prendre la photo de sa machine, signaler une panne et traiter les ordres de travail qui lui sont assignés. L\'icône de modification d\'une machine n\'est pas affichée.' },
@@ -520,7 +537,8 @@ export const ARTICLES_ORDRES = [
       description: 'Administrator, Director, management, data-entry and purchasing access levels: what each one lets you see and do in KALEA.',
       intro: 'Each person in the company has an <strong>access level</strong>. It decides what they see and what they can change. The names are the same everywhere in KALEA.',
       etapes: [
-        { titre: 'Find your level', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section. If you are neither Administrator nor Director, you read your level there as “Your access: …”. The manager sees the whole team there, with everyone\'s level.' },
+        { titre: 'Find your level', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section. If you are neither Administrator nor Director, you read your level there as “Your access: …”. The manager sees the whole team there, with everyone\'s level.',
+          image: { nom: 'equipe', alt: 'The Team management card: the list of people with each one\'s access level (1) and, on an expanded row, what the person can do (2).' } },
         { titre: 'Administrator and Director', texte: '<strong>Administrator</strong>: everything, meaning the fleet, the plans, the team and the subscription.<br><strong>Director</strong>: all the day-to-day like the Administrator (fleet, work orders, team, stock, costs…), except the subscription, Director accounts and the legal identity.' },
         { titre: 'Management access', texte: '<strong>Management access</strong>: the fleet, the maintenance, the work orders and the breakdowns. The person adds, edits and marks as “done”, but does not manage the team.' },
         { titre: 'Data-entry access', texte: '<strong>Data-entry access</strong>: view the fleet, read the meter, take the photo of their machine, report a breakdown and handle the work orders assigned to them. The machine edit icon is not shown.' },
@@ -539,7 +557,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 12. Inviter par e-mail
   {
-    id: 'ord-inviter-email', theme: 'equipe',
+    id: 'ord-inviter-email', theme: 'equipe', scenario: 'ord-inviter-email',
     fr: {
       fichier: 'aide/inviter-un-membre-par-email.html',
       titre: 'Inviter un membre de l\'équipe par e-mail | Aide KALEA',
@@ -548,9 +566,11 @@ export const ARTICLES_ORDRES = [
       description: 'Inviter quelqu\'un à rejoindre votre société dans KALEA : créer l\'invitation, envoyer le lien par e-mail, puis la personne l\'accepte.',
       intro: 'Pour une personne qui a une adresse e-mail (chef d\'équipe, comptable…), le plus simple est de l\'inviter : elle reçoit un lien et crée son compte elle-même.',
       etapes: [
-        { titre: 'Ouvrez l\'ajout d\'un membre', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}, puis cliquez sur {{ui:Ajouter}}. La fenêtre {{ui:Ajouter un membre}} s\'ouvre.' },
+        { titre: 'Ouvrez l\'ajout d\'un membre', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}, puis cliquez sur {{ui:Ajouter}}. La fenêtre {{ui:Ajouter un membre}} s\'ouvre.',
+          image: { nom: 'ajouter', alt: 'La carte Gestion de l\'équipe : le bouton Ajouter est repéré par le numéro 1.' } },
         { titre: 'Déroulez l\'invitation', texte: 'Cliquez sur {{ui:Inviter par e-mail}} pour dérouler le formulaire.' },
-        { titre: 'Remplissez l\'invitation', texte: 'Écrivez l\'adresse dans {{ui:E-mail de la personne}} et choisissez le {{ui:Droit d\'accès}} : droit de gestion, de saisie ou d\'achat. Cliquez sur {{ui:Créer l\'invitation}}.' },
+        { titre: 'Remplissez l\'invitation', texte: 'Écrivez l\'adresse dans {{ui:E-mail de la personne}} et choisissez le {{ui:Droit d\'accès}} : droit de gestion, de saisie ou d\'achat. Cliquez sur {{ui:Créer l\'invitation}}.',
+          image: { nom: 'fenetre', alt: 'Le formulaire Inviter par e-mail, déroulé dans la fenêtre Ajouter un membre : le titre à dérouler (1), le champ E-mail de la personne (2), la liste Droit d\'accès (3) et le bouton Créer l\'invitation (4).' } },
         { titre: 'Transmettez le lien', texte: 'KALEA affiche le lien à transmettre et sa date limite de validité. Cliquez sur {{ui:Envoyer l\'invitation par e-mail}} : votre messagerie s\'ouvre avec un message déjà écrit. KALEA n\'envoie pas l\'e-mail lui-même : c\'est vous qui l\'envoyez.' },
         { titre: 'La personne accepte', texte: 'La personne ouvre le lien. Elle se connecte avec l\'adresse invitée, ou crée son compte : le lien est conservé. Elle clique alors sur {{ui:Accepter l\'invitation}} et rejoint votre société avec le droit choisi.' },
       ],
@@ -571,9 +591,11 @@ export const ARTICLES_ORDRES = [
       description: 'Invite someone to join your company in KALEA: create the invitation, send the link by email, then the person accepts it.',
       intro: 'For a person who has an email address (team leader, accountant…), the simplest way is to invite them: they receive a link and create their own account.',
       etapes: [
-        { titre: 'Open the add-member window', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section, then click {{ui:Ajouter}}. The {{ui:Ajouter un membre}} window opens.' },
+        { titre: 'Open the add-member window', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section, then click {{ui:Ajouter}}. The {{ui:Ajouter un membre}} window opens.',
+          image: { nom: 'ajouter', alt: 'The Team management card: the Add button is marked with number 1.' } },
         { titre: 'Expand the invitation', texte: 'Click {{ui:Inviter par e-mail}} to expand the form.' },
-        { titre: 'Fill in the invitation', texte: 'Type the address in {{ui:E-mail de la personne}} and choose the {{ui:Droit d\'accès}}: management, data-entry or purchasing. Click {{ui:Créer l\'invitation}}.' },
+        { titre: 'Fill in the invitation', texte: 'Type the address in {{ui:E-mail de la personne}} and choose the {{ui:Droit d\'accès}}: management, data-entry or purchasing. Click {{ui:Créer l\'invitation}}.',
+          image: { nom: 'fenetre', alt: 'The Invite by email form, expanded in the Add a member window: the title to expand (1), the Person\'s email field (2), the Access level list (3) and the Create the invitation button (4).' } },
         { titre: 'Pass on the link', texte: 'KALEA shows the link to pass on and its expiry date. Click {{ui:Envoyer l\'invitation par e-mail}}: your email app opens with a message already written. KALEA does not send the email itself: you send it.' },
         { titre: 'The person accepts', texte: 'The person opens the link. They sign in with the invited address, or create their account: the link is kept. They then click {{ui:Accepter l\'invitation}} and join your company with the chosen level.' },
       ],
@@ -590,7 +612,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 13. Créer l'accès d'un membre sans e-mail
   {
-    id: 'ord-membre-direct', theme: 'equipe',
+    id: 'ord-membre-direct', theme: 'equipe', scenario: 'ord-membre-direct',
     fr: {
       fichier: 'aide/creer-acces-membre-sans-email.html',
       titre: 'Créer l\'accès d\'un membre sans adresse e-mail | Aide KALEA',
@@ -600,8 +622,10 @@ export const ARTICLES_ORDRES = [
       intro: 'Un membre d\'atelier n\'a souvent pas d\'adresse e-mail. Vous indiquez son prénom et son nom, KALEA crée son accès et vous donne son login et son mot de passe.',
       etapes: [
         { titre: 'Ouvrez l\'ajout d\'un membre', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}, puis cliquez sur {{ui:Ajouter}}.' },
-        { titre: 'Écrivez son identité', texte: 'Dans {{ui:Ajouter un membre direct}}, remplissez {{ui:Prénom}} et {{ui:Nom}}. Le nom de famille s\'écrit en majuscules sur la fiche. Le champ {{ui:Métier (facultatif)}} est un simple libellé, par exemple « Chef d\'atelier » : il ne change aucun droit.' },
-        { titre: 'Choisissez ce qu\'il peut faire', texte: 'Dans {{ui:Ce qu\'il peut faire dans l\'application}}, choisissez le droit : par exemple droit de gestion ou droit de saisie. Une aide sous la liste rappelle ce que chaque droit permet.' },
+        { titre: 'Écrivez son identité', texte: 'Dans {{ui:Ajouter un membre direct}}, remplissez {{ui:Prénom}} et {{ui:Nom}}. Le nom de famille s\'écrit en majuscules sur la fiche. Le champ {{ui:Métier (facultatif)}} est un simple libellé, par exemple « Chef d\'atelier » : il ne change aucun droit.',
+          image: { nom: 'identite', alt: 'La fenêtre Ajouter un membre, section Ajouter un membre direct : les champs Prénom (1), Nom (2) et Métier (3).' } },
+        { titre: 'Choisissez ce qu\'il peut faire', texte: 'Dans {{ui:Ce qu\'il peut faire dans l\'application}}, choisissez le droit : par exemple droit de gestion ou droit de saisie. Une aide sous la liste rappelle ce que chaque droit permet.',
+          image: { nom: 'droit', alt: 'La liste Ce qu\'il peut faire dans l\'application (1) et, plus bas, le bouton Créer le membre (2).' } },
         { titre: 'Créez le membre', texte: 'Cliquez sur {{ui:Créer le membre}}. L\'accès s\'affiche : l\'{{ui:Identifiant de connexion}} et le mot de passe, masqué. Cliquez sur {{ui:Afficher}} pour le lire, ou sur {{ui:Copier le login et le mot de passe}} pour les coller dans un message.' },
         { titre: 'Remettez l\'accès à la personne', texte: 'Notez-les tout de suite : le mot de passe ne sera plus affiché. La personne tape son login, sans arobase, dans le champ de connexion, avec le mot de passe.' },
       ],
@@ -621,8 +645,10 @@ export const ARTICLES_ORDRES = [
       intro: 'A workshop member often has no email address. You enter their first and last name, KALEA creates their access and gives you their login and password.',
       etapes: [
         { titre: 'Open the add-member window', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section, then click {{ui:Ajouter}}.' },
-        { titre: 'Enter their identity', texte: 'In {{ui:Ajouter un membre direct}}, fill in {{ui:Prénom}} and {{ui:Nom}}. The surname is written in capitals on the record. The {{ui:Métier (facultatif)}} field is just a label, for example “Workshop manager”: it changes no access level.' },
-        { titre: 'Choose what they can do', texte: 'In {{ui:Ce qu\'il peut faire dans l\'application}}, choose the level: for example management or data-entry. A help text under the list reminds you what each level allows.' },
+        { titre: 'Enter their identity', texte: 'In {{ui:Ajouter un membre direct}}, fill in {{ui:Prénom}} and {{ui:Nom}}. The surname is written in capitals on the record. The {{ui:Métier (facultatif)}} field is just a label, for example “Workshop manager”: it changes no access level.',
+          image: { nom: 'identite', alt: 'The Add a member window, Add a direct member section: the First name (1), Last name (2) and Trade (3) fields.' } },
+        { titre: 'Choose what they can do', texte: 'In {{ui:Ce qu\'il peut faire dans l\'application}}, choose the level: for example management or data-entry. A help text under the list reminds you what each level allows.',
+          image: { nom: 'droit', alt: 'The What they can do in the app list (1) and, further down, the Create the member button (2).' } },
         { titre: 'Create the member', texte: 'Click {{ui:Créer le membre}}. The access is shown: the {{ui:Identifiant de connexion}} and the password, hidden. Click {{ui:Afficher}} to read it, or {{ui:Copier le login et le mot de passe}} to paste them into a message.' },
         { titre: 'Hand the access to the person', texte: 'Write them down right away: the password will not be shown again. The person types their login, without an at sign, in the sign-in field, with the password.' },
       ],
@@ -733,7 +759,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 16. Le bandeau « À envoyer »
   {
-    id: 'ord-a-envoyer', theme: 'ordres',
+    id: 'ord-a-envoyer', theme: 'ordres', scenario: 'ord-a-envoyer',
     fr: {
       fichier: 'aide/bandeau-a-envoyer-sans-reseau.html',
       titre: 'Que faire sans réseau : le bandeau « À envoyer » | Aide KALEA',
@@ -743,8 +769,10 @@ export const ARTICLES_ORDRES = [
       intro: 'Quand vous faites une action sans réseau, KALEA la garde sur votre appareil et l\'envoie dès que possible. Le bandeau et l\'écran « À envoyer » vous montrent ce qui attend.',
       etapes: [
         { titre: 'Faites votre action normalement', texte: 'Enregistrez l\'intervention ou signalez la panne comme d\'habitude : KALEA répond que l\'action est enregistrée sur l\'appareil et qu\'elle partira dès que le réseau revient. Cocher une tâche d\'un ordre ne déclenche pas ce message : la pastille {{ui:À envoyer}} apparaît sur l\'ordre.' },
-        { titre: 'Repérez le bandeau', texte: 'Un bandeau s\'affiche en haut de l\'écran : « n action(s) enregistrée(s) sur l\'appareil, en attente d\'envoi. ». Sur la liste et la fiche d\'un ordre de travail concerné, la pastille {{ui:À envoyer}} apparaît aussi.' },
-        { titre: 'Ouvrez le détail', texte: 'Cliquez sur {{ui:Voir}} dans le bandeau. La fenêtre {{ui:À envoyer}} liste chaque action avec sa machine, son heure et la pastille {{ui:En attente}}.' },
+        { titre: 'Repérez le bandeau', texte: 'Un bandeau s\'affiche en haut de l\'écran : « n action(s) enregistrée(s) sur l\'appareil, en attente d\'envoi. ». Sur la liste et la fiche d\'un ordre de travail concerné, la pastille {{ui:À envoyer}} apparaît aussi.',
+          image: { nom: 'bandeau', alt: 'L\'écran des ordres de travail avec le bandeau d\'actions en attente en haut (1), la pastille À envoyer sur un ordre (2) et les liens Envoyer maintenant et Voir du bandeau (3).' } },
+        { titre: 'Ouvrez le détail', texte: 'Cliquez sur {{ui:Voir}} dans le bandeau. La fenêtre {{ui:À envoyer}} liste chaque action avec sa machine, son heure et la pastille {{ui:En attente}}.',
+          image: { nom: 'fenetre', alt: 'La fenêtre À envoyer : la pastille En attente d\'une action (1), le bouton Envoyer maintenant (2), puis, sur une action en erreur, Réessayer (3) et Abandonner (4).' } },
         { titre: 'Envoyez dès que le réseau revient', texte: 'L\'envoi est automatique au retour de la connexion, et KALEA affiche « n action(s) envoyée(s) au serveur ». Pour ne pas attendre, cliquez sur {{ui:Envoyer maintenant}}, dans le bandeau ou dans la fenêtre.' },
         { titre: 'Traitez les erreurs', texte: 'Si une action ne peut pas être envoyée (par exemple la machine a été supprimée), elle reste dans la liste avec son motif. Cliquez sur {{ui:Réessayer}} pour la renvoyer, ou sur {{ui:Abandonner}} : elle ne sera alors jamais envoyée.' },
       ],
@@ -766,8 +794,10 @@ export const ARTICLES_ORDRES = [
       intro: 'When you do something without a network, KALEA keeps it on your device and sends it as soon as possible. The banner and the “To send” screen show you what is waiting.',
       etapes: [
         { titre: 'Do your action as usual', texte: 'Log the intervention or report the breakdown as usual: KALEA replies that the action is saved on the device and will go as soon as the network returns. Ticking an order\'s task does not show this message: the {{ui:À envoyer}} badge appears on the order.' },
-        { titre: 'Spot the banner', texte: 'A banner appears at the top of the screen: “n action(s) saved on the device, waiting to be sent.”. On the list and the page of a work order concerned, the {{ui:À envoyer}} badge also appears.' },
-        { titre: 'Open the details', texte: 'Click {{ui:Voir}} in the banner. The {{ui:À envoyer}} window lists each action with its machine, its time and the {{ui:En attente}} badge.' },
+        { titre: 'Spot the banner', texte: 'A banner appears at the top of the screen: “n action(s) saved on the device, waiting to be sent.”. On the list and the page of a work order concerned, the {{ui:À envoyer}} badge also appears.',
+          image: { nom: 'bandeau', alt: 'The work orders screen with the pending-actions banner at the top (1), the To send badge on an order (2) and the banner\'s Send now and View links (3).' } },
+        { titre: 'Open the details', texte: 'Click {{ui:Voir}} in the banner. The {{ui:À envoyer}} window lists each action with its machine, its time and the {{ui:En attente}} badge.',
+          image: { nom: 'fenetre', alt: 'The To send window: an action\'s Waiting badge (1), the Send now button (2), then, on an action in error, Try again (3) and Discard (4).' } },
         { titre: 'Send as soon as the network returns', texte: 'Sending is automatic when the connection returns, and KALEA shows “n action(s) sent to the server”. To avoid waiting, click {{ui:Envoyer maintenant}}, in the banner or in the window.' },
         { titre: 'Deal with errors', texte: 'If an action cannot be sent (for example the machine was deleted), it stays in the list with its reason. Click {{ui:Réessayer}} to send it again, or {{ui:Abandonner}}: it will then never be sent.' },
       ],
