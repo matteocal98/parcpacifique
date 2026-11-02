@@ -1341,7 +1341,7 @@ VIEWS.account = {
         message(msg, trad('Erreur :') + ' ' + (err.message || err), true);
       }
       btn.disabled = false;
-      btn.textContent = trad('Changer l\'email');
+      btn.textContent = trad('Mettre à jour l\'e-mail');
     });
 
     // LE BOUTON DE SUPPRESSION vit dans « Mon compte », en bas, dans une zone à
@@ -1569,10 +1569,12 @@ async function ouvrirSuppressionCompte(messageEcran) {
 // repli que limiteOffre() (une offre absente de LIMITES_OFFRES = illimitée =
 // Pro), jamais un libellé à part inventé pour ce badge.
 function badgeOffreCourt() {
+  // Les clés internes (eco, pro, paid, unlimited) sont d'anciens noms : le client lit les noms d'offre actuels (voir OFFRES_LIBELLES dans app-01-base.js).
   const offre = String(UI.companyPlan || 'free').toLowerCase();
   if (offre === 'free') return { texte: trad('Gratuit'), classe: 'neutral' };
-  if (offre === 'eco') return { texte: trad('Éco'), classe: 'soon' };
-  return { texte: trad('Pro'), classe: 'ok' };
+  if (offre === 'starter' || offre === 'eco') return { texte: 'Starter', classe: 'soon' };
+  if (offre === 'business' || offre === 'pro') return { texte: 'Business', classe: 'ok' };
+  return { texte: 'Enterprise', classe: 'ok' };
 }
 // Reprise Stitch « Navigation Plus » — feuille ouverte par le bouton central
 // de la barre mobile (barreMobileHtml, id="open-plus") ET par le raccourci

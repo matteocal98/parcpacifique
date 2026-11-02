@@ -1145,7 +1145,7 @@ document.addEventListener('click', (e) => {
   if (!champ) return;
   const visible = champ.type === 'text';
   champ.type = visible ? 'password' : 'text';
-  bouton.textContent = visible ? trad('Afficher') : 'Masquer';
+  bouton.textContent = visible ? trad('Afficher') : trad('Masquer');
   bouton.setAttribute('aria-pressed', String(!visible));
   // Le focus revient au champ, curseur à la fin : on continue sa saisie sans
   // avoir à recliquer dedans.
