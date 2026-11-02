@@ -61,6 +61,12 @@ function ouvrirFicheDepuisPushSiPresent() {
     __stockDepuisLienNatifEnAttente = null;
     ouvrirFicheStockDepuisLien(lien);
   }
+  if (__supportTicketDepuisPushEnAttente) {
+    const ticketSupportId = __supportTicketDepuisPushEnAttente;
+    __supportTicketDepuisPushEnAttente = null;
+    ouvrirSupportTicket(ticketSupportId);
+    return;
+  }
   if (__ordreIdDepuisPushEnAttente) {
     const ordreId = __ordreIdDepuisPushEnAttente;
     __ordreIdDepuisPushEnAttente = null;
@@ -1965,6 +1971,7 @@ async function boot(toastMessage) {
   // À partir d'ici, UI.machines reflète les VRAIES données de la société
   // connectée — voir __appPretePourPush, lu par wirePushEcouteurs().
   __appPretePourPush = true;
+  chargerSupportNonLus();   // pastille « nouvelle réponse du support » dès l'ouverture
 
   // Entretiens programmés (calendrier Agenda) : un jeu de données léger par
   // société, chargé une fois ici comme le catalogue de pièces — jamais

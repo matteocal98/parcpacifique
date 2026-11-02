@@ -5,7 +5,7 @@
  * Pour ajouter une langue : une nouvelle entrée à côté de "en" (et LANGUES dans app.html).
  * Après toute modification : node outils/maj-empreinte-csp.mjs (met à jour la version publiée).
  */
-const TEXTES = {"en":{
+const TEXTES = {"en":{"Nouveau":"New","{n} réponse(s) du support à lire":"{n} support reply(ies) to read",
 "Archiver cette machine":"Archive this machine",
 "Une machine archivée n'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.":"An archived machine is no longer billed or tracked; its history is kept and you can restore it.",
 "Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et tu pourras la restaurer.":"Archive “{nom}”? It will no longer be billed or tracked (due dates, reminders, alerts). Its history is kept and you can restore it.",

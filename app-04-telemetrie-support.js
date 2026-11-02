@@ -1105,6 +1105,71 @@ function initialesSupport(nom) {
   return (mots[0][0] + (mots[1]?.[0] || '')).toUpperCase();
 }
 
+// ── Réponses du support non lues (migrations/support-notification-client.sql) ─────────────────────────────────────────────────────────────────
+// Pastille « nouvelle réponse » : combien de réponses du support (ou de l'assistant) le client n'a pas encore vues, pour les tickets QU'IL A OUVERTS.
+// Tout est facultatif : sans la migration (fonction absente), hors connexion ou hors session, on n'affiche simplement rien — jamais d'erreur à l'écran.
+const SUPPORT_NON_LUS_MS = 3 * 60 * 1000;
+let supportNonLusSequence = 0;
+async function chargerSupportNonLus() {
+  if (typeof UI === 'undefined' || !UI.companyId) return;
+  const numero = ++supportNonLusSequence;
+  try {
+    const { data, error } = await sb.rpc('support_non_lus');
+    if (error || numero !== supportNonLusSequence) return;   // fonction absente / appel plus récent déjà reparti : la dernière réponse l'emporte
+    const parTicket = {};
+    let total = 0;
+    (data || []).forEach((r) => { const n = Number(r.nouveaux) || 0; parTicket[r.ticket_id] = n; total += n; });
+    UI.supportNonLus = { total, parTicket };
+    appliquerPastilleSupport();
+  } catch (_) { /* pas de pastille : sans conséquence */ }
+}
+function nombreSupportNonLus() { return (UI.supportNonLus && UI.supportNonLus.total) || 0; }
+function titrePastilleSupport(n) { return tR('{n} réponse(s) du support à lire', { n }); }
+// Le point de rappel sur « Plus » / « Compte » se pose par une SEULE marque sur la page (voir styles.css) : aucune réécriture des menus.
+function appliquerPastilleSupport() {
+  const n = nombreSupportNonLus();
+  document.documentElement.toggleAttribute('data-support-nonlu', n > 0);
+  document.querySelectorAll('[data-support-pastille]').forEach((el) => {
+    el.textContent = String(n);
+    el.title = titrePastilleSupport(n);
+    el.hidden = n === 0;
+  });
+}
+// Pastille chiffrée à poser dans un bouton (Mon compte) ou dans une ligne de la feuille « Plus » (jamais affichée à zéro).
+function pastilleSupportHtml() {
+  const n = nombreSupportNonLus();
+  return `<span class="support-pastille" data-support-pastille title="${esc(titrePastilleSupport(n))}"${n ? '' : ' hidden'}>${n}</span>`;
+}
+// « J'ai vu ce ticket jusqu'à CE message » : la date du dernier message AFFICHÉ, telle quelle — une réponse arrivée pendant que la fenêtre était ouverte reste non lue.
+async function marquerSupportLu(ticketId, messages) {
+  const liste = messages || [];
+  if (!liste.length) return;
+  try {
+    const { error } = await sb.rpc('support_marquer_lu', { p_ticket: ticketId, p_jusqua: liste[liste.length - 1].created_at });
+    if (!error) chargerSupportNonLus();
+  } catch (_) { /* la pastille se corrigera au prochain rafraîchissement */ }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) chargerSupportNonLus(); });
+setInterval(() => { if (!document.hidden) chargerSupportNonLus(); }, SUPPORT_NON_LUS_MS);
+// Retour au premier plan dans l'application Android : visibilitychange y est intermittent, on écoute aussi l'état réel donné par @capacitor/app.
+try {
+  const applicationCap = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.App : null;
+  if (applicationCap && typeof applicationCap.addListener === 'function') {
+    applicationCap.addListener('appStateChange', (etat) => { if (etat && etat.isActive) chargerSupportNonLus(); });
+  }
+} catch (_) { /* secours : l'intervalle ci-dessus */ }
+
+// Ouvre DIRECTEMENT un ticket (toucher la notification « Réponse du support »).
+async function ouvrirSupportTicket(ticketId) {
+  document.querySelectorAll('.overlay.support-modal').forEach((o) => o.remove());
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay support-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const { data: sessionCourante } = await sb.auth.getUser();
+  await afficherFilTicket(overlay, sessionCourante?.user?.id || null, ticketId);
+}
+
 async function openSupportModal() {
   const overlay = document.createElement('div');
   overlay.className = 'overlay support-modal';
@@ -1150,6 +1215,7 @@ async function afficherListeTickets(overlay, moi) {
   // par ticket) — sert de sous-titre réel (« Dernier message il y a… »),
   // avec repli sur la date d'ouverture si le ticket n'a encore aucune
   // réponse (juste créé, un seul message initial pas encore chargé ici).
+  await chargerSupportNonLus();
   const { data: dernierMessages } = await sb
     .from('support_ticket_messages')
     .select('ticket_id, created_at')
@@ -1167,7 +1233,7 @@ async function afficherListeTickets(overlay, moi) {
           <span class="support-liste-sujet">${esc(t.subject)}</span>
           <span class="support-liste-ref">${refTicket(t.id)}</span>
         </span>
-        <span class="support-liste-sub">${esc(sousTitre)}</span>
+        <span class="support-liste-sub">${((UI.supportNonLus && UI.supportNonLus.parTicket) || {})[t.id] ? `<span class="support-liste-nouveau">${trad('Nouveau')}</span>` : ''}${esc(sousTitre)}</span>
       </span>
       ${statutSupportHtml(t.status)}
     </button>`;
@@ -1412,6 +1478,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       </div>`;
     }).join('') || `<div class="ui-aide">${trad('Aucun message.')}</div>`;
     fil.scrollTop = fil.scrollHeight;
+    marquerSupportLu(ticketId, messages);
     // « Parler à un humain » : proposé dès que l'assistant IA a écrit sur ce ticket, tant que le client ne l'a pas déjà demandé.
     const boutonHumain = overlay.querySelector('#support-humain');
     const annonceHumain = overlay.querySelector('#support-fil-msg');

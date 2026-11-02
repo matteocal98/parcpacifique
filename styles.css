@@ -5536,6 +5536,13 @@
   .support-liste-ligne.is-active .support-liste-sujet{color:var(--primary-dark);}
   .support-liste-ref{font-size:11px;color:var(--ink-3);font-family:'Space Grotesk',sans-serif;flex:0 0 auto;}
   .support-liste-sub{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}   /* block : sur un <span> en ligne, overflow/ellipsis sont ignorés et le texte passait sous le badge de statut */
+  /* Réponses du support non lues : pastille chiffrée, puce « Nouveau » sur le ticket, et un point de rappel sur « Plus » (téléphone) / « Compte » (ordinateur).
+     Texte foncé sur l'orange : le blanc n'y atteint pas le contraste voulu. */
+  .support-pastille{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:8px;border-radius:var(--r-pill);background:var(--gold);color:var(--ink);font-size:11px;font-weight:800;line-height:1;flex:0 0 auto;}
+  .support-pastille[hidden]{display:none;}
+  .support-liste-nouveau{display:inline-block;margin-right:6px;padding:1px 7px;vertical-align:1px;border-radius:var(--r-pill);background:var(--gold);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;}
+  html[data-support-nonlu] #open-plus .tab-icon,html[data-support-nonlu] .nav-item[data-nav="account"] .nav-ico,html[data-support-nonlu] .nav-item[data-nav="reminders"] .nav-ico{position:relative;}
+  html[data-support-nonlu] #open-plus .tab-icon::after,html[data-support-nonlu] .nav-item[data-nav="account"] .nav-ico::after,html[data-support-nonlu] .nav-item[data-nav="reminders"] .nav-ico::after{content:'';position:absolute;top:-2px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--surface);}
   .support-statut{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);font-size:11px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
   .support-statut .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
   .support-statut.is-ouvert{background:var(--voile-ambre);color:#8a4a0e;}

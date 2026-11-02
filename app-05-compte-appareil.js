@@ -1770,6 +1770,7 @@ function wirePushEcouteurs() {
   plugin.addListener('pushNotificationReceived', (notification) => {
     const titre = notification && notification.title;
     if (titre) showToast(titre);
+    if (notification && notification.data && notification.data.type === 'support') chargerSupportNonLus();
   });
   // Tap sur la notification (appli en arrière-plan OU fermée) : réutilise
   // EXACTEMENT ouvrirFicheParId(), comme le lien profond QR code — jamais
@@ -1779,6 +1780,12 @@ function wirePushEcouteurs() {
   // établi pour le lien profond QR.
   plugin.addListener('pushNotificationActionPerformed', (action) => {
     const donnees = action && action.notification && action.notification.data;
+    const ticketSupportId = donnees && donnees.type === 'support' && donnees.ticket_id;
+    if (ticketSupportId) {
+      if (__appPretePourPush) ouvrirSupportTicket(ticketSupportId);
+      else __supportTicketDepuisPushEnAttente = ticketSupportId;
+      return;
+    }
     const ordreId = donnees && donnees.type === 'ordre' && donnees.ordre_id;
     if (ordreId) {
       if (__appPretePourPush) ouvrirOrdreParId(ordreId);

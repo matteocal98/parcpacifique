@@ -280,7 +280,7 @@ VIEWS.account = {
       <section class="ui-section">
         ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
         <div class="ui-section-corps">
-          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span></button></div>
+          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span>${pastilleSupportHtml()}</button></div>
           <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
         </div>
       </section>
@@ -1599,7 +1599,7 @@ function openPlusSheet() {
         <div class="plus-sheet-separateur"></div>
         <div class="plus-sheet-section">
           <div class="plus-sheet-section-tete"><span class="plus-sheet-section-titre">${trad('Compte & organisation')}</span></div>
-          ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), '')}
+          ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), pastilleSupportHtml())}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels et notifications'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           <button type="button" class="plus-sheet-item is-deconnexion" id="plus-sheet-logout">
             <span class="plus-sheet-item-gauche">

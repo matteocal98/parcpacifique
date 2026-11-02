@@ -43,6 +43,7 @@ const __stockDepuisQr = __paramsQr.get('stock');
 let __machineIdDepuisPushEnAttente = null;
 // Idem pour un tap sur une notification d'ORDRE DE TRAVAIL (données { type:'ordre', ordre_id }) : l'ordre prime sur la machine.
 let __ordreIdDepuisPushEnAttente = null;
+let __supportTicketDepuisPushEnAttente = null;   // notification « Réponse du support » touchée AVANT que l'application soit prête
 // ⚠️ NE PAS remplacer par `Array.isArray(UI.machines)` : UI.machines vaut
 // `[]` dès la déclaration de UI (bien avant tout chargement réel), donc ce
 // test serait TOUJOURS vrai — un tap au lancement à froid résolvait alors
