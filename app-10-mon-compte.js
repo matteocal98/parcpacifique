@@ -54,6 +54,28 @@ VIEWS.telemetrie = {
   },
 };
 
+// ── Vue : Aide & support (rubrique du menu ; sortie de « Mon compte » le 2026-11-02) ──────────────────────────────────────────────────────────
+// Les tickets, avec un compteur de réponses non lues sur l'entrée du menu. Le centre d'aide écrit (procédures illustrées) viendra s'y ajouter.
+VIEWS.support = {
+  fondBlanc: true,
+  title: trad('Aide & support'),
+  subtitle: () => trad('Tes demandes au support et leurs réponses. Une question, un blocage : écris-nous, l\'équipe te répond ici.'),
+  render() {
+    return `
+      <div class="ui-page support-page">
+        <section class="ui-section">
+          ${teteSectionKit('message', trad('Mes demandes'), trad('Les réponses du support arrivent ici, avec une notification sur ton téléphone.'))}
+          <div class="ui-section-corps">
+            <div><button type="button" class="ui-btn ui-btn-plein" id="support-page-nouveau">${picto('croix')}<span>${trad('Nouveau ticket')}</span></button></div>
+            <div class="ui-puces" role="group" aria-label="${esc(trad('Filtrer les demandes'))}" id="support-page-filtres"></div>
+            <div class="support-liste" id="support-page-liste">${trad('Chargement…')}</div>
+          </div>
+        </section>
+      </div>`;
+  },
+  mount() { monterPageSupport(); },
+};
+
 VIEWS.account = {
   fondBlanc: true,
   title: trad('Mon compte'),
@@ -278,14 +300,6 @@ VIEWS.account = {
 
 
       <section class="ui-section">
-        ${tete('aideCercle', trad('Support'), trad('Une question, un blocage sur un manuel ou une machine ? Écris-nous : notre équipe te répond directement ici.'))}
-        <div class="ui-section-corps">
-          <div><button type="button" class="ui-btn ui-btn-plein" id="acc-support-ouvrir">${picto('message')}<span>${trad('Contacter le support')}</span>${pastilleSupportHtml()}</button></div>
-          <div class="ui-aide">${trad('Données atelier sécurisées')}</div>
-        </div>
-      </section>
-
-      <section class="ui-section">
         ${tete('bouclier', trad('Données locales & Sécurité'), trad('Mode hors-ligne chantier et langue de l\'interface.'))}
         <div class="ui-section-corps">
           <div class="ui-groupe">
@@ -378,7 +392,6 @@ VIEWS.account = {
     });
   }
     root.querySelector('#acc-portail')?.addEventListener('click', () => ouvrirPortailAbonnement());
-    root.querySelector('#acc-support-ouvrir')?.addEventListener('click', () => openSupportModal());
     habillerSelect(root.querySelector('#acc-activity'), trad('Activité principale'));
     // ★ LE NAVIGATEUR NE DOIT PAS REMPLIR CES DEUX CHAMPS À LA PLACE DE L'UTILISATEUR. Chrome reconnaît « un champ
     //   e-mail + un champ mot de passe » comme un formulaire de connexion et y recopie l'identifiant enregistré : le
@@ -1599,7 +1612,8 @@ function openPlusSheet() {
         <div class="plus-sheet-separateur"></div>
         <div class="plus-sheet-section">
           <div class="plus-sheet-section-tete"><span class="plus-sheet-section-titre">${trad('Compte & organisation')}</span></div>
-          ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), pastilleSupportHtml())}
+          ${itemHtml('support', 'support', 'is-signature', trad('Aide & support'), trad('Tes demandes au support et leurs réponses'), pastilleSupportHtml())}
+          ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), '')}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels et notifications'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           <button type="button" class="plus-sheet-item is-deconnexion" id="plus-sheet-logout">
             <span class="plus-sheet-item-gauche">

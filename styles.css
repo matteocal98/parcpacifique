@@ -5541,8 +5541,16 @@
   .support-pastille{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:8px;border-radius:var(--r-pill);background:var(--gold);color:var(--ink);font-size:11px;font-weight:800;line-height:1;flex:0 0 auto;}
   .support-pastille[hidden]{display:none;}
   .support-liste-nouveau{display:inline-block;margin-right:6px;padding:1px 7px;vertical-align:1px;border-radius:var(--r-pill);background:var(--gold);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;}
-  html[data-support-nonlu] #open-plus .tab-icon,html[data-support-nonlu] .nav-item[data-nav="account"] .nav-ico,html[data-support-nonlu] .nav-item[data-nav="reminders"] .nav-ico{position:relative;}
-  html[data-support-nonlu] #open-plus .tab-icon::after,html[data-support-nonlu] .nav-item[data-nav="account"] .nav-ico::after,html[data-support-nonlu] .nav-item[data-nav="reminders"] .nav-ico::after{content:'';position:absolute;top:-2px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--surface);}
+  html[data-support-nonlu] #open-plus .tab-icon{position:relative;}
+  html[data-support-nonlu] #open-plus .tab-icon::after{content:'';position:absolute;top:-2px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--surface);}
+  /* Rubrique « Aide & support » : compteur dans le menu de gauche, icône « ? » dans l'en-tête du téléphone, page de tickets. */
+  .sidebar .nav-item .support-pastille{margin-left:auto;}
+  .bm-aide{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;border-radius:50%;background:var(--surface-soft);color:var(--ink);border:none;cursor:pointer;}
+  .bm-aide svg{display:block;width:22px;height:22px;}
+  .bm-aide .support-pastille{position:absolute;top:-3px;right:-3px;margin:0;min-width:18px;height:18px;font-size:10px;box-shadow:0 0 0 2px var(--surface);}
+  .support-page .support-liste{max-height:none;margin-top:14px;}
+  .support-page .support-liste-ligne{border:none;}
+  .support-page .ui-puces{margin-top:16px;}
   .support-statut{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);font-size:11px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
   .support-statut .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
   .support-statut.is-ouvert{background:var(--voile-ambre);color:#8a4a0e;}

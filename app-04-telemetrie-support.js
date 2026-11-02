@@ -1161,13 +1161,8 @@ try {
 
 // Ouvre DIRECTEMENT un ticket (toucher la notification « Réponse du support »).
 async function ouvrirSupportTicket(ticketId) {
-  document.querySelectorAll('.overlay.support-modal').forEach((o) => o.remove());
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay support-modal';
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-  const { data: sessionCourante } = await sb.auth.getUser();
-  await afficherFilTicket(overlay, sessionCourante?.user?.id || null, ticketId);
+  if (UI.view !== 'support') goTo('support');
+  await ouvrirTicketDepuisPage(ticketId);
 }
 
 async function openSupportModal() {
@@ -1178,6 +1173,49 @@ async function openSupportModal() {
   const { data: sessionCourante } = await sb.auth.getUser();
   const moi = sessionCourante?.user?.id || null;
   await afficherListeTickets(overlay, moi);
+}
+
+// Les tickets de la société avec, pour chacun, le sous-titre de sa ligne (machine · dernier message) : partagés par la FENÊTRE et par la PAGE « Aide & support ».
+async function chargerTicketsSupport() {
+  const { data: tickets, error } = await sb
+    .from('support_tickets')
+    .select('id, subject, status, machine_id, created_at')
+    .eq('company_id', UI.companyId)
+    .order('created_at', { ascending: false });
+  if (error) return { erreur: true, tickets: [], sousTitres: {} };
+  if (!tickets || !tickets.length) return { tickets: [], sousTitres: {} };
+  // Dernier message par ticket, en un seul aller-retour (jamais une requête
+  // par ticket) — sert de sous-titre réel (« Dernier message il y a… »),
+  // avec repli sur la date d'ouverture si le ticket n'a encore aucune
+  // réponse (juste créé, un seul message initial pas encore chargé ici).
+  await chargerSupportNonLus();
+  const { data: dernierMessages } = await sb
+    .from('support_ticket_messages')
+    .select('ticket_id, created_at')
+    .in('ticket_id', tickets.map((t) => t.id))
+    .order('created_at', { ascending: false });
+  const dernierParTicket = {};
+  (dernierMessages || []).forEach((m) => { if (!dernierParTicket[m.ticket_id]) dernierParTicket[m.ticket_id] = m.created_at; });
+  const sousTitres = {};
+  tickets.forEach((t) => {
+    const m = machineDuTicket(t.machine_id);
+    sousTitres[t.id] = [libelleMachineCourt(m), tR('Dernier message {quand}', { quand: ilYaSupport(dernierParTicket[t.id] || t.created_at) })].filter(Boolean).join(' · ');
+  });
+  return { tickets, sousTitres };
+}
+
+function ligneTicketSupportHtml(t, sousTitre) {
+  const nouveau = ((UI.supportNonLus && UI.supportNonLus.parTicket) || {})[t.id] ? `<span class="support-liste-nouveau">${trad('Nouveau')}</span>` : '';
+  return `<button type="button" class="support-liste-ligne" data-id="${esc(t.id)}">
+      <span class="support-liste-corps">
+        <span class="support-liste-titre-ligne">
+          <span class="support-liste-sujet">${esc(t.subject)}</span>
+          <span class="support-liste-ref">${refTicket(t.id)}</span>
+        </span>
+        <span class="support-liste-sub">${nouveau}${esc(sousTitre)}</span>
+      </span>
+      ${statutSupportHtml(t.status)}
+    </button>`;
 }
 
 async function afficherListeTickets(overlay, moi) {
@@ -1196,51 +1234,86 @@ async function afficherListeTickets(overlay, moi) {
   overlay.querySelector('#support-fermer-x').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#support-nouveau').addEventListener('click', () => afficherNouveauTicket(overlay, moi));
 
-  const { data: tickets, error } = await sb
-    .from('support_tickets')
-    .select('id, subject, status, machine_id, created_at')
-    .eq('company_id', UI.companyId)
-    .order('created_at', { ascending: false });
+  const r = await chargerTicketsSupport();
   const zone = overlay.querySelector('#support-liste');
   if (!zone) return;
-  if (error) {
+  if (r.erreur) {
     zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger tes demandes pour le moment.')}</div>`;
     return;
   }
-  if (!tickets || !tickets.length) {
+  if (!r.tickets.length) {
     zone.innerHTML = `<div class="ui-aide">${trad('Aucune demande pour l\'instant.')}</div>`;
     return;
   }
-  // Dernier message par ticket, en un seul aller-retour (jamais une requête
-  // par ticket) — sert de sous-titre réel (« Dernier message il y a… »),
-  // avec repli sur la date d'ouverture si le ticket n'a encore aucune
-  // réponse (juste créé, un seul message initial pas encore chargé ici).
-  await chargerSupportNonLus();
-  const { data: dernierMessages } = await sb
-    .from('support_ticket_messages')
-    .select('ticket_id, created_at')
-    .in('ticket_id', tickets.map((t) => t.id))
-    .order('created_at', { ascending: false });
-  const dernierParTicket = {};
-  (dernierMessages || []).forEach((m) => { if (!dernierParTicket[m.ticket_id]) dernierParTicket[m.ticket_id] = m.created_at; });
-
-  zone.innerHTML = tickets.map((t) => {
-    const m = machineDuTicket(t.machine_id);
-    const sousTitre = [libelleMachineCourt(m), tR('Dernier message {quand}', { quand: ilYaSupport(dernierParTicket[t.id] || t.created_at) })].filter(Boolean).join(' · ');
-    return `<button type="button" class="support-liste-ligne" data-id="${esc(t.id)}">
-      <span class="support-liste-corps">
-        <span class="support-liste-titre-ligne">
-          <span class="support-liste-sujet">${esc(t.subject)}</span>
-          <span class="support-liste-ref">${refTicket(t.id)}</span>
-        </span>
-        <span class="support-liste-sub">${((UI.supportNonLus && UI.supportNonLus.parTicket) || {})[t.id] ? `<span class="support-liste-nouveau">${trad('Nouveau')}</span>` : ''}${esc(sousTitre)}</span>
-      </span>
-      ${statutSupportHtml(t.status)}
-    </button>`;
-  }).join('');
+  zone.innerHTML = r.tickets.map((t) => ligneTicketSupportHtml(t, r.sousTitres[t.id])).join('');
   zone.querySelectorAll('.support-liste-ligne').forEach((btn) => {
     btn.addEventListener('click', () => afficherFilTicket(overlay, moi, btn.dataset.id));
   });
+}
+
+// ── Page « Aide & support » (rubrique du menu de gauche) ───────────────────────────────────────────────────────────────────────────────────────
+// Les tickets s'y gèrent : liste filtrée (ouverts / résolus / tous), « Nouveau ticket », réponses. Un ticket s'ouvre dans la même fenêtre qu'avant ; en la fermant on
+// retombe sur la page, dont la liste se rafraîchit toute seule (voir l'observateur plus bas).
+let supportFiltre = 'ouverts';
+// Un ticket « résolu » qui vient de recevoir une réponse reste visible sous « Ouverts » : la réponse ne doit jamais se cacher derrière un filtre.
+const nonLuSupport = (id) => !!((UI.supportNonLus && UI.supportNonLus.parTicket) || {})[id];
+const ETATS_FILTRE_SUPPORT = { ouverts: (t) => t.status !== 'resolu' || nonLuSupport(t.id), resolus: (t) => t.status === 'resolu', tous: () => true };
+async function rechargerPageSupport() {
+  if (!document.getElementById('support-page-liste')) return;
+  const r = await chargerTicketsSupport();
+  if (!document.getElementById('support-page-liste')) return;   // la page a changé pendant le chargement
+  UI.supportTickets = r;
+  dessinerPageSupport();
+}
+function dessinerPageSupport() {
+  const zone = document.getElementById('support-page-liste');
+  const filtres = document.getElementById('support-page-filtres');
+  const r = UI.supportTickets;
+  if (!zone || !filtres || !r) return;
+  if (r.erreur) { zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger tes demandes pour le moment.')}</div>`; filtres.innerHTML = ''; return; }
+  const libelles = { ouverts: trad('Ouverts'), resolus: trad('Résolus'), tous: trad('Tous') };
+  filtres.innerHTML = Object.keys(ETATS_FILTRE_SUPPORT).map((cle) => `<button type="button" class="ui-puce${supportFiltre === cle ? ' is-actif' : ''}" data-filtre="${cle}" aria-pressed="${supportFiltre === cle ? 'true' : 'false'}"><span>${esc(libelles[cle])}</span><span class="ui-compte">${r.tickets.filter(ETATS_FILTRE_SUPPORT[cle]).length}</span></button>`).join('');
+  filtres.querySelectorAll('[data-filtre]').forEach((b) => b.addEventListener('click', () => { supportFiltre = b.dataset.filtre; dessinerPageSupport(); }));
+  const visibles = r.tickets.filter(ETATS_FILTRE_SUPPORT[supportFiltre]);
+  zone.innerHTML = visibles.length
+    ? visibles.map((t) => ligneTicketSupportHtml(t, r.sousTitres[t.id])).join('')
+    : `<div class="ui-aide">${r.tickets.length ? trad('Aucune demande dans ce filtre.') : trad('Aucune demande pour l\'instant.')}</div>`;
+  zone.querySelectorAll('.support-liste-ligne').forEach((btn) => btn.addEventListener('click', () => ouvrirTicketDepuisPage(btn.dataset.id)));
+}
+async function creerFenetreSupport() {
+  document.querySelectorAll('.overlay.support-modal').forEach((o) => o.remove());
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay support-modal';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const { data: sessionCourante } = await sb.auth.getUser();
+  return { overlay, moi: sessionCourante?.user?.id || null };
+}
+async function ouvrirTicketDepuisPage(ticketId) {
+  const { overlay, moi } = await creerFenetreSupport();
+  await afficherFilTicket(overlay, moi, ticketId);
+}
+async function nouveauTicketDepuisPage() {
+  const { overlay, moi } = await creerFenetreSupport();
+  afficherNouveauTicket(overlay, moi);
+}
+function monterPageSupport() {
+  supportFiltre = 'ouverts';   // la page s'ouvre toujours sur les demandes en cours
+  document.getElementById('support-page-nouveau')?.addEventListener('click', nouveauTicketDepuisPage);
+  // Au retour sur la page, la liste du dernier passage s'affiche tout de suite, puis se rafraîchit.
+  if (UI.supportTickets) dessinerPageSupport();
+  rechargerPageSupport();
+}
+// « Retour » d'un ticket ou « Annuler » d'un nouveau ticket : depuis la PAGE on ferme la fenêtre ; depuis l'ancienne fenêtre-liste on y revient.
+function retourSupport(overlay, moi) {
+  if (document.getElementById('support-page-liste')) overlay.remove();
+  else afficherListeTickets(overlay, moi);
+}
+// Quelle que soit la façon de fermer la fenêtre (croix, fond, « Retour », croix automatique du téléphone), la liste de la page se met à jour.
+if (typeof MutationObserver !== 'undefined') {
+  new MutationObserver((muts) => muts.forEach((m) => m.removedNodes.forEach((n) => {
+    if (n.nodeType === 1 && n.classList && n.classList.contains('support-modal')) rechargerPageSupport();
+  }))).observe(document.body, { childList: true });
 }
 
 // Sous-titre réel d'une machine dans le sélecteur (jamais une donnée
@@ -1364,7 +1437,7 @@ function afficherNouveauTicket(overlay, moi) {
     </div>
   </div>`;
   overlay.querySelector('#support-fermer-x').addEventListener('click', () => overlay.remove());
-  overlay.querySelector('#support-annuler').addEventListener('click', () => afficherListeTickets(overlay, moi));
+  overlay.querySelector('#support-annuler').addEventListener('click', () => retourSupport(overlay, moi));
   overlay.querySelector('#support-machine-trigger')?.addEventListener('click', () => {
     ouvrirSelecteurMachine(machineChoisieId, (id) => {
       machineChoisieId = id;
@@ -1444,8 +1517,8 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       </div>
     </form>
   </div>`;
-  overlay.querySelector('#support-retour').addEventListener('click', () => afficherListeTickets(overlay, moi));
-  overlay.querySelector('#support-retour-bas').addEventListener('click', () => afficherListeTickets(overlay, moi));
+  overlay.querySelector('#support-retour').addEventListener('click', () => retourSupport(overlay, moi));
+  overlay.querySelector('#support-retour-bas').addEventListener('click', () => retourSupport(overlay, moi));
 
   const { data: messages, error } = await sb
     .from('support_ticket_messages')

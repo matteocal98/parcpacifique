@@ -48,6 +48,7 @@ const NAV_ITEMS = [
   { id: 'stock', label: trad('Stocks & SAV'), short: trad('Stocks'), icon: 'stock' },
   { id: 'stats', label: trad('Statistiques'), short: trad('Stats'), icon: 'graphique' },
   { id: 'telemetrie', label: trad('Télémétrie'), short: trad('Télémétrie'), icon: 'telemetrie' },
+  { id: 'support', label: trad('Aide & support'), short: trad('Aide'), icon: 'support' },
   { id: 'account', label: trad('Mon compte'), short: trad('Compte'), icon: 'compte' },
 ];
 // NAV_ITEMS est une constante évaluée une seule fois, AVANT que tcoActif()
@@ -104,6 +105,7 @@ const RUBRIQUES = [
   { id: 'planning', label: trad('Planning'), short: trad('Planning'), icon: 'agenda', vues: ['agenda', 'ordres'] },
   { id: 'stock', label: trad('Stock & achats'), short: trad('Stock'), icon: 'stock', vues: ['stock', 'tco'] },
   { id: 'stats', label: trad('Statistiques'), short: trad('Stats'), icon: 'graphique', vues: ['stats'] },
+  { id: 'support', label: trad('Aide & support'), short: trad('Aide'), icon: 'support', vues: ['support'] },
   { id: 'compte', label: trad('Compte'), short: trad('Compte'), icon: 'compte', vues: ['account', 'reminders'] },
 ];
 const LIBELLE_SOUS_VUE = () => ({
@@ -190,6 +192,8 @@ const NAV_ICONES = {
   // Ordres de travail : une planchette à pince avec une coche (tâche à faire puis faite).
   ordres: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m8.8 13 2.2 2.2 4.4-4.6"/>',
   rappels: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21h4"/>',
+  // Aide & support : une bulle de discussion avec un point d'interrogation.
+  support: '<path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3.5 20.5l1.4-4.9A8.5 8.5 0 1 1 21 11.5z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.6 2.2c-.8.5-1.2 1-1.2 1.9"/><path d="M12 16.7h.01"/>',
   // Coûts & TCO : une pile de pièces (cylindre empilé), lecture immédiate
   // « argent » sans glyphe de police — même grille 24×24 / trait 2px que le
   // reste de NAV_ICONES.
@@ -530,7 +534,7 @@ function marqueSvg(idDegrade, couleurBarre) {
 function sidebarHtml() {
   return `
     <span class="wordmark"><span class="wm-logo" aria-hidden="true">${marqueSvg('keeva-barre', '#0E1333')}</span><span>KALEA</span></span>
-    ${rubriquesVisibles().map((r) => `<button type="button" class="nav-item${(rubriqueDe(UI.view) || {}).id === r.id ? ' is-active' : ''}" data-nav="${cibleRubrique(r)}"><span class="nav-ico" aria-hidden="true">${navIcone(r.icon)}</span>${esc(r.label)}</button>`).join('')}
+    ${rubriquesVisibles().map((r) => `<button type="button" class="nav-item${(rubriqueDe(UI.view) || {}).id === r.id ? ' is-active' : ''}" data-nav="${cibleRubrique(r)}"><span class="nav-ico" aria-hidden="true">${navIcone(r.icon)}</span>${esc(r.label)}${r.id === 'support' ? pastilleSupportHtml() : ''}</button>`).join('')}
     <div class="sidebar-foot">
       <div class="version-ligne"><span>${trad('Version')}</span><span>v${esc(versionAffichee())}</span></div>
       <button type="button" id="logout-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>${trad('Se déconnecter')}</span></button>
@@ -548,6 +552,7 @@ function barreMobileHtml() {
         <span class="bm-nom">KALEA</span>
         ${entree ? `<span class="bm-page">${esc(entree.short)}</span>` : ''}
       </span>
+      <button type="button" class="bm-aide" id="bm-aide" aria-label="${esc(trad('Aide & support'))}" title="${esc(trad('Aide & support'))}">${navIcone('support')}${pastilleSupportHtml()}</button>
       <button type="button" class="bm-compte" id="bm-compte" aria-label="${trad('Mon compte')}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></button>
     </header>`;
 }
@@ -718,6 +723,7 @@ function wireShell() {
   document.getElementById('dash-add')?.addEventListener('click', handleAddMachine);
   document.getElementById('dash-compte')?.addEventListener('click', () => goTo('account'));
   document.getElementById('bm-compte')?.addEventListener('click', () => goTo('account'));
+  document.getElementById('bm-aide')?.addEventListener('click', () => goTo('support'));
 
   document.getElementById('open-plus')?.addEventListener('click', openPlusSheet);
   document.getElementById('logout-btn')?.addEventListener('click', doLogout);
