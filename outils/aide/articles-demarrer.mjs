@@ -115,7 +115,7 @@ export const ARTICLES_DEMARRER = [
       intro: `Si vous ne vous souvenez plus de votre mot de passe, KALEA vous envoie par e-mail un code à 6 chiffres. Avec ce code, vous choisissez un nouveau mot de passe, sans l'aide de personne.`,
       etapes: [
         { titre: `Demandez le code`, texte: `Sur l'écran de connexion, cliquez sur {{ui:Mot de passe oublié ?}}. La fenêtre {{ui:Mot de passe oublié}} s'ouvre.` },
-        { titre: `Indiquez votre adresse`, texte: `Tapez votre adresse dans {{ui:Email}} puis cliquez sur {{ui:Envoyer le lien}}. Malgré son nom, ce bouton envoie un code à 6 chiffres, pas un lien.` },
+        { titre: `Indiquez votre adresse`, texte: `Tapez votre adresse dans {{ui:Email}} puis cliquez sur {{ui:Envoyer le code}} : KALEA vous envoie un code à 6 chiffres.` },
         { titre: `Relevez le code dans votre messagerie`, texte: `L'écran {{ui:Vérifie ton email}} confirme l'adresse à laquelle le code a été envoyé. Ouvrez votre messagerie et relevez le code le plus récent.` },
         { titre: `Saisissez le code et le nouveau mot de passe`, texte: `Tapez le code dans {{ui:Code reçu par e-mail}} et votre nouveau mot de passe dans {{ui:Nouveau mot de passe}} (six caractères au minimum). Le bouton {{ui:Afficher}} permet de le relire.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer le mot de passe}}. KALEA affiche {{ui:Mot de passe mis à jour}} et vous êtes connecté.` },
@@ -137,7 +137,7 @@ export const ARTICLES_DEMARRER = [
       intro: `If you no longer remember your password, KALEA sends you a 6-digit code by email. With this code, you choose a new password yourself, without anyone's help.`,
       etapes: [
         { titre: `Request the code`, texte: `On the sign-in screen, click {{ui:Mot de passe oublié ?}}. The {{ui:Mot de passe oublié}} window opens.` },
-        { titre: `Enter your address`, texte: `Type your address in {{ui:Email}} then click {{ui:Envoyer le lien}}. Despite its name, this button sends a 6-digit code, not a link.` },
+        { titre: `Enter your address`, texte: `Type your address in {{ui:Email}} then click {{ui:Envoyer le code}}: KALEA sends you a 6-digit code.` },
         { titre: `Find the code in your mailbox`, texte: `The {{ui:Vérifie ton email}} screen confirms the address the code was sent to. Open your mailbox and find the most recent code.` },
         { titre: `Enter the code and the new password`, texte: `Type the code in {{ui:Code reçu par e-mail}} and your new password in {{ui:Nouveau mot de passe}} (at least six characters). The {{ui:Afficher}} button lets you read it back.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer le mot de passe}}. KALEA shows {{ui:Mot de passe mis à jour}} and you are signed in.` },

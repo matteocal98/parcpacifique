@@ -272,6 +272,7 @@ VIEWS.account = {
             <div class="modal" role="dialog" aria-modal="true" aria-labelledby="acc-equipe-ajout-titre">
               <div class="equipe-ajout-tete"><h2 id="acc-equipe-ajout-titre">${trad('Ajouter un membre')}</h2><button type="button" class="ui-btn ui-btn-pastille" data-equipe-fermer-ajout>${trad('Fermer')}</button></div>
               <div id="acc-equipe-creation" class="ui-section-corps"></div>
+              <div class="ui-aide" id="acc-equipe-ajout-msg" role="status" aria-live="polite"></div>
             <details id="acc-equipe-invitation-bloc" class="ui-groupe">
               <summary>${trad('Inviter par e-mail')}</summary>
               <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un membre d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
@@ -440,11 +441,14 @@ VIEWS.account = {
       const liste = racine.querySelector('#acc-equipe-liste');
       const zoneInvitation = racine.querySelector('#acc-equipe-invitation');
       const annonce = racine.querySelector('#acc-equipe-msg');
+      const annonceAjout = racine.querySelector('#acc-equipe-ajout-msg');
       if (!liste) return;
       const dire = (texte, estErreur) => {
-        if (!annonce) return;
-        annonce.textContent = texte;
-        annonce.className = estErreur ? 'ui-aide is-late' : 'ui-aide';
+        const classe = estErreur ? 'ui-aide is-late' : 'ui-aide';
+        if (annonce) { annonce.textContent = texte; annonce.className = classe; }
+        // L'ajout d'un membre se fait dans une FENÊTRE ouverte par-dessus la page : sans ce second emplacement, une erreur (« Indique le prénom ET le nom », plafond atteint…)
+        // s'écrivait en haut de la page, cachée derrière la fenêtre.
+        if (annonceAjout) { annonceAjout.textContent = texte; annonceAjout.className = classe; }
       };
 
       // ★ L'ÉTAT SERVEUR EST RELU À CHAQUE OUVERTURE DE CETTE CARTE. Le rôle et
@@ -763,7 +767,12 @@ VIEWS.account = {
 
       // Filtres par droit, recherche, et fenêtre d'ajout : mêmes principes — on écoute la ZONE, jamais un bouton qui sera réécrit.
       const ajout = racine.querySelector('#acc-equipe-ajout');
-      const ouvrirAjout = () => { if (ajout) ajout.hidden = false; };
+      const ouvrirAjout = () => {
+        if (!ajout) return;
+        const ancien = ajout.querySelector('#acc-equipe-ajout-msg');
+        if (ancien) ancien.textContent = '';   // pas de message resté d'une ouverture précédente
+        ajout.hidden = false;
+      };
       cabler(racine.querySelector('#acc-equipe-filtres'), '_equipeFiltresCables', 'button', (b) => {
         racine._equipeFiltre = b.getAttribute('data-equipe-filtre') || 'tous';
         racine._equipeOuvert = null;

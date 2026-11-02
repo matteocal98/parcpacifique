@@ -1038,7 +1038,7 @@ function openForgotPasswordModal() {
         <div class="hint" id="forgot-error"></div>
         <div class="modal-actions">
           <button type="button" class="secondary" id="forgot-cancel">${trad('Annuler')}</button>
-          <button type="submit" class="primary">${trad('Envoyer le lien')}</button>
+          <button type="submit" class="primary">${trad('Envoyer le code')}</button>
         </div>
       </form>
     </div>
@@ -1143,7 +1143,7 @@ function openForgotPasswordModal() {
     } catch (err) {
       errorEl.textContent = trad('Erreur :') + " " + err.message;
       submitBtn.disabled = false;
-      submitBtn.textContent = trad('Envoyer le lien');
+      submitBtn.textContent = trad('Envoyer le code');
     }
   });
 }
