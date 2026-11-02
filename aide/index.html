@@ -51,9 +51,10 @@
     /* Custom Gradients */
     /* Accroches tournantes — effet « tourbillon » (swirl) : chaque lettre du titre, puis chaque mot du sous-titre, bascule en 3D autour de l'axe horizontal, l'un après l'autre
        (même mouvement que le titre animé d'Elementor de type « swirl » : 0,4 s, arrivée à 90°, léger dépassement à -10°, sortie de l'autre côté). Le découpage est fait par accroches.js.
-       Les accroches sont empilées dans la même cellule de grille : la hauteur est celle de la plus longue, la page ne saute jamais. */
-    .accroches { display: grid; }
-    .accroche { grid-area: 1 / 1; visibility: hidden; }
+       Les accroches sont empilées dans la même cellule de grille. Sans JavaScript, la hauteur est celle de la plus longue ; avec, accroches.js règle la hauteur du bloc sur l'accroche affichée
+       (elle grandit tout de suite, rétrécit une fois la sortie terminée) : plus de vide sous les textes courts. */
+    .accroches { display: grid; transition: height .45s ease; }
+    .accroche { grid-area: 1 / 1; align-self: start; visibility: hidden; }
     .accroche.is-actif, .accroche.is-sortant { visibility: visible; }
     .accroche .mot { display: inline-block; white-space: nowrap; }
     .accroche.lettrise .lettre, .accroche.lettrise .mot-anim { display: inline-block; backface-visibility: hidden; opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); }
@@ -72,7 +73,7 @@
     .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
     .accroches-pilote .accroche-pause:hover { opacity: 1; }
     .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
-    @media (prefers-reduced-motion: reduce) { .accroche.lettrise .entre-anim, .accroche.lettrise .sort-anim { animation: none; } }
+    @media (prefers-reduced-motion: reduce) { .accroches { transition: none; } .accroche.lettrise .entre-anim, .accroche.lettrise .sort-anim { animation: none; } }
     .brand-gradient-text {
       background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
       -webkit-background-clip: text;
