@@ -51,6 +51,19 @@
     html[data-lang="en"] .lang-fr { display: none !important; }
 
     /* Custom Gradients */
+    /* Accroches tournantes : toutes empilées dans la même cellule, donc la hauteur est celle de la plus longue (aucun saut de page quand le texte change). */
+    .accroches { display: grid; }
+    .accroche { grid-area: 1 / 1; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .55s ease, transform .55s ease, visibility 0s linear .55s; }
+    .accroche.is-actif { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+    .accroches-pilote { display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px; }
+    .accroches-pilote button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 9999px; }
+    .accroches-pilote button:focus-visible { outline: 2px solid #236FE0; outline-offset: 2px; }
+    .accroches-pilote .accroche-point { display: block; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; opacity: .25; transition: opacity .2s, transform .2s; }
+    .accroches-pilote button[aria-current="true"] .accroche-point { opacity: .9; transform: scale(1.25); }
+    .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
+    .accroches-pilote .accroche-pause:hover { opacity: 1; }
+    .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
+    @media (prefers-reduced-motion: reduce) { .accroche { transition: none; transform: none; } }
     .brand-gradient-text {
       background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
       -webkit-background-clip: text;
@@ -170,16 +183,31 @@
 <span class="lang-fr">LA JUSTE MESURE DE VOTRE PARC</span>
 
 </p>
-<!-- Main Heading with Brand Gradient -->
-<h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]">
-<span class="lang-fr">Logiciel de maintenance pour engins et véhicules : <span class="brand-gradient-text">entretiens, pièces et coûts sous contrôle</span></span>
-
-</h1>
-<!-- Hero Subtitle -->
-<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">
-<span class="lang-fr">Confiez vos manuels constructeur à KALEA et laissez l'algorithme générer vos plannings. Avec des compteurs qui se mettent à jour tout seuls et des checklists d'intervention précises, vos équipes savent toujours quoi faire, au bon moment.</span>
-
-</p>
+<!-- Accroches tournantes (outils : accroches.js). La 1re est le <h1> écrit dans la page : c'est ce que lisent les moteurs de recherche et les visiteurs sans JavaScript.
+     Les autres sont dans la page mais masquées ; elles défilent toutes les quelques secondes, avec pause (survol, clavier, bouton) et sans défilement si l'appareil demande moins d'animations. -->
+<div class="accroches w-full" data-accroches>
+<div class="accroche is-actif flex flex-col items-start space-y-6" data-accroche>
+<h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre><span>Anticipez les pannes</span> <span class="brand-gradient-text">avant qu'elles ne coûtent cher.</span></h1>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Le logiciel de maintenance qui automatise le suivi de votre parc (engins &amp; véhicules). Importez vos manuels, KALEA génère vos plannings et alerte vos équipes au bon moment. Entretiens, pièces et TCO sous contrôle, selon votre offre.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre><span>Ne gérez plus la maintenance,</span> <span class="brand-gradient-text">pilotez-la.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Oubliez les fichiers Excel. KALEA lit les manuels constructeurs à votre place et crée automatiquement vos plannings d'entretien. Vos coûts sont maîtrisés.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre><span>Ne subissez plus les coûts de votre parc machines.</span> <span class="brand-gradient-text">Maîtrisez son TCO.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Centralisez l'historique, les pièces et les entretiens de vos engins. KALEA automatise votre maintenance pour prolonger la durée de vie de vos équipements et fiabiliser votre rentabilité. Pièces et TCO : selon votre offre.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre><span>Vos plans de maintenance</span> <span class="brand-gradient-text">générés en quelques secondes.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Fini le paramétrage interminable. Déposez simplement vos manuels constructeurs, notre algorithme extrait les préconisations et déploie instantanément vos plannings d'intervention.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre><span>La bonne intervention. La bonne pièce.</span> <span class="brand-gradient-text">Au bon moment.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Le carnet d'entretien digital qui pilote votre atelier. KALEA alerte vos équipes à l'approche des échéances avec des checklists précises, pour un parc de véhicules sous contrôle.</p>
+</div>
+</div>
+<div class="accroches-pilote" data-accroches-pilote role="group" aria-label="Accroches"></div>
 <!-- CTA Buttons -->
 <div class="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
 <a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-ink hover:bg-slate-900 text-white font-bold text-base shadow-sm hover:shadow transition-all group" href="./app.html?inscription=1">
@@ -1641,6 +1669,7 @@
   </script>
 <script src="./simulateur-tarifs.js"></script>
 <script src="./videos-accueil.js"></script>
+<script src="./accroches.js" defer></script>
 <script src="./selecteur-langue.js"></script>
 <script src="./bouton-theme.js"></script>
 <script src="./mesure.js"></script>

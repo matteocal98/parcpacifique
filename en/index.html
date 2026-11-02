@@ -51,6 +51,19 @@
     html[data-lang="en"] .lang-fr { display: none !important; }
 
     /* Custom Gradients */
+    /* Accroches tournantes : toutes empilées dans la même cellule, donc la hauteur est celle de la plus longue (aucun saut de page quand le texte change). */
+    .accroches { display: grid; }
+    .accroche { grid-area: 1 / 1; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .55s ease, transform .55s ease, visibility 0s linear .55s; }
+    .accroche.is-actif { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+    .accroches-pilote { display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px; }
+    .accroches-pilote button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 9999px; }
+    .accroches-pilote button:focus-visible { outline: 2px solid #236FE0; outline-offset: 2px; }
+    .accroches-pilote .accroche-point { display: block; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; opacity: .25; transition: opacity .2s, transform .2s; }
+    .accroches-pilote button[aria-current="true"] .accroche-point { opacity: .9; transform: scale(1.25); }
+    .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
+    .accroches-pilote .accroche-pause:hover { opacity: 1; }
+    .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
+    @media (prefers-reduced-motion: reduce) { .accroche { transition: none; transform: none; } }
     .brand-gradient-text {
       background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
       -webkit-background-clip: text;
@@ -170,16 +183,31 @@
 <span class="lang-fr">THE RIGHT MEASURE OF YOUR FLEET</span>
 
 </p>
-<!-- Main Heading with Brand Gradient -->
-<h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]">
-<span class="lang-fr">Maintenance software for equipment and vehicles: <span class="brand-gradient-text">servicing, parts and costs under control</span></span>
-
-</h1>
-<!-- Hero Subtitle -->
-<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">
-<span class="lang-fr">Hand your manufacturer manuals to KALEA and let the algorithm build your schedules. With counters that update themselves and precise job checklists, your teams always know what to do, at the right time.</span>
-
-</p>
+<!-- Accroches tournantes (outils : accroches.js). La 1re est le <h1> écrit dans la page : c'est ce que lisent les moteurs de recherche et les visiteurs sans JavaScript.
+     Les autres sont dans la page mais masquées ; elles défilent toutes les quelques secondes, avec pause (survol, clavier, bouton) et sans défilement si l'appareil demande moins d'animations. -->
+<div class="accroches w-full" data-accroches="">
+<div class="accroche is-actif flex flex-col items-start space-y-6" data-accroche="">
+<h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre=""><span>Anticipate breakdowns</span> <span class="brand-gradient-text">before they get expensive.</span></h1>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">The maintenance software that automates the tracking of your fleet (equipment &amp; vehicles). Import your manuals, KALEA builds your schedules and alerts your teams at the right time. Maintenance, parts and TCO under control, depending on your plan.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche="" aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre=""><span>Stop managing maintenance,</span> <span class="brand-gradient-text">drive it.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Forget the spreadsheets. KALEA reads the manufacturer manuals for you and automatically builds your maintenance schedules. Your costs are kept in check.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche="" aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre=""><span>Stop putting up with your fleet's costs.</span> <span class="brand-gradient-text">Take control of its TCO.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">Centralise the history, parts and maintenance of your equipment. KALEA automates your maintenance to extend the life of your equipment and make your profitability more reliable. Parts and TCO: depending on your plan.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche="" aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre=""><span>Your maintenance plans</span> <span class="brand-gradient-text">generated in a few seconds.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">No more endless setup. Simply upload your manufacturer manuals, our algorithm extracts the recommendations and instantly sets up your service schedules.</p>
+</div>
+<div class="accroche flex flex-col items-start space-y-6" data-accroche="" aria-hidden="true">
+<p class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-brand-ink tracking-tight leading-[1.12]" data-titre=""><span>The right intervention. The right part.</span> <span class="brand-gradient-text">At the right time.</span></p>
+<p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-normal">The digital maintenance log that runs your workshop. KALEA alerts your teams as due dates approach, with precise checklists, for a fleet that stays under control.</p>
+</div>
+</div>
+<div class="accroches-pilote" data-accroches-pilote="" role="group" aria-label="Accroches"></div>
 <!-- CTA Buttons -->
 <div class="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
 <a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-ink hover:bg-slate-900 text-white font-bold text-base shadow-sm hover:shadow transition-all group" href="/app.html?inscription=1">
@@ -1641,6 +1669,7 @@
   </script>
 <script src="/simulateur-tarifs.js"></script>
 <script src="/videos-accueil.js"></script>
+<script src="/accroches.js" defer=""></script>
 <script src="/selecteur-langue.js"></script>
 <script src="/bouton-theme.js"></script>
 <script src="/mesure.js"></script>

@@ -19,6 +19,22 @@
   var CLE = 'parcpacific.langue';
 
   var TEXTES = [
+    // Accroches tournantes du haut de page (outils : accroches.js)
+    [`Anticipez les pannes`, `Anticipate breakdowns`],
+    [`avant qu'elles ne coûtent cher.`, `before they get expensive.`],
+    [`Le logiciel de maintenance qui automatise le suivi de votre parc (engins & véhicules). Importez vos manuels, KALEA génère vos plannings et alerte vos équipes au bon moment. Entretiens, pièces et TCO sous contrôle, selon votre offre.`, `The maintenance software that automates the tracking of your fleet (equipment & vehicles). Import your manuals, KALEA builds your schedules and alerts your teams at the right time. Maintenance, parts and TCO under control, depending on your plan.`],
+    [`Ne gérez plus la maintenance,`, `Stop managing maintenance,`],
+    [`pilotez-la.`, `drive it.`],
+    [`Oubliez les fichiers Excel. KALEA lit les manuels constructeurs à votre place et crée automatiquement vos plannings d'entretien. Vos coûts sont maîtrisés.`, `Forget the spreadsheets. KALEA reads the manufacturer manuals for you and automatically builds your maintenance schedules. Your costs are kept in check.`],
+    [`Ne subissez plus les coûts de votre parc machines.`, `Stop putting up with your fleet's costs.`],
+    [`Maîtrisez son TCO.`, `Take control of its TCO.`],
+    [`Centralisez l'historique, les pièces et les entretiens de vos engins. KALEA automatise votre maintenance pour prolonger la durée de vie de vos équipements et fiabiliser votre rentabilité. Pièces et TCO : selon votre offre.`, `Centralise the history, parts and maintenance of your equipment. KALEA automates your maintenance to extend the life of your equipment and make your profitability more reliable. Parts and TCO: depending on your plan.`],
+    [`Vos plans de maintenance`, `Your maintenance plans`],
+    [`générés en quelques secondes.`, `generated in a few seconds.`],
+    [`Fini le paramétrage interminable. Déposez simplement vos manuels constructeurs, notre algorithme extrait les préconisations et déploie instantanément vos plannings d'intervention.`, `No more endless setup. Simply upload your manufacturer manuals, our algorithm extracts the recommendations and instantly sets up your service schedules.`],
+    [`La bonne intervention. La bonne pièce.`, `The right intervention. The right part.`],
+    [`Au bon moment.`, `At the right time.`],
+    [`Le carnet d'entretien digital qui pilote votre atelier. KALEA alerte vos équipes à l'approche des échéances avec des checklists précises, pour un parc de véhicules sous contrôle.`, `The digital maintenance log that runs your workshop. KALEA alerts your teams as due dates approach, with precise checklists, for a fleet that stays under control.`],
     // Navigation
     [`Fonctionnalités`, `Features`],
     [`Comment ça marche`, `How it works`],
