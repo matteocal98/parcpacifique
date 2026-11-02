@@ -64,6 +64,12 @@ VIEWS.support = {
     return `
       <div class="ui-page support-page">
         <section class="ui-section">
+          ${teteSectionKit('aideCercle', trad('Centre d\'aide'), trad('Des procédures pas à pas, avec des captures d\'écran : modifier une machine, le carnet d\'entretien, les compteurs…'))}
+          <div class="ui-section-corps">
+            <div><a class="ui-btn ui-btn-teinte" id="support-page-aide" href="${esc(urlCentreAide())}" target="_blank" rel="noopener"><span>${trad('Ouvrir le centre d\'aide')}</span></a></div>
+          </div>
+        </section>
+        <section class="ui-section">
           ${teteSectionKit('message', trad('Mes demandes'), trad('Les réponses du support arrivent ici, avec une notification sur ton téléphone.'))}
           <div class="ui-section-corps">
             <div><button type="button" class="ui-btn ui-btn-plein" id="support-page-nouveau">${picto('croix')}<span>${trad('Nouveau ticket')}</span></button></div>

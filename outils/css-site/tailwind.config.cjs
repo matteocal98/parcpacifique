@@ -5,7 +5,7 @@
 module.exports = {
   darkMode: 'class',
   content: [
-    '../../*.html', '../../en/**/*.html',
+    '../../*.html', '../../aide/**/*.html', '../../en/**/*.html',
     '../../videos-accueil.js', '../../simulateur-tarifs.js', '../../selecteur-langue.js',
   ],
   theme: {

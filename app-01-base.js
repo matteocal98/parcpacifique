@@ -1580,7 +1580,7 @@ const TYPE_MACHINE = trad('machine');
 const TYPE_VEHICULE = 'vehicle';
 const IDENTIFIANT_LIBELLE = {
   [TYPE_MACHINE]: trad('N° de série'),
-  [TYPE_VEHICULE]: "Plaque d'immatriculation",
+  [TYPE_VEHICULE]: trad("Plaque d'immatriculation"),   // via trad() : sans cela, l'interface anglaise gardait ce libellé en français (constaté en préparant l'aide, 2026-11-02)
 };
 const IDENTIFIANT_PLACEHOLDER = {
   [TYPE_MACHINE]: 'Ex. 123456789',

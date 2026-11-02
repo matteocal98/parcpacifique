@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Edit a machine and its serial number | KALEA Help</title>
+<!-- SEO:DEBUT (généré par outils/generer-pages-publiques.mjs : ne pas modifier à la main) -->
+<meta name="description" content="Change a machine's name, make, model, year or serial number in KALEA: three steps, with screenshots.">
+<link rel="canonical" href="https://kalea.pro/en/help/edit-a-machine.html">
+<link rel="alternate" hreflang="en" href="https://kalea.pro/en/help/edit-a-machine.html">
+<link rel="alternate" hreflang="fr" href="https://kalea.pro/aide/modifier-une-machine.html">
+<link rel="alternate" hreflang="x-default" href="https://kalea.pro/aide/modifier-une-machine.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0E1333">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icones/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KALEA">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Edit a machine and its serial number | KALEA Help">
+<meta property="og:description" content="Change a machine's name, make, model, year or serial number in KALEA: three steps, with screenshots.">
+<meta property="og:url" content="https://kalea.pro/en/help/edit-a-machine.html">
+<meta property="og:image" content="https://kalea.pro/partage-og-en.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KALEA: fleet maintenance tracking, from the manufacturer manual to the maintenance plan">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Edit a machine and its serial number | KALEA Help">
+<meta name="twitter:description" content="Change a machine's name, make, model, year or serial number in KALEA: three steps, with screenshots.">
+<meta name="twitter:image" content="https://kalea.pro/partage-og-en.jpg">
+<!-- SEO:FIN -->
+<link rel="preload" href="/polices/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/polices/polices-site.css">
+<style data-purpose="custom-typography-and-helpers">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFBFC;
+      color: #0E1333;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Bilingual Switcher Classes */
+    html[data-lang="fr"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-fr { display: none !important; }
+
+    /* Custom Gradients */
+    .brand-gradient-text {
+      background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-glow {
+      background: radial-gradient(circle at 80% 20%, rgba(36, 181, 168, 0.08) 0%, rgba(35, 111, 224, 0.04) 40%, transparent 70%);
+    }
+
+
+    /* Accordion transitions */
+    details > summary svg {
+      transition: transform 0.25s ease-in-out;
+    }
+    details[open] > summary svg {
+      transform: rotate(180deg);
+    }
+  
+    /* Impression du tableau comparatif : seule la section « comparatif-offres » sort, en paysage. */
+    @media print {
+      @page { size: A4 landscape; margin: 10mm; }
+      body > *:not(main), main > *:not(#comparatif-offres) { display: none !important; }
+      body { display: block !important; min-height: 0 !important; background: #fff !important; }
+      #comparatif-offres { background: #fff; padding: 0; }
+      #comparatif-offres > div { max-width: 1300px; margin: 0 auto; padding: 0; }
+      #comparatif-offres tr { break-inside: avoid; }
+      #comparatif-offres [onclick], #comparatif-offres a[download], #comparatif-offres tfoot { display: none !important; }
+      #comparatif-offres #simulateur { display: none !important; }
+      #comparatif-offres > div > div { display: block !important; }
+    }
+  </style>
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/site-sombre.css">
+<script src="/theme.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","@id":"https://kalea.pro/en/help/edit-a-machine.html#page","url":"https://kalea.pro/en/help/edit-a-machine.html","name":"Edit a machine and its serial number | KALEA Help","description":"Change a machine's name, make, model, year or serial number in KALEA: three steps, with screenshots.","inLanguage":"en","datePublished":"2026-11-02","dateModified":"2026-11-02","isPartOf":{"@id":"https://kalea.pro/#site"},"publisher":{"@id":"https://kalea.pro/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://kalea.pro/en/"},{"@type":"ListItem","position":2,"name":"Help","item":"https://kalea.pro/en/help/"},{"@type":"ListItem","position":3,"name":"Edit a machine","item":"https://kalea.pro/en/help/edit-a-machine.html"}]}]}</script>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
+<svg aria-hidden="true" height="0" style="position:absolute" width="0">
+<defs>
+<symbol id="picto-keeva" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#FFFFFF" stroke="#6864DF" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#18183A"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#6864DF"></circle></symbol>
+<symbol id="picto-keeva-nuit" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#18183A" stroke="#8F8FCB" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#FFFFFF"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#8F8FCB"></circle></symbol>
+</defs>
+</svg>
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-borderMuted">
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Brand Logo -->
+<a aria-label="KALEA home" class="flex items-center gap-3 group" href="/en/"><div class="w-16 h-16 group-hover:scale-105 transition-transform"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-brand-ink">KALEA</span></a>
+<!-- Desktop Navigation Menu -->
+<nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+<a class="hover:text-brand-primary transition-colors" href="/en/#fonctionnalites">
+<span class="lang-fr">Features</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/en/#comment-ca-marche">
+<span class="lang-fr">How it works</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/en/#vos-donnees">
+<span class="lang-fr">Your data</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/en/#tarifs">
+<span class="lang-fr">Pricing</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/en/#simulateur">
+<span class="lang-fr">Simulator</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/en/#faq">
+<span class="lang-fr">FAQ</span>
+
+</a>
+</nav>
+<!-- Language Switcher & Action CTA -->
+<div class="flex items-center gap-4">
+<!-- LANGUE:DEBUT -->
+<div role="group" aria-label="Langue / Language" data-sans-traduction class="flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-200 bg-white p-0.5 ml-2 shrink-0">
+<a href="/plan-entretien-automatique.html" data-langue="fr" lang="fr" hreflang="fr" title="Français" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors text-slate-600 hover:text-brand-primary">FR</a>
+<a href="/en/automatic-maintenance-plan.html" data-langue="en" lang="en" hreflang="en" title="English" aria-current="true" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors bg-brand-ink text-white">EN</a>
+</div>
+<!-- LANGUE:FIN -->
+
+<a class="hidden sm:inline-block text-sm font-semibold text-slate-700 hover:text-brand-primary transition-colors px-2 py-1" href="/app.html">
+<span class="lang-fr">Log in</span>
+
+</a>
+<a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow-md" href="/app.html?inscription=1">
+<span class="lang-fr">Sign up</span>
+
+</a>
+</div>
+</div>
+</header>
+<main class="flex-1">
+<article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+<nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-6"><a href="/en/" class="hover:text-brand-primary">Home</a> <span aria-hidden="true">›</span> <a href="/en/help/" class="hover:text-brand-primary">Help</a> <span aria-hidden="true">›</span> <span>Edit a machine</span></nav>
+<h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">Edit a machine and its serial number</h1>
+<p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed [&_strong]:text-brand-ink">A name to fix, a serial number left blank at creation, a plate that changes: everything can be edited at any time, from the machine's card.</p>
+<ol class="mt-10 space-y-10"><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">1</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Step 1 : </span>Open the editor from the machine's card</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">In the menu, open <strong>“Machines”</strong>. On the machine's card, tap the cog-shaped icon: it is the <strong>“Edit the machine”</strong> button. You will also find it on the machine's page.</p><figure class="mt-4"><img src="/aide/img/modifier-machine/carte-en.webp" width="2320" height="272" alt="A machine card: the cog-shaped icon, marked with number 1, opens the editor." fetchpriority="high" decoding="async" class="w-full h-auto rounded-2xl border border-brand-borderMuted shadow-sm bg-white"></figure></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">2</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Step 2 : </span>Change the details</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">The <strong>“Edit a machine”</strong> window opens. Fix the name, make, model or year. The serial number is in the <strong>“Serial no.”</strong> field; for a vehicle, that field is called <strong>“Number plate”</strong>.</p><figure class="mt-4"><img src="/aide/img/modifier-machine/fenetre-en.webp" width="1848" height="1992" alt="The Edit a machine window: the Serial no. field is marked with number 1 and the Save changes button with number 2." loading="lazy" decoding="async" class="w-full h-auto rounded-2xl border border-brand-borderMuted shadow-sm bg-white"></figure></div></li><li class="flex gap-4"><span class="flex-none w-9 h-9 rounded-full bg-brand-ink text-white font-display font-bold flex items-center justify-center" aria-hidden="true">3</span><div class="min-w-0 flex-1"><h2 class="font-display font-bold text-xl text-brand-ink tracking-tight"><span class="sr-only">Step 3 : </span>Save</h2><p class="mt-2 text-slate-600 leading-relaxed [&_strong]:text-brand-ink [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline">Click <strong>“Save changes”</strong> to confirm: the new details replace the old ones.</p></div></li></ol>
+
+<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink"><h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Good to know</h2><ul class="mt-4 space-y-3 text-slate-600 leading-relaxed list-disc pl-5 marker:text-brand-teal"><li>The serial number can be edited at any time, not only at creation.</li><li>The meter (hours or kilometres) is not corrected in this window: see <a href="/en/help/correct-machine-meter.html">correct a machine's meter</a>.</li><li>If your plan does not cover the machine, KALEA says so and offers to change plan: the record stays readable but cannot be edited.</li><li>Depending on your access level, the edit icon may be missing from the card: it is not shown for the data-entry level or the purchasing level.</li></ul></section>
+<section class="mt-14 rounded-3xl bg-brand-ink text-white p-8 sm:p-10 [&_a]:underline [&_a]:font-semibold"><h2 class="font-display font-bold text-2xl tracking-tight">A question?</h2><p class="mt-2 text-slate-300 leading-relaxed">Can't find the answer? In the app, open <strong>“Help &amp; support”</strong> and write to us: the team replies in the same screen. You can also email <a href="mailto:support@kalea.pro">support@kalea.pro</a>.</p></section>
+<nav aria-label="Read next" class="mt-12"><h2 class="font-display font-bold text-lg text-brand-ink">Read next</h2><ul class="mt-3 space-y-2"><li><a class="font-semibold text-brand-primary hover:underline" href="/en/help/add-change-machine-photo.html">A machine's photo</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/en/help/upload-replace-maintenance-manual.html">The maintenance manual</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/en/help/correct-machine-meter.html">Correct the meter</a></li></ul></nav>
+</article>
+</main>
+<footer class="bg-brand-dark text-white border-t border-slate-800 pt-12 pb-8">
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800/80">
+<!-- Column 1: Brand details -->
+<div class="md:col-span-4 space-y-4">
+<div class="flex items-center gap-3"><div class="w-16 h-16"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva-nuit"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-white">KALEA</span></div>
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Maintenance tracking for machines and vehicles: plans built from manufacturer manuals, calendar- or counter-based due dates, reminders and parts list.</span>
+
+</p>
+<p class="text-[11px] text-slate-500 pt-2">
+<span class="lang-fr">Published by Matthieu COURTOIS, sole trader — New Caledonia.</span>
+
+</p>
+</div>
+<!-- Column 2: Produit -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">PRODUCT</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="/en/#fonctionnalites">Features</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/en/#vos-donnees">Your data</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/en/#tarifs">Pricing</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/en/#faq">FAQ</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/app.html">Log in</a></li>
+<!-- RESSOURCES:DEBUT -->
+<li class=""><a class="hover:text-white transition-colors" href="/en/cmms-fleet-maintenance-software.html" data-sans-traduction="">CMMS software</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/en/automatic-maintenance-plan.html" data-sans-traduction="">Automatic maintenance plan</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/en/construction-equipment-maintenance-tracking.html" data-sans-traduction="">Equipment maintenance tracking</a></li>
+<!-- RESSOURCES:FIN -->
+</ul>
+</div>
+<!-- Column 3: Légal -->
+<div class="md:col-span-2 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">LEGAL</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="/mentions-legales.html">Legal notice</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/cgu.html">Terms</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/politique-confidentialite.html">Privacy</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/suppression-compte.html">Account deletion</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/supprimer-mes-donnees.html">Delete my data</a></li>
+</ul>
+</div>
+<!-- Column 4: Contact -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">CONTACT</span>
+
+</p>
+<p class="text-xs">support@kalea.pro</p>
+<!-- RESEAUX:DEBUT -->
+<p class="text-xs text-slate-400 flex items-center gap-4"><a class="hover:text-white transition-colors" href="https://www.linkedin.com/company/kalea-software/" rel="me noopener" target="_blank" data-sans-traduction="">LinkedIn</a><a class="hover:text-white transition-colors" href="https://www.facebook.com/kalea.pro" rel="me noopener" target="_blank" data-sans-traduction="">Facebook</a></p>
+<!-- RESEAUX:FIN -->
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">A question, a manual that won't cooperate? Write to us.</span>
+
+</p>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+<p class="">© <span class="" id="year-placeholder">2026</span> KALEA. All rights reserved.</p>
+<div class="flex items-center gap-6">
+<a class="hover:text-slate-300" href="/politique-confidentialite.html">Privacy policy</a>
+<a class="hover:text-slate-300" href="/cgu.html">Terms and conditions</a>
+</div>
+</div>
+</div>
+</footer>
+<script src="/selecteur-langue.js"></script>
+<script src="/bouton-theme.js"></script>
+<script src="/mesure.js"></script>
+</body>
+</html>

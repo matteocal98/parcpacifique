@@ -1159,6 +1159,11 @@ try {
   }
 } catch (_) { /* secours : l'intervalle ci-dessus */ }
 
+// Le centre d'aide public (pages générées par outils/generer-aide.mjs), dans la langue de l'application.
+function urlCentreAide() {
+  return LANGUE === 'en' ? 'https://kalea.pro/en/help/' : 'https://kalea.pro/aide/';
+}
+
 // Ouvre DIRECTEMENT un ticket (toucher la notification « Réponse du support »).
 async function ouvrirSupportTicket(ticketId) {
   if (UI.view !== 'support') goTo('support');
