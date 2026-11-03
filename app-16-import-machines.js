@@ -24,7 +24,7 @@ function importNorm(texte) {
 // Les colonnes. `fr` = libellé français (reconnu quelle que soit la langue de l'interface) ; `etiquette` = libellé affiché/écrit dans le modèle.
 function importColonnes() {
   return [
-    { cle: 'nom', fr: 'Nom', requis: true, alias: ['designation', 'machine', 'name', 'libelle', 'equipement', 'materiel', 'engin'], exemple: ['Chargeuse CAT 950', 'Pick-up chantier'] },
+    { cle: 'nom', fr: 'Nom', en: 'Name', requis: true, alias: ['designation', 'machine', 'name', 'libelle', 'equipement', 'materiel', 'engin'], exemple: ['Chargeuse CAT 950', 'Pick-up chantier'] },
     { cle: 'code_interne', fr: 'Code interne', alias: ['code', 'reference', 'ref', 'n parc', 'numero de parc', 'parc', 'id interne', 'internal code', 'external ref'], exemple: ['G-14', 'V-02'] },
     { cle: 'marque', fr: 'Marque', alias: ['constructeur', 'brand', 'make'], exemple: ['CAT', 'Toyota'] },
     { cle: 'modele', fr: 'Modèle', alias: ['model'], exemple: ['950', 'Hilux'] },
@@ -39,7 +39,7 @@ function importColonnes() {
     { cle: 'date_mise_en_service', fr: 'Date de mise en service', alias: ['mise en service', 'date mise en service', 'service date', 'in service date'], exemple: ['2020-03-01', '2022-06-15'] },
     { cle: 'prix_achat', fr: "Prix d'achat", alias: ['prix achat', 'prix', 'purchase price', 'price'], exemple: ['85000', '4200000'] },
     { cle: 'date_achat', fr: "Date d'achat", alias: ['date achat', 'purchase date'], exemple: ['2020-02-10', '2022-06-01'] },
-  ].map((c) => ({ ...c, etiquette: trad(c.fr) }));
+  ].map((c) => ({ ...c, etiquette: (LANGUE === 'en' && c.en) ? c.en : trad(c.fr) }));
 }
 function importAliasDe(def) {
   return [importNorm(def.fr), importNorm(def.etiquette), ...def.alias];

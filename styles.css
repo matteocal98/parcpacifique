@@ -6258,7 +6258,8 @@
   
   .tco-donut-corps{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
   .tco-donut-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;gap:1px;}
-  .tco-donut-centre-eyebrow{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
+  /* « Dépenses parc » était plus large que le trou de l'anneau et débordait dessus (le titre du bloc le dit déjà) : masqué partout, comme sur téléphone. */
+  .tco-donut-centre-eyebrow{display:none;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-ink);}
   .tco-donut-centre-valeur{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:var(--ink);}
   .tco-donut-centre-note{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--ink-2);}
   .tco-donut-details{flex:1;min-width:220px;display:flex;flex-direction:column;gap:12px;}

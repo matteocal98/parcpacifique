@@ -802,7 +802,8 @@ function detailsIntervalleReel(info, m) {
   const part = pourcentageIntervalle(info, m) ?? 0;
   const unite = enCompteur ? counterUnitOf(m) : null;
   const echeance = enCompteur ? formatCounter(planNextDueCounter(m.plan), unite) : formatShortDate(m.plan.next_due_at);
-  const debut = enCompteur ? formatCounter(0, unite) : formatShortDate(addDaysIso(m.plan.next_due_at, -intervalle));
+  const echeanceCompteur = enCompteur ? Number(planNextDueCounter(m.plan)) : NaN;
+  const debut = enCompteur ? formatCounter(Number.isFinite(echeanceCompteur) ? Math.max(0, echeanceCompteur - intervalle) : 0, unite) : formatShortDate(addDaysIso(m.plan.next_due_at, -intervalle));
   const objectif = enCompteur ? formatCounter(intervalle, unite) : tR('{n} j', { n: intervalle });
   const enRetard = reste < 0;
   const resteValeur = enCompteur ? formatCounter(Math.abs(reste), unite) : tR('{n} j', { n: Math.round(Math.abs(reste)) });

@@ -217,7 +217,19 @@ function basculeLangueHtml() {
 // l'extraction ; elles passent par ici, avec la phrase complète comme clé.
 function tR(cle, valeurs) {
   const modele = trad(cle);
-  return modele.replace(/\{(\w+)\}/g, (tout, nom) => (valeurs && nom in valeurs ? String(valeurs[nom]) : tout));
+  let dernier = null;   // valeur numérique du dernier repère {…} rencontré : c'est elle qui décide du pluriel de « (s) » qui suit
+  return modele.replace(/\{(\w+)\}|\(es\)|\(s\)/g, (tout, nom) => {
+    if (nom !== undefined) {
+      if (!(valeurs && nom in valeurs)) { dernier = null; return tout; }
+      const v = valeurs[nom]; const texte = String(v);
+      const nombre = Number(texte.replace(/[\s\u00a0\u202f]/g, '').replace(',', '.'));
+      dernier = (texte.trim() !== '' && Number.isFinite(nombre)) ? nombre : null;
+      return texte;
+    }
+    if (dernier === null) return tout;
+    const pluriel = (typeof LANGUE !== 'undefined' && LANGUE === 'en') ? dernier !== 1 : dernier > 1;
+    return pluriel ? (tout === '(es)' ? 'es' : 's') : '';
+  });
 }
 
 // Valeurs par défaut du plan « inactif » : on stocke toujours un intervalle

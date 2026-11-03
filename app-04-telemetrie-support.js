@@ -1424,7 +1424,6 @@ function afficherNouveauTicket(overlay, moi) {
     ${UI.machines.length ? `<div class="plan-field">
       <div class="support-champ-tete">
         <label for="support-machine-trigger">${trad('Machine concernée')} <span class="muted-text">(${trad('optionnel')})</span></label>
-        <span class="support-badge-interactif">${trad('Menu interactif')}</span>
       </div>
       <button type="button" class="support-machine-trigger" id="support-machine-trigger">
         <span class="support-machine-trigger-gauche"><span class="dot"></span><span id="support-machine-trigger-label">${trad('Aucune en particulier')}</span></span>

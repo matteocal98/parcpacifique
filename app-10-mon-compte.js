@@ -119,9 +119,12 @@ VIEWS.account = {
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="acc-activity">${trad('Activité principale')}</label>
               <select id="acc-activity" class="ui-selecteur is-plein"${bloque}>
-                ${[...new Set([c.activity, ...SIGNUP_ACTIVITIES].filter(Boolean))]
-                  .map((a) => `<option value="${esc(a)}"${a === c.activity ? ' selected' : ''}>${esc(a)}</option>`)
-                  .join('')}
+                ${(() => {
+                  // La valeur enregistrée garde sa forme d'origine ; seul le libellé suit la langue, et une même activité n'apparaît qu'une fois.
+                  const vus = new Set();
+                  return [c.activity, ...SIGNUP_ACTIVITIES].filter(Boolean).filter((a) => { const lib = trad(a); if (vus.has(lib)) return false; vus.add(lib); return true; })
+                    .map((a) => `<option value="${esc(a)}"${a === c.activity ? ' selected' : ''}>${esc(trad(a))}</option>`).join('');
+                })()}
               </select>
             </div>
             ${SCHEMA.hasCountry ? `

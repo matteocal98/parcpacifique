@@ -769,11 +769,11 @@ export const ARTICLES_ORDRES = [
       intro: 'Quand vous faites une action sans réseau, KALEA la garde sur votre appareil et l\'envoie dès que possible. Le bandeau et l\'écran « À envoyer » vous montrent ce qui attend.',
       etapes: [
         { titre: 'Faites votre action normalement', texte: 'Enregistrez l\'intervention ou signalez la panne comme d\'habitude : KALEA répond que l\'action est enregistrée sur l\'appareil et qu\'elle partira dès que le réseau revient. Cocher une tâche d\'un ordre ne déclenche pas ce message : la pastille {{ui:À envoyer}} apparaît sur l\'ordre.' },
-        { titre: 'Repérez le bandeau', texte: 'Un bandeau s\'affiche en haut de l\'écran : « n action(s) enregistrée(s) sur l\'appareil, en attente d\'envoi. ». Sur la liste et la fiche d\'un ordre de travail concerné, la pastille {{ui:À envoyer}} apparaît aussi.',
+        { titre: 'Repérez le bandeau', texte: 'Un bandeau s\'affiche en haut de l\'écran : « 2 actions enregistrées sur l\'appareil, en attente d\'envoi. ». Sur la liste et la fiche d\'un ordre de travail concerné, la pastille {{ui:À envoyer}} apparaît aussi.',
           image: { nom: 'bandeau', alt: 'L\'écran des ordres de travail avec le bandeau d\'actions en attente en haut (1), la pastille À envoyer sur un ordre (2) et les liens Envoyer maintenant et Voir du bandeau (3).' } },
         { titre: 'Ouvrez le détail', texte: 'Cliquez sur {{ui:Voir}} dans le bandeau. La fenêtre {{ui:À envoyer}} liste chaque action avec sa machine, son heure et la pastille {{ui:En attente}}.',
           image: { nom: 'fenetre', alt: 'La fenêtre À envoyer : la pastille En attente d\'une action (1), le bouton Envoyer maintenant (2), puis, sur une action en erreur, Réessayer (3) et Abandonner (4).' } },
-        { titre: 'Envoyez dès que le réseau revient', texte: 'L\'envoi est automatique au retour de la connexion, et KALEA affiche « n action(s) envoyée(s) au serveur ». Pour ne pas attendre, cliquez sur {{ui:Envoyer maintenant}}, dans le bandeau ou dans la fenêtre.' },
+        { titre: 'Envoyez dès que le réseau revient', texte: 'L\'envoi est automatique au retour de la connexion, et KALEA affiche « 2 actions envoyées au serveur ». Pour ne pas attendre, cliquez sur {{ui:Envoyer maintenant}}, dans le bandeau ou dans la fenêtre.' },
         { titre: 'Traitez les erreurs', texte: 'Si une action ne peut pas être envoyée (par exemple la machine a été supprimée), elle reste dans la liste avec son motif. Cliquez sur {{ui:Réessayer}} pour la renvoyer, ou sur {{ui:Abandonner}} : elle ne sera alors jamais envoyée.' },
       ],
       notes: [
@@ -794,11 +794,11 @@ export const ARTICLES_ORDRES = [
       intro: 'When you do something without a network, KALEA keeps it on your device and sends it as soon as possible. The banner and the “To send” screen show you what is waiting.',
       etapes: [
         { titre: 'Do your action as usual', texte: 'Log the intervention or report the breakdown as usual: KALEA replies that the action is saved on the device and will go as soon as the network returns. Ticking an order\'s task does not show this message: the {{ui:À envoyer}} badge appears on the order.' },
-        { titre: 'Spot the banner', texte: 'A banner appears at the top of the screen: “n action(s) saved on the device, waiting to be sent.”. On the list and the page of a work order concerned, the {{ui:À envoyer}} badge also appears.',
+        { titre: 'Spot the banner', texte: 'A banner appears at the top of the screen: “2 actions saved on the device, waiting to be sent.”. On the list and the page of a work order concerned, the {{ui:À envoyer}} badge also appears.',
           image: { nom: 'bandeau', alt: 'The work orders screen with the pending-actions banner at the top (1), the To send badge on an order (2) and the banner\'s Send now and View links (3).' } },
         { titre: 'Open the details', texte: 'Click {{ui:Voir}} in the banner. The {{ui:À envoyer}} window lists each action with its machine, its time and the {{ui:En attente}} badge.',
           image: { nom: 'fenetre', alt: 'The To send window: an action\'s Waiting badge (1), the Send now button (2), then, on an action in error, Try again (3) and Discard (4).' } },
-        { titre: 'Send as soon as the network returns', texte: 'Sending is automatic when the connection returns, and KALEA shows “n action(s) sent to the server”. To avoid waiting, click {{ui:Envoyer maintenant}}, in the banner or in the window.' },
+        { titre: 'Send as soon as the network returns', texte: 'Sending is automatic when the connection returns, and KALEA shows “2 actions sent to the server”. To avoid waiting, click {{ui:Envoyer maintenant}}, in the banner or in the window.' },
         { titre: 'Deal with errors', texte: 'If an action cannot be sent (for example the machine was deleted), it stays in the list with its reason. Click {{ui:Réessayer}} to send it again, or {{ui:Abandonner}}: it will then never be sent.' },
       ],
       notes: [
