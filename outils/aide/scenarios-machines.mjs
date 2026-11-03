@@ -11,14 +11,14 @@ async function toutDansLaZone(c, selecteurs, zone) {
   if (dehors.length) throw new Error('éléments repérés hors de la zone photographiée : ' + dehors.join(', '));
 }
 // Zone qui va du haut d'un élément au bas d'un autre, avec la largeur d'un troisième (la fenêtre ou la section qui les contient).
-async function zoneEntre(c, haut, bas, large, marge = 16) {
+async function zoneEntre(c, haut, bas, large, marge = 16, margeY = marge) {
   return c.ev(`(() => {
     const a = document.querySelector(${JSON.stringify(haut)}).getBoundingClientRect();
     const b = document.querySelector(${JSON.stringify(bas)}).getBoundingClientRect();
     const l = document.querySelector(${JSON.stringify(large)}).getBoundingClientRect();
-    const m = ${marge};
-    const x = Math.max(0, l.left - m), y = Math.max(0, a.top - m);
-    return { x: x + (window.pageXOffset || 0), y: y + (window.pageYOffset || 0), largeur: Math.min(innerWidth - x, l.width + 2 * m), hauteur: Math.min(innerHeight - y, b.bottom + m - y) };
+    const m = ${marge}, my = ${margeY};
+    const x = Math.max(0, l.left - m), y = Math.max(0, a.top - my);
+    return { x: x + (window.pageXOffset || 0), y: y + (window.pageYOffset || 0), largeur: Math.min(innerWidth - x, l.width + 2 * m), hauteur: Math.min(innerHeight - y, b.bottom + my - y) };
   })()`);
 }
 // Les noms du parc fictif sont en français : pour les images ANGLAISES on les traduit (machines et catégories), dans la page uniquement.
@@ -439,7 +439,412 @@ export const SCENARIOS = [
       } },
     ],
   },
+  // ─────────────────────────────────────────────── Exporter la liste des machines en CSV
+  {
+    id: 'mac-exporter-parc',
+    etapes: [
+      // 2. Le bouton « Exporter (CSV) » en haut de la liste.
+      { nom: 'bouton', ecran: 'bureau', async jouer(c) {
+        await listeMachines(c);
+        await c.repere('#fleet-export', 2, { cote: 'gauche' });
+        await toutDansLaZone(c, ['#fleet-export'], '.parc-section');
+        return c.zoneJusqua('.parc-section', '#fleet-search', 22);
+      } },
+      // 3, 4 et 5. La fenêtre : contenu, format, « Télécharger » (on ne clique pas).
+      { nom: 'fenetre', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('machines'); ouvrirModaleExport(); true");
+        await c.attendre('#export-go');
+        await c.dort(600);
+        await c.marquer('input[name="export-contenu"]', 'contenu', '.ui-champ-groupe');
+        await c.marquer('input[name="export-format"]', 'format', '.ui-champ-groupe');
+        await c.repere('[data-aide="contenu"]', 3, { cote: 'gauche', marge: 6 });
+        await c.repere('[data-aide="format"]', 4, { cote: 'gauche', marge: 6 });
+        await c.repere('#export-go', 5, { marge: 4 });
+        await toutDansLaZone(c, ['[data-aide="contenu"]', '[data-aide="format"]', '#export-go'], '.export-modal');
+        return c.zone('.export-modal', 30);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Supprimer définitivement une machine
+  {
+    id: 'mac-supprimer-machine',
+    etapes: [
+      // 2. Tout en bas de « Modifier une machine » : « Supprimer cette machine » (on ne clique pas : la confirmation est une fenêtre du navigateur).
+      { nom: 'supprimer', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('machines'); true");
+        await c.dort(500);
+        await c.ev("openMachineModal(UI.companyId, UI.categories, UI.machines.find((m) => m.id === 'm1')); true");
+        await c.attendre('#delete-machine');
+        await c.dort(700);
+        await c.voir('#delete-machine', 'end');
+        await c.dort(300);
+        await c.repere('#delete-machine', 2, { cote: 'droite', marge: 5 });
+        await toutDansLaZone(c, ['#delete-machine'], '.overlay .modal');
+        return zoneEntre(c, '#submit-add', '#delete-machine', '.overlay .modal', 22);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Choisir ou créer la catégorie d'une machine
+  {
+    id: 'mac-categorie',
+    etapes: [
+      // 3. « Autre… » choisi : le champ du nom de la catégorie apparaît.
+      { nom: 'autre', ecran: 'bureau', async jouer(c) {
+        await fenetreAjout(c);
+        await c.ev(`(() => { const s = document.getElementById('f-category'); s.value = CATEGORIE_AUTRE; s.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+        await c.dort(500);
+        const nom = c.langue === 'en' ? 'BRUSH CUTTER' : 'DÉBROUSSAILLEUSE';
+        await c.ev(`(() => { const i = document.getElementById('f-category-autre'); i.value = ${JSON.stringify(nom)}; i.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
+                await c.marquer('#f-category', 'cat', 'parent');
+        await enHaut(c, '[data-aide="cat"]');
+        await c.dort(300);
+        await c.repere('#f-category-autre', 3, { cote: 'gauche-centre', marge: 6 });
+        await toutDansLaZone(c, ['#f-category-autre'], ADD);
+        return zoneEntre(c, '[data-aide="cat"]', '#f-category-autre', ADD, 20);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Le bouton « Ajouter la machine » est grisé
+  {
+    id: 'mac-bouton-ajouter-grise',
+    etapes: [
+      // 1. La phrase sous le formulaire et le bouton grisé.
+      { nom: 'message', ecran: 'bureau', async jouer(c) {
+        await fenetreAjout(c);
+        await c.marquer('#f-manque', 'manque');
+        await c.marquer('#step-form button[type="submit"]', 'valider');
+        await c.ev("document.querySelector('.overlay.machine-modal-add main').scrollTop = 99999; true");
+        await c.dort(300);
+        await c.repere('#f-manque', 1, { cote: 'gauche-centre', marge: 5 });
+        await c.repere('[data-aide="valider"]', 1, { cote: 'gauche-centre', marge: 5 });
+        await toutDansLaZone(c, ['#f-manque', '[data-aide="valider"]'], ADD);
+        return zoneEntre(c, '#f-manque', '[data-aide="valider"]', ADD, 40);
+      } },
+      // 2. Une tâche saisie : le plan d'entretien est donné.
+      { nom: 'taches', ecran: 'bureau', async jouer(c) {
+        await fenetreAjout(c);
+        const t = c.langue === 'en' ? 'Oil change, greasing, filter check' : 'Vidange, graissage, contrôle des filtres';
+        await c.ev(`(() => { const e = document.getElementById('f-tasks'); e.value = ${JSON.stringify(t)}; e.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
+        await c.dort(400);
+        await c.marquer('#f-tasks', 'taches', 'parent');
+        await enHaut(c, SECTION(4));
+        await c.dort(300);
+        await c.repere('[data-aide="taches"]', 2, { cote: 'gauche-centre', marge: 6 });
+        await toutDansLaZone(c, ['[data-aide="taches"]'], ADD);
+        return zoneEntre(c, SECTION(4), SECTION(4), ADD, 26);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Trouver le manuel de sa machine sur internet
+  {
+    id: 'mac-chercher-manuel-web',
+    etapes: [
+      // 1. Marque, modèle et année remplis.
+      { nom: 'identite', ecran: 'bureau', async jouer(c) {
+        await fenetreAjout(c);
+        await c.ev(`(() => { const v = { 'f-brand': 'TERRAX', 'f-model': 'T17-3', 'f-year': '2019' }; for (const k in v) { const e = document.getElementById(k); e.value = v[k]; e.dispatchEvent(new Event('input', { bubbles: true })); } return true; })()`);
+        await c.dort(400);
+        await c.marquer('#f-brand', 'marque', 'parent');
+        await c.marquer('#f-year', 'annee', 'parent');
+        await enHaut(c, '[data-aide="marque"]');
+        await c.dort(300);
+        await c.repere('[data-aide="marque"]', 1, { cote: 'gauche-centre', marge: 4 });
+        await c.repere('#f-model', null, { marge: 4 });
+        await c.repere('[data-aide="annee"]', null, { marge: 4 });
+        await toutDansLaZone(c, ['[data-aide="marque"]', '#f-model', '[data-aide="annee"]'], ADD);
+        return zoneEntre(c, '[data-aide="marque"]', '[data-aide="annee"]', ADD, 44, 22);
+      } },
+      // 2 et 3. Les liens de recherche, sous la zone du carnet (l'encadré commercial qui les précède reste hors de l'image).
+      { nom: 'liens', ecran: 'bureau', async jouer(c) {
+        await fenetreAjout(c);
+        await enHaut(c, '#lien-manuel-web');
+        await c.dort(300);
+        await c.repere('#lien-manuel-web', 2, { cote: 'gauche-centre', marge: 5 });
+        await c.repere('#lien-manuel-atelier', 3, { cote: 'gauche-centre', marge: 5 });
+        await toutDansLaZone(c, ['#lien-manuel-web', '#lien-manuel-atelier'], ADD);
+        return zoneEntre(c, '#lien-manuel-web', '#lien-manuel-atelier', ADD, 44);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Mon import CSV est refusé : les erreurs courantes
+  {
+    id: 'mac-import-erreurs',
+    etapes: [
+      // 1. Fichier refusé en entier : message rouge sous la zone de dépôt (une colonne « Nom » introuvable).
+      { nom: 'refuse', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('machines'); ouvrirImportMachines(); true");
+        await c.attendre('#imp-fichier');
+        await c.dort(500);
+        await c.ev(`(() => {
+          const csv = ${JSON.stringify(c.langue === 'en' ? 'Code;Brand;Type' : 'Code;Marque;Modèle')} + '\\nG-21;TERRAX;T18';
+          const dt = new DataTransfer(); dt.items.add(new File([csv], 'mon-parc.csv', { type: 'text/csv' }));
+          const inp = document.getElementById('imp-fichier'); inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true }));
+          return true; })()`);
+        await c.dort(900);
+        await c.repere('#imp-msg', 1, { cote: 'gauche-centre', marge: 6 });
+        await c.repere('#imp-zone', 1, { cote: 'gauche-centre', marge: 4 });
+        await toutDansLaZone(c, ['#imp-msg', '#imp-zone'], '.import-csv-modal');
+        return c.zone('.import-csv-modal', 30);
+      } },
+      // 2. Des lignes en erreur, chacune avec son message.
+      { nom: 'lignes', ecran: 'bureau', async jouer(c) {
+        const en = c.langue === 'en';
+        const n = en ? ['Mini excavator 1.8 t', 'Dump truck', 'Telehandler'] : ['Mini-pelle 1,8 t', 'Camion plateau', 'Chariot télescopique'];   // n[0] inutilisé
+        await c.ev("goTo('machines'); ouvrirImportMachines(); true");
+        await c.attendre('#imp-fichier');
+        await c.dort(500);
+        await c.ev(`(() => {
+          const csv = ['Nom;Code interne;Marque;Modèle;N° de série;Type;Compteur actuel;Date de mise en service',
+            ';G-22;VOLTA;G30;DEMO-G30-0007;machine;90;2020-06-01',
+            '${n[1]};G-23;ROUTIER;D-6;EF-456-GH;${en ? 'boat' : 'bateau'};52300;2022-01-10',
+            '${n[2]};G-24;BOREAL;BT-30;DEMO-BT30-0044;machine;310;31/02/2023'].join('\\n');
+          const dt = new DataTransfer(); dt.items.add(new File([csv], 'mon-parc.csv', { type: 'text/csv' }));
+          const inp = document.getElementById('imp-fichier'); inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true }));
+          return true; })()`);
+        await c.attendre('.import-apercu');
+        await c.dort(800);
+        await c.repere('.import-apercu', 2, { cote: 'gauche', marge: 5 });
+        await toutDansLaZone(c, ['.import-apercu'], '.import-csv-modal');
+        return c.zone('.import-csv-modal', 30);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Annuler un import de machines
+  {
+    id: 'mac-annuler-import',
+    etapes: [
+      // 2. Le bandeau « Import récent » en haut de l'écran Machines (mémorisé par l'appareil, on le pose comme l'application le ferait).
+      { nom: 'bandeau', ecran: 'bureau', async jouer(c) {
+        await c.ev("try { localStorage.setItem('kalea.dernier-import.' + UI.companyId, JSON.stringify({ lot: 'demo-lot', at: Date.now() - 3600000, crees: 12 })); } catch (e) {} UI.filters = null; goTo('machines'); true");
+        await c.attendre('#imp-bandeau');
+        await c.dort(600);
+        await c.repere('#imp-annuler-dernier', 2, { cote: 'gauche-centre', marge: 4 });
+        await c.repere('#imp-masquer', null, { marge: 4 });
+        await toutDansLaZone(c, ['#imp-annuler-dernier', '#imp-masquer'], '#imp-bandeau');
+        return zoneEntre(c, '#imp-bandeau', '#imp-bandeau', '#imp-bandeau', 44, 18);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Scanner un QR code pour ouvrir une machine
+  {
+    id: 'mac-scanner-qr',
+    etapes: [
+      // 1. Le bouton « Scanner un QR » de l'écran Machines.
+      { nom: 'bouton', ecran: 'bureau', async jouer(c) {
+        await listeMachines(c);
+        await c.repere('#fleet-scanner', 1, { cote: 'gauche', marge: 4 });
+        await toutDansLaZone(c, ['#fleet-scanner'], '.parc-section');
+        return c.zoneJusqua('.parc-section', '#fleet-search', 22);
+      } },
+      // 3. La fenêtre du scanner : une image de caméra est simulée (le navigateur sans caméra afficherait seulement un refus d'accès).
+      { nom: 'fenetre', ecran: 'bureau', async jouer(c) {
+        await c.ev(`(() => {
+          const cv = document.createElement('canvas'); cv.width = 480; cv.height = 480;
+          const g = cv.getContext('2d');
+          const grad = g.createLinearGradient(0, 0, 480, 480); grad.addColorStop(0, '#46535f'); grad.addColorStop(1, '#1b232b');
+          g.fillStyle = grad; g.fillRect(0, 0, 480, 480);
+          g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 6; g.lineCap = 'round';
+          [[110, 110, 1, 1], [370, 110, -1, 1], [110, 370, 1, -1], [370, 370, -1, -1]].forEach(([x, y, a, b]) => { g.beginPath(); g.moveTo(x + 60 * a, y); g.lineTo(x, y); g.lineTo(x, y + 60 * b); g.stroke(); });
+          const flux = cv.captureStream(10);
+          setInterval(() => { g.fillStyle = 'rgba(0,0,0,0)'; g.fillRect(0, 0, 1, 1); }, 100);
+          navigator.mediaDevices.getUserMedia = async () => flux;
+          goTo('machines'); ouvrirScannerQr();
+          return true; })()`);
+        await c.attendre('#scan-zone video');
+        await c.ev('document.activeElement && document.activeElement.blur && document.activeElement.blur(); true');
+        await c.dort(1200);
+        await c.marquer('#scan-zone', 'scanmodal', '.modal');
+        await c.repere('#scan-zone', 3, { cote: 'gauche-centre', marge: 5 });
+        await toutDansLaZone(c, ['#scan-zone'], '[data-aide="scanmodal"]');
+        return c.zone('[data-aide="scanmodal"]', 46);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Suivre et résoudre une panne signalée
+  {
+    id: 'mac-suivre-pannes',
+    etapes: [
+      // 1. La tuile « Pannes » du tableau de bord (des pannes fictives sont fournies).
+      { nom: 'tuile', ecran: 'bureau', async jouer(c) {
+        await pannesFictives(c);
+        await c.ev("goTo('dashboard'); true");
+        await c.attendre('#accueil-vigilance .vig-liste');
+        await c.dort(1500);
+        await c.ev("(() => { const t = document.getElementById('vig-couts'); if (t) t.remove(); return true; })()");
+        await c.dort(200);
+        await c.repere('#vig-pannes', 1, { marge: 4 });
+        await toutDansLaZone(c, ['#vig-pannes'], '#accueil-vigilance');
+        return c.zone('#accueil-vigilance', 20);
+      } },
+      // 2. La liste « Pannes signalées » : les boutons « Ouvertes » et « Résolues ».
+      { nom: 'liste', ecran: 'bureau', async jouer(c) {
+        await pannesFictives(c);
+        await c.ev('ouvrirListePannes(); true');
+        await c.attendre('#pannes-liste .panne-ligne');
+        await c.dort(600);
+        await c.repere('#pannes-filtres', 2, { cote: 'gauche-centre', marge: 5 });
+        await toutDansLaZone(c, ['#pannes-filtres'], '.panne-liste-modal');
+        return c.zone('.panne-liste-modal', 40);
+      } },
+      // 3 et 4. Les boutons d'action de chaque ligne : « Prendre en charge » (3) sur une panne ouverte, « Marquer résolue » (4) sur une panne prise en charge.
+      { nom: 'actions', ecran: 'bureau', async jouer(c) {
+        await pannesFictives(c);
+        await c.ev('ouvrirListePannes(); true');
+        await c.attendre('#pannes-liste .panne-ligne');
+        await c.dort(600);
+        await c.repere('[data-panne-statut="prise_en_charge"]', 3, { cote: 'gauche-centre', marge: 4 });
+        await c.repere('[data-panne-statut="resolue"]', 4, { cote: 'gauche-centre', marge: 4 });
+        await toutDansLaZone(c, ['[data-panne-statut="prise_en_charge"]', '[data-panne-statut="resolue"]'], '.panne-liste-modal');
+        return c.zone('.panne-liste-modal', 40);
+      } },
+      // 4. La fenêtre « Résoudre la panne » (on ne clique pas sur « Marquer résolue »).
+      { nom: 'resoudre', ecran: 'bureau', async jouer(c) {
+        await pannesFictives(c);
+        await c.ev("ouvrirResolutionPanne(UI.pannes.find((p) => p.status === 'prise_en_charge'), () => {}); true");
+        await c.attendre('#resolution-heures');
+        await c.dort(600);
+        await c.repere('#resolution-heures', 4, { cote: 'gauche-centre', marge: 4 });
+        await c.repere('#resolution-note', 4, { cote: 'gauche-centre', marge: 4 });
+        await c.repere('#resolution-valider', 4, { cote: 'droite', marge: 4 });
+        await toutDansLaZone(c, ['#resolution-heures', '#resolution-note', '#resolution-valider'], '.panne-modal');
+        return c.zone('.panne-modal', 40);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Lire les statistiques de votre parc
+  {
+    id: 'mac-statistiques',
+    etapes: [
+      // 2 et 3. La période et les filtres, en haut de l'écran.
+      { nom: 'filtres', ecran: 'bureau', async jouer(c) {
+        await donneesStats(c);
+        await c.ev("goTo('stats'); true");
+        await c.attendre('.stat-kpis');
+        await c.dort(900);
+        await c.marquer('[data-stats-periode]', 'periode', 'div');
+        await c.repere('[data-aide="periode"]', 2, { cote: 'gauche', marge: 5 });
+        await c.repere('#stats-categorie', 3, { marge: 4 });
+        await c.repere('#stats-machine', 3, { marge: 4 });
+        await toutDansLaZone(c, ['[data-aide="periode"]', '#stats-categorie', '#stats-machine'], '#view-root');
+        return zoneEntre(c, '[data-aide="periode"]', '[data-stats-onglet]', '#view-root', 44, 21);
+      } },
+      // 4. L'onglet Coûts : les tuiles de synthèse.
+      { nom: 'couts', ecran: 'bureau', async jouer(c) {
+        await donneesStats(c);
+        await c.ev("goTo('stats'); true");
+        await c.attendre('.stat-kpis');
+        await c.dort(900);
+        await c.ev("(() => { const o = document.querySelector('[data-stats-onglet=\"couts\"]'); if (o) o.click(); return true; })()");
+        await c.dort(900);
+        await c.repere('.stat-kpis', 4, { cote: 'gauche', marge: 5 });
+        await toutDansLaZone(c, ['.stat-kpis'], '#view-root');
+        return zoneEntre(c, '[data-stats-onglet]', '.stat-carte', '#view-root', 16);
+      } },
+      // 5. L'onglet Maintenance.
+      { nom: 'maintenance', ecran: 'bureau', async jouer(c) {
+        await donneesStats(c);
+        await c.ev("goTo('stats'); true");
+        await c.attendre('.stat-kpis');
+        await c.dort(900);
+        await c.ev("(() => { const o = document.querySelector('[data-stats-onglet=\"maintenance\"]'); if (o) o.click(); return true; })()");
+        await c.dort(900);
+        await c.repere('.stat-kpis', 5, { cote: 'gauche', marge: 5 });
+        await toutDansLaZone(c, ['.stat-kpis'], '#view-root');
+        return zoneEntre(c, '[data-stats-onglet]', '.stat-carte', '#view-root', 16);
+      } },
+    ],
+  },
+  // ─────────────────────────────────────────────── Comprendre le plan proposé après le dépôt d'un carnet
+  {
+    id: 'mac-plan-propose',
+    etapes: [
+      // 2. Les échéances détectées dans le manuel (le résultat de l'analyse est simulé : on ne dépose pas de vrai carnet).
+      { nom: 'echeances', ecran: 'bureau', async jouer(c) {
+        await ecranPlanPropose(c);
+        await c.ev("document.querySelectorAll('.overlay.machine-modal, .overlay.machine-modal *').forEach((e) => { e.scrollTop = 0; }); true");
+        await c.dort(300);
+        await c.marquer('.pplan-table-wrap', 'tableau');
+        await c.repere('[data-aide="tableau"]', 2, { cote: 'gauche-centre', marge: 5 });
+        await toutDansLaZone(c, ['[data-aide="tableau"]'], '.overlay.machine-modal > div');
+        return zoneEntre(c, '.pplan-resume', '.pplan-ajouter', '.overlay.machine-modal > div', 40, 66);
+      } },
+      // 3. Les trois choix : « Suivre ce plan », « Modifier ce plan », « Faire mon propre plan ».
+      { nom: 'choix', ecran: 'bureau', async jouer(c) {
+        await ecranPlanPropose(c);
+        await c.voir('.pplan-choix', 'end');
+        await c.dort(300);
+        await c.repere('.pplan-choix', 3, { cote: 'gauche-centre', marge: 6 });
+        await toutDansLaZone(c, ['.pplan-choix'], '.overlay.machine-modal > div');
+        return zoneEntre(c, '.pplan-choix', '.pplan-choix', '.overlay.machine-modal > div', 40, 16);
+      } },
+    ],
+  },
 ];
+
+// Ouvre l'écran « Plan proposé » : l'analyse du carnet (appel serveur) est remplacée par un résultat fictif, on dépose un faux PDF.
+async function ecranPlanPropose(c) {
+  const en = c.langue === 'en';
+  const items = en
+    ? [['Engine oil change', 'Every 250 h'], ['Greasing', 'Every 50 h'], ['Air filter check', 'Every 500 h'], ['Hydraulic oil change', 'Every 1000 h']]
+    : [['Vidange moteur', 'Toutes les 250 h'], ['Graissage', 'Toutes les 50 h'], ['Contrôle du filtre à air', 'Toutes les 500 h'], ['Vidange huile hydraulique', 'Toutes les 1000 h']];
+  await c.ev("goTo('machines'); true");
+  await c.dort(400);
+  await c.ev(`(() => {
+    const items = ${JSON.stringify(items)}.map(([label, frequency]) => ({ label, frequency }));
+    window.brancherCarnetPdf = async (overlay, file, contexte, apresAnalyse) => {
+      overlay._aiTrackingSuggestion = 'hours'; overlay._aiIntervalHours = 250;
+      apresAnalyse({ items, notes: [], taches: items.map((i) => i.label).join(', ') });
+    };
+    openAddWizard(UI.companyId, UI.categories);
+    return true; })()`);
+  await c.attendre('#f-manual');
+  await c.dort(700);
+  await c.ev(`(() => {
+    const dt = new DataTransfer(); dt.items.add(new File(['%PDF-1.4'], 'carnet.pdf', { type: 'application/pdf' }));
+    const inp = document.getElementById('f-manual'); inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true }));
+    return true; })()`);
+  await c.attendre('.pplan-table-wrap');
+  await c.dort(900);
+}
+
+// Remplace la lecture des tables : chaque table renvoie les lignes données (les filtres de la requête sont ignorés).
+async function tables(c, lignesParTable) {
+  await c.ev(`(() => {
+    const T = ${JSON.stringify(lignesParTable)};
+    const METHODES = ['select', 'eq', 'in', 'order', 'limit', 'gte', 'lte', 'gt', 'lt', 'is', 'neq', 'not', 'range', 'or', 'ilike', 'like', 'contains', 'filter', 'match', 'insert', 'update', 'delete', 'upsert'];
+    sb.from = (t) => { const lignes = T[t] || []; const b = {}; METHODES.forEach((k) => { b[k] = () => b; }); b.single = () => Promise.resolve({ data: lignes[0] || null, error: null }); b.maybeSingle = () => Promise.resolve({ data: lignes[0] || null, error: null }); b.then = (res) => res({ data: lignes, error: null, count: lignes.length }); return b; };
+    return true; })()`);
+}
+// Trois pannes fictives : une ouverte à l'arrêt, une prise en charge à l'arrêt, une résolue.
+async function pannesFictives(c) {
+  const en = c.langue === 'en';
+  const jour = (n) => new Date(Date.now() - n * 864e5).toISOString();
+  const lignes = [
+    { id: 'b1', company_id: 'demo-societe', machine_id: 'm3', machine_name: en ? 'Dump truck' : 'Camion benne', description: en ? 'Hydraulic leak on the tipping ram' : 'Fuite hydraulique sur le vérin de benne', severity: 'bloquante', stopped: true, status: 'ouverte', reported_at: jour(1), reported_by_name: 'Alex Durand', downtime_hours: null, downtime_cost: null },
+    { id: 'b2', company_id: 'demo-societe', machine_id: 'm1', machine_name: en ? 'Excavator 1.7 t' : 'Pelle 1,7 t', description: en ? 'Abnormal noise from the swing motor' : 'Bruit anormal du moteur de rotation', severity: 'importante', stopped: true, status: 'prise_en_charge', reported_at: jour(4), reported_by_name: 'Camille Martin', downtime_hours: null, downtime_cost: null },
+    { id: 'b3', company_id: 'demo-societe', machine_id: 'm2', machine_name: en ? 'Wheel loader' : 'Chargeuse sur pneus', description: en ? 'Warning light on the dashboard' : 'Voyant allumé au tableau de bord', severity: 'mineure', stopped: false, status: 'resolue', reported_at: jour(20), reported_by_name: 'Alex Durand', downtime_hours: null, downtime_cost: null },
+  ];
+  await tables(c, { machine_breakdowns: lignes });
+}
+// Un an de données fictives pour les statistiques : entretiens, dépannages, coûts d'exploitation et pannes.
+async function donneesStats(c) {
+  await c.ev(`(() => {
+    const ids = ['m1', 'm2', 'm3', 'm4'];
+    const date = (m, j) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - m); d.setDate(j); return d.toISOString(); };
+    const interventions = []; const couts = []; const pannes = [];
+    for (let m = 0; m <= 11; m++) {
+      ids.forEach((id, k) => {
+        if ((m + k) % 2 === 0) interventions.push({ machine_id: id, kind: 'entretien', parts_cost: 180 + 40 * ((m * 3 + k) % 5), labor_cost: 120 + 30 * ((m + k) % 4), performed_at: date(m, 8 + k), was_late: (m + k) % 5 === 0 });
+        if ((m * 2 + k) % 5 === 0) interventions.push({ machine_id: id, kind: 'depannage', parts_cost: 260 + 55 * (m % 4), labor_cost: 140 + 20 * (k % 3), performed_at: date(m, 15 + k), was_late: null });
+        couts.push({ machine_id: id, amount: 90 + 25 * ((m + k) % 4), incurred_at: date(m, 20), kind: 'carburant' });
+      });
+      if (m % 3 === 1) pannes.push({ machine_id: ids[m % 4], status: 'resolue', stopped: true, reported_at: date(m, 10), resolved_at: date(m, 12), downtime_hours: 8 + (m % 3) * 4, downtime_cost: null });
+    }
+    const T = { interventions, operating_costs: couts, machine_breakdowns: pannes };
+    const METHODES = ['select', 'eq', 'in', 'order', 'limit', 'gte', 'lte', 'gt', 'lt', 'is', 'neq', 'not', 'range', 'or', 'ilike', 'like', 'contains', 'filter', 'match', 'insert', 'update', 'delete', 'upsert'];
+    sb.from = (t) => { const lignes = T[t] || []; const b = {}; METHODES.forEach((k) => { b[k] = () => b; }); b.single = () => Promise.resolve({ data: lignes[0] || null, error: null }); b.maybeSingle = () => Promise.resolve({ data: lignes[0] || null, error: null }); b.then = (res) => res({ data: lignes, error: null, count: lignes.length }); return b; };
+    return true; })()`);
+}
 
 // Chaque étape commence par traduire les données du parc fictif si l'image est en anglais.
 for (const sc of SCENARIOS) for (const e of sc.etapes) { const jouer = e.jouer; e.jouer = async (c) => { await donneesLangue(c); return jouer(c); }; }

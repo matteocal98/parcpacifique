@@ -65,7 +65,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 2. Démarrer, cocher, terminer
   {
-    id: 'ord-realiser-ordre-travail', theme: 'ordres',
+    id: 'ord-realiser-ordre-travail', theme: 'ordres', scenario: 'ord-realiser-ordre-travail',
     fr: {
       fichier: 'aide/demarrer-cocher-terminer-ordre-de-travail.html',
       titre: 'Démarrer, cocher les tâches et terminer un ordre de travail | Aide KALEA',
@@ -75,10 +75,13 @@ export const ARTICLES_ORDRES = [
       intro: 'Un ordre vous est assigné ? Voici les trois gestes : le démarrer, cocher les tâches au fur et à mesure, puis le terminer. L\'intervention est enregistrée dans l\'historique de la machine.',
       etapes: [
         { titre: 'Ouvrez votre ordre', texte: 'Sur l\'accueil, l\'encadré {{ui:Mes ordres}} (droit de gestion et droit de saisie) liste les ordres ouverts qui vous sont assignés. Touchez-en un pour ouvrir sa fiche. Vous pouvez aussi passer par {{ui:Planning}}, puis {{ui:Ordres de travail}}.' },
-        { titre: 'Démarrez l\'ordre', texte: 'Touchez {{ui:Démarrer}}. L\'ordre passe de « À faire » à « En cours ».' },
-        { titre: 'Cochez les tâches faites', texte: 'Dans la section {{ui:Tâches à réaliser}}, cochez chaque tâche une fois terminée. Le compteur et la barre de progression avancent avec vous.' },
+        { titre: 'Démarrez l\'ordre', texte: 'Touchez {{ui:Démarrer}}. L\'ordre passe de « À faire » à « En cours ».',
+          image: { nom: 'demarrer', alt: 'La fiche d\'un ordre À faire : le bouton Démarrer est repéré par le numéro 1.' } },
+        { titre: 'Cochez les tâches faites', texte: 'Dans la section {{ui:Tâches à réaliser}}, cochez chaque tâche une fois terminée. Le compteur et la barre de progression avancent avec vous.',
+          image: { nom: 'taches', alt: 'La fiche d\'un ordre En cours : la liste des tâches à cocher, avec son compteur et sa barre de progression (1), et le bouton Terminer (2).' } },
         { titre: 'Terminez l\'ordre', texte: 'Touchez {{ui:Terminer}}. S\'il reste des tâches non cochées, KALEA demande si vous voulez terminer quand même.' },
-        { titre: 'Enregistrez l\'intervention', texte: 'La fenêtre {{ui:Enregistrer une intervention}} s\'ouvre déjà remplie : tâches cochées, personne assignée et remarque « OT-… ». Vérifiez la date, le compteur et les remarques, puis validez avec le bouton en bas de la fenêtre. L\'ordre passe à « Terminé ».' },
+        { titre: 'Enregistrez l\'intervention', texte: 'La fenêtre {{ui:Enregistrer une intervention}} s\'ouvre déjà remplie : tâches cochées, personne assignée et remarque « OT-… ». Vérifiez la date, le compteur et les remarques, puis validez avec le bouton en bas de la fenêtre. L\'ordre passe à « Terminé ».',
+          image: { nom: 'intervention', alt: 'La fenêtre Enregistrer une intervention, déjà remplie : l\'intervenant assigné (1) et les tâches cochées (2).' } },
       ],
       notes: [
         'L\'intervention enregistrée apparaît dans l\'historique de la machine, avec la personne choisie dans {{ui:Intervenant assigné}} (voir <a href="{{lien:ord-intervenant-assigne}}">indiquer qui a fait l\'intervention</a>).',
@@ -98,10 +101,13 @@ export const ARTICLES_ORDRES = [
       intro: 'An order is assigned to you? Here are the three steps: start it, tick the tasks as you go, then complete it. The intervention is saved in the machine\'s history.',
       etapes: [
         { titre: 'Open your order', texte: 'On the home screen, the {{ui:Mes ordres}} box (management and data-entry access) lists the open orders assigned to you. Tap one to open its page. You can also go through {{ui:Planning}}, then {{ui:Ordres de travail}}.' },
-        { titre: 'Start the order', texte: 'Tap {{ui:Démarrer}}. The order moves from “To do” to “In progress”.' },
-        { titre: 'Tick the tasks you have done', texte: 'In the {{ui:Tâches à réaliser}} section, tick each task once it is done. The counter and the progress bar move forward with you.' },
+        { titre: 'Start the order', texte: 'Tap {{ui:Démarrer}}. The order moves from “To do” to “In progress”.',
+          image: { nom: 'demarrer', alt: 'The page of a To do order: the Start button is marked with number 1.' } },
+        { titre: 'Tick the tasks you have done', texte: 'In the {{ui:Tâches à réaliser}} section, tick each task once it is done. The counter and the progress bar move forward with you.',
+          image: { nom: 'taches', alt: 'The page of an In progress order: the list of tasks to tick, with its counter and progress bar (1), and the Finish button (2).' } },
         { titre: 'Complete the order', texte: 'Tap {{ui:Terminer}}. If some tasks are not ticked, KALEA asks whether you want to complete anyway.' },
-        { titre: 'Log the intervention', texte: 'The {{ui:Enregistrer une intervention}} window opens already filled in: ticked tasks, assigned person and an “OT-…” remark. Check the date, the meter and the remarks, then confirm with the button at the bottom of the window. The order becomes “Done”.' },
+        { titre: 'Log the intervention', texte: 'The {{ui:Enregistrer une intervention}} window opens already filled in: ticked tasks, assigned person and an “OT-…” remark. Check the date, the meter and the remarks, then confirm with the button at the bottom of the window. The order becomes “Done”.',
+          image: { nom: 'intervention', alt: 'The Log an intervention window, already filled in: the assigned operator (1) and the ticked tasks (2).' } },
       ],
       notes: [
         'The logged intervention appears in the machine\'s history, with the person chosen in {{ui:Intervenant assigné}} (see <a href="{{lien:ord-intervenant-assigne}}">record who did the intervention</a>).',
@@ -169,7 +175,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 4. Modifier, remettre à faire, annuler
   {
-    id: 'ord-modifier-annuler-ordre', theme: 'ordres',
+    id: 'ord-modifier-annuler-ordre', theme: 'ordres', scenario: 'ord-modifier-annuler-ordre',
     fr: {
       fichier: 'aide/modifier-annuler-ordre-de-travail.html',
       titre: 'Modifier, remettre à faire ou annuler un ordre de travail | Aide KALEA',
@@ -178,10 +184,13 @@ export const ARTICLES_ORDRES = [
       description: 'Changer les tâches, la priorité ou la personne assignée d\'un ordre de travail dans KALEA, le remettre à faire ou l\'annuler avec un motif.',
       intro: 'Une priorité qui change, quelqu\'un d\'autre pour faire le travail, un ordre devenu inutile : le gérant et le droit de gestion peuvent corriger un ordre tant qu\'il est ouvert, c\'est-à-dire « À faire » ou « En cours ».',
       etapes: [
-        { titre: 'Ouvrez l\'ordre', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, touchez la ligne de l\'ordre pour ouvrir sa fiche. Les boutons de gestion sont en bas de la fiche.' },
-        { titre: 'Modifiez l\'ordre', texte: 'Touchez {{ui:Modifier}}. Changez les tâches, la {{ui:Priorité}}, la personne dans {{ui:Assigné à}}, l\'échéance ou la durée, puis cliquez sur {{ui:Enregistrer}}. Les tâches que vous gardez conservent leur état, cochées ou non.' },
+        { titre: 'Ouvrez l\'ordre', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, touchez la ligne de l\'ordre pour ouvrir sa fiche. Les boutons de gestion sont en bas de la fiche.',
+          image: { nom: 'fiche', alt: 'La fiche d\'un ordre ouvert : les boutons Modifier (1), Remettre à faire (2) et Annuler l\'ordre (3), en bas.' } },
+        { titre: 'Modifiez l\'ordre', texte: 'Touchez {{ui:Modifier}}. Changez les tâches, la {{ui:Priorité}}, la personne dans {{ui:Assigné à}}, l\'échéance ou la durée, puis cliquez sur {{ui:Enregistrer}}. Les tâches que vous gardez conservent leur état, cochées ou non.',
+          image: { nom: 'modification', alt: 'La fenêtre de modification d\'un ordre : la priorité (1), la personne dans Assigné à (2) et le bouton Enregistrer (3).' } },
         { titre: 'Remettez l\'ordre à faire', texte: 'Pour un ordre « En cours » qui doit repartir de zéro, touchez {{ui:Remettre à faire}}.' },
-        { titre: 'Annulez l\'ordre', texte: 'Touchez {{ui:Annuler l\'ordre}} et confirmez. KALEA vous propose d\'écrire un motif, facultatif. Le motif s\'affiche ensuite dans la fiche, après « Motif d\'annulation ».' },
+        { titre: 'Annulez l\'ordre', texte: 'Touchez {{ui:Annuler l\'ordre}} et confirmez. KALEA vous propose d\'écrire un motif, facultatif. Le motif s\'affiche ensuite dans la fiche, après « Motif d\'annulation ».',
+          image: { nom: 'annule', alt: 'La fiche d\'un ordre annulé : le motif d\'annulation, repéré par le numéro 1, s\'affiche au-dessus des tâches.' } },
       ],
       notes: [
         'La machine ne se change pas dans la modification : pour une autre machine, créez un nouvel ordre (voir <a href="{{lien:ord-creer-ordre-travail}}">créer un ordre de travail</a>).',
@@ -199,10 +208,13 @@ export const ARTICLES_ORDRES = [
       description: 'Change the tasks, priority or assigned person of a work order in KALEA, put it back to “to do” or cancel it with a reason.',
       intro: 'A priority that changes, someone else to do the job, an order that is no longer needed: the manager and management access can correct an order as long as it is open, meaning “To do” or “In progress”.',
       etapes: [
-        { titre: 'Open the order', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, tap the order\'s row to open its page. The management buttons are at the bottom of the page.' },
-        { titre: 'Edit the order', texte: 'Tap {{ui:Modifier}}. Change the tasks, the {{ui:Priorité}}, the person in {{ui:Assigné à}}, the due date or the duration, then click {{ui:Enregistrer}}. Tasks you keep keep their state, ticked or not.' },
+        { titre: 'Open the order', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, tap the order\'s row to open its page. The management buttons are at the bottom of the page.',
+          image: { nom: 'fiche', alt: 'The page of an open order: the Edit (1), Put back to do (2) and Cancel the order (3) buttons, at the bottom.' } },
+        { titre: 'Edit the order', texte: 'Tap {{ui:Modifier}}. Change the tasks, the {{ui:Priorité}}, the person in {{ui:Assigné à}}, the due date or the duration, then click {{ui:Enregistrer}}. Tasks you keep keep their state, ticked or not.',
+          image: { nom: 'modification', alt: 'The order edit window: the priority (1), the person in Assigned to (2) and the Save button (3).' } },
         { titre: 'Put the order back to “to do”', texte: 'For an “In progress” order that must start again, tap {{ui:Remettre à faire}}.' },
-        { titre: 'Cancel the order', texte: 'Tap {{ui:Annuler l\'ordre}} and confirm. KALEA offers to write a reason, which is optional. The reason is then shown on the page, after “Reason for cancelling”.' },
+        { titre: 'Cancel the order', texte: 'Tap {{ui:Annuler l\'ordre}} and confirm. KALEA offers to write a reason, which is optional. The reason is then shown on the page, after “Reason for cancelling”.',
+          image: { nom: 'annule', alt: 'The page of a cancelled order: the reason for cancelling, marked with number 1, is shown above the tasks.' } },
       ],
       notes: [
         'The machine cannot be changed when editing: for another machine, create a new order (see <a href="{{lien:ord-creer-ordre-travail}}">create a work order</a>).',
@@ -265,7 +277,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 6. Depuis une panne ou la fiche machine
   {
-    id: 'ord-ordre-depuis-panne-fiche', theme: 'ordres',
+    id: 'ord-ordre-depuis-panne-fiche', theme: 'ordres', scenario: 'ord-ordre-depuis-panne-fiche',
     fr: {
       fichier: 'aide/ordre-de-travail-depuis-panne-ou-fiche-machine.html',
       titre: 'Créer un ordre de travail depuis une panne ou depuis la fiche d\'une machine | Aide KALEA',
@@ -274,10 +286,14 @@ export const ARTICLES_ORDRES = [
       description: 'Gagner du temps dans KALEA : créer un ordre de travail directement depuis la fiche d\'une machine ou depuis une panne signalée, avec les tâches déjà proposées.',
       intro: 'Pas besoin de tout ressaisir : depuis la fiche d\'une machine ou depuis une panne signalée, KALEA prépare l\'ordre pour vous.',
       etapes: [
-        { titre: 'Depuis la fiche d\'une machine : ouvrez la fiche', texte: 'Ouvrez la fiche de la machine ({{ui:Plan d\'entretien & historique}}) et cliquez sur {{ui:Créer un ordre}}. Si le plan a des tâches en retard ou bientôt dues, elles sont déjà cochées.' },
-        { titre: 'Vérifiez l\'ordre proposé', texte: 'La fenêtre {{ui:Nouvel ordre de travail}} s\'ouvre sur la machine. Ajustez les tâches, la {{ui:Priorité}} et la personne dans {{ui:Assigné à}}.' },
-        { titre: 'Depuis une panne : ouvrez la liste', texte: 'Ouvrez {{ui:Pannes signalées}}, proposé dans les {{ui:Actions rapides}} (le bouton « + » de la barre du bas). Sur une panne ouverte, cliquez sur {{ui:Créer un ordre de travail}}.' },
-        { titre: 'Complétez et créez', texte: 'La description de la panne devient la tâche « Réparer : … ». La priorité est proposée selon la gravité : Urgente pour une panne bloquante, Haute pour une panne importante, Normale sinon. Corrigez si besoin, puis cliquez sur {{ui:Créer l\'ordre}}.' },
+        { titre: 'Depuis la fiche d\'une machine : ouvrez la fiche', texte: 'Ouvrez la fiche de la machine ({{ui:Plan d\'entretien & historique}}) et cliquez sur {{ui:Créer un ordre}}. Si le plan a des tâches en retard ou bientôt dues, elles sont déjà cochées.',
+          image: { nom: 'fiche', alt: 'La fiche d\'une machine : le bouton Créer un ordre est repéré par le numéro 1, à côté de Enregistrer une intervention.' } },
+        { titre: 'Vérifiez l\'ordre proposé', texte: 'La fenêtre {{ui:Nouvel ordre de travail}} s\'ouvre sur la machine. Ajustez les tâches, la {{ui:Priorité}} et la personne dans {{ui:Assigné à}}.',
+          image: { nom: 'ordre', alt: 'La fenêtre Nouvel ordre de travail ouverte depuis la fiche : les tâches du plan à cocher (1), la priorité (2) et Assigné à (3).' } },
+        { titre: 'Depuis une panne : ouvrez la liste', texte: 'Ouvrez {{ui:Pannes signalées}}, proposé dans les {{ui:Actions rapides}} (le bouton « + » de la barre du bas). Sur une panne ouverte, cliquez sur {{ui:Créer un ordre de travail}}.',
+          image: { nom: 'pannes', alt: 'La liste Pannes signalées : le bouton Créer un ordre de travail d\'une panne ouverte est repéré par le numéro 1.' } },
+        { titre: 'Complétez et créez', texte: 'La description de la panne devient la tâche « Réparer : … ». La priorité est proposée selon la gravité : Urgente pour une panne bloquante, Haute pour une panne importante, Normale sinon. Corrigez si besoin, puis cliquez sur {{ui:Créer l\'ordre}}.',
+          image: { nom: 'ordre-panne', alt: 'La fenêtre ouverte depuis une panne : la description de la panne est devenue la tâche Réparer, repérée par le numéro 1.' } },
       ],
       notes: [
         'L\'ordre créé depuis une panne porte l\'origine « Depuis une panne » ; celui créé depuis une fiche avec un plan, « Depuis un plan d\'entretien ».',
@@ -295,10 +311,14 @@ export const ARTICLES_ORDRES = [
       description: 'Save time in KALEA: create a work order straight from a machine\'s page or from a reported breakdown, with the tasks already suggested.',
       intro: 'No need to retype everything: from a machine\'s page or from a reported breakdown, KALEA prepares the order for you.',
       etapes: [
-        { titre: 'From a machine page: open the page', texte: 'Open the machine\'s page ({{ui:Plan d\'entretien & historique}}) and click {{ui:Créer un ordre}}. If the plan has late or soon-due tasks, they are already ticked.' },
-        { titre: 'Check the suggested order', texte: 'The {{ui:Nouvel ordre de travail}} window opens on the machine. Adjust the tasks, the {{ui:Priorité}} and the person in {{ui:Assigné à}}.' },
-        { titre: 'From a breakdown: open the list', texte: 'Open {{ui:Pannes signalées}}, offered in the {{ui:Actions rapides}} (the “+” button of the bottom bar). On an open breakdown, click {{ui:Créer un ordre de travail}}.' },
-        { titre: 'Complete and create', texte: 'The breakdown\'s description becomes the task “Repair: …”. The priority is suggested from the severity: Urgent for a blocking breakdown, High for an important one, Normal otherwise. Correct it if needed, then click {{ui:Créer l\'ordre}}.' },
+        { titre: 'From a machine page: open the page', texte: 'Open the machine\'s page ({{ui:Plan d\'entretien & historique}}) and click {{ui:Créer un ordre}}. If the plan has late or soon-due tasks, they are already ticked.',
+          image: { nom: 'fiche', alt: 'A machine\'s page: the Create an order button is marked with number 1, next to Log an intervention.' } },
+        { titre: 'Check the suggested order', texte: 'The {{ui:Nouvel ordre de travail}} window opens on the machine. Adjust the tasks, the {{ui:Priorité}} and the person in {{ui:Assigné à}}.',
+          image: { nom: 'ordre', alt: 'The New work order window opened from the page: the plan tasks to tick (1), the priority (2) and Assigned to (3).' } },
+        { titre: 'From a breakdown: open the list', texte: 'Open {{ui:Pannes signalées}}, offered in the {{ui:Actions rapides}} (the “+” button of the bottom bar). On an open breakdown, click {{ui:Créer un ordre de travail}}.',
+          image: { nom: 'pannes', alt: 'The Reported faults list: the Create a work order button of an open breakdown is marked with number 1.' } },
+        { titre: 'Complete and create', texte: 'The breakdown\'s description becomes the task “Repair: …”. The priority is suggested from the severity: Urgent for a blocking breakdown, High for an important one, Normal otherwise. Correct it if needed, then click {{ui:Créer l\'ordre}}.',
+          image: { nom: 'ordre-panne', alt: 'The window opened from a breakdown: the breakdown\'s description has become the Repair task, marked with number 1.' } },
       ],
       notes: [
         'An order created from a breakdown has the origin “From a breakdown”; one created from a machine page with a plan has “From a maintenance plan”.',
@@ -312,7 +332,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 7. Je ne vois pas les ordres de travail
   {
-    id: 'ord-menu-introuvable', theme: 'ordres',
+    id: 'ord-menu-introuvable', theme: 'ordres', scenario: 'ord-menu-introuvable',
     fr: {
       fichier: 'aide/je-ne-vois-pas-ordres-de-travail.html',
       titre: 'Je ne vois pas le menu Ordres de travail | Aide KALEA',
@@ -321,7 +341,8 @@ export const ARTICLES_ORDRES = [
       description: 'Le menu Ordres de travail est introuvable dans KALEA ? Où le chercher, et les trois raisons possibles : l\'emplacement, le droit d\'accès, l\'offre.',
       intro: 'Les ordres de travail ne sont pas dans le menu principal : ils se trouvent dans la rubrique Planning. S\'ils manquent vraiment, trois vérifications suffisent presque toujours.',
       etapes: [
-        { titre: 'Cherchez au bon endroit', texte: 'Sur ordinateur, ouvrez {{ui:Planning}} : les ordres sont dans l\'onglet {{ui:Ordres de travail}}. Sur téléphone, le gérant utilise l\'onglet {{ui:Planning}} en bas de l\'écran ; les autres utilisateurs passent par le bouton {{ui:Plus}}, puis {{ui:Ordres de travail}}.' },
+        { titre: 'Cherchez au bon endroit', texte: 'Sur ordinateur, ouvrez {{ui:Planning}} : les ordres sont dans l\'onglet {{ui:Ordres de travail}}. Sur téléphone, le gérant utilise l\'onglet {{ui:Planning}} en bas de l\'écran ; les autres utilisateurs passent par le bouton {{ui:Plus}}, puis {{ui:Ordres de travail}}.',
+          image: { nom: 'planning', alt: 'Le menu avec la rubrique Planning (1) et, dans la page, l\'onglet Ordres de travail (2).' } },
         { titre: 'Vérifiez votre droit d\'accès', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}} : votre droit y est indiqué. Une personne qui a le droit d\'achat n\'a pas accès aux ordres de travail. Une personne qui a le droit de saisie voit ses propres ordres, sans pouvoir en créer.' },
         { titre: 'Vérifiez votre offre', texte: 'Les ordres de travail ne sont pas inclus dans toutes les offres. Les offres sont décrites sur <a href="/#tarifs">la page des offres</a> ; le gérant peut y comparer et changer d\'offre.' },
         { titre: 'Contactez-nous si besoin', texte: 'Si votre droit et votre offre sont les bons et que le menu manque toujours, ouvrez {{ui:Aide & support}} et écrivez-nous : l\'équipe vous répond dans le même écran.' },
@@ -341,7 +362,8 @@ export const ARTICLES_ORDRES = [
       description: 'Cannot find the Work orders menu in KALEA? Where to look, and the three possible reasons: the location, the access level, the plan.',
       intro: 'Work orders are not in the main menu: they are in the Schedule section. If they are really missing, three checks are almost always enough.',
       etapes: [
-        { titre: 'Look in the right place', texte: 'On a computer, open {{ui:Planning}}: the orders are in the {{ui:Ordres de travail}} tab. On a phone, the manager uses the {{ui:Planning}} tab at the bottom of the screen; other users go through the {{ui:Plus}} button, then {{ui:Ordres de travail}}.' },
+        { titre: 'Look in the right place', texte: 'On a computer, open {{ui:Planning}}: the orders are in the {{ui:Ordres de travail}} tab. On a phone, the manager uses the {{ui:Planning}} tab at the bottom of the screen; other users go through the {{ui:Plus}} button, then {{ui:Ordres de travail}}.',
+          image: { nom: 'planning', alt: 'The menu with the Schedule section (1) and, in the page, the Work orders tab (2).' } },
         { titre: 'Check your access level', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section: your level is shown there. A person with the purchasing rights has no access to work orders. A person with the data-entry access sees their own orders, without being able to create any.' },
         { titre: 'Check your plan', texte: 'Work orders are not included in every plan. Plans are described on <a href="/en/#tarifs">the plans page</a>; the manager can compare them and change plan there.' },
         { titre: 'Contact us if needed', texte: 'If your level and your plan are the right ones and the menu is still missing, open {{ui:Aide & support}} and write to us: the team replies in the same screen.' },
@@ -357,7 +379,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 8. Signature et rapport PDF
   {
-    id: 'ord-signature-rapport', theme: 'ordres',
+    id: 'ord-signature-rapport', theme: 'ordres', scenario: 'ord-signature-rapport',
     fr: {
       fichier: 'aide/signer-intervention-rapport-pdf.html',
       titre: 'Faire signer une intervention et télécharger le rapport PDF | Aide KALEA',
@@ -366,9 +388,12 @@ export const ARTICLES_ORDRES = [
       description: 'Dans KALEA, signer une intervention au doigt ou à la souris, faire signer un responsable ou un client, ajouter un avenant et télécharger le rapport PDF.',
       intro: 'Une intervention peut être signée à l\'écran, puis reprise dans un rapport PDF à remettre ou à classer. Cette fonction dépend de votre offre : voir <a href="/#tarifs">la page des offres</a>.',
       etapes: [
-        { titre: 'Choisissez quand signer', texte: 'Par défaut, on signe à la demande. Le gérant peut exiger la signature de l\'exécutant : sur la page {{ui:Ordres de travail}}, il coche {{ui:Exiger la signature de l\'exécutant après chaque intervention}}. La fenêtre de signature s\'ouvre alors juste après chaque intervention enregistrée.' },
-        { titre: 'Ouvrez le rapport de l\'intervention', texte: 'Pour un ordre terminé, touchez {{ui:Rapport et signatures}} dans sa fiche. Pour une autre intervention, ouvrez la fiche de la machine, puis la colonne {{ui:Signature}} de l\'historique des entretiens : touchez {{ui:Rapport}} sur la ligne voulue.' },
-        { titre: 'Signez en tant qu\'exécutant', texte: 'Touchez {{ui:Signer (exécutant)}}. Tracez votre signature dans la zone « Signez ici » avec le doigt ou la souris, ajoutez votre {{ui:Fonction (facultatif)}}, puis touchez {{ui:Valider la signature}}. Le bouton reste grisé tant que le tracé est trop court ; {{ui:Effacer}} permet de recommencer.' },
+        { titre: 'Choisissez quand signer', texte: 'Par défaut, on signe à la demande. Le gérant peut exiger la signature de l\'exécutant : sur la page {{ui:Ordres de travail}}, il coche {{ui:Exiger la signature de l\'exécutant après chaque intervention}}. La fenêtre de signature s\'ouvre alors juste après chaque intervention enregistrée.',
+          image: { nom: 'reglage', alt: 'La case Exiger la signature de l\'exécutant après chaque intervention, cochée et repérée par le numéro 1, avec la confirmation de KALEA.' } },
+        { titre: 'Ouvrez le rapport de l\'intervention', texte: 'Pour un ordre terminé, touchez {{ui:Rapport et signatures}} dans sa fiche. Pour une autre intervention, ouvrez la fiche de la machine, puis la colonne {{ui:Signature}} de l\'historique des entretiens : touchez {{ui:Rapport}} sur la ligne voulue.',
+          image: { nom: 'rapport', alt: 'La fenêtre Rapport et signatures d\'une intervention non signée : les boutons Signer (exécutant) (1), Faire signer un responsable (2) et Rapport PDF (3).' } },
+        { titre: 'Signez en tant qu\'exécutant', texte: 'Touchez {{ui:Signer (exécutant)}}. Tracez votre signature dans la zone « Signez ici » avec le doigt ou la souris, ajoutez votre {{ui:Fonction (facultatif)}}, puis touchez {{ui:Valider la signature}}. Le bouton reste grisé tant que le tracé est trop court ; {{ui:Effacer}} permet de recommencer.',
+          image: { nom: 'signature', alt: 'La fenêtre de signature : le champ Fonction (1), la zone Signez ici avec un tracé (2) et le bouton Valider la signature (3).' } },
         { titre: 'Faites signer un responsable ou le client', texte: 'Touchez {{ui:Faire signer un responsable}}. Le {{ui:Nom du signataire}} est obligatoire ; la personne trace sa signature, puis vous touchez {{ui:Valider la signature}}.' },
         { titre: 'Téléchargez le rapport', texte: 'Touchez {{ui:Rapport PDF}}. Le fichier reprend la machine, l\'intervention, les pièces, les signatures et les avenants. Il ne contient aucun coût.' },
       ],
@@ -389,9 +414,12 @@ export const ARTICLES_ORDRES = [
       description: 'In KALEA, sign an intervention with a finger or a mouse, have a manager or a customer sign, add an amendment and download the PDF report.',
       intro: 'An intervention can be signed on screen, then included in a PDF report to hand over or file. This feature depends on your plan: see <a href="/en/#tarifs">the plans page</a>.',
       etapes: [
-        { titre: 'Choose when to sign', texte: 'By default, you sign on demand. The manager can require the performer\'s signature: on the {{ui:Ordres de travail}} page, they tick {{ui:Exiger la signature de l\'exécutant après chaque intervention}}. The signature window then opens right after each logged intervention.' },
-        { titre: 'Open the intervention\'s report', texte: 'For a completed order, tap {{ui:Rapport et signatures}} on its page. For another intervention, open the machine\'s page, then the {{ui:Signature}} column of the service history: tap {{ui:Rapport}} on the row you want.' },
-        { titre: 'Sign as the performer', texte: 'Tap {{ui:Signer (exécutant)}}. Draw your signature in the “Sign here” area with a finger or the mouse, add your {{ui:Fonction (facultatif)}}, then tap {{ui:Valider la signature}}. The button stays greyed out while the drawing is too short; {{ui:Effacer}} lets you start again.' },
+        { titre: 'Choose when to sign', texte: 'By default, you sign on demand. The manager can require the performer\'s signature: on the {{ui:Ordres de travail}} page, they tick {{ui:Exiger la signature de l\'exécutant après chaque intervention}}. The signature window then opens right after each logged intervention.',
+          image: { nom: 'reglage', alt: 'The Require the performer\'s signature after each intervention box, ticked and marked with number 1, with KALEA\'s confirmation.' } },
+        { titre: 'Open the intervention\'s report', texte: 'For a completed order, tap {{ui:Rapport et signatures}} on its page. For another intervention, open the machine\'s page, then the {{ui:Signature}} column of the service history: tap {{ui:Rapport}} on the row you want.',
+          image: { nom: 'rapport', alt: 'The Report and signatures window of an unsigned intervention: the Sign (performer) (1), Have a manager sign (2) and PDF report (3) buttons.' } },
+        { titre: 'Sign as the performer', texte: 'Tap {{ui:Signer (exécutant)}}. Draw your signature in the “Sign here” area with a finger or the mouse, add your {{ui:Fonction (facultatif)}}, then tap {{ui:Valider la signature}}. The button stays greyed out while the drawing is too short; {{ui:Effacer}} lets you start again.',
+          image: { nom: 'signature', alt: 'The signature window: the Job title field (1), the Sign here area with a drawing (2) and the Confirm signature button (3).' } },
         { titre: 'Have a manager or the customer sign', texte: 'Tap {{ui:Faire signer un responsable}}. The {{ui:Nom du signataire}} is required; the person draws their signature, then you tap {{ui:Valider la signature}}.' },
         { titre: 'Download the report', texte: 'Tap {{ui:Rapport PDF}}. The file includes the machine, the intervention, the parts, the signatures and the amendments. It contains no cost.' },
       ],
@@ -408,7 +436,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 9. Habilitations
   {
-    id: 'ord-habilitations', theme: 'ordres',
+    id: 'ord-habilitations', theme: 'ordres', scenario: 'ord-habilitations',
     fr: {
       fichier: 'aide/qualifications-habilitations-personnel.html',
       titre: 'Suivre les qualifications et habilitations du personnel | Aide KALEA',
@@ -417,10 +445,14 @@ export const ARTICLES_ORDRES = [
       description: 'Dans KALEA, tenir le catalogue des qualifications, saisir les habilitations de chaque personne avec leur date d\'expiration et définir qui peut intervenir sur quelle machine.',
       intro: 'KALEA vous aide à savoir qui est habilité à intervenir sur quelle machine : un catalogue de qualifications, les habilitations de chaque personne avec leurs dates, et des exigences par machine ou par catégorie. Cette fonction dépend de votre offre : voir <a href="/#tarifs">la page des offres</a>.',
       etapes: [
-        { titre: 'Ouvrez la gestion', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, descendez en bas de la page et cliquez sur {{ui:Qualifications et habilitations}}. Cette fenêtre est réservée au gérant.' },
-        { titre: 'Remplissez le catalogue', texte: 'Ouvrez l\'onglet {{ui:Catalogue}} et cliquez sur {{ui:Ajouter}}. Donnez le nom de la qualification et, si elle expire, sa {{ui:Durée de validité en mois (facultatif)}}. Laissez vide pour une qualification sans expiration. Enregistrez.' },
-        { titre: 'Saisissez les habilitations des personnes', texte: 'Ouvrez l\'onglet {{ui:Personnes}}. Sur la ligne de la personne, cliquez sur {{ui:Ajouter}}, choisissez la qualification, indiquez {{ui:Obtenue le}} et, si vous la connaissez, {{ui:Expire le (facultatif)}}. Si vous laissez la date d\'expiration vide, KALEA la calcule avec la durée de validité de la qualification.' },
-        { titre: 'Fixez les exigences', texte: 'Ouvrez l\'onglet {{ui:Exigences}} et cliquez sur {{ui:Ajouter}}. Choisissez la qualification, puis {{ui:S\'applique à}} une catégorie de machines ou à une machine, et le {{ui:Niveau}} : Obligatoire ou Recommandée.' },
+        { titre: 'Ouvrez la gestion', texte: 'Dans {{ui:Planning}}, puis {{ui:Ordres de travail}}, descendez en bas de la page et cliquez sur {{ui:Qualifications et habilitations}}. Cette fenêtre est réservée au gérant.',
+          image: { nom: 'bouton', alt: 'Le bas de la page des ordres de travail : le bouton Qualifications et habilitations est repéré par le numéro 1.' } },
+        { titre: 'Remplissez le catalogue', texte: 'Ouvrez l\'onglet {{ui:Catalogue}} et cliquez sur {{ui:Ajouter}}. Donnez le nom de la qualification et, si elle expire, sa {{ui:Durée de validité en mois (facultatif)}}. Laissez vide pour une qualification sans expiration. Enregistrez.',
+          image: { nom: 'catalogue', alt: 'L\'onglet Catalogue (1) de la fenêtre Qualifications et habilitations, avec le bouton Ajouter (2).' } },
+        { titre: 'Saisissez les habilitations des personnes', texte: 'Ouvrez l\'onglet {{ui:Personnes}}. Sur la ligne de la personne, cliquez sur {{ui:Ajouter}}, choisissez la qualification, indiquez {{ui:Obtenue le}} et, si vous la connaissez, {{ui:Expire le (facultatif)}}. Si vous laissez la date d\'expiration vide, KALEA la calcule avec la durée de validité de la qualification.',
+          image: { nom: 'personnes', alt: 'L\'onglet Personnes : le bloc À renouveler bientôt (1) et le bouton Ajouter de la ligne d\'une personne (2).' } },
+        { titre: 'Fixez les exigences', texte: 'Ouvrez l\'onglet {{ui:Exigences}} et cliquez sur {{ui:Ajouter}}. Choisissez la qualification, puis {{ui:S\'applique à}} une catégorie de machines ou à une machine, et le {{ui:Niveau}} : Obligatoire ou Recommandée.',
+          image: { nom: 'exigences', alt: 'L\'onglet Exigences : le bouton Ajouter (1) et, en bas de la fenêtre, la liste Règle de la société (2).' } },
         { titre: 'Choisissez la règle de la société', texte: 'En bas de la fenêtre, la liste {{ui:Règle de la société}} propose : {{ui:Aucune règle}} (rien n\'est contrôlé), {{ui:Avertir}} (KALEA prévient à l\'assignation d\'un ordre, sans bloquer) ou {{ui:Bloquer}} (le serveur refuse d\'assigner un ordre, ou de signer comme exécutant, sans l\'habilitation obligatoire).' },
       ],
       notes: [
@@ -441,10 +473,14 @@ export const ARTICLES_ORDRES = [
       description: 'In KALEA, keep the qualification catalogue, enter each person\'s certifications with their expiry date and define who may work on which machine.',
       intro: 'KALEA helps you know who is qualified to work on which machine: a catalogue of qualifications, each person\'s certifications with their dates, and requirements per machine or per category. This feature depends on your plan: see <a href="/en/#tarifs">the plans page</a>.',
       etapes: [
-        { titre: 'Open the management window', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, scroll to the bottom of the page and click {{ui:Qualifications et habilitations}}. This window is reserved for the manager.' },
-        { titre: 'Fill in the catalogue', texte: 'Open the {{ui:Catalogue}} tab and click {{ui:Ajouter}}. Give the qualification\'s name and, if it expires, its {{ui:Durée de validité en mois (facultatif)}}. Leave it empty for a qualification that does not expire. Save.' },
-        { titre: 'Enter people\'s certifications', texte: 'Open the {{ui:Personnes}} tab. On the person\'s row, click {{ui:Ajouter}}, choose the qualification, enter {{ui:Obtenue le}} and, if you know it, {{ui:Expire le (facultatif)}}. If you leave the expiry date empty, KALEA calculates it from the qualification\'s validity period.' },
-        { titre: 'Set the requirements', texte: 'Open the {{ui:Exigences}} tab and click {{ui:Ajouter}}. Choose the qualification, then {{ui:S\'applique à}} a machine category or a machine, and the {{ui:Niveau}}: Required or Recommended.' },
+        { titre: 'Open the management window', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, scroll to the bottom of the page and click {{ui:Qualifications et habilitations}}. This window is reserved for the manager.',
+          image: { nom: 'bouton', alt: 'The bottom of the work orders page: the Qualifications and certifications button is marked with number 1.' } },
+        { titre: 'Fill in the catalogue', texte: 'Open the {{ui:Catalogue}} tab and click {{ui:Ajouter}}. Give the qualification\'s name and, if it expires, its {{ui:Durée de validité en mois (facultatif)}}. Leave it empty for a qualification that does not expire. Save.',
+          image: { nom: 'catalogue', alt: 'The Catalog tab (1) of the Qualifications and certifications window, with the Add button (2).' } },
+        { titre: 'Enter people\'s certifications', texte: 'Open the {{ui:Personnes}} tab. On the person\'s row, click {{ui:Ajouter}}, choose the qualification, enter {{ui:Obtenue le}} and, if you know it, {{ui:Expire le (facultatif)}}. If you leave the expiry date empty, KALEA calculates it from the qualification\'s validity period.',
+          image: { nom: 'personnes', alt: 'The People tab: the To renew soon block (1) and the Add button on a person\'s row (2).' } },
+        { titre: 'Set the requirements', texte: 'Open the {{ui:Exigences}} tab and click {{ui:Ajouter}}. Choose the qualification, then {{ui:S\'applique à}} a machine category or a machine, and the {{ui:Niveau}}: Required or Recommended.',
+          image: { nom: 'exigences', alt: 'The Requirements tab: the Add button (1) and, at the bottom of the window, the Company rule list (2).' } },
         { titre: 'Choose the company rule', texte: 'At the bottom of the window, the {{ui:Règle de la société}} list offers: {{ui:Aucune règle}} (nothing is checked), {{ui:Avertir}} (KALEA warns when an order is assigned, without blocking) or {{ui:Bloquer}} (the server refuses to assign an order, or to sign as performer, without the required certification).' },
       ],
       notes: [
@@ -461,7 +497,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 10. Intervenant assigné
   {
-    id: 'ord-intervenant-assigne', theme: 'ordres',
+    id: 'ord-intervenant-assigne', theme: 'ordres', scenario: 'ord-intervenant-assigne',
     fr: {
       fichier: 'aide/indiquer-intervenant-intervention.html',
       titre: 'Indiquer qui a fait l\'intervention | Aide KALEA',
@@ -471,8 +507,10 @@ export const ARTICLES_ORDRES = [
       intro: 'Chaque intervention peut porter le nom de la personne qui a fait le travail. C\'est facultatif, mais cela rend l\'historique de la machine beaucoup plus utile.',
       etapes: [
         { titre: 'Ouvrez la fenêtre d\'intervention', texte: 'Sur la fiche de la machine, cliquez sur {{ui:Enregistrer une intervention}}. Depuis un ordre de travail, cette fenêtre s\'ouvre toute seule quand vous touchez {{ui:Terminer}}.' },
-        { titre: 'Choisissez l\'intervenant', texte: 'Dans le champ {{ui:Intervenant assigné}}, choisissez la personne dans la liste de l\'équipe. Sans choix, la mention reste {{ui:Non précisé}}. Depuis un ordre de travail, la personne assignée à l\'ordre est déjà proposée.' },
-        { titre: 'Enregistrez et retrouvez le nom', texte: 'Validez l\'intervention. Le nom apparaît ensuite dans la colonne {{ui:Opérateur / Atelier}} de l\'{{ui:Historique des entretiens}} de la machine, et dans la ligne « Intervenant » du rapport PDF.' },
+        { titre: 'Choisissez l\'intervenant', texte: 'Dans le champ {{ui:Intervenant assigné}}, choisissez la personne dans la liste de l\'équipe. Sans choix, la mention reste {{ui:Non précisé}}. Depuis un ordre de travail, la personne assignée à l\'ordre est déjà proposée.',
+          image: { nom: 'fenetre', alt: 'La fenêtre Enregistrer une intervention : le champ Intervenant assigné, repéré par le numéro 1, avec une personne choisie.' } },
+        { titre: 'Enregistrez et retrouvez le nom', texte: 'Validez l\'intervention. Le nom apparaît ensuite dans la colonne {{ui:Opérateur / Atelier}} de l\'{{ui:Historique des entretiens}} de la machine, et dans la ligne « Intervenant » du rapport PDF.',
+          image: { nom: 'historique', alt: 'L\'historique des entretiens d\'une machine : la colonne Opérateur / Atelier, repérée par le numéro 1, donne le nom de l\'intervenant.' } },
       ],
       notes: [
         'Toutes les personnes de la société peuvent choisir quelqu\'un dans cette liste, quel que soit leur droit d\'accès, y compris elles-mêmes. La liste ne montre que des noms : ni adresse e-mail, ni droit, ni métier.',
@@ -490,8 +528,10 @@ export const ARTICLES_ORDRES = [
       intro: 'Each intervention can carry the name of the person who did the job. It is optional, but it makes the machine\'s history much more useful.',
       etapes: [
         { titre: 'Open the intervention window', texte: 'On the machine\'s page, click {{ui:Enregistrer une intervention}}. From a work order, this window opens by itself when you tap {{ui:Terminer}}.' },
-        { titre: 'Choose the operator', texte: 'In the {{ui:Intervenant assigné}} field, choose the person from the team list. With no choice, the field stays {{ui:Non précisé}}. From a work order, the person assigned to the order is already suggested.' },
-        { titre: 'Save and find the name', texte: 'Confirm the intervention. The name then appears in the {{ui:Opérateur / Atelier}} column of the machine\'s {{ui:Historique des entretiens}}, and on the “Technician” line of the PDF report.' },
+        { titre: 'Choose the operator', texte: 'In the {{ui:Intervenant assigné}} field, choose the person from the team list. With no choice, the field stays {{ui:Non précisé}}. From a work order, the person assigned to the order is already suggested.',
+          image: { nom: 'fenetre', alt: 'The Log an intervention window: the Assigned operator field, marked with number 1, with a person chosen.' } },
+        { titre: 'Save and find the name', texte: 'Confirm the intervention. The name then appears in the {{ui:Opérateur / Atelier}} column of the machine\'s {{ui:Historique des entretiens}}, and on the “Technician” line of the PDF report.',
+          image: { nom: 'historique', alt: 'A machine\'s service history: the Operator / Workshop column, marked with number 1, shows the operator\'s name.' } },
       ],
       notes: [
         'Everyone in the company can pick someone from this list, whatever their access level, themselves included. The list only shows names: no email address, no access level, no trade.',
@@ -663,7 +703,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 14. Changer le droit, mot de passe, retirer
   {
-    id: 'ord-changer-retirer-membre', theme: 'equipe',
+    id: 'ord-changer-retirer-membre', theme: 'equipe', scenario: 'ord-changer-retirer-membre',
     fr: {
       fichier: 'aide/changer-droit-retirer-membre.html',
       titre: 'Changer le droit d\'un membre, redonner un mot de passe ou le retirer | Aide KALEA',
@@ -672,8 +712,10 @@ export const ARTICLES_ORDRES = [
       description: 'Dans KALEA, changer le droit d\'accès d\'une personne de l\'équipe, générer un nouveau mot de passe ou la retirer de la société.',
       intro: 'Quelqu\'un change de poste, a perdu son mot de passe ou quitte la société : tout se règle depuis la liste de l\'équipe, par l\'administrateur ou la direction.',
       etapes: [
-        { titre: 'Ouvrez la ligne de la personne', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Cliquez sur la ligne de la personne pour la déplier : vous y voyez ce qu\'elle peut faire, son login et ses boutons d\'action. À partir de sept personnes, un champ de recherche et des filtres par droit apparaissent.' },
-        { titre: 'Changez son droit', texte: 'Cliquez sur {{ui:Changer le droit}}. Dans la fenêtre, choisissez le nouveau {{ui:Droit d\'accès}} puis cliquez sur {{ui:Enregistrer}}. KALEA confirme « Droit modifié. ». Si vous choisissez le droit qu\'elle a déjà, il vous demande d\'en choisir un autre.' },
+        { titre: 'Ouvrez la ligne de la personne', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Cliquez sur la ligne de la personne pour la déplier : vous y voyez ce qu\'elle peut faire, son login et ses boutons d\'action. À partir de sept personnes, un champ de recherche et des filtres par droit apparaissent.',
+          image: { nom: 'ligne', alt: 'La ligne d\'une personne dépliée : les boutons Nouveau mot de passe (1), Changer le droit (2) et Retirer (3).' } },
+        { titre: 'Changez son droit', texte: 'Cliquez sur {{ui:Changer le droit}}. Dans la fenêtre, choisissez le nouveau {{ui:Droit d\'accès}} puis cliquez sur {{ui:Enregistrer}}. KALEA confirme « Droit modifié. ». Si vous choisissez le droit qu\'elle a déjà, il vous demande d\'en choisir un autre.',
+          image: { nom: 'droit', alt: 'La fenêtre Changer le droit : la liste Droit d\'accès (1) et le bouton Enregistrer (2).' } },
         { titre: 'Redonnez un mot de passe', texte: 'Cliquez sur {{ui:Nouveau mot de passe}}. KALEA génère aussitôt, sans demander de confirmation, un nouveau mot de passe qui remplace l\'ancien, et l\'affiche une seule fois, avec l\'{{ui:Identifiant de connexion}}. Notez-le ou copiez-le tout de suite, puis remettez-le à la personne.' },
         { titre: 'Retirez la personne si besoin', texte: 'Cliquez sur {{ui:Retirer}} et confirmez. La personne perd l\'accès au parc, mais garde son compte et son mot de passe.' },
       ],
@@ -693,8 +735,10 @@ export const ARTICLES_ORDRES = [
       description: 'In KALEA, change a team member\'s access level, generate a new password or remove them from the company.',
       intro: 'Someone changes role, has lost their password or leaves the company: everything is handled from the team list, by the Administrator or Director.',
       etapes: [
-        { titre: 'Open the person\'s row', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section. Click the person\'s row to expand it: you see what they can do, their login and their action buttons. From seven people on, a search field and filters by level appear.' },
-        { titre: 'Change their level', texte: 'Click {{ui:Changer le droit}}. In the window, choose the new {{ui:Droit d\'accès}} then click {{ui:Enregistrer}}. KALEA confirms “Access level updated.”. If you choose the level they already have, it asks you to choose another.' },
+        { titre: 'Open the person\'s row', texte: 'Open {{ui:Mon compte}}, {{ui:Gestion de l\'équipe}} section. Click the person\'s row to expand it: you see what they can do, their login and their action buttons. From seven people on, a search field and filters by level appear.',
+          image: { nom: 'ligne', alt: 'A person\'s expanded row: the New password (1), Change access level (2) and Remove (3) buttons.' } },
+        { titre: 'Change their level', texte: 'Click {{ui:Changer le droit}}. In the window, choose the new {{ui:Droit d\'accès}} then click {{ui:Enregistrer}}. KALEA confirms “Access level updated.”. If you choose the level they already have, it asks you to choose another.',
+          image: { nom: 'droit', alt: 'The Change access level window: the Access level list (1) and the Save button (2).' } },
         { titre: 'Give a new password', texte: 'Click {{ui:Nouveau mot de passe}}. KALEA immediately generates, without asking for confirmation, a new password that replaces the old one, and shows it only once, with the {{ui:Identifiant de connexion}}. Write it down or copy it right away, then hand it to the person.' },
         { titre: 'Remove the person if needed', texte: 'Click {{ui:Retirer}} and confirm. The person loses access to the fleet, but keeps their account and password.' },
       ],
@@ -710,7 +754,7 @@ export const ARTICLES_ORDRES = [
 
   // ───────────────────────────────────────────────────────── 15. Travailler sans réseau
   {
-    id: 'ord-hors-reseau', theme: 'ordres',
+    id: 'ord-hors-reseau', theme: 'ordres', scenario: 'ord-hors-reseau',
     fr: {
       fichier: 'aide/travailler-sans-reseau.html',
       titre: 'Travailler sans réseau : ce qui reste disponible | Aide KALEA',
@@ -719,8 +763,10 @@ export const ARTICLES_ORDRES = [
       description: 'Zone blanche sur le chantier ? Dans KALEA, ce que vous pouvez lire et faire sans réseau, comment activer la copie locale et ce qui se passe au retour de la connexion.',
       intro: 'Sur un chantier ou un atelier mal couvert, KALEA garde une copie des dernières données reçues. Vous continuez à les lire et à enregistrer l\'essentiel ; tout part au retour du réseau.',
       etapes: [
-        { titre: 'Vérifiez que la copie est activée', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Données locales & Sécurité}}. La case {{ui:Garder une copie pour la consultation hors connexion}} doit être cochée. Sur un appareil partagé, mieux vaut la décocher : la copie est alors effacée de l\'appareil.' },
-        { titre: 'Ouvrez KALEA sans réseau', texte: 'Quand vous êtes déjà connecté, l\'application s\'ouvre avec les dernières données et affiche un bandeau « Hors connexion » qui précise l\'âge de ces données. Le bouton {{ui:Réessayer}} du bandeau retente la connexion. Si votre session a expiré (une déconnexion volontaire efface la copie), l\'écran de connexion propose {{ui:Zone blanche ou hors réseau ?}} avec le bouton {{ui:Afficher les dernières données hors connexion}}.' },
+        { titre: 'Vérifiez que la copie est activée', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Données locales & Sécurité}}. La case {{ui:Garder une copie pour la consultation hors connexion}} doit être cochée. Sur un appareil partagé, mieux vaut la décocher : la copie est alors effacée de l\'appareil.',
+          image: { nom: 'copie', alt: 'La case Garder une copie pour la consultation hors connexion, cochée et repérée par le numéro 1, dans Mon compte.' } },
+        { titre: 'Ouvrez KALEA sans réseau', texte: 'Quand vous êtes déjà connecté, l\'application s\'ouvre avec les dernières données et affiche un bandeau « Hors connexion » qui précise l\'âge de ces données. Le bouton {{ui:Réessayer}} du bandeau retente la connexion. Si votre session a expiré (une déconnexion volontaire efface la copie), l\'écran de connexion propose {{ui:Zone blanche ou hors réseau ?}} avec le bouton {{ui:Afficher les dernières données hors connexion}}.',
+          image: { nom: 'bandeau', alt: 'Le bandeau Hors connexion (1), avec son bouton Réessayer (2).' } },
         { titre: 'Lisez ce qui est gardé', texte: 'Restent lisibles : les machines et leurs plans, le stock, les kits d\'entretien, les ordres de travail, les pannes et les commandes. Certains écrans demandent toujours le réseau, comme la gestion de l\'équipe, les habilitations, l\'historique d\'un ordre ou le rapport d\'une intervention.' },
         { titre: 'Enregistrez ce qui est possible', texte: 'Sans réseau, vous pouvez enregistrer une intervention, signaler une panne, démarrer, cocher et terminer un ordre de travail, saisir un frais, faire un mouvement de stock (sortie, entrée, transfert) et relever un compteur. Chaque action est gardée sur l\'appareil.' },
         { titre: 'Attendez le retour du réseau', texte: 'Au retour de la connexion, tout est envoyé automatiquement, dans l\'ordre. Pour suivre ce qui attend, voir <a href="{{lien:ord-a-envoyer}}">le bandeau « À envoyer »</a> (les relevés de compteur n\'y figurent pas : ils partent seuls au retour du réseau).' },
@@ -741,8 +787,10 @@ export const ARTICLES_ORDRES = [
       description: 'No signal on site? In KALEA, what you can read and do without a network, how to turn on the local copy and what happens when the connection returns.',
       intro: 'On a poorly covered site or workshop, KALEA keeps a copy of the latest data received. You keep reading it and logging the essentials; everything is sent when the network returns.',
       etapes: [
-        { titre: 'Check that the copy is turned on', texte: 'Open {{ui:Mon compte}}, {{ui:Données locales & Sécurité}} section. The {{ui:Garder une copie pour la consultation hors connexion}} box must be ticked. On a shared device, it is better to untick it: the copy is then erased from the device.' },
-        { titre: 'Open KALEA without a network', texte: 'When you are already signed in, the app opens with the latest data and shows an “Offline” banner stating how old that data is. The banner\'s {{ui:Réessayer}} button tries the connection again. If your session has expired (signing out on purpose erases the copy), the sign-in screen offers {{ui:Zone blanche ou hors réseau ?}} with the {{ui:Afficher les dernières données hors connexion}} button.' },
+        { titre: 'Check that the copy is turned on', texte: 'Open {{ui:Mon compte}}, {{ui:Données locales & Sécurité}} section. The {{ui:Garder une copie pour la consultation hors connexion}} box must be ticked. On a shared device, it is better to untick it: the copy is then erased from the device.',
+          image: { nom: 'copie', alt: 'The Keep a copy for offline reading box, ticked and marked with number 1, in My account.' } },
+        { titre: 'Open KALEA without a network', texte: 'When you are already signed in, the app opens with the latest data and shows an “Offline” banner stating how old that data is. The banner\'s {{ui:Réessayer}} button tries the connection again. If your session has expired (signing out on purpose erases the copy), the sign-in screen offers {{ui:Zone blanche ou hors réseau ?}} with the {{ui:Afficher les dernières données hors connexion}} button.',
+          image: { nom: 'bandeau', alt: 'The Offline banner (1), with its Try again button (2).' } },
         { titre: 'Read what is kept', texte: 'Still readable: the machines and their plans, the stock, the maintenance kits, the work orders, the breakdowns and the purchase orders. Some screens still need the network, such as team management, certifications, an order\'s history or an intervention\'s report.' },
         { titre: 'Log what is possible', texte: 'Without a network, you can log an intervention, report a breakdown, start, tick and complete a work order, enter an expense, make a stock movement (issue, receipt, transfer) and read a meter. Each action is kept on the device.' },
         { titre: 'Wait for the network to return', texte: 'When the connection returns, everything is sent automatically, in order. To follow what is waiting, see <a href="{{lien:ord-a-envoyer}}">the “To send” banner</a> (meter readings are not listed there: they are sent on their own when the network returns).' },

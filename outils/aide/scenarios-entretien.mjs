@@ -95,9 +95,9 @@ const TACHES_CAMION = (langue) => {
     { label: en ? 'Air filter' : 'Filtre à air', frequency: en ? 'Every 60,000 km' : 'Tous les 60 000 km', spec: '', qty: '1', interval: 60000, interval_unite: 'km', frequence: per(60000, 'km'), due_counter: 120000 },
   ];
 };
-async function ouvrirFiche(c) {
+async function ouvrirFiche(c, echeancePlan = 84520) {
   await c.ev(LOC(c.langue));
-  await c.ev(`(() => { const m3 = UI.machines.find((m) => m.id === 'm3'); m3.plan.items = ${JSON.stringify(TACHES_CAMION(c.langue))}; m3.plan.next_due_counter = 84520; return true; })()`);
+  await c.ev(`(() => { const m3 = UI.machines.find((m) => m.id === 'm3'); m3.plan.items = ${JSON.stringify(TACHES_CAMION(c.langue))}; m3.plan.next_due_counter = ${echeancePlan}; return true; })()`);
   await c.ev(POSER_HISTORIQUE(c.langue));
   await c.ev("goTo('machines'); true");
   await c.dort(500);
@@ -122,6 +122,54 @@ const POSER_STOCK = (langue) => {
     return true;
   })()`;
 };
+
+// Plans à échéance DATÉE avec liste de pièces (pour la préparation des pièces) : la pelle (m1) et la chargeuse (m2), plus le camion au km (m3) pour montrer « Au compteur ».
+const POSER_PIECES = (langue) => {
+  const en = langue === 'en';
+  const t = (label, freq, spec, qty, n, unite, jours) => ({ label, frequency: freq, spec, qty, interval: n, interval_unite: unite, frequence: { nature: 'periodique', interval: n, unite }, __jours: jours });
+  const m1 = [
+    t(en ? 'Engine oil change' : 'Vidange huile moteur', en ? 'Every 6 months' : 'Tous les 6 mois', '15W-40', '12 L', 6, 'mois', 4),
+    t(en ? 'Oil filter' : 'Filtre à huile', en ? 'Every 6 months' : 'Tous les 6 mois', en ? 'Filter' : 'Filtre', '1', 6, 'mois', 4),
+    t(en ? 'Greasing of the arm' : 'Graissage du bras', en ? 'Every month' : 'Tous les mois', en ? 'Grease' : 'Graisse', '0,5 kg', 1, 'mois', 20),
+  ];
+  const m2 = [
+    t(en ? 'Hydraulic oil' : 'Huile hydraulique', en ? 'Every year' : 'Tous les ans', 'HV 46', '40 L', 12, 'mois', 25),
+    t(en ? 'Air filter' : 'Filtre à air', en ? 'Every 6 months' : 'Tous les 6 mois', en ? 'Cartridge' : 'Cartouche', '2', 6, 'mois', 25),
+    t(en ? 'Brake pads' : 'Plaquettes de frein', en ? 'Every year' : 'Tous les ans', en ? 'Pads' : 'Plaquettes', '4', 12, 'mois', 60),
+  ];
+  return `(() => {
+    ${JOUR_FN}
+    const poser = (id, items, jours) => { const m = UI.machines.find((x) => x.id === id); m.counter_value = null; m.plan.tracking_mode = 'days'; m.plan.interval_days = 180; m.plan.next_due_counter = null; m.plan.next_due_at = jour(jours); m.plan.items = items.map((it) => { const { __jours, ...r } = it; return { ...r, due_at: jour(__jours) }; }); };
+    poser('m1', ${JSON.stringify(m1)}, 4); poser('m2', ${JSON.stringify(m2)}, 25);
+    UI.machines.find((m) => m.id === 'm3').plan.items = ${JSON.stringify(TACHES_CAMION(langue))};
+    return true;
+  })()`;
+};
+
+// Ouvre la fenêtre « Enregistrer une intervention » de la pelle (cartes de type visibles : offre Enterprise).
+async function ouvrirFenetreIntervention(c) {
+  await c.ev(POSER_TACHES(c.langue));
+  await c.ev("goTo('machines'); true");
+  await c.dort(500);
+  await c.ev("openLogInterventionModal(UI.machines.find((m) => m.id === 'm1')); true");
+  await c.attendre('#log-submit-btn');
+  await c.dort(900);
+}
+
+// Machine suivie au calendrier dont les tâches sont en heures et qui n'a aucun compteur : la fenêtre d'intervention affiche l'encadré « Compteur manquant ».
+async function ouvrirFenetreSansCompteur(c) {
+  const en = c.langue === 'en';
+  const items = [
+    { label: en ? 'Engine oil change' : 'Vidange huile moteur', frequency: en ? 'Every 500 h' : 'Toutes les 500 h', spec: '15W-40', qty: '40 L', interval: 500, interval_unite: 'heures', frequence: { nature: 'periodique', interval: 500, unite: 'heures' } },
+    { label: en ? 'Hydraulic filter' : 'Filtre hydraulique', frequency: en ? 'Every 1000 h' : 'Toutes les 1000 h', spec: '', qty: '1', interval: 1000, interval_unite: 'heures', frequence: { nature: 'periodique', interval: 1000, unite: 'heures' } },
+  ];
+  await c.ev(`(() => { const m = UI.machines.find((x) => x.id === 'm2'); m.plan.tracking_mode = 'days'; m.plan.interval_days = 180; m.counter_value = null; m.plan.next_due_counter = null; m.plan.items = ${JSON.stringify(items)}; return true; })()`);
+  await c.ev("goTo('machines'); true");
+  await c.dort(500);
+  await c.ev("openLogInterventionModal(UI.machines.find((m) => m.id === 'm2')); true");
+  await c.attendre('.log-alerte-compteur');
+  await c.dort(800);
+}
 
 export const SCENARIOS = [
   // ───────────────────────────────────────────────────────────── Enregistrer une intervention
@@ -340,6 +388,251 @@ export const SCENARIOS = [
         await c.repere('#kit-tache-enregistrer', 4, { marge: 3 });
         await toutDansLaZone(c, ['#kit-tache-select', '[data-aide="piece"]', '#kit-tache-enregistrer'], '.kit-tache-modal .modal');
         return c.zone('.kit-tache-modal .modal', 30);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────────── Dépannage et frais
+  {
+    id: 'ent-intervention-depannage-frais',
+    etapes: [
+      // 2. Les trois cartes de type d'intervention.
+      { nom: 'types', ecran: 'bureau', async jouer(c) {
+        await ouvrirFenetreIntervention(c);
+        await c.repere('.log-type-grid', 2, { cote: 'gauche', marge: 4 });
+        await toutDansLaZone(c, ['.log-type-grid'], '.overlay .modal');
+        return c.zoneJusqua('.overlay .modal', '.log-type-grid', 20);
+      } },
+      // 3. Le type « Dépannage » : organe, gravité, diagnostic.
+      { nom: 'depannage', ecran: 'bureau', async jouer(c) {
+        await ouvrirFenetreIntervention(c);
+        await c.ev("document.querySelector('.log-type-carte[data-kind=\"depannage\"]').click(); true");
+        await c.dort(700);
+        await c.marquer('#log-organe', 'organe', 'parent');
+        await c.repere('.log-type-carte[data-kind="depannage"]', 2, { marge: 3 });
+        await c.repere('#log-panel-depannage', 3, { cote: 'gauche', marge: 4 });
+        await toutDansLaZone(c, ['.log-type-carte[data-kind="depannage"]', '#log-panel-depannage'], '.overlay .modal');
+        return c.zoneJusqua('.overlay .modal', '#log-panel-depannage', 20);
+      } },
+      // 4. Le type « Frais & Carburant » : nature du frais, quantité, prix unitaire.
+      { nom: 'frais', ecran: 'bureau', async jouer(c) {
+        await ouvrirFenetreIntervention(c);
+        await c.ev("document.querySelector('.log-type-carte[data-kind=\"frais\"]').click(); true");
+        await c.dort(700);
+        await c.repere('.log-type-carte[data-kind="frais"]', 2, { marge: 3 });
+        await c.repere('#log-panel-frais', 4, { cote: 'gauche', marge: 4 });
+        await toutDansLaZone(c, ['.log-type-carte[data-kind="frais"]', '#log-panel-frais'], '.overlay .modal');
+        return c.zoneJusqua('.overlay .modal', '#log-panel-frais', 20);
+      } },
+    ],
+  },
+  // ───────────────────────────────────────────────────────────── Planifier un entretien
+  {
+    id: 'ent-planifier-entretien',
+    etapes: [
+      // 2. La fenêtre d'un jour du calendrier, avec « Planifier un entretien ».
+      { nom: 'jour', ecran: 'bureau', async jouer(c) {
+        await c.ev(DATER_MACHINES);
+        await c.ev("goTo('agenda'); true");
+        await c.attendre('.agenda-jour-dot.is-soon');
+        await c.dort(600);
+        await c.ev("document.querySelector('.agenda-jour-dot.is-soon').click(); true");
+        await c.attendre('#agenda-jour-planifier');
+        await c.dort(700);
+        await c.repere('#agenda-jour-planifier', 2, { marge: 3 });
+        await toutDansLaZone(c, ['#agenda-jour-planifier'], '.agenda-jour-modal .modal');
+        return c.zone('.agenda-jour-modal .modal', 24);
+      } },
+      // 3 et 4. La fenêtre « Planifier un entretien » : date, recherche, liste, bouton de confirmation.
+      { nom: 'fenetre', ecran: 'bureau', async jouer(c) {
+        await c.ev(DATER_MACHINES);
+        await c.ev("goTo('agenda'); true");
+        await c.attendre('.agenda-jour-dot.is-soon');
+        await c.dort(600);
+        await c.ev("document.querySelector('.agenda-jour-dot.is-soon').click(); true");
+        await c.attendre('#agenda-jour-planifier');
+        await c.dort(500);
+        await c.ev("document.getElementById('agenda-jour-planifier').click(); true");
+        await c.attendre('#pe-confirmer');
+        await c.dort(700);
+        await c.ev("document.querySelector('.pe-machine').click(); true");
+        await c.dort(500);
+        await c.marquer('#prog-date', 'date', 'parent');
+        await c.repere('[data-aide="date"]', null, { marge: 3 });
+        await c.repere('#pe-recherche', 3, { marge: 3 });
+        await c.repere('#pe-confirmer', 4, { marge: 3 });
+        await toutDansLaZone(c, ['[data-aide="date"]', '#pe-recherche', '#pe-confirmer'], '.agenda-planifier-modal .modal');
+        return c.zone('.agenda-planifier-modal .modal', 24);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────────── Choisir la fréquence d'une tâche
+  {
+    id: 'ent-choisir-frequence',
+    etapes: [
+      // 1. La fiche : bouton « Choisir » dans la colonne Échéance et carte « Fréquences à préciser ».
+      { nom: 'fiche', ecran: 'bureau', async jouer(c) {
+        await ouvrirFiche(c);
+        await c.marquer('.ref-table', 'tableau', 'section');
+        await c.marquer('.view-manual.choisir-frequence', 'carte', 'section');
+        await c.repere('.ref-table .choisir-frequence', 1, { marge: 3 });
+        await c.repere('.view-manual.choisir-frequence', 1, { marge: 3 });
+        await toutDansLaZone(c, ['.ref-table .choisir-frequence', '.view-manual.choisir-frequence'], '.overlay .modal');
+        return c.zoneJusqua('[data-aide="tableau"]', '[data-aide="carte"]', 14);
+      } },
+      // 2 à 4. La fenêtre de choix : options du carnet, personnalisation libre, point de contrôle.
+      { nom: 'choix', ecran: 'bureau', async jouer(c) {
+        await ouvrirFiche(c);
+        await c.ev("document.querySelector('.ref-table .choisir-frequence').click(); true");
+        await c.attendre('#choix-annuler');
+        await c.dort(800);
+        await c.repere('.choix-bloc-carnet', 2, { cote: 'gauche', marge: 3 });
+        await c.repere('.choix-bloc-libre', 3, { cote: 'gauche', marge: 3 });
+        await c.repere('.choix-bloc-controle', 4, { cote: 'gauche', marge: 3 });
+        await toutDansLaZone(c, ['.choix-bloc-carnet', '.choix-bloc-libre', '.choix-bloc-controle'], '.choix-frequence-modal .modal');
+        return c.zone('.choix-frequence-modal .modal', 30);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────────── Intégrer l'agenda à son calendrier
+  {
+    id: 'ent-exporter-agenda',
+    etapes: [
+      // 2. L'en-tête de la carte Agenda : le bouton d'intégration au calendrier.
+      { nom: 'bouton', ecran: 'bureau', async jouer(c) {
+        await c.ev(DATER_MACHINES);
+        await c.ev("goTo('agenda'); true");
+        await c.attendre('#agenda-export-ics');
+        await c.dort(800);
+        await c.marquer('[data-agenda-vue]', 'affichage', 'parent');
+        await c.repere('#agenda-export-ics', 2, { marge: 4 });
+        await toutDansLaZone(c, ['#agenda-export-ics'], 'section.vue-agenda');
+        return c.zoneJusqua('section.vue-agenda', '[data-aide="affichage"]', 14);
+      } },
+    ],
+  },
+  // ───────────────────────────────────────────────────────────── Préparation des pièces
+  {
+    id: 'ent-preparation-pieces',
+    etapes: [
+      // 2 à 4. La carte : boutons de période, familles de produits, copier la liste et export.
+      { nom: 'carte', ecran: 'bureau', async jouer(c) {
+        await c.ev(POSER_PIECES(c.langue));
+        await c.ev("UI.agendaPiecesDetail = false; goTo('agenda'); true");
+        await c.attendre('.prep-detail-carte');
+        await c.dort(900);
+        await c.voir('.prep-detail-carte', 'start');
+        await c.dort(400);
+        await c.repere('.prep-detail-carte .ui-segment', 2, { marge: 4 });
+        await c.repere('.prep-detail-carte .ui-deux', 3, { cote: 'gauche', marge: 4 });
+        await c.repere('#prep-copier', 4, { marge: 4 });
+        await c.repere('#agenda-pieces-detail-toggle', 4, { marge: 4 });
+        await toutDansLaZone(c, ['.prep-detail-carte .ui-segment', '.prep-detail-carte .ui-deux', '#prep-copier', '#agenda-pieces-detail-toggle'], '.prep-detail-carte');
+        return c.zone('.prep-detail-carte', 20);
+      } },
+      // 4. « Export et bon de commande » déplié : export CSV et bon de commande express.
+      { nom: 'export', ecran: 'bureau', async jouer(c) {
+        await c.ev(POSER_PIECES(c.langue));
+        await c.ev("UI.agendaPiecesDetail = true; goTo('agenda'); true");
+        await c.attendre('#prep-export');
+        await c.dort(900);
+        await c.voir('#agenda-pieces-detail-toggle', 'start');
+        await c.dort(400);
+        await c.repere('#agenda-pieces-detail-toggle', 4, { marge: 4 });
+        await c.repere('#prep-export', 4, { marge: 4 });
+        await c.repere('.agenda-pieces-detail .bon-commande, .agenda-pieces-detail > div:last-child', null, { marge: 4 });
+        return c.ev("(() => { const a = document.getElementById('agenda-pieces-detail-toggle').getBoundingClientRect(); const b = document.querySelector('.agenda-pieces-detail').getBoundingClientRect(); const m = 24; return { x: Math.max(0, b.left - m) + (window.pageXOffset || 0), y: Math.max(0, a.top - m) + (window.pageYOffset || 0), largeur: Math.min(innerWidth, b.width + 2 * m), hauteur: Math.min(innerHeight, b.bottom - a.top + 2 * m) }; })()");
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────────── Alerte « Compteur manquant »
+  {
+    id: 'ent-alerte-compteur-manquant',
+    etapes: [
+      // 1 et 2. La fenêtre d'intervention d'une machine suivie au calendrier dont les tâches sont en heures, sans compteur : l'encadré et son bouton.
+      { nom: 'encadre', ecran: 'bureau', async jouer(c) {
+        await ouvrirFenetreSansCompteur(c);
+        await c.repere('.log-alerte-compteur', 1, { cote: 'gauche', marge: 3 });
+        await c.repere('[data-log-renseigner-compteur]', 2, { cote: 'gauche-centre', marge: 3 });
+        await toutDansLaZone(c, ['.log-alerte-compteur', '[data-log-renseigner-compteur]'], '.overlay .modal');
+        return c.zoneJusqua('.overlay .modal', '.log-alerte-compteur', 24);
+      } },
+      // 3. « Modifier une machine » ouverte par le bouton : la case « Ajouter un second suivi ».
+      { nom: 'second-suivi', ecran: 'bureau', async jouer(c) {
+        await ouvrirFenetreSansCompteur(c);
+        await c.ev("document.querySelector('[data-log-renseigner-compteur]').click(); true");
+        await c.attendre('#f-secondaire-active');
+        await c.dort(900);
+        await c.ev("(() => { const k = document.getElementById('f-secondaire-active'); if (k && !k.checked) k.click(); return true; })()");
+        await c.dort(500);
+        await c.marquer('#f-secondaire-active', 'case', 'parent');
+        await c.voir('#f-secondaire-valeur');
+        await c.repere('[data-aide="case"]', 3, { cote: 'gauche-centre' });
+        await c.repere('#f-secondaire-valeur', 3, { cote: 'gauche-centre' });
+        await toutDansLaZone(c, ['[data-aide="case"]', '#f-secondaire-valeur'], '.overlay .modal');
+        return c.zone('.overlay .modal', 14);
+      } },
+    ],
+  },
+  // ───────────────────────────────────────────────────────────── Utilisation moyenne et dates estimées
+  {
+    id: 'ent-rythme-utilisation',
+    etapes: [
+      // 2 et 3. La ligne « Utilisation moyenne » sous les trois cartes, avec la période des relevés et la mention d'estimation fragile.
+      { nom: 'utilisation', ecran: 'bureau', async jouer(c) {
+        await c.ev("(() => { UI.rythmes = { 'm3|1': 160 }; UI.rythmesDetail = { 'm3|1': { nb: 2, premier: '2026-10-22', dernier: '2026-11-01' } }; return true; })()");
+        await ouvrirFiche(c);
+        await c.repere('.fm2-usage', 2, { cote: 'gauche-centre', marge: 4 });
+        await toutDansLaZone(c, ['.fm2-usage'], '.fm2-hero');
+        return c.zone('.fm2-hero', 14);
+      } },
+      // 5. Les alertes d'usage du tableau de bord : la fenêtre « Relevés en retard », avec « Ouvrir la fiche » et « Reporter ».
+      { nom: 'alertes', ecran: 'bureau', async jouer(c) {
+        await c.ev("(() => { UI.alertesUsage = [{ machine_id: 'm1', type: 'releve_oublie', counter_index: 1, detail: { jours_depuis: 18, mediane_jours: 7 } }, { machine_id: 'm4', type: 'releve_oublie', counter_index: 1, detail: { jours_depuis: 12 } }]; return true; })()");
+        await c.ev("goTo('dashboard'); true");
+        await c.dort(900);
+        await c.ev("ouvrirAlertesUsage('releve_oublie'); true");
+        await c.attendre('[data-alerte-ouvrir]');
+        await c.dort(700);
+        await c.repere('[data-alerte-ouvrir="0"]', 5, { cote: 'gauche-centre', marge: 3 });
+        await c.repere('[data-alerte-reporter="0"]', 5, { cote: 'droite', marge: 3 });
+        await toutDansLaZone(c, ['[data-alerte-ouvrir="0"]', '[data-alerte-reporter="0"]'], '.panne-liste-modal');
+        return c.zone('.panne-liste-modal', 30);
+      } },
+    ],
+  },
+  // ───────────────────────────────────────────────────────────── Pourquoi mon échéance a changé
+  {
+    id: 'ent-pourquoi-echeance',
+    etapes: [
+      // 2. La colonne « Échéance » : la tâche la plus proche (ici en retard) est celle qui commande l'échéance du plan.
+      { nom: 'echeances', ecran: 'bureau', async jouer(c) {
+        await ouvrirFiche(c, 84490);
+        await c.marquer('.ref-table', 'tableau', 'section');
+        await c.repere('.ref-table th:nth-child(3)', 2, { marge: 3 });
+        await c.repere('.ref-table tbody tr:nth-child(3)', 2, { cote: 'gauche', marge: 2 });
+        await toutDansLaZone(c, ['.ref-table th:nth-child(3)', '.ref-table tbody tr:nth-child(3)'], '[data-aide="tableau"]');
+        return c.zone('[data-aide="tableau"]', 14);
+      } },
+    ],
+  },
+  // ───────────────────────────────────────────────────────────── Je ne reçois pas mes rappels
+  {
+    id: 'ent-rappels-non-recus',
+    etapes: [
+      // 1 et 2. La tuile « Canal d'alerte e-mail » et la pastille du bloc e-mail (canal inactif tant que rien n'est enregistré), puis le bouton d'enregistrement.
+      { nom: 'canal', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('reminders'); true");
+        await c.attendre('#rap-save');
+        await c.dort(900);
+        await c.marquerTexte('section.rappels-bloc span', '^(Canal inactif|Channel inactive)$', 'pastille');
+        await c.repere('.ui-tuile', 1, { marge: 4 });
+        await c.repere('[data-aide="pastille"]', 1, { marge: 4 });
+        await c.repere('#rap-save', 2, { marge: 4 });
+        return c.ev("(() => { const a = document.querySelector('.ui-tuile').getBoundingClientRect(); const b = document.getElementById('rap-save').getBoundingClientRect(); const m = 26; return { x: Math.max(0, a.left - m) + (window.pageXOffset || 0), y: Math.max(0, a.top - m) + (window.pageYOffset || 0), largeur: Math.min(innerWidth, 1128 + 2 * m), hauteur: Math.min(innerHeight, b.bottom - a.top + 2 * m) }; })()");
       } },
     ],
   },

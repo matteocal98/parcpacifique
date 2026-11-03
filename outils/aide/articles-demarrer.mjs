@@ -113,7 +113,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Mot de passe oublié
   {
-    id: 'dem-mot-de-passe-oublie', theme: 'demarrer',
+    id: 'dem-mot-de-passe-oublie', theme: 'demarrer', scenario: 'dem-mot-de-passe-oublie',
     fr: {
       fichier: 'aide/mot-de-passe-oublie.html',
       titre: `Mot de passe oublié : le réinitialiser | Aide KALEA`,
@@ -122,10 +122,13 @@ export const ARTICLES_DEMARRER = [
       description: `Réinitialiser votre mot de passe KALEA avec un code à 6 chiffres reçu par e-mail : procédure pas à pas et réponses aux messages d'erreur.`,
       intro: `Si vous ne vous souvenez plus de votre mot de passe, KALEA vous envoie par e-mail un code à 6 chiffres. Avec ce code, vous choisissez un nouveau mot de passe, sans l'aide de personne.`,
       etapes: [
-        { titre: `Demandez le code`, texte: `Sur l'écran de connexion, cliquez sur {{ui:Mot de passe oublié ?}}. La fenêtre {{ui:Mot de passe oublié}} s'ouvre.` },
-        { titre: `Indiquez votre adresse`, texte: `Tapez votre adresse dans {{ui:Email}} puis cliquez sur {{ui:Envoyer le code}} : KALEA vous envoie un code à 6 chiffres.` },
+        { titre: `Demandez le code`, texte: `Sur l'écran de connexion, cliquez sur {{ui:Mot de passe oublié ?}}. La fenêtre {{ui:Mot de passe oublié}} s'ouvre.`,
+          image: { nom: 'lien', alt: `L'écran de connexion : le lien Mot de passe oublié ? est repéré par le numéro 1.` } },
+        { titre: `Indiquez votre adresse`, texte: `Tapez votre adresse dans {{ui:Email}} puis cliquez sur {{ui:Envoyer le code}} : KALEA vous envoie un code à 6 chiffres.`,
+          image: { nom: 'fenetre', alt: `La fenêtre Mot de passe oublié : le champ Email et le bouton Envoyer le code (2).` } },
         { titre: `Relevez le code dans votre messagerie`, texte: `L'écran {{ui:Vérifie ton email}} confirme l'adresse à laquelle le code a été envoyé. Ouvrez votre messagerie et relevez le code le plus récent.` },
-        { titre: `Saisissez le code et le nouveau mot de passe`, texte: `Tapez le code dans {{ui:Code reçu par e-mail}} et votre nouveau mot de passe dans {{ui:Nouveau mot de passe}} (six caractères au minimum). Le bouton {{ui:Afficher}} permet de le relire.` },
+        { titre: `Saisissez le code et le nouveau mot de passe`, texte: `Tapez le code dans {{ui:Code reçu par e-mail}} et votre nouveau mot de passe dans {{ui:Nouveau mot de passe}} (six caractères au minimum). Le bouton {{ui:Afficher}} permet de le relire.`,
+          image: { nom: 'code', alt: `L'écran Vérifie ton email : l'adresse à laquelle le code a été envoyé (3), les champs Code reçu par e-mail et Nouveau mot de passe (4), puis le bouton Enregistrer le mot de passe (5).` } },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer le mot de passe}}. KALEA affiche {{ui:Mot de passe mis à jour}} et vous êtes connecté.` },
       ],
       notes: [
@@ -144,10 +147,13 @@ export const ARTICLES_DEMARRER = [
       description: `Reset your KALEA password with a 6-digit code received by email: step-by-step procedure and answers to error messages.`,
       intro: `If you no longer remember your password, KALEA sends you a 6-digit code by email. With this code, you choose a new password yourself, without anyone's help.`,
       etapes: [
-        { titre: `Request the code`, texte: `On the sign-in screen, click {{ui:Mot de passe oublié ?}}. The {{ui:Mot de passe oublié}} window opens.` },
-        { titre: `Enter your address`, texte: `Type your address in {{ui:Email}} then click {{ui:Envoyer le code}}: KALEA sends you a 6-digit code.` },
+        { titre: `Request the code`, texte: `On the sign-in screen, click {{ui:Mot de passe oublié ?}}. The {{ui:Mot de passe oublié}} window opens.`,
+          image: { nom: 'lien', alt: `The sign-in screen: the Forgot your password? link is marked with number 1.` } },
+        { titre: `Enter your address`, texte: `Type your address in {{ui:Email}} then click {{ui:Envoyer le code}}: KALEA sends you a 6-digit code.`,
+          image: { nom: 'fenetre', alt: `The Forgot password window: the Email field and the Send the code button (2).` } },
         { titre: `Find the code in your mailbox`, texte: `The {{ui:Vérifie ton email}} screen confirms the address the code was sent to. Open your mailbox and find the most recent code.` },
-        { titre: `Enter the code and the new password`, texte: `Type the code in {{ui:Code reçu par e-mail}} and your new password in {{ui:Nouveau mot de passe}} (at least six characters). The {{ui:Afficher}} button lets you read it back.` },
+        { titre: `Enter the code and the new password`, texte: `Type the code in {{ui:Code reçu par e-mail}} and your new password in {{ui:Nouveau mot de passe}} (at least six characters). The {{ui:Afficher}} button lets you read it back.`,
+          image: { nom: 'code', alt: `The Check your email screen: the address the code was sent to (3), the Code received by email and New password fields (4), then the Save password button (5).` } },
         { titre: `Save`, texte: `Click {{ui:Enregistrer le mot de passe}}. KALEA shows {{ui:Mot de passe mis à jour}} and you are signed in.` },
       ],
       notes: [
@@ -162,7 +168,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Code de vérification non reçu
   {
-    id: 'dem-code-non-recu', theme: 'demarrer',
+    id: 'dem-code-non-recu', theme: 'demarrer', scenario: 'dem-code-non-recu',
     fr: {
       fichier: 'aide/code-de-verification-non-recu.html',
       titre: `Je ne reçois pas le code de vérification | Aide KALEA`,
@@ -171,10 +177,13 @@ export const ARTICLES_DEMARRER = [
       description: `Le code à 6 chiffres envoyé par e-mail n'arrive pas à la création du compte : vérifier l'adresse, redemander un code et comprendre le message « Cette adresse a déjà un compte ».`,
       intro: `À la création du compte, KALEA envoie un code à 6 chiffres par e-mail. S'il n'arrive pas, voici les vérifications à faire, dans l'ordre.`,
       etapes: [
-        { titre: `Vérifiez l'adresse affichée`, texte: `L'écran {{ui:Vérifie ton email}} rappelle l'adresse à laquelle le code a été envoyé. Si elle comporte une faute de frappe, cliquez sur {{ui:Annuler}} et recommencez la création du compte avec la bonne adresse.` },
-        { titre: `Redemandez un code`, texte: `Cliquez sur {{ui:Renvoyer le code}}. KALEA affiche {{ui:Nouveau code envoyé.}} puis un compte à rebours : le bouton redevient actif quand il est terminé.` },
+        { titre: `Vérifiez l'adresse affichée`, texte: `L'écran {{ui:Vérifie ton email}} rappelle l'adresse à laquelle le code a été envoyé. Si elle comporte une faute de frappe, cliquez sur {{ui:Annuler}} et recommencez la création du compte avec la bonne adresse.`,
+          image: { nom: 'verification', alt: `L'écran Vérifie ton email : l'adresse à laquelle le code a été envoyé (1), le lien Renvoyer le code (2) et le champ Code de vérification (3).` } },
+        { titre: `Redemandez un code`, texte: `Cliquez sur {{ui:Renvoyer le code}}. KALEA affiche {{ui:Nouveau code envoyé.}} puis un compte à rebours : le bouton redevient actif quand il est terminé.`,
+          image: { nom: 'renvoi', alt: `Après un clic sur Renvoyer le code : le message Nouveau code envoyé. et le compte à rebours avant de pouvoir redemander un code (2).` } },
         { titre: `Saisissez le code`, texte: `Tapez le code reçu dans {{ui:Code de vérification}} puis cliquez sur {{ui:Valider}}.` },
-        { titre: `Si KALEA dit que l'adresse a déjà un compte`, texte: `L'écran {{ui:Cette adresse a déjà un compte}} s'affiche : aucun code n'est envoyé dans ce cas, puisque le compte existe. Cliquez sur {{ui:Se connecter}} si vous connaissez le mot de passe, ou sur {{ui:Mot de passe oublié ?}} pour en choisir un nouveau.` },
+        { titre: `Si KALEA dit que l'adresse a déjà un compte`, texte: `L'écran {{ui:Cette adresse a déjà un compte}} s'affiche : aucun code n'est envoyé dans ce cas, puisque le compte existe. Cliquez sur {{ui:Se connecter}} si vous connaissez le mot de passe, ou sur {{ui:Mot de passe oublié ?}} pour en choisir un nouveau.`,
+          image: { nom: 'deja-compte', alt: `L'écran Cette adresse a déjà un compte : les boutons Mot de passe oublié ? et Se connecter (4).` } },
       ],
       notes: [
         `Pour un mot de passe oublié, le bouton s'appelle {{ui:Renvoyer un code}} : voir <a href="{{lien:dem-mot-de-passe-oublie}}">mot de passe oublié</a>.`,
@@ -191,10 +200,13 @@ export const ARTICLES_DEMARRER = [
       description: `The 6-digit code sent by email does not arrive when you create your account: check the address, ask for a new code and understand the message “This address already has an account”.`,
       intro: `When you create your account, KALEA sends a 6-digit code by email. If it does not arrive, here are the checks to make, in order.`,
       etapes: [
-        { titre: `Check the address shown`, texte: `The {{ui:Vérifie ton email}} screen shows the address the code was sent to. If it contains a typing error, click {{ui:Annuler}} and start the account creation again with the right address.` },
-        { titre: `Ask for a new code`, texte: `Click {{ui:Renvoyer le code}}. KALEA shows {{ui:Nouveau code envoyé.}} then a countdown: the button becomes active again when it ends.` },
+        { titre: `Check the address shown`, texte: `The {{ui:Vérifie ton email}} screen shows the address the code was sent to. If it contains a typing error, click {{ui:Annuler}} and start the account creation again with the right address.`,
+          image: { nom: 'verification', alt: `The Check your email screen: the address the code was sent to (1), the Resend code link (2) and the Verification code field (3).` } },
+        { titre: `Ask for a new code`, texte: `Click {{ui:Renvoyer le code}}. KALEA shows {{ui:Nouveau code envoyé.}} then a countdown: the button becomes active again when it ends.`,
+          image: { nom: 'renvoi', alt: `After clicking Resend code: the New code sent. message and the countdown before you can ask again (2).` } },
         { titre: `Enter the code`, texte: `Type the code you received in {{ui:Code de vérification}} then click {{ui:Valider}}.` },
-        { titre: `If KALEA says the address already has an account`, texte: `The {{ui:Cette adresse a déjà un compte}} screen appears: no code is sent in this case, because the account exists. Click {{ui:Se connecter}} if you know the password, or {{ui:Mot de passe oublié ?}} to choose a new one.` },
+        { titre: `If KALEA says the address already has an account`, texte: `The {{ui:Cette adresse a déjà un compte}} screen appears: no code is sent in this case, because the account exists. Click {{ui:Se connecter}} if you know the password, or {{ui:Mot de passe oublié ?}} to choose a new one.`,
+          image: { nom: 'deja-compte', alt: `The This address already has an account screen: the Forgot your password? and Sign in buttons (4).` } },
       ],
       notes: [
         `For a forgotten password, the button is called {{ui:Renvoyer un code}}: see <a href="{{lien:dem-mot-de-passe-oublie}}">forgot your password</a>.`,
@@ -207,7 +219,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Accepter une invitation
   {
-    id: 'dem-accepter-invitation', theme: 'demarrer',
+    id: 'dem-accepter-invitation', theme: 'demarrer', scenario: 'dem-accepter-invitation',
     fr: {
       fichier: 'aide/accepter-une-invitation.html',
       titre: `Accepter une invitation à rejoindre une société | Aide KALEA`,
@@ -216,9 +228,11 @@ export const ARTICLES_DEMARRER = [
       description: `Rejoindre la société d'un collègue dans KALEA avec un lien d'invitation : se connecter ou créer son compte, puis accepter l'invitation.`,
       intro: `Un administrateur peut inviter un collègue par e-mail. Vous recevez alors un lien : en l'ouvrant, vous rejoignez la société de votre collègue au lieu d'en créer une.`,
       etapes: [
-        { titre: `Ouvrez le lien d'invitation`, texte: `Cliquez sur le lien reçu par e-mail. KALEA s'ouvre et un encadré {{ui:Invitation à rejoindre une société}} apparaît.` },
+        { titre: `Ouvrez le lien d'invitation`, texte: `Cliquez sur le lien reçu par e-mail. KALEA s'ouvre et un encadré {{ui:Invitation à rejoindre une société}} apparaît.`,
+          image: { nom: 'invitation', alt: `L'écran de connexion avec l'encadré Invitation à rejoindre une société (1) et son bouton Créer mon compte (2), à côté du bouton Accepter l'invitation.` } },
         { titre: `Connectez-vous avec l'adresse invitée, ou créez votre compte`, texte: `Si vous avez déjà un compte avec l'adresse à laquelle l'invitation a été envoyée, connectez-vous (voir <a href="{{lien:dem-se-connecter}}">se connecter</a>). Sinon, cliquez sur {{ui:Créer mon compte}} : le code de l'invitation est conservé.` },
-        { titre: `Acceptez l'invitation`, texte: `Une fois connecté, cliquez sur {{ui:Accepter l'invitation}}. L'encadré rappelle l'adresse sur laquelle vous êtes connecté et celle à laquelle l'invitation était destinée.` },
+        { titre: `Acceptez l'invitation`, texte: `Une fois connecté, cliquez sur {{ui:Accepter l'invitation}}. L'encadré rappelle l'adresse sur laquelle vous êtes connecté et celle à laquelle l'invitation était destinée.`,
+          image: { nom: 'invitation-connecte', alt: `L'encadré affiché une fois connecté : l'adresse connectée, l'adresse de l'invitation et le bouton Accepter l'invitation (3).` } },
         { titre: `Vérifiez le message de confirmation`, texte: `KALEA indique que vous rejoignez la société et précise votre rôle. L'application se recharge ensuite sur la société rejointe.` },
       ],
       notes: [
@@ -236,9 +250,11 @@ export const ARTICLES_DEMARRER = [
       description: `Join a colleague's company in KALEA with an invitation link: sign in or create your account, then accept the invitation.`,
       intro: `An administrator can invite a colleague by email. You then receive a link: by opening it, you join your colleague's company instead of creating one.`,
       etapes: [
-        { titre: `Open the invitation link`, texte: `Click the link received by email. KALEA opens and an {{ui:Invitation à rejoindre une société}} box appears.` },
+        { titre: `Open the invitation link`, texte: `Click the link received by email. KALEA opens and an {{ui:Invitation à rejoindre une société}} box appears.`,
+          image: { nom: 'invitation', alt: `The sign-in screen with the Invitation to join a company box (1) and its Create my account button (2), next to the Accept the invitation button.` } },
         { titre: `Sign in with the invited address, or create your account`, texte: `If you already have an account with the address the invitation was sent to, sign in (see <a href="{{lien:dem-se-connecter}}">sign in</a>). Otherwise, click {{ui:Créer mon compte}}: the invitation code is kept.` },
-        { titre: `Accept the invitation`, texte: `Once signed in, click {{ui:Accepter l'invitation}}. The box reminds you which address you are signed in with and which address the invitation was meant for.` },
+        { titre: `Accept the invitation`, texte: `Once signed in, click {{ui:Accepter l'invitation}}. The box reminds you which address you are signed in with and which address the invitation was meant for.`,
+          image: { nom: 'invitation-connecte', alt: `The box shown once signed in: the address you are signed in with, the invitation's address and the Accept the invitation button (3).` } },
         { titre: `Check the confirmation message`, texte: `KALEA says you are joining the company and gives your role. The app then reloads on the company you joined.` },
       ],
       notes: [
@@ -252,7 +268,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Compte sans société
   {
-    id: 'dem-societe-manquante', theme: 'demarrer',
+    id: 'dem-societe-manquante', theme: 'demarrer', scenario: 'dem-societe-manquante',
     fr: {
       fichier: 'aide/compte-sans-societe.html',
       titre: `Mon compte est confirmé mais je n'ai pas de société | Aide KALEA`,
@@ -261,7 +277,8 @@ export const ARTICLES_DEMARRER = [
       description: `KALEA indique que votre compte n'est rattaché à aucune société : indiquer le nom de la société pour commencer.`,
       intro: `Il arrive qu'un compte soit bien confirmé alors que la société n'a pas été enregistrée, par exemple si la création s'est interrompue. KALEA vous le dit et vous propose de terminer en une étape.`,
       etapes: [
-        { titre: `Lisez le message`, texte: `L'écran affiche : {{ui:Ton compte est confirmé, mais il n'est rattaché à aucune société. Indique son nom pour commencer.}}` },
+        { titre: `Lisez le message`, texte: `L'écran affiche : {{ui:Ton compte est confirmé, mais il n'est rattaché à aucune société. Indique son nom pour commencer.}}`,
+          image: { nom: 'ecran', alt: `L'écran de création de la société : le message (1), les champs Nom de la société et Activité (2) et le bouton Créer ma société (3).` } },
         { titre: `Indiquez la société`, texte: `Tapez le nom dans {{ui:Nom de la société}} et choisissez {{ui:Activité}} dans la liste.` },
         { titre: `Créez la société`, texte: `Cliquez sur {{ui:Créer ma société}}. KALEA affiche {{ui:Société créée}} puis ouvre votre tableau de bord.` },
       ],
@@ -280,7 +297,8 @@ export const ARTICLES_DEMARRER = [
       description: `KALEA says your account is not attached to any company: enter the company name to get started.`,
       intro: `Sometimes an account is confirmed although the company was not saved, for example if the creation was interrupted. KALEA tells you so and lets you finish in one step.`,
       etapes: [
-        { titre: `Read the message`, texte: `The screen shows: {{ui:Ton compte est confirmé, mais il n'est rattaché à aucune société. Indique son nom pour commencer.}}` },
+        { titre: `Read the message`, texte: `The screen shows: {{ui:Ton compte est confirmé, mais il n'est rattaché à aucune société. Indique son nom pour commencer.}}`,
+          image: { nom: 'ecran', alt: `The company creation screen: the message (1), the Company name and Activity fields (2) and the Create my company button (3).` } },
         { titre: `Enter the company`, texte: `Type the name in {{ui:Nom de la société}} and choose {{ui:Activité}} from the list.` },
         { titre: `Create the company`, texte: `Click {{ui:Créer ma société}}. KALEA shows {{ui:Société créée}} then opens your dashboard.` },
       ],
@@ -295,7 +313,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Première machine / écran vide
   {
-    id: 'dem-premiere-machine', theme: 'demarrer',
+    id: 'dem-premiere-machine', theme: 'demarrer', scenario: 'dem-premiere-machine',
     fr: {
       fichier: 'aide/premiere-machine-ecran-vide.html',
       titre: `Premiers pas : ajouter votre première machine | Aide KALEA`,
@@ -304,9 +322,11 @@ export const ARTICLES_DEMARRER = [
       description: `Votre tableau de bord KALEA est vide : où cliquer pour ajouter une première machine, importer un tableur ou déposer un carnet d'entretien.`,
       intro: `À la création d'un compte, le tableau de bord est vide : « Aucune machine suivie pour l'instant ». C'est normal. Voici comment démarrer.`,
       etapes: [
-        { titre: `Repérez le bouton d'ajout`, texte: `Sur le {{ui:Tableau de bord}}, la carte {{ui:Prochain entretien}} indique {{ui:Rien à signaler}} et propose le bouton {{ui:Ajouter une machine}}. Sur téléphone, le bouton rond « + » de la barre du bas ({{ui:Actions rapides}}) ouvre la même action. Sur ordinateur, ce bouton est aussi en haut de l'écran.` },
+        { titre: `Repérez le bouton d'ajout`, texte: `Sur le {{ui:Tableau de bord}}, la carte {{ui:Prochain entretien}} indique {{ui:Rien à signaler}} et propose le bouton {{ui:Ajouter une machine}}. Sur téléphone, le bouton rond « + » de la barre du bas ({{ui:Actions rapides}}) ouvre la même action. Sur ordinateur, ce bouton est aussi en haut de l'écran.`,
+          image: { nom: 'tableau', alt: `Le tableau de bord d'un compte sans machine : le bouton Ajouter une machine, dans la carte Prochain entretien et en haut de l'écran (1), et la zone de dépôt du carnet (4).` } },
         { titre: `Renseignez la machine`, texte: `Une fenêtre s'ouvre : décrivez la machine en la complétant. Vous pourrez toujours la corriger plus tard (voir <a href="{{lien:modifier-machine}}">modifier une machine</a>).` },
-        { titre: `Ou importez votre liste depuis un tableur`, texte: `Si vous avez déjà la liste de votre parc dans un tableur, ouvrez {{ui:Machines}} : l'écran vide propose {{ui:Importer des machines}}. Ce bouton est réservé à l'administrateur et à la direction.` },
+        { titre: `Ou importez votre liste depuis un tableur`, texte: `Si vous avez déjà la liste de votre parc dans un tableur, ouvrez {{ui:Machines}} : l'écran vide propose {{ui:Importer des machines}}. Ce bouton est réservé à l'administrateur et à la direction.`,
+          image: { nom: 'machines-vide', alt: `L'écran Machines vide : le bouton Importer des machines (3).` } },
         { titre: `Déposez le carnet d'entretien`, texte: `Sur ordinateur, le tableau de bord propose une zone de dépôt ; sur téléphone, le bouton {{ui:Déposer un manuel PDF}}. Envoyez-y le PDF du constructeur : KALEA en extrait les échéances et propose un plan d'entretien (voir <a href="{{lien:carnet-entretien}}">le carnet d'entretien</a>).` },
       ],
       notes: [
@@ -324,9 +344,11 @@ export const ARTICLES_DEMARRER = [
       description: `Your KALEA dashboard is empty: where to click to add a first machine, import a spreadsheet or upload a maintenance manual.`,
       intro: `When an account is created, the dashboard is empty: “No machine tracked yet”. That is normal. Here is how to get started.`,
       etapes: [
-        { titre: `Find the add button`, texte: `On the {{ui:Tableau de bord}}, the {{ui:Prochain entretien}} card says {{ui:Rien à signaler}} and offers the {{ui:Ajouter une machine}} button. On a phone, the round “+” button in the bottom bar ({{ui:Actions rapides}}) opens the same action. On a computer, this button is also at the top of the screen.` },
+        { titre: `Find the add button`, texte: `On the {{ui:Tableau de bord}}, the {{ui:Prochain entretien}} card says {{ui:Rien à signaler}} and offers the {{ui:Ajouter une machine}} button. On a phone, the round “+” button in the bottom bar ({{ui:Actions rapides}}) opens the same action. On a computer, this button is also at the top of the screen.`,
+          image: { nom: 'tableau', alt: `The dashboard of an account with no machine: the Add a machine button, in the Next service card and at the top of the screen (1), and the manual drop zone (4).` } },
         { titre: `Describe the machine`, texte: `A window opens: describe the machine by filling it in. You can always correct it later (see <a href="{{lien:modifier-machine}}">edit a machine</a>).` },
-        { titre: `Or import your list from a spreadsheet`, texte: `If you already have your fleet list in a spreadsheet, open {{ui:Machines}}: the empty screen offers {{ui:Importer des machines}}. This button is reserved for the administrator and the director.` },
+        { titre: `Or import your list from a spreadsheet`, texte: `If you already have your fleet list in a spreadsheet, open {{ui:Machines}}: the empty screen offers {{ui:Importer des machines}}. This button is reserved for the administrator and the director.`,
+          image: { nom: 'machines-vide', alt: `The empty Machines screen: the Import machines button (3).` } },
         { titre: `Upload the maintenance manual`, texte: `On a computer, the dashboard offers a drop zone; on a phone, the {{ui:Déposer un manuel PDF}} button. Send the manufacturer's PDF there: KALEA extracts the due dates and suggests a maintenance plan (see <a href="{{lien:carnet-entretien}}">the maintenance manual</a>).` },
       ],
       notes: [
@@ -444,7 +466,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Le bouton + (actions rapides)
   {
-    id: 'dem-actions-rapides', theme: 'demarrer',
+    id: 'dem-actions-rapides', theme: 'demarrer', scenario: 'dem-actions-rapides',
     fr: {
       fichier: 'aide/bouton-actions-rapides.html',
       titre: `Le bouton « + » : les actions rapides | Aide KALEA`,
@@ -453,9 +475,12 @@ export const ARTICLES_DEMARRER = [
       description: `Le bouton rond « + » de la barre du bas de KALEA : ajouter une machine, enregistrer un entretien, signaler une panne, relever un compteur ou scanner un QR code.`,
       intro: `Le bouton rond « + » au centre de la barre du bas rassemble les gestes du quotidien. Il s'appelle {{ui:Actions rapides}} ; pour les droits de gestion et de saisie, il s'appelle {{ui:Saisir}}.`,
       etapes: [
-        { titre: `Touchez le bouton « + »`, texte: `Une feuille s'ouvre avec la liste des actions possibles pour vous.` },
-        { titre: `Choisissez une action`, texte: `Selon votre droit d'accès et votre offre, vous trouvez : {{ui:Ajouter une machine}}, {{ui:Enregistrer un entretien}}, {{ui:Ordres de travail}}, {{ui:Signaler une panne}}, {{ui:Pannes signalées}}, {{ui:Relever un compteur}} et {{ui:Scanner un QR code}}.` },
-        { titre: `Désignez la machine`, texte: `Pour un entretien, une panne ou un relevé, KALEA vous demande de choisir la machine dans une liste. Tapez quelques lettres du nom, de la marque ou du numéro de série pour la retrouver.` },
+        { titre: `Touchez le bouton « + »`, texte: `Une feuille s'ouvre avec la liste des actions possibles pour vous.`,
+          image: { nom: 'bouton', alt: `La barre du bas sur téléphone : le bouton rond + au centre est repéré par le numéro 1.` } },
+        { titre: `Choisissez une action`, texte: `Selon votre droit d'accès et votre offre, vous trouvez : {{ui:Ajouter une machine}}, {{ui:Enregistrer un entretien}}, {{ui:Ordres de travail}}, {{ui:Signaler une panne}}, {{ui:Pannes signalées}}, {{ui:Relever un compteur}} et {{ui:Scanner un QR code}}.`,
+          image: { nom: 'feuille', alt: `La feuille Actions rapides ouverte : la liste des actions possibles (2).` } },
+        { titre: `Désignez la machine`, texte: `Pour un entretien, une panne ou un relevé, KALEA vous demande de choisir la machine dans une liste. Tapez quelques lettres du nom, de la marque ou du numéro de série pour la retrouver.`,
+          image: { nom: 'choix-machine', alt: `Le choix de la machine : le champ de recherche (3) au-dessus de la liste des machines.` } },
         { titre: `Terminez l'action`, texte: `L'écran correspondant s'ouvre : par exemple la fenêtre d'entretien, ou la fiche de la machine pour un relevé de compteur (voir <a href="{{lien:corriger-compteur}}">corriger le compteur d'une machine</a>).` },
       ],
       notes: [
@@ -474,9 +499,12 @@ export const ARTICLES_DEMARRER = [
       description: `The round “+” button in the KALEA bottom bar: add a machine, log a maintenance, report a fault, read a counter or scan a QR code.`,
       intro: `The round “+” button in the centre of the bottom bar gathers everyday actions. It is called {{ui:Actions rapides}}; for the management and data-entry access levels, it is called {{ui:Saisir}}.`,
       etapes: [
-        { titre: `Tap the “+” button`, texte: `A sheet opens with the list of actions available to you.` },
-        { titre: `Choose an action`, texte: `Depending on your access level and your plan, you will find: {{ui:Ajouter une machine}}, {{ui:Enregistrer un entretien}}, {{ui:Ordres de travail}}, {{ui:Signaler une panne}}, {{ui:Pannes signalées}}, {{ui:Relever un compteur}} and {{ui:Scanner un QR code}}.` },
-        { titre: `Pick the machine`, texte: `For a maintenance, a fault or a reading, KALEA asks you to choose the machine from a list. Type a few letters of the name, make or serial number to find it.` },
+        { titre: `Tap the “+” button`, texte: `A sheet opens with the list of actions available to you.`,
+          image: { nom: 'bouton', alt: `The bottom bar on a phone: the round + button in the centre is marked with number 1.` } },
+        { titre: `Choose an action`, texte: `Depending on your access level and your plan, you will find: {{ui:Ajouter une machine}}, {{ui:Enregistrer un entretien}}, {{ui:Ordres de travail}}, {{ui:Signaler une panne}}, {{ui:Pannes signalées}}, {{ui:Relever un compteur}} and {{ui:Scanner un QR code}}.`,
+          image: { nom: 'feuille', alt: `The Quick actions sheet open: the list of available actions (2).` } },
+        { titre: `Pick the machine`, texte: `For a maintenance, a fault or a reading, KALEA asks you to choose the machine from a list. Type a few letters of the name, make or serial number to find it.`,
+          image: { nom: 'choix-machine', alt: `Picking the machine: the search field (3) above the list of machines.` } },
         { titre: `Finish the action`, texte: `The matching screen opens: for example the maintenance window, or the machine's page for a counter reading (see <a href="{{lien:corriger-compteur}}">correct a machine's meter</a>).` },
       ],
       notes: [
@@ -491,7 +519,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Je ne vois pas un écran ou un bouton
   {
-    id: 'dem-je-ne-vois-pas', theme: 'demarrer',
+    id: 'dem-je-ne-vois-pas', theme: 'demarrer', scenario: 'dem-je-ne-vois-pas',
     fr: {
       fichier: 'aide/je-ne-vois-pas-un-ecran-ou-un-bouton.html',
       titre: `Je ne vois pas un écran ou un bouton : droits d'accès et offre | Aide KALEA`,
@@ -500,7 +528,8 @@ export const ARTICLES_DEMARRER = [
       description: `Un écran ou un bouton manque dans KALEA : comprendre le rôle des droits d'accès (administrateur, direction, gestion, saisie, achat) et de l'offre.`,
       intro: `Dans KALEA, chaque personne voit les écrans et les boutons qui correspondent à son droit d'accès, et certains écrans dépendent aussi de l'offre de la société. Un bouton absent n'est donc pas forcément une panne.`,
       etapes: [
-        { titre: `Retrouvez votre droit d'accès`, texte: `Ouvrez {{ui:Mon compte}} puis la carte {{ui:Gestion de l'équipe}} : une phrase commençant par « Ton accès » donne votre droit et ce qu'il permet. L'administrateur voit à la place la liste de l'équipe.` },
+        { titre: `Retrouvez votre droit d'accès`, texte: `Ouvrez {{ui:Mon compte}} puis la carte {{ui:Gestion de l'équipe}} : une phrase commençant par « Ton accès » donne votre droit et ce qu'il permet. L'administrateur voit à la place la liste de l'équipe.`,
+          image: { nom: 'acces', alt: `La carte Gestion de l'équipe vue avec un droit de gestion : la phrase Ton accès : Droit de gestion… indique votre droit et ce qu'il permet (1).` } },
         { titre: `Comparez avec ce que votre droit permet`, texte: `{{ui:Administrateur}} : tout. {{ui:Direction}} : tout le quotidien, sauf l'abonnement, les comptes de direction et l'identité légale de la société. {{ui:Droit de gestion}} : le parc, les entretiens, les ordres de travail et les pannes ; pas de {{ui:Coûts & TCO}}, de {{ui:Statistiques}} ni de {{ui:Télémétrie}}. {{ui:Droit de saisie}} : les compteurs, ses ordres de travail et les pannes ; en plus, pas d'{{ui:Agenda et préparation}} ni de {{ui:Stocks & SAV}}. {{ui:Droit d'achat}} : le stock, les fournisseurs et les commandes, avec les coûts ; pas d'{{ui:Agenda et préparation}}, de {{ui:Télémétrie}} ni d'{{ui:Ordres de travail}}.` },
         { titre: `Pensez aux écrans qui dépendent de l'offre`, texte: `Selon l'offre de la société, certains écrans n'apparaissent pas : {{ui:Coûts & TCO}}, {{ui:Statistiques}}, {{ui:Ordres de travail}}, {{ui:Stocks & SAV}} et {{ui:Télémétrie}}. Le scanner de QR codes dépend aussi de l'offre. Le détail figure sur <a href="/#tarifs">la page des offres</a>.` },
         { titre: `Pensez aux boutons réservés`, texte: `Modifier les informations de la société, les rappels par e-mail et {{ui:Importer des machines}} : administrateur et direction. Modifier la raison sociale, le pays, la devise et gérer l'abonnement : administrateur seul. {{ui:Télémétrie}} : administrateur et direction, avec une offre qui l'inclut.` },
@@ -520,7 +549,8 @@ export const ARTICLES_DEMARRER = [
       description: `A screen or a button is missing in KALEA: understand the role of access levels (administrator, director, management, data entry, purchasing) and of the plan.`,
       intro: `In KALEA, each person sees the screens and buttons that match their access level, and some screens also depend on the company's plan. A missing button is therefore not necessarily a fault.`,
       etapes: [
-        { titre: `Find your access level`, texte: `Open {{ui:Mon compte}} then the {{ui:Gestion de l'équipe}} card: a sentence starting with “Your access” gives your level and what it allows. The administrator sees the team list instead.` },
+        { titre: `Find your access level`, texte: `Open {{ui:Mon compte}} then the {{ui:Gestion de l'équipe}} card: a sentence starting with “Your access” gives your level and what it allows. The administrator sees the team list instead.`,
+          image: { nom: 'acces', alt: `The Team management card seen with the management access level: the sentence Your access: Management access… gives your level and what it allows (1).` } },
         { titre: `Compare with what your level allows`, texte: `{{ui:Administrateur}}: everything. {{ui:Direction}}: everything day to day, except the subscription, director accounts and the company's legal identity. {{ui:Droit de gestion}}: the fleet, maintenance, work orders and faults; no {{ui:Coûts & TCO}}, {{ui:Statistiques}} or {{ui:Télémétrie}}. {{ui:Droit de saisie}}: counters, its own work orders and faults; also no {{ui:Agenda et préparation}} or {{ui:Stocks & SAV}}. {{ui:Droit d'achat}}: stock, suppliers and orders, with costs; no {{ui:Agenda et préparation}}, {{ui:Télémétrie}} or {{ui:Ordres de travail}}.` },
         { titre: `Think of the screens that depend on the plan`, texte: `Depending on the company's plan, some screens do not appear: {{ui:Coûts & TCO}}, {{ui:Statistiques}}, {{ui:Ordres de travail}}, {{ui:Stocks & SAV}} and {{ui:Télémétrie}}. The QR code scanner also depends on the plan. The details are on <a href="/en/#tarifs">the plans page</a>.` },
         { titre: `Think of the restricted buttons`, texte: `Editing company details, email reminders and {{ui:Importer des machines}}: administrator and director. Editing the company name, country, currency and managing the subscription: administrator only. {{ui:Télémétrie}}: administrator and director, with a plan that includes it.` },
@@ -681,7 +711,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Devise
   {
-    id: 'dem-changer-devise', theme: 'compte',
+    id: 'dem-changer-devise', theme: 'compte', scenario: 'dem-changer-devise',
     fr: {
       fichier: 'aide/changer-la-devise.html',
       titre: `Changer la devise de la société (franc Pacifique, euro) | Aide KALEA`,
@@ -692,7 +722,8 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Ouvrez Mon compte`, texte: `Ouvrez {{ui:Mon compte}} puis la section {{ui:Société & Identité légale}}.` },
         { titre: `Choisissez la nouvelle devise`, texte: `Dans la liste {{ui:Devise}}, choisissez {{ui:Franc Pacifique (XPF)}} ou {{ui:Euro (EUR €)}}.` },
-        { titre: `Lisez l'avertissement`, texte: `Dès que la devise choisie diffère de la devise actuelle, un encadré {{ui:Devise non appliquée.}} apparaît. Il rappelle que tous les montants (coûts, seuils, prix des machines, catalogue de pièces) seront convertis à un taux fixe, et que ce n'est pas annulable d'un clic.` },
+        { titre: `Lisez l'avertissement`, texte: `Dès que la devise choisie diffère de la devise actuelle, un encadré {{ui:Devise non appliquée.}} apparaît. Il rappelle que tous les montants (coûts, seuils, prix des machines, catalogue de pièces) seront convertis à un taux fixe, et que ce n'est pas annulable d'un clic.`,
+          image: { nom: 'devise', alt: `La section Société & Identité légale : la liste Devise (2), l'encadré Devise non appliquée. qui apparaît quand une autre devise est choisie (3) et le bouton Convertir les montants (4).` } },
         { titre: `Lancez la conversion`, texte: `Cliquez sur {{ui:Convertir les montants}} puis confirmez dans la fenêtre qui s'ouvre.` },
         { titre: `Laissez KALEA se recharger`, texte: `KALEA affiche {{ui:Devise et montants convertis — rechargement…}} puis se recharge pour tout remettre en cohérence.` },
       ],
@@ -714,7 +745,8 @@ export const ARTICLES_DEMARRER = [
       etapes: [
         { titre: `Open My account`, texte: `Open {{ui:Mon compte}} then the {{ui:Société & Identité légale}} section.` },
         { titre: `Choose the new currency`, texte: `In the {{ui:Devise}} list, choose {{ui:Franc Pacifique (XPF)}} or {{ui:Euro (EUR €)}}.` },
-        { titre: `Read the warning`, texte: `As soon as the chosen currency differs from the current one, a {{ui:Devise non appliquée.}} box appears. It reminds you that all amounts (costs, thresholds, machine prices, parts catalogue) will be converted at a fixed rate, and that it cannot be undone with one click.` },
+        { titre: `Read the warning`, texte: `As soon as the chosen currency differs from the current one, a {{ui:Devise non appliquée.}} box appears. It reminds you that all amounts (costs, thresholds, machine prices, parts catalogue) will be converted at a fixed rate, and that it cannot be undone with one click.`,
+          image: { nom: 'devise', alt: `The Company & legal identity section: the Currency list (2), the Currency not applied. box that appears when another currency is chosen (3) and the Convert the amounts button (4).` } },
         { titre: `Start the conversion`, texte: `Click {{ui:Convertir les montants}} then confirm in the window that opens.` },
         { titre: `Let KALEA reload`, texte: `KALEA shows {{ui:Devise et montants convertis — rechargement…}} then reloads to put everything back in line.` },
       ],
@@ -730,7 +762,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── E-mail de connexion
   {
-    id: 'dem-changer-email', theme: 'compte',
+    id: 'dem-changer-email', theme: 'compte', scenario: 'dem-changer-email',
     fr: {
       fichier: 'aide/changer-adresse-email-connexion.html',
       titre: `Changer son adresse e-mail de connexion | Aide KALEA`,
@@ -739,7 +771,8 @@ export const ARTICLES_DEMARRER = [
       description: `Remplacer l'adresse e-mail avec laquelle vous vous connectez à KALEA : confirmation par mot de passe et par e-mail.`,
       intro: `L'adresse de connexion se change dans {{ui:Mon compte}}. Pour éviter qu'une session restée ouverte serve à détourner le compte, KALEA demande votre mot de passe actuel, puis une confirmation par e-mail.`,
       etapes: [
-        { titre: `Ouvrez la section des identifiants`, texte: `Dans {{ui:Mon compte}}, ouvrez {{ui:Identifiants & Connexion}}. {{ui:E-mail de connexion actuel}} affiche l'adresse en cours.` },
+        { titre: `Ouvrez la section des identifiants`, texte: `Dans {{ui:Mon compte}}, ouvrez {{ui:Identifiants & Connexion}}. {{ui:E-mail de connexion actuel}} affiche l'adresse en cours.`,
+          image: { nom: 'identifiants', alt: `La section Identifiants & Connexion : l'e-mail de connexion actuel (1), le champ Nouvel e-mail de connexion (2), le champ Confirmer par mot de passe actuel (3) et le bouton Mettre à jour l'e-mail (4).` } },
         { titre: `Saisissez la nouvelle adresse`, texte: `Tapez-la dans {{ui:Nouvel e-mail de connexion}}.` },
         { titre: `Confirmez avec votre mot de passe`, texte: `Tapez votre mot de passe actuel dans {{ui:Confirmer par mot de passe actuel}}. Le bouton {{ui:Afficher}} permet de le relire.` },
         { titre: `Envoyez la demande`, texte: `Cliquez sur {{ui:Mettre à jour l'e-mail}}. KALEA affiche {{ui:Demande envoyée. Ouvre le lien de confirmation reçu par email : la nouvelle adresse ne sera active qu'après validation.}}` },
@@ -760,7 +793,8 @@ export const ARTICLES_DEMARRER = [
       description: `Replace the email address you sign in to KALEA with: confirmation by password and by email.`,
       intro: `The login address is changed in {{ui:Mon compte}}. So that a session left open cannot be used to hijack the account, KALEA asks for your current password, then a confirmation by email.`,
       etapes: [
-        { titre: `Open the credentials section`, texte: `In {{ui:Mon compte}}, open {{ui:Identifiants & Connexion}}. {{ui:E-mail de connexion actuel}} shows the current address.` },
+        { titre: `Open the credentials section`, texte: `In {{ui:Mon compte}}, open {{ui:Identifiants & Connexion}}. {{ui:E-mail de connexion actuel}} shows the current address.`,
+          image: { nom: 'identifiants', alt: `The Login & credentials section: the current login email (1), the New login email field (2), the Confirm with current password field (3) and the Update email button (4).` } },
         { titre: `Enter the new address`, texte: `Type it in {{ui:Nouvel e-mail de connexion}}.` },
         { titre: `Confirm with your password`, texte: `Type your current password in {{ui:Confirmer par mot de passe actuel}}. The {{ui:Afficher}} button lets you read it back.` },
         { titre: `Send the request`, texte: `Click {{ui:Mettre à jour l'e-mail}}. KALEA shows {{ui:Demande envoyée. Ouvre le lien de confirmation reçu par email : la nouvelle adresse ne sera active qu'après validation.}}` },
@@ -830,7 +864,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Push : qui est prévenu
   {
-    id: 'dem-push-qui-est-prevenu', theme: 'compte',
+    id: 'dem-push-qui-est-prevenu', theme: 'compte', scenario: 'dem-push-qui-est-prevenu',
     fr: {
       fichier: 'aide/push-qui-est-prevenu.html',
       titre: `Choisir qui reçoit les notifications push et avec quelle avance | Aide KALEA`,
@@ -840,7 +874,8 @@ export const ARTICLES_DEMARRER = [
       intro: `L'administrateur et la direction choisissent, pour toute la société, quels droits d'accès sont prévenus par notification push, et avec quelle avance. Ce réglage choisit seulement qui est ciblé : chaque personne doit encore activer le push sur son téléphone.`,
       etapes: [
         { titre: `Ouvrez les rappels`, texte: `Dans la rubrique {{ui:Compte}}, ouvrez l'onglet {{ui:Rappels et notifications}}. Repérez la section {{ui:Notifications push — qui est prévenu}}.` },
-        { titre: `Activez le push pour la société`, texte: `Cochez {{ui:Activer les notifications push pour cette société}}.` },
+        { titre: `Activez le push pour la société`, texte: `Cochez {{ui:Activer les notifications push pour cette société}}.`,
+          image: { nom: 'ciblage', alt: `La section Notifications push — qui est prévenu : la case Activer les notifications push pour cette société (2), une ligne par droit avec ses deux délais (3) et le bouton Enregistrer le ciblage (4).` } },
         { titre: `Choisissez les droits à prévenir`, texte: `Cochez les droits concernés : {{ui:Administrateur}}, {{ui:Direction}}, {{ui:Droit de gestion}}, {{ui:Droit de saisie}}. Pour chacun, indiquez {{ui:Jours avant (machines datées)}} et/ou {{ui:Avant l'échéance du compteur (h ou km)}}. Un droit coché sans aucune de ces deux valeurs n'est pas enregistré.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer le ciblage}}. KALEA affiche {{ui:Ciblage enregistré.}}` },
       ],
@@ -861,7 +896,8 @@ export const ARTICLES_DEMARRER = [
       intro: `The administrator and the director choose, for the whole company, which access levels are notified by push notification, and how far ahead. This setting only chooses who is targeted: each person still has to turn push on on their phone.`,
       etapes: [
         { titre: `Open the reminders`, texte: `In the {{ui:Compte}} section, open the {{ui:Rappels et notifications}} tab. Find the {{ui:Notifications push — qui est prévenu}} section.` },
-        { titre: `Turn push on for the company`, texte: `Tick {{ui:Activer les notifications push pour cette société}}.` },
+        { titre: `Turn push on for the company`, texte: `Tick {{ui:Activer les notifications push pour cette société}}.`,
+          image: { nom: 'ciblage', alt: `The Push notifications — who is notified section: the Turn on push notifications for this company box (2), one row per access level with its two lead times (3) and the Save targeting button (4).` } },
         { titre: `Choose the access levels to notify`, texte: `Tick the relevant levels: {{ui:Administrateur}}, {{ui:Direction}}, {{ui:Droit de gestion}}, {{ui:Droit de saisie}}. For each one, fill in {{ui:Jours avant (machines datées)}} and/or {{ui:Avant l'échéance du compteur (h ou km)}}. A level ticked with neither value is not saved.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer le ciblage}}. KALEA shows {{ui:Ciblage enregistré.}}` },
       ],
@@ -989,7 +1025,7 @@ export const ARTICLES_DEMARRER = [
 
   // ───────────────────────────────────────────────────────── Supprimer son compte
   {
-    id: 'dem-supprimer-compte', theme: 'compte',
+    id: 'dem-supprimer-compte', theme: 'compte', scenario: 'dem-supprimer-compte',
     fr: {
       fichier: 'aide/supprimer-mon-compte.html',
       titre: `Supprimer mon compte KALEA | Aide KALEA`,
@@ -998,10 +1034,13 @@ export const ARTICLES_DEMARRER = [
       description: `Supprimer définitivement votre compte KALEA : ce qui est effacé, la double confirmation et ce qui arrive à l'abonnement.`,
       intro: `La suppression du compte est définitive. Avant de la lancer, KALEA liste ce qui sera effacé, puis vous demande de taper un mot pour confirmer.`,
       etapes: [
-        { titre: `Ouvrez la zone sensible`, texte: `Dans {{ui:Mon compte}}, descendez jusqu'à la section {{ui:Zone sensible}}, tout en bas.` },
+        { titre: `Ouvrez la zone sensible`, texte: `Dans {{ui:Mon compte}}, descendez jusqu'à la section {{ui:Zone sensible}}, tout en bas.`,
+          image: { nom: 'zone-sensible', alt: `La section Zone sensible (1) et son bouton Supprimer mon compte (2).` } },
         { titre: `Lancez la suppression`, texte: `Cliquez sur {{ui:Supprimer mon compte}}. Une fenêtre du même nom s'ouvre.` },
-        { titre: `Lisez ce qui sera effacé`, texte: `La fenêtre liste les machines, leurs plans d'entretien, l'historique, les photos, les carnets, les catégories, les rappels, et votre compte. Si un abonnement est en cours, un avertissement précise que la suppression le résilie immédiatement, sans remboursement au prorata : la période déjà payée est perdue. Si d'autres membres utilisent la société, la fenêtre l'indique : elle ne liste alors que votre compte et ne parle pas d'abonnement, car seul votre compte est supprimé.` },
-        { titre: `Tapez le mot de confirmation`, texte: `Tapez {{ui:SUPPRIMER}} dans le champ prévu. Le bouton de suppression reste grisé tant que le mot n'est pas exact.` },
+        { titre: `Lisez ce qui sera effacé`, texte: `La fenêtre liste les machines, leurs plans d'entretien, l'historique, les photos, les carnets, les catégories, les rappels, et votre compte. Si un abonnement est en cours, un avertissement précise que la suppression le résilie immédiatement, sans remboursement au prorata : la période déjà payée est perdue. Si d'autres membres utilisent la société, la fenêtre l'indique : elle ne liste alors que votre compte et ne parle pas d'abonnement, car seul votre compte est supprimé.`,
+          image: { nom: 'fenetre-seul', alt: `La fenêtre Supprimer mon compte quand vous êtes seul dans la société : la liste de ce qui sera effacé et l'avertissement sur l'abonnement (3).` } },
+        { titre: `Tapez le mot de confirmation`, texte: `Tapez {{ui:SUPPRIMER}} dans le champ prévu. Le bouton de suppression reste grisé tant que le mot n'est pas exact.`,
+          image: { nom: 'fenetre-membres', alt: `La même fenêtre quand d'autres membres utilisent la société : seul votre compte est listé (3), sans avertissement sur l'abonnement. Le mot SUPPRIMER est tapé dans le champ (4) et le bouton Supprimer définitivement est actif (5).` } },
         { titre: `Confirmez`, texte: `Cliquez sur {{ui:Supprimer définitivement}}. KALEA affiche {{ui:Compte supprimé.}}` },
       ],
       notes: [
@@ -1021,10 +1060,13 @@ export const ARTICLES_DEMARRER = [
       description: `Permanently delete your KALEA account: what is erased, the double confirmation and what happens to the subscription.`,
       intro: `Deleting the account is permanent. Before you start it, KALEA lists what will be erased, then asks you to type a word to confirm.`,
       etapes: [
-        { titre: `Open the sensitive area`, texte: `In {{ui:Mon compte}}, scroll down to the {{ui:Zone sensible}} section, at the very bottom.` },
+        { titre: `Open the sensitive area`, texte: `In {{ui:Mon compte}}, scroll down to the {{ui:Zone sensible}} section, at the very bottom.`,
+          image: { nom: 'zone-sensible', alt: `The Sensitive area section (1) and its Delete my account button (2).` } },
         { titre: `Start the deletion`, texte: `Click {{ui:Supprimer mon compte}}. A window with the same name opens.` },
-        { titre: `Read what will be erased`, texte: `The window lists the machines, their maintenance plans, the history, the photos, the manuals, the categories, the reminders, and your account. If a subscription is running, a warning says the deletion cancels it immediately, with no pro-rata refund: the period already paid is lost. If other members use the company, the window says so: it then lists only your account and does not mention a subscription, because only your account is deleted.` },
-        { titre: `Type the confirmation word`, texte: `Type {{ui:SUPPRIMER}} in the field. The delete button stays greyed out until the word is exact.` },
+        { titre: `Read what will be erased`, texte: `The window lists the machines, their maintenance plans, the history, the photos, the manuals, the categories, the reminders, and your account. If a subscription is running, a warning says the deletion cancels it immediately, with no pro-rata refund: the period already paid is lost. If other members use the company, the window says so: it then lists only your account and does not mention a subscription, because only your account is deleted.`,
+          image: { nom: 'fenetre-seul', alt: `The Delete my account window when you are alone in the company: the list of what will be erased and the subscription warning (3).` } },
+        { titre: `Type the confirmation word`, texte: `Type {{ui:SUPPRIMER}} in the field. The delete button stays greyed out until the word is exact.`,
+          image: { nom: 'fenetre-membres', alt: `The same window when other members use the company: only your account is listed (3), with no subscription warning. The word DELETE is typed in the field (4) and the Delete permanently button is active (5).` } },
         { titre: `Confirm`, texte: `Click {{ui:Supprimer définitivement}}. KALEA shows {{ui:Compte supprimé.}}` },
       ],
       notes: [

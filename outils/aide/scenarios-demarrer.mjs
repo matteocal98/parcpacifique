@@ -5,7 +5,7 @@
 // Échoue si un élément repéré sort de la zone photographiée.
 async function toutDansLaZone(c, selecteurs, zone) {
   const dehors = await c.horsZone(selecteurs, zone);
-  if (dehors.length) throw new Error('éléments repérés hors de la zone photographiée : ' + dehors.join(', '));
+  if (dehors.length) { const r = await c.ev('JSON.stringify([' + JSON.stringify(zone) + ', ' + JSON.stringify(dehors) + '].map((s) => Array.isArray(s) ? s.map((x) => { const e = document.querySelector(x); return e ? [x, e.getBoundingClientRect().toJSON()] : [x]; }) : (() => { const e = document.querySelector(s); return e ? e.getBoundingClientRect().toJSON() : null; })()))'); throw new Error('éléments repérés hors de la zone photographiée : ' + dehors.join(', ') + ' ' + r); }
 }
 // Crée un cadre invisible qui englobe plusieurs éléments (du premier au dernier), pour pouvoir le repérer d'un seul trait rouge.
 async function englober(c, selDebut, selFin, nom) {
@@ -278,7 +278,369 @@ export const SCENARIOS = [
       } },
     ],
   },
+
+  // ═════════════════════════════════════ SECONDE SÉRIE ═════════════════════════════════════
+
+  // ───────────────────────────────────────── Mot de passe oublié
+  {
+    id: 'dem-mot-de-passe-oublie',
+    etapes: [
+      // Étape 1 : le lien « Mot de passe oublié ? » de l'écran de connexion.
+      { nom: 'lien', ecran: 'bureau', async jouer(c) {
+        await fondClair(c);
+        await c.ev('renderLogin(); true');
+        await c.attendre('#open-forgot');
+        await c.dort(600);
+        await c.repere('#open-forgot', 1, { marge: 4, cote: 'gauche-centre' });
+        return c.zoneJusqua('.login-box', '.login-actions', 12);
+      } },
+      // Étape 2 : la fenêtre « Mot de passe oublié » — le champ Email et le bouton « Envoyer le code ».
+      { nom: 'fenetre', ecran: 'bureau', async jouer(c) {
+        await ouvrirOubli(c);
+        await c.repere('#forgot-email', 2, { marge: 5, cote: 'gauche-centre' });
+        await c.repere('#forgot-form button[type="submit"]', 2, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['#forgot-email', '#forgot-form button[type="submit"]'], '.overlay .modal');
+        return c.zone('.overlay .modal', 34);
+      } },
+      // Étapes 3 à 5 : l'écran « Vérifie ton email » — l'adresse confirmée (3), le code et le nouveau mot de passe (4), « Enregistrer le mot de passe » (5).
+      { nom: 'code', ecran: 'bureau', async jouer(c) {
+        await ouvrirOubli(c);
+        await c.ev("(() => { sb.auth.resetPasswordForEmail = async () => ({ error: null }); document.getElementById('forgot-form').requestSubmit(); return true; })()");
+        await c.attendre('#reset-code');
+        await c.dort(600);
+        await c.ev("(() => { const f = (id, v) => { const e = document.getElementById(id); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); }; f('reset-code', '482915'); f('reset-password', 'exemple-mot-de-passe'); document.activeElement && document.activeElement.blur(); return true; })()");
+        await englober(c, 'label[for="reset-code"]', '#reset-password', 'champs');
+        await c.repere('.overlay .modal .sub', 3, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('[data-aide="champs"]', 4, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('.overlay .modal button[type="submit"]', 5, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['.overlay .modal .sub', '[data-aide="champs"]', '.overlay .modal button[type="submit"]'], '.overlay .modal');
+        return c.zone('.overlay .modal', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Code de vérification non reçu
+  {
+    id: 'dem-code-non-recu',
+    etapes: [
+      // Étapes 1 à 3 : l'écran « Vérifie ton email » — l'adresse affichée (1), « Renvoyer le code » (2), le champ du code (3).
+      { nom: 'verification', ecran: 'bureau', async jouer(c) {
+        await ouvrirCodeInscription(c);
+        await c.repere('.overlay .modal .sub', 1, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('#verify-resend', 2, { marge: 5, cote: 'gauche-centre' });
+        await c.repere('#su-code', 3, { marge: 5, cote: 'gauche-centre' });
+        await toutDansLaZone(c, ['.overlay .modal .sub', '#verify-resend', '#su-code'], '.overlay .modal');
+        return c.zone('.overlay .modal', 34);
+      } },
+      // Étape 2 : après « Renvoyer le code » — « Nouveau code envoyé. » puis le compte à rebours.
+      { nom: 'renvoi', ecran: 'bureau', async jouer(c) {
+        await ouvrirCodeInscription(c);
+        await c.ev("(() => { sb.auth.resend = async () => ({ error: null }); document.getElementById('verify-resend').click(); return true; })()");
+        await c.dort(700);
+        await englober(c, '#verify-resend', '#verify-resend-msg', 'renvoi');
+        await c.repere('[data-aide="renvoi"]', 2, { marge: 6, cote: 'gauche-centre' });
+        await toutDansLaZone(c, ['[data-aide="renvoi"]'], '.overlay .modal');
+        return c.zone('.overlay .modal', 34);
+      } },
+      // Étape 4 : « Cette adresse a déjà un compte » — « Mot de passe oublié ? » et « Se connecter ».
+      { nom: 'deja-compte', ecran: 'bureau', async jouer(c) {
+        await ouvrirInscription(c);
+        await c.ev("(() => { sb.auth.signUp = async () => ({ data: { user: { identities: [] } }, error: null }); document.getElementById('signup-form').requestSubmit(); return true; })()");
+        await c.attendre('#deja-login');
+        await c.dort(600);
+        await c.repere('#deja-forgot', 4, { marge: 4, cote: 'gauche' });
+        await c.repere('#deja-login', 4, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['#deja-forgot', '#deja-login'], '.overlay .modal');
+        return c.zone('.overlay .modal', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Compte sans société
+  {
+    id: 'dem-societe-manquante',
+    etapes: [
+      // Étapes 1 à 3 : le message (1), « Nom de la société » et « Activité » (2), « Créer ma société » (3).
+      { nom: 'ecran', ecran: 'bureau', async jouer(c) {
+        await fondClair(c);
+        await c.ev("renderSocieteManquante({ id: 'demo', user_metadata: {} }); true");
+        await c.attendre('#societe-nom');
+        await c.dort(600);
+        await c.ev("(() => { const e = document.getElementById('societe-nom'); e.value = 'ATELIER DU LAGON'; document.activeElement && document.activeElement.blur(); return true; })()");
+        await c.ev("(() => { const s = document.getElementById('societe-activite'); let f = s; if (s.getBoundingClientRect().height === 0) { f = s.nextElementSibling; while (f && f.getBoundingClientRect().height === 0) f = f.nextElementSibling; } f.setAttribute('data-aide', 'activite-fin'); return true; })()");
+        await englober(c, 'label[for="societe-nom"]', '[data-aide="activite-fin"]', 'champs');
+        await c.repere('.login-box > p', 1, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('[data-aide="champs"]', 2, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('#societe-form button[type="submit"]', 3, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['.login-box > p', '[data-aide="champs"]', '#societe-form button[type="submit"]'], '.login-box');
+        return c.zone('.login-box', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Accepter une invitation
+  {
+    id: 'dem-accepter-invitation',
+    etapes: [
+      // Étapes 1 et 2 : l'encadré « Invitation à rejoindre une société » de l'écran de connexion (1) et « Créer mon compte » (2).
+      { nom: 'invitation', ecran: 'bureau', async jouer(c) {
+        await fondClair(c);
+        await c.ev('renderLogin(); true');
+        await c.attendre('#email');
+        await c.ev("afficherBlocInvitation('0123456789abcdef0123456789abcdef'); document.querySelectorAll('.presentation-publique .pres-pied').forEach((n) => { n.style.visibility = 'hidden'; }); true");
+        await c.attendre('#invitation-zone');
+        await c.dort(600);
+        await c.voir('#invitation-zone', 'end');
+        await c.dort(300);
+        await c.repere('#invitation-zone', 1, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('#invitation-inscrire', 2, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['#invitation-zone', '#invitation-inscrire'], '.login-box');
+        return c.zoneJusqua('.login-box', '#invitation-zone', 16);
+      } },
+      // Étape 3 : une fois connecté, l'encadré rappelle l'adresse connectée et l'adresse invitée, avec « Accepter l'invitation ».
+      { nom: 'invitation-connecte', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('dashboard'); true");
+        await c.attendre('#view-root');
+        await c.dort(500);
+        await c.ev("(() => { const code = '0123456789abcdef0123456789abcdef'; afficherInvitationConnectee(code); const z = document.getElementById('invitation-connectee'); z.innerHTML = invitationConnecteeHtml(code, { email: 'camille@exemple.fr', invite: 'camille@exemple.fr' }); brancherAcceptationInvitation(code, z); return true; })()");
+        await c.attendre('#invitation-accepter');
+        await c.dort(500);
+        await c.repere('#invitation-accepter', 3, { marge: 5, cote: 'droite' });
+        await toutDansLaZone(c, ['#invitation-accepter'], '#invitation-connectee');
+        return c.zone('#invitation-connectee', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Première machine : écran sans machine
+  {
+    id: 'dem-premiere-machine',
+    etapes: [
+      // Étape 1 : le tableau de bord d'un compte sans machine — « Ajouter une machine » (carte « Prochain entretien », et en haut de l'écran sur ordinateur).
+      { nom: 'tableau', ecran: 'bureau', async jouer(c) {
+        await ouvrirParcVide(c, 'dashboard');
+        await c.attendre('#priority-add');
+        await c.repere('#priority-add', 1, { marge: 5, cote: 'gauche-centre' });
+        await c.repere('#dash-add', 1, { marge: 5, cote: 'gauche-centre' });
+        await c.marquer('.dz-zone', 'depot', '.ui-section');
+        await c.repere('.dz-zone', 4, { marge: 5, cote: 'gauche-centre' });
+        return c.ev("(() => { const a = document.getElementById('dash-add').getBoundingClientRect(); const b = document.querySelector('.dz-zone').getBoundingClientRect(); const r = document.getElementById('view-root').getBoundingClientRect(); const g = Math.max(0, r.left - 44); const h = Math.max(0, a.top - 20); const d = Math.min(innerWidth, r.right + 10); const bas = b.bottom + 60; return { x: g, y: h, largeur: d - g, hauteur: bas - h }; })()");
+      } },
+      // Étape 3 : l'écran « Machines » vide — « Importer des machines ».
+      { nom: 'machines-vide', ecran: 'bureau', async jouer(c) {
+        await ouvrirParcVide(c, 'machines');
+        await c.attendre('#fleet-import');
+        await c.marquer('#fleet-import', 'import', '.ui-section');
+        await c.repere('#fleet-import', 3, { marge: 5, cote: 'gauche-centre' });
+        return c.zone('[data-aide="import"]', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Le bouton « + » : les actions rapides (téléphone)
+  {
+    id: 'dem-actions-rapides',
+    etapes: [
+      // Étape 1 : le bouton rond « + » au centre de la barre du bas.
+      { nom: 'bouton', ecran: 'mobile', async jouer(c) {
+        await c.ev("goTo('dashboard'); true");
+        await c.attendre('#fab-add');
+        await c.dort(700);
+        await c.repere('#fab-add', 1, { marge: 6, cote: 'gauche' });
+        return c.zone('.tabbar', 12);
+      } },
+      // Étape 2 : la feuille ouverte — la liste des actions (2).
+      { nom: 'feuille', ecran: 'mobile', async jouer(c) {
+        await c.ev("goTo('dashboard'); true");
+        await c.attendre('#fab-add');
+        await c.dort(500);
+        await c.ev("document.getElementById('fab-add').click(); true");
+        await c.attendre('.plus-sheet-item');
+        await c.dort(900);
+        await c.ev('document.activeElement && document.activeElement.blur(); true');
+        await c.repere('.plus-sheet-corps .plus-sheet-section', 2, { marge: 2 });
+        await toutDansLaZone(c, ['.plus-sheet-corps .plus-sheet-section'], '.plus-sheet-corps');
+        return { x: 0, y: 0, largeur: 390, hauteur: 844 };
+      } },
+      // Étape 3 : le choix de la machine dans une liste, avec la recherche (3).
+      { nom: 'choix-machine', ecran: 'mobile', async jouer(c) {
+        await c.ev("goTo('dashboard'); true");
+        await c.attendre('#fab-add');
+        await c.dort(500);
+        await c.ev("choisirMachineRapide(trad('Relever un compteur'), () => {}); true");
+        await c.attendre('#picker-recherche');
+        await c.dort(700);
+        await c.ev('document.activeElement && document.activeElement.blur(); true');
+        await c.repere('#picker-recherche', 3, { marge: 3, cote: 'gauche-centre' });
+        await c.repere('#picker-liste', null, { marge: 2 });
+        await toutDansLaZone(c, ['#picker-recherche', '#picker-liste'], '.overlay .modal');
+        return c.zone('.overlay .modal', 20);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Changer la devise
+  {
+    id: 'dem-changer-devise',
+    etapes: [
+      // Étapes 2 à 4 : la liste « Devise » (2), l'encadré « Devise non appliquée. » qui apparaît (3) et « Convertir les montants » (4).
+      { nom: 'devise', ecran: 'bureau', async jouer(c) {
+        await ouvrirCompte(c);
+        await c.ev("(() => { const s = document.getElementById('acc-devise'); s.value = 'XPF'; s.dispatchEvent(new Event('change', { bubbles: true })); document.querySelector('#view-root .compte-page .ui-section').setAttribute('data-aide', 'societe'); return true; })()");
+        await c.dort(500);
+        await c.attendre('#acc-devise-appliquer');
+        await c.marquer('#acc-devise', 'devise', '.ui-champ-groupe');
+        await c.repere('[data-aide="devise"]', 2, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('#acc-devise-bloc', 3, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('#acc-devise-appliquer', 4, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['[data-aide="devise"]', '#acc-devise-bloc', '#acc-devise-appliquer'], '[data-aide="societe"]');
+        return c.zoneJusqua('[data-aide="societe"]', '#acc-devise-appliquer', 30);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Changer son adresse e-mail de connexion
+  {
+    id: 'dem-changer-email',
+    etapes: [
+      // Étapes 1 à 4 : l'adresse actuelle (1), « Nouvel e-mail de connexion » (2), « Confirmer par mot de passe actuel » (3), « Mettre à jour l'e-mail » (4).
+      { nom: 'identifiants', ecran: 'bureau', async jouer(c) {
+        await ouvrirCompte(c);
+        await c.ev("(() => { const e = document.getElementById('acc-email'); e.value = 'nouvelle.adresse@exemple.fr'; const p = document.getElementById('acc-password'); p.value = 'exemple-mot-de-passe'; e.closest('.ui-section').setAttribute('data-aide', 'identifiants'); e.closest('.ui-section').querySelector('.ui-champ-groupe').setAttribute('data-aide', 'actuel'); return true; })()");
+        await c.marquer('#acc-email', 'nouvel', '.ui-champ-groupe');
+        await c.marquer('#acc-password', 'mdp', '.ui-champ-groupe');
+        await c.voir('[data-aide="identifiants"]', 'start');
+        await c.dort(300);
+        await c.repere('[data-aide="actuel"]', 1, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('[data-aide="nouvel"]', 2, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('[data-aide="mdp"]', 3, { marge: 6, cote: 'droite' });
+        await c.repere('#acc-save-email', 4, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['[data-aide="actuel"]', '[data-aide="nouvel"]', '[data-aide="mdp"]', '#acc-save-email'], '[data-aide="identifiants"]');
+        return c.zone('[data-aide="identifiants"]', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Supprimer mon compte
+  {
+    id: 'dem-supprimer-compte',
+    etapes: [
+      // Étapes 1 et 2 : la section « Zone sensible » (1) et « Supprimer mon compte » (2).
+      { nom: 'zone-sensible', ecran: 'bureau', async jouer(c) {
+        await ouvrirCompte(c);
+        await c.ev("document.getElementById('acc-supprimer').closest('.ui-section').setAttribute('data-aide', 'zone'); true");
+        await c.voir('[data-aide="zone"]', 'center');
+        await c.dort(300);
+        await c.repere('[data-aide="zone"] .ui-section-tete', 1, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('#acc-supprimer', 2, { marge: 5, cote: 'droite' });
+        await toutDansLaZone(c, ['[data-aide="zone"] .ui-section-tete', '#acc-supprimer'], '[data-aide="zone"]');
+        return c.zone('[data-aide="zone"]', 34);
+      } },
+      // Étape 3 : la fenêtre quand vous êtes seul dans la société — ce qui sera effacé et l'avertissement sur l'abonnement.
+      { nom: 'fenetre-seul', ecran: 'bureau', async jouer(c) {
+        await ouvrirSuppression(c, false);
+        await englober(c, '.suppr-liste', '.suppr-alerte', 'liste');
+        await c.repere('[data-aide="liste"]', 3, { marge: 6, cote: 'gauche-centre' });
+        await toutDansLaZone(c, ['[data-aide="liste"]'], '.suppr-compte-modal .modal');
+        return c.zone('.suppr-compte-modal .modal', 34);
+      } },
+      // Étapes 3 à 5 : quand d'autres membres utilisent la société — seul le compte est supprimé, pas d'avertissement d'abonnement ; le mot SUPPRIMER est tapé (4), le bouton s'active (5).
+      { nom: 'fenetre-membres', ecran: 'bureau', async jouer(c) {
+        await ouvrirSuppression(c, true);
+        await c.ev("(() => { const m = document.getElementById('suppr-mot'); m.value = m.placeholder; m.dispatchEvent(new Event('input', { bubbles: true })); document.activeElement && document.activeElement.blur(); return true; })()");
+        await c.dort(300);
+        await c.repere('.suppr-liste', 3, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('#suppr-mot', 4, { marge: 5, cote: 'gauche-centre' });
+        await c.repere('#suppr-confirmer', 5, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['.suppr-liste', '#suppr-mot', '#suppr-confirmer'], '.suppr-compte-modal .modal');
+        return c.zone('.suppr-compte-modal .modal', 34);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Notifications push : qui est prévenu
+  {
+    id: 'dem-push-qui-est-prevenu',
+    etapes: [
+      // Étapes 2 à 4 : la case « Activer les notifications push pour cette société » (2), une ligne par droit (3) et « Enregistrer le ciblage » (4). On part sous le texte d'introduction de la section.
+      { nom: 'ciblage', ecran: 'bureau', async jouer(c) {
+        await c.ev("goTo('reminders'); true");
+        await c.attendre('#push-cible-actif');
+        await c.dort(900);
+        await c.ev("document.getElementById('push-cible-actif').closest('.ui-section').setAttribute('data-aide', 'push'); true");
+        await c.marquer('#push-cible-actif', 'case', '.check-row');
+        await c.marquer('#push-role-gerant', 'role-debut', '.ui-groupe');
+        await c.marquer('#push-cible-save', 'enregistrer');
+        await c.ev("(() => { const g = [...document.querySelectorAll('[data-aide=\"push\"] .ui-groupe')]; g[g.length - 1].setAttribute('data-aide', 'role-fin'); return true; })()");
+        await c.voir('[data-aide="case"]', 'start');
+        await c.ev('window.scrollBy(0, -70); true');
+        await c.dort(300);
+        await englober(c, '[data-aide="role-debut"]', '[data-aide="role-fin"]', 'roles');
+        await c.repere('[data-aide="case"]', 2, { marge: 6, cote: 'gauche-centre' });
+        await c.repere('[data-aide="roles"]', 3, { marge: 4, cote: 'gauche-centre' });
+        await c.repere('#push-cible-save', 4, { marge: 4, cote: 'droite' });
+        await toutDansLaZone(c, ['[data-aide="case"]', '[data-aide="roles"]', '#push-cible-save'], '[data-aide="push"]');
+        return c.zoneJusqua('[data-aide="case"]', '#push-cible-save', 44);
+      } },
+    ],
+  },
+
+  // ───────────────────────────────────────── Je ne vois pas un écran ou un bouton
+  {
+    id: 'dem-je-ne-vois-pas',
+    etapes: [
+      // Étape 1 : la phrase « Ton accès : … » de la carte « Gestion de l'équipe », telle que la voit un droit de gestion.
+      { nom: 'acces', ecran: 'bureau', async jouer(c) {
+        await c.ev("UI.role = 'mecanicien'; goTo('account'); true");
+        await c.attendre('#view-root .compte-page .ui-section');
+        await c.dort(900);
+        await c.ev("(() => { const re = /Ton accès|Your access/i; const f = [...document.querySelectorAll('#view-root .compte-page *')].filter((e) => !e.children.length && re.test(e.textContent)); if (!f.length) throw new Error('phrase « Ton accès » absente'); f[0].setAttribute('data-aide', 'acces'); f[0].closest('.ui-section').setAttribute('data-aide', 'equipe'); return true; })()");
+        await c.voir('[data-aide="equipe"]', 'center');
+        await c.dort(300);
+        await c.repere('[data-aide="acces"]', 1, { marge: 6, cote: 'gauche-centre' });
+        await toutDansLaZone(c, ['[data-aide="acces"]'], '[data-aide="equipe"]');
+        return c.zone('[data-aide="equipe"]', 34);
+      } },
+    ],
+  },
 ];
+
+// Compte sans aucune machine : l'écran demandé s'affiche vide.
+async function ouvrirParcVide(c, vue) {
+  await c.ev("UI.machines = []; UI.machinesArchivees = []; goTo('" + vue + "'); true");
+  await c.dort(900);
+}
+// Ouvre la fenêtre « Supprimer mon compte » — seul dans la société (offre payante : avertissement sur l'abonnement) ou avec d'autres membres.
+async function ouvrirSuppression(c, avecMembres) {
+  await ouvrirCompte(c);
+  // Le flou de l'arrière-plan laisse deviner la ligne d'offre (prix) : on la remplace par le seul nom de l'offre.
+  await c.ev("(() => { const b = document.getElementById('account-upgrade'); if (b) { const l = b.closest('.ui-ligne'); l.querySelector('.ui-ligne-nom').textContent = OFFRES_LIBELLES.enterprise; l.querySelectorAll('.ui-aide').forEach((n) => n.remove()); } return true; })()");
+  if (avecMembres) await c.ev("sb.rpc = async (nom) => (nom === 'equipe_pour_attribution' ? { data: [{ id: 'demo-utilisateur' }, { id: 'autre-membre' }], error: null } : { data: [], error: null }); true");
+  await c.ev("document.getElementById('acc-supprimer').click(); true");
+  await c.attendre('#suppr-mot');
+  await c.dort(700);
+  await c.ev('document.activeElement && document.activeElement.blur(); true');
+}
+
+// Ouvre la fenêtre « Mot de passe oublié » depuis l'écran de connexion, avec une adresse d'exemple.
+async function ouvrirOubli(c) {
+  await fondClair(c);
+  await c.ev('renderLogin(); true');
+  await c.attendre('#open-forgot');
+  await c.ev("document.getElementById('open-forgot').click(); true");
+  await c.attendre('#forgot-form');
+  await c.dort(600);
+  await c.ev("(() => { const e = document.getElementById('forgot-email'); e.value = 'camille@exemple.fr'; document.activeElement && document.activeElement.blur(); return true; })()");
+  await c.dort(200);
+}
+// Affiche l'écran « Vérifie ton email » de l'inscription (le serveur est simulé : « code envoyé »).
+async function ouvrirCodeInscription(c) {
+  await ouvrirInscription(c);
+  await c.ev("(() => { sb.auth.signUp = async () => ({ data: { user: { identities: [{}] } }, error: null }); document.getElementById('signup-form').requestSubmit(); return true; })()");
+  await c.attendre('#su-code');
+  await c.dort(700);
+  await c.ev('document.activeElement && document.activeElement.blur(); true');
+}
 
 // Ouvre la fenêtre « Les offres KALEA » pour une société sur l'offre gratuite (ses cartes montrent donc « Ton offre actuelle » et des boutons « Passer à … »).
 async function ouvrirOffres(c) {

@@ -61,7 +61,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 2. Le bouton « Ajouter la machine » est grisé
   {
-    id: 'mac-bouton-ajouter-grise', theme: 'machines',
+    id: 'mac-bouton-ajouter-grise', theme: 'machines', scenario: 'mac-bouton-ajouter-grise',
     fr: {
       fichier: 'aide/bouton-ajouter-la-machine-grise.html',
       titre: `Le bouton « Ajouter la machine » est grisé : que faire ? | Aide KALEA`,
@@ -70,8 +70,8 @@ export const ARTICLES_MACHINES = [
       description: `Pourquoi on ne peut pas enregistrer une nouvelle machine dans KALEA : il manque un plan d'entretien ou une photo. Comment les ajouter.`,
       intro: `Quand vous ajoutez une machine, KALEA ne l'enregistre que si elle a un plan d'entretien <strong>et</strong> une photo. Tant qu'un des deux manque, le bouton reste grisé et une phrase sous le formulaire vous dit lequel.`,
       etapes: [
-        { titre: `Lisez la phrase sous le formulaire`, texte: `Descendez en bas de la fenêtre {{ui:Ajouter une machine}}. Une phrase qui commence par « Pour enregistrer, il manque » nomme ce qui manque : le plan d'entretien, la photo de la machine, ou les deux.` },
-        { titre: `Ajoutez le plan d'entretien`, texte: `Déposez le carnet du constructeur dans {{ui:Carnet d'entretien du constructeur}}, ou tapez au moins une tâche dans {{ui:Tâches de maintenance}} (par exemple : vidange, graissage, contrôle des filtres). Le bouton se dégrise dès que la zone contient une tâche.` },
+        { titre: `Lisez la phrase sous le formulaire`, image: { nom: 'message', alt: `Le bas de la fenêtre Ajouter une machine : la phrase Pour enregistrer, il manque… et le bouton Ajouter la machine grisé, repérés par le numéro 1.` }, texte: `Descendez en bas de la fenêtre {{ui:Ajouter une machine}}. Une phrase qui commence par « Pour enregistrer, il manque » nomme ce qui manque : le plan d'entretien, la photo de la machine, ou les deux.` },
+        { titre: `Ajoutez le plan d'entretien`, image: { nom: 'taches', alt: `La zone Tâches de maintenance avec une tâche saisie, repérée par le numéro 2.` }, texte: `Déposez le carnet du constructeur dans {{ui:Carnet d'entretien du constructeur}}, ou tapez au moins une tâche dans {{ui:Tâches de maintenance}} (par exemple : vidange, graissage, contrôle des filtres). Le bouton se dégrise dès que la zone contient une tâche.` },
         { titre: `Ajoutez la photo`, texte: `Dans {{ui:Visuel & photo du matériel}}, touchez {{ui:Choisir une photo}} pour prendre un fichier, ou {{ui:Prendre une photo}} pour utiliser l'appareil photo.` },
         { titre: `Enregistrez`, texte: `Quand la phrase a disparu, cliquez sur {{ui:Ajouter la machine}}. Si un message rouge apparaît, corrigez le champ indiqué puis recommencez.` },
       ],
@@ -91,8 +91,8 @@ export const ARTICLES_MACHINES = [
       description: `Why a new machine cannot be saved in KALEA: a maintenance plan or a photo is missing. How to add them.`,
       intro: `When you add a machine, KALEA only saves it if it has a maintenance plan <strong>and</strong> a photo. While one of the two is missing, the button stays greyed out and a sentence under the form tells you which one.`,
       etapes: [
-        { titre: `Read the sentence under the form`, texte: `Scroll to the bottom of the {{ui:Ajouter une machine}} window. A sentence starting with “To save, you still need” names what is missing: the maintenance plan, the machine's photo, or both.` },
-        { titre: `Add the maintenance plan`, texte: `Upload the manufacturer's manual in {{ui:Carnet d'entretien du constructeur}}, or type at least one task in {{ui:Tâches de maintenance}} (for example: oil change, greasing, filter check). The button un-greys as soon as the box contains a task.` },
+        { titre: `Read the sentence under the form`, image: { nom: 'message', alt: `The bottom of the Add a machine window: the To save, you still need… sentence and the greyed-out Add the machine button, marked with number 1.` }, texte: `Scroll to the bottom of the {{ui:Ajouter une machine}} window. A sentence starting with “To save, you still need” names what is missing: the maintenance plan, the machine's photo, or both.` },
+        { titre: `Add the maintenance plan`, image: { nom: 'taches', alt: `The Maintenance tasks box with a task entered, marked with number 2.` }, texte: `Upload the manufacturer's manual in {{ui:Carnet d'entretien du constructeur}}, or type at least one task in {{ui:Tâches de maintenance}} (for example: oil change, greasing, filter check). The button un-greys as soon as the box contains a task.` },
         { titre: `Add the photo`, texte: `In {{ui:Visuel & photo du matériel}}, tap {{ui:Choisir une photo}} to pick a file, or {{ui:Prendre une photo}} to use the camera.` },
         { titre: `Save`, texte: `When the sentence has disappeared, click {{ui:Ajouter la machine}}. If a red message appears, fix the field it points to and try again.` },
       ],
@@ -108,7 +108,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 3. Trouver le manuel sur internet
   {
-    id: 'mac-chercher-manuel-web', theme: 'machines',
+    id: 'mac-chercher-manuel-web', theme: 'machines', scenario: 'mac-chercher-manuel-web',
     fr: {
       fichier: 'aide/chercher-le-manuel-de-ma-machine-sur-internet.html',
       titre: `Trouver le manuel de sa machine sur internet | Aide KALEA`,
@@ -117,8 +117,8 @@ export const ARTICLES_MACHINES = [
       description: `Vous n'avez pas le carnet d'entretien ? KALEA prépare une recherche internet avec la marque et le modèle de votre machine.`,
       intro: `Vous n'avez pas le carnet d'entretien sous la main ? Dans la fenêtre d'ajout, KALEA ouvre une recherche internet déjà préparée avec les informations de votre machine. KALEA ne télécharge rien : c'est vous qui choisissez et enregistrez le document.`,
       etapes: [
-        { titre: `Remplissez d'abord l'identité de la machine`, texte: `Dans la fenêtre {{ui:Ajouter une machine}}, indiquez la {{ui:Marque}}, le {{ui:Modèle}} et, pour un engin, l'{{ui:Année du modèle}}. Pour un véhicule, ajoutez la {{ui:Motorisation (facultatif)}} : le plan d'entretien change selon le moteur. Plus ces champs sont précis, meilleure est la recherche.` },
-        { titre: `Cliquez sur le lien de recherche`, texte: `Dans la section {{ui:Carnet d'entretien du constructeur}}, cliquez sur {{ui:Chercher le manuel du fabricant sur le web →}}. Un nouvel onglet s'ouvre avec la recherche. Pour un engin, elle vise le manuel d'utilisation (souvent en anglais : « operator's manual »). Pour un véhicule, elle vise le plan d'entretien.` },
+        { titre: `Remplissez d'abord l'identité de la machine`, image: { nom: 'identite', alt: `Les champs Marque, Modèle et Année du modèle remplis, repérés par le numéro 1.` }, texte: `Dans la fenêtre {{ui:Ajouter une machine}}, indiquez la {{ui:Marque}}, le {{ui:Modèle}} et, pour un engin, l'{{ui:Année du modèle}}. Pour un véhicule, ajoutez la {{ui:Motorisation (facultatif)}} : le plan d'entretien change selon le moteur. Plus ces champs sont précis, meilleure est la recherche.` },
+        { titre: `Cliquez sur le lien de recherche`, image: { nom: 'liens', alt: `Les liens de recherche sous la zone du carnet : Chercher le manuel du fabricant sur le web (2) et Manuel d'atelier (3).` }, texte: `Dans la section {{ui:Carnet d'entretien du constructeur}}, cliquez sur {{ui:Chercher le manuel du fabricant sur le web →}}. Un nouvel onglet s'ouvre avec la recherche. Pour un engin, elle vise le manuel d'utilisation (souvent en anglais : « operator's manual »). Pour un véhicule, elle vise le plan d'entretien.` },
         { titre: `Enregistrez le PDF sur votre appareil`, texte: `Dans les résultats, ouvrez le document qui correspond à votre machine, puis enregistrez-le. Pour plus de détails (réparations, couples de serrage), essayez {{ui:Manuel d'atelier (service manual) →}} : il est plus long et parfois payant, et le manuel d'utilisation suffit en général pour le planning d'entretien.` },
         { titre: `Déposez-le dans KALEA`, texte: `Revenez dans la fenêtre et glissez le PDF dans la zone {{ui:Glissez votre PDF ici ou parcourez}}. KALEA analyse alors le tableau d'entretien (voir <a href="{{lien:mac-plan-propose}}">comprendre le plan proposé</a>).` },
       ],
@@ -138,8 +138,8 @@ export const ARTICLES_MACHINES = [
       description: `No maintenance manual at hand? KALEA prepares an internet search with your machine's make and model.`,
       intro: `Don't have the maintenance manual at hand? In the add window, KALEA opens an internet search already prepared with your machine's details. KALEA downloads nothing: you choose and save the document yourself.`,
       etapes: [
-        { titre: `Fill in the machine's identity first`, texte: `In the {{ui:Ajouter une machine}} window, enter the {{ui:Marque}}, the {{ui:Modèle}} and, for equipment, the {{ui:Année du modèle}}. For a vehicle, add the {{ui:Motorisation (facultatif)}}: the maintenance plan depends on the engine. The more precise these fields are, the better the search.` },
-        { titre: `Click the search link`, texte: `In the {{ui:Carnet d'entretien du constructeur}} section, click {{ui:Chercher le manuel du fabricant sur le web →}}. A new tab opens with the search. For equipment, it targets the operator's manual (often in English: “operator's manual”). For a vehicle, it targets the service schedule.` },
+        { titre: `Fill in the machine's identity first`, image: { nom: 'identite', alt: `The Make, Model and Model year fields filled in, marked with number 1.` }, texte: `In the {{ui:Ajouter une machine}} window, enter the {{ui:Marque}}, the {{ui:Modèle}} and, for equipment, the {{ui:Année du modèle}}. For a vehicle, add the {{ui:Motorisation (facultatif)}}: the maintenance plan depends on the engine. The more precise these fields are, the better the search.` },
+        { titre: `Click the search link`, image: { nom: 'liens', alt: `The search links under the manual area: the search for the manufacturer's manual (2) and the workshop manual (3).` }, texte: `In the {{ui:Carnet d'entretien du constructeur}} section, click {{ui:Chercher le manuel du fabricant sur le web →}}. A new tab opens with the search. For equipment, it targets the operator's manual (often in English: “operator's manual”). For a vehicle, it targets the service schedule.` },
         { titre: `Save the PDF on your device`, texte: `In the results, open the document that matches your machine, then save it. For more detail (repairs, tightening torques), try {{ui:Manuel d'atelier (service manual) →}}: it is longer and sometimes paid, and the operator's manual is usually enough for the maintenance schedule.` },
         { titre: `Upload it to KALEA`, texte: `Go back to the window and drag the PDF into the {{ui:Glissez votre PDF ici ou parcourez}} area. KALEA then analyses the maintenance table (see <a href="{{lien:mac-plan-propose}}">understand the suggested plan</a>).` },
       ],
@@ -155,7 +155,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 4. Le plan proposé par l'algorithme
   {
-    id: 'mac-plan-propose', theme: 'plans',
+    id: 'mac-plan-propose', theme: 'plans', scenario: 'mac-plan-propose',
     fr: {
       fichier: 'aide/comprendre-le-plan-propose-par-lalgorithme.html',
       titre: `Comprendre le plan proposé après le dépôt d'un carnet | Aide KALEA`,
@@ -165,8 +165,8 @@ export const ARTICLES_MACHINES = [
       intro: `Quand vous déposez un carnet en créant une machine, KALEA affiche un écran à part : {{ui:Plan proposé par notre algorithme}}. Vous relisez ce qui a été trouvé et vous décidez. Rien n'est activé sans votre accord.`,
       etapes: [
         { titre: `Déposez le carnet et choisissez les pages`, texte: `Dans {{ui:Carnet d'entretien du constructeur}}, déposez le PDF. KALEA repère les pages du tableau d'entretien et vous les montre : cochez celles à analyser, ajoutez-en avec {{ui:Ajouter une page}} si besoin, puis cliquez sur le bouton « Analyser ces … pages ». Si le document est une image, choisissez les pages vous-même avec {{ui:Choisir les pages moi-même}}.` },
-        { titre: `Relisez les échéances détectées`, texte: `Le tableau {{ui:Échéances détectées dans le manuel}} liste chaque élément et sa fréquence. Le bouton {{ui:Modifier l'étape}} corrige une fréquence, la corbeille retire une ligne détectée par erreur et {{ui:Ajouter une ligne}} ajoute une tâche manquante. Un résumé en haut annonce l'échéance proposée.` },
-        { titre: `Choisissez ce que vous faites du plan`, texte: `{{ui:Suivre ce plan}} active tel quel le mode de suivi et l'intervalle proposés. {{ui:Modifier ce plan}} vous ramène au formulaire pour ajuster le mode de suivi, l'intervalle ou la photo. {{ui:Faire mon propre plan}} ignore la proposition : le carnet reste attaché à la fiche.` },
+        { titre: `Relisez les échéances détectées`, image: { nom: 'echeances', alt: `L'écran Plan proposé par notre algorithme : le tableau des échéances détectées dans le manuel, repéré par le numéro 2, avec Modifier l'étape et la corbeille sur chaque ligne.` }, texte: `Le tableau {{ui:Échéances détectées dans le manuel}} liste chaque élément et sa fréquence. Le bouton {{ui:Modifier l'étape}} corrige une fréquence, la corbeille retire une ligne détectée par erreur et {{ui:Ajouter une ligne}} ajoute une tâche manquante. Un résumé en haut annonce l'échéance proposée.` },
+        { titre: `Choisissez ce que vous faites du plan`, image: { nom: 'choix', alt: `Les trois choix : Suivre ce plan, Modifier ce plan et Faire mon propre plan, repérés par le numéro 3.` }, texte: `{{ui:Suivre ce plan}} active tel quel le mode de suivi et l'intervalle proposés. {{ui:Modifier ce plan}} vous ramène au formulaire pour ajuster le mode de suivi, l'intervalle ou la photo. {{ui:Faire mon propre plan}} ignore la proposition : le carnet reste attaché à la fiche.` },
         { titre: `Terminez par la dernière étape`, texte: `Après {{ui:Suivre ce plan}} ou {{ui:Faire mon propre plan}}, l'écran {{ui:Dernière étape}} demande le relevé actuel (s'il n'a pas déjà été saisi) et la photo. Cliquez ensuite sur {{ui:Enregistrer la machine}}.` },
       ],
       notes: [
@@ -186,8 +186,8 @@ export const ARTICLES_MACHINES = [
       intro: `When you upload a manual while creating a machine, KALEA shows a separate screen: {{ui:Plan proposé par notre algorithme}}. You read what was found and you decide. Nothing is activated without your agreement.`,
       etapes: [
         { titre: `Upload the manual and choose the pages`, texte: `In {{ui:Carnet d'entretien du constructeur}}, upload the PDF. KALEA finds the pages of the maintenance table and shows them: tick the ones to analyse, add more with {{ui:Ajouter une page}} if needed, then click the “Analyse these … pages” button. If the document is an image, pick the pages yourself with {{ui:Choisir les pages moi-même}}.` },
-        { titre: `Read the due dates that were found`, texte: `The {{ui:Échéances détectées dans le manuel}} table lists each item and its interval. The {{ui:Modifier l'étape}} button corrects an interval, the bin removes a line detected by mistake and {{ui:Ajouter une ligne}} adds a missing task. A summary at the top states the suggested interval.` },
-        { titre: `Choose what to do with the plan`, texte: `{{ui:Suivre ce plan}} activates the suggested tracking mode and interval as they are. {{ui:Modifier ce plan}} takes you back to the form to adjust the tracking mode, the interval or the photo. {{ui:Faire mon propre plan}} ignores the suggestion: the manual stays attached to the record.` },
+        { titre: `Read the due dates that were found`, image: { nom: 'echeances', alt: `The Plan suggested by our algorithm screen: the table of due dates found in the manual, marked with number 2, with an edit button and a bin on each row.` }, texte: `The {{ui:Échéances détectées dans le manuel}} table lists each item and its interval. The {{ui:Modifier l'étape}} button corrects an interval, the bin removes a line detected by mistake and {{ui:Ajouter une ligne}} adds a missing task. A summary at the top states the suggested interval.` },
+        { titre: `Choose what to do with the plan`, image: { nom: 'choix', alt: `The three choices: follow this plan, edit this plan and make my own plan, marked with number 3.` }, texte: `{{ui:Suivre ce plan}} activates the suggested tracking mode and interval as they are. {{ui:Modifier ce plan}} takes you back to the form to adjust the tracking mode, the interval or the photo. {{ui:Faire mon propre plan}} ignores the suggestion: the manual stays attached to the record.` },
         { titre: `Finish with the last step`, texte: `After {{ui:Suivre ce plan}} or {{ui:Faire mon propre plan}}, the {{ui:Dernière étape}} screen asks for the current reading (if not already entered) and the photo. Then click {{ui:Enregistrer la machine}}.` },
       ],
       notes: [
@@ -255,7 +255,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 6. Les erreurs courantes d'un import
   {
-    id: 'mac-import-erreurs', theme: 'machines',
+    id: 'mac-import-erreurs', theme: 'machines', scenario: 'mac-import-erreurs',
     fr: {
       fichier: 'aide/import-csv-refuse-erreurs-courantes.html',
       titre: `Mon import CSV est refusé : les erreurs courantes | Aide KALEA`,
@@ -264,8 +264,8 @@ export const ARTICLES_MACHINES = [
       description: `Fichier refusé, lignes en erreur, doublons : les causes les plus fréquentes d'un import de machines dans KALEA et comment les corriger.`,
       intro: `Votre fichier est refusé avant l'aperçu, ou certaines lignes sont marquées {{ui:En erreur}} ? Voici les causes les plus fréquentes et comment les corriger.`,
       etapes: [
-        { titre: `Si le fichier est refusé en entier`, texte: `Un message rouge apparaît sous la zone de dépôt. Il peut dire que le fichier est vide ; que la colonne du nom est introuvable dans la première ligne (KALEA liste alors les colonnes qu'il a lues : vérifiez que la première ligne contient bien les titres) ; que le fichier ne contient que l'en-tête ; qu'il contient trop de lignes (découpez-le en plusieurs fichiers) ; ou qu'il est illisible (réenregistrez-le au format CSV).` },
-        { titre: `Si des lignes sont en erreur`, texte: `Dans l'aperçu, chaque ligne en erreur porte son message. Les plus fréquents : le nom est obligatoire ; type inconnu (écrivez machine ou véhicule) ; statut inconnu (en service, en panne ou hors service) ; unité du compteur inconnue (heures ou km) ; année, compteur ou prix invalide ; date invalide (écrivez AAAA-MM-JJ ou JJ/MM/AAAA) ; doublon (même code interne, même n° de série ou même immatriculation qu'une ligne plus haut). Le numéro de ligne est celui de votre tableur, l'en-tête étant la ligne 1 (à condition que le fichier ne contienne pas de lignes vides, qui sont ignorées).` },
+        { titre: `Si le fichier est refusé en entier`, image: { nom: 'refuse', alt: `La fenêtre d'import après le choix d'un fichier sans colonne Nom : la zone de dépôt et le message rouge qui explique le refus, repérés par le numéro 1.` }, texte: `Un message rouge apparaît sous la zone de dépôt. Il peut dire que le fichier est vide ; que la colonne du nom est introuvable dans la première ligne (KALEA liste alors les colonnes qu'il a lues : vérifiez que la première ligne contient bien les titres) ; que le fichier ne contient que l'en-tête ; qu'il contient trop de lignes (découpez-le en plusieurs fichiers) ; ou qu'il est illisible (réenregistrez-le au format CSV).` },
+        { titre: `Si des lignes sont en erreur`, image: { nom: 'lignes', alt: `L'aperçu avec des lignes en erreur : chacune porte son message, la liste est repérée par le numéro 2.` }, texte: `Dans l'aperçu, chaque ligne en erreur porte son message. Les plus fréquents : le nom est obligatoire ; type inconnu (écrivez machine ou véhicule) ; statut inconnu (en service, en panne ou hors service) ; unité du compteur inconnue (heures ou km) ; année, compteur ou prix invalide ; date invalide (écrivez AAAA-MM-JJ ou JJ/MM/AAAA) ; doublon (même code interne, même n° de série ou même immatriculation qu'une ligne plus haut). Le numéro de ligne est celui de votre tableur, l'en-tête étant la ligne 1 (à condition que le fichier ne contienne pas de lignes vides, qui sont ignorées).` },
         { titre: `Téléchargez les erreurs`, texte: `À la fin de l'import, cliquez sur {{ui:Télécharger les erreurs (CSV)}}. Le fichier contient seulement les lignes à corriger, avec une dernière colonne qui donne la raison.` },
         { titre: `Corrigez et réimportez`, texte: `Corrigez les lignes dans ce fichier, puis relancez l'import avec {{ui:Importer}}. Les machines déjà créées sont reconnues grâce à leur code interne, à leur n° de série ou à leur immatriculation : elles ne sont pas créées une seconde fois. Une machine qui n'a aucun de ces trois repères ne peut pas être reconnue et serait créée en double si vous la réimportez.` },
       ],
@@ -285,8 +285,8 @@ export const ARTICLES_MACHINES = [
       description: `File rejected, rows with errors, duplicates: the most frequent causes of a machine import in KALEA and how to fix them.`,
       intro: `Is your file rejected before the preview, or are some rows marked {{ui:En erreur}}? Here are the most frequent causes and how to fix them.`,
       etapes: [
-        { titre: `If the whole file is rejected`, texte: `A red message appears under the drop area. It may say that the file is empty; that the name column cannot be found in the first row (KALEA then lists the columns it read: check that the first row really contains the headings); that the file contains only the header; that it contains too many rows (split it into several files); or that it cannot be read (save it again as CSV).` },
-        { titre: `If some rows have errors`, texte: `In the preview, each row with an error carries its message. The most frequent ones: the name is required; unknown type (write machine or vehicle); unknown status (in service, broken down or out of service); unknown meter unit (hours or km); invalid year, meter or price; invalid date (write YYYY-MM-DD or DD/MM/YYYY); duplicate (same internal code, serial number or registration as a row above). The row number is the one in your spreadsheet, the header being row 1 (provided the file has no empty rows, which are ignored).` },
+        { titre: `If the whole file is rejected`, image: { nom: 'refuse', alt: `The import window after choosing a file with no Name column: the drop area and the red message explaining the refusal, marked with number 1.` }, texte: `A red message appears under the drop area. It may say that the file is empty; that the name column cannot be found in the first row (KALEA then lists the columns it read: check that the first row really contains the headings); that the file contains only the header; that it contains too many rows (split it into several files); or that it cannot be read (save it again as CSV).` },
+        { titre: `If some rows have errors`, image: { nom: 'lignes', alt: `The preview with rows in error: each carries its message, the list is marked with number 2.` }, texte: `In the preview, each row with an error carries its message. The most frequent ones: the name is required; unknown type (write machine or vehicle); unknown status (in service, broken down or out of service); unknown meter unit (hours or km); invalid year, meter or price; invalid date (write YYYY-MM-DD or DD/MM/YYYY); duplicate (same internal code, serial number or registration as a row above). The row number is the one in your spreadsheet, the header being row 1 (provided the file has no empty rows, which are ignored).` },
         { titre: `Download the errors`, texte: `At the end of the import, click {{ui:Télécharger les erreurs (CSV)}}. The file contains only the rows to fix, with a last column giving the reason.` },
         { titre: `Fix and import again`, texte: `Fix the rows in that file, then run the import again with {{ui:Importer}}. Machines already created are recognised by their internal code, serial number or registration: they are not created a second time. A machine with none of these three references cannot be recognised and would be created twice if you import it again.` },
       ],
@@ -302,7 +302,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 7. Annuler un import
   {
-    id: 'mac-annuler-import', theme: 'machines',
+    id: 'mac-annuler-import', theme: 'machines', scenario: 'mac-annuler-import',
     fr: {
       fichier: 'aide/annuler-un-import-de-machines.html',
       titre: `Annuler un import de machines (dans les 24 heures) | Aide KALEA`,
@@ -312,7 +312,7 @@ export const ARTICLES_MACHINES = [
       intro: `Vous vous êtes rendu compte d'une erreur dans le fichier après l'import ? Le dernier import reste annulable pendant 24 heures.`,
       etapes: [
         { titre: `Juste après l'import, depuis le rapport`, texte: `Dans le rapport de fin d'import, cliquez sur {{ui:Annuler cet import}}. Ce bouton n'apparaît que si des machines ont été créées.` },
-        { titre: `Plus tard, depuis la page Machines`, texte: `Si vous avez fermé la fenêtre, ouvrez {{ui:Machines}} : pendant 24 heures, un bandeau « Import récent » reste affiché en haut de la page, avec les boutons {{ui:Annuler cet import}} et {{ui:Masquer}}. Cliquez sur {{ui:Annuler cet import}}.` },
+        { titre: `Plus tard, depuis la page Machines`, image: { nom: 'bandeau', alt: `Le bandeau Import récent en haut de l'écran Machines : le bouton Annuler cet import, repéré par le numéro 2, et le bouton Masquer.` }, texte: `Si vous avez fermé la fenêtre, ouvrez {{ui:Machines}} : pendant 24 heures, un bandeau « Import récent » reste affiché en haut de la page, avec les boutons {{ui:Annuler cet import}} et {{ui:Masquer}}. Cliquez sur {{ui:Annuler cet import}}.` },
         { titre: `Confirmez`, texte: `Une fenêtre de confirmation rappelle que les machines créées par ce lot (sans intervention ni panne) seront supprimées définitivement. Confirmez pour continuer.` },
         { titre: `Lisez le résultat`, texte: `KALEA indique combien de machines ont été supprimées et combien ont été conservées parce qu'elles ont un historique.` },
       ],
@@ -335,7 +335,7 @@ export const ARTICLES_MACHINES = [
       intro: `Did you notice a mistake in the file after the import? The latest import can be cancelled for 24 hours.`,
       etapes: [
         { titre: `Right after the import, from the report`, texte: `In the end-of-import report, click {{ui:Annuler cet import}}. This button only appears if machines were created.` },
-        { titre: `Later, from the Machines page`, texte: `If you closed the window, open {{ui:Machines}}: for 24 hours, a “Recent import” banner stays at the top of the page, with the {{ui:Annuler cet import}} and {{ui:Masquer}} buttons. Click {{ui:Annuler cet import}}.` },
+        { titre: `Later, from the Machines page`, image: { nom: 'bandeau', alt: `The Recent import banner at the top of the Machines screen: the Cancel this import button, marked with number 2, and the Hide button.` }, texte: `If you closed the window, open {{ui:Machines}}: for 24 hours, a “Recent import” banner stays at the top of the page, with the {{ui:Annuler cet import}} and {{ui:Masquer}} buttons. Click {{ui:Annuler cet import}}.` },
         { titre: `Confirm`, texte: `A confirmation window reminds you that the machines created by this batch (with no intervention or fault) will be deleted permanently. Confirm to continue.` },
         { titre: `Read the result`, texte: `KALEA states how many machines were deleted and how many were kept because they have a history.` },
       ],
@@ -398,7 +398,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 9. Supprimer une machine
   {
-    id: 'mac-supprimer-machine', theme: 'machines',
+    id: 'mac-supprimer-machine', theme: 'machines', scenario: 'mac-supprimer-machine',
     fr: {
       fichier: 'aide/supprimer-definitivement-une-machine.html',
       titre: `Supprimer définitivement une machine | Aide KALEA`,
@@ -408,7 +408,7 @@ export const ARTICLES_MACHINES = [
       intro: `Supprimer une machine l'efface avec tout ce qui s'y rattache. <strong>Cette action est irréversible.</strong> Si vous voulez seulement arrêter de la suivre, préférez l'archivage.`,
       etapes: [
         { titre: `Ouvrez la modification de la machine`, texte: `Touchez l'icône en forme de roue sur la carte de la machine (voir <a href="{{lien:modifier-machine}}">modifier une machine</a>).` },
-        { titre: `Cliquez sur Supprimer`, texte: `Tout en bas de la fenêtre {{ui:Modifier une machine}}, cliquez sur {{ui:Supprimer cette machine}}.` },
+        { titre: `Cliquez sur Supprimer`, image: { nom: 'supprimer', alt: `Le bas de la fenêtre Modifier une machine : le bouton Supprimer cette machine, repéré par le numéro 2, à côté d'Archiver cette machine.` }, texte: `Tout en bas de la fenêtre {{ui:Modifier une machine}}, cliquez sur {{ui:Supprimer cette machine}}.` },
         { titre: `Lisez la confirmation`, texte: `Une fenêtre vous prévient que le plan d'entretien, l'historique, les relevés, les ordres de travail, le carnet et la photo seront aussi supprimés, et que l'action est irréversible. Si vous n'êtes pas sûr, annulez.` },
         { titre: `Confirmez`, texte: `Pendant la suppression, le bouton affiche « Suppression… ». Le message {{ui:Machine supprimée}} s'affiche ensuite, et la machine disparaît de la liste.` },
       ],
@@ -430,7 +430,7 @@ export const ARTICLES_MACHINES = [
       intro: `Deleting a machine erases it together with everything attached to it. <strong>This action cannot be undone.</strong> If you only want to stop tracking it, prefer archiving.`,
       etapes: [
         { titre: `Open the machine editor`, texte: `Tap the cog-shaped icon on the machine's card (see <a href="{{lien:modifier-machine}}">edit a machine</a>).` },
-        { titre: `Click Delete`, texte: `At the very bottom of the {{ui:Modifier une machine}} window, click {{ui:Supprimer cette machine}}.` },
+        { titre: `Click Delete`, image: { nom: 'supprimer', alt: `The bottom of the Edit a machine window: the Delete this machine button, marked with number 2, next to Archive this machine.` }, texte: `At the very bottom of the {{ui:Modifier une machine}} window, click {{ui:Supprimer cette machine}}.` },
         { titre: `Read the confirmation`, texte: `A window warns you that the maintenance plan, the history, the readings, the work orders, the manual and the photo will also be deleted, and that the action cannot be undone. If you are not sure, cancel.` },
         { titre: `Confirm`, texte: `While the deletion runs, the button shows “Deleting…”. The {{ui:Machine supprimée}} message then appears, and the machine disappears from the list.` },
       ],
@@ -447,7 +447,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 10. Les catégories
   {
-    id: 'mac-categorie', theme: 'machines',
+    id: 'mac-categorie', theme: 'machines', scenario: 'mac-categorie',
     fr: {
       fichier: 'aide/choisir-ou-creer-une-categorie-de-machine.html',
       titre: `Choisir ou créer la catégorie d'une machine | Aide KALEA`,
@@ -458,7 +458,7 @@ export const ARTICLES_MACHINES = [
       etapes: [
         { titre: `Ouvrez le formulaire de la machine`, texte: `Pour une nouvelle machine, cliquez sur {{ui:Ajouter une machine}} dans {{ui:Machines}}. Pour une machine existante, touchez l'icône en forme de roue sur sa carte (voir <a href="{{lien:modifier-machine}}">modifier une machine</a>).` },
         { titre: `Choisissez dans la liste`, texte: `Ouvrez la liste {{ui:Catégorie}} : elle propose des catégories courantes des chantiers et des parcs (tronçonneuse, tondeuse, mini-pelle, tracteur, remorque, groupe électrogène, compresseur…), plus celles que vous avez déjà utilisées.` },
-        { titre: `Créez-en une si elle manque`, texte: `Choisissez {{ui:Autre…}} tout en bas de la liste, puis tapez le nom de la catégorie dans le champ qui apparaît. Le nom est mis en majuscules automatiquement.` },
+        { titre: `Créez-en une si elle manque`, image: { nom: 'autre', alt: `Le formulaire de la machine après le choix de Autre… : le champ du nom de la nouvelle catégorie, repéré par le numéro 3.` }, texte: `Choisissez {{ui:Autre…}} tout en bas de la liste, puis tapez le nom de la catégorie dans le champ qui apparaît. Le nom est mis en majuscules automatiquement.` },
         { titre: `Enregistrez`, texte: `Validez le formulaire. La catégorie est créée avec la machine et sera proposée la prochaine fois, même sans réseau sur cet appareil.` },
       ],
       notes: [
@@ -479,7 +479,7 @@ export const ARTICLES_MACHINES = [
       etapes: [
         { titre: `Open the machine form`, texte: `For a new machine, click {{ui:Ajouter une machine}} in {{ui:Machines}}. For an existing machine, tap the cog-shaped icon on its card (see <a href="{{lien:modifier-machine}}">edit a machine</a>).` },
         { titre: `Choose from the list`, texte: `Open the {{ui:Catégorie}} list: it offers common categories for worksites and fleets (chainsaw, mower, mini excavator, tractor, trailer, generator, compressor…), plus the ones you have already used.` },
-        { titre: `Create one if it is missing`, texte: `Choose {{ui:Autre…}} at the very bottom of the list, then type the category name in the field that appears. The name is turned into capital letters automatically.` },
+        { titre: `Create one if it is missing`, image: { nom: 'autre', alt: `The machine form after choosing Other…: the field for the new category's name, marked with number 3.` }, texte: `Choose {{ui:Autre…}} at the very bottom of the list, then type the category name in the field that appears. The name is turned into capital letters automatically.` },
         { titre: `Save`, texte: `Confirm the form. The category is created with the machine and will be offered next time, even without a network on this device.` },
       ],
       notes: [
@@ -541,7 +541,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 12. Scanner un QR code
   {
-    id: 'mac-scanner-qr', theme: 'machines',
+    id: 'mac-scanner-qr', theme: 'machines', scenario: 'mac-scanner-qr',
     fr: {
       fichier: 'aide/scanner-un-qr-code-pour-ouvrir-une-machine.html',
       titre: `Scanner un QR code pour ouvrir une machine | Aide KALEA`,
@@ -550,9 +550,9 @@ export const ARTICLES_MACHINES = [
       description: `Ouvrir la fiche d'une machine en scannant son QR code avec le scanner de KALEA ou l'appareil photo du téléphone.`,
       intro: `Devant la machine, scannez son QR code : sa fiche s'ouvre aussitôt, sans chercher dans la liste.`,
       etapes: [
-        { titre: `Ouvrez le scanner`, texte: `Dans {{ui:Machines}}, cliquez sur {{ui:Scanner un QR}}. Sur téléphone, touchez {{ui:Scanner}} dans la barre du bas (droits de gestion et de saisie), ou le bouton + puis {{ui:Scanner un QR code}}.` },
+        { titre: `Ouvrez le scanner`, image: { nom: 'bouton', alt: `L'écran Machines : le bouton Scanner un QR, repéré par le numéro 1.` }, texte: `Dans {{ui:Machines}}, cliquez sur {{ui:Scanner un QR}}. Sur téléphone, touchez {{ui:Scanner}} dans la barre du bas (droits de gestion et de saisie), ou le bouton + puis {{ui:Scanner un QR code}}.` },
         { titre: `Autorisez la caméra`, texte: `Au premier usage, le téléphone ou le navigateur demande l'autorisation d'utiliser la caméra. Acceptez. Si l'accès est refusé, KALEA vous invite à vérifier les réglages de votre téléphone ou de votre navigateur.` },
-        { titre: `Visez le QR code`, texte: `Placez le QR code devant la caméra. Dès qu'il est lu, la fenêtre se ferme et la fiche de la machine s'ouvre.` },
+        { titre: `Visez le QR code`, image: { nom: 'fenetre', alt: `La fenêtre du scanner : l'image de la caméra, repérée par le numéro 3, et le bouton Fermer.` }, texte: `Placez le QR code devant la caméra. Dès qu'il est lu, la fenêtre se ferme et la fiche de la machine s'ouvre.` },
       ],
       variante: {
         titre: `Autre chemin : avec l'appareil photo du téléphone`,
@@ -575,9 +575,9 @@ export const ARTICLES_MACHINES = [
       description: `Open a machine's record by scanning its QR code with the KALEA scanner or your phone's camera.`,
       intro: `In front of the machine, scan its QR code: its record opens right away, with no searching through the list.`,
       etapes: [
-        { titre: `Open the scanner`, texte: `In {{ui:Machines}}, click {{ui:Scanner un QR}}. On a phone, tap {{ui:Scanner}} in the bottom bar (management and data-entry access), or the + button then {{ui:Scanner un QR code}}.` },
+        { titre: `Open the scanner`, image: { nom: 'bouton', alt: `The Machines screen: the Scan a QR code button, marked with number 1.` }, texte: `In {{ui:Machines}}, click {{ui:Scanner un QR}}. On a phone, tap {{ui:Scanner}} in the bottom bar (management and data-entry access), or the + button then {{ui:Scanner un QR code}}.` },
         { titre: `Allow the camera`, texte: `The first time, your phone or browser asks for permission to use the camera. Accept. If access is refused, KALEA invites you to check your phone or browser settings.` },
-        { titre: `Aim at the QR code`, texte: `Hold the QR code in front of the camera. As soon as it is read, the window closes and the machine's record opens.` },
+        { titre: `Aim at the QR code`, image: { nom: 'fenetre', alt: `The scanner window: the camera view, marked with number 3, and the Close button.` }, texte: `Hold the QR code in front of the camera. As soon as it is read, the window closes and the machine's record opens.` },
       ],
       variante: {
         titre: `Another route: with the phone's camera`,
@@ -696,7 +696,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 15. Suivre et résoudre une panne
   {
-    id: 'mac-suivre-pannes', theme: 'machines',
+    id: 'mac-suivre-pannes', theme: 'machines', scenario: 'mac-suivre-pannes',
     fr: {
       fichier: 'aide/suivre-et-resoudre-une-panne-signalee.html',
       titre: `Suivre et résoudre une panne signalée | Aide KALEA`,
@@ -705,10 +705,10 @@ export const ARTICLES_MACHINES = [
       description: `Prendre en charge une panne, créer un ordre de travail, la marquer résolue et noter les heures d'arrêt dans KALEA.`,
       intro: `Une panne signalée passe par trois états : ouverte, prise en charge, résolue. Le gérant et le droit de gestion la font avancer.`,
       etapes: [
-        { titre: `Ouvrez la liste des pannes`, texte: `Gérant : dans le tableau de bord, section {{ui:Points de vigilance}}, touchez la tuile {{ui:Pannes}} : elle indique le nombre de pannes ouvertes et, s'il y en a, combien de machines sont à l'arrêt. Droit de gestion : touchez la tuile {{ui:Suivi}} de la section {{ui:À faire maintenant}}. Sur téléphone, vous pouvez aussi passer par le bouton +, puis {{ui:Pannes signalées}}.` },
-        { titre: `Choisissez ce que vous voulez voir`, texte: `Les boutons {{ui:Ouvertes}} et {{ui:Résolues}} filtrent la liste. Chaque ligne donne la machine, l'état, la description, la gravité, la date et la personne qui a signalé.` },
-        { titre: `Prenez la panne en charge`, texte: `Sur une panne ouverte, cliquez sur {{ui:Prendre en charge}} : elle passe à l'état {{ui:Prise en charge}}. Si les ordres de travail sont disponibles dans votre offre, {{ui:Créer un ordre de travail}} permet de confier la réparation à quelqu'un.` },
-        { titre: `Marquez-la résolue`, texte: `Quand la machine est réparée, cliquez sur {{ui:Marquer résolue}}. La fenêtre {{ui:Résoudre la panne}} s'ouvre. Si la machine était à l'arrêt, les {{ui:Heures d'arrêt (heures ouvrées)}} sont pré-remplies par une estimation : corrigez-les si besoin. Vous pouvez ajouter une {{ui:Note (facultatif)}}. Validez avec {{ui:Marquer résolue}}.` },
+        { titre: `Ouvrez la liste des pannes`, image: { nom: 'tuile', alt: `La section Points de vigilance : la tuile Pannes, repérée par le numéro 1, indique les machines à l'arrêt.` }, texte: `Gérant : dans le tableau de bord, section {{ui:Points de vigilance}}, touchez la tuile {{ui:Pannes}} : elle indique le nombre de pannes ouvertes et, s'il y en a, combien de machines sont à l'arrêt. Droit de gestion : touchez la tuile {{ui:Suivi}} de la section {{ui:À faire maintenant}}. Sur téléphone, vous pouvez aussi passer par le bouton +, puis {{ui:Pannes signalées}}.` },
+        { titre: `Choisissez ce que vous voulez voir`, image: { nom: 'liste', alt: `La fenêtre Pannes signalées : les boutons Ouvertes et Résolues, repérés par le numéro 2, puis la liste des pannes.` }, texte: `Les boutons {{ui:Ouvertes}} et {{ui:Résolues}} filtrent la liste. Chaque ligne donne la machine, l'état, la description, la gravité, la date et la personne qui a signalé.` },
+        { titre: `Prenez la panne en charge`, image: { nom: 'actions', alt: `Les boutons de chaque panne : Prendre en charge sur une panne ouverte (3), Marquer résolue sur une panne prise en charge (4).` }, texte: `Sur une panne ouverte, cliquez sur {{ui:Prendre en charge}} : elle passe à l'état {{ui:Prise en charge}}. Si les ordres de travail sont disponibles dans votre offre, {{ui:Créer un ordre de travail}} permet de confier la réparation à quelqu'un.` },
+        { titre: `Marquez-la résolue`, image: { nom: 'resoudre', alt: `La fenêtre Résoudre la panne : les heures d'arrêt, la note et le bouton Marquer résolue, repérés par le numéro 4.` }, texte: `Quand la machine est réparée, cliquez sur {{ui:Marquer résolue}}. La fenêtre {{ui:Résoudre la panne}} s'ouvre. Si la machine était à l'arrêt, les {{ui:Heures d'arrêt (heures ouvrées)}} sont pré-remplies par une estimation : corrigez-les si besoin. Vous pouvez ajouter une {{ui:Note (facultatif)}}. Validez avec {{ui:Marquer résolue}}.` },
       ],
       notes: [
         `L'estimation des heures d'arrêt compte les jours ouvrés (du lundi au vendredi) sur la durée de la panne, sans dépasser le temps réellement écoulé.`,
@@ -726,10 +726,10 @@ export const ARTICLES_MACHINES = [
       description: `Take over a fault, create a work order, mark it resolved and record the downtime hours in KALEA.`,
       intro: `A reported fault goes through three states: open, taken over, resolved. The manager and management access move it forward.`,
       etapes: [
-        { titre: `Open the list of faults`, texte: `Manager: on the dashboard, in the {{ui:Points de vigilance}} section, tap the {{ui:Pannes}} tile: it shows the number of open faults and, if any, how many machines are stopped. Management access: tap the {{ui:Suivi}} tile in the {{ui:À faire maintenant}} section. On a phone, you can also use the + button, then {{ui:Pannes signalées}}.` },
-        { titre: `Choose what you want to see`, texte: `The {{ui:Ouvertes}} and {{ui:Résolues}} buttons filter the list. Each row gives the machine, the state, the description, the severity, the date and the person who reported it.` },
-        { titre: `Take the fault over`, texte: `On an open fault, click {{ui:Prendre en charge}}: it moves to the {{ui:Prise en charge}} state. If work orders are available in your plan, {{ui:Créer un ordre de travail}} lets you entrust the repair to someone.` },
-        { titre: `Mark it resolved`, texte: `When the machine is repaired, click {{ui:Marquer résolue}}. The {{ui:Résoudre la panne}} window opens. If the machine was stopped, the {{ui:Heures d'arrêt (heures ouvrées)}} are pre-filled with an estimate: correct them if needed. You can add a {{ui:Note (facultatif)}}. Confirm with {{ui:Marquer résolue}}.` },
+        { titre: `Open the list of faults`, image: { nom: 'tuile', alt: `The Points of attention section: the Faults tile, marked with number 1, shows the machines that are stopped.` }, texte: `Manager: on the dashboard, in the {{ui:Points de vigilance}} section, tap the {{ui:Pannes}} tile: it shows the number of open faults and, if any, how many machines are stopped. Management access: tap the {{ui:Suivi}} tile in the {{ui:À faire maintenant}} section. On a phone, you can also use the + button, then {{ui:Pannes signalées}}.` },
+        { titre: `Choose what you want to see`, image: { nom: 'liste', alt: `The Reported faults window: the Open and Resolved buttons, marked with number 2, then the list of faults.` }, texte: `The {{ui:Ouvertes}} and {{ui:Résolues}} buttons filter the list. Each row gives the machine, the state, the description, the severity, the date and the person who reported it.` },
+        { titre: `Take the fault over`, image: { nom: 'actions', alt: `The buttons of each fault: Take over on an open fault (3), Mark resolved on a fault that has been taken over (4).` }, texte: `On an open fault, click {{ui:Prendre en charge}}: it moves to the {{ui:Prise en charge}} state. If work orders are available in your plan, {{ui:Créer un ordre de travail}} lets you entrust the repair to someone.` },
+        { titre: `Mark it resolved`, image: { nom: 'resoudre', alt: `The Resolve the fault window: the downtime hours, the note and the Mark resolved button, marked with number 4.` }, texte: `When the machine is repaired, click {{ui:Marquer résolue}}. The {{ui:Résoudre la panne}} window opens. If the machine was stopped, the {{ui:Heures d'arrêt (heures ouvrées)}} are pre-filled with an estimate: correct them if needed. You can add a {{ui:Note (facultatif)}}. Confirm with {{ui:Marquer résolue}}.` },
       ],
       notes: [
         `The downtime estimate counts working days (Monday to Friday) over the length of the fault, without exceeding the time that has actually elapsed.`,
@@ -794,7 +794,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 17. Lire les statistiques
   {
-    id: 'mac-statistiques', theme: 'couts',
+    id: 'mac-statistiques', theme: 'couts', scenario: 'mac-statistiques',
     fr: {
       fichier: 'aide/lire-les-statistiques.html',
       titre: `Lire les statistiques de votre parc | Aide KALEA`,
@@ -804,10 +804,10 @@ export const ARTICLES_MACHINES = [
       intro: `L'écran {{ui:Statistiques}} met en graphiques les dépenses, la maintenance et le stock de votre parc, sur la période de votre choix. Tout est calculé à partir de ce que vous avez déjà enregistré.`,
       etapes: [
         { titre: `Ouvrez les statistiques`, texte: `Dans le menu, ouvrez {{ui:Statistiques}} (sur téléphone : bouton {{ui:Plus}}, puis {{ui:Statistiques}}). Cet écran dépend de votre offre et de votre droit d'accès : il n'est pas proposé aux droits de gestion et de saisie.` },
-        { titre: `Choisissez la période`, texte: `En haut, sélectionnez {{ui:12 derniers mois}} (par défaut), {{ui:Année en cours}} ou {{ui:Depuis la mise en service}}.` },
+        { titre: `Choisissez la période`, image: { nom: 'filtres', alt: `Le haut de l'écran Statistiques : les boutons de période (2), puis les listes Toutes catégories et Toutes machines (3).` }, texte: `En haut, sélectionnez {{ui:12 derniers mois}} (par défaut), {{ui:Année en cours}} ou {{ui:Depuis la mise en service}}.` },
         { titre: `Filtrez si besoin`, texte: `Les listes {{ui:Toutes catégories}} et {{ui:Toutes machines}} limitent les graphiques à une catégorie ou à une machine. Tout se recalcule aussitôt.` },
-        { titre: `Lisez l'onglet Coûts`, texte: `Dans l'onglet {{ui:Coûts}}, les tuiles résument les dépenses de la période, le coût moyen par machine, le coût d'arrêt et la part des pièces. Les graphiques montrent les {{ui:Dépenses par mois}}, la {{ui:Répartition par nature}} (pièces, main-d'œuvre, exploitation, arrêts), le coût par unité d'usage et les {{ui:Dépenses cumulées}}. Un tableau classe les cinq machines les plus coûteuses.` },
-        { titre: `Lisez l'onglet Maintenance`, texte: `Dans l'onglet {{ui:Maintenance}}, vous trouvez le {{ui:Respect du plan}}, les pannes signalées, les heures d'arrêt, le délai moyen de résolution et la disponibilité du parc, avec les interventions par mois et par machine et l'état du parc aujourd'hui.` },
+        { titre: `Lisez l'onglet Coûts`, image: { nom: 'couts', alt: `L'onglet Coûts : les tuiles de synthèse, repérées par le numéro 4, puis les premiers graphiques.` }, texte: `Dans l'onglet {{ui:Coûts}}, les tuiles résument les dépenses de la période, le coût moyen par machine, le coût d'arrêt et la part des pièces. Les graphiques montrent les {{ui:Dépenses par mois}}, la {{ui:Répartition par nature}} (pièces, main-d'œuvre, exploitation, arrêts), le coût par unité d'usage et les {{ui:Dépenses cumulées}}. Un tableau classe les cinq machines les plus coûteuses.` },
+        { titre: `Lisez l'onglet Maintenance`, image: { nom: 'maintenance', alt: `L'onglet Maintenance : les tuiles de synthèse, repérées par le numéro 5, puis les premiers graphiques.` }, texte: `Dans l'onglet {{ui:Maintenance}}, vous trouvez le {{ui:Respect du plan}}, les pannes signalées, les heures d'arrêt, le délai moyen de résolution et la disponibilité du parc, avec les interventions par mois et par machine et l'état du parc aujourd'hui.` },
         { titre: `Lisez l'onglet Stock`, texte: `Si votre offre comprend le stock, l'onglet {{ui:Stock}} montre la {{ui:Valeur du stock}}, la rotation, la couverture, les références en alerte, les commandes en cours, les pièces les plus consommées et les achats par fournisseur.` },
       ],
       notes: [
@@ -827,10 +827,10 @@ export const ARTICLES_MACHINES = [
       intro: `The {{ui:Statistiques}} screen turns your fleet's spending, maintenance and stock into charts, over the period of your choice. Everything is calculated from what you have already recorded.`,
       etapes: [
         { titre: `Open the statistics`, texte: `In the menu, open {{ui:Statistiques}} (on a phone: the {{ui:Plus}} button, then {{ui:Statistiques}}). This screen depends on your plan and access level: it is not offered to management and data-entry access.` },
-        { titre: `Choose the period`, texte: `At the top, select {{ui:12 derniers mois}} (default), {{ui:Année en cours}} or {{ui:Depuis la mise en service}}.` },
+        { titre: `Choose the period`, image: { nom: 'filtres', alt: `The top of the Statistics screen: the period buttons (2), then the All categories and All machines lists (3).` }, texte: `At the top, select {{ui:12 derniers mois}} (default), {{ui:Année en cours}} or {{ui:Depuis la mise en service}}.` },
         { titre: `Filter if needed`, texte: `The {{ui:Toutes catégories}} and {{ui:Toutes machines}} lists limit the charts to one category or one machine. Everything is recalculated at once.` },
-        { titre: `Read the Costs tab`, texte: `In the {{ui:Coûts}} tab, the tiles sum up the period's spending, the average cost per machine, the downtime cost and the share of parts. The charts show the {{ui:Dépenses par mois}}, the {{ui:Répartition par nature}} (parts, labour, operation, downtime), the cost per usage unit and the {{ui:Dépenses cumulées}}. A table ranks the five most expensive machines.` },
-        { titre: `Read the Maintenance tab`, texte: `In the {{ui:Maintenance}} tab, you find the {{ui:Respect du plan}}, the reported faults, the downtime hours, the average resolution time and the fleet availability, with interventions by month and by machine and today's fleet status.` },
+        { titre: `Read the Costs tab`, image: { nom: 'couts', alt: `The Costs tab: the summary tiles, marked with number 4, then the first charts.` }, texte: `In the {{ui:Coûts}} tab, the tiles sum up the period's spending, the average cost per machine, the downtime cost and the share of parts. The charts show the {{ui:Dépenses par mois}}, the {{ui:Répartition par nature}} (parts, labour, operation, downtime), the cost per usage unit and the {{ui:Dépenses cumulées}}. A table ranks the five most expensive machines.` },
+        { titre: `Read the Maintenance tab`, image: { nom: 'maintenance', alt: `The Maintenance tab: the summary tiles, marked with number 5, then the first charts.` }, texte: `In the {{ui:Maintenance}} tab, you find the {{ui:Respect du plan}}, the reported faults, the downtime hours, the average resolution time and the fleet availability, with interventions by month and by machine and today's fleet status.` },
         { titre: `Read the Stock tab`, texte: `If your plan includes stock, the {{ui:Stock}} tab shows the {{ui:Valeur du stock}}, the turnover, the coverage, the references on alert, the orders in progress, the most used parts and the purchases by supplier.` },
       ],
       notes: [
@@ -894,7 +894,7 @@ export const ARTICLES_MACHINES = [
 
   // ───────────────────────────────────────────────────────── 19. Exporter la liste des machines
   {
-    id: 'mac-exporter-parc', theme: 'machines',
+    id: 'mac-exporter-parc', theme: 'machines', scenario: 'mac-exporter-parc',
     fr: {
       fichier: 'aide/exporter-la-liste-des-machines-en-csv.html',
       titre: `Exporter la liste des machines en CSV | Aide KALEA`,
@@ -904,8 +904,8 @@ export const ARTICLES_MACHINES = [
       intro: `Pour travailler la liste de vos machines dans un tableur, KALEA l'enregistre dans un fichier CSV. Vous choisissez le contenu et le format.`,
       etapes: [
         { titre: `Préparez la sélection`, texte: `Dans {{ui:Machines}}, filtrez la liste si vous ne voulez exporter qu'une partie du parc (voir <a href="{{lien:mac-rechercher-filtrer}}">retrouver une machine</a>).` },
-        { titre: `Ouvrez l'export`, texte: `Cliquez sur {{ui:Exporter (CSV)}} en haut de la liste.` },
-        { titre: `Choisissez le contenu`, texte: `Sous {{ui:Contenu}}, choisissez les machines affichées, tout le parc, ou {{ui:Les interventions de tout le parc}}. Dans ce dernier cas, une liste propose la période : 30 jours, 90 jours, 12 mois ou tout l'historique.` },
+        { titre: `Ouvrez l'export`, image: { nom: 'bouton', alt: `L'écran Machines : le bouton Exporter (CSV), repéré par le numéro 2.` }, texte: `Cliquez sur {{ui:Exporter (CSV)}} en haut de la liste.` },
+        { titre: `Choisissez le contenu`, image: { nom: 'fenetre', alt: `La fenêtre d'export : les choix de Contenu (3), ceux du Format du fichier (4) et le bouton Télécharger (5).` }, texte: `Sous {{ui:Contenu}}, choisissez les machines affichées, tout le parc, ou {{ui:Les interventions de tout le parc}}. Dans ce dernier cas, une liste propose la période : 30 jours, 90 jours, 12 mois ou tout l'historique.` },
         { titre: `Choisissez le format`, texte: `Sous {{ui:Format du fichier}}, prenez {{ui:Excel (UTF-16) — s'ouvre directement dans Excel}} pour l'ouvrir dans Excel, ou {{ui:Universel (UTF-8) — pour un autre logiciel ou un programme}} pour un autre outil.` },
         { titre: `Téléchargez`, texte: `Cliquez sur {{ui:Télécharger}}. Le fichier est enregistré sur votre appareil.` },
       ],
@@ -927,8 +927,8 @@ export const ARTICLES_MACHINES = [
       intro: `To work on your list of machines in a spreadsheet, KALEA saves it in a CSV file. You choose the content and the format.`,
       etapes: [
         { titre: `Prepare the selection`, texte: `In {{ui:Machines}}, filter the list if you only want to export part of the fleet (see <a href="{{lien:mac-rechercher-filtrer}}">find a machine</a>).` },
-        { titre: `Open the export`, texte: `Click {{ui:Exporter (CSV)}} at the top of the list.` },
-        { titre: `Choose the content`, texte: `Under {{ui:Contenu}}, choose the machines shown, the whole fleet, or {{ui:Les interventions de tout le parc}}. In the last case, a list offers the period: 30 days, 90 days, 12 months or the whole history.` },
+        { titre: `Open the export`, image: { nom: 'bouton', alt: `The Machines screen: the Export (CSV) button, marked with number 2.` }, texte: `Click {{ui:Exporter (CSV)}} at the top of the list.` },
+        { titre: `Choose the content`, image: { nom: 'fenetre', alt: `The export window: the Content choices (3), the File format choices (4) and the Download button (5).` }, texte: `Under {{ui:Contenu}}, choose the machines shown, the whole fleet, or {{ui:Les interventions de tout le parc}}. In the last case, a list offers the period: 30 days, 90 days, 12 months or the whole history.` },
         { titre: `Choose the format`, texte: `Under {{ui:Format du fichier}}, take {{ui:Excel (UTF-16) — s'ouvre directement dans Excel}} to open it in Excel, or {{ui:Universel (UTF-8) — pour un autre logiciel ou un programme}} for another tool.` },
         { titre: `Download`, texte: `Click {{ui:Télécharger}}. The file is saved on your device.` },
       ],

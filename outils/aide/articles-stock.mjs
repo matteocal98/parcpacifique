@@ -50,7 +50,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-creer-magasin', theme: 'stock',
+    id: 'stk-creer-magasin', theme: 'stock', scenario: 'stk-creer-magasin',
     fr: {
       fichier: 'aide/creer-un-magasin-de-stock.html',
       titre: `Créer un magasin de stock | Aide KALEA`,
@@ -60,7 +60,8 @@ export const ARTICLES_STOCK = [
       intro: `Le stock est rangé par <strong>magasin</strong>. Il faut en créer au moins un avant d'enregistrer une première entrée. Un magasin peut être central (l'atelier) ou mobile (le fourgon d'un technicien).`,
       etapes: [
         { titre: `Ouvrez les réglages du stock`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Réglages}}. Le bloc {{ui:Magasins}} liste vos magasins.` },
-        { titre: `Remplissez le formulaire`, texte: `Sous {{ui:Ajouter un magasin}}, écrivez le nom (par exemple « Magasin central » ou « Fourgon Paul »). Choisissez le type : {{ui:Magasin central}} ou {{ui:Magasin mobile (fourgon)}}. La note est facultative.` },
+        { titre: `Remplissez le formulaire`, texte: `Sous {{ui:Ajouter un magasin}}, écrivez le nom (par exemple « Magasin central » ou « Fourgon Paul »). Choisissez le type : {{ui:Magasin central}} ou {{ui:Magasin mobile (fourgon)}}. La note est facultative.`,
+          image: { nom: 'reglages', alt: `L'onglet Réglages (repère 1), puis le bloc Magasins : le nom et le type du nouveau magasin (repère 2) et le bouton Ajouter le magasin (repère 3).` } },
         { titre: `Ajoutez le magasin`, texte: `Cliquez sur {{ui:Ajouter le magasin}}. Il apparaît dans la liste et vous pouvez le choisir dans vos mouvements de stock.` },
       ],
       notes: [
@@ -79,7 +80,8 @@ export const ARTICLES_STOCK = [
       intro: `Stock is organised by <strong>warehouse</strong>. You need at least one before recording a first stock-in. A warehouse can be central (the workshop) or mobile (a technician's van).`,
       etapes: [
         { titre: `Open the stock settings`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Réglages}} tab. The {{ui:Magasins}} block lists your warehouses.` },
-        { titre: `Fill in the form`, texte: `Under {{ui:Ajouter un magasin}}, type the name (for example "Main store" or "Paul's van"). Choose the type: {{ui:Magasin central}} or {{ui:Magasin mobile (fourgon)}}. The note is optional.` },
+        { titre: `Fill in the form`, texte: `Under {{ui:Ajouter un magasin}}, type the name (for example "Main store" or "Paul's van"). Choose the type: {{ui:Magasin central}} or {{ui:Magasin mobile (fourgon)}}. The note is optional.`,
+          image: { nom: 'reglages', alt: `The Settings tab (marker 1), then the Stores block: the name and type of the new store (marker 2) and the Add the store button (marker 3).` } },
         { titre: `Add the warehouse`, texte: `Click {{ui:Ajouter le magasin}}. It appears in the list and you can pick it in your stock movements.` },
       ],
       notes: [
@@ -144,7 +146,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-importer-catalogue', theme: 'stock',
+    id: 'stk-importer-catalogue', theme: 'stock', scenario: 'stk-importer-catalogue',
     fr: {
       fichier: 'aide/importer-des-pieces-depuis-un-fichier-csv.html',
       titre: `Importer des pièces depuis un fichier CSV | Aide KALEA`,
@@ -153,8 +155,10 @@ export const ARTICLES_STOCK = [
       description: `Charger ou mettre à jour tout un catalogue de pièces d'un coup avec un fichier CSV dans KALEA : en-tête exact, modèle à télécharger, messages d'erreur.`,
       intro: `Plutôt que de saisir les pièces une par une, vous pouvez en charger plusieurs d'un coup avec un fichier CSV (un tableau enregistré au format texte, que vous pouvez préparer dans un tableur).`,
       etapes: [
-        { titre: `Ouvrez l'import`, texte: `Dans le catalogue ({{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, puis {{ui:Catalogue de pièces}}), touchez {{ui:Importer des pièces (CSV)}}.` },
-        { titre: `Partez du modèle`, texte: `Touchez {{ui:Télécharger un modèle}} : vous obtenez un fichier avec la bonne première ligne et une ligne d'exemple. Le bouton {{ui:Copier}} copie la première ligne attendue. Elle doit être reprise exactement, avec les mêmes noms de colonnes dans le même ordre.` },
+        { titre: `Ouvrez l'import`, texte: `Dans le catalogue ({{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, puis {{ui:Catalogue de pièces}}), touchez {{ui:Importer des pièces (CSV)}}.`,
+          image: { nom: 'bouton', alt: `L'en-tête du catalogue de pièces : le bouton Importer des pièces (CSV), repéré par le numéro 1.` } },
+        { titre: `Partez du modèle`, texte: `Touchez {{ui:Télécharger un modèle}} : vous obtenez un fichier avec la bonne première ligne et une ligne d'exemple. Le bouton {{ui:Copier}} copie la première ligne attendue. Elle doit être reprise exactement, avec les mêmes noms de colonnes dans le même ordre.`,
+          image: { nom: 'fenetre', alt: `La fenêtre d'import : Télécharger un modèle (repère 2) avec le bouton Copier, puis la zone Choisir un fichier (repère 4) et le bouton Importer.` } },
         { titre: `Remplissez votre fichier`, texte: `Une pièce par ligne. Seule la désignation et un prix valide sont indispensables ; la référence et le fournisseur peuvent rester vides. Le prix accepte la virgule ou le point.` },
         { titre: `Choisissez le fichier et importez`, texte: `Touchez {{ui:Choisir un fichier…}} (ou glissez le fichier dans la zone), puis cliquez sur {{ui:Importer}}.` },
         { titre: `Lisez le résultat`, texte: `KALEA annonce le nombre de pièces importées ou mises à jour. Si certaines lignes sont refusées, la fenêtre reste ouverte et liste chaque ligne ignorée avec la raison : corrigez le fichier puis recommencez.` },
@@ -175,8 +179,10 @@ export const ARTICLES_STOCK = [
       description: `Load or update a whole parts catalogue at once with a CSV file in KALEA: exact header, template to download, error messages.`,
       intro: `Instead of typing parts one by one, you can load several at once with a CSV file (a table saved as plain text, which you can prepare in a spreadsheet).`,
       etapes: [
-        { titre: `Open the import`, texte: `In the catalogue ({{ui:Stocks & SAV}}, {{ui:Pièces}} tab, then {{ui:Catalogue de pièces}}), tap {{ui:Importer des pièces (CSV)}}.` },
-        { titre: `Start from the template`, texte: `Tap {{ui:Télécharger un modèle}}: you get a file with the right first line and an example line. The {{ui:Copier}} button copies the expected first line. It must be reproduced exactly, with the same column names in the same order.` },
+        { titre: `Open the import`, texte: `In the catalogue ({{ui:Stocks & SAV}}, {{ui:Pièces}} tab, then {{ui:Catalogue de pièces}}), tap {{ui:Importer des pièces (CSV)}}.`,
+          image: { nom: 'bouton', alt: `The parts catalogue header: the Import parts (CSV) button, marked with number 1.` } },
+        { titre: `Start from the template`, texte: `Tap {{ui:Télécharger un modèle}}: you get a file with the right first line and an example line. The {{ui:Copier}} button copies the expected first line. It must be reproduced exactly, with the same column names in the same order.`,
+          image: { nom: 'fenetre', alt: `The import window: Download a template (marker 2) with the Copy button, then the Choose a file area (marker 4) and the Import button.` } },
         { titre: `Fill in your file`, texte: `One part per line. Only the description and a valid price are essential; the reference and the supplier can stay empty. The price accepts a comma or a dot.` },
         { titre: `Choose the file and import`, texte: `Tap {{ui:Choisir un fichier…}} (or drag the file into the area), then click {{ui:Importer}}.` },
         { titre: `Read the result`, texte: `KALEA tells you how many parts were imported or updated. If some lines are rejected, the window stays open and lists each ignored line with the reason: fix the file and try again.` },
@@ -248,7 +254,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-seuil-alertes', theme: 'stock',
+    id: 'stk-seuil-alertes', theme: 'stock', scenario: 'stk-seuil-alertes',
     fr: {
       fichier: 'aide/seuil-bas-et-alertes-de-stock.html',
       titre: `Seuil bas et alertes de stock | Aide KALEA`,
@@ -258,7 +264,8 @@ export const ARTICLES_STOCK = [
       intro: `KALEA signale les pièces dont le stock devient trop bas. Pour cela, il faut dire à partir de quelle quantité : c'est le <strong>seuil bas</strong> de la pièce.`,
       etapes: [
         { titre: `Fixez le seuil de la pièce`, texte: `Dans le catalogue, modifiez la pièce (voir <a href="{{lien:stk-ajouter-piece}}">ajouter une pièce au catalogue</a>) et remplissez {{ui:Seuil bas (optionnel)}}. Une pièce sans seuil n'est jamais comptée en alerte.` },
-        { titre: `Repérez l'alerte dans le stock`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, vue {{ui:Stock par magasin}} : une ligne dont la quantité est égale ou inférieure au seuil porte l'étiquette rouge {{ui:Seuil bas}}. Les tuiles du haut comptent les {{ui:Références en alerte}}.` },
+        { titre: `Repérez l'alerte dans le stock`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, vue {{ui:Stock par magasin}} : une ligne dont la quantité est égale ou inférieure au seuil porte l'étiquette rouge {{ui:Seuil bas}}. Les tuiles du haut comptent les {{ui:Références en alerte}}.`,
+          image: { nom: 'stock', alt: `La vue Stock par magasin : la tuile Références en alerte et la ligne portant l'étiquette Seuil bas (repère 2), le bouton Commander de cette ligne (repère 4) et le bouton Exporter en CSV (repère 5).` } },
         { titre: `Repérez l'alerte ailleurs`, texte: `Sur le tableau de bord, une tuile indique les {{ui:Références sous le seuil}}. Sur téléphone, une pastille s'affiche sur la ligne {{ui:Stocks & SAV}} du menu {{ui:Plus}}.` },
         { titre: `Commandez`, texte: `Sur la ligne en alerte, touchez {{ui:Commander}} : KALEA ouvre l'onglet {{ui:Commandes}} et prépare un bon pour cette pièce. Voir <a href="{{lien:stk-commande-reception}}">commander et réceptionner des pièces</a>.` },
         { titre: `Exportez l'état du stock si besoin`, texte: `Dans la vue {{ui:Stock par magasin}}, touchez {{ui:Exporter en CSV}} : vous obtenez un fichier avec la référence, la désignation, le magasin et la quantité (et, selon votre droit, la valeur).` },
@@ -279,7 +286,8 @@ export const ARTICLES_STOCK = [
       intro: `KALEA flags parts whose stock gets too low. To do so, you need to tell it from which quantity: this is the part's <strong>low-stock level</strong>.`,
       etapes: [
         { titre: `Set the part's level`, texte: `In the catalogue, edit the part (see <a href="{{lien:stk-ajouter-piece}}">add a part to the catalogue</a>) and fill in {{ui:Seuil bas (optionnel)}}. A part with no level is never counted as an alert.` },
-        { titre: `Spot the alert in stock`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, {{ui:Stock par magasin}} view: a line whose quantity is equal to or below the level carries the red {{ui:Seuil bas}} label. The tiles at the top count the {{ui:Références en alerte}}.` },
+        { titre: `Spot the alert in stock`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, {{ui:Stock par magasin}} view: a line whose quantity is equal to or below the level carries the red {{ui:Seuil bas}} label. The tiles at the top count the {{ui:Références en alerte}}.`,
+          image: { nom: 'stock', alt: `The Stock by warehouse view: the References on alert tile and the line carrying the Low threshold label (marker 2), that line's Order button (marker 4) and the Export as CSV button (marker 5).` } },
         { titre: `Spot the alert elsewhere`, texte: `On the dashboard, a tile shows the {{ui:Références sous le seuil}}. On a phone, a dot appears on the {{ui:Stocks & SAV}} line of the {{ui:Plus}} menu.` },
         { titre: `Order`, texte: `On the line in alert, tap {{ui:Commander}}: KALEA opens the {{ui:Commandes}} tab and prepares an order for this part. See <a href="{{lien:stk-commande-reception}}">order and receive parts</a>.` },
         { titre: `Export the stock status if needed`, texte: `In the {{ui:Stock par magasin}} view, tap {{ui:Exporter en CSV}}: you get a file with the reference, the description, the warehouse and the quantity (and, depending on your access level, the value).` },
@@ -294,7 +302,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-emplacement-statut', theme: 'stock',
+    id: 'stk-emplacement-statut', theme: 'stock', scenario: 'stk-emplacement-statut',
     fr: {
       fichier: 'aide/emplacement-et-statut-du-stock.html',
       titre: `Emplacement et statut du stock (libéré, quarantaine, rebut) | Aide KALEA`,
@@ -303,8 +311,10 @@ export const ARTICLES_STOCK = [
       description: `Indiquer où se range une pièce et la mettre en quarantaine ou au rebut dans KALEA : emplacement, statut Libéré, Quarantaine, Rebut.`,
       intro: `Pour chaque pièce dans chaque magasin, vous pouvez noter <strong>où elle est rangée</strong> et son <strong>statut</strong> : libérée, en quarantaine ou au rebut.`,
       etapes: [
-        { titre: `Ouvrez la fenêtre`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, vue {{ui:Stock par magasin}}, touchez {{ui:Emplacement}} (ou le crayon d'une ligne, qui ouvre {{ui:Emplacement et statut}} sur cette ligne).` },
-        { titre: `Choisissez la ligne de stock`, texte: `Choisissez l'{{ui:Article}} et le {{ui:Magasin}}. Si vous êtes parti d'une ligne, ces deux champs sont déjà remplis.` },
+        { titre: `Ouvrez la fenêtre`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, vue {{ui:Stock par magasin}}, touchez {{ui:Emplacement}} (ou le crayon d'une ligne, qui ouvre {{ui:Emplacement et statut}} sur cette ligne).`,
+          image: { nom: 'stock', alt: `La vue Stock par magasin : le bouton Emplacement en haut du bloc et le crayon d'une ligne, repérés par le numéro 1.` } },
+        { titre: `Choisissez la ligne de stock`, texte: `Choisissez l'{{ui:Article}} et le {{ui:Magasin}}. Si vous êtes parti d'une ligne, ces deux champs sont déjà remplis.`,
+          image: { nom: 'fenetre', alt: `La fenêtre Emplacement et statut : l'article et le magasin (repère 2), l'emplacement (repère 3), le statut du stock (repère 4) et le bouton Enregistrer (repère 5).` } },
         { titre: `Saisissez l'emplacement`, texte: `Dans {{ui:Emplacement}}, écrivez où la pièce se range, par exemple « Allée B, rayon 3, casier 12 ».` },
         { titre: `Choisissez le statut`, texte: `Dans {{ui:Statut du stock}}, choisissez {{ui:Libéré}} (utilisable), {{ui:Quarantaine}} (à contrôler) ou {{ui:Rebut}}.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer}}. L'emplacement apparaît sur la ligne de stock.` },
@@ -325,8 +335,10 @@ export const ARTICLES_STOCK = [
       description: `Note where a part is stored and put it in quarantine or scrap in KALEA: location, status Released, Quarantine, Scrap.`,
       intro: `For each part in each warehouse, you can note <strong>where it is stored</strong> and its <strong>status</strong>: released, in quarantine or scrapped.`,
       etapes: [
-        { titre: `Open the window`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, {{ui:Stock par magasin}} view, tap {{ui:Emplacement}} (or the pencil on a line, which opens {{ui:Emplacement et statut}} for that line).` },
-        { titre: `Choose the stock line`, texte: `Choose the {{ui:Article}} and the {{ui:Magasin}}. If you started from a line, both fields are already filled in.` },
+        { titre: `Open the window`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, {{ui:Stock par magasin}} view, tap {{ui:Emplacement}} (or the pencil on a line, which opens {{ui:Emplacement et statut}} for that line).`,
+          image: { nom: 'stock', alt: `The Stock by warehouse view: the Location button at the top of the block and a line's pencil, both marked with number 1.` } },
+        { titre: `Choose the stock line`, texte: `Choose the {{ui:Article}} and the {{ui:Magasin}}. If you started from a line, both fields are already filled in.`,
+          image: { nom: 'fenetre', alt: `The Location and status window: the item and the store (marker 2), the location (marker 3), the stock status (marker 4) and the Save button (marker 5).` } },
         { titre: `Enter the location`, texte: `In {{ui:Emplacement}}, write where the part is stored, for example "Aisle B, shelf 3, bin 12".` },
         { titre: `Choose the status`, texte: `In {{ui:Statut du stock}}, choose {{ui:Libéré}} (usable), {{ui:Quarantaine}} (to be checked) or {{ui:Rebut}}.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer}}. The location appears on the stock line.` },
@@ -342,7 +354,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-etiquettes-qr', theme: 'stock',
+    id: 'stk-etiquettes-qr', theme: 'stock', scenario: 'stk-etiquettes-qr',
     fr: {
       fichier: 'aide/imprimer-des-etiquettes-qr.html',
       titre: `Imprimer des étiquettes QR pour vos pièces | Aide KALEA`,
@@ -351,8 +363,10 @@ export const ARTICLES_STOCK = [
       description: `Imprimer des étiquettes avec QR code pour vos lignes de stock ou vos références dans KALEA : feuille A4 ou étiquette unitaire.`,
       intro: `Une étiquette porte le nom de la pièce, le magasin, l'emplacement et un <strong>QR code</strong>. Scanné, il ouvre la fiche de la ligne de stock : on peut sortir ou entrer une pièce en deux gestes.`,
       etapes: [
-        { titre: `Ouvrez les étiquettes`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, touchez {{ui:Étiquettes}} (dans la vue {{ui:Stock par magasin}} comme dans le catalogue). Dans le catalogue, l'icône QR d'une pièce ouvre la fenêtre déjà réglée sur cette pièce.` },
-        { titre: `Choisissez le format`, texte: `Sous {{ui:Format}} : une feuille A4 d'étiquettes autocollantes (24 par feuille, 3 × 8) ou une étiquette unitaire de 62 × 29 mm pour une imprimante d'étiquettes. Pour la feuille A4, vous pouvez choisir à partir de quelle étiquette commencer.` },
+        { titre: `Ouvrez les étiquettes`, texte: `Dans {{ui:Stocks & SAV}}, onglet {{ui:Pièces}}, touchez {{ui:Étiquettes}} (dans la vue {{ui:Stock par magasin}} comme dans le catalogue). Dans le catalogue, l'icône QR d'une pièce ouvre la fenêtre déjà réglée sur cette pièce.`,
+          image: { nom: 'bouton', alt: `La vue Stock par magasin : le bouton Étiquettes, repéré par le numéro 1.` } },
+        { titre: `Choisissez le format`, texte: `Sous {{ui:Format}} : une feuille A4 d'étiquettes autocollantes (24 par feuille, 3 × 8) ou une étiquette unitaire de 62 × 29 mm pour une imprimante d'étiquettes. Pour la feuille A4, vous pouvez choisir à partir de quelle étiquette commencer.`,
+          image: { nom: 'fenetre', alt: `La fenêtre Imprimer des étiquettes : le format (repère 2), ce qu'il faut étiqueter (repère 3), le nombre d'exemplaires et le bouton Imprimer (repère 4).` } },
         { titre: `Choisissez ce qu'il faut étiqueter`, texte: `Sous {{ui:Étiqueter}} : des lignes de stock (article, magasin, emplacement) ou des références du catalogue, même celles qui ne sont plus en stock. Cochez les lignes voulues, ou utilisez la recherche et la case « tout ».` },
         { titre: `Réglez les exemplaires et imprimez`, texte: `Indiquez le nombre d'exemplaires par ligne, puis cliquez sur {{ui:Imprimer}}.` },
       ],
@@ -372,8 +386,10 @@ export const ARTICLES_STOCK = [
       description: `Print labels with a QR code for your stock lines or references in KALEA: A4 sheet or single label.`,
       intro: `A label carries the part's name, the warehouse, the location and a <strong>QR code</strong>. Once scanned, it opens the stock line's record: you can take a part out or put one in with two taps.`,
       etapes: [
-        { titre: `Open the labels`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, tap {{ui:Étiquettes}} (in the {{ui:Stock par magasin}} view as well as in the catalogue). In the catalogue, a part's QR icon opens the window already set on that part.` },
-        { titre: `Choose the format`, texte: `Under {{ui:Format}}: an A4 sheet of sticky labels (24 per sheet, 3 × 8) or a single 62 × 29 mm label for a label printer. For the A4 sheet, you can choose which label to start from.` },
+        { titre: `Open the labels`, texte: `In {{ui:Stocks & SAV}}, {{ui:Pièces}} tab, tap {{ui:Étiquettes}} (in the {{ui:Stock par magasin}} view as well as in the catalogue). In the catalogue, a part's QR icon opens the window already set on that part.`,
+          image: { nom: 'bouton', alt: `The Stock by warehouse view: the Labels button, marked with number 1.` } },
+        { titre: `Choose the format`, texte: `Under {{ui:Format}}: an A4 sheet of sticky labels (24 per sheet, 3 × 8) or a single 62 × 29 mm label for a label printer. For the A4 sheet, you can choose which label to start from.`,
+          image: { nom: 'fenetre', alt: `The Print labels window: the format (marker 2), what to label (marker 3), the number of copies and the Print button (marker 4).` } },
         { titre: `Choose what to label`, texte: `Under {{ui:Étiqueter}}: stock lines (item, warehouse, location) or catalogue references, even those no longer in stock. Tick the lines you want, or use the search and the "all" box.` },
         { titre: `Set the copies and print`, texte: `Enter the number of copies per line, then click {{ui:Imprimer}}.` },
       ],
@@ -388,7 +404,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-inventaire', theme: 'stock',
+    id: 'stk-inventaire', theme: 'stock', scenario: 'stk-inventaire',
     fr: {
       fichier: 'aide/faire-un-inventaire.html',
       titre: `Faire un inventaire de stock | Aide KALEA`,
@@ -397,8 +413,10 @@ export const ARTICLES_STOCK = [
       description: `Compter le stock réel d'un magasin, voir les écarts et les régulariser dans KALEA : ouvrir, compter, valider un inventaire.`,
       intro: `Un <strong>inventaire</strong> consiste à compter ce qu'il y a vraiment dans un magasin et à le comparer à ce que KALEA affiche. Les écarts sont ensuite régularisés.`,
       etapes: [
-        { titre: `Ouvrez un nouvel inventaire`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Inventaire}}, puis touchez {{ui:Nouvel inventaire}}.` },
-        { titre: `Réglez-le`, texte: `Choisissez le {{ui:Magasin}}. Le nom et la zone sont facultatifs : une zone limite le comptage aux emplacements qui commencent par ce texte. Vous pouvez cocher {{ui:Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)}}.` },
+        { titre: `Ouvrez un nouvel inventaire`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Inventaire}}, puis touchez {{ui:Nouvel inventaire}}.`,
+          image: { nom: 'onglet', alt: `L'onglet Inventaire et le bouton Nouvel inventaire, repérés par le numéro 1.` } },
+        { titre: `Réglez-le`, texte: `Choisissez le {{ui:Magasin}}. Le nom et la zone sont facultatifs : une zone limite le comptage aux emplacements qui commencent par ce texte. Vous pouvez cocher {{ui:Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)}}.`,
+          image: { nom: 'nouveau', alt: `La fenêtre Nouvel inventaire : le magasin, le nom, la zone et la case de comptage en aveugle (repère 2), puis le bouton Ouvrir l'inventaire (repère 3).` } },
         { titre: `Lancez l'inventaire`, texte: `Cliquez sur {{ui:Ouvrir l'inventaire}}. La fenêtre de comptage s'ouvre avec les lignes du magasin.` },
         { titre: `Comptez`, texte: `Saisissez la quantité comptée pour chaque ligne. Le bouton {{ui:Scanner}} lit l'étiquette d'une pièce ; la liste {{ui:+ Article non prévu…}} ajoute un article qui ne figurait pas sur la liste. Le filtre peut n'afficher que les lignes {{ui:À compter}}, {{ui:Comptées}} ou {{ui:Avec écart}}.` },
         { titre: `Validez (Administrateur ou Direction)`, texte: `Cliquez sur {{ui:Valider}}. KALEA indique combien de lignes sont comptées et combien ont un écart. Cliquez sur {{ui:Confirmer la validation}} : chaque écart devient un ajustement de stock.` },
@@ -419,8 +437,10 @@ export const ARTICLES_STOCK = [
       description: `Count a warehouse's real stock, see the gaps and correct them in KALEA: open, count and validate a stock count.`,
       intro: `A <strong>stock count</strong> means counting what is really in a warehouse and comparing it with what KALEA shows. The gaps are then corrected.`,
       etapes: [
-        { titre: `Open a new count`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Inventaire}} tab, then tap {{ui:Nouvel inventaire}}.` },
-        { titre: `Set it up`, texte: `Choose the {{ui:Magasin}}. The name and the zone are optional: a zone limits the count to locations that start with that text. You can tick {{ui:Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)}}.` },
+        { titre: `Open a new count`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Inventaire}} tab, then tap {{ui:Nouvel inventaire}}.`,
+          image: { nom: 'onglet', alt: `The Inventory tab and the New inventory button, marked with number 1.` } },
+        { titre: `Set it up`, texte: `Choose the {{ui:Magasin}}. The name and the zone are optional: a zone limits the count to locations that start with that text. You can tick {{ui:Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)}}.`,
+          image: { nom: 'nouveau', alt: `The New inventory window: the store, the name, the zone and the blind count box (marker 2), then the Open the inventory button (marker 3).` } },
         { titre: `Start the count`, texte: `Click {{ui:Ouvrir l'inventaire}}. The counting window opens with the warehouse's lines.` },
         { titre: `Count`, texte: `Enter the counted quantity for each line. The {{ui:Scanner}} button reads a part's label; the {{ui:+ Article non prévu…}} list adds an item that was not on the list. The filter can show only the {{ui:À compter}}, {{ui:Comptées}} or {{ui:Avec écart}} lines.` },
         { titre: `Validate (Administrator or Director)`, texte: `Click {{ui:Valider}}. KALEA shows how many lines are counted and how many have a gap. Click {{ui:Confirmer la validation}}: each gap becomes a stock adjustment.` },
@@ -436,7 +456,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-fournisseur', theme: 'stock',
+    id: 'stk-fournisseur', theme: 'stock', scenario: 'stk-fournisseur',
     fr: {
       fichier: 'aide/creer-une-fiche-fournisseur.html',
       titre: `Créer une fiche fournisseur | Aide KALEA`,
@@ -445,8 +465,10 @@ export const ARTICLES_STOCK = [
       description: `Créer la fiche d'un fournisseur de pièces dans KALEA : nom, contacts, délais, conditions de paiement, documents.`,
       intro: `Une <strong>fiche fournisseur</strong> rassemble les contacts, les délais et les conditions d'un fournisseur de pièces. Elle sert ensuite à préparer les bons de commande.`,
       etapes: [
-        { titre: `Ouvrez les fournisseurs`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Réglages}}, puis le bloc {{ui:Fournisseurs}}. Touchez {{ui:Nouveau fournisseur}}.` },
-        { titre: `Donnez un nom`, texte: `Seul le champ {{ui:Nom usuel (affiché dans l'application)}} est obligatoire. Remplissez ce que vous connaissez : le reste peut venir plus tard. Une jauge indique à quel point la fiche est complète.` },
+        { titre: `Ouvrez les fournisseurs`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Réglages}}, puis le bloc {{ui:Fournisseurs}}. Touchez {{ui:Nouveau fournisseur}}.`,
+          image: { nom: 'liste', alt: `Le bloc Fournisseurs de l'onglet Réglages : le bouton Nouveau fournisseur, repéré par le numéro 1.` } },
+        { titre: `Donnez un nom`, texte: `Seul le champ {{ui:Nom usuel (affiché dans l'application)}} est obligatoire. Remplissez ce que vous connaissez : le reste peut venir plus tard. Une jauge indique à quel point la fiche est complète.`,
+          image: { nom: 'fenetre', alt: `La fiche Nouveau fournisseur : le nom usuel (repère 2) et le bouton Enregistrer (repère 4) ; les autres cartes sont repliées sur leur titre.` } },
         { titre: `Ajoutez les contacts et les délais`, texte: `Pour recevoir les bons de commande, renseignez {{ui:E-mail pour les bons de commande}}. Le {{ui:Délai de livraison standard (jours)}} et les {{ui:Conditions de paiement}} aident à préparer les commandes.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer}}. Le fournisseur apparaît dans la liste, que vous pouvez chercher par nom, contact, ville ou pièce.` },
       ],
@@ -466,8 +488,10 @@ export const ARTICLES_STOCK = [
       description: `Create the record of a parts supplier in KALEA: name, contacts, lead times, payment terms, documents.`,
       intro: `A <strong>supplier record</strong> gathers the contacts, lead times and terms of a parts supplier. It is then used to prepare purchase orders.`,
       etapes: [
-        { titre: `Open the suppliers`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Réglages}} tab, then the {{ui:Fournisseurs}} block. Tap {{ui:Nouveau fournisseur}}.` },
-        { titre: `Give a name`, texte: `Only the {{ui:Nom usuel (affiché dans l'application)}} field is required. Fill in what you know: the rest can come later. A gauge shows how complete the record is.` },
+        { titre: `Open the suppliers`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Réglages}} tab, then the {{ui:Fournisseurs}} block. Tap {{ui:Nouveau fournisseur}}.`,
+          image: { nom: 'liste', alt: `The Suppliers block of the Settings tab: the New supplier button, marked with number 1.` } },
+        { titre: `Give a name`, texte: `Only the {{ui:Nom usuel (affiché dans l'application)}} field is required. Fill in what you know: the rest can come later. A gauge shows how complete the record is.`,
+          image: { nom: 'fenetre', alt: `The New supplier record: the usual name (marker 2) and the Save button (marker 4); the other cards are collapsed to their title.` } },
         { titre: `Add contacts and lead times`, texte: `To receive purchase orders, fill in {{ui:E-mail pour les bons de commande}}. The {{ui:Délai de livraison standard (jours)}} and the {{ui:Conditions de paiement}} help prepare orders.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer}}. The supplier appears in the list, which you can search by name, contact, city or part.` },
       ],
@@ -482,7 +506,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-commande-reception', theme: 'stock',
+    id: 'stk-commande-reception', theme: 'stock', scenario: 'stk-commande-reception',
     fr: {
       fichier: 'aide/commander-et-receptionner-des-pieces.html',
       titre: `Commander et réceptionner des pièces | Aide KALEA`,
@@ -491,12 +515,16 @@ export const ARTICLES_STOCK = [
       description: `Préparer un bon de commande suggéré, l'enregistrer, l'envoyer puis réceptionner la livraison dans KALEA.`,
       intro: `KALEA suggère les pièces à commander, prépare le bon par fournisseur, puis suit la commande jusqu'à la réception, qui remet les pièces en stock.`,
       etapes: [
-        { titre: `Ouvrez les suggestions`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Commandes}}. Le bloc {{ui:Bon de commande suggéré}} liste les pièces à commander, groupées par fournisseur, avec leur urgence ({{ui:Urgent}}, {{ui:Bientôt}}, {{ui:À prévoir}}).` },
+        { titre: `Ouvrez les suggestions`, texte: `Dans {{ui:Stocks & SAV}}, ouvrez l'onglet {{ui:Commandes}}. Le bloc {{ui:Bon de commande suggéré}} liste les pièces à commander, groupées par fournisseur, avec leur urgence ({{ui:Urgent}}, {{ui:Bientôt}}, {{ui:À prévoir}}).`,
+          image: { nom: 'suggestions', alt: `L'onglet Commandes (repère 1), les réglages du calcul (repère 2) et le bouton Préparer le bon d'un fournisseur (repère 3).` } },
         { titre: `Réglez le calcul si besoin`, texte: `{{ui:Prévoir sur (jours)}}, {{ui:Rythme observé sur (jours)}} et {{ui:Marge de sécurité (jours)}} ajustent les suggestions. Chaque quantité reste modifiable, et une case permet d'exclure une pièce du bon.` },
-        { titre: `Préparez le bon`, texte: `Pour un fournisseur, touchez {{ui:Préparer le bon}}. Vérifiez les quantités, la {{ui:Livraison souhaitée}} et l'{{ui:Adresse de livraison}}.` },
+        { titre: `Préparez le bon`, texte: `Pour un fournisseur, touchez {{ui:Préparer le bon}}. Vérifiez les quantités, la {{ui:Livraison souhaitée}} et l'{{ui:Adresse de livraison}}.`,
+          image: { nom: 'bon', alt: `La fenêtre du bon de commande : la livraison souhaitée et l'adresse de livraison (repère 3), puis le bouton Enregistrer la commande (repère 4) ; Imprimer / PDF est à côté.` } },
         { titre: `Enregistrez ou envoyez`, texte: `{{ui:Enregistrer la commande}} la garde en brouillon dans KALEA. {{ui:Imprimer / PDF}}, {{ui:Copier}} et {{ui:Envoyer par e-mail}} préparent le document : sur téléphone, un message s'ouvre ; sur ordinateur, KALEA télécharge un brouillon à ouvrir par double-clic dans votre messagerie, avec le bon en PDF joint.` },
-        { titre: `Suivez la commande`, texte: `Dans {{ui:Commandes fournisseurs}}, touchez {{ui:Ouvrir}} sur la commande puis {{ui:Marquer envoyée}} une fois qu'elle est partie.` },
-        { titre: `Réceptionnez la livraison`, texte: `Touchez {{ui:Réceptionner}}. Choisissez le {{ui:Magasin de réception}}, indiquez ce qui est réellement arrivé (quantité et prix), puis cliquez sur {{ui:Valider la réception}}. Les pièces entrent en stock.` },
+        { titre: `Suivez la commande`, texte: `Dans {{ui:Commandes fournisseurs}}, touchez {{ui:Ouvrir}} sur la commande puis {{ui:Marquer envoyée}} une fois qu'elle est partie.`,
+          image: { nom: 'commande', alt: `Une commande enregistrée : le bouton Marquer envoyée (repère 5) et le bouton Réceptionner (repère 6).` } },
+        { titre: `Réceptionnez la livraison`, texte: `Touchez {{ui:Réceptionner}}. Choisissez le {{ui:Magasin de réception}}, indiquez ce qui est réellement arrivé (quantité et prix), puis cliquez sur {{ui:Valider la réception}}. Les pièces entrent en stock.`,
+          image: { nom: 'reception', alt: `La fenêtre de réception : le magasin de réception (repère 6), les quantités reçues et le bouton Valider la réception (repère 6).` } },
       ],
       notes: [
         `Statuts d'une commande : {{ui:Brouillon}}, {{ui:Envoyée}}, {{ui:Partielle}}, {{ui:Reçue}}, {{ui:Annulée}}. Une livraison partielle laisse la commande en {{ui:Partielle}} ; {{ui:Clôturer (solde abandonné)}} abandonne le reste.`,
@@ -515,12 +543,16 @@ export const ARTICLES_STOCK = [
       description: `Prepare a suggested purchase order, save it, send it and then receive the delivery in KALEA.`,
       intro: `KALEA suggests the parts to order, prepares the order per supplier, then follows it through to receipt, which puts the parts back in stock.`,
       etapes: [
-        { titre: `Open the suggestions`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Commandes}} tab. The {{ui:Bon de commande suggéré}} block lists the parts to order, grouped by supplier, with their urgency ({{ui:Urgent}}, {{ui:Bientôt}}, {{ui:À prévoir}}).` },
+        { titre: `Open the suggestions`, texte: `In {{ui:Stocks & SAV}}, open the {{ui:Commandes}} tab. The {{ui:Bon de commande suggéré}} block lists the parts to order, grouped by supplier, with their urgency ({{ui:Urgent}}, {{ui:Bientôt}}, {{ui:À prévoir}}).`,
+          image: { nom: 'suggestions', alt: `The Orders tab (marker 1), the calculation settings (marker 2) and a supplier's Prepare the order button (marker 3).` } },
         { titre: `Adjust the calculation if needed`, texte: `{{ui:Prévoir sur (jours)}}, {{ui:Rythme observé sur (jours)}} and {{ui:Marge de sécurité (jours)}} adjust the suggestions. Each quantity stays editable, and a box lets you leave a part out of the order.` },
-        { titre: `Prepare the order`, texte: `For a supplier, tap {{ui:Préparer le bon}}. Check the quantities, the {{ui:Livraison souhaitée}} and the {{ui:Adresse de livraison}}.` },
+        { titre: `Prepare the order`, texte: `For a supplier, tap {{ui:Préparer le bon}}. Check the quantities, the {{ui:Livraison souhaitée}} and the {{ui:Adresse de livraison}}.`,
+          image: { nom: 'bon', alt: `The purchase order window: the requested delivery and the delivery address (marker 3), then the Save the order button (marker 4); Print / PDF is next to it.` } },
         { titre: `Save or send`, texte: `{{ui:Enregistrer la commande}} keeps it as a draft in KALEA. {{ui:Imprimer / PDF}}, {{ui:Copier}} and {{ui:Envoyer par e-mail}} prepare the document: on a phone, a message opens; on a computer, KALEA downloads a draft to open by double-click in your mail program, with the order attached as a PDF.` },
-        { titre: `Follow the order`, texte: `In {{ui:Commandes fournisseurs}}, tap {{ui:Ouvrir}} on the order, then {{ui:Marquer envoyée}} once it has gone.` },
-        { titre: `Receive the delivery`, texte: `Tap {{ui:Réceptionner}}. Choose the {{ui:Magasin de réception}}, enter what really arrived (quantity and price), then click {{ui:Valider la réception}}. The parts go into stock.` },
+        { titre: `Follow the order`, texte: `In {{ui:Commandes fournisseurs}}, tap {{ui:Ouvrir}} on the order, then {{ui:Marquer envoyée}} once it has gone.`,
+          image: { nom: 'commande', alt: `A saved order: the Mark as sent button (marker 5) and the Receive button (marker 6).` } },
+        { titre: `Receive the delivery`, texte: `Tap {{ui:Réceptionner}}. Choose the {{ui:Magasin de réception}}, enter what really arrived (quantity and price), then click {{ui:Valider la réception}}. The parts go into stock.`,
+          image: { nom: 'reception', alt: `The receiving window: the receiving store (marker 6), the quantities received and the Confirm receipt button (marker 6).` } },
       ],
       notes: [
         `Order statuses: {{ui:Brouillon}}, {{ui:Envoyée}}, {{ui:Partielle}}, {{ui:Reçue}}, {{ui:Annulée}}. A partial delivery leaves the order as {{ui:Partielle}}; {{ui:Clôturer (solde abandonné)}} drops the remainder.`,
@@ -534,7 +566,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'stk-sortie-intervention', theme: 'stock',
+    id: 'stk-sortie-intervention', theme: 'stock', scenario: 'stk-sortie-intervention',
     fr: {
       fichier: 'aide/sortir-une-piece-du-stock-dans-une-intervention.html',
       titre: `Sortir une pièce du stock en enregistrant une intervention | Aide KALEA`,
@@ -543,7 +575,8 @@ export const ARTICLES_STOCK = [
       description: `Ajouter les pièces utilisées dans une intervention et les sortir du stock en même temps dans KALEA, sans double saisie.`,
       intro: `En enregistrant une intervention, vous déclarez les pièces utilisées. KALEA peut en même temps les <strong>sortir du stock</strong> : vous n'avez pas à faire deux saisies.`,
       etapes: [
-        { titre: `Ouvrez l'intervention`, texte: `Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine. Dans le bloc de coûts, sous {{ui:Pièces détachées & consommables}}, touchez {{ui:+ Ajouter une pièce}}.` },
+        { titre: `Ouvrez l'intervention`, texte: `Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine. Dans le bloc de coûts, sous {{ui:Pièces détachées & consommables}}, touchez {{ui:+ Ajouter une pièce}}.`,
+          image: { nom: 'pieces', alt: `Le bloc de coûts d'une intervention : le bouton Ajouter une pièce (repère 1), le bouton Scanner une pièce (repère 2), la quantité d'une pièce (repère 3) et la case Sortir du stock avec son magasin (repère 4).` } },
         { titre: `Choisissez les pièces`, texte: `Le catalogue s'ouvre : touchez toutes les pièces utilisées, puis validez. Vous pouvez aussi toucher {{ui:Scanner une pièce}} pour lire le QR code d'une étiquette de stock.` },
         { titre: `Réglez la quantité et le prix`, texte: `Pour chaque pièce, indiquez la quantité (les décimales sont acceptées) ; le prix du catalogue est proposé, vous pouvez le corriger.` },
         { titre: `Contrôlez la sortie de stock`, texte: `Sous chaque pièce suivie en stock, la case {{ui:Sortir du stock}} est cochée d'office, avec le magasin où il y en a le plus. KALEA affiche l'effet, par exemple « Stock : 8 → 6 ». Décochez la case si la pièce vient d'ailleurs, ou changez de magasin.` },
@@ -566,7 +599,8 @@ export const ARTICLES_STOCK = [
       description: `Add the parts used in an intervention and take them out of stock at the same time in KALEA, with no double entry.`,
       intro: `When you log an intervention, you declare the parts used. KALEA can <strong>take them out of stock</strong> at the same time: no need to enter them twice.`,
       etapes: [
-        { titre: `Open the intervention`, texte: `In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine's card. In the costs block, under {{ui:Pièces détachées & consommables}}, tap {{ui:+ Ajouter une pièce}}.` },
+        { titre: `Open the intervention`, texte: `In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine's card. In the costs block, under {{ui:Pièces détachées & consommables}}, tap {{ui:+ Ajouter une pièce}}.`,
+          image: { nom: 'pieces', alt: `An intervention's cost block: the Add a part button (marker 1), the Scan a part button (marker 2), a part's quantity (marker 3) and the Take from stock box with its store (marker 4).` } },
         { titre: `Choose the parts`, texte: `The catalogue opens: tap all the parts used, then confirm. You can also tap {{ui:Scanner une pièce}} to read the QR code of a stock label.` },
         { titre: `Set the quantity and price`, texte: `For each part, enter the quantity (decimals are accepted); the catalogue price is suggested, you can correct it.` },
         { titre: `Check the stock-out`, texte: `Under each part tracked in stock, the {{ui:Sortir du stock}} box is ticked by default, with the warehouse holding the most. KALEA shows the effect, for example "Stock: 8 → 6". Untick the box if the part comes from elsewhere, or change the warehouse.` },
@@ -585,7 +619,7 @@ export const ARTICLES_STOCK = [
 
   // ───────────────────────────────────────────── COÛTS & TCO
   {
-    id: 'cout-frais-carburant', theme: 'couts',
+    id: 'cout-frais-carburant', theme: 'couts', scenario: 'cout-frais-carburant',
     fr: {
       fichier: 'aide/enregistrer-un-frais-ou-un-plein.html',
       titre: `Enregistrer un plein de carburant ou un frais d'exploitation | Aide KALEA`,
@@ -595,7 +629,8 @@ export const ARTICLES_STOCK = [
       intro: `Carburant, transport de l'engin, contrôle périodique : ces frais s'ajoutent au coût de la machine. Ils s'enregistrent depuis la même fenêtre que les interventions, sans toucher au plan d'entretien.`,
       etapes: [
         { titre: `Ouvrez la fenêtre`, texte: `Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine.` },
-        { titre: `Choisissez le type de frais`, texte: `Touchez la carte {{ui:Frais & Carburant}}. Si vous ne voyez pas ces cartes de type, voir la note ci-dessous.` },
+        { titre: `Choisissez le type de frais`, texte: `Touchez la carte {{ui:Frais & Carburant}}. Si vous ne voyez pas ces cartes de type, voir la note ci-dessous.`,
+          image: { nom: 'frais', alt: `La fenêtre d'intervention sur le type Frais & Carburant (repère 2) : la nature du frais (repère 3), la quantité et le prix unitaire (repère 4) et le bouton de validation (repère 5).` } },
         { titre: `Indiquez la nature du frais`, texte: `Dans {{ui:Nature du frais}}, choisissez {{ui:Plein Gazole de chantier}}, {{ui:Transport engin (Porte-char)}}, {{ui:Contrôle périodique VGP}} ou {{ui:Appoint huiles hydrauliques}}. Vous pouvez préciser dans les remarques.` },
         { titre: `Saisissez la quantité et le prix`, texte: `Remplissez {{ui:Quantité / Litres}} et le prix unitaire. Le montant est calculé à partir de la quantité et du prix : il doit être supérieur à zéro. Vérifiez aussi la date.` },
         { titre: `Validez`, texte: `Cliquez sur {{ui:Valider et intégrer au TCO}} (sur téléphone, le bouton s'appelle {{ui:Valider}}). KALEA affiche « Frais enregistré ».` },
@@ -617,7 +652,8 @@ export const ARTICLES_STOCK = [
       intro: `Fuel, machine transport, periodic inspection: these expenses add to the machine's cost. They are recorded from the same window as interventions, without touching the maintenance plan.`,
       etapes: [
         { titre: `Open the window`, texte: `In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine's card.` },
-        { titre: `Choose the expense type`, texte: `Tap the {{ui:Frais & Carburant}} card. If you do not see these type cards, see the note below.` },
+        { titre: `Choose the expense type`, texte: `Tap the {{ui:Frais & Carburant}} card. If you do not see these type cards, see the note below.`,
+          image: { nom: 'frais', alt: `The intervention window on the Expenses & fuel type (marker 2): the expense type (marker 3), the quantity and unit price (marker 4) and the confirm button (marker 5).` } },
         { titre: `Give the nature of the expense`, texte: `In {{ui:Nature du frais}}, choose {{ui:Plein Gazole de chantier}}, {{ui:Transport engin (Porte-char)}}, {{ui:Contrôle périodique VGP}} or {{ui:Appoint huiles hydrauliques}}. You can add details in the remarks.` },
         { titre: `Enter the quantity and price`, texte: `Fill in {{ui:Quantité / Litres}} and the unit price. The amount is computed from the quantity and the price: it must be greater than zero. Check the date too.` },
         { titre: `Validate`, texte: `Click {{ui:Valider et intégrer au TCO}} (on a phone, the button is called {{ui:Valider}}). KALEA shows "Frais enregistré".` },
@@ -633,7 +669,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-intervention', theme: 'couts',
+    id: 'cout-intervention', theme: 'couts', scenario: 'cout-intervention',
     fr: {
       fichier: 'aide/renseigner-les-couts-d-une-intervention.html',
       titre: `Renseigner la main d'œuvre et les pièces d'une intervention | Aide KALEA`,
@@ -642,8 +678,10 @@ export const ARTICLES_STOCK = [
       description: `Saisir les heures de main d'œuvre, les pièces et le total d'une intervention dans KALEA pour alimenter le suivi des coûts.`,
       intro: `Quand vous enregistrez un entretien ou un dépannage, vous pouvez en noter le coût : la main d'œuvre et les pièces. C'est facultatif, mais c'est ce qui alimente le suivi des coûts de la machine.`,
       etapes: [
-        { titre: `Ouvrez l'intervention`, texte: `Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine. Choisissez {{ui:Entretien planifié}} ou {{ui:Dépannage / Curatif}}.` },
-        { titre: `Notez la main d'œuvre`, texte: `Dans le bloc {{ui:Coûts d'intervention & TCO}}, remplissez {{ui:Heures de main d'œuvre}}. Si le taux horaire de l'atelier est renseigné, le coût de main d'œuvre est proposé (heures × taux) ; vous pouvez le corriger. Touchez {{ui:Ajouter}} : le montant passe dans le total et les deux champs se vident, ce qui permet d'ajouter un second passage.` },
+        { titre: `Ouvrez l'intervention`, texte: `Dans {{ui:Machines}}, touchez {{ui:Enregistrer une intervention}} sur la carte de la machine. Choisissez {{ui:Entretien planifié}} ou {{ui:Dépannage / Curatif}}.`,
+          image: { nom: 'type', alt: `Les types d'intervention : Entretien planifié et Dépannage / Curatif, repérés par le numéro 1.` } },
+        { titre: `Notez la main d'œuvre`, texte: `Dans le bloc {{ui:Coûts d'intervention & TCO}}, remplissez {{ui:Heures de main d'œuvre}}. Si le taux horaire de l'atelier est renseigné, le coût de main d'œuvre est proposé (heures × taux) ; vous pouvez le corriger. Touchez {{ui:Ajouter}} : le montant passe dans le total et les deux champs se vident, ce qui permet d'ajouter un second passage.`,
+          image: { nom: 'couts', alt: `Le bloc Coûts d'intervention & TCO : la main d'œuvre (repère 2), le bouton Ajouter une pièce (repère 3), Scanner une facture (repère 4) et le total des pièces (repère 5).` } },
         { titre: `Ajoutez les pièces`, texte: `Touchez {{ui:+ Ajouter une pièce}} : le catalogue s'ouvre, ou une ligne libre si le catalogue est vide. Pour une pièce hors catalogue, saisissez quantité et prix à la main. Voir aussi <a href="{{lien:stk-sortie-intervention}}">sortir une pièce du stock</a>.` },
         { titre: `Lisez la facture si vous l'avez`, texte: `{{ui:Scanner une facture}} lit le montant sur une photo. Vérifiez toujours le montant avant d'enregistrer ; si la lecture échoue, saisissez-le à la main.` },
         { titre: `Contrôlez le total et validez`, texte: `Le {{ui:Total pièces & consommables}} et le total du bouton de validation se mettent à jour. Cliquez sur {{ui:Valider et intégrer au TCO}}.` },
@@ -664,8 +702,10 @@ export const ARTICLES_STOCK = [
       description: `Enter labour hours, parts and the total of an intervention in KALEA to feed cost tracking.`,
       intro: `When you log a maintenance or a repair, you can note its cost: labour and parts. It is optional, but it is what feeds the machine's cost tracking.`,
       etapes: [
-        { titre: `Open the intervention`, texte: `In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine's card. Choose {{ui:Entretien planifié}} or {{ui:Dépannage / Curatif}}.` },
-        { titre: `Note the labour`, texte: `In the {{ui:Coûts d'intervention & TCO}} block, fill in {{ui:Heures de main d'œuvre}}. If the workshop hourly rate is set, the labour cost is suggested (hours × rate); you can correct it. Tap {{ui:Ajouter}}: the amount goes into the total and both fields empty, which lets you add a second spell.` },
+        { titre: `Open the intervention`, texte: `In {{ui:Machines}}, tap {{ui:Enregistrer une intervention}} on the machine's card. Choose {{ui:Entretien planifié}} or {{ui:Dépannage / Curatif}}.`,
+          image: { nom: 'type', alt: `The intervention types: Planned maintenance and Repair / Corrective, marked with number 1.` } },
+        { titre: `Note the labour`, texte: `In the {{ui:Coûts d'intervention & TCO}} block, fill in {{ui:Heures de main d'œuvre}}. If the workshop hourly rate is set, the labour cost is suggested (hours × rate); you can correct it. Tap {{ui:Ajouter}}: the amount goes into the total and both fields empty, which lets you add a second spell.`,
+          image: { nom: 'couts', alt: `The Intervention costs & TCO block: labour (marker 2), the Add a part button (marker 3), Scan an invoice (marker 4) and the parts total (marker 5).` } },
         { titre: `Add the parts`, texte: `Tap {{ui:+ Ajouter une pièce}}: the catalogue opens, or a free line if the catalogue is empty. For a part outside the catalogue, enter quantity and price by hand. See also <a href="{{lien:stk-sortie-intervention}}">take a part out of stock</a>.` },
         { titre: `Read the invoice if you have one`, texte: `{{ui:Scanner une facture}} reads the amount from a photo. Always check the amount before saving; if reading fails, enter it by hand.` },
         { titre: `Check the total and validate`, texte: `The {{ui:Total pièces & consommables}} and the total on the validation button update. Click {{ui:Valider et intégrer au TCO}}.` },
@@ -681,7 +721,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-prix-achat', theme: 'couts',
+    id: 'cout-prix-achat', theme: 'couts', scenario: 'cout-prix-achat',
     fr: {
       fichier: 'aide/renseigner-le-prix-d-achat-d-une-machine.html',
       titre: `Renseigner le prix d'achat d'une machine pour voir son TCO | Aide KALEA`,
@@ -691,7 +731,8 @@ export const ARTICLES_STOCK = [
       intro: `Le coût total de possession (TCO) d'une machine se calcule à partir de son prix d'achat. <strong>Sans prix d'achat, la machine n'apparaît ni dans le classement ni dans la scorecard.</strong>`,
       etapes: [
         { titre: `Ouvrez la modification de la machine`, texte: `Dans {{ui:Machines}}, touchez l'icône en forme de roue sur la carte de la machine : c'est {{ui:Modifier la machine}} (voir <a href="{{lien:modifier-machine}}">modifier une machine</a>).` },
-        { titre: `Trouvez l'encadré des coûts`, texte: `Descendez jusqu'à l'encadré {{ui:Acquisition & TCO (Facultatif)}} (« Pour le calcul de rentabilité »).` },
+        { titre: `Trouvez l'encadré des coûts`, texte: `Descendez jusqu'à l'encadré {{ui:Acquisition & TCO (Facultatif)}} (« Pour le calcul de rentabilité »).`,
+          image: { nom: 'encadre', alt: `La fenêtre Modifier une machine : l'encadré Acquisition & TCO (repère 2) et ses champs de prix d'achat, de date, de revente, de durée de vie et d'amortissement (repère 3).` } },
         { titre: `Renseignez ce que vous connaissez`, texte: `Saisissez le prix d'achat, la {{ui:Date d'achat}}, la revente estimée, la durée de vie (en heures ou en kilomètres) et l'{{ui:Amortissement (ans)}}. Laissez vide ce que vous ne savez pas : vous pourrez le renseigner plus tard.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer les modifications}}. La machine apparaît ensuite dans le classement TCO, et sa scorecard devient visible.` },
       ],
@@ -712,7 +753,8 @@ export const ARTICLES_STOCK = [
       intro: `A machine's total cost of ownership (TCO) is computed from its purchase price. <strong>Without a purchase price, the machine appears neither in the ranking nor in the scorecard.</strong>`,
       etapes: [
         { titre: `Open the machine editor`, texte: `In {{ui:Machines}}, tap the cog-shaped icon on the machine's card: it is {{ui:Modifier la machine}} (see <a href="{{lien:modifier-machine}}">edit a machine</a>).` },
-        { titre: `Find the costs box`, texte: `Scroll down to the {{ui:Acquisition & TCO (Facultatif)}} box ("For the profitability calculation").` },
+        { titre: `Find the costs box`, texte: `Scroll down to the {{ui:Acquisition & TCO (Facultatif)}} box ("For the profitability calculation").`,
+          image: { nom: 'encadre', alt: `The Edit a machine window: the Acquisition & TCO box (marker 2) and its purchase price, date, resale, lifespan and depreciation fields (marker 3).` } },
         { titre: `Fill in what you know`, texte: `Enter the purchase price, the {{ui:Date d'achat}}, the estimated resale value, the lifespan (in hours or kilometres) and the {{ui:Amortissement (ans)}}. Leave empty what you do not know: you can fill it in later.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer les modifications}}. The machine then appears in the TCO ranking, and its scorecard becomes visible.` },
       ],
@@ -833,7 +875,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-seuils', theme: 'couts',
+    id: 'cout-seuils', theme: 'couts', scenario: 'cout-seuils',
     fr: {
       fichier: 'aide/comprendre-le-cout-horaire-et-les-seuils.html',
       titre: `Comprendre le coût horaire et fixer un seuil | Aide KALEA`,
@@ -842,7 +884,8 @@ export const ARTICLES_STOCK = [
       description: `Qu'est-ce que le coût horaire d'une machine dans KALEA, et comment fixer un seuil cible par catégorie pour être alerté quand elle coûte trop cher.`,
       intro: `Le <strong>coût horaire</strong> d'une machine, c'est son coût total divisé par son compteur (heures ou kilomètres). Le <strong>seuil</strong> est le coût horaire au-delà duquel KALEA la signale comme trop chère à l'usage.`,
       etapes: [
-        { titre: `Ouvrez les seuils`, texte: `Dans {{ui:Coûts & TCO}}, ouvrez l'onglet {{ui:Seuils de coût}}. Il y a une ligne par catégorie de machines de votre parc.` },
+        { titre: `Ouvrez les seuils`, texte: `Dans {{ui:Coûts & TCO}}, ouvrez l'onglet {{ui:Seuils de coût}}. Il y a une ligne par catégorie de machines de votre parc.`,
+          image: { nom: 'seuils', alt: `L'onglet Seuils de coût (repère 1) : l'étiquette Moy. actuelle d'une catégorie (repère 2), le bouton +10 % au-dessus (repère 3) et le bouton Enregistrer les seuils (repère 4).` } },
         { titre: `Repérez votre moyenne`, texte: `Sur chaque ligne, une étiquette « Moy. actuelle » donne la moyenne du coût horaire des machines de la catégorie. Elle se remplit une fois le classement chargé. Le détail {{ui:Comment est calculé ce repère ?}} explique l'amortissement indicatif.` },
         { titre: `Choisissez un seuil`, texte: `Visez un chiffre légèrement au-dessus de votre moyenne, sinon la moitié de votre parc serait signalée en permanence. Le bouton {{ui:+10 % au-dessus}} propose ce point de départ ; il se tape aussi à la main, en devise par heure.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer les seuils}}. KALEA affiche « Seuils enregistrés ».` },
@@ -864,7 +907,8 @@ export const ARTICLES_STOCK = [
       description: `What a machine's hourly cost is in KALEA, and how to set a target threshold per category to be alerted when it costs too much.`,
       intro: `A machine's <strong>hourly cost</strong> is its total cost divided by its meter (hours or kilometres). The <strong>threshold</strong> is the hourly cost above which KALEA flags it as too expensive in use.`,
       etapes: [
-        { titre: `Open the thresholds`, texte: `In {{ui:Coûts & TCO}}, open the {{ui:Seuils de coût}} tab. There is one line per machine category in your fleet.` },
+        { titre: `Open the thresholds`, texte: `In {{ui:Coûts & TCO}}, open the {{ui:Seuils de coût}} tab. There is one line per machine category in your fleet.`,
+          image: { nom: 'seuils', alt: `The Cost thresholds tab (marker 1): a category's Current avg. label (marker 2), the +10% above average button (marker 3) and the Save thresholds button (marker 4).` } },
         { titre: `Spot your average`, texte: `On each line, a "Current avg." label gives the average hourly cost of the category's machines. It fills in once the ranking has loaded. The {{ui:Comment est calculé ce repère ?}} detail explains the indicative depreciation.` },
         { titre: `Choose a threshold`, texte: `Aim slightly above your average, otherwise half your fleet would be flagged all the time. The {{ui:+10 % au-dessus}} button suggests that starting point; you can also type it by hand, in currency per hour.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer les seuils}}. KALEA shows "Thresholds saved".` },
@@ -881,7 +925,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'cout-rapport', theme: 'couts',
+    id: 'cout-rapport', theme: 'couts', scenario: 'cout-rapport',
     fr: {
       fichier: 'aide/telecharger-ou-envoyer-le-rapport-tco.html',
       titre: `Télécharger ou envoyer le rapport TCO (PDF) | Aide KALEA`,
@@ -891,8 +935,10 @@ export const ARTICLES_STOCK = [
       intro: `Le <strong>rapport TCO</strong> est une synthèse financière du parc en PDF. Il suit la période affichée à l'écran au moment où vous le demandez.`,
       etapes: [
         { titre: `Choisissez la période`, texte: `Dans {{ui:Coûts & TCO}}, onglet {{ui:Classement}}, choisissez {{ui:Depuis mise en service}}, {{ui:12 derniers mois}} ou {{ui:Année en cours}}. Le rapport reprendra cette période.` },
-        { titre: `Ouvrez le rapport`, texte: `Touchez {{ui:Rapport TCO (PDF)}} en haut de l'écran. Le bouton est grisé tant que les données du parc se chargent : patientez un instant.` },
-        { titre: `Téléchargez-le`, texte: `Dans la fenêtre, touchez {{ui:Télécharger le rapport}}. KALEA génère le PDF et lance le téléchargement.` },
+        { titre: `Ouvrez le rapport`, texte: `Touchez {{ui:Rapport TCO (PDF)}} en haut de l'écran. Le bouton est grisé tant que les données du parc se chargent : patientez un instant.`,
+          image: { nom: 'bouton', alt: `L'en-tête de Coûts & TCO : le bouton Rapport TCO (PDF), repéré par le numéro 2.` } },
+        { titre: `Téléchargez-le`, texte: `Dans la fenêtre, touchez {{ui:Télécharger le rapport}}. KALEA génère le PDF et lance le téléchargement.`,
+          image: { nom: 'fenetre', alt: `La fenêtre du rapport : le bouton Télécharger le rapport (repère 3), l'adresse e-mail (repère 4) et le bouton Envoyer par e-mail.` } },
         { titre: `Ou envoyez-le par e-mail`, texte: `Vérifiez l'adresse dans {{ui:Envoyer par e-mail à}} (celle de notification de votre société est proposée), puis touchez {{ui:Envoyer par e-mail}}. KALEA confirme par « Rapport envoyé à … ».` },
       ],
       notes: [
@@ -912,8 +958,10 @@ export const ARTICLES_STOCK = [
       intro: `The <strong>TCO report</strong> is a financial summary of the fleet as a PDF. It follows the period shown on screen at the moment you request it.`,
       etapes: [
         { titre: `Choose the period`, texte: `In {{ui:Coûts & TCO}}, {{ui:Classement}} tab, choose {{ui:Depuis mise en service}}, {{ui:12 derniers mois}} or {{ui:Année en cours}}. The report will use that period.` },
-        { titre: `Open the report`, texte: `Tap {{ui:Rapport TCO (PDF)}} at the top of the screen. The button is greyed out while the fleet data loads: wait a moment.` },
-        { titre: `Download it`, texte: `In the window, tap {{ui:Télécharger le rapport}}. KALEA generates the PDF and starts the download.` },
+        { titre: `Open the report`, texte: `Tap {{ui:Rapport TCO (PDF)}} at the top of the screen. The button is greyed out while the fleet data loads: wait a moment.`,
+          image: { nom: 'bouton', alt: `The Costs & TCO header: the TCO report (PDF) button, marked with number 2.` } },
+        { titre: `Download it`, texte: `In the window, tap {{ui:Télécharger le rapport}}. KALEA generates the PDF and starts the download.`,
+          image: { nom: 'fenetre', alt: `The report window: the Download the report button (marker 3), the email address (marker 4) and the Send by email button.` } },
         { titre: `Or email it`, texte: `Check the address in {{ui:Envoyer par e-mail à}} (your company's notification address is suggested), then tap {{ui:Envoyer par e-mail}}. KALEA confirms with "Report sent to …".` },
       ],
       notes: [
@@ -980,7 +1028,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'tele-relier-machine', theme: 'telemetrie',
+    id: 'tele-relier-machine', theme: 'telemetrie', scenario: 'tele-relier-machine',
     fr: {
       fichier: 'aide/relier-une-machine-a-un-boitier.html',
       titre: `Relier une machine à un boîtier et la localiser | Aide KALEA`,
@@ -989,7 +1037,8 @@ export const ARTICLES_STOCK = [
       description: `Associer une machine à une source et à l'identifiant de son boîtier dans KALEA, pour que son compteur se mette à jour tout seul, et la voir sur la carte.`,
       intro: `Une fois la source créée, il reste à dire quelle machine correspond à quel boîtier. La machine passe alors en compteur automatique ; vous pouvez aussi la faire apparaître sur la carte.`,
       etapes: [
-        { titre: `Repérez la machine`, texte: `Dans {{ui:Machines}}, onglet {{ui:Télémétrie}}, le bloc {{ui:Machines reliées}} liste toutes vos machines. Sous le nom, vous voyez « Saisie manuelle » ou le dernier relevé automatique.` },
+        { titre: `Repérez la machine`, texte: `Dans {{ui:Machines}}, onglet {{ui:Télémétrie}}, le bloc {{ui:Machines reliées}} liste toutes vos machines. Sous le nom, vous voyez « Saisie manuelle » ou le dernier relevé automatique.`,
+          image: { nom: 'machines', alt: `Le bloc Machines reliées : la ligne d'une machine (repère 1), sa source (repère 2), l'identifiant du boîtier (repère 3), le bouton Enregistrer (repère 4) et la case Localiser (repère 5).` } },
         { titre: `Choisissez la source`, texte: `Dans la liste de la machine, choisissez votre source à la place de {{ui:Saisie manuelle}}. La liste est grisée tant qu'aucune source n'existe : voir <a href="{{lien:tele-source}}">créer une source de télémétrie</a>.` },
         { titre: `Saisissez l'identifiant du boîtier`, texte: `Dans {{ui:Identifiant du boîtier}}, tapez l'identifiant (IMEI, VIN…). Il est obligatoire dès qu'une source est choisie, et un même identifiant ne peut pas être relié à deux machines.` },
         { titre: `Enregistrez`, texte: `Cliquez sur {{ui:Enregistrer}} sur la ligne de la machine. Elle passe en vert et le bouton affiche {{ui:Enregistré ✓}}. La machine attend alors son premier relevé : « En attente du premier relevé ».` },
@@ -1012,7 +1061,8 @@ export const ARTICLES_STOCK = [
       description: `Associate a machine with a source and its tracker's identifier in KALEA, so its meter updates by itself, and see it on the map.`,
       intro: `Once the source is created, you still need to say which machine matches which tracker. The machine then switches to an automatic meter; you can also make it appear on the map.`,
       etapes: [
-        { titre: `Find the machine`, texte: `In {{ui:Machines}}, {{ui:Télémétrie}} tab, the {{ui:Machines reliées}} block lists all your machines. Under the name, you see "Manual entry" or the latest automatic reading.` },
+        { titre: `Find the machine`, texte: `In {{ui:Machines}}, {{ui:Télémétrie}} tab, the {{ui:Machines reliées}} block lists all your machines. Under the name, you see "Manual entry" or the latest automatic reading.`,
+          image: { nom: 'machines', alt: `The Linked machines block: a machine's line (marker 1), its source (marker 2), the tracker identifier (marker 3), the Save button (marker 4) and the Track location box (marker 5).` } },
         { titre: `Choose the source`, texte: `In the machine's list, choose your source instead of {{ui:Saisie manuelle}}. The list is greyed out while no source exists: see <a href="{{lien:tele-source}}">create a telemetry source</a>.` },
         { titre: `Enter the tracker's identifier`, texte: `In {{ui:Identifiant du boîtier}}, type the identifier (IMEI, VIN…). It is required as soon as a source is chosen, and one identifier cannot be linked to two machines.` },
         { titre: `Save`, texte: `Click {{ui:Enregistrer}} on the machine's line. It turns green and the button shows {{ui:Enregistré ✓}}. The machine then waits for its first reading: "Waiting for the first reading".` },
@@ -1123,7 +1173,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'sup-suivre-reponse', theme: 'support',
+    id: 'sup-suivre-reponse', theme: 'support', scenario: 'sup-suivre-reponse',
     fr: {
       fichier: 'aide/suivre-un-ticket-et-voir-une-reponse.html',
       titre: `Suivre un ticket et savoir qu'une réponse est arrivée | Aide KALEA`,
@@ -1132,10 +1182,12 @@ export const ARTICLES_STOCK = [
       description: `Retrouver vos tickets, comprendre leur statut, voir la pastille « nouvelle réponse » et répondre au support dans KALEA.`,
       intro: `Une réponse du support (ou de l'assistant) se repère dans l'application : une petite pastille chiffrée signale les réponses que vous n'avez pas encore lues.`,
       etapes: [
-        { titre: `Repérez la pastille`, texte: `La pastille chiffrée s'affiche sur {{ui:Aide & support}} dans le menu de gauche, sur l'icône d'aide de l'en-tête et sur la ligne {{ui:Aide & support}} du menu {{ui:Plus}} sur téléphone. Elle compte les réponses non lues de vos tickets. Elle disparaît quand le ticket est ouvert.` },
+        { titre: `Repérez la pastille`, texte: `La pastille chiffrée s'affiche sur {{ui:Aide & support}} dans le menu de gauche, sur l'icône d'aide de l'en-tête et sur la ligne {{ui:Aide & support}} du menu {{ui:Plus}} sur téléphone. Elle compte les réponses non lues de vos tickets. Elle disparaît quand le ticket est ouvert.`,
+          image: { nom: 'liste', alt: `La page Aide & support : la pastille du menu (repère 1), les puces de filtre (repère 2), l'étiquette Nouveau d'un ticket et son statut (repère 3).` } },
         { titre: `Ouvrez la liste de vos demandes`, texte: `Dans {{ui:Aide & support}}, la carte {{ui:Mes demandes}} liste vos tickets. Les puces {{ui:Ouverts}} (par défaut), {{ui:Résolus}} et {{ui:Tous}} filtrent la liste. Une ligne porte l'étiquette {{ui:Nouveau}} quand elle contient une réponse non lue.` },
         { titre: `Lisez le statut`, texte: `Chaque ticket est {{ui:Ouvert}}, {{ui:En cours}} ou {{ui:Résolu}}. Sa référence, de la forme #TK-XXXXXX, se cite facilement à l'oral.` },
-        { titre: `Ouvrez le ticket et lisez la réponse`, texte: `Touchez la ligne : le fil de la conversation s'affiche, avec l'auteur de chaque message et son ancienneté.` },
+        { titre: `Ouvrez le ticket et lisez la réponse`, texte: `Touchez la ligne : le fil de la conversation s'affiche, avec l'auteur de chaque message et son ancienneté.`,
+          image: { nom: 'fil', alt: `Le fil d'un ticket : les messages avec leur auteur et leur ancienneté (repère 4), le champ Répondre (repère 5) et le bouton Envoyer.` } },
         { titre: `Répondez`, texte: `Écrivez dans {{ui:Répondre}} puis touchez {{ui:Envoyer}}. La touche Entrée envoie aussi ; Maj+Entrée passe à la ligne.` },
       ],
       notes: [
@@ -1154,10 +1206,12 @@ export const ARTICLES_STOCK = [
       description: `Find your tickets, understand their status, see the "new reply" badge and answer support in KALEA.`,
       intro: `A reply from support (or from the assistant) can be spotted in the app: a small numbered badge flags the replies you have not read yet.`,
       etapes: [
-        { titre: `Spot the badge`, texte: `The numbered badge shows on {{ui:Aide & support}} in the left-hand menu, on the header's help icon and on the {{ui:Aide & support}} line of the {{ui:Plus}} menu on a phone. It counts the unread replies on your tickets. It disappears once the ticket is opened.` },
+        { titre: `Spot the badge`, texte: `The numbered badge shows on {{ui:Aide & support}} in the left-hand menu, on the header's help icon and on the {{ui:Aide & support}} line of the {{ui:Plus}} menu on a phone. It counts the unread replies on your tickets. It disappears once the ticket is opened.`,
+          image: { nom: 'liste', alt: `The Help & support page: the menu dot (marker 1), the filter chips (marker 2), a ticket's New label and its status (marker 3).` } },
         { titre: `Open the list of your requests`, texte: `In {{ui:Aide & support}}, the {{ui:Mes demandes}} card lists your tickets. The {{ui:Ouverts}} (default), {{ui:Résolus}} and {{ui:Tous}} chips filter the list. A line carries the {{ui:Nouveau}} label when it contains an unread reply.` },
         { titre: `Read the status`, texte: `Each ticket is {{ui:Ouvert}}, {{ui:En cours}} or {{ui:Résolu}}. Its reference, in the form #TK-XXXXXX, is easy to quote over the phone.` },
-        { titre: `Open the ticket and read the reply`, texte: `Tap the line: the conversation thread appears, with each message's author and age.` },
+        { titre: `Open the ticket and read the reply`, texte: `Tap the line: the conversation thread appears, with each message's author and age.`,
+          image: { nom: 'fil', alt: `A ticket's thread: the messages with their author and age (marker 4), the Reply field (marker 5) and the Send button.` } },
         { titre: `Reply`, texte: `Write in {{ui:Répondre}} then tap {{ui:Envoyer}}. The Enter key also sends; Shift+Enter starts a new line.` },
       ],
       notes: [
@@ -1171,7 +1225,7 @@ export const ARTICLES_STOCK = [
   },
 
   {
-    id: 'sup-assistant-humain', theme: 'support',
+    id: 'sup-assistant-humain', theme: 'support', scenario: 'sup-assistant-humain',
     fr: {
       fichier: 'aide/assistant-ia-et-parler-a-un-humain.html',
       titre: `L'Assistant IA KALEA et le bouton « Parler à un humain » | Aide KALEA`,
@@ -1180,9 +1234,11 @@ export const ARTICLES_STOCK = [
       description: `Reconnaître les messages de l'Assistant IA KALEA dans un ticket et demander à parler à un membre de l'équipe.`,
       intro: `Dans un ticket, certains messages sont écrits par l'<strong>Assistant IA KALEA</strong>. Si vous préférez parler à une personne, un bouton le permet.`,
       etapes: [
-        { titre: `Reconnaissez ses messages`, texte: `Dans le fil d'un ticket, les messages de l'assistant sont signés {{ui:Assistant IA KALEA}}, avec un avatar « IA ». Ils sont distincts de vos messages (« Toi ») et de ceux de l'équipe (« Support KALEA »).` },
+        { titre: `Reconnaissez ses messages`, texte: `Dans le fil d'un ticket, les messages de l'assistant sont signés {{ui:Assistant IA KALEA}}, avec un avatar « IA ». Ils sont distincts de vos messages (« Toi ») et de ceux de l'équipe (« Support KALEA »).`,
+          image: { nom: 'fil', alt: `Le fil d'un ticket où l'assistant a écrit : le message signé Assistant IA KALEA (repère 1) et le bouton Parler à un humain (repère 2).` } },
         { titre: `Demandez à parler à une personne`, texte: `Dès que l'assistant a écrit sur un ticket, le bouton {{ui:Parler à un humain}} apparaît à côté de {{ui:Retour}} et {{ui:Envoyer}}. Touchez-le.` },
-        { titre: `Lisez la confirmation`, texte: `KALEA affiche « Un membre de l'équipe reprendra ta demande. », puis, sous le champ de réponse : « Tu as demandé à parler à un humain : l'équipe te répondra ici. »` },
+        { titre: `Lisez la confirmation`, texte: `KALEA affiche « Un membre de l'équipe reprendra ta demande. », puis, sous le champ de réponse : « Tu as demandé à parler à un humain : l'équipe te répondra ici. »`,
+          image: { nom: 'confirmation', alt: `Après la demande : le message de confirmation sous le champ de réponse (repère 3).` } },
       ],
       notes: [
         `Le bouton n'apparaît qu'une fois que l'assistant a écrit sur le ticket, et plus après que vous l'avez utilisé.`,
@@ -1199,9 +1255,11 @@ export const ARTICLES_STOCK = [
       description: `Recognise the KALEA AI Assistant's messages in a ticket and ask to talk to a team member.`,
       intro: `In a ticket, some messages are written by the <strong>KALEA AI Assistant</strong>. If you would rather talk to a person, a button lets you.`,
       etapes: [
-        { titre: `Recognise its messages`, texte: `In a ticket's thread, the assistant's messages are signed {{ui:Assistant IA KALEA}}, with an "IA" avatar. They are distinct from your messages ("You") and from the team's ("KALEA Support").` },
+        { titre: `Recognise its messages`, texte: `In a ticket's thread, the assistant's messages are signed {{ui:Assistant IA KALEA}}, with an "IA" avatar. They are distinct from your messages ("You") and from the team's ("KALEA Support").`,
+          image: { nom: 'fil', alt: `A ticket thread where the assistant has written: the message signed Assistant IA KALEA (marker 1) and the Talk to a human button (marker 2).` } },
         { titre: `Ask to talk to a person`, texte: `As soon as the assistant has written on a ticket, the {{ui:Parler à un humain}} button appears next to {{ui:Retour}} and {{ui:Envoyer}}. Tap it.` },
-        { titre: `Read the confirmation`, texte: `KALEA shows "A team member will take over your request.", then, under the reply field: "You asked to talk to a human: the team will reply here."` },
+        { titre: `Read the confirmation`, texte: `KALEA shows "A team member will take over your request.", then, under the reply field: "You asked to talk to a human: the team will reply here."`,
+          image: { nom: 'confirmation', alt: `After the request: the confirmation message under the reply field (marker 3).` } },
       ],
       notes: [
         `The button only appears once the assistant has written on the ticket, and no longer after you have used it.`,
