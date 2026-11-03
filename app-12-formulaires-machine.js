@@ -2161,6 +2161,8 @@ function habillerSelect(select, titre) {
   // texte d'une <option> déjà là est réécrit en direct (brancherCategorie),
   // ce qui ne remonte comme mutation qu'au niveau de l'option, pas du select.
   new MutationObserver(majBouton).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] });
+  // Valeur posée par le code puis annoncée par un événement « change » (ex. priorité d'un ordre créé depuis une panne) : le bouton doit suivre, sinon il garde l'ancien libellé.
+  select.addEventListener('change', majBouton);
 }
 
 // SÉLECTEUR DE DATE MAISON — même raison que ouvrirListeChoix/habillerSelect

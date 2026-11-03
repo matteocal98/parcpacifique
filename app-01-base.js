@@ -218,7 +218,7 @@ function basculeLangueHtml() {
 function tR(cle, valeurs) {
   const modele = trad(cle);
   let dernier = null;   // valeur numérique du dernier repère {…} rencontré : c'est elle qui décide du pluriel de « (s) » qui suit
-  return modele.replace(/\{(\w+)\}|\(es\)|\(s\)/g, (tout, nom) => {
+  return modele.replace(/\{(\w+)\}|\(y\/ies\)|\(es\)|\(s\)/g, (tout, nom) => {
     if (nom !== undefined) {
       if (!(valeurs && nom in valeurs)) { dernier = null; return tout; }
       const v = valeurs[nom]; const texte = String(v);
@@ -228,6 +228,7 @@ function tR(cle, valeurs) {
     }
     if (dernier === null) return tout;
     const pluriel = (typeof LANGUE !== 'undefined' && LANGUE === 'en') ? dernier !== 1 : dernier > 1;
+    if (tout === '(y/ies)') return pluriel ? 'ies' : 'y';   // anglais : « categor(y/ies) »
     return pluriel ? (tout === '(es)' ? 'es' : 's') : '';
   });
 }

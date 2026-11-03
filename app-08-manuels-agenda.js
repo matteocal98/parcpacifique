@@ -1995,7 +1995,7 @@ function blocCiblagePushHtml() {
     <section class="ui-section">
       ${teteSectionKit('cloche', trad('Notifications push — qui est prévenu'), '', `<span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>`)}
       <div class="ui-section-corps">
-        <p class="ui-aide">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai s\'ajoute à celui déjà réglé sur chaque plan de maintenance, il ne le remplace pas. Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
+        <p class="ui-aide">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai est propre à chaque rôle : il est indépendant de celui réglé sur chaque plan de maintenance (qui sert aux e-mails). Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
         <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
         ${rolesAffiches.map(ligneRole).join('')}
         ${multi ? '' : `<div class="ui-aide">${trad('Ciblage par rôle : disponible avec plusieurs utilisateurs (offre Business).')}</div>`}
