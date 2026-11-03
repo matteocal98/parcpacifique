@@ -389,7 +389,7 @@ function majuscules(valeur) {
 const CLE_CATEGORIES = 'keeva-categories';
 const CATEGORIE_AUTRE = 'AUTRE';
 // Liste de départ : le vocabulaire courant des chantiers et des parcs.
-const CATEGORIES_DEPART = [
+const CATEGORIES_DEPART_FR = [
   'TRONÇONNEUSE', 'DÉBROUSSAILLEUSE', 'TONDEUSE', 'MOTOCULTURE', 'MINI-PELLE',
   'PELLETEUSE', 'TRACTEUR', 'REMORQUE', 'VÉHICULE', 'ÉLAGUEUSE',
   'GROUPE ÉLECTROGÈNE', 'COMPRESSEUR',
@@ -397,11 +397,24 @@ const CATEGORIES_DEPART = [
   'MINI-CHARGEUSE', 'CHARGEUSE SUR PNEUS', 'CHARGEUSE-PELLETEUSE', 'BULLDOZER', 'COMPACTEUR', 'NIVELEUSE', 'TOMBEREAU ARTICULÉ', 'CHARIOT TÉLESCOPIQUE', 'CHARIOT ÉLÉVATEUR', 'NACELLE ÉLÉVATRICE', 'GRUE MOBILE', 'CAMION MALAXEUR', 'TRACTEUR COMPACT', 'TONDEUSE AUTOPORTÉE', 'GROUPE ÉLECTROGÈNE STATIONNAIRE', 'COMPRESSEUR À VIS', 'MOTOPOMPE', 'FOURGON / UTILITAIRE', 'PICK-UP', 'CAMION PORTEUR', 'CAMION BENNE', 'TRACTEUR ROUTIER', 'TAILLE-HAIE', 'BROYEUR', 'MINIBUS',
 ];
 
+// Liste proposée : traduite dans la langue de l'écran (identique en français). La liste française ci-dessus reste la RÉFÉRENCE : cleCategorie() y ramène un nom anglais.
+const CATEGORIES_DEPART = CATEGORIES_DEPART_FR.map((c) => trad(c));
+
 // ── DURÉES DE VIE MOYENNES PAR TYPE DE MACHINE ────────────────────────
 // Table machine_type_references (lecture seule, mise à jour annuelle par nos soins) : une valeur INDICATIVE
 // proposée dans le champ « Durée de vie » quand on choisit la catégorie. Le client la modifie librement.
-function cleCategorie(nom) {
+function cleCategorieBrute(nom) {
   return String(nom || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+}
+// Clé d'une catégorie : indépendante de la langue (« EXCAVATOR » et « PELLETEUSE » donnent la même clé), car la table des durées de vie de référence est en français.
+let CATEGORIES_VERS_CLE_FR = null;
+function cleCategorie(nom) {
+  const cle = cleCategorieBrute(nom);
+  if (!CATEGORIES_VERS_CLE_FR) {
+    CATEGORIES_VERS_CLE_FR = new Map();
+    CATEGORIES_DEPART_FR.forEach((fr) => CATEGORIES_VERS_CLE_FR.set(cleCategorieBrute(trad(fr)), cleCategorieBrute(fr)));
+  }
+  return CATEGORIES_VERS_CLE_FR.get(cle) || cle;
 }
 // La référence d'une catégorie, SEULEMENT si elle est dans l'unité du compteur (heures ou km) de la machine.
 function referenceDureeVie(nomCategorie, unite) {
@@ -502,7 +515,7 @@ function categoriesUtiles(chargees) {
   CATEGORIES_DEPART.forEach(ajouter);
   categoriesLocales().forEach(ajouter);
   (Array.isArray(chargees) ? chargees : []).forEach((c) => ajouter(c && c.name ? c.name : c));
-  return [...vues.values()].sort((a, b) => a.localeCompare(b, 'fr'));
+  return [...vues.values()].sort((a, b) => a.localeCompare(b, LANGUE === 'en' ? 'en' : 'fr'));
 }
 
 // Retient une catégorie pour la PROCHAINE fois : c'est ce qui fait qu'une

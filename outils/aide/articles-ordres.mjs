@@ -209,7 +209,7 @@ export const ARTICLES_ORDRES = [
       intro: 'A priority that changes, someone else to do the job, an order that is no longer needed: the manager and management access can correct an order as long as it is open, meaning “To do” or “In progress”.',
       etapes: [
         { titre: 'Open the order', texte: 'In {{ui:Planning}}, then {{ui:Ordres de travail}}, tap the order\'s row to open its page. The management buttons are at the bottom of the page.',
-          image: { nom: 'fiche', alt: 'The page of an open order: the Edit (1), Put back to do (2) and Cancel the order (3) buttons, at the bottom.' } },
+          image: { nom: 'fiche', alt: 'The page of an open order: the Edit (1), Reopen (2) and Cancel the order (3) buttons, at the bottom.' } },
         { titre: 'Edit the order', texte: 'Tap {{ui:Modifier}}. Change the tasks, the {{ui:Priorité}}, the person in {{ui:Assigné à}}, the due date or the duration, then click {{ui:Enregistrer}}. Tasks you keep keep their state, ticked or not.',
           image: { nom: 'modification', alt: 'The order edit window: the priority (1), the person in Assigned to (2) and the Save button (3).' } },
         { titre: 'Put the order back to “to do”', texte: 'For an “In progress” order that must start again, tap {{ui:Remettre à faire}}.' },

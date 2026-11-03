@@ -208,6 +208,8 @@ function blocSeuilsCategorieTcoHtml() {
           ${categories.map((cat, i) => {
             const nbMachines = (UI.machines || []).filter((m) => m.category?.id === cat.id).length;
             const repere = repereAmortissementCategorie(cat.id);
+            const unitesCompteur = (UI.machines || []).filter((m) => m.category?.id === cat.id).map((m) => counterUnitOf(m));
+            const uniteSeuil = repere ? counterShort(repere.unite) : ((unitesCompteur.length && unitesCompteur.every((u) => u === 'km')) ? 'km' : 'h');
             return `
             <div class="ui-liste"><div class="ui-ligne" data-seuil-ligne data-categorie-id="${esc(cat.id)}">
               <div class="ui-ligne-id">
@@ -228,7 +230,7 @@ function blocSeuilsCategorieTcoHtml() {
               <div class="ui-ligne-action">
                 <div class="ui-champ-unite">
                   <input type="text" inputmode="decimal" class="ui-champ" data-seuil-input value="${cat.target_hourly_cost != null ? esc(cat.target_hourly_cost) : ''}"${bloque}>
-                  <span class="ui-unite">${deviseCourte()}/h</span>
+                  <span class="ui-unite">${deviseCourte()}/${uniteSeuil}</span>
                 </div>
                 <button type="button" class="ui-btn ui-btn-pastille tco-seuil-plus" data-seuil-plus aria-expanded="false" aria-label="${esc(trad('Afficher l\'aide de saisie'))}" title="${esc(trad('Aide de saisie : moyenne actuelle, amortissement…'))}">+</button>
               </div>
