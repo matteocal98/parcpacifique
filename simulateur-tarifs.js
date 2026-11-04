@@ -39,7 +39,7 @@
     return Math.round((offre.base + total) * 100) / 100;
   }
 
-  // besoin : 0 l'essentiel, 1 export CSV, 2 QR codes / préparation groupée / Coûts & TCO, 3 Stocks & SAV / télémétrie / support dédié.
+  // besoin : 0 l'essentiel, 1 export CSV, 2 ordres de travail / QR codes / préparation groupée / Coûts & TCO / statistiques, 3 Stocks & SAV / télémétrie / signature numérique et habilitations / support dédié.
   // utilisateurs : nombre de personnes (1, 3 pour « 2 à 3 », 99 pour « 4 ou plus »).
   function simuler(machines, besoin, utilisateurs) {
     var n = Math.max(1, Math.floor(Number(machines) || 1));

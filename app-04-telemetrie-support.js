@@ -1671,6 +1671,8 @@ function openUpgradeNotice(companyId, message) {
         trad('Multi-utilisateurs (accès illimités)'),
         trad('QR codes équipements'),
         trad('Préparation groupée d\'atelier'),
+        trad('Ordres de travail'),
+        trad('Statistiques de dépenses et de maintenance'),
         trad('Module Coûts & TCO'),
       ];
     }
@@ -1679,6 +1681,7 @@ function openUpgradeNotice(companyId, message) {
       trad('Rôles d\'équipe'),
       trad('Support dédié'),
       trad('Module Stocks & SAV (magasins, mouvements, kits)'),
+      trad('Signature numérique et habilitations'),
       trad('Télémétrie : connexion et suivi (matériel en sus)'),
     ];
   }

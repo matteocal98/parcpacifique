@@ -2099,7 +2099,7 @@ const OFFRE_GRILLE = [
     prix: trad('39 €/mois'),
     analyses: trad('30 analyses de carnet'),
     lectures: trad('500 lectures de compteur'),
-    inclus: trad('multi-utilisateurs illimités, QR codes, préparation groupée, module Coûts & TCO'),
+    inclus: trad('multi-utilisateurs illimités, ordres de travail, QR codes, préparation groupée, module Coûts & TCO, statistiques'),
     recommandee: true,
   },
   {
@@ -2111,7 +2111,7 @@ const OFFRE_GRILLE = [
     prix: trad('79 €/mois'),
     analyses: trad('5 000 analyses de carnet'),
     lectures: trad('2 000 lectures de compteur'),
-    inclus: trad('support dédié, module Stocks & SAV, télémétrie (connexion et suivi)'),
+    inclus: trad('support dédié, module Stocks & SAV, signature numérique et habilitations, télémétrie (connexion et suivi)'),
     recommandee: false,
   },
 ];
@@ -2138,8 +2138,8 @@ const COMPARATIF_OFFRES = {
     { etiquette: trad('Utilisateurs'), valeurs: ['1', '1', trad('illimités'), trad('illimités'), trad('sur mesure')] },
     { etiquette: trad('Consultation, rappels e-mail et notifications'), valeurs: [true, true, true, true, true] },
     { etiquette: trad('Export CSV'), valeurs: [false, true, true, true, true] },
-    { etiquette: trad('QR codes, préparation groupée, Coûts & TCO'), valeurs: [false, false, true, true, true] },
-    { etiquette: trad('Stocks & SAV, support dédié'), valeurs: [false, false, false, true, true] },
+    { etiquette: trad('Ordres de travail, QR codes, préparation groupée, Coûts & TCO, statistiques'), valeurs: [false, false, true, true, true] },
+    { etiquette: trad('Stocks & SAV, signature numérique et habilitations, support dédié'), valeurs: [false, false, false, true, true] },
     { etiquette: trad('Télémétrie (connexion et suivi)'), valeurs: [false, false, false, true, true] },
     { etiquette: trad('Intégrations sur mesure, accompagnement, contrat annuel'), valeurs: [false, false, false, false, true] },
     { etiquette: trad('Analyses de carnet par mois'), valeurs: ['10', '20', '30', '5 000', trad('sur devis')] },
@@ -2166,7 +2166,7 @@ function planCouvreQr() {
 }
 
 // La PRÉPARATION GROUPÉE (liste consolidée des pièces et consommables à commander, carte de l'agenda et résumé de l'accueil) est, comme les QR codes et Coûts & TCO,
-// une ligne de la grille des offres réservée à Business et Enterprise (COMPARATIF_OFFRES : « QR codes, préparation groupée, Coûts & TCO »).
+// une ligne de la grille des offres réservée à Business et Enterprise (COMPARATIF_OFFRES : « Ordres de travail, QR codes, préparation groupée, Coûts & TCO, statistiques »).
 function planCouvrePreparation() {
   return ['business', 'enterprise'].includes(offreDeLaGrille(UI.companyPlan || 'free').cle);
 }
