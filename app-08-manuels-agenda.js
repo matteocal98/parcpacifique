@@ -113,7 +113,7 @@ VIEWS.manuals = {
   subtitle: () => tR('{n} plan(s) extrait(s) de vos carnets sur {total} machine(s)', { n: UI.counts.analysed, total: UI.machines.length }),
   render() {
     if (!UI.machines.length) {
-      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Ajoute une machine pour pouvoir déposer son carnet d\'entretien.')}</div></section></div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Ajoutez une machine pour pouvoir déposer son carnet d\'entretien.')}</div></section></div>`;
     }
     const total = UI.machines.length;
     const analyse = UI.machines.filter((m) => etatManuel(m) === 'analyse').length;
@@ -560,7 +560,7 @@ function preparationHtml() {
       ${rien
         ? `<p class="muted-text">${trad('Rien à prévoir sur cette période.')}</p>`
         : `${produits}${sansItems}`}
-      ${(liste.produits.length || liste.sansItems.length) ? `<div class="ui-aide">${trad('Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.')}</div>` : ''}
+      ${(liste.produits.length || liste.sansItems.length) ? `<div class="ui-aide">${trad('Les quantités proviennent du carnet constructeur : vérifiez-les avant de commander.')}</div>` : ''}
     </section>`;
 }
 
@@ -913,7 +913,7 @@ function wirePreparation(root) {
     } catch (err) {
       // Presse-papiers refusé (permission, contexte non sécurisé) : on le dit
       // plutôt que de laisser croire que la copie a réussi.
-      showToast(trad('Copie impossible — sélectionne la liste à la main'));
+      showToast(trad('Copie impossible — sélectionnez la liste à la main'));
     }
   };
   root.querySelector('#prep-copier')?.addEventListener('click', copierTexte);
@@ -1377,7 +1377,7 @@ function ouvrirJourAgenda(iso) {
         </div>
         <button type="button" class="jm-fermer" id="agenda-jour-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
-      <div class="jm-liste">${cartesHtml || `<p class="jm-vide">${trad('Aucune échéance ce jour — planifie un entretien ci-dessous si besoin.')}</p>`}</div>
+      <div class="jm-liste">${cartesHtml || `<p class="jm-vide">${trad('Aucune échéance ce jour — planifiez un entretien ci-dessous si besoin.')}</p>`}</div>
       <div class="jm-pied">
         <button type="button" class="pe-confirmer" id="agenda-jour-planifier" style="cursor:pointer;background:var(--primary-dark);color:#fff;">${picto('croix')}<span>${trad('Planifier un entretien')}</span></button>
         <button type="button" class="pe-fermer" id="agenda-jour-fermer">${trad('Fermer')}</button>
@@ -1490,7 +1490,7 @@ function ouvrirProgrammerEntretien(dateInitiale) {
       <div class="pe-tete">
         <div>
           <h2>${trad('Planifier un entretien')}</h2>
-          <p class="sub" style="margin-bottom:0;">${trad('Choisis la date puis la machine : la programmation apparaît dans le calendrier, colorée selon l\'état réel de la machine.')}</p>
+          <p class="sub" style="margin-bottom:0;">${trad('Choisissez la date puis la machine : la programmation apparaît dans le calendrier, colorée selon l\'état réel de la machine.')}</p>
         </div>
         <span class="pe-tete-icone">${picto('calendrier')}</span>
       </div>
@@ -1826,7 +1826,7 @@ VIEWS.agenda = {
     // entretien à la main (scheduled_maintenances) — une raison de plus de
     // ne jamais bloquer l'écran tant qu'au moins une machine existe.
     if (!UI.machines.length) {
-      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée. Ajoute une machine pour commencer.')}</div></section></div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée. Ajoutez une machine pour commencer.')}</div></section></div>`;
     }
     const piecesHtml = preparationCompleteAgendaHtml();
     const calendrier = `
@@ -1908,11 +1908,11 @@ function blocReglagesRappelsHtml() {
           <input id="rap-email" class="ui-champ" type="email" inputmode="email" autocomplete="email" value="${esc(adresseRappels())}"${bloque}>
         </div>
         <label class="check-row" for="rap-par-email"><input type="checkbox" id="rap-par-email"${rappelsEmailCoches() ? ' checked' : ''}${bloque}> ${trad('Recevoir les rappels par e-mail')}</label>
-        <div class="ui-aide">${trad('Laisse l\'adresse vide pour ne plus recevoir de rappel par e-mail. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est proposée.')}</div>
+        <div class="ui-aide">${trad('Laissez l\'adresse vide pour ne plus recevoir de rappel par e-mail. Tant qu\'aucune adresse propre n\'est enregistrée, celle du compte est proposée.')}</div>
         <div class="ui-aide" id="rap-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="rap-save"${bloque}>${picto('case')}<span>${trad('Enregistrer les préférences e-mail')}</span></button></div>
         ${(dispo && reserveGerant) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
-        ${dispo ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>`}
+        ${dispo ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écrivez-nous depuis « Aide & support ».')}</div>`}
       </div>
     </section>`;
 }
@@ -1922,14 +1922,14 @@ function blocReglagesRappelsHtml() {
 // jamais réclamée avant le clic explicite).
 function blocPushHtml() {
   if (!pushDisponible()) {
-    return `<p class="ui-aide">${trad('Les notifications push nécessitent l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
+    return `<p class="ui-aide">${trad('Les notifications push nécessitent l\'application Android : installez-la sur votre téléphone pour les recevoir.')}</p>`;
   }
   const actif = !!monTokenPushConnu();
   return `
     <div class="switch-row rappel-switch-row">
       <span class="switch-label">
         <span class="rappel-switch-titre">${trad('Recevoir les rappels d\'échéance par notification push')}</span>
-        <span class="rappel-switch-sous">${trad('Envoyée par le serveur, même application fermée — nécessite ton autorisation Android')}</span>
+        <span class="rappel-switch-sous">${trad('Envoyée par le serveur, même application fermée — nécessite votre autorisation Android')}</span>
       </span>
       <button type="button" class="switch${actif ? ' on' : ''}" id="acc-push" role="switch" aria-checked="${actif ? 'true' : 'false'}" aria-label="${trad('Recevoir les rappels d\'échéance par notification push')}"><span></span></button>
     </div>
@@ -1995,11 +1995,11 @@ function blocCiblagePushHtml() {
     <section class="ui-section">
       ${teteSectionKit('cloche', trad('Notifications push — qui est prévenu'), '', `<span class="ui-statut ${actif ? 'is-ok' : ''}">${actif ? trad('Canal actif') : trad('Canal inactif')}</span>`)}
       <div class="ui-section-corps">
-        <p class="ui-aide">${trad('Choisis quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai est propre à chaque rôle : il est indépendant de celui réglé sur chaque plan de maintenance (qui sert aux e-mails). Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
+        <p class="ui-aide">${trad('Choisissez quels rôles reçoivent les rappels d\'échéance par notification, et à quel délai d\'anticipation chacun. Ce délai est propre à chaque rôle : il est indépendant de celui réglé sur chaque plan de maintenance (qui sert aux e-mails). Seuls les membres ayant eux-mêmes activé le push sur leur téléphone les recevront réellement — ce réglage choisit QUI est ciblé, pas d\'activer le push à leur place.')}</p>
         <label class="check-row" for="push-cible-actif"><input type="checkbox" id="push-cible-actif"${actif ? ' checked' : ''}${bloque}> ${trad('Activer les notifications push pour cette société')}</label>
         ${rolesAffiches.map(ligneRole).join('')}
         ${multi ? '' : `<div class="ui-aide">${trad('Ciblage par rôle : disponible avec plusieurs utilisateurs (offre Business).')}</div>`}
-        ${!dispo ? `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>` : (!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : '')}
+        ${!dispo ? `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écrivez-nous depuis « Aide & support ».')}</div>` : (!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : '')}
         <div class="ui-aide" id="push-cible-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="push-cible-save"${bloque}>${picto('case')}<span>${trad('Enregistrer le ciblage')}</span></button></div>
       </div>
@@ -2017,7 +2017,7 @@ function wirePush(root) {
     if (actif) {
       const resultat = await activerPush();
       if (resultat.refuse) {
-        if (msg) msg.textContent = trad('Autorisation refusée : Android n\'affichera aucune notification. Tu peux l\'accorder dans les réglages de l\'application.');
+        if (msg) msg.textContent = trad('Autorisation refusée : Android n\'affichera aucune notification. Vous pouvez l\'accorder dans les réglages de l\'application.');
       } else if (resultat.erreur) {
         if (msg) msg.textContent = tR('Activation impossible : {erreur}', { erreur: resultat.erreur });
       } else {
@@ -2293,7 +2293,7 @@ VIEWS.reminders = {
       if (resultat.erreur) {
         msg.textContent = tR('Rappels non programmés : {erreur}', { erreur: resultat.erreur });
       } else if (resultat.refuse) {
-        msg.textContent = trad('Autorisation refusée : Android n\'affichera aucun rappel. Tu peux l\'accorder dans les réglages de l\'application.');
+        msg.textContent = trad('Autorisation refusée : Android n\'affichera aucun rappel. Vous pouvez l\'accorder dans les réglages de l\'application.');
         bouton.classList.remove('on');
         bouton.setAttribute('aria-checked', 'false');
         activerRappels(false);

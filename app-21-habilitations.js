@@ -129,7 +129,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
   const vuePersonnes = () => {
     const exp = d.expirantes.length ? `<section class="otm-bloc"><h3 class="otm-bloc-titre">${otSymbole('alarm')}<span>${trad('À renouveler bientôt')}</span></h3>
       ${d.expirantes.map((e) => { const [cl, tx] = habEtat({ expire_le: e.expire_le }); return `<div class="hab-ligne"><div><strong>${esc(e.nom_affiche)}</strong><span class="sig-meta">${esc(e.qualification)}</span></div><span class="ui-statut ${cl}">${esc(tx)}</span></div>`; }).join('')}</section>` : '';
-    if (!d.qualifications.length) return exp + `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Commence par le catalogue : ajoute les qualifications utiles à ta société, puis reviens saisir les habilitations des personnes.')}</p></div>`;
+    if (!d.qualifications.length) return exp + `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Commencez par le catalogue : ajoutez les qualifications utiles à votre société, puis revenez saisir les habilitations des personnes.')}</p></div>`;
     return exp + d.equipe.map((m) => {
       const lignes = d.habilitations.filter((h) => h.profil_id === m.id);
       // Une personne sans habilitation tient sur UNE ligne (nom, mention discrète, bouton) ; avec des habilitations, le nom puis une ligne par habilitation.
@@ -151,13 +151,13 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
         <span class="sig-meta">${q.duree_validite_mois ? tR('Valable {n} mois', { n: q.duree_validite_mois }) : trad('Sans expiration par défaut')}</span></div>
         <div class="hab-actions"><button type="button" class="ui-btn ui-btn-pastille" data-hab-edit-qual="${esc(q.id)}">${trad('Modifier')}</button>
         <button type="button" class="ui-btn ui-btn-pastille" data-hab-suppr-qual="${esc(q.id)}">${trad('Supprimer')}</button></div></div>`).join('')
-      : `<p class="ui-aide">${trad('Aucune qualification pour l\'instant. Ajoute celles dont ta société a besoin (nom, durée de validité).')}</p>`}</section>`;
+      : `<p class="ui-aide">${trad('Aucune qualification pour l\'instant. Ajoutez celles dont votre société a besoin (nom, durée de validité).')}</p>`}</section>`;
   const vueExigences = () => `<section class="otm-bloc"><div class="hab-tete"><h3 class="otm-bloc-titre">${otSymbole('rule')}<span>${trad('Exigences par catégorie ou machine')}</span></h3>
       <button type="button" class="ui-btn ui-btn-pastille" data-hab-nouvelle-exig ${d.qualifications.length ? '' : 'disabled'}>${trad('Ajouter')}</button></div>
       ${d.exigences.length ? d.exigences.map((e) => `<div class="hab-ligne"><div><strong>${esc(nomQual(e.qualification_id))}</strong><span class="sig-meta">${esc(nomCible(e))}</span></div>
         <div class="hab-actions"><span class="ui-statut ${e.niveau === 'obligatoire' ? 'is-retard' : 'is-bientot'}">${e.niveau === 'obligatoire' ? trad('Obligatoire') : trad('Recommandée')}</span>
         <button type="button" class="ui-btn ui-btn-pastille" data-hab-retirer-exig="${esc(e.id)}">${trad('Retirer')}</button></div></div>`).join('')
-      : `<p class="ui-aide">${d.qualifications.length ? trad('Aucune exigence : personne n\'est contrôlé pour l\'instant.') : trad('Ajoute d\'abord des qualifications au catalogue.')}</p>`}</section>`;
+      : `<p class="ui-aide">${d.qualifications.length ? trad('Aucune exigence : personne n\'est contrôlé pour l\'instant.') : trad('Ajoutez d\'abord des qualifications au catalogue.')}</p>`}</section>`;
 
   const dessiner = () => {
     const onglets = [['personnes', trad('Personnes')], ['catalogue', trad('Catalogue')], ['exigences', trad('Exigences')]];
@@ -180,11 +180,11 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
       champs: [
         { id: 'qual', etiquette: trad('Qualification'), type: 'liste', options: optsQual(true), valeur: qual0, obligatoire: true },
         { id: 'obt', etiquette: trad('Obtenue le'), type: 'date', valeur: existante ? existante.obtenue_le : todayIso(), obligatoire: true },
-        { id: 'exp', etiquette: trad('Expire le (facultatif)'), type: 'date', valeur: existante && existante.expire_le ? existante.expire_le : '', aide: trad('Laisse vide pour calculer la date avec la durée de validité de la qualification.') },
+        { id: 'exp', etiquette: trad('Expire le (facultatif)'), type: 'date', valeur: existante && existante.expire_le ? existante.expire_le : '', aide: trad('Laissez vide pour calculer la date avec la durée de validité de la qualification.') },
       ],
       valider: async (v) => {
         const { error } = await sb.rpc('habilitation_enregistrer', { p_id: existante ? existante.id : nouvelIdentifiant(), p_profil: profilId, p_qualification: v.qual, p_obtenue_le: v.obt, p_expire_le: v.exp || null, p_justificatif: existante ? existante.justificatif : null });
-        return error ? (error.message || trad('Enregistrement impossible. Réessaie.')) : null;
+        return error ? (error.message || trad('Enregistrement impossible. Réessayez.')) : null;
       },
     });
     if (r) await recharger();
@@ -199,7 +199,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
       ],
       valider: async (v) => {
         const { error } = await sb.rpc('qualification_enregistrer', { p_id: existante ? existante.id : nouvelIdentifiant(), p_nom: v.nom, p_duree_mois: v.duree ? Number(v.duree) : null, p_description: existante ? existante.description : null, p_actif: v.actif });
-        return error ? (error.message || trad('Enregistrement impossible. Réessaie.')) : null;
+        return error ? (error.message || trad('Enregistrement impossible. Réessayez.')) : null;
       },
     });
     if (r) await recharger();
@@ -210,7 +210,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
     const machines = (UI.machines || []).map((m) => [m.id, m.name]).sort(parNom);
     // Seuls les choix possibles sont proposés : sans catégorie, on ne propose que « une machine » ; sans machine, que « une catégorie ».
     const cibles = [...(cats.length ? [['categorie', trad('Une catégorie de machines')]] : []), ...(machines.length ? [['machine', trad('Une machine')]] : [])];
-    if (!cibles.length) { dire(trad('Aucune machine ni catégorie : ajoute d\'abord une machine.')); return; }
+    if (!cibles.length) { dire(trad('Aucune machine ni catégorie : ajoutez d\'abord une machine.')); return; }
     const r = await habMiniFormulaire({
       titre: trad('Nouvelle exigence'), symbole: 'rule', bouton: trad('Ajouter'),
       champs: [
@@ -223,9 +223,9 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
       ],
       valider: async (v) => {
         const cible = v.type === 'machine' ? { p_machine: v.machine || null, p_categorie: null } : { p_machine: null, p_categorie: v.cat || null };
-        if (!cible.p_machine && !cible.p_categorie) return trad('Choisis une catégorie ou une machine.');
+        if (!cible.p_machine && !cible.p_categorie) return trad('Choisissez une catégorie ou une machine.');
         const { error } = await sb.rpc('exigence_definir', { p_id: nouvelIdentifiant(), p_qualification: v.qual, ...cible, p_niveau: v.niveau });
-        return error ? (error.message || trad('Enregistrement impossible. Réessaie.')) : null;
+        return error ? (error.message || trad('Enregistrement impossible. Réessayez.')) : null;
       },
     });
     if (r) await recharger();
@@ -289,7 +289,7 @@ async function ouvrirHabilitesMachine(machine) {
       ? `<section class="otm-bloc"><h3 class="otm-bloc-titre">${otSymbole('rule')}<span>${trad('Exigences de cette machine')}</span></h3>
           ${exigences.map((e) => `<div class="hab-ligne"><div><strong>${esc(noms.get(e.qualification_id) || '—')}</strong><span class="sig-meta">${e.machine_id ? trad('Cette machine') : trad('Sa catégorie')}</span></div>
             <span class="ui-statut ${e.niveau === 'obligatoire' ? 'is-retard' : 'is-bientot'}">${e.niveau === 'obligatoire' ? trad('Obligatoire') : trad('Recommandée')}</span></div>`).join('')}</section>`
-      : `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Aucune exigence pour cette machine : tout le monde peut intervenir. Ajoute-en depuis « Qualifications et habilitations ».')}</p></div>`;
+      : `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Aucune exigence pour cette machine : tout le monde peut intervenir. Ajoutez-en depuis « Qualifications et habilitations ».')}</p></div>`;
     const lignes = equipe.map((m) => {
       const manquantes = Array.isArray(m.manquantes) ? m.manquantes : [];
       const detail = manquantes.length
@@ -327,7 +327,7 @@ async function ouvrirMesHabilitations() {
     const lignes = hs.data || [];
     overlay.querySelector('#hab-m-corps').innerHTML = lignes.length ? `<section class="otm-bloc">${lignes.map((h) => { const [cl, tx] = habEtat(h); return `
       <div class="hab-ligne"><div><strong>${esc(noms.get(h.qualification_id) || '—')}</strong><span class="sig-meta">${tR('Obtenue le {date}', { date: habDate(h.obtenue_le) })}${h.verifie_a ? ' · ' + trad('Vérifiée') : ''}</span></div><span class="ui-statut ${cl}">${esc(tx)}</span></div>`; }).join('')}</section>`
-      : `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Aucune habilitation enregistrée pour toi. Ton gérant les saisit.')}</p></div>`;
+      : `<div class="ui-encadre">${otSymbole('info')}<p>${trad('Aucune habilitation enregistrée pour vous. Votre gérant les saisit.')}</p></div>`;
   } catch (err) { overlay.querySelector('#hab-m-corps').innerHTML = `<p class="ui-aide" style="color:var(--danger,#c0392b)">${esc((err && err.message) || trad('Chargement impossible.'))}</p>`; }
 }
 
@@ -336,7 +336,7 @@ function blocHabilitationsHtml() {
   if (!habilitationsActif()) return '';
   return `<div class="ui-groupe ot-validation" id="hab-entree">
     <button type="button" class="ui-btn ui-btn-pastille" data-hab-ouvrir>${estGerant() ? trad('Qualifications et habilitations') : trad('Mes habilitations')}</button>
-    <div class="ui-aide">${estGerant() ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Tes qualifications et leur date de validité.')}</div>
+    <div class="ui-aide">${estGerant() ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Vos qualifications et leur date de validité.')}</div>
   </div>`;
 }
 function brancherHabilitations(root) {

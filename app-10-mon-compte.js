@@ -19,7 +19,7 @@
 VIEWS.telemetrie = {
   fondBlanc: true,
   title: trad('Télémétrie'),
-  subtitle: () => trad('Compteurs automatiques de tes machines'),
+  subtitle: () => trad('Compteurs automatiques de vos machines'),
   render() {
     const carte = telemetrieCarteHtml();
     const blocCarte = carteGpsHtml();
@@ -59,7 +59,7 @@ VIEWS.telemetrie = {
 VIEWS.support = {
   fondBlanc: true,
   title: trad('Aide & support'),
-  subtitle: () => trad('Tes demandes au support et leurs réponses. Une question, un blocage : écris-nous, l\'équipe te répond ici.'),
+  subtitle: () => trad('Vos demandes au support et leurs réponses. Une question, un blocage : écrivez-nous, l\'équipe vous répond ici.'),
   render() {
     return `
       <div class="ui-page support-page">
@@ -70,7 +70,7 @@ VIEWS.support = {
           </div>
         </section>
         <section class="ui-section">
-          ${teteSectionKit('message', trad('Mes demandes'), trad('Les réponses du support arrivent ici, avec une notification sur ton téléphone.'))}
+          ${teteSectionKit('message', trad('Mes demandes'), trad('Les réponses du support arrivent ici, avec une notification sur votre téléphone.'))}
           <div class="ui-section-corps">
             <div><button type="button" class="ui-btn ui-btn-plein" id="support-page-nouveau">${picto('croix')}<span>${trad('Nouveau ticket')}</span></button></div>
             <div class="ui-puces" role="group" aria-label="${esc(trad('Filtrer les demandes'))}" id="support-page-filtres"></div>
@@ -177,7 +177,7 @@ VIEWS.account = {
             <div class="ui-ligne-id">
               <div class="ui-ligne-textes">
                 <span class="ui-ligne-nom">${trad('Facturation')}</span>
-                <span class="ui-ligne-sous">${trad('Institution : facturation mensuelle sur facture. Pour changer d\'offre ou de facturation, écris à support@kalea.pro.')}</span>
+                <span class="ui-ligne-sous">${trad('Institution : facturation mensuelle sur facture. Pour changer d\'offre ou de facturation, écrivez à support@kalea.pro.')}</span>
               </div>
             </div>
           </div>` : ''}
@@ -249,7 +249,7 @@ VIEWS.account = {
           <div class="ui-aide" id="acc-contact-msg" role="status" aria-live="polite"></div>
           <div><button type="button" class="ui-btn ui-btn-plein" id="acc-save-contact"${bloque}>${trad('Enregistrer')}</button></div>
           ${(SCHEMA.hasContactNames && !modifiable) ? `<div class="ui-aide">${trad('Ces réglages sont réservés au gérant.')}</div>` : ''}
-          ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écris-nous depuis « Aide & support ».')}</div>`}
+          ${SCHEMA.hasContactNames ? '' : `<div class="ui-aide">${trad('Ce réglage n\'est pas disponible pour le moment. Si cela continue, écrivez-nous depuis « Aide & support ».')}</div>`}
         </div>
       </section>
       </div>
@@ -278,7 +278,7 @@ VIEWS.account = {
               <div class="ui-aide" id="acc-equipe-ajout-msg" role="status" aria-live="polite"></div>
             <details id="acc-equipe-invitation-bloc" class="ui-groupe">
               <summary>${trad('Inviter par e-mail')}</summary>
-              <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un membre d\'atelier n\'en a souvent pas — utilise plutôt « Ajouter un membre ».')}</p>
+              <p class="ui-aide">${trad('Pour quelqu\'un qui a une adresse : il reçoit un lien et crée son compte lui-même. Un membre d\'atelier n\'en a souvent pas — utilisez plutôt « Ajouter un membre ».')}</p>
               <div id="acc-equipe-invitation" class="ui-section-corps"></div>
             </details>
             </div>
@@ -317,7 +317,7 @@ VIEWS.account = {
               <input type="checkbox" id="acc-hors-ligne" ${copieHorsLigneActive() ? 'checked' : ''}>
               ${trad('Garder une copie pour la consultation hors connexion')}
             </label>
-            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans ton accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
+            <div class="ui-aide">${trad('Sans cette copie, l\'application demandera le réseau à chaque ouverture. Sur un appareil partagé, mieux vaut la désactiver : elle n\'est jamais affichée sans votre accord explicite, mais elle reste lisible dans le stockage du navigateur.')}</div>
             <div class="ui-aide" id="acc-hors-ligne-msg" role="status" aria-live="polite"></div>
           </div>
           <div class="ui-groupe">
@@ -329,7 +329,7 @@ VIEWS.account = {
             <div class="ui-segment theme-segment" role="group" aria-label="${esc(trad('Thème de l\'interface'))}">
               ${[['auto', trad('Auto')], ['clair', trad('Clair')], ['sombre', trad('Sombre')]].map(([cle, nom]) => `<button type="button" data-theme-choix="${cle}" class="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle ? 'is-actif' : ''}" aria-pressed="${(window.kaleaTheme ? window.kaleaTheme.lire() : 'auto') === cle}">${esc(nom)}</button>`).join('')}
             </div>
-            <div class="ui-aide">${trad('Auto suit le réglage de ton téléphone ou de ton ordinateur.')}</div>
+            <div class="ui-aide">${trad('Auto suit le réglage de votre téléphone ou de votre ordinateur.')}</div>
           </div>
           ${dansApplication() ? `
           <div class="ui-groupe">
@@ -524,7 +524,7 @@ VIEWS.account = {
         const mesDroits = estGerant()
           ? trad('Tout, y compris l\'équipe et l\'abonnement')
           : (UI.role === 'mecanicien' ? trad('Le parc et les compteurs') : (UI.role === 'achats' ? trad('Le stock, les fournisseurs et les commandes') : trad('Les compteurs')));
-        liste.innerHTML = `<p class="ui-aide">${tR('Ton accès : {role}. {droits}', {
+        liste.innerHTML = `<p class="ui-aide">${tR('Votre accès : {role}. {droits}', {
           role: esc(monLibelle),
           droits: esc(mesDroits),
         })}</p>`;
@@ -549,7 +549,7 @@ VIEWS.account = {
       const invitationsVivantes = membres.filter((m) => m.invitation_en_attente).length;
       const placesOccupees = membres.filter((m) => !m.invitation_en_attente).length + invitationsVivantes;
       if (placesRestantes !== null && placesRestantes <= 0) {
-        dire(tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe en occupe déjà {occupees}. Passe à une offre supérieure pour ajouter quelqu\'un.', { plafond, occupees: placesOccupees }));
+        dire(tR('Votre offre permet {plafond} utilisateur(s), et l\'équipe en occupe déjà {occupees}. Passez à une offre supérieure pour ajouter quelqu\'un.', { plafond, occupees: placesOccupees }));
       }
 
       // ── QUI FAIT QUOI, EN UNE LIGNE, ET SOUS QUEL NOM ON LE MONTRE ─────────
@@ -569,7 +569,7 @@ VIEWS.account = {
         achats: trad('Le stock, les fournisseurs et les commandes. Il voit les coûts, consulte le parc et ne modifie ni les machines ni les entretiens.'),
       };
       const roleDe = (role) => trad((ROLE_DROITS[role] || {}).libelle || role || '');
-      const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demande au gérant de vérifier son rôle.');
+      const ceQuIlPeutFaire = (role) => ROLE_DESCRIPTIONS[role] || trad('Aucun droit connu : demandez au gérant de vérifier son rôle.');
       // Ce qui s'affiche comme identité : le login court quand il existe,
       // l'adresse sinon. L'adresse TECHNIQUE n'est jamais montrée au gérant —
       // elle ne veut rien dire pour lui.
@@ -662,7 +662,7 @@ VIEWS.account = {
             <div class="equipe-ligne${ouvert ? ' is-ouvert' : ''}" data-membre="${esc(m.id)}">
               <button type="button" class="equipe-tete" data-equipe-ouvrir="${esc(m.id)}" aria-expanded="${ouvert ? 'true' : 'false'}">
                 <span class="ui-ligne-icone is-initiales is-${teinteRole}" aria-hidden="true">${esc(initialsFrom(titre))}</span>
-                <span class="equipe-nom">${esc(titre)}${m.est_moi ? ` <span class="equipe-toi">(${trad('toi')})</span>` : ''}</span>
+                <span class="equipe-nom">${esc(titre)}${m.est_moi ? ` <span class="equipe-toi">(${trad('vous')})</span>` : ''}</span>
                 <span class="ui-tag equipe-droit is-droit-${teinteRole}">${esc(libelleDe(role || 'autre'))}</span>
                 <span class="equipe-chevron" aria-hidden="true"></span>
               </button>
@@ -695,7 +695,7 @@ VIEWS.account = {
           ? `<div class="ui-liste equipe-liste">${visibles.map(ligneMembre).join('')}</div>${(q || filtre !== 'tous') ? `<div class="ui-aide">${tR('{n} personne(s) sur {total}', { n: visibles.length, total: membres.length })}</div>` : ''}`
           : (membres.length
             ? `<p class="ui-aide">${trad('Personne ne correspond.')}</p>`
-            : `<p class="ui-aide">${trad('Personne pour l\'instant : clique sur « Ajouter » pour créer un accès ou inviter quelqu\'un.')}</p>`);
+            : `<p class="ui-aide">${trad('Personne pour l\'instant : cliquez sur « Ajouter » pour créer un accès ou inviter quelqu\'un.')}</p>`);
       };
       dessinerListe();
 
@@ -754,7 +754,7 @@ VIEWS.account = {
         if (bouton.hasAttribute('data-equipe-copier')) {
           const login = bouton.getAttribute('data-equipe-copier') || '';
           const copie = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(login) : Promise.reject(new Error('copie indisponible'));
-          copie.then(() => showToast(trad('Login copié')), () => showToast(trad('Copie impossible : sélectionne le login et copie-le.')));
+          copie.then(() => showToast(trad('Login copié')), () => showToast(trad('Copie impossible : sélectionnez le login et copiez-le.')));
           return;
         }
         if (bouton.hasAttribute('data-equipe-ouvrir')) {
@@ -809,7 +809,7 @@ VIEWS.account = {
               <span class="ui-groupe-titre">${trad('Ajouter un membre direct')}</span>
               <span class="ui-tag">${trad('Identifiant auto')}</span>
             </div>
-            <p class="ui-aide">${trad('Pour un membre de l\'équipe qui n\'a pas d\'e-mail : indique son prénom et son nom, le serveur crée son accès et te donne son login et son mot de passe.')}</p>
+            <p class="ui-aide">${trad('Pour un membre de l\'équipe qui n\'a pas d\'e-mail : indiquez son prénom et son nom, le serveur crée son accès et vous donne son login et son mot de passe.')}</p>
             <div class="ui-grille">
               <div class="ui-champ-groupe">
                 <label class="ui-etiquette" for="acc-membre-prenom">${trad('Prénom')}</label>
@@ -835,7 +835,7 @@ VIEWS.account = {
                 ${estAdministrateur() ? `<option value="direction">${trad('Direction')}</option>` : ''}
               </select>
             </div>
-            ${estAdministrateur() ? `<div class="ui-aide">${trad('Direction : fait tout le quotidien comme toi (ordres de travail, équipe, stock, coûts…), mais ne gère ni l\'abonnement ni les comptes Direction.')}</div>` : ''}
+            ${estAdministrateur() ? `<div class="ui-aide">${trad('Direction : fait tout le quotidien comme vous (ordres de travail, équipe, stock, coûts…), mais ne gère ni l\'abonnement ni les comptes Direction.')}</div>` : ''}
             <div class="ui-aide">${trad('Droit de gestion : tient le parc, les entretiens, les ordres de travail et les pannes. Droit de saisie : consulte le parc, relève le compteur, prend la photo de sa machine, signale une panne et traite les ordres qui lui sont assignés. Droit d\'achat : gère le stock, les fournisseurs et les commandes, voit les coûts. Aucun des trois ne gère l\'équipe.')}</div>
             <div><button type="button" class="ui-btn ui-btn-plein" id="acc-membre-creer">${trad('Créer le membre')}</button></div>
           </div>
@@ -860,7 +860,7 @@ VIEWS.account = {
         <div class="ui-champ-groupe">
           <span class="ui-etiquette">${trad('Inviter quelqu\'un par e-mail')}</span>
           <p class="ui-aide">${trad('Pour un chef d\'équipe, un comptable ou quelqu\'un qui a une adresse : la personne reçoit un lien et crée son compte elle-même.')}</p>
-          ${placesRestantes === 0 ? `<p class="ui-aide">${tR('Ton offre permet {plafond} utilisateur(s), et l\'équipe les occupe déjà. Passe à une offre supérieure pour inviter.', { plafond }) }</p>` : ''}
+          ${placesRestantes === 0 ? `<p class="ui-aide">${tR('Votre offre permet {plafond} utilisateur(s), et l\'équipe les occupe déjà. Passez à une offre supérieure pour inviter.', { plafond }) }</p>` : ''}
         </div>
         <div class="ui-grille">
           <div class="ui-champ-groupe">
@@ -909,7 +909,7 @@ VIEWS.account = {
         // qu'à cet instant — reste lisible par le gérant.
         const zone = racine.querySelector('#acc-membre-acces');
         dire('');
-        if (!prenom || !nom) { dire(trad('Indique le prénom ET le nom.'), true); return; }
+        if (!prenom || !nom) { dire(trad('Indiquez le prénom ET le nom.'), true); return; }
         if (zone) zone.innerHTML = `<p class="ui-aide">${trad('Création du compte…')}</p>`;
         try {
           const { data, error } = await sb.functions.invoke('creer-membre', {
@@ -1024,7 +1024,7 @@ VIEWS.account = {
                 <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
               </div>
             </div>
-            <p class="ui-aide">${trad('Note-les maintenant : le mot de passe ne sera plus affiché. Tu peux en générer un nouveau à tout moment.')}</p>
+            <p class="ui-aide">${trad('Notez-les maintenant : le mot de passe ne sera plus affiché. Vous pouvez en générer un nouveau à tout moment.')}</p>
             <div><button type="button" class="ui-btn ui-btn-pastille" data-copier-access="${esc(texte)}">${trad('Copier le login et le mot de passe')}</button></div>
           </div>`;
       }
@@ -1075,13 +1075,13 @@ VIEWS.account = {
         const ligne = bouton.closest('[data-membre]');
         const qui = ligne && ligne.querySelector('.equipe-nom') ? ligne.querySelector('.equipe-nom').textContent.trim() : '';
         const droits = estAdministrateur() ? ['direction', 'mecanicien', 'chauffeur', 'achats'] : ['mecanicien', 'chauffeur', 'achats'];
-        if (typeof habMiniFormulaire !== 'function') { dire(trad('Fenêtre de choix indisponible : recharge la page.'), true); return; }
+        if (typeof habMiniFormulaire !== 'function') { dire(trad('Fenêtre de choix indisponible : rechargez la page.'), true); return; }
         const choix = await habMiniFormulaire({
           titre: trad('Changer le droit'), sousTitre: qui, symbole: 'manage_accounts', etape: trad('Équipe'), bouton: trad('Enregistrer'),
           champs: [{ id: 'droit', etiquette: trad('Droit d\'accès'), type: 'liste', options: droits.map((r) => [r, libelleDe(r)]), valeur: droits.includes(actuel) ? actuel : 'mecanicien',
             aide: trad('Droit de gestion : parc, entretiens, ordres de travail et pannes. Droit de saisie : compteurs, ses ordres et les pannes. Droit d\'achat : stock, fournisseurs, commandes et coûts.') }],
           valider: async (v) => {
-            if (v.droit === actuel) return trad('C\'est déjà son droit : choisis-en un autre.');
+            if (v.droit === actuel) return trad('C\'est déjà son droit : choisissez-en un autre.');
             const { error } = await sb.rpc('changer_role_membre', { p_profil: profil, p_role: v.droit });
             return error ? String(error.message || error) : null;
           },
@@ -1167,7 +1167,7 @@ VIEWS.account = {
         trad('Voici le lien pour rejoindre notre société sur KALEA :'),
         lien,
         '',
-        trad('Ouvre-le : si tu n\'as pas encore de compte, tu peux le créer — le lien est conservé.'),
+        trad('Ouvrez-le : si vous n\'avez pas encore de compte, vous pouvez le créer — le lien est conservé.'),
       ].join('\n');
     }
 
@@ -1318,7 +1318,7 @@ VIEWS.account = {
         return;
       }
       if (!motDePasse) {
-        message(msg, trad('Saisis ton mot de passe actuel pour confirmer.'), true);
+        message(msg, trad('Saisissez votre mot de passe actuel pour confirmer.'), true);
         return;
       }
 
@@ -1337,7 +1337,7 @@ VIEWS.account = {
         const { error } = await sb.auth.updateUser({ email: nouvelEmail });
         if (error) throw error;
 
-        message(msg, trad('Demande envoyée. Ouvre le lien de confirmation reçu par email : la nouvelle adresse ne sera active qu\'après validation.'), false);
+        message(msg, trad('Demande envoyée. Ouvrez le lien de confirmation reçu par email : la nouvelle adresse ne sera active qu\'après validation.'), false);
         champEmail.value = '';
         champMotDePasse.value = '';
       } catch (err) {
@@ -1458,7 +1458,7 @@ function resumeDeCeQuiSeraPerdu() {
       tR('{n} machine(s), leurs plans d\'entretien, et tout l\'historique des entretiens et des relevés de compteur.', { n: machines }),
       trad('Les photos des machines et les carnets d\'entretien (PDF).'),
       tR('Les {n} catégorie(s) de machines et les rappels programmés.', { n: categories }),
-      trad('Ton compte et ton adresse de connexion.'),
+      trad('Votre compte et votre adresse de connexion.'),
     ],
   };
 }
@@ -1496,16 +1496,16 @@ async function ouvrirSuppressionCompte(messageEcran) {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="suppr-titre">
       <h2 id="suppr-titre">${trad('Supprimer mon compte')}</h2>
-      <p class="sub">${resteDesMembres ? trad('Cette action est irréversible. Seul ton compte sera supprimé : la société, ses machines et son abonnement restent en place pour les autres membres.') : trad('Cette action est irréversible. Voici ce qui sera définitivement effacé :')}</p>
+      <p class="sub">${resteDesMembres ? trad('Cette action est irréversible. Seul votre compte sera supprimé : la société, ses machines et son abonnement restent en place pour les autres membres.') : trad('Cette action est irréversible. Voici ce qui sera définitivement effacé :')}</p>
       <ul class="suppr-liste">
         ${(resteDesMembres ? resume.lignes.slice(-1) : resume.lignes).map((l) => `<li>${esc(l)}</li>`).join('')}
       </ul>
       ${payant ? `
         <div class="suppr-alerte" role="alert">
-          <strong>${trad('Ton abonnement en cours sera résilié immédiatement, sans remboursement au prorata (CGU §12) : la période déjà payée est perdue.')}</strong>
+          <strong>${trad('Votre abonnement en cours sera résilié immédiatement, sans remboursement au prorata (CGU §12) : la période déjà payée est perdue.')}</strong>
         </div>` : ''}
-      ${resteDesMembres ? '' : `<p class="hint">${trad('Si d\'autres membres utilisent cette société, elle n\'est PAS supprimée : seul ton compte disparaît.')}</p>`}
-      <label for="suppr-mot">${tR('Pour confirmer, tape {mot} ci-dessous.', { mot: motConfirmation })}</label>
+      ${resteDesMembres ? '' : `<p class="hint">${trad('Si d\'autres membres utilisent cette société, elle n\'est PAS supprimée : seul votre compte disparaît.')}</p>`}
+      <label for="suppr-mot">${tR('Pour confirmer, tapez {mot} ci-dessous.', { mot: motConfirmation })}</label>
       <input id="suppr-mot" autocomplete="off" placeholder="${esc(motConfirmation)}">
       <div class="hint" id="suppr-erreur" role="status" aria-live="polite"></div>
       <div class="modal-actions">
@@ -1554,7 +1554,7 @@ async function ouvrirSuppressionCompte(messageEcran) {
       // Le message dit CE QUI a été supprimé : « profil » signifie que la
       // société et ses machines sont restées (d'autres membres y travaillent).
       boot(data.portee === 'profil'
-        ? trad('Compte supprimé. Ta société et ses machines restent en place : d\'autres membres y ont accès.')
+        ? trad('Compte supprimé. Votre société et ses machines restent en place : d\'autres membres y ont accès.')
         : trad('Compte supprimé.'));
     } catch (err) {
       // UN REFUS SE DIT, ET RIEN N'EST PERDU : on laisse la fenêtre ouverte pour
@@ -1619,7 +1619,7 @@ function openPlusSheet() {
               <span class="plus-sheet-nom">${esc(nom)}</span>
               <span class="badge ${offre.classe}">${offre.texte}</span>
             </div>
-            <p class="plus-sheet-sous-titre">${esc(tR('{societe} • {n} machine(s) suivie(s)', { societe: UI.companyName || trad('Ta société'), n: nbMachines }))}</p>
+            <p class="plus-sheet-sous-titre">${esc(tR('{societe} • {n} machine(s) suivie(s)', { societe: UI.companyName || trad('Votre société'), n: nbMachines }))}</p>
           </div>
         </div>
         <button type="button" class="plus-sheet-fermer" id="plus-sheet-fermer-x" aria-label="${esc(trad('Fermer le menu'))}">${picto('fermer')}</button>
@@ -1641,7 +1641,7 @@ function openPlusSheet() {
         <div class="plus-sheet-separateur"></div>
         <div class="plus-sheet-section">
           <div class="plus-sheet-section-tete"><span class="plus-sheet-section-titre">${trad('Compte & organisation')}</span></div>
-          ${itemHtml('support', 'support', 'is-signature', trad('Aide & support'), trad('Tes demandes au support et leurs réponses'), pastilleSupportHtml())}
+          ${itemHtml('support', 'support', 'is-signature', trad('Aide & support'), trad('Vos demandes au support et leurs réponses'), pastilleSupportHtml())}
           ${itemHtml('account', 'compte', 'is-neutre', trad('Mon compte'), trad('Société, équipe et licences matérielles'), '')}
           ${itemHtml('reminders', 'rappels', 'is-amber', trad('Rappels et notifications'), trad('Notifications push et périodicités'), alerteRappels ? `<span class="plus-sheet-item-pastille"><span></span><span></span></span>` : '')}
           <button type="button" class="plus-sheet-item is-deconnexion" id="plus-sheet-logout">

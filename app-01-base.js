@@ -426,7 +426,7 @@ function referenceDureeVie(nomCategorie, unite) {
 function noteReferenceDureeVie(ref) {
   const unite = ref.unite === 'km' ? 'km' : 'h';
   const source = ref.annee ? `${ref.source}, ${ref.annee}` : ref.source;
-  return tR('Durée de vie estimée moyenne indicative : {valeur} {unite} ({source}) — non exhaustive, à ajuster selon ton usage.', {
+  return tR('Durée de vie estimée moyenne indicative : {valeur} {unite} ({source}) — non exhaustive, à ajuster selon votre usage.', {
     valeur: texteAvecSeparateurs(ref.duree_vie), unite, source,
   });
 }
@@ -536,7 +536,7 @@ function retenirCategorie(nom) {
 function optionsCategorie(liste, choisie) {
   const valeur = majuscules(choisie);
   const connue = liste.includes(valeur);
-  const options = [`<option value="" disabled${valeur ? '' : ' selected'}>${esc(trad('Choisis une catégorie'))}</option>`];
+  const options = [`<option value="" disabled${valeur ? '' : ' selected'}>${esc(trad('Choisissez une catégorie'))}</option>`];
   for (const nom of liste) {
     options.push(`<option value="${esc(nom)}"${nom === valeur ? ' selected' : ''}>${esc(nom)}</option>`);
   }
@@ -611,7 +611,7 @@ function retenirComposant(nom) {
 function optionsComposant(liste, choisie) {
   const valeur = String(choisie || '').trim();
   const connue = liste.includes(valeur);
-  const options = [`<option value="" disabled${valeur ? '' : ' selected'}>${esc(trad('Choisis un organe'))}</option>`];
+  const options = [`<option value="" disabled${valeur ? '' : ' selected'}>${esc(trad('Choisissez un organe'))}</option>`];
   for (const nom of liste) {
     options.push(`<option value="${esc(nom)}"${nom === valeur ? ' selected' : ''}>${esc(trad(nom))}</option>`);
   }
@@ -1354,7 +1354,7 @@ function ouvrirChoixIndicatifPays(valeurActuelle, onChoisi) {
       zone.innerHTML = `<div class="indicatif-vide">
         <span class="card-ico">${picto('recherche')}</span>
         <p>${trad('Aucun pays trouvé')}</p>
-        <p class="muted-text">${trad('Vérifie l\'orthographe du pays ou renseigne directement l\'indicatif sans symbole.')}</p>
+        <p class="muted-text">${trad('Vérifiez l\'orthographe du pays ou renseignez directement l\'indicatif sans symbole.')}</p>
       </div>`;
     } else {
       zone.innerHTML = liste.map((p) => `
@@ -1395,7 +1395,7 @@ function ouvrirChoixIndicatifPays(valeurActuelle, onChoisi) {
     <div class="support-tete">
       <div class="indicatif-tete-gauche">
         <span class="card-ico card-ico-plein indicatif-tete-ico">${picto('monde')}</span>
-        <div><h2>${trad('Pays de l\'indicatif')}</h2><p class="sub">${trad('Sélectionne l\'indicatif international pour tes alertes et notifications.')}</p></div>
+        <div><h2>${trad('Pays de l\'indicatif')}</h2><p class="sub">${trad('Sélectionnez l\'indicatif international pour vos alertes et notifications.')}</p></div>
       </div>
       <button type="button" class="mform-close" id="indicatif-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
     </div>

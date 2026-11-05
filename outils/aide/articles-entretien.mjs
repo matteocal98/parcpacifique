@@ -237,7 +237,7 @@ export const ARTICLES_ENTRETIEN = [
         'Si l\'unité choisie n\'est pas suivie par la machine (par exemple des kilomètres sur une machine suivie au calendrier), KALEA ajoute tout seul un second suivi et vous demande le relevé actuel : {{ui:Ajouter ce suivi}}. Voir <a href="{{lien:second-compteur}}">un second compteur</a>.',
         'Quand le second suivi ne peut pas être ajouté, la tâche reste un point de contrôle, sans échéance automatique ; la fenêtre le dit avant d\'enregistrer.',
         'Une valeur dans une autre unité que celle du plan donne à la tâche sa propre échéance, mais elle ne compte pas dans l\'échéance du plan.',
-        'Une valeur vide ou nulle est refusée : {{ui:Renseigne une valeur supérieure à zéro.}}',
+        'Une valeur vide ou nulle est refusée : {{ui:Renseignez une valeur supérieure à zéro.}}',
       ],
       liees: ['ent-lire-plan-entretien', 'ent-pourquoi-echeance', 'second-compteur'],
     },
@@ -262,7 +262,7 @@ export const ARTICLES_ENTRETIEN = [
         'If the chosen unit is not tracked by the machine (for example kilometres on a machine tracked by calendar), KALEA adds a second tracking by itself and asks for the current reading: {{ui:Ajouter ce suivi}}. See <a href="{{lien:second-compteur}}">a second meter</a>.',
         'When the second tracking cannot be added, the task stays a check point with no automatic due date; the window says so before you save.',
         'A value in a different unit from the plan\'s gives the task its own due date, but it does not count towards the plan\'s due date.',
-        'An empty or zero value is refused: {{ui:Renseigne une valeur supérieure à zéro.}}',
+        'An empty or zero value is refused: {{ui:Renseignez une valeur supérieure à zéro.}}',
       ],
       liees: ['ent-lire-plan-entretien', 'ent-pourquoi-echeance', 'second-compteur'],
     },
@@ -551,7 +551,7 @@ export const ARTICLES_ENTRETIEN = [
       ],
       notes: [
         `La préparation groupée n'est pas incluse dans toutes les offres : sans elle, l'agenda affiche à la place de la carte un message qui l'indique (voir la page des offres).`,
-        'Les quantités viennent du carnet constructeur : {{ui:Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.}}',
+        'Les quantités viennent du carnet constructeur : {{ui:Les quantités proviennent du carnet constructeur : vérifiez-les avant de commander.}}',
         'Un plan sans liste de pièces est signalé à part sous {{ui:Entretiens sans liste de pièces}}.',
         'Pour les pièces reliées à un kit, la liste indique aussi si le stock suffit : voir <a href="{{lien:ent-kits-entretien}}">associer des pièces à une tâche</a>.',
       ],
@@ -574,7 +574,7 @@ export const ARTICLES_ENTRETIEN = [
       ],
       notes: [
         `Group preparation is not included in every plan: without it, the calendar shows a message in place of the card (see the plans page).`,
-        'Quantities come from the manufacturer\'s manual: {{ui:Les quantités proviennent du carnet constructeur : vérifie-les avant de commander.}}',
+        'Quantities come from the manufacturer\'s manual: {{ui:Les quantités proviennent du carnet constructeur : vérifiez-les avant de commander.}}',
         'A plan with no parts list is shown separately under {{ui:Entretiens sans liste de pièces}}.',
         'For parts linked to a kit, the list also shows whether the stock is enough: see <a href="{{lien:ent-kits-entretien}}">link parts to a task</a>.',
       ],
@@ -651,7 +651,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'L\'adresse est-elle enregistrée ?', texte: 'Une adresse seulement proposée dans le champ ne suffit pas : touchez {{ui:Enregistrer les préférences e-mail}}. Pensez aussi à regarder les courriers indésirables de la boîte.' },
         { titre: 'L\'échéance est-elle dans la fenêtre de rappel ?', texte: 'Le rappel n\'est envoyé que lorsque l\'échéance entre dans le délai d\'avance de la machine (champ « Rappel avant » de {{ui:Modifier la machine}}). Une échéance encore lointaine ne déclenche rien.' },
         { titre: 'La machine a-t-elle un compteur et une échéance ?', texte: 'Pour une machine suivie au compteur, KALEA compare le relevé à l\'échéance : sans relevé ({{ui:Compteur à saisir}}) il ne peut rien annoncer. Renseignez le compteur sur la carte de la machine (voir <a href="{{lien:corriger-compteur}}">corriger le compteur</a>).' },
-        { titre: 'Pour le téléphone : l\'autorisation est-elle accordée ?', texte: 'Les notifications existent seulement dans l\'application Android. Dans {{ui:Rappels et notifications}}, vérifiez l\'interrupteur et le message d\'autorisation : {{ui:Autorisation refusée : Android n\'affichera aucune notification. Tu peux l\'accorder dans les réglages de l\'application.}} Le bouton {{ui:Tester le rappel local maintenant}} programme une notification d\'essai, qui doit arriver dans une minute. Pour les notifications push d\'échéance, vérifiez aussi que la société les a activées et que votre droit d\'accès est ciblé (voir <a href="{{lien:dem-push-qui-est-prevenu}}">choisir qui reçoit les notifications</a>).' },
+        { titre: 'Pour le téléphone : l\'autorisation est-elle accordée ?', texte: 'Les notifications existent seulement dans l\'application Android. Dans {{ui:Rappels et notifications}}, vérifiez l\'interrupteur et le message d\'autorisation : {{ui:Autorisation refusée : Android n\'affichera aucune notification. Vous pouvez l\'accorder dans les réglages de l\'application.}} Le bouton {{ui:Tester le rappel local maintenant}} programme une notification d\'essai, qui doit arriver dans une minute. Pour les notifications push d\'échéance, vérifiez aussi que la société les a activées et que votre droit d\'accès est ciblé (voir <a href="{{lien:dem-push-qui-est-prevenu}}">choisir qui reçoit les notifications</a>).' },
       ],
       notes: [
         'Les rappels locaux du téléphone ne concernent que les échéances datées, jamais les machines suivies au compteur.',
@@ -673,7 +673,7 @@ export const ARTICLES_ENTRETIEN = [
         { titre: 'Is the address saved?', texte: 'An address that is only suggested in the field is not enough: tap {{ui:Enregistrer les préférences e-mail}}. Also look in the mailbox\'s junk folder.' },
         { titre: 'Is the due date inside the reminder window?', texte: 'The reminder is sent only when the due date enters the machine\'s advance notice (the “Remind … before” field in {{ui:Modifier la machine}}). A due date still far away triggers nothing.' },
         { titre: 'Does the machine have a meter and a due date?', texte: 'For a machine tracked by meter, KALEA compares the reading with the due value: with no reading ({{ui:Compteur à saisir}}) it cannot announce anything. Enter the meter on the machine\'s card (see <a href="{{lien:corriger-compteur}}">correct the meter</a>).' },
-        { titre: 'On the phone: is the permission granted?', texte: 'Notifications exist only in the Android app. In {{ui:Rappels et notifications}}, check the switch and the permission message: {{ui:Autorisation refusée : Android n\'affichera aucune notification. Tu peux l\'accorder dans les réglages de l\'application.}} The {{ui:Tester le rappel local maintenant}} button schedules a test notification, which should arrive within a minute. For due-date push notifications, also check that the company has turned them on and that your access level is targeted (see <a href="{{lien:dem-push-qui-est-prevenu}}">choose who receives notifications</a>).' },
+        { titre: 'On the phone: is the permission granted?', texte: 'Notifications exist only in the Android app. In {{ui:Rappels et notifications}}, check the switch and the permission message: {{ui:Autorisation refusée : Android n\'affichera aucune notification. Vous pouvez l\'accorder dans les réglages de l\'application.}} The {{ui:Tester le rappel local maintenant}} button schedules a test notification, which should arrive within a minute. For due-date push notifications, also check that the company has turned them on and that your access level is targeted (see <a href="{{lien:dem-push-qui-est-prevenu}}">choose who receives notifications</a>).' },
       ],
       notes: [
         'The phone\'s local reminders only concern dated due dates, never meter-tracked machines.',

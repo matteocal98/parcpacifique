@@ -691,7 +691,7 @@ function assemblerDonneesRapportTco({ flotte, interventionsFlotte, coutsFlotte, 
     if (machine.category && machine.category.target_hourly_cost == null) categoriesSansSeuil.add(machine.category.id);
   });
   return {
-    societe: UI.companyName || trad('Ta société'),
+    societe: UI.companyName || trad('Votre société'),
     devise: UI.company?.currency || 'EUR',
     dateIso: todayIso(),
     periodeLabel: PERIODE_LABEL[periode] || PERIODE_LABEL.total,
@@ -1088,7 +1088,7 @@ function controleReleveAberrant(machine, valeur, index) {
   const plancher = unite === 'km' ? 100 : 8;
   const parJour = ecart / jours;
   if (ecart >= plancher && (parJour > maxParJour || parJour > SAISIE_SAUT_FACTEUR * habituel)) {
-    return tR('Ce relevé ({nouveau}) ajoute {ecart} depuis le précédent, bien plus que d\'habitude (environ {habituel} par jour). Vérifie la valeur saisie. Enregistrer quand même ?', { nouveau: fmt(valeur), ecart: fmt(ecart), habituel: texteRythme(habituel, unite) });
+    return tR('Ce relevé ({nouveau}) ajoute {ecart} depuis le précédent, bien plus que d\'habitude (environ {habituel} par jour). Vérifiez la valeur saisie. Enregistrer quand même ?', { nouveau: fmt(valeur), ecart: fmt(ecart), habituel: texteRythme(habituel, unite) });
   }
   return null;
 }
@@ -1505,7 +1505,7 @@ function blocChoixTache(item, plan, machine) {
   return `
     <div class="plan-field choix-frequence-bloc" data-tache="${esc(item.label || '')}">
       <div class="nom">${esc(item.label || '')}</div>
-      <div class="value">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</div>
+      <div class="value">${trad('Fréquence d\'entretien : à vous de choisir selon votre usage.')}</div>
       ${lignes ? `<ul class="choix-options">${lignes}</ul>` : ''}
       <button type="button" class="view-manual choisir-frequence" data-tache="${esc(item.label || '')}">${trad('Choisir la fréquence')}</button>
     </div>`;

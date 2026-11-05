@@ -27,7 +27,7 @@ try {
     <div class="empty">
       <strong>${trad('Impossible de charger l\'application.')}</strong><br>
       ${esc(err.message)}<br><br>
-      ${trad('Vérifie ta connexion internet puis recharge la page.')}<br><br>
+      ${trad('Vérifiez votre connexion internet puis rechargez la page.')}<br><br>
       <button type="button" class="primary" id="fatal-retry" style="max-width:220px;margin:0 auto;">${trad('Réessayer')}</button>
     </div>`;
   const retryBtn = document.getElementById('fatal-retry');
@@ -664,7 +664,7 @@ async function genererRapportTcoPdf(donnees) {
 async function envoyerRapportTcoParEmail(arrayBuffer, destinataire, nomFichier, periodeLabel) {
   const { data: sessionData } = await sb.auth.getSession();
   const jeton = sessionData && sessionData.session ? sessionData.session.access_token : '';
-  if (!jeton) throw new Error(trad('Session expirée : reconnecte-toi pour envoyer ce rapport.'));
+  if (!jeton) throw new Error(trad('Session expirée : reconnectez-vous pour envoyer ce rapport.'));
   const reponse = await fetch(`${SUPABASE_URL}/functions/v1/envoyer-rapport-tco`, {
     method: 'POST',
     headers: {
@@ -803,7 +803,7 @@ function brancherPhotoManuelle(overlay, options = {}) {
   const retenir = async (file) => {
     if (!file) return;
     if (!/^image\//.test(file.type)) {
-      poserStatut(trad('Choisis une image : JPEG, PNG ou WebP.'));
+      poserStatut(trad('Choisissez une image : JPEG, PNG ou WebP.'));
       return;
     }
     poserStatut(trad('Préparation de la photo…'));
@@ -828,7 +828,7 @@ function brancherPhotoManuelle(overlay, options = {}) {
         origine: Math.round(reduite.tailleOrigine / 1024),
       }));
     } catch (err) {
-      poserStatut(tR('Photo illisible ({erreur}). Essaie une autre image.', { erreur: (err && err.message) || err }));
+      poserStatut(tR('Photo illisible ({erreur}). Essayez une autre image.', { erreur: (err && err.message) || err }));
     }
   };
 
@@ -986,7 +986,7 @@ function renderSetNewPassword() {
   app.innerHTML = `
     <div class="login-box">
       <h1>KALEA</h1>
-      <p>${trad('Choisis un nouveau mot de passe.')}</p>
+      <p>${trad('Choisissez un nouveau mot de passe.')}</p>
       <form id="reset-form">
         <label for="new-password">${trad('Nouveau mot de passe')}</label>
         <div class="password-wrap" style="margin-bottom:16px;">
@@ -1031,7 +1031,7 @@ function openForgotPasswordModal() {
   overlay.innerHTML = `
     <div class="modal">
       <h2>${trad('Mot de passe oublié')}</h2>
-      <p class="sub">${trad('Indique ton email de connexion : on t\'envoie un code à 6 chiffres pour définir un nouveau mot de passe.')}</p>
+      <p class="sub">${trad('Indiquez votre email de connexion : on vous envoie un code à 6 chiffres pour définir un nouveau mot de passe.')}</p>
       <form id="forgot-form">
         <label for="forgot-email">${trad('Email')}</label>
         <input id="forgot-email" type="email" required>
@@ -1060,8 +1060,8 @@ function openForgotPasswordModal() {
       // l'utilisateur se retrouve avec un lien mort sans comprendre pourquoi.
       overlay.innerHTML = `
         <div class="modal">
-          <h2>${trad('Vérifie ton email')}</h2>
-          <p class="sub">${tR('Un code à 6 chiffres a été envoyé à {email}. Saisis-le avec ton nouveau mot de passe. Chaque demande remplace la précédente : utilise le dernier code reçu.', { email: esc(email) })}</p>
+          <h2>${trad('Vérifiez votre email')}</h2>
+          <p class="sub">${tR('Un code à 6 chiffres a été envoyé à {email}. Saisissez-le avec votre nouveau mot de passe. Chaque demande remplace la précédente : utilisez le dernier code reçu.', { email: esc(email) })}</p>
           <form id="reset-code-form">
             <label for="reset-code">${trad('Code reçu par e-mail')}</label>
             <input id="reset-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required>
@@ -1108,7 +1108,7 @@ function openForgotPasswordModal() {
           // le plus courant — un code d'une demande précédente, remplacé depuis —
           // on dit quoi faire, et le bouton juste en dessous le fait.
           codeEl.textContent = /expired or is invalid/i.test(brut)
-            ? trad('Ce code a expiré ou a déjà servi. Demande un nouveau code.')
+            ? trad('Ce code a expiré ou a déjà servi. Demandez un nouveau code.')
             : trad('Erreur :') + " " + brut;
           valider.disabled = false;
           valider.textContent = trad('Enregistrer le mot de passe');
@@ -1201,7 +1201,7 @@ function renderSocieteManquante(user, motif) {
   app.innerHTML = `
     <div class="login-box">
       <h1>KALEA</h1>
-      <p>${trad('Ton compte est confirmé, mais il n\'est rattaché à aucune société. Indique son nom pour commencer.')}</p>
+      <p>${trad('Votre compte est confirmé, mais il n\'est rattaché à aucune société. Indiquez son nom pour commencer.')}</p>
       <form id="societe-form">
         <label for="societe-nom">${trad('Nom de la société')}</label>
         <input id="societe-nom" required autocomplete="organization">
@@ -1233,7 +1233,7 @@ function renderSocieteManquante(user, motif) {
     bouton.disabled = true;
     bouton.textContent = trad('Création…');
     try {
-      if (!nom) throw new Error(trad('Indique le nom de la société.'));
+      if (!nom) throw new Error(trad('Indiquez le nom de la société.'));
       // ★ UNE SEULE ÉCRITURE, CÔTÉ SERVEUR, ET ELLE EST IDEMPOTENTE.
       //   Avant : `companies.insert` PUIS `profiles.insert`, deux écritures
       //   séparées. La seconde échouait avec « duplicate key value violates
@@ -1278,7 +1278,7 @@ function renderSocieteManquante(user, motif) {
         .test(String((err && err.message) || ''));
       console.error('Création de société :', err);
       errorEl.textContent = technique
-        ? trad('La création n\'a pas pu aboutir. Réessaie dans un instant — si cela recommence, écris à support@kalea.pro.')
+        ? trad('La création n\'a pas pu aboutir. Réessayez dans un instant — si cela recommence, écrivez à support@kalea.pro.')
         : trad('Erreur :') + ' ' + err.message;
       bouton.disabled = false;
       bouton.textContent = trad('Créer ma société');
@@ -1376,7 +1376,7 @@ function renderLogin(errorMsg, horsLigne) {
       ${horsLigne && horsLigne.copieDu ? `
       <section class="access-local" aria-labelledby="acces-local-titre">
         <div class="card-head"><h2 class="card-title" id="acces-local-titre">${trad('Zone blanche ou hors réseau ?')}</h2></div>
-        <p class="muted-text">${trad('Les machines et les carnets déjà reçus sur cet appareil restent consultables sans réseau : ouvre la copie locale, sans ressaisir ton mot de passe.')}</p>
+        <p class="muted-text">${trad('Les machines et les carnets déjà reçus sur cet appareil restent consultables sans réseau : ouvrez la copie locale, sans ressaisir votre mot de passe.')}</p>
         <p class="texte-attenue">${tR('Copie du {date} — sept jours, puis elle expire.', { date: formatShortDate(new Date(horsLigne.copieDu).toISOString().slice(0, 10)) })}</p>
         <button type="button" class="secondary" id="voir-copie">${trad('Afficher les dernières données hors connexion')}</button>
         <p class="texte-attenue">${trad('À ne faire que sur un appareil personnel : l\'affichage ne demande aucune vérification.')}</p>
@@ -1506,7 +1506,7 @@ function invitationConnecteeHtml(code, options = {}) {
     ${options.invite ? ligne(trad('Invitation destinée à'), invite,
       memeAdresse ? 'hint' : 'hint is-late') : ''}
     ${memeAdresse
-      ? `<div class="hint">${trad('Accepte pour rejoindre la société de cette invitation.')}</div>`
+      ? `<div class="hint">${trad('Acceptez pour rejoindre la société de cette invitation.')}</div>`
       : ''}
     <div class="modal-actions" style="margin-top:8px;">
       <button type="button" class="primary" id="invitation-accepter">${trad('Accepter l\'invitation')}</button>
@@ -1527,7 +1527,7 @@ function brancherAcceptationInvitation(code, racine) {
       if (error) throw error;
       const ligne = Array.isArray(data) ? data[0] : data;
       oublierInvitation();
-      if (msg) msg.textContent = tR('Invitation acceptée : tu rejoins {societe} comme {role}.', { societe: ligne && ligne.societe ? ligne.societe : '', role: ligne && ligne.role ? ligne.role : '' });
+      if (msg) msg.textContent = tR('Invitation acceptée : vous rejoignez {societe} comme {role}.', { societe: ligne && ligne.societe ? ligne.societe : '', role: ligne && ligne.role ? ligne.role : '' });
       setTimeout(() => boot(), 1200);
     } catch (err) {
       if (msg) msg.textContent = String((err && err.message) || err);
@@ -1603,7 +1603,7 @@ function afficherBlocInvitation(code) {
   }
   zone.hidden = false;
   zone.innerHTML = `
-    <div class="hint" role="status" aria-live="polite" id="invitation-msg">${trad('Invitation à rejoindre une société. Connecte-toi avec l\'adresse invitée, ou crée ton compte : le code est conservé.')}</div>
+    <div class="hint" role="status" aria-live="polite" id="invitation-msg">${trad('Invitation à rejoindre une société. Connectez-vous avec l\'adresse invitée, ou créez votre compte : le code est conservé.')}</div>
     <div class="modal-actions">
       <button type="button" class="primary" id="invitation-accepter">${trad('Accepter l\'invitation')}</button>
       <button type="button" class="secondary" id="invitation-inscrire">${trad('Créer mon compte')}</button>
@@ -1617,7 +1617,7 @@ function afficherBlocInvitation(code) {
       if (error) throw error;
       const ligne = Array.isArray(data) ? data[0] : data;
       oublierInvitation();
-      if (msg) msg.textContent = tR('Invitation acceptée : tu rejoins {societe} comme {role}.', { societe: ligne && ligne.societe ? ligne.societe : '', role: ligne && ligne.role ? ligne.role : '' });
+      if (msg) msg.textContent = tR('Invitation acceptée : vous rejoignez {societe} comme {role}.', { societe: ligne && ligne.societe ? ligne.societe : '', role: ligne && ligne.role ? ligne.role : '' });
       setTimeout(() => boot(), 1200);
     } catch (err) {
       if (msg) msg.textContent = String((err && err.message) || err);
@@ -1742,7 +1742,7 @@ function openSignupWizard() {
 
         <div class="callout">
           <span class="card-ico">${picto('mail')}</span>
-          <span>${trad('Un code de vérification à 6 chiffres te sera envoyé par e-mail après validation.')}</span>
+          <span>${trad('Un code de vérification à 6 chiffres vous sera envoyé par e-mail après validation.')}</span>
         </div>
 
         <div class="modal-actions">
@@ -1878,7 +1878,7 @@ function openSignupWizard() {
   function stepDejaInscrit() {
     shell(`
       <h2>${trad('Cette adresse a déjà un compte')}</h2>
-      <p class="sub">${trad('Un compte existe déjà avec cette adresse. Connecte-toi avec ton mot de passe, ou demandes-en un nouveau.')}</p>
+      <p class="sub">${trad('Un compte existe déjà avec cette adresse. Connectez-vous avec votre mot de passe, ou demandez-en un nouveau.')}</p>
       <div class="modal-actions">
         <button type="button" class="secondary" id="deja-forgot">${trad('Mot de passe oublié ?')}</button>
         <button type="button" class="primary" id="deja-login">${trad('Se connecter')}</button>
@@ -1890,8 +1890,8 @@ function openSignupWizard() {
 
   function stepVerify() {
     shell(`
-      <h2>${trad('Vérifie ton email')}</h2>
-      <p class="sub">${tR('Un code à 6 chiffres a été envoyé à {email}. Saisis-le ci-dessous pour activer ton compte.', { email: esc(state.email) })}</p>
+      <h2>${trad('Vérifiez votre email')}</h2>
+      <p class="sub">${tR('Un code à 6 chiffres a été envoyé à {email}. Saisissez-le ci-dessous pour activer votre compte.', { email: esc(state.email) })}</p>
       <form id="verify-form">
         <label for="su-code">${trad('Code de vérification')}</label>
         <input id="su-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required autofocus style="letter-spacing:6px;font-size:20px;text-align:center;">

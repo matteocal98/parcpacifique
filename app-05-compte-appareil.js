@@ -274,7 +274,7 @@ function messageForfaitConnexion() {
   const forfait = forfaitDemande();
   const nom = forfait ? offreNom(forfait) : null;
   if (!nom) return '';
-  return tR('Ton paiement est enregistré : connecte-toi pour activer ton forfait {offre}.', { offre: nom });
+  return tR('Votre paiement est enregistré : connectez-vous pour activer votre forfait {offre}.', { offre: nom });
 }
 
 // Retire les paramètres de retour de l'adresse : un rechargement ne doit pas
@@ -355,14 +355,14 @@ function afficherConfirmationForfait(forfait, actif) {
     const nom = offreNom(forfait);
     if (!nom) return;
     afficherFenetreConfirmation(
-      tR('Ton forfait {offre} est actif', { offre: nom }),
+      tR('Votre forfait {offre} est actif', { offre: nom }),
       forfait === 'eco' || forfait === 'starter'
         ? trad("Jusqu'à 5 machines suivies.")
         : trad('Machines suivies sans limite.'));
     return;
   }
-  afficherFenetreConfirmation(trad('Ton paiement est bien enregistré'),
-    trad("L'activation peut prendre une minute. Recharge la page dans un instant."));
+  afficherFenetreConfirmation(trad('Votre paiement est bien enregistré'),
+    trad("L'activation peut prendre une minute. Rechargez la page dans un instant."));
 }
 
 // ── Retour du PORTAIL de facturation (?abonnement=retour) ────────────────────
@@ -384,14 +384,14 @@ async function annoncerRetourPortail() {
   if (apres && apres !== avant) {
     // Palier changé : le prorata s'applique tout de suite, on annonce le nouveau.
     if (apres === 'eco' || apres === 'pro') { afficherConfirmationForfait(apres, true); return; }
-    afficherFenetreConfirmation(trad('Ton offre a changé'), libellePalier(apres));
+    afficherFenetreConfirmation(trad('Votre offre a changé'), libellePalier(apres));
     return;
   }
   // Palier inchangé — le cas le plus fréquent (résiliation demandée ou carte
   // mise à jour). On dit ce qu'on sait, et on ne promet aucun remboursement.
   afficherFenetreConfirmation(
-    trad("Tes réglages d'abonnement sont enregistrés"),
-    tR("Tes réglages d'abonnement sont enregistrés. Ton offre actuelle : {offre}. Si tu as demandé une résiliation, l'accès reste actif jusqu'à la fin de la période déjà réglée ; le détail est dans « Mon compte ».", { offre: libellePalier(apres || avant) }));
+    trad("Vos réglages d'abonnement sont enregistrés"),
+    tR("Vos réglages d'abonnement sont enregistrés. Votre offre actuelle : {offre}. Si vous avez demandé une résiliation, l'accès reste actif jusqu'à la fin de la période déjà réglée ; le détail est dans « Mon compte ».", { offre: libellePalier(apres || avant) }));
 }
 
 // Appelée à la fin d'un boot() réussi : c'est le seul moment où l'on sait que
@@ -433,7 +433,7 @@ async function ouvrirPortailAbonnement(idMessage, idBouton) {
   const message = document.getElementById(idMessage || 'acc-portail-msg');
   const bouton = document.getElementById(idBouton || 'acc-portail');
   const dire = (texte) => { if (message) message.textContent = texte; };
-  const indisponible = () => trad('Le portail est indisponible pour le moment. Réessaie dans un instant, ou écris à support@kalea.pro.');
+  const indisponible = () => trad('Le portail est indisponible pour le moment. Réessayez dans un instant, ou écrivez à support@kalea.pro.');
   dire('');
   if (bouton) bouton.disabled = true;
   try {
@@ -457,7 +457,7 @@ function messagePortail(erreur) {
   const statut = erreur && erreur.context && erreur.context.status;
   if (statut === 409) return trad("Aucun abonnement n'est rattaché à ce compte.");
   if (statut === 403) return trad("Seul l'administrateur peut gérer l'abonnement.");
-  return trad('Le portail est indisponible pour le moment. Réessaie dans un instant, ou écris à support@kalea.pro.');
+  return trad('Le portail est indisponible pour le moment. Réessayez dans un instant, ou écrivez à support@kalea.pro.');
 }
 
 // Même mécanisme que les liens de paiement : une ancre target="_blank"
@@ -555,7 +555,7 @@ function renderVerrouillage() {
   app.innerHTML = `
     <div class="login-box verrou">
       <h1>KALEA</h1>
-      <p>${trad('Déverrouille pour accéder à ton parc.')}</p>
+      <p>${trad('Déverrouillez pour accéder à votre parc.')}</p>
       <div class="modal-actions">
         <button type="button" class="primary" id="verrou-bouton">${libelle}</button>
       </div>
@@ -634,7 +634,7 @@ async function sortirDuVerrou() {
   // objet, et ne doit pas bloquer un futur verrouillage.
   verrouGeneration += 1;
   verrouEnCours = false;
-  renderLogin(trad('Tu es déconnecté. Ressaisis ton mot de passe.'));
+  renderLogin(trad('Vous êtes déconnecté. Ressaisissez votre mot de passe.'));
 }
 
 // Retour au premier plan : on redemande la vérification SEULEMENT si l'absence a
@@ -842,7 +842,7 @@ function libellesAcces(mode) {
     return {
       bouton: trad("Déverrouiller avec le code de l'appareil"),
       case: trad("Déverrouiller avec le code de l'appareil la prochaine fois"),
-      repli: trad('Aucune biométrie utilisable n\'est annoncée : c\'est ton code, schéma ou mot de passe de téléphone qui servira.'),
+      repli: trad('Aucune biométrie utilisable n\'est annoncée : c\'est votre code, schéma ou mot de passe de téléphone qui servira.'),
     };
   }
   if (mode === 'empreinte') {
@@ -869,7 +869,7 @@ function libellesAcces(mode) {
   return {
     bouton: trad('Essayer le déverrouillage par biométrie'),
     case: trad('Essayer le déverrouillage par biométrie la prochaine fois'),
-    repli: trad('Le téléphone n\'annonce ni biométrie ni verrouillage utilisable. Tu peux essayer : la vérification dira ce que le capteur répond.'),
+    repli: trad('Le téléphone n\'annonce ni biométrie ni verrouillage utilisable. Vous pouvez essayer : la vérification dira ce que le capteur répond.'),
   };
 }
 
@@ -880,10 +880,10 @@ async function verifierIdentite() {
   if (!plugin) return { echec: 'greffon' };
   try {
     await plugin.verifyIdentity({
-      reason: trad('Déverrouille KALEA'),
+      reason: trad('Déverrouiller KALEA'),
       title: trad('Connexion à KALEA'),
       subtitle: trad('Empreinte, visage ou code du téléphone'),
-      description: trad('Ton mot de passe n\'est pas enregistré : cette vérification ouvre la session gardée sur ce téléphone.'),
+      description: trad('Votre mot de passe n\'est pas enregistré : cette vérification ouvre la session gardée sur ce téléphone.'),
       negativeButtonText: trad('Annuler'),
       // iOS seulement : Android ignore ce drapeau ici (voir l'en-tête) — le repli
       // Android passe par isAvailable({ useFallback: true }).
@@ -984,10 +984,10 @@ async function lireAccesEnregistre(plugin, mode) {
       const identifiants = essai === 'biometry-any'
         ? await plugin.getSecureCredentials({
             server: BIOMETRIE_SERVEUR,
-            reason: trad('Relire ton accès KALEA'),
+            reason: trad('Relire votre accès KALEA'),
             title: trad('Connexion à KALEA'),
             subtitle: trad('Empreinte, visage ou code du téléphone'),
-            description: trad('Ton mot de passe n\'est pas enregistré : cette vérification ouvre la session gardée sur ce téléphone.'),
+            description: trad('Votre mot de passe n\'est pas enregistré : cette vérification ouvre la session gardée sur ce téléphone.'),
             negativeButtonText: trad('Annuler'),
           })
         : await plugin.getCredentials({ server: BIOMETRIE_SERVEUR });
@@ -1102,11 +1102,11 @@ function detailGreffon(etat) {
 // écrits directement en .textContent : c'est la forme que l'extraction traduit.
 function messageBiometrie(el, resultat) {
   if (!el || !resultat) return;
-  if (resultat.annule) el.textContent = trad('Connexion sans mot de passe annulée : tu peux saisir ton mot de passe.');
-  else if (resultat.echec === 'indisponible') el.textContent = trad('L\'empreinte ou le visage n\'est plus configuré sur ce téléphone : ressaisis ton mot de passe, puis réactive la fonction dans « Mon compte ».');
-  else if (resultat.echec === 'jeton') el.textContent = trad('L\'accès enregistré sur ce téléphone a expiré : ressaisis ton mot de passe pour le réactiver.');
-  else if (resultat.echec === 'greffon') el.textContent = trad('Ce téléphone ne propose pas la vérification d\'identité : saisis ton mot de passe.');
-  else el.textContent = trad('La vérification n\'a pas abouti. Tu peux réessayer, ou saisir ton mot de passe.');
+  if (resultat.annule) el.textContent = trad('Connexion sans mot de passe annulée : vous pouvez saisir votre mot de passe.');
+  else if (resultat.echec === 'indisponible') el.textContent = trad('L\'empreinte ou le visage n\'est plus configuré sur ce téléphone : ressaisissez votre mot de passe, puis réactivez la fonction dans « Mon compte ».');
+  else if (resultat.echec === 'jeton') el.textContent = trad('L\'accès enregistré sur ce téléphone a expiré : ressaisissez votre mot de passe pour le réactiver.');
+  else if (resultat.echec === 'greffon') el.textContent = trad('Ce téléphone ne propose pas la vérification d\'identité : saisissez votre mot de passe.');
+  else el.textContent = trad('La vérification n\'a pas abouti. Vous pouvez réessayer, ou saisir votre mot de passe.');
 }
 
 // Message d'activation, en français, avec le code technique quand il y en a un.
@@ -1114,9 +1114,9 @@ function messageActivation(el, resultat) {
   if (!el) return;
   const code = resultat && resultat.code;
   if (resultat && resultat.annule) el.textContent = trad('Vérification annulée : rien n\'a été enregistré.');
-  else if (code === 1 || code === 3 || code === 14) el.textContent = trad('Le téléphone ne propose ni biométrie ni code de verrouillage : configure-les dans les réglages Android, puis réessaie.');
+  else if (code === 1 || code === 3 || code === 14) el.textContent = trad('Le téléphone ne propose ni biométrie ni code de verrouillage : configurez-les dans les réglages Android, puis réessayez.');
   else if (resultat && resultat.echec === 'greffon') el.textContent = trad('Ce téléphone ne propose pas la vérification d\'identité : la reconnexion automatique reste indisponible.');
-  else el.textContent = trad('La vérification n\'a pas abouti : rien n\'a été enregistré. Réessaie, ou utilise ton mot de passe.');
+  else el.textContent = trad('La vérification n\'a pas abouti : rien n\'a été enregistré. Réessayez, ou utilisez votre mot de passe.');
 }
 
 // Message d'échec d'activation du VERROU : il ne s'arme que si le téléphone a
@@ -1125,9 +1125,9 @@ function messageVerrou(el, resultat) {
   if (!el) return;
   const code = resultat && resultat.code;
   if (resultat && resultat.annule) el.textContent = trad('Vérification annulée : le verrou n\'a pas été activé.');
-  else if (code === 1 || code === 3 || code === 14) el.textContent = trad('Le téléphone ne propose ni biométrie ni code de verrouillage : configure-les dans les réglages Android, puis réessaie.');
+  else if (code === 1 || code === 3 || code === 14) el.textContent = trad('Le téléphone ne propose ni biométrie ni code de verrouillage : configurez-les dans les réglages Android, puis réessayez.');
   else if (resultat && resultat.echec === 'greffon') el.textContent = trad('Ce téléphone ne propose pas la vérification d\'identité : le verrouillage reste indisponible.');
-  else el.textContent = trad('La vérification n\'a pas abouti : le verrou n\'a pas été activé. Réessaie.');
+  else el.textContent = trad('La vérification n\'a pas abouti : le verrou n\'a pas été activé. Réessayez.');
 }
 
 // Prépare le bloc de l'écran de connexion. Rien n'est affiché si le greffon
@@ -1145,7 +1145,7 @@ async function preparerBiometrieConnexion() {
       if (inscrit) {
         await oublierAccesSansMotDePasse();
         zone.hidden = false;
-        zone.innerHTML = `<p class="ui-aide">${trad('Le déverrouillage biométrique n\'est plus disponible sur ce téléphone : ressaisis ton mot de passe.')}</p>`;
+        zone.innerHTML = `<p class="ui-aide">${trad('Le déverrouillage biométrique n\'est plus disponible sur ce téléphone : ressaisissez votre mot de passe.')}</p>`;
       }
       return;
     }
@@ -1227,13 +1227,13 @@ async function preparerCarteBiometrie(root) {
     if (detail) detail.textContent = detailGreffon(etat);
     // 1. État du VERROU.
     if (etat.mode === 'aucun') {
-      etatBloc.textContent = trad('Ce téléphone n\'annonce ni biométrie ni code de verrouillage utilisable. Tu peux essayer : la vérification dira ce que le capteur répond.');
+      etatBloc.textContent = trad('Ce téléphone n\'annonce ni biométrie ni code de verrouillage utilisable. Vous pouvez essayer : la vérification dira ce que le capteur répond.');
     } else if (etat.mode === 'code') {
-      etatBloc.textContent = trad('Ce téléphone n\'annonce pas de biométrie utilisable : c\'est ton code de déverrouillage qui servira.');
+      etatBloc.textContent = trad('Ce téléphone n\'annonce pas de biométrie utilisable : c\'est votre code de déverrouillage qui servira.');
     } else if (verrouille) {
-      etatBloc.textContent = trad('Verrouillage activé : ton identité est demandée à chaque ouverture, et de nouveau après 30 secondes en arrière-plan.');
+      etatBloc.textContent = trad('Verrouillage activé : votre identité est demandée à chaque ouverture, et de nouveau après 30 secondes en arrière-plan.');
     } else {
-      etatBloc.textContent = trad('Ce téléphone peut vérifier ton identité : tu peux verrouiller l\'application ci-dessous.');
+      etatBloc.textContent = trad('Ce téléphone peut vérifier votre identité : vous pouvez verrouiller l\'application ci-dessous.');
     }
     if (corps) {
       corps.innerHTML = `
@@ -1242,11 +1242,11 @@ async function preparerCarteBiometrie(root) {
     }
     // 2. État de la RECONNEXION AUTOMATIQUE (option séparée).
     if (etatAcces) {
-      if (inscrit && mode === 'biometry-any') etatAcces.textContent = trad('Reconnexion automatique activée : le jeton est protégé par le système, qui redemande ton identité pour le relire.');
+      if (inscrit && mode === 'biometry-any') etatAcces.textContent = trad('Reconnexion automatique activée : le jeton est protégé par le système, qui redemande votre identité pour le relire.');
       else if (inscrit && mode === 'none') etatAcces.textContent = trad('Reconnexion automatique activée sans protection biométrique du jeton : ce téléphone a refusé ce mode. Le verrou de l\'application reste la protection.');
       else if (inscrit) etatAcces.textContent = trad('Reconnexion automatique activée.');
       else if (mode === 'echec') etatAcces.textContent = trad('Reconnexion automatique indisponible : ce téléphone a refusé d\'enregistrer la session. Le verrouillage de l\'application, lui, fonctionne.');
-      else etatAcces.textContent = trad('Reconnexion automatique : garde un jeton de session pour éviter de ressaisir ton mot de passe après une expiration. Ce téléphone peut le refuser.');
+      else etatAcces.textContent = trad('Reconnexion automatique : garde un jeton de session pour éviter de ressaisir votre mot de passe après une expiration. Ce téléphone peut le refuser.');
     }
     if (corpsAcces) {
       corpsAcces.innerHTML = `
@@ -1266,7 +1266,7 @@ async function preparerCarteBiometrie(root) {
           verrouGeneration += 1;
           verrouEnCours = false;
           if (detail) detail.textContent = detailGreffon(await etatBiometrie());
-          if (msg) msg.textContent = trad('Verrouillage désactivé : l\'application ne demandera plus ton identité à l\'ouverture.');
+          if (msg) msg.textContent = trad('Verrouillage désactivé : l\'application ne demandera plus votre identité à l\'ouverture.');
           rafraichir();
           return;
         }
@@ -1282,7 +1282,7 @@ async function preparerCarteBiometrie(root) {
         }
         reglerVerrouLocal(true);
         verrouLeve = true;   // l'identité vient d'être prouvée : pas de verrou immédiat
-        if (msg) msg.textContent = trad('Verrouillage activé : ton identité sera demandée à chaque ouverture.');
+        if (msg) msg.textContent = trad('Verrouillage activé : votre identité sera demandée à chaque ouverture.');
         rafraichir();
       });
     }
@@ -1457,8 +1457,8 @@ async function programmerRappels(options) {
 // On affiche donc l'état en clair, EN PERMANENCE, même quand la case est cochée.
 function texteAutorisation(etat) {
   if (etat === 'granted') return trad('Autorisation accordée : les rappels peuvent être programmés.');
-  if (etat === 'denied') return trad('Autorisation refusée — Android n\'affichera aucun rappel. Accorde-la dans les réglages de l\'application.');
-  return trad('Autorisation non encore demandée : coche l\'interrupteur ou utilise le bouton de test.');
+  if (etat === 'denied') return trad('Autorisation refusée — Android n\'affichera aucun rappel. Accordez-la dans les réglages de l\'application.');
+  return trad('Autorisation non encore demandée : cochez l\'interrupteur ou utilisez le bouton de test.');
 }
 
 async function etatAutorisationRappels() {
@@ -1566,7 +1566,7 @@ async function testerRappelLocal(root) {
       etat = await plugin.requestPermissions();
     }
     if (!etat || etat.display !== 'granted') {
-      dire(trad('Autorisation refusée : Android n\'affichera aucun rappel. Tu peux l\'accorder dans les réglages de l\'application.'));
+      dire(trad('Autorisation refusée : Android n\'affichera aucun rappel. Vous pouvez l\'accorder dans les réglages de l\'application.'));
       majRappelsLocaux(root);
       return { refuse: true };
     }
@@ -1606,7 +1606,7 @@ const ID_TEST_NOTIFICATION = 987654;
 
 function blocRappelsHtml() {
   if (!rappelsDisponibles()) {
-    return `<p class="ui-aide">${trad('Les notifications locales sont gérées directement par le terminal Android, sans dépendre de la couverture réseau ni d\'un compte cloud tiers. Elles n\'existent que dans l\'application Android : installe-la sur ton téléphone pour les recevoir.')}</p>`;
+    return `<p class="ui-aide">${trad('Les notifications locales sont gérées directement par le terminal Android, sans dépendre de la couverture réseau ni d\'un compte cloud tiers. Elles n\'existent que dans l\'application Android : installez-la sur votre téléphone pour les recevoir.')}</p>`;
   }
   const actif = rappelsActifs();
   return `

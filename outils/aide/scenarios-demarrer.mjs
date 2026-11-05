@@ -208,7 +208,7 @@ export const SCENARIOS = [
         await toutDansLaZone(c, ['#su-type-cards', '[data-aide="structure"]', '[data-aide="contact-id"]', '.signup-modal .modal-actions .primary'], '.overlay .modal');
         return c.zone('.overlay .modal', 14);
       } },
-      // Étape 5 : « Vérifie ton email » — le serveur n'est pas joignable, on simule la réponse « code envoyé » avant de valider le formulaire.
+      // Étape 5 : « Vérifiez votre email » — le serveur n'est pas joignable, on simule la réponse « code envoyé » avant de valider le formulaire.
       { nom: 'code', ecran: 'bureau', async jouer(c) {
         await ouvrirInscription(c);
         await c.ev("(() => { sb.auth.signUp = async () => ({ data: { user: { identities: [{}] } }, error: null }); document.getElementById('signup-form').requestSubmit(); return true; })()");
@@ -302,7 +302,7 @@ export const SCENARIOS = [
         await toutDansLaZone(c, ['#forgot-email', '#forgot-form button[type="submit"]'], '.overlay .modal');
         return c.zone('.overlay .modal', 34);
       } },
-      // Étapes 3 à 5 : l'écran « Vérifie ton email » — l'adresse confirmée (3), le code et le nouveau mot de passe (4), « Enregistrer le mot de passe » (5).
+      // Étapes 3 à 5 : l'écran « Vérifiez votre email » — l'adresse confirmée (3), le code et le nouveau mot de passe (4), « Enregistrer le mot de passe » (5).
       { nom: 'code', ecran: 'bureau', async jouer(c) {
         await ouvrirOubli(c);
         await c.ev("(() => { sb.auth.resetPasswordForEmail = async () => ({ error: null }); document.getElementById('forgot-form').requestSubmit(); return true; })()");
@@ -323,7 +323,7 @@ export const SCENARIOS = [
   {
     id: 'dem-code-non-recu',
     etapes: [
-      // Étapes 1 à 3 : l'écran « Vérifie ton email » — l'adresse affichée (1), « Renvoyer le code » (2), le champ du code (3).
+      // Étapes 1 à 3 : l'écran « Vérifiez votre email » — l'adresse affichée (1), « Renvoyer le code » (2), le champ du code (3).
       { nom: 'verification', ecran: 'bureau', async jouer(c) {
         await ouvrirCodeInscription(c);
         await c.repere('.overlay .modal .sub', 1, { marge: 4, cote: 'gauche-centre' });
@@ -589,12 +589,12 @@ export const SCENARIOS = [
   {
     id: 'dem-je-ne-vois-pas',
     etapes: [
-      // Étape 1 : la phrase « Ton accès : … » de la carte « Gestion de l'équipe », telle que la voit un droit de gestion.
+      // Étape 1 : la phrase « Votre accès : … » de la carte « Gestion de l'équipe », telle que la voit un droit de gestion.
       { nom: 'acces', ecran: 'bureau', async jouer(c) {
         await c.ev("UI.role = 'mecanicien'; goTo('account'); true");
         await c.attendre('#view-root .compte-page .ui-section');
         await c.dort(900);
-        await c.ev("(() => { const re = /Ton accès|Your access/i; const f = [...document.querySelectorAll('#view-root .compte-page *')].filter((e) => !e.children.length && re.test(e.textContent)); if (!f.length) throw new Error('phrase « Ton accès » absente'); f[0].setAttribute('data-aide', 'acces'); f[0].closest('.ui-section').setAttribute('data-aide', 'equipe'); return true; })()");
+        await c.ev("(() => { const re = /Votre accès|Your access/i; const f = [...document.querySelectorAll('#view-root .compte-page *')].filter((e) => !e.children.length && re.test(e.textContent)); if (!f.length) throw new Error('phrase « Votre accès » absente'); f[0].setAttribute('data-aide', 'acces'); f[0].closest('.ui-section').setAttribute('data-aide', 'equipe'); return true; })()");
         await c.voir('[data-aide="equipe"]', 'center');
         await c.dort(300);
         await c.repere('[data-aide="acces"]', 1, { marge: 6, cote: 'gauche-centre' });
@@ -633,7 +633,7 @@ async function ouvrirOubli(c) {
   await c.ev("(() => { const e = document.getElementById('forgot-email'); e.value = 'camille@exemple.fr'; document.activeElement && document.activeElement.blur(); return true; })()");
   await c.dort(200);
 }
-// Affiche l'écran « Vérifie ton email » de l'inscription (le serveur est simulé : « code envoyé »).
+// Affiche l'écran « Vérifiez votre email » de l'inscription (le serveur est simulé : « code envoyé »).
 async function ouvrirCodeInscription(c) {
   await ouvrirInscription(c);
   await c.ev("(() => { sb.auth.signUp = async () => ({ data: { user: { identities: [{}] } }, error: null }); document.getElementById('signup-form').requestSubmit(); return true; })()");
@@ -644,7 +644,7 @@ async function ouvrirCodeInscription(c) {
 
 // Ouvre la fenêtre « Les offres KALEA » pour une société sur l'offre gratuite (ses cartes montrent donc « Ton offre actuelle » et des boutons « Passer à … »).
 async function ouvrirOffres(c) {
-  // Une seule machine : sous le plafond de l'offre gratuite, la fenêtre s'ouvre en simple consultation (« Choisis ton offre »), sans annoncer de limite chiffrée.
+  // Une seule machine : sous le plafond de l'offre gratuite, la fenêtre s'ouvre en simple consultation (« Choisissez votre offre »), sans annoncer de limite chiffrée.
   await c.ev("UI.companyPlan = 'free'; UI.company.plan = 'free'; UI.machines = UI.machines.slice(0, 1); goTo('dashboard'); true");
   await c.dort(500);
   await c.ev("openUpgradeNotice(UI.companyId); true");

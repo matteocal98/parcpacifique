@@ -1193,7 +1193,7 @@ export const ARTICLES_STOCK = [
       notes: [
         `Un ticket résolu qui reçoit une nouvelle réponse reste visible sous {{ui:Ouverts}} : une réponse ne se cache jamais derrière un filtre.`,
         `La pastille ne compte que les tickets que vous avez ouverts vous-même, et se met à jour régulièrement et au retour sur l'application.`,
-        `Si la liste ne se charge pas, KALEA affiche « Impossible de charger tes demandes pour le moment. » : réessayez un peu plus tard.`,
+        `Si la liste ne se charge pas, KALEA affiche « Impossible de charger vos demandes pour le moment. » : réessayez un peu plus tard.`,
         `Dans le fil, vos messages sont signés « Toi », ceux de l'équipe « Support KALEA ». Voir aussi <a href="{{lien:sup-assistant-humain}}">l'assistant IA et « Parler à un humain »</a>.`,
       ],
       liees: ['sup-nouveau-ticket', 'sup-assistant-humain'],
@@ -1237,7 +1237,7 @@ export const ARTICLES_STOCK = [
         { titre: `Reconnaissez ses messages`, texte: `Dans le fil d'un ticket, les messages de l'assistant sont signés {{ui:Assistant IA KALEA}}, avec un avatar « IA ». Ils sont distincts de vos messages (« Toi ») et de ceux de l'équipe (« Support KALEA »).`,
           image: { nom: 'fil', alt: `Le fil d'un ticket où l'assistant a écrit : le message signé Assistant IA KALEA (repère 1) et le bouton Parler à un humain (repère 2).` } },
         { titre: `Demandez à parler à une personne`, texte: `Dès que l'assistant a écrit sur un ticket, le bouton {{ui:Parler à un humain}} apparaît à côté de {{ui:Retour}} et {{ui:Envoyer}}. Touchez-le.` },
-        { titre: `Lisez la confirmation`, texte: `KALEA affiche « Un membre de l'équipe reprendra ta demande. », puis, sous le champ de réponse : « Tu as demandé à parler à un humain : l'équipe te répondra ici. »`,
+        { titre: `Lisez la confirmation`, texte: `KALEA affiche « Un membre de l'équipe reprendra votre demande. », puis, sous le champ de réponse : « Tu as demandé à parler à un humain : l'équipe te répondra ici. »`,
           image: { nom: 'confirmation', alt: `Après la demande : le message de confirmation sous le champ de réponse (repère 3).` } },
       ],
       notes: [

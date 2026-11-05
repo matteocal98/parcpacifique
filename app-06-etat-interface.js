@@ -810,7 +810,7 @@ function machineCouverte(machine) {
 
 // Message UNIQUE pour toutes les écritures refusées (i18n).
 function messageMachineNonCouverte() {
-  return tR('Ton offre actuelle couvre {n} machine(s). Repasse à une offre payante pour continuer à suivre celle-ci.', { n: limiteOffre() });
+  return tR('Votre offre actuelle couvre {n} machine(s). Repassez à une offre payante pour continuer à suivre celle-ci.', { n: limiteOffre() });
 }
 
 // Refuse une écriture sur une machine non couverte, en menant à la fenêtre des
@@ -892,7 +892,7 @@ async function confirmerMachineEnPlus() {
   }
   // Prix de CETTE machine (la suivante) : avec les tranches d'Enterprise, il baisse à mesure que le parc grandit.
   const prix = prixEuros(montantMachinesEnPlus(plan, apres) - montantMachinesEnPlus(plan, avant));
-  return window.confirm(tR('Cette machine dépasse celles incluses dans ton offre : elle est facturée {prix} par mois en plus, au prorata du mois en cours, sur ta prochaine facture. Ajouter la machine ?', { prix }));
+  return window.confirm(tR('Cette machine dépasse celles incluses dans votre offre : elle est facturée {prix} par mois en plus, au prorata du mois en cours, sur votre prochaine facture. Ajouter la machine ?', { prix }));
 }
 
 // Une ligne pour « Mon compte » : « 8 machines : 5 incluses + 3 en plus (+ 6,00 € par mois) ». Vide s'il n'y a rien en plus.
@@ -915,10 +915,10 @@ async function changerOffreAbonnement(cle, bouton, idMessage, overlay) {
   const cible = offreDeLaGrille(cle);
   const n = UI.machines.length;
   const enPlus = machinesEnPlusFacturees(cible.cle, n);
-  let question = tR('Passer à l\'offre {offre} ({prix}) ? Le changement est facturé au prorata sur ta prochaine facture.',
+  let question = tR('Passer à l\'offre {offre} ({prix}) ? Le changement est facturé au prorata sur votre prochaine facture.',
     { offre: trad(cible.offre), prix: trad(cible.prix) });
   if (enPlus > 0) {
-    question += ' ' + tR('Avec tes {n} machines, {enPlus} seront facturées en plus ({montant} par mois).',
+    question += ' ' + tR('Avec vos {n} machines, {enPlus} seront facturées en plus ({montant} par mois).',
       { n, enPlus, montant: prixEuros(montantMachinesEnPlus(cible.cle, enPlus)) });
   }
   if (!window.confirm(question)) return;
@@ -937,10 +937,10 @@ async function changerOffreAbonnement(cle, bouton, idMessage, overlay) {
       boot(trad('Offre modifiée'));
       return;
     }
-    if (reponse && reponse.raison === 'aucun abonnement Stripe') { dire(trad("Aucun abonnement n'est rattaché à ce compte.") + ' ' + trad('Écris à support@kalea.pro.')); return; }
-    dire(trad('Impossible de changer l\'offre pour le moment. Réessaie dans un instant, ou écris à support@kalea.pro.'));
+    if (reponse && reponse.raison === 'aucun abonnement Stripe') { dire(trad("Aucun abonnement n'est rattaché à ce compte.") + ' ' + trad('Écrivez à support@kalea.pro.')); return; }
+    dire(trad('Impossible de changer l\'offre pour le moment. Réessayez dans un instant, ou écrivez à support@kalea.pro.'));
   } catch (err) {
-    dire(trad('Impossible de changer l\'offre pour le moment. Réessaie dans un instant, ou écris à support@kalea.pro.'));
+    dire(trad('Impossible de changer l\'offre pour le moment. Réessayez dans un instant, ou écrivez à support@kalea.pro.'));
   } finally {
     if (bouton) bouton.disabled = false;
   }
@@ -1197,7 +1197,7 @@ function dropzoneHtml(id) {
   return `
     <div class="dropzone" id="${id}">
       <span class="dz-titre"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg><span class="dz-title">${trad('Déposer un manuel PDF')}</span></span>
-      <span class="dz-help">${trad('Notre algorithme extrait les échéances (heures, mois) et crée le plan d\'entretien. Tu valides avant activation.')}</span>
+      <span class="dz-help">${trad('Notre algorithme extrait les échéances (heures, mois) et crée le plan d\'entretien. Vous validez avant activation.')}</span>
       <span class="dz-zone">
         <span class="dz-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 18a4 4 0 01-.6-7.96A6 6 0 0117.9 8.6 4.5 4.5 0 0117 18M12 12v7M9 15l3-3 3 3"/></svg></span>
         <span class="dz-texte">

@@ -179,7 +179,7 @@ function importAnalyser(texte) {
   const donnees = lignesCsv.slice(1);
   if (!donnees.length) return { erreur: trad('Le fichier ne contient que l\'en-tête : aucune machine à importer.') };
   if (donnees.length > IMPORT_MAX_LIGNES) {
-    return { erreur: tR('Ce fichier contient {n} lignes : l\'import est limité à {max} lignes à la fois. Découpe-le en plusieurs fichiers.', { n: donnees.length, max: IMPORT_MAX_LIGNES }) };
+    return { erreur: tR('Ce fichier contient {n} lignes : l\'import est limité à {max} lignes à la fois. Découpez-le en plusieurs fichiers.', { n: donnees.length, max: IMPORT_MAX_LIGNES }) };
   }
   const valeur = (cellules, cle) => (cle in index ? String(cellules[index[cle]] ?? '').trim() : '');
   const lignes = donnees.map((cellules, k) => {
@@ -280,9 +280,9 @@ function importPlanifier(analyse, politique) {
     l.message = null;
     if (l.erreurs.length) { l.action = 'erreur'; l.message = l.erreurs.join(' '); }
     else if (l.doublonFichier) { l.action = 'erreur'; l.message = tR('Doublon : déjà présent à la ligne {n} du fichier.', { n: l.doublonFichier }); }
-    else if (l.existant && politique === 'ignorer') { l.action = 'ignorer'; l.message = tR('Déjà dans ton parc : « {nom} ».', { nom: l.existant.name }); }
-    else if (l.existant && politique === 'mettre_a_jour') { l.action = 'maj'; l.message = tR('Met à jour « {nom} ».', { nom: l.existant.name }); }
-    else if (place <= 0) { l.action = 'hors_limite'; l.message = trad('Au-delà de la limite de ton offre.'); }
+    else if (l.existant && politique === 'ignorer') { l.action = 'ignorer'; l.message = tR('Déjà dans votre parc : « {nom} ».', { nom: l.existant.name }); }
+    else if (l.existant && politique === 'mettre_a_jour') { l.action = 'maj'; l.message = tR('Mettre à jour « {nom} ».', { nom: l.existant.name }); }
+    else if (place <= 0) { l.action = 'hors_limite'; l.message = trad('Au-delà de la limite de votre offre.'); }
     else { l.action = 'creer'; place--; }
     comptes[l.action]++;
   }
@@ -331,7 +331,7 @@ function importBandeauHtml() {
   const d = importDernierLot();
   if (!d) return '';
   return `<div class="ui-encadre" id="imp-bandeau">${picto('info')}<div>
-    <p>${tR('Import récent : {n} machine(s) créée(s). Tu peux l\'annuler pendant 24 heures (seules les machines sans intervention ni panne sont retirées).', { n: d.crees })}</p>
+    <p>${tR('Import récent : {n} machine(s) créée(s). Vous pouvez l\'annuler pendant 24 heures (seules les machines sans intervention ni panne sont retirées).', { n: d.crees })}</p>
     <div class="import-bandeau-boutons">
       <button type="button" class="ui-btn ui-btn-pastille is-danger" id="imp-annuler-dernier">${trad('Annuler cet import')}</button>
       <button type="button" class="ui-btn ui-btn-pastille" id="imp-masquer">${trad('Masquer')}</button>
@@ -393,7 +393,7 @@ function ouvrirImportMachines() {
               <div class="import-csv-icone">${picto('boite')}</div>
               <div>
                 <h2>${trad('Importer des machines')}</h2>
-                <p class="import-csv-sous-titre">${trad('Charge ton parc depuis un fichier CSV (Excel, Google Sheets…)')}</p>
+                <p class="import-csv-sous-titre">${trad('Chargez votre parc depuis un fichier CSV (Excel, Google Sheets…)')}</p>
               </div>
             </div>
             <button type="button" class="log-close2" id="imp-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
@@ -418,10 +418,10 @@ function ouvrirImportMachines() {
       <div class="import-csv-section">
         <span class="import-csv-eyebrow">${trad('Règles')}</span>
         <div class="import-csv-regles">
-          <div class="import-csv-regle"><div class="import-csv-regle-icone is-bleu">${picto('info')}</div><div><strong>${trad('Code interne :')}</strong> ${trad('ton repère (ex. G-14). Il permet de rejouer l\'import sans créer de doublon.')}</div></div>
-          <div class="import-csv-regle"><div class="import-csv-regle-icone is-vert">${picto('devise')}</div><div><strong>${trad('Dates et nombres :')}</strong> ${trad('AAAA-MM-JJ ou JJ/MM/AAAA ; virgule ou point décimal. Les prix sont dans la devise de ta société.')}</div></div>
+          <div class="import-csv-regle"><div class="import-csv-regle-icone is-bleu">${picto('info')}</div><div><strong>${trad('Code interne :')}</strong> ${trad('votre repère (ex. G-14). Il permet de rejouer l\'import sans créer de doublon.')}</div></div>
+          <div class="import-csv-regle"><div class="import-csv-regle-icone is-vert">${picto('devise')}</div><div><strong>${trad('Dates et nombres :')}</strong> ${trad('AAAA-MM-JJ ou JJ/MM/AAAA ; virgule ou point décimal. Les prix sont dans la devise de votre société.')}</div></div>
           <div class="import-csv-regle"><div class="import-csv-regle-icone is-ambre">${picto('bientot')}</div><div><strong>${trad('Type :')}</strong> ${trad('« machine » (par défaut) ou « véhicule » ; le compteur d\'un véhicule est en km.')}</div></div>
-          <div class="import-csv-regle is-accent"><div class="import-csv-regle-icone is-primaire">${picto('rafraichir')}</div><div><strong>${trad('Tu vérifies avant :')}</strong> ${tR('un aperçu montre chaque ligne, les doublons et le coût, rien n\'est créé avant ta confirmation. Jusqu\'à {max} machines par fichier.', { max: IMPORT_MAX_LIGNES })}</div></div>
+          <div class="import-csv-regle is-accent"><div class="import-csv-regle-icone is-primaire">${picto('rafraichir')}</div><div><strong>${trad('Vous vérifiez avant :')}</strong> ${tR('un aperçu montre chaque ligne, les doublons et le coût, rien n\'est créé avant votre confirmation. Jusqu\'à {max} machines par fichier.', { max: IMPORT_MAX_LIGNES })}</div></div>
         </div>
       </div>
       <div class="import-csv-section">
@@ -465,9 +465,9 @@ function ouvrirImportMachines() {
     if (!etat.abonne || comptes.creer <= 0 || INCLUSES_OFFRES[plan] == null) return '';   // pas d'abonnement ou offre sans supplément (Gratuit)
     const avant = machinesEnPlusFacturees(plan, UI.machines.length);
     const apres = machinesEnPlusFacturees(plan, UI.machines.length + comptes.creer);
-    if (apres <= avant) return `<div class="ui-encadre">${picto('info')}<p>${tR('Ces {n} machine(s) restent dans les machines incluses de ton offre : aucun supplément.', { n: comptes.creer })}</p></div>`;
+    if (apres <= avant) return `<div class="ui-encadre">${picto('info')}<p>${tR('Ces {n} machine(s) restent dans les machines incluses de votre offre : aucun supplément.', { n: comptes.creer })}</p></div>`;
     const delta = montantMachinesEnPlus(plan, apres) - montantMachinesEnPlus(plan, avant);
-    return `<div class="ui-encadre is-attention">${picto('alerte')}<p><strong>${tR('+ {montant} par mois', { montant: prixEuros(delta) })}</strong> — ${tR('{n} machine(s) de plus que celles incluses dans ton offre seront facturées en plus, au prorata du mois en cours, sur ta prochaine facture (après l\'import : {total} machines, dont {enPlus} en plus).', { n: apres - avant, total: UI.machines.length + comptes.creer, enPlus: apres })}</p></div>`;
+    return `<div class="ui-encadre is-attention">${picto('alerte')}<p><strong>${tR('+ {montant} par mois', { montant: prixEuros(delta) })}</strong> — ${tR('{n} machine(s) de plus que celles incluses dans votre offre seront facturées en plus, au prorata du mois en cours, sur votre prochaine facture (après l\'import : {total} machines, dont {enPlus} en plus).', { n: apres - avant, total: UI.machines.length + comptes.creer, enPlus: apres })}</p></div>`;
   }
 
   function afficherApercu() {
@@ -497,13 +497,13 @@ function ouvrirImportMachines() {
       </div>
       ${doublons ? `
       <div class="import-csv-section">
-        <span class="import-csv-eyebrow">${tR('{n} machine(s) déjà dans ton parc (même code interne, n° de série ou immatriculation)', { n: doublons })}</span>
+        <span class="import-csv-eyebrow">${tR('{n} machine(s) déjà dans votre parc (même code interne, n° de série ou immatriculation)', { n: doublons })}</span>
         <div class="ui-segment" role="group" aria-label="${esc(trad('Que faire des doublons ?'))}">
           ${[['ignorer', trad('Les ignorer')], ['mettre_a_jour', trad('Les mettre à jour')], ['creer', trad('Créer quand même')]].map(([cle, nom]) => `<button type="button" data-imp-politique="${cle}" class="${etat.politique === cle ? 'is-actif' : ''}" aria-pressed="${etat.politique === cle}">${esc(nom)}</button>`).join('')}
         </div>
         <p class="ui-aide">${trad('« Mettre à jour » ne remplit que les colonnes fournies et ne touche jamais à un compteur déjà renseigné. « Créer quand même » ne passe pas si le code interne existe déjà.')}</p>
       </div>` : ''}
-      ${comptes.hors_limite ? `<div class="ui-encadre is-attention">${picto('alerte')}<p>${tR('Ton offre gratuite est limitée à {limite} machines : {n} ligne(s) ne seront pas importées. Passe à une offre payante pour importer tout ton parc.', { limite, n: comptes.hors_limite })}</p></div>` : ''}
+      ${comptes.hors_limite ? `<div class="ui-encadre is-attention">${picto('alerte')}<p>${tR('Votre offre gratuite est limitée à {limite} machines : {n} ligne(s) ne seront pas importées. Passez à une offre payante pour importer tout votre parc.', { limite, n: comptes.hors_limite })}</p></div>` : ''}
       ${blocCout(comptes)}
       ${a.categoriesACreer.length ? `<div class="ui-encadre">${picto('info')}<p><strong>${tR('{n} catégorie(s) seront créées :', { n: a.categoriesACreer.length })}</strong> ${esc(a.categoriesACreer.join(', '))}</p></div>` : ''}
       ${a.ignorees.length ? `<p class="ui-aide">${tR('Colonnes ignorées (non reconnues) : {liste}.', { liste: a.ignorees.join(', ') })}</p>` : ''}
@@ -528,7 +528,7 @@ function ouvrirImportMachines() {
       <div class="import-csv-section">
         <p class="ui-aide" id="imp-progres" role="status" aria-live="polite">${trad('Préparation…')}</p>
         <div class="import-barre-progres"><div id="imp-barre" style="width:0%"></div></div>
-        <p class="ui-aide">${trad('Ne ferme pas cette fenêtre avant la fin.')}</p>
+        <p class="ui-aide">${trad('Ne fermez pas cette fenêtre avant la fin.')}</p>
       </div>`, '');
     const progres = overlay.querySelector('#imp-progres');
     const barre = overlay.querySelector('#imp-barre');
@@ -581,7 +581,7 @@ function ouvrirImportMachines() {
       } else if (utiles.length) {
         const message = derniereErreur && /Reserve au gerant/i.test(derniereErreur.message || '')
           ? trad('Réservé au gérant.')
-          : trad('Réseau ou serveur indisponible : relance l\'import, les lignes déjà créées seront reconnues.');
+          : trad('Réseau ou serveur indisponible : relancez l\'import, les lignes déjà créées seront reconnues.');
         utiles.forEach((l) => resultats.set(l.n, { statut: 'erreur', message }));
       }
       fait += paquet.length;
@@ -630,9 +630,9 @@ function ouvrirImportMachines() {
           </div></div></div>`).join('')}</div>
         ${erreurs.length > 40 ? `<p class="ui-aide">${tR('… et {n} autres, dans le fichier des erreurs.', { n: erreurs.length - 40 })}</p>` : ''}
         <button type="button" class="ui-btn ui-btn-pastille" id="imp-erreurs">${picto('export')}<span>${trad('Télécharger les erreurs (CSV)')}</span></button>
-        <p class="ui-aide">${trad('Corrige ces lignes dans le fichier téléchargé (dernière colonne : raison), puis réimporte-le : les machines déjà créées sont reconnues grâce à leur code interne ou n° de série.')}</p>
+        <p class="ui-aide">${trad('Corrigez ces lignes dans le fichier téléchargé (dernière colonne : raison), puis réimportez-le : les machines déjà créées sont reconnues grâce à leur code interne ou n° de série.')}</p>
       </div>` : ''}
-      ${crees ? `<div class="import-csv-section"><p class="ui-aide">${trad('Une erreur de fichier ? Tu peux annuler ce lot pendant 24 heures : seules les machines sans intervention ni panne sont retirées.')}</p></div>` : ''}
+      ${crees ? `<div class="import-csv-section"><p class="ui-aide">${trad('Une erreur de fichier ? Vous pouvez annuler ce lot pendant 24 heures : seules les machines sans intervention ni panne sont retirées.')}</p></div>` : ''}
       <div id="imp-msg" role="status" aria-live="polite"></div>`,
     `${crees ? `<button type="button" class="ui-btn ui-btn-pastille is-danger" id="imp-annuler-lot">${trad('Annuler cet import')}</button>` : ''}
      <button type="button" class="primary" id="imp-fermer">${picto('coche')}<span>${trad('Terminer')}</span></button>`);

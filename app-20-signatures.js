@@ -104,13 +104,13 @@ function ouvrirPadSignature({ role, titre, sousTitre, obligatoire = false, fonct
     if (!obligatoire) overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); resolve(null); } });
     q('#sig-valider').addEventListener('click', () => {
       const nom = role === 'responsable' ? q('#sig-nom').value.trim() : '';
-      if (role === 'responsable' && !nom) { q('#sig-msg').textContent = trad('Indique le nom du signataire.'); q('#sig-nom').focus(); return; }
+      if (role === 'responsable' && !nom) { q('#sig-msg').textContent = trad('Indiquez le nom du signataire.'); q('#sig-nom').focus(); return; }
       // Image réduite (largeur 560 px au plus) : légère à stocker, à envoyer et à intégrer au PDF.
       const largeur = Math.min(560, canvas.width); const hauteur = Math.round(canvas.height * (largeur / canvas.width));
       const reduit = document.createElement('canvas'); reduit.width = largeur; reduit.height = hauteur;
       reduit.getContext('2d').drawImage(canvas, 0, 0, largeur, hauteur);
       const image = reduit.toDataURL('image/png');
-      if (image.length > 240000) { q('#sig-msg').textContent = trad('Signature trop volumineuse : efface et recommence plus simplement.'); return; }
+      if (image.length > 240000) { q('#sig-msg').textContent = trad('Signature trop volumineuse : effacez et recommencez plus simplement.'); return; }
       overlay.remove();
       resolve({ image, nom, fonction: q('#sig-fonction').value.trim() });
     });
@@ -155,7 +155,7 @@ async function proposerSignaturesApresIntervention(machine, interventionId, diff
       if (resp) await poserSignature({ machine, interventionId, role: 'responsable', nom: resp.nom, fonction: resp.fonction, image: resp.image, differe });
     }
   } catch (err) {
-    showToast(trad('Signature non enregistrée : ') + ((err && err.message) || err) + ' — ' + trad('tu peux signer depuis l\'historique de la machine.'));
+    showToast(trad('Signature non enregistrée : ') + ((err && err.message) || err) + ' — ' + trad('vous pouvez signer depuis l\'historique de la machine.'));
   }
 }
 
@@ -288,7 +288,7 @@ function ouvrirAvenant(interventionId) {
         <header class="otm-tete">
           <div class="otm-tuile">${otSymbole('edit_note')}</div>
           <div class="otm-tete-textes"><div class="otm-tete-ligne"><span class="otm-etape">${trad('Avenant')}</span><span class="otm-marque">GMAO KALEA</span></div>
-            <h2 id="av-titre">${trad('Ajouter un avenant')}</h2><p>${trad('L\'intervention signée n\'est pas modifiée : l\'avenant s\'ajoute à son rapport, avec ton nom et la date.')}</p></div>
+            <h2 id="av-titre">${trad('Ajouter un avenant')}</h2><p>${trad('L\'intervention signée n\'est pas modifiée : l\'avenant s\'ajoute à son rapport, avec votre nom et la date.')}</p></div>
           <button type="button" class="otm-fermer" data-av-annuler aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
         </header>
         <div class="otm-form-corps"><section class="otm-bloc">
@@ -307,7 +307,7 @@ function ouvrirAvenant(interventionId) {
       if (navigator.onLine === false) { q('#av-msg').textContent = trad('Un avenant demande le réseau pour l\'instant.'); return; }
       q('#av-valider').disabled = true;
       const { error } = await sb.rpc('ajouter_avenant_intervention', { p_id: idAvenant, p_intervention: interventionId, p_motif: motif, p_correction: correction });
-      if (error) { q('#av-valider').disabled = false; q('#av-msg').textContent = error.message || trad('Enregistrement impossible. Réessaie.'); return; }
+      if (error) { q('#av-valider').disabled = false; q('#av-msg').textContent = error.message || trad('Enregistrement impossible. Réessayez.'); return; }
       overlay.remove(); showToast(trad('Avenant enregistré')); resolve(true);
     });
     setTimeout(() => q('#av-motif').focus(), 80);

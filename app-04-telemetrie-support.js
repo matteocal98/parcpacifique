@@ -45,7 +45,7 @@ function telemetrieBadgeHtml(m) {
   }
   const age = Date.now() - new Date(m.telemetry_last_at).getTime();
   if (age > TELEMETRIE_SILENCE_MS) {
-    return `<span class="tele-badge is-silence" title="${esc(trad('Aucun relevé reçu depuis plus de 3 jours : vérifie le boîtier.'))}">${trad('Auto · sans signal')} (${esc(ilYaSupport(m.telemetry_last_at))})</span>`;
+    return `<span class="tele-badge is-silence" title="${esc(trad('Aucun relevé reçu depuis plus de 3 jours : vérifiez le boîtier.'))}">${trad('Auto · sans signal')} (${esc(ilYaSupport(m.telemetry_last_at))})</span>`;
   }
   const depuis = ilYaSupport(m.telemetry_last_at);
   // Version courte (« 2 j ») pour le titre d'une carte du Parc sur téléphone, où la place est comptée.
@@ -330,7 +330,7 @@ function majMarqueursGps(ajuster, suivi) {
   const compte = document.getElementById('tele-carte-compte');
   if (compte) compte.textContent = tR('{n} machine(s) localisée(s)', { n: points.length });
   if (!etatCarteGps.trajet) {
-    messageCarteGps(points.length ? '' : trad('Aucune machine localisée pour l\'instant : relie une machine à un boîtier puis coche « Localiser » dans le tableau ci-dessous.'));
+    messageCarteGps(points.length ? '' : trad('Aucune machine localisée pour l\'instant : reliez une machine à un boîtier puis cochez « Localiser » dans le tableau ci-dessous.'));
   }
   if (!ajuster && suivi && bouges.length && points.length) {
     const vue = carteGps.getBounds();
@@ -459,7 +459,7 @@ function telemetrieCarteHtml() {
           <section class="ui-section">
             ${teteSectionKit('compteur', trad('Compteur automatique (télémétrie)'), '', '<span class="ui-tag" id="acc-tele-compte"></span>')}
             <div class="ui-section-corps">
-              <p class="ui-aide">${trad('Un boîtier, un système tiers ou le compte de ton constructeur fournit les heures ou les kilomètres de tes engins : le compteur, les échéances et les rappels se mettent à jour tout seuls. Ton abonnement donne la connexion et le suivi dans KALEA ; le matériel et son installation (boîtiers, cartes SIM, pose) restent à ta charge, ou font l\'objet d\'un devis de KALEA. C\'est optionnel — la saisie manuelle reste possible partout.')}</p>
+              <p class="ui-aide">${trad('Un boîtier, un système tiers ou le compte de votre constructeur fournit les heures ou les kilomètres de vos engins : le compteur, les échéances et les rappels se mettent à jour tout seuls. Votre abonnement donne la connexion et le suivi dans KALEA ; le matériel et son installation (boîtiers, cartes SIM, pose) restent à votre charge, ou font l\'objet d\'un devis de KALEA. C\'est optionnel — la saisie manuelle reste possible partout.')}</p>
               <div class="ui-aide" id="acc-tele-msg" role="status" aria-live="polite"></div>
               <div id="acc-tele-liste" class="ui-liste">${trad('Chargement…')}</div>
               <div id="acc-tele-jeton"></div>
@@ -477,7 +477,7 @@ function telemetrieCarteHtml() {
                   </div>
                 </div>
                 <div class="ui-section-corps" id="acc-tele-aemp" hidden>
-                  <p class="ui-aide">${trad('KALEA lit les heures moteur de tes machines directement chez leur constructeur (Caterpillar, Volvo CE, John Deere…), avec les identifiants API que ton constructeur te fournit. Ils sont chiffrés et ne sont jamais réaffichés.')}</p>
+                  <p class="ui-aide">${trad('KALEA lit les heures moteur de vos machines directement chez leur constructeur (Caterpillar, Volvo CE, John Deere…), avec les identifiants API que votre constructeur vous fournit. Ils sont chiffrés et ne sont jamais réaffichés.')}</p>
                   <div class="ui-champ-groupe">
                     <label class="ui-etiquette" for="acc-tele-aemp-url">${trad('Adresse de l\'API du constructeur')}</label>
                     <input id="acc-tele-aemp-url" class="ui-champ" type="url" maxlength="300" placeholder="https://" autocomplete="off">
@@ -519,7 +519,7 @@ function telemetrieCarteHtml() {
         </div>
         <div class="ui-colonne">
           <section class="ui-section">
-            ${teteSectionKit('boite', trad('Machines reliées'), trad('Choisis la source et l\'identifiant du boîtier (IMEI, VIN…) pour chaque machine à suivre automatiquement. Sans source, la machine reste en saisie manuelle.'))}
+            ${teteSectionKit('boite', trad('Machines reliées'), trad('Choisissez la source et l\'identifiant du boîtier (IMEI, VIN…) pour chaque machine à suivre automatiquement. Sans source, la machine reste en saisie manuelle.'))}
             <div class="ui-section-corps">
               <div id="acc-tele-machines" class="ui-liste"></div>
             </div>
@@ -563,7 +563,7 @@ async function preparerCarteTelemetrie(racine) {
           <button type="button" class="ui-btn ui-btn-teinte is-danger" data-tele-revoquer="${esc(s.id)}">${trad('Révoquer')}</button>
         </div>
       </div>`;
-    }).join('') : `<p class="ui-aide">${trad('Aucune source pour le moment. Crée-en une pour recevoir des relevés.')}</p>`;
+    }).join('') : `<p class="ui-aide">${trad('Aucune source pour le moment. Créez-en une pour recevoir des relevés.')}</p>`;
 
     const options = (choisie) => `<option value="">${trad('Saisie manuelle')}</option>` +
       sources.map((s) => `<option value="${esc(s.id)}"${s.id === choisie ? ' selected' : ''}>${esc(s.label)}</option>`).join('');
@@ -572,7 +572,7 @@ async function preparerCarteTelemetrie(racine) {
         <div class="ui-ligne-id"><div class="ui-ligne-textes">
         <span class="ui-ligne-nom">${esc(m.name)}</span>
           <span class="ui-ligne-sous">${m.counter_source === 'telemetry' ? (m.telemetry_last_at ? tR('Dernier relevé automatique : {quand}', { quand: ilYaSupport(m.telemetry_last_at) }) : trad('En attente du premier relevé')) : trad('Saisie manuelle')}</span>
-          ${SCHEMA.hasGps ? `<label class="ui-case" title="${esc(trad('Indique d\'abord la source et l\'identifiant du boîtier.'))}">
+          ${SCHEMA.hasGps ? `<label class="ui-case" title="${esc(trad('Indiquez d\'abord la source et l\'identifiant du boîtier.'))}">
             <input type="checkbox" data-tele-localiser${m.position_enabled && m.counter_source === 'telemetry' ? ' checked' : ''}${m.counter_source === 'telemetry' ? '' : ' disabled'}>
             <span>${trad('Localiser')}</span>${m.position_enabled && m.counter_source === 'telemetry' && m.last_position_at ? ` <span class="tele-sous">· ${esc(tR('position {quand}', { quand: ilYaSupport(m.last_position_at) }))}</span>` : ''}
           </label>` : ''}
@@ -611,11 +611,11 @@ async function preparerCarteTelemetrie(racine) {
 
   function afficherJeton(jeton, type) {
     const consigne = type === 'flespi'
-      ? trad('Dans Flespi, crée un « HTTP stream » vers l\'adresse ci-dessous, avec l\'en-tête personnalisé x-kalea-token. L\'identifiant de la machine est l\'« ident » du boîtier (souvent son IMEI).')
-      : trad('Envoie une requête POST en JSON à l\'adresse ci-dessous, avec l\'en-tête x-kalea-token. Chaque relevé : ref (identifiant du boîtier), counter (valeur), unit (hours ou km), at (date ISO).');
+      ? trad('Dans Flespi, créez un « HTTP stream » vers l\'adresse ci-dessous, avec l\'en-tête personnalisé x-kalea-token. L\'identifiant de la machine est l\'« ident » du boîtier (souvent son IMEI).')
+      : trad('Envoyez une requête POST en JSON à l\'adresse ci-dessous, avec l\'en-tête x-kalea-token. Chaque relevé : ref (identifiant du boîtier), counter (valeur), unit (hours ou km), at (date ISO).');
     zoneJeton.innerHTML = `
       <div class="ui-groupe" role="status">
-        <strong>${trad('Copie ce jeton maintenant : il ne sera plus jamais affiché.')}</strong>
+        <strong>${trad('Copiez ce jeton maintenant : il ne sera plus jamais affiché.')}</strong>
         <p class="ui-aide">${consigne}</p>
         <div class="ui-champ-groupe"><span class="ui-etiquette">${trad('Adresse')}</span><code class="ui-code">${esc(adresse)}</code>
           <div><button type="button" class="ui-btn ui-btn-teinte" data-tele-copier="${esc(adresse)}">${trad('Copier')}</button></div></div>
@@ -708,7 +708,7 @@ async function preparerCarteTelemetrie(racine) {
       zoneJeton.innerHTML = `
         <div class="ui-groupe" role="status">
           <strong>${tR('Connexion réussie : {n} machine(s) trouvée(s) chez le constructeur.', { n: r.total })}</strong>
-          <p class="ui-aide">${trad('Étape suivante : « Relier mes machines » rapproche tes machines KALEA de celles du constructeur par numéro de série. Le compteur de chaque machine reconnue sera remplacé par celui du constructeur.')}</p>
+          <p class="ui-aide">${trad('Étape suivante : « Relier mes machines » rapproche vos machines KALEA de celles du constructeur par numéro de série. Le compteur de chaque machine reconnue sera remplacé par celui du constructeur.')}</p>
         </div>`;
       dire('');
       await charger();
@@ -746,7 +746,7 @@ async function preparerCarteTelemetrie(racine) {
     }
 
     if (cible.hasAttribute('data-tele-relier')) {
-      if (!window.confirm(trad('Relier tes machines à ce compte ? Chaque machine dont le numéro de série correspond verra son compteur remplacé par celui du constructeur.'))) return;
+      if (!window.confirm(trad('Relier vos machines à ce compte ? Chaque machine dont le numéro de série correspond verra son compteur remplacé par celui du constructeur.'))) return;
       cible.disabled = true;
       dire(trad('Connexion au constructeur…'));
       try {
@@ -756,7 +756,7 @@ async function preparerCarteTelemetrie(racine) {
         dessiner();
         dire(r.relies.length
           ? tR('{n} machine(s) reliée(s) : {noms}', { n: r.relies.length, noms: r.relies.join(', ') })
-          : trad('Aucune machine reconnue : le numéro de série de tes machines doit être identique à celui du constructeur (fiche machine).'), !r.relies.length);
+          : trad('Aucune machine reconnue : le numéro de série de vos machines doit être identique à celui du constructeur (fiche machine).'), !r.relies.length);
       } catch (err) {
         dire(tR('Connexion impossible : {erreur}', { erreur: String((err && err.message) || err) }), true);
       } finally { cible.disabled = false; }
@@ -767,7 +767,7 @@ async function preparerCarteTelemetrie(racine) {
       try {
         await navigator.clipboard.writeText(cible.getAttribute('data-tele-copier'));
         cible.textContent = trad('Copié');
-      } catch (err) { dire(trad('Copie impossible : sélectionne le texte à la main.'), true); }
+      } catch (err) { dire(trad('Copie impossible : sélectionnez le texte à la main.'), true); }
       return;
     }
 
@@ -775,7 +775,7 @@ async function preparerCarteTelemetrie(racine) {
       const champ = carte.querySelector('#acc-tele-nom');
       const type = carte.querySelector('#acc-tele-type').value;
       const nom = (champ.value || '').trim();
-      if (!nom) { dire(trad('Donne un nom à la source.'), true); champ.focus(); return; }
+      if (!nom) { dire(trad('Donnez un nom à la source.'), true); champ.focus(); return; }
       cible.disabled = true;
       dire('');
       if (type === 'aemp') { await creerCompteConstructeur(nom, cible); return; }
@@ -820,7 +820,7 @@ async function preparerCarteTelemetrie(racine) {
       if (!machine) return;
       const source = ligne.querySelector('[data-tele-source]').value || null;
       const ref = (ligne.querySelector('[data-tele-ref]').value || '').trim() || null;
-      if (source && !ref) { dire(trad('Indique l\'identifiant du boîtier de cette machine.'), true); return; }
+      if (source && !ref) { dire(trad('Indiquez l\'identifiant du boîtier de cette machine.'), true); return; }
       const auto = !!(source && ref);
       const caseLoc = ligne.querySelector('[data-tele-localiser]');
       const veutLocaliser = !!(auto && caseLoc && caseLoc.checked);
@@ -920,19 +920,19 @@ const OFFRES_PAYANTES = [
     cle: 'eco',
     ligne: ligneOffrePayante('eco'),
     bouton: 'Passer à Starter',
-    changement: "Pour passer à l'offre Starter, change d'offre depuis ton abonnement : le montant est ajusté au prorata.",
+    changement: "Pour passer à l'offre Starter, changez d'offre depuis votre abonnement : le montant est ajusté au prorata.",
   },
   {
     cle: 'pro',
     ligne: ligneOffrePayante('pro'),
     bouton: 'Passer à Business',
-    changement: "Pour passer à l'offre Business, change d'offre depuis ton abonnement : le montant est ajusté au prorata.",
+    changement: "Pour passer à l'offre Business, changez d'offre depuis votre abonnement : le montant est ajusté au prorata.",
   },
   {
     cle: 'paid',
     ligne: ligneOffrePayante('paid'),
     bouton: 'Passer à Enterprise',
-    changement: "Pour passer à l'offre Enterprise, change d'offre depuis ton abonnement : le montant est ajusté au prorata.",
+    changement: "Pour passer à l'offre Enterprise, changez d'offre depuis votre abonnement : le montant est ajusté au prorata.",
   },
 ];
 
@@ -1004,7 +1004,7 @@ function blocGrandCompteHtml(companyId) {
           <h3>${trad('Grand compte')}</h3>
           <span class="offre-service-prix">${trad('sur devis')}</span>
         </div>
-        <p>${trad('Grand compte : contrat sur mesure (région des données dédiée, contrat annuel, intégrations, support). Nous établissons un devis adapté à ton parc.')}</p>
+        <p>${trad('Grand compte : contrat sur mesure (région des données dédiée, contrat annuel, intégrations, support). Nous établissons un devis adapté à votre parc.')}</p>
       </div>
       <a href="${contactGrandCompte(companyId)}" class="offre-bouton is-secondaire">${trad('Demander un devis')}${picto('mail')}</a>
     </div>`;
@@ -1226,7 +1226,7 @@ function ligneTicketSupportHtml(t, sousTitre) {
 async function afficherListeTickets(overlay, moi) {
   overlay.innerHTML = `<div class="modal">
     <div class="support-tete">
-      <div><h2>${trad('Support')}</h2><p class="sub">${trad('Tes demandes précédentes, et une nouvelle si besoin.')}</p></div>
+      <div><h2>${trad('Support')}</h2><p class="sub">${trad('Vos demandes précédentes, et une nouvelle si besoin.')}</p></div>
       <button type="button" class="mform-close" id="support-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
     </div>
     <div class="support-liste" id="support-liste">${trad('Chargement…')}</div>
@@ -1243,7 +1243,7 @@ async function afficherListeTickets(overlay, moi) {
   const zone = overlay.querySelector('#support-liste');
   if (!zone) return;
   if (r.erreur) {
-    zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger tes demandes pour le moment.')}</div>`;
+    zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger vos demandes pour le moment.')}</div>`;
     return;
   }
   if (!r.tickets.length) {
@@ -1275,7 +1275,7 @@ function dessinerPageSupport() {
   const filtres = document.getElementById('support-page-filtres');
   const r = UI.supportTickets;
   if (!zone || !filtres || !r) return;
-  if (r.erreur) { zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger tes demandes pour le moment.')}</div>`; filtres.innerHTML = ''; return; }
+  if (r.erreur) { zone.innerHTML = `<div class="hint is-late">${trad('Impossible de charger vos demandes pour le moment.')}</div>`; filtres.innerHTML = ''; return; }
   const libelles = { ouverts: trad('Ouverts'), resolus: trad('Résolus'), tous: trad('Tous') };
   filtres.innerHTML = Object.keys(ETATS_FILTRE_SUPPORT).map((cle) => `<button type="button" class="ui-puce${supportFiltre === cle ? ' is-actif' : ''}" data-filtre="${cle}" aria-pressed="${supportFiltre === cle ? 'true' : 'false'}"><span>${esc(libelles[cle])}</span><span class="ui-compte">${r.tickets.filter(ETATS_FILTRE_SUPPORT[cle]).length}</span></button>`).join('');
   filtres.querySelectorAll('[data-filtre]').forEach((b) => b.addEventListener('click', () => { supportFiltre = b.dataset.filtre; dessinerPageSupport(); }));
@@ -1380,7 +1380,7 @@ function ouvrirSelecteurMachine(actuelId, onConfirm) {
 
   overlay2.innerHTML = `<div class="modal">
     <div class="support-tete">
-      <div><h2>${trad('Machine concernée')} <span class="support-badge-optionnel">${trad('optionnel')}</span></h2><p class="sub">${trad('Sélectionne un matériel pour assigner la fiche atelier immédiatement.')}</p></div>
+      <div><h2>${trad('Machine concernée')} <span class="support-badge-optionnel">${trad('optionnel')}</span></h2><p class="sub">${trad('Sélectionnez un matériel pour assigner la fiche atelier immédiatement.')}</p></div>
       <button type="button" class="mform-close" id="support-picker-fermer-x" aria-label="${esc(trad('Fermer la liste'))}">${picto('fermer')}</button>
     </div>
     <div class="support-picker-recherche">
@@ -1414,7 +1414,7 @@ function afficherNouveauTicket(overlay, moi) {
   let machineChoisieId = null;
   overlay.innerHTML = `<div class="modal">
     <div class="support-tete">
-      <div><h2>${trad('Nouveau ticket')}</h2><p class="sub">${trad('Décris ta demande : nous te répondons ici.')}</p></div>
+      <div><h2>${trad('Nouveau ticket')}</h2><p class="sub">${trad('Décrivez votre demande : nous vous répondons ici.')}</p></div>
       <button type="button" class="mform-close" id="support-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
     </div>
     <div class="plan-field">
@@ -1466,7 +1466,7 @@ function afficherNouveauTicket(overlay, moi) {
       .insert({ company_id: UI.companyId, created_by: moi, machine_id: machineId, subject: sujet })
       .select('id').single();
     if (erreurTicket || !ticket) {
-      annonce.textContent = trad('L\'envoi a échoué. Réessaie dans un instant.');
+      annonce.textContent = trad('L\'envoi a échoué. Réessayez dans un instant.');
       annonce.className = 'hint is-late';
       bouton.disabled = false;
       return;
@@ -1475,7 +1475,7 @@ function afficherNouveauTicket(overlay, moi) {
       .from('support_ticket_messages')
       .insert({ ticket_id: ticket.id, author_id: moi, body: message });
     if (erreurMessage) {
-      annonce.textContent = trad('Le ticket a été créé, mais le message n\'a pas pu être envoyé. Rouvre-le pour réessayer.');
+      annonce.textContent = trad('Le ticket a été créé, mais le message n\'a pas pu être envoyé. Rouvrez-le pour réessayer.');
       annonce.className = 'hint is-late';
       bouton.disabled = false;
       return;
@@ -1547,7 +1547,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       // ET superviseur à la fois) doit se voir lui-même, pas son autre rôle.
       // Un client ne peut pas lire le profil d'un membre du personnel : la jointure revient vide (null). Un auteur qui n'est pas « moi » et dont le profil est illisible EST donc le support.
       const estStaff = !!m2.profiles?.is_staff || (!deMoi && !m2.profiles);
-      const auteur = deMoi ? trad('Toi') : (estStaff ? trad('Support KALEA') : (m2.profiles?.full_name || m2.profiles?.login || '?'));
+      const auteur = deMoi ? trad('Vous') : (estStaff ? trad('Support KALEA') : (m2.profiles?.full_name || m2.profiles?.login || '?'));
       const avatar = deMoi ? '' : `<span class="avatar">${estStaff ? 'KV' : esc(initialesSupport(auteur))}</span>`;
       return `<div class="support-bulle-ligne ${deMoi ? 'is-moi' : 'is-autre'}">
         <span class="support-bulle-auteur">${avatar}<span class="nom">${esc(auteur)}</span><span>· ${ilYaSupport(m2.created_at)}</span></span>
@@ -1561,7 +1561,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
     const annonceHumain = overlay.querySelector('#support-fil-msg');
     const asEcrit = (messages || []).some((m2) => m2.ia === true);
     if (ticket && ticket.humain_demande === true) {
-      if (annonceHumain) annonceHumain.textContent = trad('Tu as demandé à parler à un humain : l\'équipe te répondra ici.');
+      if (annonceHumain) annonceHumain.textContent = trad('Vous avez demandé à parler à un humain : l\'équipe vous répondra ici.');
     } else if (boutonHumain && asEcrit) {
       boutonHumain.hidden = false;
       boutonHumain.addEventListener('click', async () => {
@@ -1569,10 +1569,10 @@ async function afficherFilTicket(overlay, moi, ticketId) {
         const { error: erreurHumain } = await sb.rpc('support_demander_humain', { p_ticket: ticketId });
         if (erreurHumain) {
           boutonHumain.disabled = false;
-          if (annonceHumain) { annonceHumain.textContent = trad('La demande a échoué. Réessaie dans un instant.'); annonceHumain.className = 'hint is-late'; }
+          if (annonceHumain) { annonceHumain.textContent = trad('La demande a échoué. Réessayez dans un instant.'); annonceHumain.className = 'hint is-late'; }
           return;
         }
-        showToast(trad('Un membre de l\'équipe reprendra ta demande.'));
+        showToast(trad('Un membre de l\'équipe reprendra votre demande.'));
         afficherFilTicket(overlay, moi, ticketId);
       });
     }
@@ -1590,7 +1590,7 @@ async function afficherFilTicket(overlay, moi, ticketId) {
       .insert({ ticket_id: ticketId, author_id: moi, body: texte });
     bouton.disabled = false;
     if (erreurReponse) {
-      annonce.textContent = trad('L\'envoi a échoué. Réessaie dans un instant.');
+      annonce.textContent = trad('L\'envoi a échoué. Réessayez dans un instant.');
       annonce.className = 'hint is-late';
       return;
     }
@@ -1633,14 +1633,14 @@ function openUpgradeNotice(companyId, message) {
   function phraseLimite() {
     const o = offreCourante();
     // Le PLAFOND réel (limiteOffre), pas les machines incluses dans le prix : c'est lui qui bloque l'ajout.
-    return tR('Ton offre {offre} couvre {machines}. Pour en suivre davantage, choisis une offre ci-dessous.',
+    return tR('Votre offre {offre} couvre {machines}. Pour en suivre davantage, choisissez une offre ci-dessous.',
       { offre: `<strong>${esc(trad(o.offre))}</strong>`, machines: tR('{n} machines', { n: limiteOffre() }) });
   }
   const quotaAtteint = limiteOffre() != null && UI.machines.length >= limiteOffre();
   const restreint = Boolean(message) || quotaAtteint;
-  const titre = restreint ? trad('Limite de ton offre atteinte') : trad('Les offres KALEA');
-  const eyebrowTexte = restreint ? trad('Accès limité par ton offre') : trad('Choisis ton offre');
-  const sousTitre = message ? esc(message) : (quotaAtteint ? phraseLimite() : trad('Compare les offres ci-dessous et choisis celle qui correspond à ton activité.'));
+  const titre = restreint ? trad('Limite de votre offre atteinte') : trad('Les offres KALEA');
+  const eyebrowTexte = restreint ? trad('Accès limité par votre offre') : trad('Choisissez votre offre');
+  const sousTitre = message ? esc(message) : (quotaAtteint ? phraseLimite() : trad('Comparez les offres ci-dessous et choisissez celle qui correspond à votre activité.'));
 
   // Reskin Stitch « modale_les_offres_kalea » (2026-10-01) : l'argument de
   // vente visuel passe des quotas IA (ci-dessous, désormais secondaires)
@@ -1728,7 +1728,7 @@ function openUpgradeNotice(companyId, message) {
   function piedCarte(o, estActuelle) {
     // Institution : jamais de paiement par carte ni de portail Stripe, seulement la demande de facturation sur facture.
     if (estInstitution()) {
-      if (estActuelle) return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`;
+      if (estActuelle) return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Votre offre actuelle')}</button>`;
       if (o.cle === 'free') return '';
       const classeInst = o.recommandee ? 'offre-bouton is-primaire' : 'offre-bouton is-accent';
       return `<a href="${contactFacturationInstitution(o, companyId)}" class="${classeInst}">${trad('Demander la facturation mensuelle')}${picto('mail')}</a>`;
@@ -1736,7 +1736,7 @@ function openUpgradeNotice(companyId, message) {
     // L'abonnement est l'affaire de l'administrateur : une Direction voit les offres, sans bouton pour en changer (le serveur le refuserait aussi).
     if (estDirection()) {
       return estActuelle
-        ? `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`
+        ? `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Votre offre actuelle')}</button>`
         : (o.cle === 'free' ? '' : `<div class="ui-aide">${trad('Géré par l\'administrateur')}</div>`);
     }
     if (estActuelle) {
@@ -1745,7 +1745,7 @@ function openUpgradeNotice(companyId, message) {
       // carte (le portail Stripe est générique, pas propre à une offre).
       // Le plan Gratuit n'a rien à gérer (aucun abonnement réel).
       if (!dejaAbonne) {
-        return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Ton offre actuelle')}</button>`;
+        return `<button type="button" class="offre-bouton is-neutre" disabled>${trad('Votre offre actuelle')}</button>`;
       }
       return `<button type="button" class="offre-bouton is-secondaire js-forfait-changer" id="forfait-changer-${o.cle}">${trad('Gérer mon abonnement')}</button>`;
     }
@@ -1765,7 +1765,7 @@ function openUpgradeNotice(companyId, message) {
       return `<button type="button" class="${classeChangement} js-offre-changer" id="forfait-changer-offre-${correspondante.cle}" data-offre="${correspondante.cle}">${trad(correspondante.bouton)}</button>`;
     }
     const lien = STRIPE_LIENS[correspondante.cle];
-    if (!lien) return `<div class="ui-aide">${trad('Le lien de cette offre est indisponible pour le moment. Écris-nous à support@kalea.pro.')}</div>`;
+    if (!lien) return `<div class="ui-aide">${trad('Le lien de cette offre est indisponible pour le moment. Écrivez-nous à support@kalea.pro.')}</div>`;
     const url = lien + '?client_reference_id=' + encodeURIComponent(companyId);
     urlPaiement[correspondante.cle] = url;
     const classe = o.recommandee ? 'offre-bouton is-primaire' : 'offre-bouton is-accent';
@@ -1796,7 +1796,7 @@ function openUpgradeNotice(companyId, message) {
           </div>
           <div class="offre-carte-ajoute">
             <strong>${trad('Inclus IA :')}</strong> ${ligneQuotasIA(o)}
-            <div class="offre-carte-hint">${trad('Les lectures de compteur ne consomment pas tes analyses.')}</div>
+            <div class="offre-carte-hint">${trad('Les lectures de compteur ne consomment pas vos analyses.')}</div>
           </div>
         </div>
         <div class="offre-carte-pied">${piedCarte(o, estActuelle)}</div>
@@ -1811,10 +1811,10 @@ function openUpgradeNotice(companyId, message) {
       <div class="offre-service-icone">${picto('carnet')}</div>
       <div class="offre-service-corps">
         <div class="offre-service-titre-ligne">
-          <h3>${trad('Établissement de ton plan d\'entretien')}</h3>
+          <h3>${trad('Établissement de votre plan d\'entretien')}</h3>
           <span class="offre-service-prix">${trad('29 € l\'acte')}</span>
         </div>
-        <p>${trad('Le processus ne change pas : tu nous écris depuis la fiche de la machine, l\'e-mail part pré-rempli.')}</p>
+        <p>${trad('Le processus ne change pas : vous nous écrivez depuis la fiche de la machine, l\'e-mail part pré-rempli.')}</p>
       </div>
       <a href="${contactPlanEtabli(companyId)}" class="offre-bouton is-secondaire">${trad('Demander un plan')}${picto('flecheDroite')}</a>
     </div>`;

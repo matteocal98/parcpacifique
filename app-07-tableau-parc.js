@@ -41,7 +41,7 @@ function actionsRapidesDuRole() {
   }
   if (SCHEMA.hasPannes) {
     actions.push({
-      id: 'panne', court: trad('Panne'), titre: trad('Signaler une panne'), sous: trad('Prévient le gérant : machine, gravité, arrêt'), picto: 'alerte', teinte: 'is-amber',
+      id: 'panne', court: trad('Panne'), titre: trad('Signaler une panne'), sous: trad('Prévenir le gérant : machine, gravité, arrêt'), picto: 'alerte', teinte: 'is-amber',
       agir: () => choisirMachineRapide(trad('Panne : quelle machine ?'), (m) => ouvrirSignalerPanne(m)),
     });
   }
@@ -52,7 +52,7 @@ function actionsRapidesDuRole() {
     });
   }
   if (UI.role !== 'achats') actions.push({
-    id: 'releve', court: trad('Relevé'), titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvre la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
+    id: 'releve', court: trad('Relevé'), titre: trad('Relever un compteur'), sous: trad('Heures ou kilomètres : ouvrir la fiche de la machine'), picto: 'bientot', teinte: 'is-indigo',
     agir: () => choisirMachineRapide(trad('Relevé : quelle machine ?'), (m) => ouvrirFicheParId(m.id)),
   });
   if (stockOk) {
@@ -68,7 +68,7 @@ function actionsRapidesDuRole() {
     });
   }
   actions.push({
-    id: 'scan', court: trad('Scanner'), titre: trad('Scanner un QR code'), sous: trad('Ouvre la fiche de la machine ou de la pièce'), picto: 'qrcode', teinte: 'is-royal',
+    id: 'scan', court: trad('Scanner'), titre: trad('Scanner un QR code'), sous: trad('Ouvrir la fiche de la machine ou de la pièce'), picto: 'qrcode', teinte: 'is-royal',
     agir: () => {
       if (typeof planPermetScannerQr === 'function' && !planPermetScannerQr()) {
         openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
@@ -672,7 +672,7 @@ function aiCardHtml() {
     return `
       <div class="mobile-only">
         <section class="ui-section">
-          ${teteSectionKit('carnet', trad('Manuel & carnet'), trad('Aucun carnet déposé. Dépose le PDF du fabricant : notre algorithme en extrait les échéances et propose le plan d\'entretien.'))}
+          ${teteSectionKit('carnet', trad('Manuel & carnet'), trad('Aucun carnet déposé. Déposez le PDF du fabricant : notre algorithme en extrait les échéances et propose le plan d\'entretien.'))}
           <div class="ui-section-corps"><div><button type="button" class="ui-btn ui-btn-pastille" id="ai-cta">${trad('Déposer un manuel PDF')}</button></div></div>
         </section>
       </div>`;
@@ -792,7 +792,7 @@ async function enregistrerCompteur(machine, valeurBrute) {
   // désormais un séparateur de milliers en kilométrique (stepper tactile
   // Stitch), "300 000" doit se lire correctement, pas juste "300 000" → NaN.
   const valeur = nombreDepuisTexte(valeurBrute);
-  if (valeur == null) { annoncerCompteur(machine.id, trad('Saisis un relevé.'), 'late'); return false; }
+  if (valeur == null) { annoncerCompteur(machine.id, trad('Saisissez un relevé.'), 'late'); return false; }
   if (valeur < 0) {
     annoncerCompteur(machine.id, trad('Relevé invalide : un nombre positif est attendu.'), 'late');
     return false;
@@ -847,7 +847,7 @@ async function enregistrerCompteur2(machine, valeurBrute) {
     machine.counter_value_2 = avant;
     renderApp();
     showToast(estErreurReseau(echec)
-      ? trad('Pas de connexion : le relevé n\'a pas été enregistré. Réessaie quand le réseau est de retour.')
+      ? trad('Pas de connexion : le relevé n\'a pas été enregistré. Réessayez quand le réseau est de retour.')
       : tR('Enregistrement impossible ({erreur}).', { erreur: (echec && echec.message) || trad('erreur') }));
     return false;
   }
@@ -937,7 +937,7 @@ function compteurHtml(m, emplacement, libelle, libelleBouton) {
       <div class="compteur compteur-${emplacement} compteur-lecture" data-compteur="${id}">
         <span class="compteur-titre">${trad('Compteur')}</span>
         <span class="compteur-jour-valeur">${esc(valeur == null ? '—' : formatCounter(valeur, unite))}</span>
-        <span class="compteur-note">${trad('Non couverte par ton offre : le relevé n\'est pas enregistré.')}</span>
+        <span class="compteur-note">${trad('Non couverte par votre offre : le relevé n\'est pas enregistré.')}</span>
       </div>`;
   }
   // MOBILE (fiche machine) ET STRIP SUR TÉLÉPHONE (bandeau du Parc) :
@@ -1559,7 +1559,7 @@ function blocMachinesArchiveesHtml() {
         <section class="ui-section" id="machines-archivees">
           <details>
             <summary class="ui-etiquette">${tR('Machines archivées ({n})', { n: liste.length })}</summary>
-            <div class="ui-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé. Tu peux la restaurer à tout moment.')}</div>
+            <div class="ui-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé. Vous pouvez la restaurer à tout moment.')}</div>
             <div class="ui-liste">
               ${liste.map((m) => `<div class="ui-ligne">
                 <div class="ui-ligne-textes"><span class="ui-ligne-nom">${esc(m.name)}</span><span class="ui-ligne-sous">${esc(m.brand_model || '')}</span></div>
@@ -1591,9 +1591,9 @@ VIEWS.machines = {
     if (!UI.machines.length) {
       // L'import est proposé ICI aussi : c'est là que commence un nouveau client qui a déjà la liste de son parc dans un tableur.
       const importVide = peutImporterMachines()
-        ? `<div class="ui-aide" style="margin-top:10px">${trad('Tu as déjà la liste de ton parc dans un tableur ?')}</div><div style="margin-top:8px"><button type="button" class="ui-btn ui-btn-pastille" id="fleet-import">${picto('televerser')}<span>${trad('Importer des machines')}</span></button></div>`
+        ? `<div class="ui-aide" style="margin-top:10px">${trad('Vous avez déjà la liste de votre parc dans un tableur ?')}</div><div style="margin-top:8px"><button type="button" class="ui-btn ui-btn-pastille" id="fleet-import">${picto('televerser')}<span>${trad('Importer des machines')}</span></button></div>`
         : '';
-      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Clique sur « Ajouter une machine » pour créer la première.')}</div>${importVide}</section>${blocMachinesArchiveesHtml()}</div>`;
+      return `<div class="ui-page"><section class="ui-section"><div class="ui-aide">${trad('Aucune machine enregistrée pour l\'instant. Cliquez sur « Ajouter une machine » pour créer la première.')}</div>${importVide}</section>${blocMachinesArchiveesHtml()}</div>`;
     }
     const c = UI.counts;
     const f = fleetFilters();
@@ -1910,7 +1910,7 @@ function machineCardHtml(m) {
               <span class="badge mstrip-badge ${badgeClass(info.state)}"><span class="dot"></span><span>${badgeLabel(info.state)}${(info.state === 'late' || info.state === 'soon') && deltaTexte ? ` (${deltaTexte.replace(/^[+-]/, '')})` : ''}</span></span>${puceValeur}
             </div>
             ${metaLigne || identifiant ? `<div class="mstrip-meta">${[metaLigne, identifiant ? `<span class="id">${esc(identifiant)}</span>` : null].filter(Boolean).join(' &bull; ')}</div>` : ''}
-            ${horsOffre ? `<div class="ui-aide">${trad('Non couverte par ton offre')}</div>` : ''}
+            ${horsOffre ? `<div class="ui-aide">${trad('Non couverte par votre offre')}</div>` : ''}
             ${tache ? `
             <div class="mstrip-tache is-${info.state === 'late' ? 'late' : (info.state === 'soon' ? 'soon' : 'ok')}">
               ${info.state === 'late' ? picto('alerte') : (info.state === 'soon' ? picto('bientot') : pictoEtat('ok'))}
@@ -1935,7 +1935,7 @@ function machineCardHtml(m) {
             ${segments ? `<span class="mstrip-jauge-part is-depassement" style="width:${segments.depassement}%"></span>` : ''}
           </span>
           ${etatNoteTexte(info.state) ? `<span class="mstrip-jauge-note is-${info.state}">${info.state === 'late' ? picto('alerte') : ''}${etatNoteTexte(info.state)}</span>` : ''}
-        </div>` : `<div class="mstrip-jauge desktop-only">${m.plan ? `<span class="mstrip-jauge-note">${esc(info.short)}</span>` : `<div class="mstrip-jauge-vide"><span class="card-ico">${picto('plan')}</span><div><p>${trad('Plan d\'entretien à définir')}</p><p>${trad('Configure une périodicité pour activer la jauge.')}</p></div></div>`}</div>`}
+        </div>` : `<div class="mstrip-jauge desktop-only">${m.plan ? `<span class="mstrip-jauge-note">${esc(info.short)}</span>` : `<div class="mstrip-jauge-vide"><span class="card-ico">${picto('plan')}</span><div><p>${trad('Plan d\'entretien à définir')}</p><p>${trad('Configurez une périodicité pour activer la jauge.')}</p></div></div>`}</div>`}
 
         <div class="mstrip-actions">
           <button class="mstrip-btn-principal log-intervention-btn" data-open="log" data-id="${esc(m.id)}">${picto('entretien')}<span class="lib-long">${trad('Enregistrer une intervention')}</span><span class="lib-court">${trad('Intervention')}</span></button>

@@ -253,7 +253,7 @@ function openAddWizard(companyId, categories) {
                 </div>
                 <div class="text-xs text-slate-500 pt-0.5">
                   <a id="lien-photo-web" href="https://www.google.com/search?tbm=isch&q=" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher une photo sur Google Images →')}</a>
-                  <span class="block mt-0.5">${trad('Enregistre l\'image (appui long sur téléphone), puis clique sur « Choisir une photo ». La recherche demande un fond blanc pour garder des photos homogènes.')}</span>
+                  <span class="block mt-0.5">${trad('Enregistrez l\'image (appui long sur téléphone), puis cliquez sur « Choisir une photo ». La recherche demande un fond blanc pour garder des photos homogènes.')}</span>
                 </div>
                 <input id="f-machine-photo" type="file" accept="image/*" hidden>
                 <input id="f-machine-photo-camera" type="file" accept="image/*" capture="environment" hidden>
@@ -294,7 +294,7 @@ function openAddWizard(companyId, categories) {
           <div class="bg-surface-container-low/70 rounded-xl p-5 shadow-sm">
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-current-hours">${unite.field} <span class="text-primary">*</span></label>
             <input id="f-current-hours" type="number" min="0" step="${unite.step}" inputmode="decimal" required class="w-full sm:w-1/3 h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${state.releve ?? ''}" placeholder="${unite.placeholder}">
-            <div class="text-xs text-slate-500 mt-1.5">${trad('Obligatoire : sert à calculer les premières échéances. Mets 0 si la machine est neuve.')}</div>
+            <div class="text-xs text-slate-500 mt-1.5">${trad('Obligatoire : sert à calculer les premières échéances. Mettez 0 si la machine est neuve.')}</div>
           </div>
         </section>` : '';
     overlay.innerHTML = `
@@ -360,7 +360,7 @@ function openAddWizard(companyId, categories) {
       if (!state.pendingPhotoBlob) { majBoutonFinal(); return; }
       if (demanderReleve) {
         const valeur = nombreDepuisTexte(overlay.querySelector('#f-current-hours').value);
-        if (valeur == null || valeur < 0) { erreur.textContent = trad('Indique le relevé actuel (0 si la machine est neuve).'); return; }
+        if (valeur == null || valeur < 0) { erreur.textContent = trad('Indiquez le relevé actuel (0 si la machine est neuve).'); return; }
         state.releve = valeur;
       }
       state.currentHours = compteur ? state.releve : null;
@@ -469,7 +469,7 @@ function openAddWizard(companyId, categories) {
                 <input id="f-service-date" type="date" class="w-full h-11 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.serviceDate)}" required>
               </div>
             </div>
-            <div class="text-xs text-slate-500 -mt-2">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
+            <div class="text-xs text-slate-500 -mt-2">${trad('Précisez l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
 
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-motorisation">${trad('Motorisation (facultatif)')}</label>
@@ -485,7 +485,7 @@ function openAddWizard(companyId, categories) {
             <div id="hours-field">
               <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5" for="f-current-hours"><span id="f-current-hours-label">${uniteReleve.field}</span> <span class="text-primary">*</span></label>
               <input id="f-current-hours" type="number" min="0" step="${uniteReleve.step}" inputmode="decimal" class="w-full sm:w-1/3 h-11 px-3.5 rounded-xl bg-surface-container-lowest text-sm text-on-surface font-semibold shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow" value="${state.releve ?? ''}" placeholder="${uniteReleve.placeholder}" ${state.modeCalendaireVoulu ? '' : 'required'}>
-              <div class="text-xs text-slate-500 mt-1.5">${trad('Obligatoire : sert à calculer les premières échéances. Mets 0 si la machine est neuve.')}</div>
+              <div class="text-xs text-slate-500 mt-1.5">${trad('Obligatoire : sert à calculer les premières échéances. Mettez 0 si la machine est neuve.')}</div>
             </div>
 
             <div id="dernier-entretien-bloc"${state.modeCalendaireVoulu ? ' style="display:none"' : ''}>
@@ -527,7 +527,7 @@ function openAddWizard(companyId, categories) {
                   </div>
                 </div>
                 <div class="text-[11px] text-slate-500 pt-2" id="f-duree-vie-note"></div>
-                <div class="text-[11px] text-slate-500 pt-2">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laisse vide si tu ne le sais pas, tu pourras le renseigner plus tard.')}</div>
+                <div class="text-[11px] text-slate-500 pt-2">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laissez vide si vous ne le savez pas, vous pourrez le renseigner plus tard.')}</div>
               </details>
             </div>` : ''}
           </div>
@@ -1029,7 +1029,7 @@ function openAddWizard(companyId, categories) {
       const manques = [];
       const tacheSaisie = !!(overlay.querySelector('#f-tasks')?.value || '').trim();
       const planPret = !!((overlay._aiItems && overlay._aiItems.length) || (state.items && state.items.length) || tacheSaisie);
-      if (!planPret) manques.push(trad('le plan d\'entretien (dépose le carnet ou saisis des tâches)'));
+      if (!planPret) manques.push(trad('le plan d\'entretien (déposez le carnet ou saisissez des tâches)'));
       if (!state.pendingPhotoBlob) manques.push(trad('la photo de la machine'));
       return manques;
     };
@@ -1049,13 +1049,13 @@ function openAddWizard(companyId, categories) {
       if (elementsManquants().length) { majBoutonEnregistrer(); return; }
       const dernier = state.dernierEntretien;
       if (!state.modeCalendaireVoulu && dernier && dernier.mode === 'fait') {
-        const erreurDernier = dernier.releve == null ? trad('Indique le relevé du dernier entretien, ou choisis « Je ne sais pas ».')
+        const erreurDernier = dernier.releve == null ? trad('Indiquez le relevé du dernier entretien, ou choisissez « Je ne sais pas ».')
           : (state.releve != null && dernier.releve > state.releve ? trad('Le dernier entretien ne peut pas être au-delà du relevé actuel.') : '');
         if (erreurDernier) { overlay.querySelector('#f-error').textContent = erreurDernier; overlay.querySelector('#f-dernier-releve')?.focus(); return; }
       }
       overlay.querySelector('#f-error').textContent = '';
       if (!state.modeCalendaireVoulu && state.releve == null) {
-        overlay.querySelector('#f-error').textContent = trad('Indique le relevé actuel (0 si la machine est neuve).');
+        overlay.querySelector('#f-error').textContent = trad('Indiquez le relevé actuel (0 si la machine est neuve).');
         overlay.querySelector('#f-current-hours')?.focus();
         return;
       }
@@ -1126,7 +1126,7 @@ function openAddWizard(companyId, categories) {
         <div class="pplan-section-tete">
           <div>
             <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
-            <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+            <p>${trad('Ajustez la fréquence de chaque ligne, retirez une ligne détectée par erreur, ou ajoutez les tâches manquantes.')}</p>
           </div>
         </div>
         <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
@@ -1242,7 +1242,7 @@ function openAddWizard(companyId, categories) {
     if (state.categorieManquante || !state.category) {
       if (!overlay.querySelector('#f-category')) stepFormUnique();
       const erreur = overlay.querySelector('#f-error');
-      if (erreur) erreur.textContent = trad('Indique le nom de la catégorie.');
+      if (erreur) erreur.textContent = trad('Indiquez le nom de la catégorie.');
       const champAutre = overlay.querySelector('#f-category-autre');
       if (champAutre && !champAutre.hidden && typeof champAutre.focus === 'function') champAutre.focus();
       return;
@@ -1584,7 +1584,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
       <div class="piece-resume-droite"><span class="piece-resume-mot">${trad('Total estimé')}</span><div class="piece-resume-prix">${liste.length ? texteAvecSeparateurs(total) : '—'} <span style="font-size:11px;color:var(--ink-3);">${liste.length ? esc(deviseCourte()) : ''}</span></div></div>`;
     if (bouton) {
       bouton.disabled = !liste.length;
-      bouton.querySelector('span').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisis au moins une pièce');
+      bouton.querySelector('span').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisissez au moins une pièce');
     }
   };
 
@@ -1622,7 +1622,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
       zone.innerHTML = ligneAucune + `<div class="piece-vide">
         <span class="card-ico">${picto('recherche')}</span>
         <p>${trad('Aucune pièce ne correspond')}</p>
-        <p class="muted-text">${trad('Vérifie l\'orthographe, ou choisis un autre fournisseur.')}</p>
+        <p class="muted-text">${trad('Vérifiez l\'orthographe, ou choisissez un autre fournisseur.')}</p>
       </div>`;
     } else {
       zone.innerHTML = ligneAucune + liste.map((p) => {
@@ -1666,7 +1666,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
   overlay.innerHTML = `<div class="modal">
     <div class="support-tete">
       <div class="piece-tete-gauche">
-        <div><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p class="sub">${multiple ? trad('Touche une ou plusieurs pièces, puis ajoute-les à l\'intervention.') : trad('Sélectionne une pièce pour cette intervention.')}</p></div>
+        <div><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p class="sub">${multiple ? trad('Touchez une ou plusieurs pièces, puis ajoutez-les à l\'intervention.') : trad('Sélectionnez une pièce pour cette intervention.')}</p></div>
       </div>
       <button type="button" class="mform-close" id="piece-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
     </div>
@@ -1691,7 +1691,7 @@ function ouvrirChoixPieceCatalogue(valeurActuelle, onChoisi, options = {}) {
     <div class="piece-liste${multiple ? ' is-multi' : ''}" id="piece-liste"></div>
     <div class="piece-resume" id="piece-resume"></div>
     <div class="modal-actions">
-      <button type="button" class="primary" id="piece-valider"><span>${multiple ? trad('Choisis au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
+      <button type="button" class="primary" id="piece-valider"><span>${multiple ? trad('Choisissez au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
       ${multiple && options.onLigneLibre ? `<button type="button" class="secondary" id="piece-libre">${trad('Ligne libre (hors catalogue)')}</button>` : ''}
       <button type="button" class="secondary" id="piece-annuler">${trad('Annuler')}</button>
     </div>
@@ -1805,7 +1805,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {})
     const total = liste.reduce((s, p) => s + (Number(p.unit_price) || 0), 0);
     resume.innerHTML = `<div class="piece-mobile-resume-titre-ligne"><span class="dot"></span><span class="piece-mobile-resume-nom">${liste.length ? tR('{n} pièce(s) sélectionnée(s)', { n: liste.length }) + ' · ' + texteAvecSeparateurs(total) + ' ' + esc(deviseCourte()) : trad('Aucune pièce sélectionnée')}</span></div>`;
     bouton.disabled = !liste.length;
-    bouton.querySelector('span:last-child').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisis au moins une pièce');
+    bouton.querySelector('span:last-child').textContent = liste.length ? tR('Ajouter {n} pièce(s)', { n: liste.length }) : trad('Choisissez au moins une pièce');
   };
 
   const rendreResume = (piece) => {
@@ -1837,7 +1837,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {})
       zone.innerHTML = carteAucune + `<div class="piece-mobile-vide">
         <span class="card-ico">${picto('recherche')}</span>
         <p>${trad('Aucune pièce ne correspond')}</p>
-        <p class="muted-text">${trad('Vérifie l\'orthographe, ou choisis un autre fournisseur.')}</p>
+        <p class="muted-text">${trad('Vérifiez l\'orthographe, ou choisissez un autre fournisseur.')}</p>
       </div>`;
     } else {
       zone.innerHTML = carteAucune + liste.map((p) => {
@@ -1878,7 +1878,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {})
   overlay.innerHTML = `
     <div class="piece-mobile-tete">
       <button type="button" class="piece-mobile-fermer" id="piece-m-fermer" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
-      <div class="piece-mobile-titre-bloc"><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p>${multiple ? trad('Touche plusieurs pièces') : trad('Atelier & chantier')}</p></div>
+      <div class="piece-mobile-titre-bloc"><h2>${multiple ? trad('Pièces du catalogue') : trad('Pièce du catalogue')}</h2><p>${multiple ? trad('Touchez plusieurs pièces') : trad('Atelier & chantier')}</p></div>
       <span style="width:44px;flex:0 0 auto;" aria-hidden="true"></span>
     </div>
     <div class="piece-mobile-corps">
@@ -1906,7 +1906,7 @@ function ouvrirChoixPieceCatalogueMobile(valeurActuelle, onChoisi, options = {})
       ${multiple && options.onLigneLibre ? `<button type="button" class="piece-mobile-annuler" id="piece-m-libre" style="width:100%;margin-bottom:8px;">${trad('Ligne libre (hors catalogue)')}</button>` : ''}
       <div class="piece-mobile-actions">
         <button type="button" class="piece-mobile-annuler" id="piece-m-annuler">${trad('Annuler')}</button>
-        <button type="button" class="primary piece-mobile-valider" id="piece-m-valider"><span class="card-ico">${picto('coche')}</span><span>${multiple ? trad('Choisis au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
+        <button type="button" class="primary piece-mobile-valider" id="piece-m-valider"><span class="card-ico">${picto('coche')}</span><span>${multiple ? trad('Choisissez au moins une pièce') : trad('Valider la pièce sélectionnée')}</span></button>
       </div>
     </div>`;
 
@@ -2591,7 +2591,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
               </div>
             </div>
             <div class="log-mo-ajouter-zone">
-              <button type="button" class="log-mo-ajouter" id="log-mo-ajouter" title="${esc(trad('Ajoute ce montant au total pièces & consommables ci-dessous, et remet ces deux champs à zéro'))}">${picto('croix')}<span>${trad('Ajouter')}</span></button>
+              <button type="button" class="log-mo-ajouter" id="log-mo-ajouter" title="${esc(trad('Ajoutez ce montant au total pièces & consommables ci-dessous, et remettez ces deux champs à zéro'))}">${picto('croix')}<span>${trad('Ajouter')}</span></button>
             </div>
           </div>
           <label class="log-pieces-label">${picto('boite')}${trad('Pièces détachées & consommables')}</label>
@@ -2774,12 +2774,12 @@ function openLogInterventionModal(machine, tache, options = {}) {
     const dateVal = overlay.querySelector('#log-date')?.value || today;
     const hoursVal = isCounter ? parseFloat(overlay.querySelector('#log-hours')?.value) : null;
     if (isCounter && !Number.isFinite(hoursVal)) {
-      previewEl.textContent = trad('Indique le relevé du compteur pour voir la prochaine échéance.');
+      previewEl.textContent = trad('Indiquez le relevé du compteur pour voir la prochaine échéance.');
       return;
     }
     const hoursVal2 = unit2 ? parseFloat(overlay.querySelector('#log-hours-2')?.value) : null;
     if (unit2 && !Number.isFinite(hoursVal2)) {
-      previewEl.textContent = trad('Indique le relevé du second compteur pour voir la prochaine échéance.');
+      previewEl.textContent = trad('Indiquez le relevé du second compteur pour voir la prochaine échéance.');
       return;
     }
     const suivi = tachesApresEntretien(planItems, machine.plan, machine, checkedItems, hoursVal, dateVal, hoursVal2);
@@ -2787,7 +2787,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
     if (echeance == null) {
       previewEl.textContent = checkedItems.length
         ? trad('Aucun des éléments cochés ne porte d\'échéance chiffrée : la prochaine alerte du plan ne changera pas.')
-        : trad('Coche au moins un élément pour recalculer la prochaine échéance.');
+        : trad('Cochez au moins un élément pour recalculer la prochaine échéance.');
       return;
     }
     previewEl.textContent = isCounter
@@ -2997,7 +2997,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
       const statut = overlay.querySelector('#log-facture-statut');
       const dire = (texte) => { if (statut) statut.textContent = texte || ''; };
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        dire(trad('La lecture d\'une photo nécessite une connexion — saisis le montant à la main.'));
+        dire(trad('La lecture d\'une photo nécessite une connexion — saisissez le montant à la main.'));
         return;
       }
       dire(trad('Lecture de la photo…'));
@@ -3007,21 +3007,21 @@ function openLogInterventionModal(machine, tache, options = {}) {
         const dataUrl = await blobVersDataUrl(reduite.blob);
         base64 = String(dataUrl).split(',')[1] || '';
       } catch (err) {
-        dire(tR('Photo illisible ({erreur}) — saisis le montant à la main.', { erreur: (err && err.message) || err }));
+        dire(tR('Photo illisible ({erreur}) — saisissez le montant à la main.', { erreur: (err && err.message) || err }));
         return;
       }
-      if (!base64) { dire(trad('Photo illisible — saisis le montant à la main.')); return; }
+      if (!base64) { dire(trad('Photo illisible — saisissez le montant à la main.')); return; }
       let reponse = null;
       try {
         const { data, error } = await sb.functions.invoke('lire-facture', { body: { imageBase64: base64, mimeType: 'image/jpeg' } });
         if (error) throw new Error(await functionErrorMessage(error, trad('lecture impossible')));
         reponse = data;
       } catch (err) {
-        dire(tR('Lecture impossible ({erreur}) — saisis le montant à la main.', { erreur: (err && err.message) || err }));
+        dire(tR('Lecture impossible ({erreur}) — saisissez le montant à la main.', { erreur: (err && err.message) || err }));
         return;
       }
       if (!reponse || reponse.lisible === false || reponse.montant_ttc == null) {
-        dire(trad('Je n\'ai pas réussi à lire la facture — saisis le montant à la main.'));
+        dire(trad('Je n\'ai pas réussi à lire la facture — saisissez le montant à la main.'));
         return;
       }
       // Ajouté au total (comme le bouton « Ajouter » de la main d'œuvre),
@@ -3029,7 +3029,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
       // ce montant lu (même correctif que #log-mo-ajouter, voir plus haut).
       montantHorsPieces += Number(reponse.montant_ttc) || 0;
       recalcTotalPieces();
-      dire(tR('Montant lu : {valeur} — vérifie avant d\'enregistrer.', { valeur: formatMontant(reponse.montant_ttc) }));
+      dire(tR('Montant lu : {valeur} — vérifiez avant d\'enregistrer.', { valeur: formatMontant(reponse.montant_ttc) }));
     });
   }
 
@@ -3172,7 +3172,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
     if (lignesSortie.length) {
       const besoin = new Map();
       for (const l of lignesSortie) {
-        if (!l.magasinId) { refuserSortie(tR('Choisis le magasin pour « {nom} ».', { nom: designationPiece(l.partId) })); return; }
+        if (!l.magasinId) { refuserSortie(tR('Choisissez le magasin pour « {nom} ».', { nom: designationPiece(l.partId) })); return; }
         const cle = `${l.partId}|${l.magasinId}`;
         besoin.set(cle, (besoin.get(cle) || 0) + l.quantity);
       }
@@ -3230,7 +3230,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
       // aucun doublon (identifiants fournis par l'appareil, étapes déjà faites retenues dans suiviEnregistrement).
       let minuterie = null;
       const tropLong = new Promise((resolve, reject) => {
-        minuterie = setTimeout(() => reject(new Error(trad('Le serveur ne répond pas. Rien n\'est dupliqué : appuie de nouveau sur Valider dans un instant.'))), 40000);
+        minuterie = setTimeout(() => reject(new Error(trad('Le serveur ne répond pas. Rien n\'est dupliqué : appuyez de nouveau sur Valider dans un instant.'))), 40000);
       });
       let resultatEnvoi;
       try { resultatEnvoi = await Promise.race([executerIntervention(machine, saisie, suiviEnregistrement, false), tropLong]); } finally { clearTimeout(minuterie); }
@@ -3362,7 +3362,7 @@ function ouvrirSignalerPanne(machine) {
   q('#panne-annuler').addEventListener('click', () => overlay.remove());
   q('#panne-envoyer').addEventListener('click', async () => {
     const description = q('#panne-desc').value.trim();
-    if (!description) { showToast(trad('Décris la panne en quelques mots.')); q('#panne-desc').focus(); return; }
+    if (!description) { showToast(trad('Décrivez la panne en quelques mots.')); q('#panne-desc').focus(); return; }
     const bouton = q('#panne-envoyer');
     bouton.disabled = true;
     const panne = {
@@ -3385,12 +3385,12 @@ function ouvrirSignalerPanne(machine) {
           return;
         } catch (errFile) {
           bouton.disabled = false;
-          showToast((errFile && errFile.message) || trad('Envoi impossible. Réessaie.'));
+          showToast((errFile && errFile.message) || trad('Envoi impossible. Réessayez.'));
           return;
         }
       }
       bouton.disabled = false;
-      showToast((error && error.message) || trad('Envoi impossible. Réessaie.'));
+      showToast((error && error.message) || trad('Envoi impossible. Réessayez.'));
       return;
     }
     overlay.remove();
@@ -3513,7 +3513,7 @@ async function ouvrirResolutionPanne(panne, apres) {
       ${panne.stopped ? `
       <label class="ui-etiquette" for="resolution-heures">${trad('Heures d\'arrêt (heures ouvrées)')}</label>
       <input id="resolution-heures" class="ui-champ" type="text" inputmode="decimal" value="${esc(String(estimation.heures).replace('.', ','))}" autocomplete="off">
-      <p class="ui-aide">${tR('Estimation : {j} jour(s) ouvré(s) × {h} h par jour, sans dépasser le temps écoulé. Corrige si besoin.', { j: estimation.jours, h: heuresJour })}</p>
+      <p class="ui-aide">${tR('Estimation : {j} jour(s) ouvré(s) × {h} h par jour, sans dépasser le temps écoulé. Corrigez si besoin.', { j: estimation.jours, h: heuresJour })}</p>
       <p class="ui-aide" id="resolution-cout">${taux == null ? trad('Aucun coût horaire d\'arrêt réglé pour cette machine : l\'arrêt ne sera pas chiffré.') : ''}</p>` : `<p class="ui-aide">${trad('La machine n\'était pas à l\'arrêt : aucun coût d\'arrêt.')}</p>`}
       <label class="ui-etiquette" for="resolution-note">${trad('Note (facultatif)')}</label>
       <textarea id="resolution-note" class="ui-champ" rows="2" maxlength="300"></textarea>
@@ -3544,7 +3544,7 @@ async function ouvrirResolutionPanne(panne, apres) {
     let heures = null;
     if (panne.stopped) {
       heures = lireHeures();
-      if (heures == null) { showToast(trad('Indique les heures d\'arrêt (un nombre).')); q('#resolution-heures').focus(); return; }
+      if (heures == null) { showToast(trad('Indiquez les heures d\'arrêt (un nombre).')); q('#resolution-heures').focus(); return; }
     }
     const bouton = q('#resolution-valider');
     bouton.disabled = true;

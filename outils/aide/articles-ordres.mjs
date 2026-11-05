@@ -553,7 +553,7 @@ export const ARTICLES_ORDRES = [
       description: 'Administrateur, Direction, droit de gestion, droit de saisie, droit d\'achat : ce que chaque droit d\'accès permet de voir et de faire dans KALEA.',
       intro: 'Chaque personne de la société a un <strong>droit d\'accès</strong>. Il décide de ce qu\'elle voit et de ce qu\'elle peut modifier. Les noms sont les mêmes partout dans KALEA.',
       etapes: [
-        { titre: 'Retrouvez votre droit', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Si vous n\'êtes ni administrateur ni direction, vous y lisez votre droit sous la forme « Ton accès : … ». Le gérant y voit toute l\'équipe, avec le droit de chacun.',
+        { titre: 'Retrouvez votre droit', texte: 'Ouvrez {{ui:Mon compte}}, section {{ui:Gestion de l\'équipe}}. Si vous n\'êtes ni administrateur ni direction, vous y lisez votre droit sous la forme « Votre accès : … ». Le gérant y voit toute l\'équipe, avec le droit de chacun.',
           image: { nom: 'equipe', alt: 'La carte Gestion de l\'équipe : la liste des personnes avec le droit de chacune (1) et, sur une ligne dépliée, ce que la personne peut faire (2).' } },
         { titre: 'Administrateur et Direction', texte: '<strong>Administrateur</strong> : tout, c\'est-à-dire le parc, les plans, l\'équipe et l\'abonnement.<br><strong>Direction</strong> : tout le quotidien comme l\'administrateur (parc, ordres de travail, équipe, stock, coûts…), sauf l\'abonnement, les comptes Direction et l\'identité légale.' },
         { titre: 'Droit de gestion', texte: '<strong>Droit de gestion</strong> : le parc, les entretiens, les ordres de travail et les pannes. La personne ajoute, modifie et marque « fait », mais ne gère pas l\'équipe.' },

@@ -102,7 +102,7 @@ function presenterChoixPlanEditForm(overlay, resultat, machine) {
         <span class="pplan-resume-dot"></span>
         <strong>${items.length
           ? esc(tR('{n} échéance(s) détectée(s) dans le manuel.', { n: items.length }))
-          : esc(trad('Analyse terminée : vérifie le mode de suivi ci-dessous si besoin.'))}</strong>
+          : esc(trad('Analyse terminée : vérifiez le mode de suivi ci-dessous si besoin.'))}</strong>
       </div>
     </div>
     ${items.length ? `
@@ -110,7 +110,7 @@ function presenterChoixPlanEditForm(overlay, resultat, machine) {
       <div class="pplan-section-tete">
         <div>
           <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
-          <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+          <p>${trad('Ajustez la fréquence de chaque ligne, retirez une ligne détectée par erreur, ou ajoutez les tâches manquantes.')}</p>
         </div>
       </div>
       <div class="pplan-table-wrap" style="margin-top:8px;"><div class="pplan-table-scroll">
@@ -239,7 +239,7 @@ function openManualUploadModal(presetMachine, presetFile) {
     if (!UI.machines.length) {
       shell(`
         <h2>${trad('Déposer un manuel')}</h2>
-        <p class="sub">${trad('Ajoute d\'abord une machine : le carnet d\'entretien vient compléter sa fiche.')}</p>
+        <p class="sub">${trad('Ajoutez d\'abord une machine : le carnet d\'entretien vient compléter sa fiche.')}</p>
         <div class="modal-actions">
           <button type="button" class="secondary" id="mu-close">${trad('Fermer')}</button>
           <button type="button" class="primary" id="mu-add">${trad('Ajouter une machine')}</button>
@@ -281,7 +281,7 @@ function openManualUploadModal(presetMachine, presetFile) {
               <h2>${trad('Déposer un manuel constructeur')}</h2>
               <span class="pplan-badge"><span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>${trad('Analyse locale')}</span>
             </div>
-            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
+            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Vous validez avant activation.')}</p>
           </div>
           <button type="button" class="pplan-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}"><span class="material-symbols-outlined">close</span></button>
         </div>
@@ -322,8 +322,8 @@ function openManualUploadModal(presetMachine, presetFile) {
     });
     overlay.querySelector('#mu-cancel').addEventListener('click', close);
     overlay.querySelector('#mu-start').addEventListener('click', () => {
-      if (!file) { statusEl.textContent = trad('Choisis d\'abord un fichier PDF (glisser-déposer ou clic sur la zone).'); return; }
-      if (!machine) { statusEl.textContent = trad('Choisis la machine concernée.'); return; }
+      if (!file) { statusEl.textContent = trad('Choisissez d\'abord un fichier PDF (glisser-déposer ou clic sur la zone).'); return; }
+      if (!machine) { statusEl.textContent = trad('Choisissez la machine concernée.'); return; }
       run();
     });
   }
@@ -343,7 +343,7 @@ function openManualUploadModal(presetMachine, presetFile) {
     const progress = () => overlay.querySelector('#mu-progress');
 
     try {
-      if (file.size > 15 * 1024 * 1024) throw new Error(trad('Le PDF dépasse 15 Mo, réduis sa taille avant de réessayer.'));
+      if (file.size > 15 * 1024 * 1024) throw new Error(trad('Le PDF dépasse 15 Mo, réduisez sa taille avant de réessayer.'));
 
       const path = `${UI.companyId}/${machine.id}.pdf`;
       const { error: upErr } = await sb.storage.from('manuals').upload(path, file, { upsert: true, contentType: 'application/pdf' });
@@ -361,7 +361,7 @@ function openManualUploadModal(presetMachine, presetFile) {
       shell(`
         <h2>${trad('Analyse interrompue')}</h2>
         <p class="sub">${esc(err.message)}</p>
-        <div class="hint">${trad('Le carnet n\'a peut-être pas été enregistré. Tu peux réessayer, ou renseigner le plan à la main depuis la fiche de la machine.')}</div>
+        <div class="hint">${trad('Le carnet n\'a peut-être pas été enregistré. Vous pouvez réessayer, ou renseigner le plan à la main depuis la fiche de la machine.')}</div>
         <div class="modal-actions">
           <button type="button" class="secondary" id="mu-close">${trad('Fermer')}</button>
           <button type="button" class="primary" id="mu-retry">${trad('Réessayer')}</button>
@@ -387,7 +387,7 @@ function openManualUploadModal(presetMachine, presetFile) {
               <h2>${trad('Déposer un manuel constructeur')}</h2>
               <span class="pplan-badge"><span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>${trad('Analyse locale')}</span>
             </div>
-            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Tu valides avant activation.')}</p>
+            <p class="sub" style="white-space:normal;max-width:none;">${trad('Notre algorithme repère localement les pages du tableau d\'entretien, puis propose le plan. Vous validez avant activation.')}</p>
           </div>
           <button type="button" class="pplan-close" id="mu-close-x" aria-label="${esc(trad('Fermer'))}"><span class="material-symbols-outlined">close</span></button>
         </div>
@@ -442,7 +442,7 @@ function openManualUploadModal(presetMachine, presetFile) {
   // du coût avant d'appeler cette fonction.
   async function analyserDocumentEntier(contexte) {
     const analyse = overlay.querySelector('#f-analysis');
-    if (analyse) { analyse.style.color = 'var(--ok)'; analyse.textContent = trad('Analyse automatique du carnet… (jusqu\'à 20 secondes, ne ferme pas cette fenêtre)'); }
+    if (analyse) { analyse.style.color = 'var(--ok)'; analyse.textContent = trad('Analyse automatique du carnet… (jusqu\'à 20 secondes, ne fermez pas cette fenêtre)'); }
     demarrerBarreAnalyse(overlay);
     try {
       const base64 = await fileToBase64(file);
@@ -644,7 +644,7 @@ function openManualUploadModal(presetMachine, presetFile) {
             <div class="pplan-section-tete">
               <div>
                 <h3><span class="material-symbols-outlined">checklist</span>${trad('Échéances détectées dans le manuel')}</h3>
-                <p>${trad('Ajuste la fréquence de chaque ligne, retire une ligne détectée par erreur, ou ajoute les tâches manquantes.')}</p>
+                <p>${trad('Ajustez la fréquence de chaque ligne, retirez une ligne détectée par erreur, ou ajoutez les tâches manquantes.')}</p>
               </div>
               <button type="button" class="pplan-filtrer" id="mu-filtrer-btn"><span class="material-symbols-outlined">filter_list</span>${trad('Filtrer')}</button>
             </div>
@@ -819,7 +819,7 @@ function manuelSansArchivage(file) { return !!file && file.size > MANUEL_ANALYSE
 async function envoyerGrosManuel(file, mode, context) {
   const { data: sessionData } = await sb.auth.getSession();
   const jeton = sessionData && sessionData.session ? sessionData.session.access_token : '';
-  if (!jeton) throw new Error(trad('Session expirée : reconnecte-toi pour analyser ce manuel.'));
+  if (!jeton) throw new Error(trad('Session expirée : reconnectez-vous pour analyser ce manuel.'));
   const contexte = encodeURIComponent(JSON.stringify({
     trackingMode: mode,
     currentHours: context.currentHours ?? null,
@@ -848,7 +848,7 @@ async function analyzeManualAndFill(overlay, fileOrBlob, mode = 'days', context 
   const submitBtn = overlay.querySelector('button[type=submit]');
 
   const grosDocument = manuelSansArchivage(fileOrBlob);
-  const nonConserve = trad('Manuel volumineux : il a été analysé, mais il n\'est pas conservé dans la fiche. Dépose-le à nouveau si tu veux le consulter plus tard.');
+  const nonConserve = trad('Manuel volumineux : il a été analysé, mais il n\'est pas conservé dans la fiche. Déposez-le à nouveau si vous voulez le consulter plus tard.');
   if (grosDocument && fileOrBlob.size > MANUEL_ENVOI_MAX) {
     analysisEl.style.color = 'var(--alert)';
     analysisEl.textContent = trad('Manuel trop volumineux pour être analysé (30 Mo maximum).') + " " + nonConserve;
@@ -860,8 +860,8 @@ async function analyzeManualAndFill(overlay, fileOrBlob, mode = 'days', context 
   analysisEl.style.color = 'var(--ok)';
   analysisEl.style.fontWeight = '600';
   analysisEl.textContent = grosDocument
-    ? trad('Manuel volumineux : envoi du document pour analyse… (cela peut prendre une minute, ne ferme pas cette fenêtre)')
-    : trad('Analyse automatique du carnet d\'entretien… (jusqu\'à 15-20 secondes, ne ferme pas cette fenêtre)');
+    ? trad('Manuel volumineux : envoi du document pour analyse… (cela peut prendre une minute, ne fermez pas cette fenêtre)')
+    : trad('Analyse automatique du carnet d\'entretien… (jusqu\'à 15-20 secondes, ne fermez pas cette fenêtre)');
   demarrerBarreAnalyse(overlay);
 
   try {
@@ -924,11 +924,11 @@ async function analyzeManualAndFill(overlay, fileOrBlob, mode = 'days', context 
       if (radioUnite) { radioUnite.checked = true; radioUnite.dispatchEvent(new Event('change')); }
     }
     const detailMsg = overlay._aiItems ? ` ${tR('{n} élément(s) détaillé(s) extrait(s), consultables via « Voir le plan » une fois enregistré.', { n: overlay._aiItems.length })}` : '';
-    const modeMsg = ` ℹ️ ${tR('Le carnet exprime ses échéances en {mode} : ce mode de suivi te sera proposé à l\'étape suivante, et tu pourras le corriger.', { mode: modeRecommande === 'hours' ? trad('heures') : trad('jours') })}`;
+    const modeMsg = ` ℹ️ ${tR('Le carnet exprime ses échéances en {mode} : ce mode de suivi vous sera proposé à l\'étape suivante, et vous pourrez le corriger.', { mode: modeRecommande === 'hours' ? trad('heures') : trad('jours') })}`;
     const secondaireMsg = overlay._aiUniteSecondaire
-      ? ` ℹ️ ${tR('Le carnet mélange aussi une échéance en {unite} : un second suivi te sera proposé, tu pourras le retirer.', { unite: overlay._aiUniteSecondaire === 'km' ? trad('kilomètres') : trad('heures') })}`
+      ? ` ℹ️ ${tR('Le carnet mélange aussi une échéance en {unite} : un second suivi vous sera proposé, vous pourrez le retirer.', { unite: overlay._aiUniteSecondaire === 'km' ? trad('kilomètres') : trad('heures') })}`
       : '';
-    analysisEl.textContent = `✅ ${tR('Suggestion de notre algorithme appliquée (confiance {valeur})', { valeur: data.confidence || '—' })}${data.notes ? ' — ' + data.notes : ''}.${detailMsg}${modeMsg}${secondaireMsg} ${trad('Vérifie les champs ci-dessus avant d\'enregistrer.')}`;
+    analysisEl.textContent = `✅ ${tR('Suggestion de notre algorithme appliquée (confiance {valeur})', { valeur: data.confidence || '—' })}${data.notes ? ' — ' + data.notes : ''}.${detailMsg}${modeMsg}${secondaireMsg} ${trad('Vérifiez les champs ci-dessus avant d\'enregistrer.')}`;
     // LE MANUEL VOLUMINEUX N'EST PAS GARDÉ — et on le dit sans détour : le client
     // doit savoir qu'il devra le redéposer pour le consulter plus tard.
     if (grosDocument) analysisEl.textContent += ' ' + nonConserve;
@@ -939,7 +939,7 @@ async function analyzeManualAndFill(overlay, fileOrBlob, mode = 'days', context 
     return data;
   } catch (err) {
     analysisEl.style.color = 'var(--alert)';
-    analysisEl.textContent = tR('Analyse automatique indisponible ({erreur}) — renseigne le plan manuellement.', { erreur: err.message });
+    analysisEl.textContent = tR('Analyse automatique indisponible ({erreur}) — renseignez le plan manuellement.', { erreur: err.message });
     if (grosDocument) analysisEl.textContent += ' ' + trad('Il n\'a pas été conservé dans la fiche.');
     return null;
   } finally {
@@ -1018,7 +1018,7 @@ async function brancherCarnetPhotos(overlay, fichiers, contexte, apresAnalyse) {
       break;
     }
     if (!CARNET_MIMES.includes(String(fichier.type || '').toLowerCase())) {
-      messages.push(tR('{nom} : format non pris en charge ({format}). Les photos HEIC ne sont pas lisibles — règle l\'appareil photo sur « Le plus compatible ».', {
+      messages.push(tR('{nom} : format non pris en charge ({format}). Les photos HEIC ne sont pas lisibles — réglez l\'appareil photo sur « Le plus compatible ».', {
         nom: fichier.name || 'photo', format: fichier.type || 'inconnu',
       }));
       continue;
@@ -1088,8 +1088,8 @@ async function analyserPagesCarnet(overlay, contexte, apresAnalyse) {
       // « reprends la photo » vaut mieux qu'un plan inventé.
       analyse.style.color = items.length ? 'var(--ok)' : 'var(--alert)';
       analyse.textContent = items.length
-        ? tR('{pages} page(s) analysée(s) : {n} échéance(s) extraite(s). Vérifie les champs ci-dessus avant d\'enregistrer.', { pages: pages.length, n: items.length })
-        : tR('{pages} page(s) analysée(s) : aucune échéance lisible. Reprends la photo de plus près, bien à plat, et réessaie.', { pages: pages.length });
+        ? tR('{pages} page(s) analysée(s) : {n} échéance(s) extraite(s). Vérifiez les champs ci-dessus avant d\'enregistrer.', { pages: pages.length, n: items.length })
+        : tR('{pages} page(s) analysée(s) : aucune échéance lisible. Reprenez la photo de plus près, bien à plat, et réessayez.', { pages: pages.length });
     }
     if (typeof apresAnalyse === 'function') apresAnalyse(resultat);
     return resultat;
@@ -1376,7 +1376,7 @@ async function remplirVignettes(overlay, zone, reperage) {
       zoneLignes.innerHTML = lignes.length
         ? `<span class="page-lignes-titre">${esc(trad('Lignes d\'entretien repérées :'))}</span>`
           + '<ul>' + lignes.map((l) => `<li>${esc(l.tache)} — ${esc(l.periodicite)}</li>`).join('') + '</ul>'
-        : `<span class="page-lignes-vide">${esc(trad('Le texte de cette page n\'est pas extractible ligne par ligne : ouvre-la pour vérifier.'))}</span>`;
+        : `<span class="page-lignes-vide">${esc(trad('Le texte de cette page n\'est pas extractible ligne par ligne : ouvrez-la pour vérifier.'))}</span>`;
     }
     // On rend la main : le rendu d'une page ne doit pas figer l'écran.
     await new Promise((r) => setTimeout(r, 0));
@@ -1787,7 +1787,7 @@ function messageErreurAnalyse(err, overlay) {
     return tR('Votre offre {offre} a utilisé ses {plafond} analyses de ce mois. L\'analyse reprendra le 1er du mois prochain, ou passez à une offre supérieure depuis votre abonnement. Aucun paiement supplémentaire ne vous sera demandé ici.',
       { offre: quota.offre, plafond: quota.plafond });
   }
-  return tR('Analyse indisponible ({erreur}) — renseigne le plan à la main.', { erreur: brut });
+  return tR('Analyse indisponible ({erreur}) — renseignez le plan à la main.', { erreur: brut });
 }
 
 // Branche un PDF de carnet : repérage local, puis confirmation par le client.
@@ -1813,7 +1813,7 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
     if (zone) {
       zone.innerHTML = `
         <div class="reperage-titre">${esc(trad('Repérage impossible : je ne peux pas lire ce document.'))}</div>
-        <div class="hint">${esc(trad('Tu peux analyser le document entier — le coût est annoncé avant l\'envoi.'))}</div>
+        <div class="hint">${esc(trad('Vous pouvez analyser le document entier — le coût est annoncé avant l\'envoi.'))}</div>
         <div class="modal-actions">
           <button type="button" class="pplan-btn-activer" id="btn-analyser-tout"><span>${esc(trad('Analyser tout le document'))}</span></button>
         </div>`;
@@ -1828,8 +1828,8 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
     if (analyse) {
       analyse.style.color = 'var(--ok)';
       analyse.textContent = reperage.retenues.length
-        ? tR('{n} pages du tableau d\'entretien trouvées — vérifie et confirme ci-dessous.', { n: reperage.retenues.length })
-        : trad('Aucune page de tableau d\'entretien repérée : choisis les pages toi-même, ou analyse tout le document.');
+        ? tR('{n} pages du tableau d\'entretien trouvées — vérifiez et confirmez ci-dessous.', { n: reperage.retenues.length })
+        : trad('Aucune page de tableau d\'entretien repérée : choisissez les pages vous-même, ou analysez tout le document.');
     }
     return;
   }
@@ -1837,7 +1837,7 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
   if (zone) {
     zone.innerHTML = `
       <div class="reperage-titre">${esc(trad('Ce document est une image : je ne peux pas repérer les bonnes pages.'))}</div>
-      <div class="hint">${esc(trad('Choisis les pages toi-même (gratuit), ou analyse tout le document.'))}</div>
+      <div class="hint">${esc(trad('Choisissez les pages vous-même (gratuit), ou analyse tout le document.'))}</div>
       <div class="modal-actions">
         <button type="button" class="pplan-btn-annuler" id="btn-choisir-pages">${esc(trad('Choisir les pages moi-même'))}</button>
         <button type="button" class="pplan-btn-activer" id="btn-analyser-tout"><span>${esc(tR('Analyser tout le document ({n} pages — coût élevé)', { n: reperage.total }))}</span></button>
@@ -1845,7 +1845,7 @@ async function brancherCarnetPdf(overlay, file, contexte, apresAnalyse, analyser
     const choisir = zone.querySelector('#btn-choisir-pages');
     if (choisir) choisir.addEventListener('click', () => {
       afficherReperage(overlay, reperage, contexte, apresAnalyse);
-      if (analyse) analyse.textContent = trad('Indique les numéros de page du tableau d\'entretien.');
+      if (analyse) analyse.textContent = trad('Indiquez les numéros de page du tableau d\'entretien.');
     });
     const tout = zone.querySelector('#btn-analyser-tout');
     if (tout) tout.addEventListener('click', () => analyserTout());

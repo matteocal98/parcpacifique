@@ -191,7 +191,7 @@ VIEWS.ordres = {
       root.querySelector('#ot-compte').textContent = tR('{n} ordre(s)', { n: tous.length });
       root.querySelector('#ot-liste').innerHTML = liste.length
         ? `<div class="ui-liste">${liste.map(otLigneHtml).join('')}</div>`
-        : `<div class="ui-aide">${tous.length ? trad('Aucun ordre ne correspond à ce filtre.') : (peutGererOrdres() ? trad('Aucun ordre de travail pour l\'instant. Crée le premier avec « Nouvel ordre ».') : trad('Aucun ordre ne t\'est assigné pour l\'instant.'))}</div>`;
+        : `<div class="ui-aide">${tous.length ? trad('Aucun ordre ne correspond à ce filtre.') : (peutGererOrdres() ? trad('Aucun ordre de travail pour l\'instant. Créez le premier avec « Nouvel ordre ».') : trad('Aucun ordre ne vous est assigné pour l\'instant.'))}</div>`;
     };
     UI.redessinerOrdres = dessiner;
     root.querySelector('#ot-nouveau')?.addEventListener('click', () => ouvrirFormOrdre({}));
@@ -218,7 +218,7 @@ VIEWS.ordres = {
         caseValidation.disabled = false;
         if (error) { caseValidation.checked = !voulu; msg.textContent = trad('Réglage impossible pour le moment.'); return; }
         UI.validationOrdres = voulu;
-        msg.textContent = voulu ? trad('Validation activée : les ordres terminés attendent ta validation.') : trad('Validation désactivée : un ordre terminé est clos tout de suite.');
+        msg.textContent = voulu ? trad('Validation activée : les ordres terminés attendent votre validation.') : trad('Validation désactivée : un ordre terminé est clos tout de suite.');
       });
     }
     if (typeof brancherReglageSignature === 'function') brancherReglageSignature(root);
@@ -523,7 +523,7 @@ function ouvrirOrdre(id) {
     if (act === 'refuser') {
       const motif = window.prompt(trad('Motif du refus (obligatoire) :'), '');
       if (motif === null) return;
-      if (!motif.trim()) { const msg = overlay.querySelector('#ot-msg'); msg.style.color = 'var(--danger,#c0392b)'; msg.textContent = trad('Indique le motif du refus.'); return; }
+      if (!motif.trim()) { const msg = overlay.querySelector('#ot-msg'); msg.style.color = 'var(--danger,#c0392b)'; msg.textContent = trad('Indiquez le motif du refus.'); return; }
       if (await appeler('ordre_travail_agir', { p_id: o.id, p_action: 'refuser', p_note: motif.trim() }, b)) dessiner();
       return;
     }
@@ -631,7 +631,7 @@ function ouvrirChoixMachineOrdre({ machineId = null } = {}) {
         <div class="otm-tete-textes">
           <div class="otm-tete-ligne"><span class="otm-etape">${trad('Étape 1/2')}</span><span class="otm-marque">GMAO KALEA</span></div>
           <h2 id="otc-titre">${trad('Créer un ordre de travail')}</h2>
-          <p>${trad('Sélectionne l\'équipement de la flotte nécessitant l\'intervention technique')}</p>
+          <p>${trad('Sélectionnez l\'équipement de la flotte nécessitant l\'intervention technique')}</p>
         </div>
         <button type="button" class="otm-fermer" data-otm-fermer aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
       </header>
@@ -734,7 +734,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
         <div class="otm-tete-textes">
           <div class="otm-tete-ligne"><span class="otm-etape">${edition ? 'OT-' + ordre.numero : trad('Étape 2/2')}</span><span class="otm-marque">GMAO KALEA</span></div>
           <h2 id="otf-titre">${edition ? tR('Modifier l\'ordre OT-{n}', { n: ordre.numero }).replace('OT-', 'OT‑') : trad('Nouvel ordre de travail')}</h2>
-          <p>${trad('Définis les tâches à faire, la priorité et la personne assignée')}</p>
+          <p>${trad('Définissez les tâches à faire, la priorité et la personne assignée')}</p>
         </div>
         <button type="button" class="otm-fermer" data-otm-fermer aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
       </header>
@@ -746,7 +746,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
         </div>
         <section class="otm-bloc">
           <h3 class="otm-bloc-titre">${otSymbole('checklist')}<span>${trad('Type de tâche')}</span></h3>
-          <p class="ui-aide">${trad('Coche les tâches du plan d\'entretien à faire, ou ajoute une autre tâche.')}</p>
+          <p class="ui-aide">${trad('Cochez les tâches du plan d\'entretien à faire, ou ajoutez une autre tâche.')}</p>
           <div id="otf-plan-liste"></div>
           <div id="otf-autres-liste"></div>
           <div class="ot-ajout">
@@ -765,7 +765,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
               <label class="ui-etiquette" for="otf-assigne">${trad('Assigné à')}</label>
               <select id="otf-assigne" class="ui-selecteur is-plein"><option value="">${trad('Non assigné')}</option>${assignables.map((m) => `<option value="${esc(m.id)}"${ordre && String(ordre.assigne_a) === String(m.id) ? ' selected' : ''}>${esc(m.nom_affiche)}</option>`).join('')}</select>
               <p class="ui-aide" id="otf-habilitation" role="status" aria-live="polite" hidden></p>
-              ${assigneInvalide ? `<p class="ui-aide" id="otf-assigne-alerte" style="color:var(--danger,#c0392b)">${tR('{n} n\'a pas accès aux ordres de travail (droit d\'achat) : choisis quelqu\'un d\'autre.', { n: esc(otNomEquipe(ordre.assigne_a)) })}</p>` : ''}
+              ${assigneInvalide ? `<p class="ui-aide" id="otf-assigne-alerte" style="color:var(--danger,#c0392b)">${tR('{n} n\'a pas accès aux ordres de travail (droit d\'achat) : choisissez quelqu\'un d\'autre.', { n: esc(otNomEquipe(ordre.assigne_a)) })}</p>` : ''}
             </div>
             <div class="ui-champ-groupe">
               <label class="ui-etiquette" for="otf-echeance">${trad('Échéance (facultatif)')}</label>
@@ -824,7 +824,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
             <span class="ot-choix-texte">${esc(x.label)}</span>
             ${x.info && classes[x.info.state] ? `<span class="ui-statut ${classes[x.info.state]}">${esc(x.info.short || '')}</span>` : ''}
           </label>`).join('')}</div>`
-      : `<p class="ui-aide">${trad('Cette machine n\'a pas de plan d\'entretien : ajoute les tâches ci-dessous.')}</p>`;
+      : `<p class="ui-aide">${trad('Cette machine n\'a pas de plan d\'entretien : ajoutez les tâches ci-dessous.')}</p>`;
   };
   const dessinerAutres = () => {
     q('#otf-autres-liste').innerHTML = etat.autres.length
@@ -868,7 +868,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
     const enAttente = q('#otf-autre').value.trim();
     if (enAttente && !etat.autres.includes(enAttente)) { etat.autres.push(enAttente); q('#otf-autre').value = ''; dessinerAutres(); }
     const libelles = [...new Set([...elementsCourants.map((x) => x.label).filter((l) => etat.cochees.has(l)), ...etat.autres])];
-    if (!libelles.length) { msg.textContent = trad('Coche au moins une tâche du plan ou ajoute une autre tâche.'); return; }
+    if (!libelles.length) { msg.textContent = trad('Cochez au moins une tâche du plan ou ajoutez une autre tâche.'); return; }
     const checklist = libelles.map((l) => (existantes.has(l) ? existantes.get(l) : { label: l, fait: false }));
     const titre = otTitreAuto(libelles);
     const duree = q('#otf-duree').value;
@@ -889,7 +889,7 @@ async function ouvrirFormOrdre({ ordre = null, machineId = null, panne = null, p
         p_plan: plan && machineChoisie() && machineChoisie().plan ? machineChoisie().plan.id : null, p_panne: panne ? panne.id : null,
       });
     }
-    if (reponse.error) { bouton.disabled = false; msg.textContent = reponse.error.message || trad('Enregistrement impossible. Réessaie.'); return; }
+    if (reponse.error) { bouton.disabled = false; msg.textContent = reponse.error.message || trad('Enregistrement impossible. Réessayez.'); return; }
     otMettreAJour(reponse.data);
     overlay.remove();
     showToast(edition ? trad('Ordre modifié') : tR('Ordre OT-{n} créé', { n: reponse.data.numero }));

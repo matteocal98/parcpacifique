@@ -96,7 +96,7 @@ async function ouvrirQrMachine(machine) {
       <div id="qr-zone" style="display:flex;justify-content:center;align-items:center;min-height:300px;margin:16px 0;">
         <span class="muted">${trad('Génération…')}</span>
       </div>
-      <p class="hint">${trad('Colle ce QR code sur la machine : le scanner (menu Machines) ouvre directement cette fiche.')}</p>
+      <p class="hint">${trad('Collez ce QR code sur la machine : le scanner (menu Machines) ouvre directement cette fiche.')}</p>
       <div class="modal-actions">
         <button type="button" class="secondary" id="qr-imprimer" disabled>${trad('Imprimer')}</button>
         <button type="button" class="primary" id="qr-telecharger" disabled>${picto('export')}<span>${trad('Télécharger')}</span></button>
@@ -218,7 +218,7 @@ async function ouvrirScannerQr(options = {}) {
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
   } catch (err) {
-    if (zone) zone.innerHTML = `<span class="muted" style="color:#fff;">${esc(trad('Accès à la caméra refusé. Vérifie les réglages de ton téléphone ou de ton navigateur.'))}</span>`;
+    if (zone) zone.innerHTML = `<span class="muted" style="color:#fff;">${esc(trad('Accès à la caméra refusé. Vérifiez les réglages de votre téléphone ou de votre navigateur.'))}</span>`;
     return;
   }
   // La modale a pu être fermée pendant qu'on attendait la permission : on ne
@@ -433,7 +433,7 @@ function openMachineModal(companyId, categories, existing) {
               <input class="h-10 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-year" type="number" inputmode="numeric" min="1950" max="2100" placeholder="${trad('Ex. 2019')}" value="${isEdit && machineYear(existing) ? machineYear(existing) : ''}">
             </div>
           </div>
-          <div class="hint">${trad('Précise l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
+          <div class="hint">${trad('Précisez l\'année : un même modèle change parfois beaucoup d\'une version à l\'autre — la fiche et la photo aussi.')}</div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
             <div class="flex flex-col gap-space-xs">
@@ -483,7 +483,7 @@ function openMachineModal(companyId, categories, existing) {
             </div>
             <div class="hint" id="f-duree-vie-note"></div>
             <div class="hint">${trad('L\'amortissement (en années) sert à comparer le coût d\'entretien à la dépréciation annuelle de la machine (jauge Garder/Remplacer) ; sans lui, la jauge se base sur le cumul entretien / prix d\'achat. La durée de vie (en heures ou en km) sert à afficher la part de vie déjà consommée de la machine.')}</div>
-            <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laisse vide ce que tu ne connais pas encore.')}</div>
+            <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laissez vide ce que vous ne connaissez pas encore.')}</div>
           </div>` : ''}
         </section>
 
@@ -685,13 +685,13 @@ function openMachineModal(companyId, categories, existing) {
           ${isEdit && (peutArchiverMachine() || peutSupprimerMachine()) ? `
           <div class="machine-actions-sous">
             ${peutArchiverMachine() ? `<div class="machine-action-ligne">
-              <button class="machine-action machine-action-archiver" type="button" id="archive-machine" title="${esc(trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.'))}"><span class="material-symbols-outlined">inventory_2</span><span class="machine-action-libelle">${trad('Archiver cette machine')}</span></button>
+              <button class="machine-action machine-action-archiver" type="button" id="archive-machine" title="${esc(trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et vous pouvez la restaurer.'))}"><span class="material-symbols-outlined">inventory_2</span><span class="machine-action-libelle">${trad('Archiver cette machine')}</span></button>
               <button type="button" class="ui-info-btn" id="archive-info" aria-label="${esc(trad('Afficher l\'explication'))}" aria-expanded="false">i</button>
             </div>
-            <div class="hint info-bulle-texte machine-archive-aide" id="archive-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et tu peux la restaurer.')}</div>` : ''}
+            <div class="hint info-bulle-texte machine-archive-aide" id="archive-aide">${trad('Une machine archivée n\'est plus facturée ni suivie ; son historique est conservé et vous pouvez la restaurer.')}</div>` : ''}
             ${peutSupprimerMachine() ? `<button class="machine-action machine-action-supprimer delete-link" type="button" id="delete-machine"><span class="material-symbols-outlined">delete</span><span class="machine-action-libelle">${trad('Supprimer cette machine')}</span></button>` : ''}
           </div>` : ''}
-          ${isEdit && !peutSupprimerMachine() ? `<div class="hint" id="machine-suppr-refus">${trad('Seul le gérant peut supprimer une machine : tu peux la modifier, pas l\'effacer.')}</div>` : ''}
+          ${isEdit && !peutSupprimerMachine() ? `<div class="hint" id="machine-suppr-refus">${trad('Seul le gérant peut supprimer une machine : vous pouvez la modifier, pas l\'effacer.')}</div>` : ''}
         </div>
       </form>
     </div>
@@ -835,7 +835,7 @@ function openMachineModal(companyId, categories, existing) {
     const pastilleArchive = overlay.querySelector('#archive-info');
     if (pastilleArchive) pastilleArchive._cible = overlay.querySelector('#archive-aide');
     overlay.querySelector('#archive-machine')?.addEventListener('click', async (e) => {
-      if (!window.confirm(tR('Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et tu pourras la restaurer.', { nom: existing.name }))) return;
+      if (!window.confirm(tR('Archiver « {nom} » ? Elle ne sera plus facturée ni suivie (échéances, rappels, alertes). Son historique est conservé et vous pourrez la restaurer.', { nom: existing.name }))) return;
       const btn = e.currentTarget;
       btn.disabled = true;
       const { error } = await sb.from('machines').update({ archived: true, archived_at: new Date().toISOString() }).eq('id', existing.id);
@@ -1014,7 +1014,7 @@ function openMachineModal(companyId, categories, existing) {
       const champAutre = overlay.querySelector('#f-category-autre');
       const choix = overlay.querySelector('#f-category').value.trim();
       if (!choix || (champAutre && !champAutre.hidden && !champAutre.value.trim())) {
-        if (errorEl) errorEl.textContent = trad('Indique le nom de la catégorie.');
+        if (errorEl) errorEl.textContent = trad('Indiquez le nom de la catégorie.');
         if (champAutre && !champAutre.hidden && typeof champAutre.focus === 'function') champAutre.focus();
         return;
       }
@@ -1887,7 +1887,7 @@ async function boot(toastMessage) {
     .order('name');
 
   UI.companyId = profile.company_id;
-  UI.companyName = company?.name || trad('Ta société');
+  UI.companyName = company?.name || trad('Votre société');
   UI.companyPlan = company?.plan || 'free';
   // Le rôle vient de `profiles.role`. Vide = rôle INCONNU, et c'est un cas à part
   // entière : l'écran ne suppose alors rien et dit pourquoi (voir la carte Équipe).

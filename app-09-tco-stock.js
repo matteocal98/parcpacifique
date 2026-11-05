@@ -200,7 +200,7 @@ function blocSeuilsCategorieTcoHtml() {
           ${picto('ampoule')}
           <div>
             <span class="ui-encadre-titre">${trad('Comment fixer un seuil cohérent ?')}</span>
-            <p>${trad('C\'est le coût horaire au-delà duquel une machine de cette catégorie est signalée comme trop chère à l\'usage (classement TCO, tableau de bord). Vise un chiffre légèrement AU-DESSUS de ta moyenne actuelle plutôt qu\'égal à elle — sinon la moitié de ta flotte serait signalée en permanence. Les boutons sous chaque catégorie proposent un point de départ calculé sur tes propres machines.')}</p>
+            <p>${trad('C\'est le coût horaire au-delà duquel une machine de cette catégorie est signalée comme trop chère à l\'usage (classement TCO, tableau de bord). Visez un chiffre légèrement AU-DESSUS de votre moyenne actuelle plutôt qu\'égal à elle — sinon la moitié de votre flotte serait signalée en permanence. Les boutons sous chaque catégorie proposent un point de départ calculé sur vos propres machines.')}</p>
           </div>
         </div>
         ${!gerant ? `<div class="ui-aide">${trad('Réservé au gérant.')}</div>` : ''}
@@ -303,7 +303,7 @@ function blocCoutArretTcoHtml() {
           </div></div>`).join('')}
         </div>
         <label class="ui-case"><input type="checkbox" id="tco-arret-inclus"${tcoArretInclus() ? ' checked' : ''}> ${trad('Inclure le coût d\'arrêt dans le TCO total')}</label>
-        <div class="ui-aide">${trad('Laisse vide une catégorie dont l\'arrêt n\'a pas de coût : ses pannes ne seront pas chiffrées. Une machine peut avoir son propre coût horaire dans sa fiche (Modifier la machine).')}</div>
+        <div class="ui-aide">${trad('Laissez vide une catégorie dont l\'arrêt n\'a pas de coût : ses pannes ne seront pas chiffrées. Une machine peut avoir son propre coût horaire dans sa fiche (Modifier la machine).')}</div>
         <div class="ui-aide" id="tco-arret-msg" role="status" aria-live="polite"></div>
         <div><button type="button" class="ui-btn ui-btn-plein" id="tco-save-arret"${bloque}>${picto('coche')}<span>${trad('Enregistrer le coût d\'arrêt')}</span></button></div>
       </div>
@@ -1028,7 +1028,7 @@ function ouvrirImportCatalogue() {
             <div class="import-csv-icone">${picto('boite')}</div>
             <div>
               <h2>${trad('Importer le catalogue depuis un CSV')}</h2>
-              <p class="import-csv-sous-titre">${trad('Mets à jour tes pièces et tarifs en un clic')}</p>
+              <p class="import-csv-sous-titre">${trad('Mettez à jour vos pièces et tarifs en un clic')}</p>
             </div>
           </div>
           <button type="button" class="log-close2" id="import-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
@@ -1055,7 +1055,7 @@ function ouvrirImportCatalogue() {
               </div>`).join('')}
             <div class="import-csv-regle is-accent">
               <div class="import-csv-regle-icone is-primaire">${picto('rafraichir')}</div>
-              <div><strong>${trad('Mise à jour intelligente :')}</strong> ${trad('une pièce dont la Référence existe déjà dans ton catalogue est')} <span class="import-csv-souligne">${trad('mise à jour')}</span>${trad(', pas dupliquée.')}</div>
+              <div><strong>${trad('Mise à jour intelligente :')}</strong> ${trad('une pièce dont la Référence existe déjà dans votre catalogue est')} <span class="import-csv-souligne">${trad('mise à jour')}</span>${trad(', pas dupliquée.')}</div>
             </div>
           </div>
         </div>
@@ -1513,7 +1513,7 @@ VIEWS.tco = {
         }
         if (!root.isConnected || !section.isConnected) return;
         if (!flotte) {
-          if (valueEl) valueEl.textContent = trad('Aucune machine avec un prix d\'achat renseigné pour l\'instant — ajoute-le sur la fiche d\'une machine pour la voir apparaître ici.');
+          if (valueEl) valueEl.textContent = trad('Aucune machine avec un prix d\'achat renseigné pour l\'instant — ajoutez-le sur la fiche d\'une machine pour la voir apparaître ici.');
           return;
         }
         if (valueEl) valueEl.remove();
@@ -2078,7 +2078,7 @@ function ouvrirExplicationPump() {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pump-titre">
       <h2 id="pump-titre">${trad('Principe de valorisation PUMP')}</h2>
-      <p class="sub">${trad('Prix Unitaire Moyen Pondéré — la méthode utilisée par ce module pour donner une valeur réelle à ton stock.')}</p>
+      <p class="sub">${trad('Prix Unitaire Moyen Pondéré — la méthode utilisée par ce module pour donner une valeur réelle à votre stock.')}</p>
       <div class="ui-aide" style="margin-top:10px;line-height:1.6;">
         <p>${trad('À chaque entrée de stock, le coût moyen d\'une référence est recalculé en pondérant l\'ancien stock par son ancien coût, et la quantité entrante par son coût d\'achat réel :')}</p>
         <p style="margin-top:8px;font-family:'Space Grotesk',monospace;background:var(--surface);padding:10px 12px;border-radius:var(--r-md);">${trad('nouveau coût = (stock × ancien coût + entrée × prix d\'achat) / (stock + entrée)')}</p>
@@ -2154,7 +2154,7 @@ function ligneMagasinHtml(w) {
 function blocMagasinsStockHtml() {
   const magasins = UI.warehouses || [];
   const gerant = peutGererParametresStock();
-  const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="ui-aide">${trad('Aucun magasin pour l\'instant — crée le magasin central pour commencer.')}</div>`;
+  const liste = magasins.length ? magasins.map(ligneMagasinHtml).join('') : `<div class="ui-aide">${trad('Aucun magasin pour l\'instant — créez le magasin central pour commencer.')}</div>`;
   return `
     <section class="ui-section" id="stock-magasins-section">
       ${teteSectionKit('batiment', trad('Magasins'), trad('Magasin central ou magasin mobile (fourgon d\'un technicien) — chaque référence du catalogue peut avoir un stock différent dans chacun.'),
@@ -2499,7 +2499,7 @@ function ouvrirEditionKit(kit) {
       const qte = nombreDepuisTexte(ligneEl.querySelector('[data-kit-ligne-qte]').value);
       return partId && qte > 0 ? { part_id: partId, quantity: qte } : null;
     }).filter(Boolean);
-    if (!lignesSaisies.length) { dire(trad('Ajoute au moins une pièce avec une quantité.'), true); return; }
+    if (!lignesSaisies.length) { dire(trad('Ajoutez au moins une pièce avec une quantité.'), true); return; }
 
     geler(true);
     dire(trad('Enregistrement…'), false);
@@ -2646,7 +2646,7 @@ function ouvrirModaleEmplacementStock(partIdInitial, magasinIdInitial) {
   overlay.querySelector('#emplacement-fermer').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#emplacement-go').addEventListener('click', async () => {
     const bouton = overlay.querySelector('#emplacement-go');
-    if (!selPiece.value || !selMagasin.value) { msg.textContent = trad('Choisis un article et un magasin.'); return; }
+    if (!selPiece.value || !selMagasin.value) { msg.textContent = trad('Choisissez un article et un magasin.'); return; }
     bouton.disabled = true;
     msg.textContent = '';
     try {
@@ -2756,8 +2756,8 @@ function ouvrirFichePieceStock(partId) {
         <div class="ligne-info"><span>${trad('Stock total')}</span><strong>${esc(texteAvecSeparateurs(total))}${esc(unite)}</strong></div>
       </div>
       ${lignes.length
-        ? `<div class="ui-champ-groupe"><strong>${trad('Choisis le magasin à ouvrir')}</strong>${lignes.map((it) => `<button type="button" class="ui-btn ui-btn-pastille" data-fiche-magasin="${esc(it.warehouse_id)}">${esc(nomMagasin(it.warehouse_id))}${it.location ? ' · ' + esc(it.location) : ''} — ${esc(texteAvecSeparateurs(it.quantity))}</button>`).join('')}</div>`
-        : `<div class="ui-aide">${trad('Cette référence n\'est plus en stock : aucune ligne dans les magasins. Fais une entrée pour la remettre en stock.')}</div>`}
+        ? `<div class="ui-champ-groupe"><strong>${trad('Choisissez le magasin à ouvrir')}</strong>${lignes.map((it) => `<button type="button" class="ui-btn ui-btn-pastille" data-fiche-magasin="${esc(it.warehouse_id)}">${esc(nomMagasin(it.warehouse_id))}${it.location ? ' · ' + esc(it.location) : ''} — ${esc(texteAvecSeparateurs(it.quantity))}</button>`).join('')}</div>`
+        : `<div class="ui-aide">${trad('Cette référence n\'est plus en stock : aucune ligne dans les magasins. Faites une entrée pour la remettre en stock.')}</div>`}
       <div class="modal-actions">
         <button type="button" class="ui-btn ui-btn-pastille" id="fiche-piece-fermer">${trad('Fermer')}</button>
         ${peutGererMouvementsStock() ? `<button type="button" class="ui-btn ui-btn-plein" id="fiche-piece-mouvement">${picto('plusCercle')}<span>${trad('Nouveau mouvement de stock')}</span></button>` : ''}
@@ -3109,7 +3109,7 @@ function ouvrirModaleEtiquettes(options = {}) {
   overlay.querySelector('#etiquettes-go').addEventListener('click', async () => {
     const boutonGo = overlay.querySelector('#etiquettes-go');
     const choisies = coches();
-    if (!choisies.length) { msg.textContent = source === 'catalogue' ? trad('Coche au moins une référence.') : trad('Coche au moins une ligne.'); return; }
+    if (!choisies.length) { msg.textContent = source === 'catalogue' ? trad('Cochez au moins une référence.') : trad('Cochez au moins une ligne.'); return; }
     const copies = Math.max(1, Math.min(10, Math.round(Number(overlay.querySelector('#etiquettes-copies').value) || 1)));
     const debut = Math.max(1, Math.min(24, Math.round(Number(overlay.querySelector('#etiquettes-debut').value) || 1)));
     const lignes = choisies.flatMap((it) => Array(copies).fill(it));
@@ -3215,7 +3215,7 @@ function ouvrirNouveauMouvementModal(prefill) {
         <select id="mvt-intervention" disabled>
           <option value="">${trad('Choisir une machine d\'abord')}</option>
         </select>
-        <p class="ui-aide">${trad('Si cette sortie a déjà été saisie via « Enregistrer une intervention », ne la lie pas ici aussi — le coût serait compté deux fois.')}</p>
+        <p class="ui-aide">${trad('Si cette sortie a déjà été saisie via « Enregistrer une intervention », ne la liez pas ici aussi — le coût serait compté deux fois.')}</p>
       </div>
       <label for="mvt-motif" style="margin-top:8px;display:block;">${trad('Motif / note (optionnel)')}</label>
       <input id="mvt-motif" placeholder="${trad('Ex : bon de livraison, casse, inventaire…')}">
@@ -3291,9 +3291,9 @@ function ouvrirNouveauMouvementModal(prefill) {
     const interventionId = (type === 'sortie' && overlay.querySelector('#mvt-intervention')?.value) || null;
     const motif = overlay.querySelector('#mvt-motif').value.trim() || null;
 
-    if (!partId) { dire(trad('Choisis une pièce.'), true); return; }
-    if (!warehouseId) { dire(trad('Choisis un magasin.'), true); return; }
-    if (type === 'transfert' && (!destId || destId === warehouseId)) { dire(trad('Choisis un magasin de destination différent du magasin source.'), true); return; }
+    if (!partId) { dire(trad('Choisissez une pièce.'), true); return; }
+    if (!warehouseId) { dire(trad('Choisissez un magasin.'), true); return; }
+    if (type === 'transfert' && (!destId || destId === warehouseId)) { dire(trad('Choisissez un magasin de destination différent du magasin source.'), true); return; }
     if (!qty || qty <= 0) { dire(trad('Quantité invalide.'), true); return; }
     if (type === 'entree' && (cout == null || cout < 0)) { dire(trad('Coût unitaire requis pour une entrée.'), true); return; }
 
@@ -3429,7 +3429,7 @@ function ouvrirImportMouvementsStock() {
             <div class="import-csv-icone">${picto('televerser')}</div>
             <div>
               <h2>${trad('Importer des mouvements depuis un CSV')}</h2>
-              <p class="import-csv-sous-titre">${trad('Enregistre plusieurs entrées de stock en une fois')}</p>
+              <p class="import-csv-sous-titre">${trad('Enregistrez plusieurs entrées de stock en une fois')}</p>
             </div>
           </div>
           <button type="button" class="log-close2" id="import-mvt-fermer-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
@@ -3691,7 +3691,7 @@ function ouvrirNouvelInventaire(surCree) {
         <input id="invnew-label" class="ui-champ" maxlength="80" placeholder="${trad('Ex : Inventaire annuel')}">
         <label for="invnew-zone"><strong>${trad('Zone (optionnel)')}</strong></label>
         <input id="invnew-zone" class="ui-champ" maxlength="60" placeholder="${trad('Ex : A-')}">
-        <div class="ui-aide">${trad('Une zone limite l\'inventaire aux emplacements qui commencent par ce texte. Laisse vide pour compter tout le magasin.')}</div>
+        <div class="ui-aide">${trad('Une zone limite l\'inventaire aux emplacements qui commencent par ce texte. Laissez vide pour compter tout le magasin.')}</div>
         <label class="ui-case"><input type="checkbox" id="invnew-aveugle"> ${trad('Comptage en aveugle (les quantités théoriques sont cachées à ceux qui comptent)')}</label>
       </div>
       <div id="invnew-msg" role="status" aria-live="polite"></div>
@@ -3706,7 +3706,7 @@ function ouvrirNouvelInventaire(surCree) {
     const bouton = overlay.querySelector('#invnew-go');
     const msg = overlay.querySelector('#invnew-msg');
     const magasinId = overlay.querySelector('#invnew-magasin').value;
-    if (!magasinId) { msg.textContent = trad('Choisis un magasin.'); return; }
+    if (!magasinId) { msg.textContent = trad('Choisissez un magasin.'); return; }
     bouton.disabled = true;
     msg.textContent = '';
     try {
@@ -4109,7 +4109,7 @@ function blocFournisseursStockHtml() {
   const gerant = peutAcheter();
   return `
     <section class="ui-section" id="stock-fournisseurs-section">
-      ${teteSectionKit('mallette', trad('Fournisseurs'), trad('Contacts, délais et conditions de tes fournisseurs de pièces'),
+      ${teteSectionKit('mallette', trad('Fournisseurs'), trad('Contacts, délais et conditions de vos fournisseurs de pièces'),
         `<span class="ui-tag" id="stock-fournisseurs-badge">${tR('{n} fournisseur(s)', { n: (UI.suppliers || []).length })}</span>${gerant ? `<button type="button" class="ui-btn ui-btn-pastille" id="stock-fournisseur-nouveau">${picto('plusCercle')}<span>${trad('Nouveau fournisseur')}</span></button>` : ''}`)}
       <div class="ui-section-corps">
         ${gerant ? '' : `<div class="ui-aide">${trad('Réservé au gérant et au droit d\'achat.')}</div>`}
@@ -4336,7 +4336,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
     <div class="modal export-modal fournisseur-modal a-croix" role="dialog" aria-modal="true" aria-labelledby="fo-titre">
       <header class="fo-entete">
         <h2 id="fo-titre">${f ? esc(f.name) : trad('Nouveau fournisseur')}</h2>
-        <p class="sub" id="fo-hero-sous">${f ? esc([f.legal_name, f.city].filter(Boolean).join(' · ')) : trad('Remplis ce que tu connais : le reste peut venir plus tard.')}</p>
+        <p class="sub" id="fo-hero-sous">${f ? esc([f.legal_name, f.city].filter(Boolean).join(' · ')) : trad('Remplissez ce que vous connaissez : le reste peut venir plus tard.')}</p>
         <div class="fo-completude" title="${esc(trad('Part des informations utiles pour passer commande'))}">
           <span class="fo-completude-texte" id="fo-completude-texte"></span>
           <span class="fo-completude-barre"><span id="fo-completude-remplie"></span></span>
@@ -4475,7 +4475,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
     }
     if (e.target.id === 'fo-legal_name' || e.target.id === 'fo-city') {
       const sous = [q('#fo-legal_name')?.value.trim(), q('#fo-city')?.value.trim()].filter(Boolean).join(' · ');
-      q('#fo-hero-sous').textContent = sous || trad('Remplis ce que tu connais : le reste peut venir plus tard.');
+      q('#fo-hero-sous').textContent = sous || trad('Remplissez ce que vous connaissez : le reste peut venir plus tard.');
     }
     majCompletude();
   });
@@ -4531,7 +4531,7 @@ function ouvrirEditionFournisseur(f, surEnregistre) {
       champsBanque().forEach((c) => { valeursBanque[c.k] = (q('#fo-bk_' + c.k).value || '').trim() || null; });
       if (valeursBanque.iban) valeursBanque.iban = valeursBanque.iban.replace(/\s+/g, '').toUpperCase();
       if (valeursBanque.bic) valeursBanque.bic = valeursBanque.bic.replace(/\s+/g, '').toUpperCase();
-      if (valeursBanque.iban && !ibanValide(valeursBanque.iban)) { msg.textContent = trad('IBAN invalide : vérifie les caractères et la clé de contrôle.'); q('#fo-bk_iban').closest('details').open = true; q('#fo-bk_iban').focus(); return; }
+      if (valeursBanque.iban && !ibanValide(valeursBanque.iban)) { msg.textContent = trad('IBAN invalide : vérifiez les caractères et la clé de contrôle.'); q('#fo-bk_iban').closest('details').open = true; q('#fo-bk_iban').focus(); return; }
       if (valeursBanque.bic && !bicValide(valeursBanque.bic)) { msg.textContent = trad('BIC invalide (8 ou 11 caractères).'); q('#fo-bk_bic').focus(); return; }
     }
     bouton.disabled = true;
@@ -5183,7 +5183,7 @@ function ouvrirBonDeCommande(g) {
   overlay.innerHTML = `
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="bon-titre">
       <h2 id="bon-titre">${trad('Bon de commande')} — ${esc(g.nom)}</h2>
-      <p class="sub">${trad('Vérifie le bon, puis imprime-le (ou enregistre-le en PDF), copie-le ou envoie-le par e-mail. Il n\'est pas encore enregistré dans l\'application.')}</p>
+      <p class="sub">${trad('Vérifiez le bon, puis imprimez-le (ou enregistrez-le en PDF), copiez-le ou envoyez-le par e-mail. Il n\'est pas encore enregistré dans l\'application.')}</p>
       <div class="achats-bon-apercu" id="bon-apercu"></div>
       <div class="ui-champ-groupe">
         <label for="bon-ref"><strong>${trad('Référence du bon')}</strong></label>
@@ -5222,8 +5222,8 @@ function ouvrirBonDeCommande(g) {
   const apercu = () => {
     const lignes = g.lignes.filter(ligneEstInclue);
     q('#bon-apercu').innerHTML = lignes.length
-      ? `<table class="achats-bon-table"><tbody>${lignes.map((l) => `<tr><td>${esc(l.piece.designation)}${l.piece.reference ? `<span class="ui-ligne-sous">${esc(l.piece.reference)}</span>` : ''}</td><td class="n"><input class="ui-champ achats-bon-qte" type="text" inputmode="decimal" data-bon-qte="${esc(l.id)}" value="${esc(String(quantiteAchat(l)))}" aria-label="${esc(tR('Quantité de {nom}', { nom: l.piece.designation }))}"></td></tr>`).join('')}</tbody></table><div class="achats-bon-total" id="bon-total"></div><div class="ui-aide is-late" id="bon-aide-vide" hidden>${trad('Aucune ligne à commander : mets une quantité sur au moins une pièce.')}</div>`
-      : `<div class="ui-aide is-late">${trad('Aucune ligne à commander : coche au moins une pièce avec une quantité.')}</div>`;
+      ? `<table class="achats-bon-table"><tbody>${lignes.map((l) => `<tr><td>${esc(l.piece.designation)}${l.piece.reference ? `<span class="ui-ligne-sous">${esc(l.piece.reference)}</span>` : ''}</td><td class="n"><input class="ui-champ achats-bon-qte" type="text" inputmode="decimal" data-bon-qte="${esc(l.id)}" value="${esc(String(quantiteAchat(l)))}" aria-label="${esc(tR('Quantité de {nom}', { nom: l.piece.designation }))}"></td></tr>`).join('')}</tbody></table><div class="achats-bon-total" id="bon-total"></div><div class="ui-aide is-late" id="bon-aide-vide" hidden>${trad('Aucune ligne à commander : mettez une quantité sur au moins une pièce.')}</div>`
+      : `<div class="ui-aide is-late">${trad('Aucune ligne à commander : cochez au moins une pièce avec une quantité.')}</div>`;
     majTotalBon();
   };
   apercu();
@@ -5259,7 +5259,7 @@ function ouvrirBonDeCommande(g) {
     q('#bon-ref').readOnly = true;
     bouton.hidden = true;
     overlay.querySelectorAll('[data-bon-qte]').forEach((c) => { c.readOnly = true; }); // la commande est enregistrée avec ces quantités : plus de modification
-    q('#bon-msg').textContent = tR('Commande {ref} enregistrée (brouillon). Imprime-la ou envoie-la, puis marque-la envoyée depuis la liste des commandes.', { ref: data.reference });
+    q('#bon-msg').textContent = tR('Commande {ref} enregistrée (brouillon). Imprimez-la ou envoyez-la, puis marquez-la envoyée depuis la liste des commandes.', { ref: data.reference });
     showToast(trad('Commande enregistrée'));
     const racine = document.getElementById('view-root');
     if (racine) { await rafraichirCommandes(racine); rafraichirAchats(racine); }
@@ -5268,7 +5268,7 @@ function ouvrirBonDeCommande(g) {
   q('#bon-copier').addEventListener('click', async () => {
     const texte = texteBonDeCommande(g, infos());
     try { await navigator.clipboard.writeText(texte); q('#bon-msg').textContent = trad('Bon copié dans le presse-papiers.'); }
-    catch (e) { q('#bon-msg').textContent = trad('Copie impossible sur cet appareil : utilise « Imprimer / PDF ».'); }
+    catch (e) { q('#bon-msg').textContent = trad('Copie impossible sur cet appareil : utilisez « Imprimer / PDF ».'); }
   });
   q('#bon-email')?.addEventListener('click', async (e) => {
     const bouton = e.currentTarget;
@@ -5289,10 +5289,10 @@ function ouvrirBonDeCommande(g) {
       const nom = `${i.reference}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
       await telechargerFichierBinaire(new Blob([eml], { type: 'message/rfc822' }), `${nom}.eml`, 'message/rfc822');
       q('#bon-msg').textContent = emailDest
-        ? trad('Brouillon téléchargé : ouvre le fichier .eml (double-clic) pour l\'écrire dans ton logiciel de messagerie, avec le fournisseur en destinataire et le bon en PDF joint. Rien ne s\'ouvre ? Utilise « Copier » ou « Imprimer / PDF ».')
-        : trad('Brouillon téléchargé : ouvre le fichier .eml (double-clic), le bon est en PDF joint. Ce fournisseur n\'a pas d\'adresse e-mail : renseigne-la dans sa fiche pour qu\'elle soit préremplie.');
+        ? trad('Brouillon téléchargé : ouvrez le fichier .eml (double-clic) pour l\'écrire dans votre logiciel de messagerie, avec le fournisseur en destinataire et le bon en PDF joint. Rien ne s\'ouvrez ? Utilisez « Copier » ou « Imprimer / PDF ».')
+        : trad('Brouillon téléchargé : ouvrez le fichier .eml (double-clic), le bon est en PDF joint. Ce fournisseur n\'a pas d\'adresse e-mail : renseignez-la dans sa fiche pour qu\'elle soit préremplie.');
     } catch (err) {
-      q('#bon-msg').textContent = trad('Préparation impossible :') + ' ' + ((err && err.message) || trad('erreur inconnue')) + ' — ' + trad('utilise « Copier » ou « Imprimer / PDF ».');
+      q('#bon-msg').textContent = trad('Préparation impossible :') + ' ' + ((err && err.message) || trad('erreur inconnue')) + ' — ' + trad('utilisez « Copier » ou « Imprimer / PDF ».');
     } finally {
       bouton.disabled = !lignesDuBon(g).length;
     }
@@ -5385,7 +5385,7 @@ function dessinerCommandes(root) {
     ? (ouvertes.length ? '' : `<div class="ui-aide">${trad('Aucune commande en cours.')}</div>`)
       + ouvertes.map(ligneCommandeHtml).join('')
       + (closes.length ? `<details class="commandes-historique"><summary>${tR('Historique ({n})', { n: closes.length })}</summary><div class="ui-liste">${closes.slice(0, 30).map(ligneCommandeHtml).join('')}</div></details>` : '')
-    : `<div class="ui-aide">${trad('Aucune commande enregistrée. Prépare un bon ci-dessus puis enregistre-le.')}</div>`;
+    : `<div class="ui-aide">${trad('Aucune commande enregistrée. Préparez un bon ci-dessus puis enregistrez-le.')}</div>`;
 }
 async function rafraichirCommandes(root) {
   const zone = root.querySelector('#commandes-liste');
@@ -5485,7 +5485,7 @@ function ouvrirReceptionCommande(c, lignes, rafraichir) {
   overlay.innerHTML = `
     <div class="modal export-modal achats-bon-modal" role="dialog" aria-modal="true" aria-labelledby="rec-titre">
       <h2 id="rec-titre">${trad('Réceptionner')} ${esc(c.reference)}</h2>
-      <p class="sub">${trad('Indique ce qui est réellement arrivé. Chaque quantité reçue entre en stock dans le magasin choisi, au prix indiqué (il alimente le coût moyen du stock).')}</p>
+      <p class="sub">${trad('Indiquez ce qui est réellement arrivé. Chaque quantité reçue entre en stock dans le magasin choisi, au prix indiqué (il alimente le coût moyen du stock).')}</p>
       <div class="ui-champ-groupe">
         <label for="rec-magasin"><strong>${trad('Magasin de réception')}</strong></label>
         <div class="ui-select-wrap"><select id="rec-magasin" class="ui-champ">${magasins.map((w) => `<option value="${esc(w.id)}"${String(w.id) === String(defaut) ? ' selected' : ''}>${esc(w.name)}</option>`).join('')}</select>${picto('chevronBas')}</div>
@@ -5525,7 +5525,7 @@ function ouvrirReceptionCommande(c, lignes, rafraichir) {
       const id = el.getAttribute('data-rec-ligne');
       return { line_id: id, quantity: nombrePositif(q(`[data-rec-qte="${CSS.escape(id)}"]`).value, 0), unit_cost: nombrePositif(q(`[data-rec-cout="${CSS.escape(id)}"]`).value, 0) };
     }).filter((x) => x.quantity > 0);
-    if (!recues.length) { msg.textContent = trad('Indique au moins une quantité reçue.'); return; }
+    if (!recues.length) { msg.textContent = trad('Indiquez au moins une quantité reçue.'); return; }
     bouton.disabled = true;
     msg.textContent = trad('Enregistrement…');
     const { error } = await sb.rpc('receptionner_commande', { p_order_id: c.id, p_warehouse_id: q('#rec-magasin').value, p_lines: recues, p_note: q('#rec-note').value.trim() || null });

@@ -52,7 +52,7 @@ const FAITS         = [
     fr: 'Rappels d\'échéance par notification.', en: 'Due-date reminders by notification.',
     preuve: 'seo-config.mjs APPLICATION.fonctions[2] (reformulé le 2026-11-02 : « avant panne » promettait plus que ce qu\'on peut prouver)' },
   { id: 'service-plan-29', sujet: 'offre', statut: 'verifie', verifie_le: '2026-11-02', mots: ['29 €', '29€', '€29', 'plaque constructeur', 'manufacturer plate'],
-    fr: 'Service « Établissement de ton plan d\'entretien » : 29 € l\'acte. Sur photo de la plaque constructeur, KALEA recherche et configure le plan complet dans l\'application.', en: 'Maintenance-plan setup service: €29 per plan. From a photo of the manufacturer plate, KALEA researches and configures the full plan in the application.',
+    fr: 'Service « Établissement de votre plan d\'entretien » : 29 € l\'acte. Sur photo de la plaque constructeur, KALEA recherche et configure le plan complet dans l\'application.', en: 'Maintenance-plan setup service: €29 per plan. From a photo of the manufacturer plate, KALEA researches and configures the full plan in the application.',
     preuve: 'parcpacifique/decouvrir.html (bloc service, 29 € l\'acte) ; confirmé d\'actualité par le propriétaire le 2026-11-02' },
   { id: 'message-cle', sujet: 'message', statut: 'verifie', verifie_le: '2026-11-02', mots: [],
     fr: 'Évitez les pannes faute d\'un suivi efficace.', en: 'Avoid breakdowns caused by weak maintenance tracking.',

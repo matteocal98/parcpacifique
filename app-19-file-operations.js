@@ -50,7 +50,7 @@ async function fileMiennes() {
 
 // Met une opération en file. Lance une erreur si l'appareil ne peut pas la garder durablement.
 async function fileAjouter(type, payload, resume, etapes) {
-  if (!(await fileDisponible())) throw new Error(trad('Ce navigateur ne peut pas garder l\'action sur l\'appareil : attends le réseau pour l\'enregistrer.'));
+  if (!(await fileDisponible())) throw new Error(trad('Ce navigateur ne peut pas garder l\'action sur l\'appareil : attendez le réseau pour l\'enregistrer.'));
   const op = {
     id: nouvelIdentifiant(), type, companyId: UI.companyId, userId: UI.userId, creeA: Date.now(),
     payload, resume: resume || {}, etat: 'attente', etapes: { ...(etapes || {}) }, tentatives: 0, erreur: null,
@@ -270,7 +270,7 @@ async function ouvrirFileOperations() {
 async function fileConfirmerDeconnexion() {
   const restantes = await fileMiennes();
   if (!restantes.length) return true;
-  if (!window.confirm(tR('{n} action(s) n\'ont pas encore été envoyées et seront PERDUES si tu te déconnectes. Te déconnecter quand même ?', { n: restantes.length }))) return false;
+  if (!window.confirm(tR('{n} action(s) n\'ont pas encore été envoyées et seront PERDUES si vous vous déconnectez. Se déconnecter quand même ?', { n: restantes.length }))) return false;
   for (const op of restantes) await fileSupprimer(op.id);
   UI.fileEnAttente = 0; UI.fileEnErreur = 0;
   return true;

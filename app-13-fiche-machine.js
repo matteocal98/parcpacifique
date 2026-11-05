@@ -135,8 +135,8 @@ function demanderReleveSecondSuivi(mode, confirmer, valeurInitiale) {
         <button type="button" class="mform-close" id="second-compteur-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
       <p class="sub">${km
-        ? trad('Cette fréquence est en kilomètres, mais la machine n\'est pas encore suivie en kilomètres. KALEA ajoute ce suivi automatiquement : indique le kilométrage actuel.')
-        : trad('Cette fréquence est en heures, mais la machine n\'est pas encore suivie en heures. KALEA ajoute ce compteur automatiquement : indique le relevé actuel.')}</p>
+        ? trad('Cette fréquence est en kilomètres, mais la machine n\'est pas encore suivie en kilomètres. KALEA ajoute ce suivi automatiquement : indiquez le kilométrage actuel.')
+        : trad('Cette fréquence est en heures, mais la machine n\'est pas encore suivie en heures. KALEA ajoute ce compteur automatiquement : indiquez le relevé actuel.')}</p>
       <div class="field-row">
         <div>
           <label for="second-compteur-valeur">${km ? trad('Kilométrage actuel') : trad('Relevé actuel')}</label>
@@ -158,7 +158,7 @@ function demanderReleveSecondSuivi(mode, confirmer, valeurInitiale) {
   overlay.querySelector('#second-compteur-annuler').addEventListener('click', fermer);
   const valider = async () => {
     const valeur = nombreDepuisTexte(champ.value);
-    if (valeur == null || valeur < 0) { erreur.textContent = trad('Indique le relevé actuel (0 si la machine est neuve).'); return; }
+    if (valeur == null || valeur < 0) { erreur.textContent = trad('Indiquez le relevé actuel (0 si la machine est neuve).'); return; }
     erreur.textContent = '';
     bouton.disabled = true;
     bouton.textContent = trad('Enregistrement…');
@@ -291,7 +291,7 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
         <div class="mform-tete-titre"><h2>${esc(item.label || '')}</h2></div>
         <button type="button" class="mform-close" id="choix-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
-      <p class="sub">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</p>
+      <p class="sub">${trad('Fréquence d\'entretien : à vous de choisir selon votre usage.')}</p>
       ${item.interval_choisi ? `<div class="choix-retenu"><span class="card-ico">${picto('ajuste')}</span>${esc(tR('Actuellement retenu : {choix}', { choix: trad(item.interval_choisi) }))}</div>` : ''}
 
       ${options.length ? `
@@ -308,7 +308,7 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
           <div class="mform-head-gauche"><span class="mform-section-ico">${picto('crayon')}</span><h3>${trad('Personnalisation libre')}</h3></div>
           <span class="mform-eyebrow">${trad('Option sur mesure')}</span>
         </div>
-        <p class="muted-text">${trad('Si tes conditions d\'usage demandent une périodicité différente de ce que propose le carnet.')}</p>
+        <p class="muted-text">${trad('Si vos conditions d\'usage demandent une périodicité différente de ce que propose le carnet.')}</p>
         <div class="field-row">
           <div>
             <label for="choix-valeur">${trad('Valeur')}</label>
@@ -375,7 +375,7 @@ function openChoixFrequence(machine, item, companyId, categories, planScrollTop)
   const appliquer = async (choix, boutonClique) => {
     const erreur = overlay.querySelector('#choix-erreur');
     if (!choix.pointDeControle && !(Number(choix.interval) > 0)) {
-      erreur.textContent = trad('Renseigne une valeur supérieure à zéro.');
+      erreur.textContent = trad('Renseignez une valeur supérieure à zéro.');
       return;
     }
     const items = appliquerChoixTache(plan.items, item.label, choix, plan, machine);
@@ -485,7 +485,7 @@ function ouvrirChoixFrequenceApercu(item, plan, machine, onChoix) {
         <div class="mform-tete-titre"><h2>${esc(item.label || trad('Nouvelle tâche'))}</h2></div>
         <button type="button" class="mform-close" id="choix-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
-      <p class="sub">${trad('Fréquence d\'entretien : à toi de choisir selon ton usage.')}</p>
+      <p class="sub">${trad('Fréquence d\'entretien : à vous de choisir selon votre usage.')}</p>
       ${item.interval_choisi ? `<div class="choix-retenu"><span class="card-ico">${picto('ajuste')}</span>${esc(tR('Actuellement retenu : {choix}', { choix: trad(item.interval_choisi) }))}</div>` : ''}
 
       ${options.length ? `
@@ -502,7 +502,7 @@ function ouvrirChoixFrequenceApercu(item, plan, machine, onChoix) {
           <div class="mform-head-gauche"><span class="mform-section-ico">${picto('crayon')}</span><h3>${trad('Personnalisation libre')}</h3></div>
           <span class="mform-eyebrow">${trad('Option sur mesure')}</span>
         </div>
-        <p class="muted-text">${trad('Si tes conditions d\'usage demandent une périodicité différente de ce que propose le carnet.')}</p>
+        <p class="muted-text">${trad('Si vos conditions d\'usage demandent une périodicité différente de ce que propose le carnet.')}</p>
         <div class="field-row">
           <div>
             <label for="choix-valeur">${trad('Valeur')}</label>
@@ -538,7 +538,7 @@ function ouvrirChoixFrequenceApercu(item, plan, machine, onChoix) {
   const appliquer = (choix) => {
     const erreur = overlay.querySelector('#choix-erreur');
     if (!choix.pointDeControle && !(Number(choix.interval) > 0)) {
-      erreur.textContent = trad('Renseigne une valeur supérieure à zéro.');
+      erreur.textContent = trad('Renseignez une valeur supérieure à zéro.');
       return;
     }
     fermer();
@@ -673,7 +673,7 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
         <option value="">${trad('— Aucun kit —')}</option>
         ${kits.map((k) => `<option value="${esc(k.id)}"${item.kit_id === k.id ? ' selected' : ''}>${esc(k.name)}</option>`).join('')}
       </select>
-      ${!kits.length ? `<p class="hint">${trad('Aucun kit actif pour l\'instant — tu peux quand même associer une pièce seule ci-dessous, ou en créer un depuis Stocks & SAV.')}</p>` : ''}
+      ${!kits.length ? `<p class="hint">${trad('Aucun kit actif pour l\'instant — vous pouvez quand même associer une pièce seule ci-dessous, ou en créer un depuis Stocks & SAV.')}</p>` : ''}
       <div class="hint" style="margin:10px 0;">${trad('— ou —')}</div>
       <label for="kit-tache-piece-select">${trad('Pièce seule du catalogue (sans créer de kit)')}</label>
       <select id="kit-tache-piece-select">
@@ -686,7 +686,7 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
           <input id="kit-tache-piece-qte" type="text" inputmode="decimal" value="${ligneActuelle ? esc(texteAvecSeparateurs(ligneActuelle.quantity)) : '1'}">
         </div>
       </div>
-      ${!pieces.length ? `<p class="hint">${trad('Aucune pièce dans le catalogue pour l\'instant — ajoute-la depuis Stocks & SAV.')}</p>` : ''}
+      ${!pieces.length ? `<p class="hint">${trad('Aucune pièce dans le catalogue pour l\'instant — ajoutez-la depuis Stocks & SAV.')}</p>` : ''}
       <div class="hint" id="kit-tache-erreur"></div>
       <div class="modal-actions">
         <button type="button" class="secondary" id="kit-tache-annuler">${trad('Annuler')}</button>
@@ -724,7 +724,7 @@ function ouvrirChoixKitTache(machine, item, index, companyId, categories, planSc
     const pieceId = selectPiece.value || null;
     const qte = pieceId ? nombreDepuisTexte(overlay.querySelector('#kit-tache-piece-qte').value) : null;
     if (pieceId && !(qte > 0)) {
-      erreur.textContent = trad('Renseigne une quantité supérieure à zéro.');
+      erreur.textContent = trad('Renseignez une quantité supérieure à zéro.');
       return;
     }
     erreur.textContent = '';
@@ -1251,7 +1251,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
           </div>
           <span class="fm-card-sub" id="operating-costs-total"></span>
         </div>
-        <p class="fm-card-sub" style="margin-bottom:10px;">${trad('Carburant, assurance, taxe, stockage… Pour en ajouter un, utilise « Enregistrer un entretien » sur la carte de cette machine.')}</p>
+        <p class="fm-card-sub" style="margin-bottom:10px;">${trad('Carburant, assurance, taxe, stockage… Pour en ajouter un, utilisez « Enregistrer un entretien » sur la carte de cette machine.')}</p>
         <div class="fm-card-sub" id="operating-costs-liste">${trad('Chargement…')}</div>
       </section>` : ''}
 
@@ -1483,7 +1483,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
     }
     const subject = encodeURIComponent(tR('Historique entretien — {machine}', { machine: machine.name }));
     const bodyLines = historyData.slice(0, 20).map(h => `${h.performed_at} — ${h.hours_at_intervention != null ? h.hours_at_intervention + trad('h') : ''} — ${(h.items_done || []).join(', ')}${nomOperateurTexte(h) ? ' — ' + nomOperateurTexte(h) : ''} — ${h.description || ''}`);
-    const body = encodeURIComponent(`${tR('Historique des entretiens pour {machine}', { machine: machine.name })} :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si tu veux le joindre en pièce jointe.)')}`);
+    const body = encodeURIComponent(`${tR('Historique des entretiens pour {machine}', { machine: machine.name })} :\n\n${bodyLines.join('\n')}\n\n${trad('(Le fichier CSV complet est disponible via « Exporter en CSV » si vous voulez le joindre en pièce jointe.)')}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   });
 
