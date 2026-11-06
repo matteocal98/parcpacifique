@@ -2668,6 +2668,9 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
   .mstrip-liste.is-tuiles,#fleet-list.is-tuiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
   .mstrip-liste.is-tuiles .mstrip-corps{padding:8px;gap:6px;}
   .mstrip-liste.is-tuiles .mstrip-photo{height:84px;}
+  /* La règle « petite photo des cartes » (max-width:700px, plus haut) fixait l'image à 68×56 px même en tuiles : la photo de la machine
+     ne remplissait qu'un bandeau de la tuile sur téléphone. En tuiles, l'image prend toute la zone photo. */
+  .mstrip-liste.is-tuiles .mstrip-photo img{width:100%;height:100%;object-fit:cover;}
   .mstrip-liste.is-tuiles .mstrip-nom{font-size:13px;}
 }
 /* Statistiques sur téléphone : filtres compacts (période sur une ligne, catégorie et machine côte à côte). */
