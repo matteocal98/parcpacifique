@@ -1658,10 +1658,10 @@ function openSignupWizard() {
         <div class="mform-tete-titre"><span class="card-ico card-ico-plein">${picto('ajoutPersonne')}</span><h2>${trad('Créer un compte')}</h2></div>
         <button type="button" class="mform-close" id="su-close-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
       </div>
-      <div class="callout">
+      ${estAppliIOS() ? '' : `<div class="callout">
         <span class="card-ico">${picto('info')}</span>
         <span>${trad('Offre Gratuit : 2 machines. Offre Starter / Artisan : 12 €/mois, 5 machines, puis 2 € par machine en plus. Offre Business / Flotte : 39 €/mois, 20 machines et utilisateurs illimités, puis 1,50 € par machine en plus. Offre Enterprise / Parc : 79 €/mois, 40 machines, puis 1 € par machine (dégressif dès 150 machines). Aucune limite de machines en offre payante.')}</span>
-      </div>
+      </div>`}
       <form id="signup-form">
         <label>${trad('Type de structure')} <span class="requis">*</span></label>
         <div class="mform-cards" id="su-type-cards">

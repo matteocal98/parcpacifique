@@ -557,7 +557,7 @@ function openAddWizard(companyId, categories) {
             <div class="pages-utiles" id="pages-utiles"></div>
             <div class="hint" id="f-analysis"></div>
 
-            <div class="bg-tertiary-light rounded-xl p-4 sm:p-5 shadow-card border-l-4 border-tertiary-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            ${estAppliIOS() ? '' : `<div class="bg-tertiary-light rounded-xl p-4 sm:p-5 shadow-card border-l-4 border-tertiary-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div class="flex items-start gap-3">
                 <div class="w-10 h-10 rounded-xl bg-tertiary-container/15 text-tertiary-container flex items-center justify-center shrink-0 mt-0.5">
                   <span class="material-symbols-outlined text-xl">contact_support</span>
@@ -570,7 +570,7 @@ function openAddWizard(companyId, categories) {
               <button type="button" id="btn-plan-payant" class="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-tertiary-container hover:bg-tertiary-container-hover text-white text-xs font-bold transition-all shadow-subtle">
                 <span>${trad('Demander l\'établissement de mon plan — 29 €')}</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
-            </div>
+            </div>`}
             <div class="text-xs text-slate-500"><a id="lien-manuel-web" href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline">${trad('Chercher le manuel du fabricant sur le web →')}</a>
               <div class="mt-1"><a id="lien-manuel-atelier" href="https://www.google.com/search?q=${queryAtelier}" target="_blank" rel="noopener" class="text-slate-500 font-semibold hover:underline" title="${trad("Plus détaillé (réparations, couples de serrage), mais souvent plus long et parfois payant. Le manuel d'utilisation suffit en général pour le planning d'entretien.")}">${trad("Manuel d'atelier (service manual) →")}</a></div></div>
           </div>

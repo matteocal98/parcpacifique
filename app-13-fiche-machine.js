@@ -10,6 +10,14 @@
  *   · Choix de la fréquence d'une tâche
  */
 // ───────────────────────── début du code ─────────────────────────
+// ── Photo de la fiche machine : paysage → le cadre est REMPLI (cover), portrait → la photo est montrée en entier (contain) ──
+// Le CSS ne sait pas distinguer les deux : on marque l'image « is-paysage » quand elle est chargée (voir kit.css, fin de fichier).
+// Écoute posée sur le document (l'événement « load » ne remonte pas, d'où la phase de capture) : couvre toutes les fiches, présentes et futures.
+document.addEventListener('load', (e) => {
+  const img = e.target;
+  if (!img || img.tagName !== 'IMG' || !img.closest || !img.closest('.fm2-o1-photo-box, .fm2-o2-photo-box')) return;
+  img.classList.toggle('is-paysage', img.naturalWidth >= img.naturalHeight * 1.15);
+}, true);
 // ── TCO flotte (phase 2) — fetch en masse ────────────────────────
 // Jusqu'ici (fetchAllInterventions/fetchOperatingCosts ci-dessus)
 // toujours UNE machine à la fois. Le classement flotte a besoin des coûts

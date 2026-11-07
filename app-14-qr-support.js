@@ -542,7 +542,7 @@ function openMachineModal(companyId, categories, existing) {
           <div class="pages-utiles" id="pages-utiles"></div>
           <div class="hint" id="f-analysis">${trad('Le PDF du fabricant reste attaché à la fiche, consultable par n\'importe quel technicien. S\'il est fourni, notre algorithme propose un intervalle et des tâches à partir de son contenu.')}</div>
           <div id="plan-choix-zone"></div>
-          <div class="p-space-md rounded-xl bg-tertiary-fixed/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-sm">
+          ${estAppliIOS() ? '' : `<div class="p-space-md rounded-xl bg-tertiary-fixed/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-sm">
             <div class="flex items-center gap-space-md">
               <div class="w-10 h-10 rounded-lg bg-tertiary-container text-on-tertiary flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-[22px]">contact_support</span></div>
               <div class="flex flex-col">
@@ -551,7 +551,7 @@ function openMachineModal(companyId, categories, existing) {
               </div>
             </div>
             <button class="px-space-md py-2.5 rounded-lg bg-tertiary-container text-on-tertiary font-label-sm text-label-sm font-bold hover:opacity-95 transition-opacity shadow-sm flex items-center gap-space-xs flex-shrink-0" type="button" id="btn-plan-payant"><span class="material-symbols-outlined text-[18px]">verified_user</span>${trad('Demander l\'établissement de mon plan — 29 €')}</button>
-          </div>
+          </div>`}
         </section>
 
         <section class="flex flex-col gap-space-md" id="bloc-mode-suivi" data-mode-defaut="${esc(editMode)}" data-interval-defaut="${isEdit ? esc(editInterval) : FALLBACK_INTERVAL_DAYS}">

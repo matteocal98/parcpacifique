@@ -1879,6 +1879,10 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
   .parc-section .ui-section-acces .fleet-ajouter{flex:1 1 auto;}
 }
 
+/* ── Photo de la fiche machine : une photo en PAYSAGE remplit le cadre (légèrement recadrée), une photo en PORTRAIT reste entière.
+   La classe « is-paysage » est posée par le script de app-13-fiche-machine.js au chargement de l'image. ── */
+.fm2-o1-photo-box img.is-paysage,.fm2-o2-photo-box img.is-paysage{object-fit:cover;}
+
 /* ── Fiche machine sur téléphone (phase 4) : barre d'actions sur une ligne, tâches sans lignes vides, TCO replié ── */
 .lib-court{display:none;}
 .fm-btn-primary .lib-court{display:none;}
