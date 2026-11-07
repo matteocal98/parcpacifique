@@ -611,7 +611,7 @@ textarea:not([data-x]),
   .fm2-hero{padding:12px;}
   .fm2-grid{gap:10px;}
   .fm2-o2-photo,.fm2-o2-photo-box{height:130px;}
-  .fm2-o2-photo-box img{height:118px;object-fit:contain;}
+  .fm2-o2-photo-box img{height:100%;object-fit:contain;}
   .fm2-o2-main{gap:10px;}
   .fm2-o2-ligne1{padding-bottom:8px;gap:8px;}
   .fm2-compteur-entete-o2{padding:6px 10px;gap:12px;}
@@ -824,7 +824,7 @@ textarea:not([data-x]),
   .bm-nom{font-size:14px;}
   .bm-page{font-size:10px;}
   .bm-compte{width:30px;height:30px;}
-  .content{padding-top:44px;padding-bottom:60px;}
+  .content{padding-top:calc(44px + var(--safe-top));padding-bottom:60px;}
   .tabbar{padding:2px 6px calc(2px + var(--safe-bottom));transition:transform .25s ease;}
   .tab{min-height:34px;padding:2px 0;flex-direction:row;justify-content:center;gap:6px;}
   .tab-fab{flex:0 0 46px;}
@@ -905,7 +905,9 @@ textarea:not([data-x]),
 /* ── Téléphone en portrait : bandeau du haut flottant (comme en paysage) pour pouvoir s'effacer sans décaler la page ── */
 @media (max-width:899px) and (orientation:portrait){
   .barre-mobile{position:fixed;left:0;right:0;top:var(--safe-top);z-index:20;transition:transform .25s ease;}
-  .content{padding-top:62px;}
+  /* + la marge d'encoche : le bandeau est posé SOUS elle (top:var(--safe-top)), donc le contenu doit la réserver aussi,
+     sinon sur iPhone les ~47 premiers pixels de la page (titre, boutons d'onglet) passent sous le bandeau. Zéro sur Android. */
+  .content{padding-top:calc(62px + var(--safe-top));}
   .tabbar{transition:transform .25s ease;}
   body.barres-masquees .barre-mobile{transform:translateY(-115%);}
   body.barres-masquees .tabbar{transform:translateY(115%);}
@@ -1017,7 +1019,7 @@ textarea:not([data-x]),
   /* fiche machine : photo à gauche, informations à droite ; indicateurs sur une ligne */
   .fm2-grid{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;}
   .fm2-o2-photo,.fm2-o2-photo-box{height:110px;}
-  .fm2-o2-photo-box img{height:98px;}
+  .fm2-o2-photo-box img{height:100%;}
   .fm-kpi-row{grid-template-columns:repeat(4,minmax(0,1fr));}
   .fm-toolbar{grid-template-columns:repeat(4,minmax(0,1fr));}
   .fm-toolbar .fm-btn-primary{grid-column:auto;}
@@ -1881,14 +1883,18 @@ html[data-theme="dark"] .overlay .modal .modal-actions .ui-btn-pastille{box-shad
 .lib-court{display:none;}
 .fm-btn-primary .lib-court{display:none;}
 @media (max-width:560px){
-  .plan-modal .fm-toolbar{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-bottom:10px;}
-  .plan-modal .fm-toolbar .fm-btn-primary{order:-1;flex:1 1 auto;min-width:0;height:44px;justify-content:center;white-space:nowrap;}
+  /* Barre d'actions : « Intervention » sur toute la largeur (avant : sur la même ligne que cinq carrés de 44 px, il ne lui
+     restait qu'environ 95 px pour une icône + le mot, qui en demandent 130 → le texte dépassait des deux côtés).
+     Les boutons secondaires se partagent la ligne du dessous à parts égales : plus de largeur fixe, rien ne peut dépasser. */
+  .plan-modal .fm-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:10px;}
+  .plan-modal .fm-toolbar .fm-btn-primary{order:-1;flex:1 1 100%;min-width:0;height:44px;justify-content:center;white-space:nowrap;}
   .plan-modal .fm-toolbar .fm-btn-primary .lib-long{display:none;}
   .plan-modal .fm-toolbar .fm-btn-primary .lib-court{display:inline;}
-  .plan-modal .fm-toolbar .fm-btn-secondaire{flex:0 0 44px;width:44px;height:44px;min-width:44px;padding:0;justify-content:center;}
+  .plan-modal .fm-toolbar .fm-btn-secondaire{flex:1 1 0;width:auto;height:44px;min-width:0;padding:0;justify-content:center;}
   .plan-modal .fm-toolbar .fm-btn-secondaire > span:not([class^="fm-btn-ico"]){display:none;}
   .plan-fil-ariane > :not(.plan-fil-retour){display:none;}
-  .fm2-o2-photo-box{height:104px;}
+  /* Photo : cadre un peu plus haut ET image à 100 % du cadre (avant : cadre 104 px mais image forcée à 118 px → rognée en haut et en bas) */
+  .fm2-o2-photo-box{height:140px;}
   .plan-modal .fm2-mini-carte-o2{padding:6px 10px;}
   .tache-carte{padding:10px 12px;}
   .tache-carte .tache-titre{margin-bottom:6px;}
