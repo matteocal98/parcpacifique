@@ -373,7 +373,9 @@ textarea:not([data-x]),
   .bm-logo,.bm-logo svg{width:32px;height:32px;}
   .bm-nom{font-size:16px;}
   .bm-compte{width:38px;height:38px;}
-  .content{padding:10px 14px 96px;}
+  /* bas de page : + la marge des gestes de l'iPhone (--safe-bottom, 34 px), car la barre du bas est montée d'autant ; sans elle le dernier
+     contenu (liens Mentions légales / CGU / Confidentialité de « Mon compte »…) restait sous la barre. Zéro sur Android. */
+  .content{padding:10px 14px calc(96px + var(--safe-bottom));}
   .head-title h1{font-size:28px;line-height:32px;}
   /* blocs */
   .ui-section{padding:12px;gap:10px;margin:0 0 12px;}
@@ -839,7 +841,7 @@ textarea:not([data-x]),
   .bm-nom{font-size:14px;}
   .bm-page{font-size:10px;}
   .bm-compte{width:30px;height:30px;}
-  .content{padding-top:calc(44px + var(--safe-top));padding-bottom:60px;}
+  .content{padding-top:calc(44px + var(--safe-top));padding-bottom:calc(60px + var(--safe-bottom));}
   .tabbar{padding:2px 6px calc(2px + var(--safe-bottom));transition:transform .25s ease;}
   .tab{min-height:34px;padding:2px 0;flex-direction:row;justify-content:center;gap:6px;}
   .tab-fab{flex:0 0 46px;}
