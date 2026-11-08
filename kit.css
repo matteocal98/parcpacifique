@@ -636,6 +636,21 @@ textarea:not([data-x]),
   .pplan-foot > button{flex:1 1 0;min-width:0;justify-content:center;}
   .pplan-dropzone{padding:10px;}
   .pplan-note{padding:8px 10px;}
+  /* Tableau des échéances détectées (Élément / Fréquence / Actions) : sur téléphone il faisait au moins 460 px de large dans une carte
+     d'environ 340 px, donc la colonne « Modifier » sortait de l'écran (texte coupé « Modifi… »). Chaque ligne est empilée :
+     1) l'élément, 2) la fréquence, 3) les boutons Modifier + Supprimer sur toute la largeur. Les trois fenêtres qui l'utilisent
+     (assistant d'ajout, analyse du carnet, plan enregistré) partagent ces classes. */
+  .pplan-table{min-width:0;}
+  .pplan-table thead{display:none;}
+  .pplan-table,.pplan-table tbody,.pplan-table tr,.pplan-table td{display:block;width:100%;box-sizing:border-box;}
+  .pplan-table tbody tr{padding:12px 14px;}
+  .pplan-table td{padding:0;}
+  .pplan-table td.pplan-elt{display:flex;}
+  .pplan-table td.pplan-freq-valeur{margin-top:4px;font-size:12.5px;line-height:1.4;color:var(--ink-3);}
+  .pplan-table td:last-child{margin-top:10px;}
+  .pplan-table .pplan-actions-cell{justify-content:stretch;}
+  .pplan-table .pplan-btn-modifier{flex:1 1 auto;min-width:0;min-height:36px;justify-content:center;white-space:nowrap;}
+  .pplan-table .pplan-btn-supprimer{width:36px;height:36px;}
 }
 @media (max-width:700px){
   /* Coûts : graphique en anneau à gauche, légende à droite */
