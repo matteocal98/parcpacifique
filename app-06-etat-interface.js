@@ -1488,7 +1488,9 @@ function compacterAidesTelephone(racine) {
     texte.classList.add('info-bulle-texte');
     const titre = document.createElement('strong');
     titre.className = 'callout-titre-tel';
-    titre.textContent = trad('Offres et tarifs');
+    // Le titre dépend du CONTENU : l'encadré des offres s'appelle « Offres et tarifs », celui du code de vérification (le seul qui reste
+    // sur iPhone, où les offres sont masquées) « Code par e-mail ». Avant, tout encadré long s'appelait « Offres et tarifs » — à tort.
+    titre.textContent = /v[ée]rification/i.test(texte.textContent || '') ? trad('Code par e-mail') : trad('Offres et tarifs');
     const bouton = document.createElement('button');
     bouton.type = 'button';
     bouton.className = 'ui-info-btn';
