@@ -306,7 +306,7 @@
     [`Un compte, un manuel, et vous saurez si KALEA tient la route sur vos machines. Gratuit pour deux machines, 12 €/mois jusqu'à cinq.`, `One account, one manual, and you'll know whether KALEA holds up on your machines. Free for two machines, €12/month up to five.`],
     [`Poser une question`, `Ask a question`],
     [`Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.`, `Maintenance tracking for machines and vehicles: plans built from manufacturer manuals, calendar- or counter-based due dates, reminders and parts list.`],
-    [`Édité par Matthieu COURTOIS, entrepreneur individuel — Nouvelle-Calédonie.`, `Published by Matthieu COURTOIS, sole trader — New Caledonia.`],
+    [`Édité par SAMPORIA SAS — Nouvelle-Calédonie.`, `Published by SAMPORIA SAS — New Caledonia.`],
     [`PRODUIT`, `PRODUCT`],
     [`Tarification`, `Pricing`],
     [`LÉGAL`, `LEGAL`],
