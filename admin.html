@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-C39wZjCW8di1DyMoG0l6YbEWU4fRc5lRo31pOkA7DLc=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-rQ5xulzGB5YoMBhqW5Cqf79NT8z5gqr/R6+C7q03CKo=' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -1785,10 +1785,10 @@ async function connecterEnTantQue(societe) {
   const corps = await reponse.json().catch(() => ({}));
   if (!reponse.ok) { alert('Échec : ' + (corps.error || reponse.status)); return; }
   const url = new URL('app.html', location.href);
-  url.searchParams.set('mode_support', '1');
-  url.searchParams.set('support_email', corps.email);
-  url.searchParams.set('support_token', corps.hashed_token);
-  window.open(url.toString(), '_blank');
+  // Dans le FRAGMENT (#…), pas dans la requête (?…) : un fragment n'est jamais envoyé au serveur ni consigné dans ses journaux.
+  url.hash = new URLSearchParams({ mode_support: '1', support_email: corps.email, support_token: corps.hashed_token }).toString();
+  // `noopener` : la page ouverte ne peut pas remonter jusqu'à la console administrateur.
+  window.open(url.toString(), '_blank', 'noopener');
 }
 
 // ── Assistant IA de support ──────────────────────────────────────────────

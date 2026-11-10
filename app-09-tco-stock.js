@@ -436,7 +436,7 @@ function exporterParcCsv(options) {
     trad('Unité du compteur'), trad('Valeur du compteur'), trad('Source du compteur'),
     trad('Prochaine échéance (date)'), trad('Prochaine échéance (compteur)'),
   ];
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const liste = toutLeParc ? fleetSorted((UI.machines || []).slice()) : fleetSorted(fleetMatches());
   const rows = liste.map((m) => {
     const info = infoMachine(m);
@@ -494,7 +494,7 @@ async function exporterInterventionsCsv(jours) {
     trad('Éléments traités'), trad('Remarques'), trad('Opérateur'),
   ];
   if (avecCouts) header.push(trad('Coût pièces'), trad('Coût main-d\'œuvre'), trad('Heures main-d\'œuvre'));
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const rows = toutes.map((h) => {
     const ligne = [
       h.id, h.machine_id, noms.get(h.machine_id) || '', h.performed_at, h.hours_at_intervention ?? '',
@@ -576,7 +576,7 @@ function ouvrirModaleExport() {
 }
 function exporterClassementTcoCsv(flotte) {
   const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('Coût d\'arrêt'), trad('Heures d\'arrêt'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const rows = flotte.lignes.map(({ machine, tco, decision }) => [
     machine.name, machine.purchase_price ?? '', machine.purchase_date ?? '', machine.estimated_resale_value ?? '',
     Math.round(tco.parEntretien), Math.round(tco.parExploitation), Math.round(tco.parArret || 0), Math.round((tco.heuresArret || 0) * 10) / 10, Math.round(tco.total),
@@ -993,7 +993,7 @@ function modeleCsvCatalogue() {
   if (colConditionnement()) exemple.push('Boîte de 12');
   if (colSeuil()) exemple.push('3');
   if (colChampsStock()) exemple.push('3760123456789', 'Pièce');
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   return [enteteCsvPieces(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
 function telechargerModeleCsvCatalogue() {
@@ -3137,7 +3137,7 @@ function exporterInventaireStockCsv() {
     ? [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité'), trad('Coût PUMP'), trad('Valeur')]
     : [trad('Référence'), trad('Désignation'), trad('Magasin'), trad('Quantité')];
   if (SCHEMA.hasStockChamps) header.push(trad('EAN'), trad('Unité de mesure'), trad('Emplacement'), trad('Statut'));
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const items = (UI.stockItems || []).slice().sort((a, b) => designationPiece(a.part_id).localeCompare(designationPiece(b.part_id)));
   const rows = items.map((it) => {
     const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(it.part_id));
@@ -3399,7 +3399,7 @@ function analyserCsvMouvements(texte) {
 }
 function modeleCsvMouvements() {
   const exemple = ['FLT-0142', '50', '24.90', trad('Livraison BL-2026-0142')];
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   return [enteteCsvMouvements(), exemple].map((r) => r.map(escape).join(',')).join('\r\n');
 }
 function telechargerModeleCsvMouvements() {
@@ -3734,7 +3734,7 @@ function exporterSessionInventaireCsv(c, lignes) {
   const entete = [trad('Référence'), trad('Désignation'), trad('Emplacement'), trad('Unité de mesure'), trad('Quantité théorique'), trad('Quantité comptée'), trad('Écart')];
   if (c.status === 'valide') entete.push(trad('Écart appliqué'));
   if (gerant) entete.push(trad('Coût PUMP'), trad('Valeur de l\'écart'));
-  const echapper = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const echapper = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const rows = lignes.map((l) => {
     const theo = l.theoretical_at_count ?? l.expected_qty;
     const ecart = l.variation_qty != null ? l.variation_qty : (l.counted_qty != null && theo != null ? Number(l.counted_qty) - Number(theo) : '');

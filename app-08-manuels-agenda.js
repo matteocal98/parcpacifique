@@ -597,7 +597,7 @@ function preparationTexte() {
 function preparationCsv(jours) {
   const liste = listePreparation(UI.machines, jours);
   const header = [trad('Produit'), trad('Spécification'), trad('Machine'), trad('Quantité'), trad('Échéance')];
-  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const rows = [];
   for (const produit of liste.produits) {
     for (const besoin of produit.besoins) {
@@ -612,6 +612,17 @@ function preparationCsv(jours) {
 
 // UTF-16 avec BOM : Excel en français ouvre ce format proprement, sans
 // demander d'encodage — la même recette que l'export d'historique machine.
+// Une cellule d'un fichier CSV destiné à Excel : jamais une formule (injection de formule : un texte saisi par un
+// collègue comme « =HYPERLINK(…) » serait exécuté par le tableur du gérant à l'ouverture). On préfixe d'une
+// apostrophe tout texte qui commence par = + - @ (ou tabulation / retour chariot). Les NOMBRES, y compris négatifs,
+// restent intacts. Même règle que importCelluleSure() (import des machines).
+function csvCelluleSure(valeur) {
+  if (typeof valeur === 'number') return String(valeur);
+  const v = String(valeur ?? '');
+  if (/^-?\d+(?:[.,]\d+)?$/.test(v)) return v;
+  return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+}
+
 function csvToUtf16Buffer(csvString) {
   const buf = new ArrayBuffer(2 + csvString.length * 2);
   const view = new DataView(buf);

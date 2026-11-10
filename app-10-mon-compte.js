@@ -1549,6 +1549,8 @@ async function ouvrirSuppressionCompte(messageEcran) {
         'keeva-recherches-image.v1', 'keeva-analyses-restantes']) {
         try { localStorage.removeItem(cle); } catch (err) { /* stockage indisponible */ }
       }
+      // La copie hors connexion vit dans la base locale (IndexedDB), pas seulement dans localStorage : on l'efface aussi.
+      try { await effacerToutesLesCopies(); } catch (err) { /* stockage indisponible */ }
       try { await sb.auth.signOut(); } catch (err) { /* la session est de toute façon morte */ }
       fermer();
       // Le message dit CE QUI a été supprimé : « profil » signifie que la

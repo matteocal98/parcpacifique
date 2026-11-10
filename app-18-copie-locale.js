@@ -60,6 +60,9 @@ async function copieLire(cle) {
   return r.ok ? r.valeur : undefined;
 }
 async function copieEcrire(cle, valeur) {
+  // MODE SUPPORT (un membre du personnel agit dans la société d'un client) : on n'écrit RIEN sur son appareil, la copie des
+  // données du client ne doit pas rester dans son navigateur après la session.
+  try { if (sessionStorage.getItem('mode_support') === '1') return true; } catch (err) { /* stockage indisponible */ }
   const r = await copieOperation('readwrite', (st) => st.put(valeur, cle));
   if (r.secours) { __copieSecours.set(cle, valeur); return true; }
   return Boolean(r.ok);

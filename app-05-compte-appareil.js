@@ -625,6 +625,8 @@ async function sortirDuVerrou() {
   try {
     await sb.auth.signOut();
   } catch (err) { /* l'important est d'effacer ce qui est local : on continue */ }
+  // « effacer cet accès » : la copie hors connexion des données de la société part aussi (appareil possiblement partagé).
+  try { await effacerToutesLesCopies(); } catch (err) { /* stockage indisponible */ }
   await oublierAccesSansMotDePasse();
   reglerVerrouLocal(false);
   verrouActif = false;

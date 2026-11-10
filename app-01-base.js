@@ -24,7 +24,16 @@ const __isPasswordRecovery = window.location.hash.includes('type=recovery');
 // « Se connecter en tant que » depuis la console superviseur (admin.html) :
 // un jeton à usage unique dans l'URL (jamais un mot de passe) échangé UNE
 // fois contre une vraie session, voir activerModeSupport() plus bas.
-const __paramsSupport = new URLSearchParams(window.location.search);
+// Le jeton est lu dans le FRAGMENT (#…) : il n'est jamais envoyé au serveur, donc absent des journaux de l'hébergeur et
+// des adresses « référent ». L'ancien format (?…) reste accepté : une ancienne console (ou l'APK « KALEA Admin ») peut
+// encore fabriquer ce lien. activerModeSupport() efface ensuite l'adresse, fragment compris.
+const __paramsSupport = (() => {
+  const p = new URLSearchParams(window.location.search);
+  new URLSearchParams(window.location.hash.replace(/^#/, '')).forEach((v, k) => {
+    if (k === 'mode_support' || k === 'support_token' || k === 'support_email') p.set(k, v);
+  });
+  return p;
+})();
 const __isModeSupport = __paramsSupport.has('mode_support');
 // Lien profond depuis un QR code de machine (imprimé ou scanné dans l'appli) :
 // `?qr=<id machine>`. Lu ICI, avant toute authentification, car un QR peut

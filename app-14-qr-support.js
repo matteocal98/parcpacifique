@@ -1493,7 +1493,11 @@ function afficherBandeauSupportSiActif() {
   document.body.style.paddingTop = bandeau.offsetHeight + 'px';
   document.getElementById('quitter-mode-support').addEventListener('click', async () => {
     sessionStorage.removeItem('mode_support');
-    await sb.auth.signOut();
+    // Les données du client ne restent pas dans le navigateur du personnel.
+    try { await effacerToutesLesCopies(); } catch (err) { /* on continue : la déconnexion compte davantage */ }
+    // Session LOCALE seulement : la portée par défaut (globale) révoquait TOUTES les sessions du client, sur tous ses
+    // appareils, à chaque fin d'intervention du support.
+    await sb.auth.signOut({ scope: 'local' });
     window.close();
     setTimeout(() => { location.href = 'about:blank'; }, 200);
   });

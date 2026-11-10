@@ -1455,7 +1455,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
   const buildHistoryCsv = () => {
     const header = [trad('Date'), trad('Compteur (h)'), trad('Elements traites'), trad('Operateur'), trad('Remarques')];
     if (tcoActif()) header.push(trad('Cout total'));
-    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
     const rows = historyData.map(h => {
       const row = [
         h.performed_at,
