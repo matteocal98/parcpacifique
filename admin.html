@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-FElvSFOlIAXWwPUBjJSw/QlCmD38T5e+5WUIqCW57kY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0G5yeCCt8o9k0VPOUoIJgOHk7zb3LxPgJub+aH10qb0='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -1571,10 +1571,10 @@ async function gererConnexion(ev) {
 // ── Double authentification (TOTP : application d'authentification sur le téléphone) ─────────────────────────────────────────────
 // Le compte d'un superviseur peut tout faire (se connecter à la place d'un client, supprimer une société, corriger des données) : le mot de
 // passe seul ne suffit plus. Supabase : « niveau d'assurance » aal1 = mot de passe, aal2 = mot de passe + code.
-// MFA_OBLIGATOIRE = false : PÉRIODE D'INSCRIPTION — un bouton « Continuer sans » reste possible pour qui n'a pas encore de code.
-// À passer à true, EN MÊME TEMPS que migrations/securite-mfa-staff.sql (la base exige alors aal2) et la variable MFA_STAFF_OBLIGATOIRE des
-// fonctions serveur : sans code, plus aucun accès. Ne JAMAIS l'activer avant que tous les superviseurs aient inscrit leur application.
-const MFA_OBLIGATOIRE = false;
+// MFA_OBLIGATOIRE = true (depuis le 2026-11-11) : plus de « Continuer sans » — sans code, plus aucun accès. Va de pair avec
+// migrations/securite-mfa-staff.sql (la base exige aal2) et la variable MFA_STAFF_OBLIGATOIRE=1 des fonctions serveur.
+// Retour à la période d'inscription (nouveau superviseur à enregistrer) : repasser à false le temps de son inscription.
+const MFA_OBLIGATOIRE = true;
 let MFA_PASSE = false;     // « Continuer sans » choisi pendant cette visite (période d'inscription seulement)
 let MFA_FACTEUR_ID = null; // facteur TOTP à vérifier (ou en cours d'inscription)
 let MFA_UTILISATEUR = null;
