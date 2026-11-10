@@ -1,3 +1,6 @@
+/* Garde anti-encadrement (clickjacking) : si la page est affichée dans un cadre d'un autre site, on la masque et rien ne
+ * peut être cliqué. Aucun en-tête HTTP n'est possible sur GitHub Pages, ce test est donc le seul rempart côté navigateur. */
+(function () { try { if (window.top !== window.self) { document.documentElement.style.display = 'none'; } } catch (e) { document.documentElement.style.display = 'none'; } })();
 /* KALEA — thème de l'interface : Auto (suit le téléphone / l'ordinateur), Clair ou Sombre.
  *
  * Chargé dans l'EN-TÊTE de app.html, avant le premier affichage : le thème est posé sur <html> avant que la page ne se

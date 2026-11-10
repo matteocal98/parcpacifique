@@ -28,9 +28,12 @@ on:
         type: boolean
         default: true
 
+permissions: {}
+
 jobs:
   sequences:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Envoyer la séquence de démarrage
         env:
@@ -50,7 +53,10 @@ jobs:
             -H 'Content-Type: application/json' \
             -d "{\"simulation\": ${SIMULATION}}")
           echo "HTTP $code"
-          cat reponse.json
+          # Dépôt public : les journaux sont lisibles par tous. On n'affiche JAMAIS le contenu de la réponse
+          # (noms de sociétés, adresses, identifiants) : seulement le code HTTP, un décompte et l'éventuelle erreur.
+          grep -o '"action":"[a-z]*"' reponse.json | sort | uniq -c || true
+          grep -o '"error":"[^"]\{0,200\}"' reponse.json | head -c 300 || true
           echo
           if [ "$code" != "200" ]; then
             echo "::error::la séquence de démarrage n'a pas été traitée (HTTP $code)"

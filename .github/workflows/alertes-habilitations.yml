@@ -25,9 +25,12 @@ on:
         type: boolean
         default: true
 
+permissions: {}
+
 jobs:
   alertes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Envoyer les alertes d'habilitations
         env:
@@ -47,7 +50,9 @@ jobs:
             -H 'Content-Type: application/json' \
             -d "{\"simulation\": ${SIMULATION}}")
           echo "HTTP $code"
-          cat reponse.json
+          # Dépôt public : les journaux sont lisibles par tous. On n'affiche JAMAIS le contenu de la réponse
+          # (noms de sociétés, adresses, identifiants) : seulement le code HTTP, un décompte et l'éventuelle erreur.
+          grep -o '"error":"[^"]\{0,200\}"' reponse.json | head -c 300 || true
           echo
           if [ "$code" != "200" ]; then
             echo "::error::les alertes d'habilitations n'ont pas été traitées (HTTP $code)"

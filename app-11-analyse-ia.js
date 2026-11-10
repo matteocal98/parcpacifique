@@ -760,7 +760,7 @@ async function viewManual(path, btn) {
   btn.textContent = trad('Ouverture…');
   const { data, error } = await sb.storage.from('manuals').createSignedUrl(path, 300);
   if (error) { btn.textContent = trad('Erreur d\'ouverture'); return; }
-  window.open(data.signedUrl, '_blank');
+  window.open(data.signedUrl, '_blank', 'noopener');
   btn.textContent = original;
 }
 

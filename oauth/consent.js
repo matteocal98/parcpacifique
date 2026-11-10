@@ -1,3 +1,6 @@
+/* Garde anti-encadrement (clickjacking) : si la page est affichée dans un cadre d'un autre site, on la masque et rien ne
+ * peut être cliqué. Aucun en-tête HTTP n'est possible sur GitHub Pages, ce test est donc le seul rempart côté navigateur. */
+(function () { try { if (window.top !== window.self) { document.documentElement.style.display = 'none'; } } catch (e) { document.documentElement.style.display = 'none'; } })();
 // KALEA — page « Autoriser une connexion » (OAuth 2.1, Supabase Auth). ESSAI DE FAISABILITÉ du connecteur Claude / ChatGPT (2026-10-25).
 //
 // Supabase redirige ici avec ?authorization_id=… quand un outil (Claude, ChatGPT) demande l'accès à un compte KALEA. La personne :
