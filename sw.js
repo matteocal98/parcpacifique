@@ -10,13 +10,13 @@
 // Les scripts et styles de l'application portent un « ?v=empreinte » : une nouvelle version = une nouvelle adresse, donc « cache d'abord » est sûr pour eux.
 // Les fichiers sans ?v (styles.css, kit.css, polices…) sont servis depuis la copie PUIS rafraîchis en arrière-plan.
 // Retour en arrière : « Mon compte » > refuser la copie locale désinscrit ce fichier et vide ses copies ; ou changer VERSION ci-dessous (l'ancien cache est supprimé).
-const VERSION = 'v1';
+const VERSION = 'v2'; // v2 (2026-11-11) : purge l'ancienne copie de supabase-js venue du CDN
 const CACHE = 'kalea-appli-' + VERSION;
 const PAGE = 'app.html';
 const DELAI_RESEAU_MS = 4000;
 const EXTENSIONS = /\.(?:js|css|webmanifest|png|svg|ico|woff2?|webp|jpg|jpeg)$/i;
-// Hors du site : seulement ce que app.html charge depuis l'extérieur (bibliothèque supabase-js, polices Google).
-const EXTERNES = ['https://cdn.jsdelivr.net/npm/@supabase/', 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/'];
+// Hors du site : seulement ce que app.html charge depuis l'extérieur (polices Google). supabase-js est hébergé sur le site (vendor/).
+const EXTERNES = ['https://fonts.googleapis.com/', 'https://fonts.gstatic.com/'];
 
 const urlPage = () => new URL(PAGE, self.location).href;
 const sansRecherche = (href) => { const u = new URL(href); return u.origin + u.pathname; };

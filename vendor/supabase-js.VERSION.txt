@@ -1,0 +1,11 @@
+supabase-js 2.118.0 (MIT License)
+Source : https://github.com/supabase/supabase-js (paquet npm @supabase/supabase-js@2.118.0)
+Obtenu avec : npm pack @supabase/supabase-js@2.118.0 — intégrité du paquet vérifiée contre le registre npm :
+  sha512-FxI8UXMVC2UG7IkeiI8fuQZqq2oI3JeSuN8MPIC2RLVaoEAxKS0nqE6kii9Ewpq8f9gNPM6git1Y8f0vN/QLFw==
+Fichier embarqué : supabase-js-2.118.0.umd.js = dist/umd/supabase.js du paquet, copié tel quel (déjà minifié par l'éditeur).
+sha256 : ee3be8de192b97cb1d73d1e95d6b82bb1f6b658c0f97c4ef757fc331996ed3d3
+Raison : jusqu'au 2026-11-11 l'application, la console admin et l'écran OAuth chargeaient supabase-js depuis cdn.jsdelivr.net en
+  version flottante (@2), sans contrôle d'intégrité : une version piégée du paquet aurait exécuté du code dans l'origine kalea.pro
+  (vol des jetons de session). La version est maintenant figée, hébergée ici, et jsDelivr est retiré de la politique CSP.
+Choix de la version : 2.118.0 (publiée le 2026-10-15, utilisée en production avant la 2.119.0 du 2026-11-04).
+Pour mettre à jour : npm pack @supabase/supabase-js@<version>, vérifier l'intégrité, remplacer le fichier ET son nom, changer les 3 pages.
