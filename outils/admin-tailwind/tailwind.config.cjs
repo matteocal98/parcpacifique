@@ -240,12 +240,12 @@ module.exports = {
   }
  },
  "content": [
-  "../../admin.html",
-  "../../marketing-controle.js",
-  "../../marketing-semaine.js",
-  "../../marketing-sequences.js",
-  "../../marketing-tri.js",
-  "../../bouton-theme.js",
-  "../../theme.js"
+  "./admin.html",
+  "./marketing-controle.js",
+  "./marketing-semaine.js",
+  "./marketing-sequences.js",
+  "./marketing-tri.js",
+  "./bouton-theme.js",
+  "./theme.js"
  ]
 };

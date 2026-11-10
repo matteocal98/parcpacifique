@@ -9,7 +9,7 @@ hébergée avec le site : aucun script externe.
 bouton-theme.js / theme.js (ou le thème de couleurs de tailwind.config.cjs). Une classe absente de la feuille = un style
 qui ne s'applique plus, sans erreur.
 
-## Comment (depuis la racine du site)
+## Comment (TOUJOURS depuis la racine du site : Tailwind lit les chemins du fichier de config depuis le dossier où l'on lance la commande)
     npx --yes tailwindcss@3.4.17 -c outils/admin-tailwind/tailwind.config.cjs -i outils/admin-tailwind/entree.css -o admin-tailwind.css --minify
 
 `npx --yes` télécharge l'outil le temps de la commande : il n'est PAS une dépendance du projet. Puis, comme pour tout
