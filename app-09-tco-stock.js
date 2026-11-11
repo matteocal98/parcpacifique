@@ -2298,7 +2298,7 @@ async function chargerPiecesHorsStock() {
   const parInter = new Map(interventions.map((i) => [String(i.id), i]));
   const lignes = [];
   for (const t of tranches([...parInter.keys()], 80)) {
-    const { data, error } = await sb.from('intervention_parts').select('id, intervention_id, part_id, designation, quantity').in('intervention_id', t).not('part_id', 'is', null);
+    const { data, error } = await sb.from('intervention_parts').select('id, intervention_id, part_id, designation, quantity, unit_price').in('intervention_id', t).not('part_id', 'is', null);
     if (error) throw error;
     lignes.push(...(data || []));
   }
@@ -3257,6 +3257,22 @@ function ouvrirNouveauMouvementModal(prefill) {
     if (garni && overlay.querySelector(`#mvt-magasin option[value="${garni.warehouse_id}"]`)) overlay.querySelector('#mvt-magasin').value = String(garni.warehouse_id);
     if (prefill.quantity != null) overlay.querySelector('#mvt-quantite').value = texteAvecSeparateurs(prefill.quantity);
     if (prefill.reason) overlay.querySelector('#mvt-motif').value = prefill.reason;
+    // Coût unitaire repris de l'intervention (régularisation) : verrouillé, pour que le stock et le coût de la machine concordent.
+    if (prefill.unitCost > 0) {
+      const champCout = overlay.querySelector('#mvt-cout');
+      champCout.value = texteAvecSeparateurs(prefill.unitCost);
+      if (prefill.coutVerrouille) {
+        champCout.readOnly = true;
+        overlay.querySelector('#mvt-cout-bloc').insertAdjacentHTML('beforeend', `<p class="ui-aide">${esc(tR('Coût repris de l\'intervention ({prix} {devise} l\'unité) : le stock et le coût de la machine restent ainsi concordants.', { prix: texteAvecSeparateurs(prefill.unitCost), devise: deviseCourte() }))}</p>`);
+      }
+    }
+    // Sortie de régularisation : si le coût moyen du stock diffère du prix compté dans l'intervention, on le DIT (écart de valeur).
+    if (prefill.type !== 'entree' && prefill.prixIntervention > 0 && garni) {
+      const pump = Number(garni.pump_unit_cost) || 0;
+      if (Math.abs(pump - prefill.prixIntervention) > 0.005) {
+        overlay.querySelector('#mvt-motif').insertAdjacentHTML('afterend', `<p class="ui-aide" role="note" style="color:var(--late-texte)">${esc(tR('Écart de valeur : l\'intervention comptait cette pièce à {prix} {devise} l\'unité, le stock la sort à {pump} {devise} (coût moyen).', { prix: texteAvecSeparateurs(prefill.prixIntervention), pump: texteAvecSeparateurs(pump), devise: deviseCourte() }))}</p>`);
+      }
+    }
   }
   majSelonType();
 
@@ -5962,15 +5978,24 @@ VIEWS.stock = {
         const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
         const quantite = Number(l.quantity) || 1;
         const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+        const prixIntervention = Number(l.unit_price) || 0;   // prix unitaire compté dans l'intervention (donc dans le coût de la machine)
         const ouvrirSortie = () => ouvrirNouveauMouvementModal({
-          type: 'sortie', partId: l.part_id, quantity: quantite,
+          type: 'sortie', partId: l.part_id, quantity: quantite, prixIntervention,
           reason: tR('Régularisation — intervention du {date} sur {machine}', { date: formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)), machine: machine ? machine.name : '' }) + ' [#' + String(l.id).slice(0, 8) + ']',
           onSaved: () => { horsStock = horsStock.filter((x) => String(x.id) !== String(l.id)); },
         });
         // Stock insuffisant (pièce jamais entrée en stock, ou entrée pas encore saisie) : une sortie serait refusée. On saisit d'abord
         // l'entrée correspondante, puis la sortie s'ouvre toute seule (solde net : zéro, comme si la pièce avait été entrée puis utilisée).
         if (enStock >= quantite) ouvrirSortie();
-        else ouvrirNouveauMouvementModal({ type: 'entree', partId: l.part_id, quantity: quantite, reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'), onSaved: ouvrirSortie });
+        else {
+          // L'entrée est saisie AU COÛT de l'intervention (verrouillé) : le stock sort ensuite à ce même coût (PUMP), donc la valeur du
+          // stock et le coût de la machine (TCO) concordent. Quantité = ce qui manque pour que la sortie passe.
+          ouvrirNouveauMouvementModal({
+            type: 'entree', partId: l.part_id, quantity: (quantite - enStock) > 0 ? (quantite - enStock) : quantite,
+            unitCost: prixIntervention, coutVerrouille: prixIntervention > 0,
+            reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'), onSaved: ouvrirSortie,
+          });
+        }
       });
     }
     root.querySelector('#stock-mouvements-nouveau')?.addEventListener('click', () => ouvrirNouveauMouvementModal());

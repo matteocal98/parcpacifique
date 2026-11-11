@@ -2953,6 +2953,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
         if (!partId || typeof ouvrirNouveauMouvementModal !== 'function') return;
         ouvrirNouveauMouvementModal({
           type: 'entree', partId, quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 1,
+          unitCost: nombreDepuisTexte(ligne.querySelector('.log-piece-prix')?.value) || 0,   // coût proposé = prix saisi sur la ligne (modifiable)
           reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'),
           onSaved: () => majStockLigneLog(ligne, null, true),   // entrée saisie → la sortie liée à l'intervention se coche d'office
         });
