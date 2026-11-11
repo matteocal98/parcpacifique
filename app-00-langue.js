@@ -21,13 +21,18 @@
   codes.push(String(navigator.language || '').slice(0, 2).toLowerCase());
 
   var ecrit = false;
+  // Langues qui ONT un dictionnaire (chargé ou non) : langueDisponible() (app-01-base.js) s'en sert, sinon « English » serait refusé tant
+  // que le dictionnaire n'est pas chargé — c'est-à-dire en français, justement quand on veut passer à l'anglais.
+  window.LANGUES_A_DICTIONNAIRE = [];
   var modele = document.getElementById('dictionnaires');
   if (modele && modele.content) {
     var balises = modele.content.querySelectorAll('script[src]');
     for (var i = 0; i < balises.length; i++) {
       var src = balises[i].getAttribute('src');
       var m = /traductions-([a-z]{2})\.js/.exec(src);
-      if (m && codes.indexOf(m[1]) !== -1) {
+      if (!m) continue;
+      window.LANGUES_A_DICTIONNAIRE.push(m[1]);
+      if (codes.indexOf(m[1]) !== -1) {
         document.write('<script src="' + src + '"><\/script>');
         ecrit = true;
       }

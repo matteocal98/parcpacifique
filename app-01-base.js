@@ -118,7 +118,9 @@ const LANGUES = [
 // DICTIONNAIRES_FIN
 
 function langueDisponible(code) {
-  return LANGUES.some((l) => l.code === code) && !!TEXTES[code];
+  // Dictionnaire chargé OU déclaré (app-00-langue.js ne charge que celui de la langue de départ : en français, TEXTES est vide,
+  // et passer à l'anglais doit pourtant rester possible — le rechargement qui suit charge alors le dictionnaire).
+  return LANGUES.some((l) => l.code === code) && (!!TEXTES[code] || (window.LANGUES_A_DICTIONNAIRE || []).indexOf(code) !== -1);
 }
 
 // Langue de départ : celle choisie précédemment, sinon celle de l'appareil.
