@@ -3263,14 +3263,14 @@ function ouvrirNouveauMouvementModal(prefill) {
       champCout.value = texteAvecSeparateurs(prefill.unitCost);
       if (prefill.coutVerrouille) {
         champCout.readOnly = true;
-        overlay.querySelector('#mvt-cout-bloc').insertAdjacentHTML('beforeend', `<p class="ui-aide">${esc(tR('Coût repris de l\'intervention ({prix} {devise} l\'unité) : le stock et le coût de la machine restent ainsi concordants.', { prix: texteAvecSeparateurs(prefill.unitCost), devise: deviseCourte() }))}</p>`);
+        overlay.querySelector('#mvt-quantite').closest('.field-row').insertAdjacentHTML('afterend', `<p class="mvt-note">${esc(tR('Coût repris de l\'intervention ({prix} {devise} l\'unité) : le stock et le coût de la machine restent ainsi concordants.', { prix: texteAvecSeparateurs(prefill.unitCost), devise: deviseCourte() }))}</p>`);
       }
     }
     // Sortie de régularisation : si le coût moyen du stock diffère du prix compté dans l'intervention, on le DIT (écart de valeur).
     if (prefill.type !== 'entree' && prefill.prixIntervention > 0 && garni) {
       const pump = Number(garni.pump_unit_cost) || 0;
       if (Math.abs(pump - prefill.prixIntervention) > 0.005) {
-        overlay.querySelector('#mvt-motif').insertAdjacentHTML('afterend', `<p class="ui-aide" role="note" style="color:var(--late-texte)">${esc(tR('Le coût de cette pièce dans l\'intervention (le coût de la machine) passera de {prix} {devise} à {pump} {devise} l\'unité, le coût du stock : l\'intervention et le stock concorderont.', { prix: texteAvecSeparateurs(prefill.prixIntervention), pump: texteAvecSeparateurs(pump), devise: deviseCourte() }))}</p>`);
+        overlay.querySelector('#mvt-quantite').closest('.field-row').insertAdjacentHTML('afterend', `<p class="mvt-note" role="note" style="color:var(--late-texte)">${esc(tR('Le coût de cette pièce dans l\'intervention (le coût de la machine) passera de {prix} {devise} à {pump} {devise} l\'unité, le coût du stock : l\'intervention et le stock concorderont.', { prix: texteAvecSeparateurs(prefill.prixIntervention), pump: texteAvecSeparateurs(pump), devise: deviseCourte() }))}</p>`);
       }
     }
   }
