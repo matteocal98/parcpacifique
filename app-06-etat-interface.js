@@ -1198,15 +1198,40 @@ function showToast(message) {
     host.setAttribute('aria-live', 'polite');
     document.body.appendChild(host);
   }
+  placerToast(host);
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = message;
   host.appendChild(el);
   requestAnimationFrame(() => el.classList.add('is-on'));
+  // La fenêtre peut changer pendant que le message est affiché (l'entrée se ferme, la sortie s'ouvre) : on recalcule sa position.
+  const suivi = setInterval(() => { if (!el.isConnected) clearInterval(suivi); else placerToast(host); }, 150);
   setTimeout(() => {
     el.classList.remove('is-on');
-    setTimeout(() => el.remove(), 260);
+    setTimeout(() => {
+      el.remove();
+      clearInterval(suivi);
+      if (!host.children.length) host.style.bottom = '';   // plus de message : retour à la position normale
+    }, 260);
   }, 3200);
+}
+
+// Quand une fenêtre (modale) est ouverte, le message ne doit jamais se poser sur ses boutons : on le remonte juste au-dessus de la rangée
+// de boutons la plus basse de la fenêtre du dessus (cas vécu : « Mouvement enregistré » cachait « Enregistrer le mouvement » de la fenêtre suivante).
+// Sans fenêtre ouverte, la position normale (feuille de style) s'applique.
+function placerToast(host) {
+  try {
+    const calques = document.querySelectorAll('.overlay, .piece-mobile-overlay, .compteur-rouleaux-overlay');
+    const calque = calques[calques.length - 1];
+    if (!calque) { host.style.bottom = ''; return; }
+    const hauteur = window.innerHeight;
+    const boutons = [...calque.querySelectorAll('button')].map((b) => b.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.height > 0 && r.bottom <= hauteur + 1);
+    if (!boutons.length) { host.style.bottom = ''; return; }
+    const basse = Math.max(...boutons.map((r) => r.bottom));
+    const haut = Math.min(...boutons.filter((r) => r.bottom >= basse - 4).map((r) => r.top));
+    host.style.bottom = Math.max(12, Math.round(hauteur - haut + 8)) + 'px';
+  } catch (err) { host.style.bottom = ''; }
 }
 
 // ── Éléments partagés ─────────────────────────────────────────
