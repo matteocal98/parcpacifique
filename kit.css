@@ -1927,6 +1927,10 @@ html:not([data-theme="dark"]) .saisie-picker-ligne:hover{background:var(--primar
   .plan-modal .fm-toolbar .fm-btn-primary .lib-long{display:none;}
   .plan-modal .fm-toolbar .fm-btn-primary .lib-court{display:inline;}
   .plan-modal .fm-toolbar .fm-btn-secondaire{flex:1 1 0;width:auto;height:44px;min-width:0;padding:0;justify-content:center;}
+  /* ★ AUDIT DESIGN, PRIORITÉ 3 (2026-11-11) : une icône seule ne dit pas ce qu'elle fait (médaille ? coche ?). Chaque bouton
+     secondaire porte un mot court SOUS son icône (attribut data-court, posé dans app-13-fiche-machine.js). */
+  .plan-modal .fm-toolbar .fm-btn-secondaire[data-court]{height:54px;flex-direction:column;gap:3px;}
+  .plan-modal .fm-toolbar .fm-btn-secondaire[data-court]::after{content:attr(data-court);max-width:100%;padding:0 2px;font-size:12px;font-weight:700;line-height:1.1;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .plan-modal .fm-toolbar .fm-btn-secondaire > span:not([class^="fm-btn-ico"]){display:none;}
   .plan-fil-ariane > :not(.plan-fil-retour){display:none;}
   /* Photo : cadre un peu plus haut ET image à 100 % du cadre (avant : cadre 104 px mais image forcée à 118 px → rognée en haut et en bas) */

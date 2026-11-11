@@ -482,10 +482,10 @@
        C'est la disposition de la maquette de bureau, et elle n'ajoute aucune
        donnée : le mot vient de `greetingLabel()`, le compte de `UI.machines`,
        les initiales de `initialsFrom()`. */
-    [data-view="dashboard"] .head-title,
-    [data-view="machines"] .head-title{display:none;}
-    [data-view="dashboard"] .dash-head,
-    [data-view="machines"] .dash-head{display:flex;}
+    /* ★ AUDIT DESIGN, PRIORITÉ 3 (2026-11-11) : « Bonjour … » n'accueille que sur le TABLEAU DE BORD. L'écran Machines
+       reprend l'en-tête de toutes les autres pages (titre + sous-titre), au lieu d'une salutation posée sous ses onglets. */
+    [data-view="dashboard"] .head-title{display:none;}
+    [data-view="dashboard"] .dash-head{display:flex;}
     .dash-head .dash-ajouter{display:inline-flex;align-items:center;}
   }
 

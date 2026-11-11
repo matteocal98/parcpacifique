@@ -18,9 +18,9 @@ function statsEtat() {
 }
 function statsOngletsDisponibles() {
   const liste = [];
-  if (tcoActif()) liste.push({ id: 'couts', libelle: trad('Coûts') });
-  liste.push({ id: 'maintenance', libelle: trad('Maintenance') });
-  if (SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) liste.push({ id: 'stock', libelle: trad('Stock') });
+  if (tcoActif()) liste.push({ id: 'couts', libelle: trad('Coûts'), picto: 'argent' });
+  liste.push({ id: 'maintenance', libelle: trad('Maintenance'), picto: 'entretien' });
+  if (SCHEMA.hasStock && planCouvreStock() && vueAutoriseePourRole('stock')) liste.push({ id: 'stock', libelle: trad('Stock'), picto: 'boite' });
   return liste;
 }
 function statsOngletActif() {
@@ -562,7 +562,7 @@ VIEWS.stats = {
           </select>
         </div>
         <div class="stock-onglets stats-onglets" role="tablist" aria-label="${esc(trad('Sections des statistiques'))}">
-          ${onglets.map((o) => `<button type="button" class="stock-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" aria-selected="${o.id === actif}" data-stats-onglet="${o.id}">${esc(o.libelle)}</button>`).join('')}
+          ${onglets.map((o) => `<button type="button" class="stock-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" aria-selected="${o.id === actif}" data-stats-onglet="${o.id}">${picto(o.picto)}<span>${esc(o.libelle)}</span></button>`).join('')}
         </div>
         <div id="stats-zone">${statsZoneHtml()}</div>
       </div>`;

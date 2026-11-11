@@ -1390,10 +1390,10 @@ function cablerCatalogueTco(root) {
 // ── Onglets de la page Coûts & TCO (bureau) ──
 function tcoOngletsDisponibles() {
   const liste = [];
-  if (tcoActif()) liste.push({ id: 'classement', libelle: trad('Classement') });
-  liste.push({ id: 'baremes', libelle: trad('Barèmes') });
-  liste.push({ id: 'seuils', libelle: trad('Seuils de coût') });
-  if (SCHEMA.hasArretCout) liste.push({ id: 'arret', libelle: trad('Coût d\'arrêt') });
+  if (tcoActif()) liste.push({ id: 'classement', libelle: trad('Classement'), picto: 'trier' });
+  liste.push({ id: 'baremes', libelle: trad('Barèmes'), picto: 'calculatrice' });
+  liste.push({ id: 'seuils', libelle: trad('Seuils de coût'), picto: 'curseurs' });
+  if (SCHEMA.hasArretCout) liste.push({ id: 'arret', libelle: trad('Coût d\'arrêt'), picto: 'sablier' });
   return liste;
 }
 function tcoOngletActif(onglets) {
@@ -1428,7 +1428,7 @@ VIEWS.tco = {
       <div class="ui-page tco-page">
         ${tcoKpiGridHtml()}
         <div class="stock-onglets tco-onglets" role="tablist" aria-label="${esc(trad('Sections des coûts'))}">
-          ${onglets.map((o) => `<button type="button" class="stock-onglet tco-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" id="tco-onglet-${o.id}" aria-selected="${o.id === actif}" aria-controls="tco-panneau-${o.id}" data-tco-onglet="${o.id}">${esc(o.libelle)}</button>`).join('')}
+          ${onglets.map((o) => `<button type="button" class="stock-onglet tco-onglet${o.id === actif ? ' is-actif' : ''}" role="tab" id="tco-onglet-${o.id}" aria-selected="${o.id === actif}" aria-controls="tco-panneau-${o.id}" data-tco-onglet="${o.id}">${picto(o.picto)}<span>${esc(o.libelle)}</span></button>`).join('')}
         </div>
         ${panneau('classement', tcoActif() ? tcoClassementFlotteHtml() : '')}
         ${panneau('baremes', `${blocParametresTcoHtml()}${(SCHEMA.hasStock && planCouvreStock()) ? '' : blocCatalogueTcoHtml()}`)}
