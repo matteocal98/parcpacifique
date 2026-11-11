@@ -990,7 +990,7 @@ function renderSetNewPassword() {
       <form id="reset-form">
         <label for="new-password">${trad('Nouveau mot de passe')}</label>
         <div class="password-wrap" style="margin-bottom:16px;">
-          <input id="new-password" type="password" minlength="6" required>
+          <input id="new-password" type="password" minlength="8" required>
           <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
         </div>
         <button class="primary" type="submit">${trad('Enregistrer le mot de passe')}</button>
@@ -1067,7 +1067,7 @@ function openForgotPasswordModal() {
             <input id="reset-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required>
             <label for="reset-password">${trad('Nouveau mot de passe')}</label>
             <div class="password-wrap">
-              <input id="reset-password" type="password" minlength="6" required>
+              <input id="reset-password" type="password" minlength="8" required>
               <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
             </div>
             <div class="hint" id="reset-code-error"></div>
@@ -1768,7 +1768,7 @@ function openSignupWizard() {
           <div>
             <label for="su-password" class="label-avec-note"><span>${trad('Mot de passe')} <span class="requis">*</span></span><span class="label-annotation">${trad('Min. 6 car.')}</span></label>
             <div class="password-wrap">
-              <input id="su-password" type="password" autocomplete="new-password" required minlength="6">
+              <input id="su-password" type="password" autocomplete="new-password" required minlength="8">
               <button type="button" class="toggle-pw-btn" aria-pressed="false">${trad('Afficher')}</button>
             </div>
           </div>
