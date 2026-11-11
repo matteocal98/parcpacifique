@@ -792,8 +792,8 @@ const FM2_SVG_MODE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 // remplacé par le même ambre qu'« imminent », un simple dépassement de la
 // même urgence).
 const FM2_ETAT_COULEUR = {
-  late: { bg: '#FFFBEB', fg: '#F58220' },
-  soon: { bg: '#FFFBEB', fg: '#F58220' },
+  late: { bg: '#FFFBEB', fg: '#A04A07' },
+  soon: { bg: '#FFFBEB', fg: '#A04A07' },
   ok: { bg: '#ECFDF5', fg: '#047857' },
   unknown: { bg: '#F1F5F9', fg: '#64748B' },
 };
@@ -941,7 +941,7 @@ function fm2BandeauDoubleHtml(machine, infoBadge, infoPrincipal, v2, unit, isCou
   // échéance confortable resté dans sa propre teinte, bloc horaire proche
   // de l'échéance basculé en ambre partagé).
   const resteStyle = (d, bgOk, fgOk) => (d.state === 'late' || d.state === 'soon')
-    ? 'background:rgba(245,158,11,.15);color:#D97706;'
+    ? 'background:rgba(245,158,11,.15);color:#A04A07;'
     : `background:${bgOk};color:${fgOk};`;
   return `
     <div class="fm2-hero fm2-hero-o2">

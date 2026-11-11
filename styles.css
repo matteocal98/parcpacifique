@@ -111,6 +111,14 @@
     --ok-bg:rgba(36,181,168,.14);
     --ok-ink:#0E1333;
     --ok-accent:#24B5A8;
+    /* ★ LISIBILITÉ (2026-11-11) — LES TEINTES DE STATUT QUI ÉCRIVENT DU PETIT TEXTE.
+       --late / --soon / --ok restent les teintes des liserés, points et barres. Posées
+       sur du texte de 11 à 14 px, elles tombaient à 2,2–3,7:1 (audit du 2026-11-11).
+       Ces trois jetons gardent la même famille, plus dense : ≥ 4,5:1 sur le blanc ET
+       sur le voile de leur propre statut (--late-bg, --soon-bg, --ok-bg). */
+    --late-texte:#A04A07;
+    --soon-texte:#4338CA;
+    --ok-texte:#0F766E;
     /* ★ LOT 9 — LES DEUX TEINTES DU GRAND TEXTE DE LA CARTE MACHINE.
        La maquette de bureau écrit l'échéance en grand DANS la teinte de son état
        (`text-ambre`, `text-indigo`). Chez nous ce chiffre est à 25 px : WCAG le
@@ -889,11 +897,11 @@
   .mstrip-info{min-width:0;display:flex;flex-direction:column;gap:2px;}
   .mstrip-nom-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .mstrip-nom{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--ink);}
-  .mstrip-meta{font-size:12px;color:var(--ink-2);}
-  .mstrip-meta .id{font-family:'Space Grotesk',sans-serif;color:var(--dark-ink);}
-  .mstrip-tache{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;font-weight:600;}
+  .mstrip-meta{font-size:13px;color:var(--ink-2);}
+  .mstrip-meta .id{font-family:'Space Grotesk',sans-serif;color:var(--ink-3);}
+  .mstrip-tache{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;font-weight:600;}
   .mstrip-tache svg{width:15px;height:15px;flex:0 0 auto;}
-  .mstrip-tache.is-late{color:var(--late);}
+  .mstrip-tache.is-late{color:var(--late-texte);}
   .mstrip-tache.is-soon{color:var(--primary-dark);}
   .mstrip-tache.is-ok{color:var(--ok-ink);}
 
@@ -920,7 +928,7 @@
   /* display:inline-flex (pas block) : la vue BUREAU pose maintenant une
      icône devant le libellé (picto('compteur'), comme la maquette), qui a
      besoin de s'aligner À CÔTÉ du texte, pas au-dessus. */
-  .mstrip-compteur-bloc .compteur-titre{font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--dark-ink);display:inline-flex;align-items:center;gap:5px;margin-bottom:2px;}
+  .mstrip-compteur-bloc .compteur-titre{font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;color:var(--ink-3);display:inline-flex;align-items:center;gap:5px;margin-bottom:2px;}
   .mstrip-compteur-bloc .compteur-titre svg{width:13px;height:13px;}
   /* Suivi calendaire : la date reprend .compteur-jour-valeur (22px) taillée
      pour le hero de la fiche machine — trop grande pour ce bandeau étroit,
@@ -948,14 +956,17 @@
      structure/comportement. */
   .compteur-strip-ligne{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap;}
   .compteur-strip-saisie{display:flex;align-items:center;flex:0 0 auto;background:#f4f7fc;border-radius:12px;padding:3px;box-shadow:inset 0 2px 4px rgba(0,0,0,.05);}
-  .compteur-strip-pas{width:24px;height:24px;flex:0 0 auto;border-radius:8px;border:none;background:transparent;color:var(--ink-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;line-height:1;cursor:pointer;transition:background .15s ease,color .15s ease,transform .1s ease;}
+  .compteur-strip-pas{position:relative;width:24px;height:24px;flex:0 0 auto;border-radius:8px;border:none;background:transparent;color:var(--ink-3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;line-height:1;cursor:pointer;transition:background .15s ease,color .15s ease,transform .1s ease;}
   .compteur-strip-pas:hover{background:rgba(0,0,0,.06);color:var(--ink);}
   .compteur-strip-pas:active{transform:scale(.95);}
+  /* ★ LISIBILITÉ (2026-11-11) : le bouton garde ses 24 px VISIBLES (bloc compacté à la demande
+     de l'utilisateur), mais sa zone de clic passe à 40 × 32 px — c'est le geste le plus fréquent. */
+  .compteur-strip-pas::after{content:"";position:absolute;inset:-8px -4px;}
   .compteur-strip-valeur-bloc{display:flex;align-items:baseline;gap:2px;padding:0 5px;}
-  .compteur-strip-saisie .compteur-champ{width:34px;flex:0 0 auto;border:none;background:transparent;padding:0;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;text-align:center;color:var(--ink);}
+  .compteur-strip-saisie .compteur-champ{width:34px;flex:0 0 auto;border:none;background:transparent;padding:8px 0;margin:-8px 0;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;text-align:center;color:var(--ink);}
   .compteur-strip-saisie .compteur-champ:focus{outline:none;}
   .compteur[data-unite="km"] .compteur-strip-saisie .compteur-champ{width:54px;}
-  .compteur-strip-unite{font-size:11px;font-weight:700;color:var(--ink-3);flex:0 0 auto;}
+  .compteur-strip-unite{font-size:12px;font-weight:700;color:var(--ink-3);flex:0 0 auto;}
   /* Bouton OK : pastille encre pleine + coche turquoise + texte, remplace
      l'ancienne icône coche seule (var(--dark) carré 36px). */
   .compteur-strip-icone{height:39px;flex:0 0 auto;border-radius:14px;border:none;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:background .15s ease,transform .1s ease;}
@@ -982,7 +993,7 @@
      bordure teintés), pas juste du texte gras coloré — mêmes tokens
      --late/--soon/--ok(-bg) déjà utilisés partout pour ces 3 états. */
   .mstrip-jauge-delta{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;white-space:nowrap;padding:2px 8px;border-radius:6px;}
-  .mstrip-jauge-delta.is-late{color:var(--late);background:var(--late-bg);}
+  .mstrip-jauge-delta.is-late{color:var(--late-texte);background:var(--late-bg);}
   .mstrip-jauge-delta.is-soon{color:var(--primary-dark);background:var(--primary-tint);}
   .mstrip-jauge-delta.is-ok{color:var(--ok-ink);background:var(--ok-bg);}
   .mstrip-jauge-piste{width:100%;height:10px;border-radius:var(--r-pill);background:var(--line);overflow:hidden;display:flex;}
@@ -1002,9 +1013,9 @@
      ambre, comme la maquette (striped-alert) — jamais de pourcentage
      inventé écrit dessus, juste le repère visuel. */
   .mstrip-jauge-part.is-depassement{background-image:repeating-linear-gradient(-45deg,rgba(222,122,22,.55) 0 6px,rgba(222,122,22,.85) 6px 12px);}
-  .mstrip-jauge-note{font-size:11px;color:var(--ink-2);display:flex;align-items:center;gap:4px;}
+  .mstrip-jauge-note{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:4px;}
   .mstrip-jauge-note svg{width:13px;height:13px;flex:0 0 auto;}
-  .mstrip-jauge-note.is-late{color:var(--late);}
+  .mstrip-jauge-note.is-late{color:var(--late-texte);}
   /* « Plan à définir » (pas de plan du tout, donc rien à jauger) — reprise
      Stitch : encart neutre à bordure pointillée, plutôt que la simple
      phrase de secours utilisée quand un plan EXISTE mais n'a pas encore de
@@ -1677,16 +1688,17 @@
   .plan-fil-retour{
     display:inline-flex;align-items:center;gap:5px;background:none;border:none;padding:0;
     color:var(--ink-3);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    padding:9px 0;margin:-9px 0;   /* zone de clic 33 px, même encombrement */
   }
   .plan-fil-retour:hover{color:var(--primary-dark);}
   .plan-fil-retour svg{width:15px;height:15px;display:block;}
-  .plan-fil-sep{color:var(--line-3);}
+  .plan-fil-sep{color:var(--ink-3);}
   .plan-fil-courant{color:var(--ink);}
   .plan-modal .modal-actions{justify-content:flex-end;}
   /* Le bouton Fermer, seul en pied de modale, ne reste pas gris neutre :
      même teinte indigo que le reste de la fiche (mini-champs, icônes). */
   .plan-modal .modal-actions #close-plan{
-    flex:0 0 auto;min-width:140px;color:var(--primary-dark);border-color:var(--primary-tint-2);background:var(--primary-tint);
+    flex:0 0 auto;min-width:140px;color:var(--soon-texte);border-color:var(--primary-tint-2);background:var(--primary-tint);
   }
   .plan-modal .modal-actions #close-plan:hover{background:var(--primary-tint-2);border-color:var(--primary-dark);}
   /* En-tête de la fiche : photo (si connue), nom et badge d'état — sans rien
@@ -1743,16 +1755,16 @@
   .fm-filtres{display:flex;flex-wrap:wrap;gap:6px;}
   .fm-filtre-chip{
     padding:6px 12px;border-radius:999px;border:none;background:var(--surface-soft);
-    color:var(--ink-2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
+    color:var(--ink-2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-height:32px;
   }
   .fm-filtre-chip:hover{background:var(--line-2);}
   .fm-filtre-chip.is-active{background:var(--ink);color:#fff;}
   /* Chaque puce d'état reprend la couleur de son état (même palette que les
      .badge/pastilles du tableau juste en dessous) — sinon la carte perd le
      repère de couleur que l'app utilise partout ailleurs pour ces 3 états. */
-  .fm-filtre-chip.is-late{background:var(--late-bg);color:var(--late);}
-  .fm-filtre-chip.is-soon{background:var(--soon-bg);color:var(--soon);}
-  .fm-filtre-chip.is-ok{background:var(--ok-bg);color:var(--ok);}
+  .fm-filtre-chip.is-late{background:var(--late-bg);color:var(--late-texte);}
+  .fm-filtre-chip.is-soon{background:var(--soon-bg);color:var(--soon-texte);}
+  .fm-filtre-chip.is-ok{background:var(--ok-bg);color:var(--ok-texte);}
   .fm-filtre-chip.is-late.is-active{background:var(--late);color:#fff;}
   .fm-filtre-chip.is-soon.is-active{background:var(--soon);color:#fff;}
   .fm-filtre-chip.is-ok.is-active{background:var(--ok);color:#fff;}
@@ -1840,7 +1852,7 @@
   .fm2-o2-photo-box{position:relative;width:100%;height:224px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.05);border:1px solid #F1F5F9;}
   .fm2-o2-photo-box img{width:100%;height:100%;object-fit:contain;border-radius:8px;display:block;}
   .fm2-vin-o2{bottom:8px;left:8px;padding:4px 10px;border-radius:4px;font-size:11px;}
-  .fm2-statut-o2{position:absolute;top:8px;left:8px;background:#00B4D8;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.05em;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .fm2-statut-o2{position:absolute;top:8px;left:8px;background:#0E7490;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.05em;box-shadow:0 1px 2px rgba(0,0,0,.05);}
   .fm2-o2-main{display:flex;flex-direction:column;justify-content:space-between;gap:14px;}
   .fm2-o2-ligne1{display:flex;flex-direction:column;justify-content:space-between;gap:12px;border-bottom:1px solid #F1F5F9;padding-bottom:12px;}
   @media(min-width:768px){.fm2-o2-ligne1{flex-direction:row;align-items:flex-start;}}
@@ -1848,11 +1860,11 @@
   .fm2-o2-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
   .fm2-badge-echeance-o2{gap:4px;padding:2px 10px;}
   .fm2-chip-cat-o2{padding:2px 10px;border-radius:4px;font-size:11px;font-weight:600;background:#F1F5F9;color:#334155;}
-  .fm2-meta-o2{font-size:12px;color:#94A3B8;font-weight:500;}
+  .fm2-meta-o2{font-size:13px;color:var(--ink-3);font-weight:500;}
   .fm2-titre-o2{font-size:20px;font-weight:900;color:#141738;letter-spacing:-.025em;margin:0;}
   @media(min-width:768px){.fm2-titre-o2{font-size:28px;}}
   .fm2-compteur-entete-o2{display:flex;align-items:center;gap:24px;background:rgba(248,250,252,.8);padding:8px 16px;border-radius:12px;flex:0 0 auto;}
-  .fm2-label-o2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94A3B8;}
+  .fm2-label-o2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-3);}
   .fm2-releve-valeur-o2{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:900;color:#141738;line-height:1;}
   .fm2-releve-valeur-o2 span{font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;color:#64748B;}
   .fm2-divider-o2{width:1px;height:32px;background:#E2E8F0;}
@@ -1869,23 +1881,23 @@
   .fm2-bloc-row1{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
   .fm2-bloc-row1>span:first-child{color:#475569;font-weight:500;}
   .fm2-fort-o2{font-weight:700;color:#1E293B;}
-  .fm2-bloc-label{font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.03em;}
+  .fm2-bloc-label{font-size:12px;text-transform:uppercase;font-weight:700;letter-spacing:.03em;}
   .fm2-bloc-label-horaire{color:#4338CA;}
   .fm2-bloc-label-calendaire{color:#115E59;}
   .fm2-bloc-row2{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:#141738;margin-top:2px;gap:8px;flex-wrap:wrap;}
-  .fm2-bloc-reste{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+  .fm2-bloc-reste{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;}
   .fm2-bloc-piste{width:100%;background:rgba(226,232,240,.9);border-radius:9999px;height:10px;overflow:hidden;}
   .fm2-bloc-fill{height:10px;border-radius:9999px;}
   .fm2-bloc-fill-horaire{background:#4F46E5;}
   .fm2-bloc-fill-calendaire{background:#0D9488;}
-  .fm2-bloc-pied{font-size:11px;color:#64748B;display:flex;justify-content:space-between;align-items:center;font-weight:500;}
+  .fm2-bloc-pied{font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center;font-weight:500;}
   .fm2-bloc-pct{font-weight:700;}
   .fm2-bloc-pct-horaire{color:#4338CA;}
   .fm2-bloc-pct-calendaire{color:#0F766E;}
   .fm2-o2-ligne3{display:grid;grid-template-columns:1fr;gap:12px;padding-top:2px;}
   @media(min-width:640px){.fm2-o2-ligne3{grid-template-columns:repeat(3,1fr);}}
   .fm2-mini-carte-o2{background:#F8FAFC;border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .fm2-mini-label-o2{font-size:11px;text-transform:uppercase;font-weight:700;color:#94A3B8;}
+  .fm2-mini-label-o2{font-size:12px;text-transform:uppercase;font-weight:700;color:var(--ink-3);}
   .fm2-mini-valeur-o2{font-size:12px;font-weight:700;color:#141738;margin-top:2px;}
   .fm2-mini-ico-o2{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .fm2-mini-ico-o2 svg{width:14px;height:14px;display:block;}
@@ -2516,7 +2528,7 @@
      câblée (jaugeTcoHtml), posée à plat sous les cartes. */
   .fm-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
   .fm-kpi-card{background:#F8FAFD;border-radius:14px;padding:14px;box-shadow:0 2px 8px -2px rgba(14,19,51,.05),0 1px 3px rgba(14,19,51,.04);}
-  .fm-kpi-label{font-size:11px;font-weight:700;color:var(--ink-3);}
+  .fm-kpi-label{font-size:12px;font-weight:700;color:var(--ink-3);}
   .fm-kpi-value{display:flex;align-items:baseline;gap:4px;margin-top:6px;flex-wrap:wrap;}
   .fm-kpi-value .num{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:800;color:var(--ink);}
   .fm-kpi-value .unit{font-size:11px;font-weight:700;color:var(--ink-3);}
@@ -2542,7 +2554,7 @@
      neutre (pas la teinte indigo utilisée ailleurs dans l'app), lignes plus
      aérées, pas de cadre. */
   .plan-modal .ref-scroll,.plan-modal .ref-table{border-color:transparent;}
-  .plan-modal .ref-table th{background:var(--surface-soft);color:var(--ink-3);font-size:11px;}
+  .plan-modal .ref-table th{background:var(--surface-soft);color:var(--ink-3);font-size:12px;}
   .plan-modal .ref-table td{padding:13px 14px;border-top-color:var(--line-2);}
   .plan-modal .ref-scroll-plan .ref-table th:nth-child(2),
   .plan-modal .ref-scroll-plan .ref-table td:nth-child(2){width:13%;}
@@ -2553,7 +2565,7 @@
      réelle inchangée) : une pastille de couleur devant le texte, comme le
      mockup — scopé à cette modale, le .badge générique du reste de l'app
      n'a pas de pastille. */
-  .plan-modal .ref-table .badge,.plan-modal .tache-carte .badge{position:relative;padding-left:22px;font-size:11px;}
+  .plan-modal .ref-table .badge,.plan-modal .tache-carte .badge{position:relative;padding-left:22px;font-size:12px;}
   .plan-modal .ref-table .badge::before,.plan-modal .tache-carte .badge::before{
     content:'';position:absolute;left:10px;top:50%;transform:translateY(-50%);
     width:5px;height:5px;border-radius:999px;background:currentColor;
@@ -2580,7 +2592,7 @@
   .ref-table tr.is-late-row td{background:rgba(222,122,22,.08);}
   /* Le texte de dépassement (« +3 h ») posé sous le badge « En retard » :
      même teinte ambre que le badge, jamais du texte ambre nu sur blanc. */
-  .echeance-retard{display:inline-block;background:var(--late-bg);color:var(--late);font-weight:800;padding:1px 7px;border-radius:999px;margin-top:2px;}
+  .echeance-retard{display:inline-block;background:var(--late-bg);color:var(--late-texte);font-weight:800;padding:1px 7px;border-radius:999px;margin-top:2px;}
   .tache-carte.is-late-row{border-color:rgba(222,122,22,.35);background:var(--late-bg);}
   /* Boutons « Choisir » / « Modifier » de la table : pilule fine, cohérente
      avec le reste des actions secondaires de l'appli. */
@@ -6431,7 +6443,7 @@ html:not(.icones-pretes) .material-symbols-outlined{visibility:hidden;display:in
 .mstrip-compteur-bloc .compteur-secondaire{margin-top:6px;padding-top:6px;border-top:1px solid var(--line-2);}
 .compteur2-ligne{display:flex;align-items:center;gap:8px;width:100%;min-height:32px;}
 button.compteur2-ligne{border:none;background:transparent;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
-.compteur2-lib{flex:1 1 0;min-width:0;display:block;font-size:11px;font-weight:600;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;color:var(--dark-ink);overflow-wrap:anywhere;}
+.compteur2-lib{flex:1 1 0;min-width:0;display:block;font-size:12px;font-weight:600;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-3);overflow-wrap:anywhere;}
 /* pas d'icône devant le libellé : sur un écran étroit elle poussait le texte sous la valeur (signalé sur téléphone) */
 .compteur2-lib svg{display:none;}
 .compteur2-val{flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
