@@ -2270,8 +2270,8 @@ function ligneMouvementStockHtml(m) {
     </div>`;
 }
 // ── PIÈCES UTILISÉES HORS STOCK ───────────────────────────────────────────────────────────────────────────────
-// Une pièce que KALEA suit en stock, déclarée utilisée dans une intervention SANS sortie de stock : c'est l'origine des écarts
-// entre stock réel et stock affiché (entrée pas encore saisie, case décochée par erreur…). Sur les 30 derniers jours.
+// Une pièce du catalogue (suivie en stock ou non) déclarée utilisée dans une intervention SANS sortie de stock : c'est l'origine des écarts
+// entre stock réel et stock affiché (entrée pas encore saisie, case décochée par erreur, pièce jamais entrée…). Sur les 30 derniers jours.
 // Détection sans rien changer en base : une ligne de pièce (intervention_parts) n'a pas de sortie de stock (stock_movements.intervention_id)
 // pour la même pièce. « Régulariser » ouvre une sortie pré-remplie, dont le motif porte [#identifiant] : c'est ce repère qui la retire
 // ensuite de la liste, sur tous les appareils. « Ignorer » (pièce réellement prise ailleurs) est mémorisé sur CET appareil.
@@ -2307,10 +2307,11 @@ async function chargerPiecesHorsStock() {
   if (errS) throw errS;
   const sortiesLiees = new Set((sorties || []).filter((m) => m.intervention_id).map((m) => m.intervention_id + '|' + m.part_id));
   const motifs = (sorties || []).map((m) => String(m.reason || '')).filter((r) => r.includes('[#'));
-  const suivies = new Set((UI.stockItems || []).map((it) => String(it.part_id)));
   const ignores = horsStockIgnores();
+  // Toute pièce du catalogue utilisée sans sortie de stock est à régulariser — y compris celle qui n'a JAMAIS eu de ligne de stock
+  // (choix de l'utilisateur, 2026-11-11 : sinon une pièce achetée hors stock disparaissait des radars). « Ignorer » règle le cas
+  // d'une pièce volontairement non suivie en stock.
   return lignes
-    .filter((l) => suivies.has(String(l.part_id)))
     .filter((l) => !sortiesLiees.has(l.intervention_id + '|' + l.part_id))
     .filter((l) => !ignores.has(String(l.id)))
     .filter((l) => !motifs.some((r) => r.includes('[#' + String(l.id).slice(0, 8) + ']')))
@@ -2339,10 +2340,10 @@ function blocHorsStockHtml() {
   if (!peutGererMouvementsStock()) return '';
   return `
     <section class="ui-section" id="stock-horsstock-section" hidden>
-      ${teteSectionKit('alerte', trad('Pièces utilisées hors stock'), tR('Sur les {n} derniers jours : pièces suivies en stock, utilisées dans une intervention sans sortie de stock', { n: HORS_STOCK_JOURS }))}
+      ${teteSectionKit('alerte', trad('Pièces utilisées hors stock'), tR('Sur les {n} derniers jours : pièces du catalogue utilisées dans une intervention sans sortie de stock', { n: HORS_STOCK_JOURS }))}
       <div class="ui-section-corps">
         <div class="ui-liste" id="stock-horsstock-liste"></div>
-        <p class="ui-aide">${trad('« Régulariser » retire la pièce du stock (sortie pré-remplie). « Ignorer » : la pièce vient d\'ailleurs, rien à corriger (mémorisé sur cet appareil).')}</p>
+        <p class="ui-aide">${trad('« Régulariser » retire la pièce du stock (sortie pré-remplie ; si le stock est insuffisant, on commence par une entrée). « Ignorer » : la pièce vient d\'ailleurs, rien à corriger (mémorisé sur cet appareil).')}</p>
       </div>
     </section>`;
 }
@@ -5955,11 +5956,17 @@ VIEWS.stock = {
         const l = horsStock.find((x) => String(x.id) === reg.dataset.horsStockRegulariser);
         if (!l) return;
         const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
-        ouvrirNouveauMouvementModal({
-          type: 'sortie', partId: l.part_id, quantity: Number(l.quantity) || 1,
+        const quantite = Number(l.quantity) || 1;
+        const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+        const ouvrirSortie = () => ouvrirNouveauMouvementModal({
+          type: 'sortie', partId: l.part_id, quantity: quantite,
           reason: tR('Régularisation — intervention du {date} sur {machine}', { date: formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)), machine: machine ? machine.name : '' }) + ' [#' + String(l.id).slice(0, 8) + ']',
           onSaved: () => { horsStock = horsStock.filter((x) => String(x.id) !== String(l.id)); },
         });
+        // Stock insuffisant (pièce jamais entrée en stock, ou entrée pas encore saisie) : une sortie serait refusée. On saisit d'abord
+        // l'entrée correspondante, puis la sortie s'ouvre toute seule (solde net : zéro, comme si la pièce avait été entrée puis utilisée).
+        if (enStock >= quantite) ouvrirSortie();
+        else ouvrirNouveauMouvementModal({ type: 'entree', partId: l.part_id, quantity: quantite, reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'), onSaved: ouvrirSortie });
       });
     }
     root.querySelector('#stock-mouvements-nouveau')?.addEventListener('click', () => ouvrirNouveauMouvementModal());

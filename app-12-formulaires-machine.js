@@ -2954,7 +2954,7 @@ function openLogInterventionModal(machine, tache, options = {}) {
         ouvrirNouveauMouvementModal({
           type: 'entree', partId, quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 1,
           reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'),
-          onSaved: () => majStockLigneLog(ligne, null, false),
+          onSaved: () => majStockLigneLog(ligne, null, true),   // entrée saisie → la sortie liée à l'intervention se coche d'office
         });
         return;
       }
