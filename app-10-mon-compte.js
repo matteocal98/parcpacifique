@@ -1594,7 +1594,7 @@ function openPlusSheet() {
   overlay.className = 'overlay';
   overlay.style.alignItems = 'flex-end';
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-  const nom = UI.contactName || UI.companyName || trad('Mon compte');
+  const nom = identiteConnectee().complet || trad('Mon compte');
   const offre = badgeOffreCourt();
   const nbMachines = (UI.machines || []).filter((m) => !m.archived).length;
   const nbDocs = UI.counts?.manuals || 0;

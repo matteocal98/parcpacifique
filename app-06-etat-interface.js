@@ -26,6 +26,7 @@ const UI = {
   companyPlan: 'free',
   contactName: '',
   contactFirstName: '',
+  moi: null, // identité de la personne connectée { nomComplet, login } — distincte du contact de la société
   // Fiche société complète (rubrique « Mon compte »)
   company: {},
   email: '',
@@ -375,6 +376,20 @@ function formatHours(n) {
 function initialsFrom(label) {
   return esc(String(label || 'PP').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'PP');
 }
+// Qui est la PERSONNE connectée (et non le contact de la société) : son propre nom, sinon — pour le gérant seulement —
+// le contact de la société, sinon la partie lisible de son identifiant (« georges.moustaki » → « Georges Moustaki »).
+function identiteConnectee() {
+  const propre = String((UI.moi && UI.moi.nomComplet) || '').trim();
+  if (propre) return { prenom: firstNameFrom(propre), complet: propre };
+  if (typeof estGerant === 'function' && estGerant()) {
+    const prenom = UI.contactFirstName || firstNameFrom(UI.contactName) || firstNameFrom(UI.companyName);
+    return { prenom, complet: UI.contactName || UI.companyName || '' };
+  }
+  const login = String((UI.moi && UI.moi.login) || '').split('@')[0];
+  const mots = login.split(/[._-]+/).filter(Boolean).map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  if (mots.length) return { prenom: mots[0], complet: mots.join(' ') };
+  return { prenom: '', complet: UI.contactName || UI.companyName || '' };
+}
 function firstNameFrom(label) {
   const w = String(label || '').trim().split(/\s+/).filter(Boolean);
   return w.length ? w[0] : '';
@@ -517,7 +532,7 @@ function badgeLabel(state) {
 function greetingLabel() {
   // Le prénom est saisi séparément depuis la rubrique « Mon compte » ; le repli
   // sur le contact historique garde les bases non migrées fonctionnelles.
-  const who = UI.contactFirstName || firstNameFrom(UI.contactName) || firstNameFrom(UI.companyName);
+  const who = identiteConnectee().prenom;
   return who ? tR('Bonjour {nom}', { nom: esc(who) }) : trad('Bonjour');
 }
 
@@ -581,7 +596,7 @@ function dashHeadHtml() {
   return `
     <div class="dash-head">
       <div class="dash-head-tete">
-        <span class="avatar dash-avatar" aria-hidden="true">${initialsFrom(UI.contactName || UI.companyName)}</span>
+        <span class="avatar dash-avatar" aria-hidden="true">${initialsFrom(identiteConnectee().complet)}</span>
         <div class="dash-head-mots">
           <h1>${greetingLabel()}</h1>
           <span class="dash-head-compte">${UI.companyName ? tR('{societe} · {n} machine(s) suivie(s)', { societe: esc(UI.companyName), n }) : tR('{n} machine(s) suivie(s)', { n })}</span>
@@ -603,7 +618,7 @@ function pageHeadHtml() {
         <span class="hello">${greetingLabel()}</span>
         <span class="count">${UI.view === 'dashboard' ? tR('{n} machine(s) suivie(s)', { n }) : `${n} machine${n > 1 ? 's' : ''}`}</span>
       </div>
-      <span class="avatar">${initialsFrom(UI.contactName || UI.companyName)}</span>
+      <span class="avatar">${initialsFrom(identiteConnectee().complet)}</span>
     </div>
     <div class="head-title">
       <div>

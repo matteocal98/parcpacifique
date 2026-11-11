@@ -1432,6 +1432,7 @@ function afficherDepuisCache(cache) {
   // Le RÔLE et l'identité : sans eux, hors connexion, l'application ne sait pas qui est la personne et retombe sur le droit le plus faible.
   UI.role = cache.role || '';
   UI.userId = cache.userId || null;
+  UI.moi = cache.moi || null;
   UI.suppliers = cache.suppliers || [];
   UI.company = cache.company || {};
   UI.contactName = cache.contactName || '';
@@ -1937,6 +1938,11 @@ async function boot(toastMessage) {
   UI.contactFirstName = companyFirstName(UI.company);
   UI.email = session.user.email || '';
   UI.userId = session.user.id || null;   // sert aux ordres de travail : « assigné à moi »
+  // Identité de LA PERSONNE connectée (≠ contact de la société) : sert au « Bonjour … » et aux initiales. Tolérant : en cas d'échec, repli sur le login.
+  try {
+    const { data: moi } = await sb.from('profiles').select('full_name, login').eq('id', session.user.id).maybeSingle();
+    UI.moi = { nomComplet: (moi && moi.full_name) || '', login: (moi && moi.login) || '' };
+  } catch (e) { UI.moi = null; }
   UI.categories = categories || [];
   UI.components = composants || [];
   UI.partsCatalog = partsCatalog;
@@ -1987,6 +1993,7 @@ async function boot(toastMessage) {
     companyPlan: UI.companyPlan,
     role: UI.role,
     userId: UI.userId,
+    moi: UI.moi,
     suppliers: UI.suppliers,
     company: UI.company,
     contactName: UI.contactName,
