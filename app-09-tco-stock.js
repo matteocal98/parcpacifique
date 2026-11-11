@@ -2283,7 +2283,10 @@ function horsStockIgnorer(id) {
   const s = horsStockIgnores(); s.add(String(id));
   try { localStorage.setItem('kalea.horsStockIgnores:' + UI.companyId, JSON.stringify([...s].slice(-500))); } catch (e) { /* mémoire locale indisponible : l'élément réapparaîtra */ }
 }
+// Bilan de la dernière vérification (affiché quand il n'y a rien à régulariser : on SAIT que la vérification a eu lieu).
+let horsStockBilan = { interventions: 0, lignes: 0 };
 async function chargerPiecesHorsStock() {
+  horsStockBilan = { interventions: 0, lignes: 0 };
   const ids = (UI.machines || []).map((m) => m.id);
   if (!ids.length) return [];
   const depuis = new Date(Date.now() - HORS_STOCK_JOURS * 86400000).toISOString();
@@ -2294,6 +2297,7 @@ async function chargerPiecesHorsStock() {
     if (error) throw error;
     interventions.push(...(data || []));
   }
+  horsStockBilan.interventions = interventions.length;
   if (!interventions.length) return [];
   const parInter = new Map(interventions.map((i) => [String(i.id), i]));
   const lignes = [];
@@ -2302,6 +2306,7 @@ async function chargerPiecesHorsStock() {
     if (error) throw error;
     lignes.push(...(data || []));
   }
+  horsStockBilan.lignes = lignes.length;
   const { data: sorties, error: errS } = await sb.from('stock_movements').select('intervention_id, part_id, reason')
     .eq('company_id', UI.companyId).eq('type', 'sortie').gte('performed_at', new Date(Date.now() - (HORS_STOCK_JOURS + 5) * 86400000).toISOString()).limit(5000);
   if (errS) throw errS;
@@ -2339,11 +2344,12 @@ function ligneHorsStockHtml(l) {
 function blocHorsStockHtml() {
   if (!peutGererMouvementsStock()) return '';
   return `
-    <section class="ui-section" id="stock-horsstock-section" hidden>
+    <section class="ui-section" id="stock-horsstock-section">
       ${teteSectionKit('alerte', trad('Pièces utilisées hors stock'), tR('Sur les {n} derniers jours : pièces du catalogue utilisées dans une intervention sans sortie de stock', { n: HORS_STOCK_JOURS }))}
       <div class="ui-section-corps">
         <div class="ui-liste" id="stock-horsstock-liste"></div>
-        <p class="ui-aide">${trad('« Régulariser » retire la pièce du stock (sortie pré-remplie ; si le stock est insuffisant, on commence par une entrée). « Ignorer » : la pièce vient d\'ailleurs, rien à corriger (mémorisé sur cet appareil).')}</p>
+        <p class="ui-aide" id="stock-horsstock-etat" role="status">${trad('Vérification en cours…')}</p>
+        <p class="ui-aide" id="stock-horsstock-aide" hidden>${trad('« Régulariser » retire la pièce du stock (sortie pré-remplie ; si le stock est insuffisant, on commence par une entrée). « Ignorer » : la pièce vient d\'ailleurs, rien à corriger (mémorisé sur cet appareil).')}</p>
       </div>
     </section>`;
 }
@@ -5967,8 +5973,16 @@ VIEWS.stock = {
     const rafraichirHorsStock = () => {
       const section = root.querySelector('#stock-horsstock-section');
       if (!section) return;
-      section.hidden = !horsStock.length;
       root.querySelector('#stock-horsstock-liste').innerHTML = horsStock.map(ligneHorsStockHtml).join('');
+      const aideRegul = root.querySelector('#stock-horsstock-aide');
+      if (aideRegul) aideRegul.hidden = !horsStock.length;   // l'explication des deux boutons n'a de sens que s'il y a des lignes
+      const etat = root.querySelector('#stock-horsstock-etat');
+      if (etat) {
+        etat.hidden = horsStock.length > 0;
+        if (!horsStock.length) etat.textContent = horsStockBilan.lignes
+          ? tR('Rien à régulariser : {n} pièce(s) utilisée(s) dans {m} intervention(s) ces {j} derniers jours, toutes avec leur sortie de stock.', { n: horsStockBilan.lignes, m: horsStockBilan.interventions, j: HORS_STOCK_JOURS })
+          : tR('Rien à régulariser : aucune pièce du catalogue n\'a été utilisée dans une intervention ces {j} derniers jours.', { j: HORS_STOCK_JOURS });
+      }
       // pastille de compte sur l'onglet Mouvements
       const onglet = root.querySelector('#stock-onglet-mouvements');
       if (onglet) {
@@ -5981,7 +5995,11 @@ VIEWS.stock = {
         if (!root.isConnected) return;
         horsStock = liste;
         rafraichirHorsStock();
-      }).catch((err) => console.warn('Pièces hors stock non chargées :', err && err.message));
+      }).catch((err) => {
+        console.warn('Pièces hors stock non chargées :', err && err.message);
+        const etat = root.querySelector('#stock-horsstock-etat');
+        if (etat) { etat.hidden = false; etat.textContent = trad('Vérification impossible pour le moment (connexion ?). Rechargez la page pour réessayer.'); }
+      });
       root.querySelector('#stock-horsstock-liste')?.addEventListener('click', (e) => {
         const reg = e.target.closest('[data-hors-stock-regulariser]');
         const ign = e.target.closest('[data-hors-stock-ignorer]');

@@ -3403,6 +3403,9 @@ html[data-theme="dark"]{
    sur toute la largeur, pour ne pas décaler le champ Coût unitaire par rapport à Quantité. */
 .stock-mouvement-modal .mvt-note{display:block;grid-column:1 / -1;margin:6px 0 0;font-size:12px;line-height:1.4;color:var(--ink-2);}   /* pas « ui-aide » : sur téléphone ces textes se replient derrière une pastille « i », or celui-ci doit rester lisible */
 
+#stock-horsstock-liste:empty{display:none;}   /* bloc « Pièces utilisées hors stock » vide : pas de trou au-dessus du message */
+#stock-horsstock-aide[hidden]{display:none;}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
