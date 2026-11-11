@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-tu3VmeQpKslf/nSk9e+/kqZzHoolUULWx+eYS++x2MY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
-<meta name="kalea-empreinte" content="sha256-hVux2Q3L16Y1aOOoK/VBjActtxq3STxLopz0wEvtrmA=">
+<meta name="kalea-empreinte" content="sha256-qMxPyTzAr3ahaHqLJRtOw74XJuIMPzMM2csywW2o7FU=">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
      que le WebView est récent : il laisse alors la page réserver la hauteur de
@@ -65,7 +65,10 @@
   <div class="loading">Chargement…</div>
 </div>
 
-<script src="./traductions-en.js?v=46cea6918e6a"></script>
+<!-- Dictionnaires de traduction : balises INERTES dans un <template>, ré-activées par app-00-langue.js seulement si la langue de départ en a un
+     (un francophone ne télécharge pas les 97 Ko du dictionnaire anglais). Garder la balise sous cette forme exacte : les outils la lisent. -->
+<template id="dictionnaires"><script src="./traductions-en.js?v=46cea6918e6a"></script></template>
+<script src="./app-00-langue.js?v=2185acf08809"></script>
 <script src="./app-01-base.js?v=e40cda7cd6db"></script>
 <script src="./app-02-calculs.js?v=72ac397df320"></script>
 <script src="./app-03-services.js?v=af85ace16116"></script>
