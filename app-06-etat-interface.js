@@ -699,12 +699,13 @@ function goTo(viewId) {
   }).observe(document.body, { childList: true });
 })();
 
-// Téléphone : toute fenêtre qui n'a pas de croix de fermeture en reçoit une (plus besoin de chercher « Annuler » en bas).
+// Toute fenêtre qui n'a pas de croix de fermeture en reçoit une (plus besoin de chercher « Annuler » en bas).
+// D'abord réservé au téléphone ; étendu à l'ordinateur le 2026-11-11 avec le style « bandeau encre » : la croix est au même
+// endroit dans toutes les fenêtres (huit n'en avaient aucune sur grand écran).
 (function ajouterCroixFenetres() {
   if (typeof MutationObserver === 'undefined') return;
   const SEL = '.modal-croix,.log-close2,.mform-close,.fo-fermer-x,.pplan-close,.piece-mobile-overlay,[aria-label*="Fermer"],[aria-label*="fermer"],[aria-label*="Close"]';
   const traiter = (ov) => {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 560px), (orientation: landscape) and (max-height: 520px) and (max-width: 899px)').matches) return;
     const mod = ov.querySelector('.modal');
     if (!mod || mod.querySelector(SEL) || ov.classList.contains('piece-mobile-overlay') || mod.dataset.croixAjoutee) return;
     mod.dataset.croixAjoutee = '1'; mod.classList.add('croix-auto');
@@ -712,7 +713,8 @@ function goTo(viewId) {
     b.type = 'button'; b.className = 'modal-croix'; b.setAttribute('aria-label', trad('Fermer'));
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     b.addEventListener('click', () => ov.remove());
-    mod.appendChild(b);
+    // En PREMIER enfant, comme la croix des fenêtres qui en ont une d'origine : le pied (.modal-actions) reste le dernier enfant.
+    mod.insertBefore(b, mod.firstChild);
   };
   new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => {
     if (n.nodeType === 1 && n.classList && n.classList.contains('overlay')) setTimeout(() => traiter(n), 80);

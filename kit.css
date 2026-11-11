@@ -3113,6 +3113,48 @@ html[data-theme="dark"] .otm-machine.is-choisi .otm-radio{color:#0E1226;}
 }
 
 
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MODALES — STYLE C « BANDEAU ENCRE » (choisi par l'utilisateur le 2026-11-11, sur maquettes puis essai sur trois fenêtres)
+   Bandeau de titre bleu nuit (comme la barre latérale), corps BLANC, pied teinté, voile plus marqué derrière.
+   Conséquence sur la règle « l'inverse du parent » : dans une fenêtre, le fond est blanc, donc ses éléments (lignes, puces,
+   encadrés) sont TEINTÉS (--mod-element), et les champs gardent la règle 8 (fond blanc, bordure encre de 2 px).
+   Tout passe par les jetons --mod-* : une seule ligne à changer pour retoucher le style, et le thème sombre a les siens.
+
+   LOT 1 — les fenêtres « standard » : .modal dont le titre <h2> est un enfant direct (Signaler une panne, Export, QR code,
+   Kit, Mouvement, Inventaire, Étiquettes, Emplacement, Choix de date, Prochain entretien, Liste de choix, Confirmation…).
+   Les fenêtres à en-tête particulier (.support-tete, .mform-tete, .pe-tete, .jm-tete, .fo-entete, imports, intervention,
+   fiche machine, ordres de travail) gardent leur style actuel jusqu'aux lots suivants.
+   ════════════════════════════════════════════════════════════════════════════ */
+:root{
+  --mod-corps:#FFFFFF;--mod-bandeau:#0E1333;--mod-sur-bandeau:#FFFFFF;--mod-pied:#F0F2F8;--mod-element:#F0F2F8;
+  --mod-bord:#B9BFD6;--mod-filet:#E1E4EE;--mod-voile:rgba(14,19,51,.45);--mod-marge:24px;
+}
+html[data-theme="dark"]{
+  --mod-corps:#141A33;--mod-bandeau:#070A18;--mod-sur-bandeau:#FFFFFF;--mod-pied:#1E2542;--mod-element:#2A3257;
+  --mod-bord:rgba(255,255,255,.26);--mod-filet:rgba(255,255,255,.10);--mod-voile:rgba(0,0,0,.6);
+}
+@media (max-width:700px){:root{--mod-marge:14px;}}
+/* Le voile : 45 % au lieu de 10 %, pour que la fenêtre se détache de la page (toutes les fenêtres, tous les lots). */
+.overlay{background:var(--mod-voile);}
+/* Corps blanc ; le bandeau et le pied vont d'un bord à l'autre, d'où le padding horizontal seul et les marges négatives. */
+.overlay > .modal:has(> h2){background:var(--mod-corps) !important;padding:0 var(--mod-marge) var(--mod-marge);position:relative;}
+.overlay > .modal:has(> h2):has(> .modal-actions:last-child){padding-bottom:0;}
+.overlay > .modal > h2{margin:0 calc(-1 * var(--mod-marge)) 16px;padding:15px 60px 15px var(--mod-marge);background:var(--mod-bandeau);color:var(--mod-sur-bandeau);font-size:18px;line-height:1.25;}
+.overlay > .modal > h2 + .sub{margin-top:-4px;}
+/* La croix : toujours au même endroit, en blanc sur le bandeau (elle est ajoutée à toute fenêtre qui n'en a pas : app-06). */
+.overlay > .modal:has(> h2) > .modal-croix{top:5px;right:8px;width:44px;height:44px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
+.overlay > .modal:has(> h2) > .modal-croix:hover{background:rgba(255,255,255,.14);}
+.overlay > .modal:has(> h2) > .modal-croix svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
+/* Le pied : bande teintée, collée en bas quand la fenêtre défile. */
+.overlay > .modal:has(> h2) > .modal-actions:last-child{position:sticky;bottom:0;z-index:3;margin:20px calc(-1 * var(--mod-marge)) 0;padding:12px var(--mod-marge);background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+/* Champs : RIEN ici. La règle 8 de la charte (§ 18 plus haut) impose fond blanc + bordure encre de 2 px sur tout champ, sans
+   exception ; le style des fenêtres ne la défait pas. */
+/* Boutons secondaires : blancs bordés (ils étaient blancs sur l'ardoise, ils seraient invisibles sur le blanc). */
+.overlay > .modal:has(> h2) :is(.ui-btn-pastille,button.secondary,.stock-btn-outline){background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
+/* Éléments posés dans la fenêtre : teintés. */
+.overlay > .modal:has(> h2) :is(.ui-puce:not(.is-actif):not(:has(input:checked)),.saisie-picker-ligne,.panne-ligne,.plan-field,.ligne-choix,.mvt-types){background:var(--mod-element);}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
@@ -3626,6 +3668,7 @@ html[data-theme="dark"] .otm-sous{font-weight:600}
 html[data-theme="dark"] .otm-compteur{font-weight:700}
 html[data-theme="dark"] .otm-tache{font-weight:700}
 html[data-theme="dark"] .overlay .modal.otm .otm-tache{font-weight:700}
+html[data-theme="dark"] .overlay > .modal:has(> h2) > .modal-croix:hover{background:rgba(255,255,255,0.02)}
 html[data-theme="dark"] [style*="color:#000" i]:not([style*="background-color:#000" i]),html[data-theme="dark"] [style*="color: #000" i]:not([style*="background-color: #000" i]){color:var(--ink) !important}
 html[data-theme="dark"] [style*="color:#000000" i]:not([style*="background-color:#000000" i]),html[data-theme="dark"] [style*="color: #000000" i]:not([style*="background-color: #000000" i]){color:var(--ink) !important}
 html[data-theme="dark"] [style*="color:#047857" i]:not([style*="background-color:#047857" i]),html[data-theme="dark"] [style*="color: #047857" i]:not([style*="background-color: #047857" i]){color:rgba(142,194,179,1) !important}
