@@ -3129,6 +3129,8 @@ html[data-theme="dark"] .otm-machine.is-choisi .otm-radio{color:#0E1226;}
 :root{
   --mod-corps:#FFFFFF;--mod-bandeau:#0E1333;--mod-sur-bandeau:#FFFFFF;--mod-pied:#F0F2F8;--mod-element:#F0F2F8;
   --mod-bord:#B9BFD6;--mod-filet:#E1E4EE;--mod-voile:rgba(14,19,51,.45);--mod-marge:24px;
+  /* Voiles blancs posés SUR le bandeau (pastilles, bouton de fermeture) : en jetons pour que le thème sombre les garde tels quels. */
+  --mod-sur-voile:rgba(255,255,255,.14);--mod-sur-voile-fort:rgba(255,255,255,.24);
 }
 html[data-theme="dark"]{
   --mod-corps:#141A33;--mod-bandeau:#070A18;--mod-sur-bandeau:#FFFFFF;--mod-pied:#1E2542;--mod-element:#2A3257;
@@ -3144,7 +3146,7 @@ html[data-theme="dark"]{
 .overlay > .modal > h2 + .sub{margin-top:-4px;}
 /* La croix : toujours au même endroit, en blanc sur le bandeau (elle est ajoutée à toute fenêtre qui n'en a pas : app-06). */
 .overlay > .modal:has(> h2) > .modal-croix{top:5px;right:8px;width:44px;height:44px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
-.overlay > .modal:has(> h2) > .modal-croix:hover{background:rgba(255,255,255,.14);}
+.overlay > .modal:has(> h2) > .modal-croix:hover{background:var(--mod-sur-voile);}
 .overlay > .modal:has(> h2) > .modal-croix svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
 /* Le pied : bande teintée, collée en bas quand la fenêtre défile. */
 .overlay > .modal:has(> h2) > .modal-actions:last-child{position:sticky;bottom:0;z-index:3;margin:20px calc(-1 * var(--mod-marge)) 0;padding:12px var(--mod-marge);background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
@@ -3154,6 +3156,81 @@ html[data-theme="dark"]{
 .overlay > .modal:has(> h2) :is(.ui-btn-pastille,button.secondary,.stock-btn-outline){background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
 /* Éléments posés dans la fenêtre : teintés. */
 .overlay > .modal:has(> h2) :is(.ui-puce:not(.is-actif):not(:has(input:checked)),.saisie-picker-ligne,.panne-ligne,.plan-field,.ligne-choix,.mvt-types){background:var(--mod-element);}
+
+/* ── MODALES, STYLE C — LOT 2 : les fenêtres à EN-TÊTE PARTICULIER (2026-11-11) ──────────────────────────────────────────
+   Même style que le lot 1, posé sur des charpentes différentes : l'en-tête n'est pas un <h2> nu mais un bloc
+   (.support-tete, .mform-tete, .pe-tete, .jm-tete), ou la fenêtre a déjà son en-tête / corps / pied (fournisseur, imports,
+   intervention, dépôt de manuel). Restent pour le lot 3 : la fiche machine, Ajouter / Modifier une machine, les offres et
+   les fenêtres des ordres de travail (signature, habilitations). */
+
+/* 1. En-tête en bloc : Support, sélecteur de machine, indicatif, choix de pièce, fréquence, kit de tâche, Planifier, Jour d'agenda. */
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)){background:var(--mod-corps) !important;padding:0 var(--mod-marge) var(--mod-marge);position:relative;}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)):has(> :is(.modal-actions,.pe-pied,.jm-nav,.support-picker-pied):last-child){padding-bottom:0;}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete){margin:0 calc(-1 * var(--mod-marge)) 16px;padding:13px var(--mod-marge);background:var(--mod-bandeau);color:var(--mod-sur-bandeau);align-items:center;border-radius:0;}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) :is(h2,h3){color:var(--mod-sur-bandeau);font-size:18px;line-height:1.25;margin:0;}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) :is(p,.sub){color:rgba(255,255,255,.86);margin-bottom:0;}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) :is(.mform-close,.jm-fermer,.pe-tete-icone,.piece-tete-icone,.indicatif-tete-icone){background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);border:0;box-shadow:none;}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) :is(.mform-close,.jm-fermer):hover{background:var(--mod-sur-voile-fort);}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > .modal-croix{top:5px;right:8px;width:44px;height:44px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > .modal-croix:hover{background:var(--mod-sur-voile);}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > .modal-croix svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
+/* Planifier un entretien : la croix ajoutée prend la place du pictogramme de l'en-tête. */
+.overlay > .modal:has(> .modal-croix) > .pe-tete{padding-right:60px;}
+.overlay > .modal:has(> .modal-croix) > .pe-tete .pe-tete-icone{display:none;}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > :is(.modal-actions,.pe-pied,.jm-nav,.support-picker-pied):last-child{position:sticky;bottom:0;z-index:3;margin:20px calc(-1 * var(--mod-marge)) 0;padding:12px var(--mod-marge);background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) :is(.ui-btn-pastille,button.secondary,.pe-fermer,.stock-btn-outline){background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
+/* Lignes, puces et encadrés : teintés — sauf l'élément choisi ou survolé, qui garde sa règle d'origine. */
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) :is(.pe-pill:not(.is-active),.pe-machine,.indicatif-onglet:not(.is-actif),.indicatif-ligne,.support-picker-ligne,.piece-fournisseur-chip:not(.is-actif),.piece-ligne-catalogue,.piece-resume,.choix-bloc-controle,.ui-puce:not(.is-actif):not(:has(input:checked))):not(.is-choisie):not(:hover){background:var(--mod-element);}
+
+/* 2. Fournisseur : en-tête, corps et pied existent déjà. */
+.overlay > .modal.fournisseur-modal{background:var(--mod-corps) !important;}
+.fournisseur-modal > .fo-entete{background:var(--mod-bandeau);color:var(--mod-sur-bandeau);}
+.fournisseur-modal > .fo-entete :is(h2,.fo-completude-texte){color:var(--mod-sur-bandeau);}
+.fournisseur-modal > .fo-entete .sub{color:rgba(255,255,255,.86);}
+.fournisseur-modal > .fo-entete .fo-completude-barre{background:var(--mod-sur-voile-fort);}
+.fournisseur-modal > .fo-entete .modal-croix{color:var(--mod-sur-bandeau);}
+.fournisseur-modal > .fo-entete .modal-croix:hover{background:var(--mod-sur-voile);}
+.fournisseur-modal > .fo-pied{background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+.fournisseur-modal .ui-btn-pastille{background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
+
+/* 3. Imports CSV (machines, catalogue, mouvements). */
+.overlay > .modal.import-csv-modal{background:var(--mod-corps) !important;padding:0;}   /* padding:0 aussi sur téléphone, sinon le bandeau n'atteint pas les bords */
+.import-csv-modal > .import-csv-barre{display:none;}
+.import-csv-modal > .import-csv-corps{padding-top:0;}
+.import-csv-modal .import-csv-entete{margin:0 -24px;padding:13px 24px;background:var(--mod-bandeau);color:var(--mod-sur-bandeau);align-items:center;}
+.import-csv-modal .import-csv-entete :is(h2,h3){color:var(--mod-sur-bandeau);font-size:18px;margin:0;}
+.import-csv-modal .import-csv-entete :is(p,.sub,span){color:rgba(255,255,255,.86);}
+.import-csv-modal .import-csv-entete :is(.import-csv-icone,.log-close2){background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);}
+.import-csv-modal .import-csv-regle:not(.is-accent),.import-csv-modal .import-csv-zone:not(.is-rempli):not(.is-survol):not(:hover){background:var(--mod-element);}
+.import-csv-modal .import-csv-bouton-modele{background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
+.import-csv-modal > .import-csv-pied{background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+
+/* 4. Enregistrer une intervention. */
+.overlay.log-modal > .modal{background:var(--mod-corps) !important;}
+.log-modal .log-topband{display:none;}
+.log-modal .log-header2{background:var(--mod-bandeau);color:var(--mod-sur-bandeau);padding-top:14px;padding-bottom:14px;align-items:center;}
+.log-modal .log-header2 :is(h2,.val){color:var(--mod-sur-bandeau);}
+.log-modal .log-header2 :is(.lbl,.log-header2-eyebrow-texte){color:rgba(255,255,255,.78);}
+.log-modal .log-header2 :is(.log-chip-machine,.log-chip-serial,.log-close2,.log-header2-cat-badge){background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);}
+.log-modal .log-header2 .log-header2-compteur{border-color:var(--mod-sur-voile-fort);}
+.log-modal .log-footer2{background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+.log-modal .log-type-carte:not(.is-active):not(:hover):not([data-kind="depannage"]){background:var(--mod-element);}
+
+/* 5. Déposer un manuel (le corps est déjà blanc). */
+.manual-modal .pplan-head{background:var(--mod-bandeau);color:var(--mod-sur-bandeau);align-items:center;}
+.manual-modal .pplan-head :is(h2,h3){color:var(--mod-sur-bandeau);}
+.manual-modal .pplan-head :is(p,span){color:rgba(255,255,255,.86);}
+.manual-modal .pplan-head .pplan-close{background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);}
+.manual-modal .pplan-foot{background:var(--mod-pied);border-top:1px solid var(--mod-filet);}
+.manual-modal .pplan-btn-annuler{background:var(--mod-corps);box-shadow:inset 0 0 0 1px var(--mod-bord);}
+
+/* 6. Retouches de lisibilité relevées au contrôle du lot 2 : étiquettes posées dans le bandeau, et trois petits textes qui
+      étaient déjà trop pâles avant le changement de fond (gris #94A3B8, orange et turquoise de statut sur blanc). */
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) .jm-eyebrow{color:rgba(255,255,255,.86);}
+.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete) :is(.jm-compte,.support-badge-optionnel){background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);}
+.log-modal :is(.log-step-tag,.log-cout-champ-icone .unite){color:var(--ink-3);}
+.piece-stock-badge.is-vide{color:var(--late-texte);}
+.piece-stock-badge.is-ok{color:var(--ok-texte);}
 
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
@@ -3668,7 +3745,6 @@ html[data-theme="dark"] .otm-sous{font-weight:600}
 html[data-theme="dark"] .otm-compteur{font-weight:700}
 html[data-theme="dark"] .otm-tache{font-weight:700}
 html[data-theme="dark"] .overlay .modal.otm .otm-tache{font-weight:700}
-html[data-theme="dark"] .overlay > .modal:has(> h2) > .modal-croix:hover{background:rgba(255,255,255,0.02)}
 html[data-theme="dark"] [style*="color:#000" i]:not([style*="background-color:#000" i]),html[data-theme="dark"] [style*="color: #000" i]:not([style*="background-color: #000" i]){color:var(--ink) !important}
 html[data-theme="dark"] [style*="color:#000000" i]:not([style*="background-color:#000000" i]),html[data-theme="dark"] [style*="color: #000000" i]:not([style*="background-color: #000000" i]){color:var(--ink) !important}
 html[data-theme="dark"] [style*="color:#047857" i]:not([style*="background-color:#047857" i]),html[data-theme="dark"] [style*="color: #047857" i]:not([style*="background-color: #047857" i]){color:rgba(142,194,179,1) !important}
