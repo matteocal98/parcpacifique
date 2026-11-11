@@ -3374,6 +3374,21 @@ html[data-theme="dark"]{
   .log-modal .log-bloc-cout .log-bento-badge{font-size:10px;margin-left:6px;}
 }
 
+/* ── Enregistrer une intervention, pièces ajoutées : sur écran large, chaque pièce tient sur UNE ligne pleine largeur — icône, pièce, quantité,
+      prix, « Sortir du stock » (case, magasin si coché, état du stock) et corbeille. Avant : deux pièces côte à côte, chacune sur trois lignes. ── */
+@media (min-width:901px){
+  .log-modal .log-pieces-liste{grid-template-columns:minmax(0,1fr);gap:8px;align-items:stretch;}
+  .log-modal .log-piece-ligne{grid-template-columns:28px minmax(180px,1fr) 64px 120px auto 34px;gap:10px;padding:8px 12px;}
+  .log-modal .log-piece-icone{grid-column:1;grid-row:1;}
+  .log-modal .log-piece-ligne .champ-select{grid-column:2;grid-row:1;}
+  .log-modal .log-piece-ligne .log-piece-qte{grid-column:3;grid-row:1;}
+  .log-modal .log-piece-ligne .log-piece-prix{grid-column:4;grid-row:1;max-width:none;justify-self:stretch;}
+  .log-modal .log-piece-stock{grid-column:5;grid-row:1;justify-content:flex-start;min-width:0;}
+  .log-modal .log-piece-retirer{grid-column:6;grid-row:1;}
+  .log-modal .log-piece-stock .log-piece-magasin{flex:0 1 190px;min-width:110px;}
+  .log-modal .log-piece-stock-info{white-space:nowrap;}
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
