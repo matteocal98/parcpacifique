@@ -1187,15 +1187,16 @@ function openPlanView(machine, companyId, categories, options = {}) {
 
   overlay.innerHTML = `
     <div class="modal">
-      <nav class="plan-fil-ariane" aria-label="${esc(trad('Fil d\'Ariane'))}">
-        <button type="button" class="plan-fil-retour" id="plan-fil-retour">${picto('flecheGauche')}<span>${trad('Retour au parc')}</span></button>
-        <span class="plan-fil-sep">/</span>
-        <span>${trad('Machines (Parc)')}</span>
-        <span class="plan-fil-sep">/</span>
-        <span>${esc(machine.name)}</span>
-        <span class="plan-fil-sep">/</span>
-        <span class="plan-fil-courant">${trad('Plan d\'entretien & historique')}</span>
-      </nav>
+      <div class="plan-tete">
+        <div class="plan-tete-textes">
+          <h2 class="plan-tete-titre">${trad('Fiche machine')}</h2>
+          <div class="plan-tete-meta">
+            <span class="plan-tete-nom">${esc(machine.name)}</span>
+            ${machineIdentifiant(machine) ? `<span class="plan-tete-point"></span><span class="plan-tete-id">${esc(machineIdentifiant(machine))}</span>` : ''}
+            <span class="plan-tete-statut">${machine.status === 'en_service' ? trad('En service') : esc(machine.status || '')}</span>
+          </div>
+        </div>
+      </div>
       <div class="fm-toolbar">
         <button type="button" class="fm-btn fm-btn-secondaire" id="edit-from-plan" data-court="${esc(trad('Modifier'))}" aria-label="${esc(trad('Modifier la machine'))}" title="${esc(trad('Modifier la machine'))}"><span class="fm-btn-ico-primary">${picto('crayon')}</span><span>${trad('Modifier la machine')}</span></button>
         ${machine.manual_url ? `<button type="button" class="fm-btn fm-btn-secondaire" id="plan-view-manual" data-court="${esc(trad('Carnet'))}" aria-label="${esc(trad('Voir le carnet d\'entretien (PDF)'))}" title="${esc(trad('Voir le carnet d\'entretien (PDF)'))}"><span class="fm-btn-ico-accent">${picto('carnet')}</span><span>${trad('Voir le carnet d\'entretien (PDF)')}</span></button>` : ''}
@@ -1283,7 +1284,6 @@ function openPlanView(machine, companyId, categories, options = {}) {
   `;
 
   overlay.querySelector('#close-plan').addEventListener('click', () => overlay.remove());
-  overlay.querySelector('#plan-fil-retour').addEventListener('click', () => overlay.remove());
   // Scorecard TCO : sur téléphone, seul l'en-tête (prix d'achat, recommandation) se voit ; un toucher déplie les chiffres.
   overlay.addEventListener('click', (e) => {
     const tete = e.target.closest('#tco-scorecard-section .fm-card-head');

@@ -2359,23 +2359,17 @@ function openLogInterventionModal(machine, tache, options = {}) {
     <div class="modal">
       <div class="log-topband"></div>
       <div class="log-header2">
-        <div>
-          <div class="log-header2-eyebrow">
-            <span class="log-header2-eyebrow-texte">${trad('Intervention atelier & chantier')}</span>
-            ${machine.category?.name ? `<span class="log-header2-cat-badge">${esc(machine.category.name)}</span>` : ''}
-          </div>
+        <div class="log-header2-textes">
           <div class="log-header2-titre-ligne">
             <h2>${trad('Enregistrer une intervention')}</h2>
-            <span class="log-chip-machine"><span class="dot"></span>${esc(machine.name)}</span>
-            ${identifiant ? `<span class="log-chip-serial">${picto('compteur')}${esc(identifiant)}</span>` : ''}
+          </div>
+          <div class="log-header2-meta">
+            <span class="log-meta-nom">${esc(machine.name)}</span>
+            ${identifiant ? `<span class="log-meta-point"></span><span class="log-meta-id">${esc(identifiant)}</span>` : ''}
+            ${isCounter && compteurActuel != null ? `<span class="log-meta-compteur"><span class="lbl">${trad('Compteur certifié')}</span> <span class="val">${formatCounter(compteurActuel, unit)}</span></span>` : ''}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex:0 0 auto;">
-          ${isCounter && compteurActuel != null ? `
-          <div class="log-header2-compteur">
-            <span class="lbl">${trad('Compteur certifié')}</span>
-            <span class="val">${formatCounter(compteurActuel, unit)}</span>
-          </div>` : ''}
           <button type="button" class="log-close2" id="cancel-log-x" aria-label="${esc(trad('Fermer'))}">${picto('fermer')}</button>
         </div>
       </div>
