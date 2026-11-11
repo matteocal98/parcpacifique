@@ -3406,6 +3406,9 @@ html[data-theme="dark"]{
 #stock-horsstock-liste:empty{display:none;}   /* bloc « Pièces utilisées hors stock » vide : pas de trou au-dessus du message */
 #stock-horsstock-aide[hidden]{display:none;}
 
+/* Champs repris de l'intervention d'origine (machine, intervention) dans la fenêtre de régularisation : verrouillés, donc grisés. */
+.stock-mouvement-modal #mvt-machine:disabled,.stock-mouvement-modal #mvt-intervention:disabled,.stock-mouvement-modal #mvt-cout[readonly]{background:var(--surface-soft) !important;color:var(--ink);opacity:1;cursor:not-allowed;}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »

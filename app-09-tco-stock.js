@@ -3263,6 +3263,20 @@ function ouvrirNouveauMouvementModal(prefill) {
     if (garni && overlay.querySelector(`#mvt-magasin option[value="${garni.warehouse_id}"]`)) overlay.querySelector('#mvt-magasin').value = String(garni.warehouse_id);
     if (prefill.quantity != null) overlay.querySelector('#mvt-quantite').value = texteAvecSeparateurs(prefill.quantity);
     if (prefill.reason) overlay.querySelector('#mvt-motif').value = prefill.reason;
+    // Régularisation : la machine et l'intervention d'origine sont reprises (en lecture seule) comme repère. La régularisation se
+    // rattache à la ligne de l'intervention par la fonction serveur ; elle ne « lie » pas l'intervention une 2e fois.
+    if (prefill.ligneId && prefill.interventionId) {
+      const selM = overlay.querySelector('#mvt-machine');
+      const selI = overlay.querySelector('#mvt-intervention');
+      if (selM && prefill.machineId) { selM.value = String(prefill.machineId); selM.disabled = true; }
+      if (selI) {
+        selI.innerHTML = `<option value="${esc(prefill.interventionId)}">${esc(prefill.interventionLibelle || trad('Intervention d\'origine'))}</option>`;
+        selI.value = String(prefill.interventionId);
+        selI.disabled = true;
+      }
+      const noteLiee = overlay.querySelector('#mvt-intervention-bloc .ui-aide');
+      if (noteLiee) noteLiee.textContent = trad('Intervention déjà enregistrée : la régularisation s\'y rattache, son coût n\'est pas compté une 2e fois.');
+    }
     // Coût unitaire repris de l'intervention (régularisation) : verrouillé, pour que le stock et le coût de la machine concordent.
     if (prefill.unitCost > 0) {
       const champCout = overlay.querySelector('#mvt-cout');
@@ -3311,7 +3325,7 @@ function ouvrirNouveauMouvementModal(prefill) {
     const qty = nombreDepuisTexte(overlay.querySelector('#mvt-quantite').value);
     const coutBrut = overlay.querySelector('#mvt-cout').value;
     const cout = type === 'entree' ? nombreDepuisTexte(coutBrut) : (coutBrut ? nombreDepuisTexte(coutBrut) : null);
-    const interventionId = (type === 'sortie' && overlay.querySelector('#mvt-intervention')?.value) || null;
+    const interventionId = (type === 'sortie' && !(prefill && prefill.ligneId) && overlay.querySelector('#mvt-intervention')?.value) || null;   // régularisation : jamais liée ici (le coût serait compté deux fois)
     const motif = overlay.querySelector('#mvt-motif').value.trim() || null;
 
     if (!partId) { dire(trad('Choisissez une pièce.'), true); return; }
@@ -6020,8 +6034,11 @@ VIEWS.stock = {
         const quantite = Number(l.quantity) || 1;
         const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
         const prixIntervention = Number(l.unit_price) || 0;   // prix unitaire compté dans l'intervention (donc dans le coût de la machine)
+        const dateOrigine = formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10));
+        const libelleOrigine = dateOrigine + (machine ? ' — ' + machine.name : '');
         const ouvrirSortie = () => ouvrirNouveauMouvementModal({
           type: 'sortie', partId: l.part_id, quantity: quantite, prixIntervention, ligneId: l.id,
+          machineId: l.intervention?.machine_id, interventionId: l.intervention_id, interventionLibelle: libelleOrigine,
           reason: tR('Régularisation — intervention du {date} sur {machine}', { date: formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)), machine: machine ? machine.name : '' }) + ' [#' + String(l.id).slice(0, 8) + ']',
           onSaved: () => { horsStock = horsStock.filter((x) => String(x.id) !== String(l.id)); },
         });
@@ -6034,7 +6051,7 @@ VIEWS.stock = {
           ouvrirNouveauMouvementModal({
             type: 'entree', partId: l.part_id, quantity: (quantite - enStock) > 0 ? (quantite - enStock) : quantite,
             unitCost: prixIntervention, coutVerrouille: prixIntervention > 0,
-            reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'), onSaved: ouvrirSortie,
+            reason: tR('Entrée de stock — pièce utilisée lors de l\'intervention du {date} sur {machine}', { date: dateOrigine, machine: machine ? machine.name : '' }), onSaved: ouvrirSortie,
           });
         }
       });
