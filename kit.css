@@ -3130,11 +3130,11 @@ html[data-theme="dark"] .otm-machine.is-choisi .otm-radio{color:#0E1226;}
   --mod-corps:#FFFFFF;--mod-bandeau:#0E1333;--mod-sur-bandeau:#FFFFFF;--mod-pied:#F0F2F8;--mod-element:#F0F2F8;
   --mod-bord:#B9BFD6;--mod-filet:#E1E4EE;--mod-voile:rgba(14,19,51,.45);--mod-marge:24px;
   /* Voiles blancs posés SUR le bandeau (pastilles, bouton de fermeture) : en jetons pour que le thème sombre les garde tels quels. */
-  --mod-sur-voile:rgba(255,255,255,.14);--mod-sur-voile-fort:rgba(255,255,255,.24);
+  --mod-sur-voile:rgba(255,255,255,.14);--mod-sur-voile-fort:rgba(255,255,255,.24);--mod-bouton:#0E1333;
 }
 html[data-theme="dark"]{
   --mod-corps:#141A33;--mod-bandeau:#070A18;--mod-sur-bandeau:#FFFFFF;--mod-pied:#1E2542;--mod-element:#2A3257;
-  --mod-bord:rgba(255,255,255,.26);--mod-filet:rgba(255,255,255,.10);--mod-voile:rgba(0,0,0,.6);
+  --mod-bord:rgba(255,255,255,.26);--mod-filet:rgba(255,255,255,.10);--mod-voile:rgba(0,0,0,.6);--mod-bouton:#5B52DF;
 }
 @media (max-width:700px){:root{--mod-marge:14px;}}
 /* Le voile : 45 % au lieu de 10 %, pour que la fenêtre se détache de la page (toutes les fenêtres, tous les lots). */
@@ -3143,7 +3143,6 @@ html[data-theme="dark"]{
 .overlay > .modal:has(> h2){background:var(--mod-corps) !important;padding:0 var(--mod-marge) var(--mod-marge);position:relative;}
 .overlay > .modal:has(> h2):has(> .modal-actions:last-child){padding-bottom:0;}
 .overlay > .modal > h2{margin:0 calc(-1 * var(--mod-marge)) 16px;padding:15px 60px 15px var(--mod-marge);background:var(--mod-bandeau);color:var(--mod-sur-bandeau);font-size:18px;line-height:1.25;}
-.overlay > .modal > h2 + .sub{margin-top:-4px;}
 /* La croix : toujours au même endroit, en blanc sur le bandeau (elle est ajoutée à toute fenêtre qui n'en a pas : app-06). */
 .overlay > .modal:has(> h2) > .modal-croix{top:5px;right:8px;width:44px;height:44px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
 .overlay > .modal:has(> h2) > .modal-croix:hover{background:var(--mod-sur-voile);}
@@ -3231,6 +3230,72 @@ html[data-theme="dark"]{
 .log-modal :is(.log-step-tag,.log-cout-champ-icone .unite){color:var(--ink-3);}
 .piece-stock-badge.is-vide{color:var(--late-texte);}
 .piece-stock-badge.is-ok{color:var(--ok-texte);}
+
+/* 7. CORRECTIFS signalés par l'utilisateur sur captures (2026-11-11).
+   a) Un LISERÉ BLANC apparaissait au-dessus du bandeau : c'était la bordure de 1 px de la fenêtre et ses coins arrondis, que le
+      bandeau (carré) ne couvrait pas. La fenêtre perd sa bordure (son ombre suffit à la détacher) et le bandeau prend les coins
+      arrondis de la fenêtre ; le pied fait de même en bas.
+   b) Enregistrer une intervention : le contenu était collé au bandeau — le corps retrouve une marge en haut. */
+.overlay > .modal:has(> h2),.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)),.overlay > .modal.fournisseur-modal,.overlay > .modal.import-csv-modal,.overlay.log-modal > .modal,.manual-modal .pplan-modal{border:0;}
+.overlay > .modal > h2,.overlay > .modal > :is(.support-tete,.mform-tete,.pe-tete,.jm-tete),.fournisseur-modal > .fo-entete,.import-csv-modal .import-csv-entete,.log-modal .log-header2,.manual-modal .pplan-head{border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay > .modal:has(> h2) > .modal-actions:last-child,.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > :is(.modal-actions,.pe-pied,.jm-nav,.support-picker-pied):last-child,.fournisseur-modal > .fo-pied,.import-csv-modal > .import-csv-pied,.log-modal .log-footer2{border-radius:0 0 var(--r-card) var(--r-card);}
+.log-modal .log-body2{padding-top:20px;}
+@media (max-width:700px){.log-modal .log-body2{padding-top:14px;}}
+
+/* ── MODALES, STYLE C — LOT 3 (2026-11-11, validé par l'utilisateur après essai à l'écran) ────────────────────────────────
+   Les cinq dernières familles : Ajouter une machine, Modifier une machine, Les offres, la fiche machine, et les fenêtres
+   des ordres de travail (signature, habilitations : même charpente .otm). Les deux premières et les offres étaient des
+   reprises Stitch gardées à l'identique ; l'utilisateur a choisi de leur donner le même bandeau que les autres. */
+
+/* Ajouter une machine (charpente Tailwind : header / form / footer). Le bouton principal passe de l'orange à l'encre. */
+.overlay.machine-modal-add > .bg-modal-bg{background:var(--mod-corps) !important;border:0;}
+.overlay.machine-modal-add header.bg-modal-bg{background:var(--mod-bandeau) !important;border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay.machine-modal-add header.bg-modal-bg :is(h1,h2,h3,p,span,div){color:var(--mod-sur-bandeau) !important;}
+.overlay.machine-modal-add header.bg-modal-bg > div > div:first-child,.overlay.machine-modal-add #wiz-close{background:var(--mod-sur-voile) !important;}
+.overlay.machine-modal-add footer.bg-modal-bg{background:var(--mod-pied) !important;border-top:1px solid var(--mod-filet);border-radius:0 0 var(--r-card) var(--r-card);}
+.overlay.machine-modal-add footer #cancel{background:var(--mod-corps) !important;box-shadow:inset 0 0 0 1px var(--mod-bord);}
+.overlay.machine-modal-add footer button[type="submit"]{background:var(--mod-bouton) !important;color:#fff !important;}
+
+/* Modifier une machine. */
+.overlay.machine-modal-edit > .modal{background:var(--mod-corps) !important;border:0;}
+.overlay.machine-modal-edit > .modal > div:first-child{background:var(--mod-bandeau);padding-bottom:18px;border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay.machine-modal-edit > .modal > div:first-child :is(h2,p,span,div){color:var(--mod-sur-bandeau) !important;}
+.overlay.machine-modal-edit > .modal > div:first-child .mf-meta :is([class*="bg-"],[class*="rounded"]),.overlay.machine-modal-edit #mform-close{background:var(--mod-sur-voile) !important;}
+.overlay.machine-modal-edit #add-form > div:last-child{background:var(--mod-pied);border-top:1px solid var(--mod-filet);border-radius:0 0 var(--r-card) var(--r-card);}
+
+/* Les offres KALEA. */
+.overlay.offres-modal > .modal{background:var(--mod-corps) !important;padding:0 var(--mod-marge);border:0;position:relative;}
+.overlay.offres-modal .offres-entete{margin:0 calc(-1 * var(--mod-marge)) 18px;padding:16px 60px 16px var(--mod-marge);background:var(--mod-bandeau);border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay.offres-modal .offres-entete :is(h2,p,.sub,span){color:var(--mod-sur-bandeau);}
+.overlay.offres-modal .offres-entete .offres-eyebrow-ligne > *,.overlay.offres-modal .offres-entete button{background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);border-color:transparent;}
+.overlay.offres-modal > .modal > .modal-croix{top:6px;right:8px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
+.overlay.offres-modal :is(.offre-carte:not(.is-recommandee),.offres-comparatif-defile,.offre-service-icone,.offre-bouton.is-secondaire){box-shadow:inset 0 0 0 1px var(--mod-bord);}
+.overlay.offres-modal .offres-pied{margin:18px calc(-1 * var(--mod-marge)) 0;padding:12px var(--mod-marge);background:var(--mod-pied);border-top:1px solid var(--mod-filet);border-radius:0 0 var(--r-card) var(--r-card);}
+
+/* Fiche machine : le fil d'Ariane devient le bandeau. Le corps est TEINTÉ et non blanc — la fiche est faite de grandes cartes
+   blanches, qui doivent rester lisibles — et c'est donc le pied qui est blanc. */
+.overlay.plan-modal > .modal{background:var(--mod-element) !important;padding:0 var(--mod-marge) var(--mod-marge);border:0;position:relative;}
+.overlay.plan-modal > .modal:has(> .modal-actions:last-child){padding-bottom:0;}
+.overlay.plan-modal .plan-fil-ariane{margin:0 calc(-1 * var(--mod-marge)) 16px;padding:14px 64px 14px var(--mod-marge);background:var(--mod-bandeau);border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay.plan-modal .plan-fil-ariane :is(button,span){color:var(--mod-sur-bandeau);}
+.overlay.plan-modal .plan-fil-ariane .plan-fil-retour:hover{color:var(--mod-sur-bandeau);text-decoration:underline;}
+.overlay.plan-modal > .modal > .modal-croix{top:4px;right:8px;color:var(--mod-sur-bandeau);background:transparent;z-index:4;}
+.overlay.plan-modal > .modal > .modal-croix svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
+.overlay.plan-modal > .modal > .modal-actions:last-child{margin:20px calc(-1 * var(--mod-marge)) 0;padding:12px var(--mod-marge);background:var(--mod-corps);border-top:1px solid var(--mod-filet);border-radius:0 0 var(--r-card) var(--r-card);}
+
+/* Ordres de travail, signatures, habilitations (.otm) : coins de 16 px comme les autres fenêtres, liste sur fond teinté. */
+.overlay.otm-overlay .modal.otm{--otm-fond:var(--mod-element);border-radius:var(--r-card);border:0;}
+.overlay.otm-overlay .otm-tete{background:var(--mod-bandeau);border-radius:var(--r-card) var(--r-card) 0 0;}
+.overlay.otm-overlay .otm-tete :is(h2,p,span,div){color:var(--mod-sur-bandeau);}
+.overlay.otm-overlay .otm-tete :is(.otm-tuile,.otm-fermer),.overlay.otm-overlay .otm-tete .otm-tete-ligne > :first-child{background:var(--mod-sur-voile);}
+.overlay.otm-overlay .otm-pied{background:var(--mod-pied);border-top:1px solid var(--mod-filet);border-radius:0 0 var(--r-card) var(--r-card);}
+
+/* 8. ESPACE SOUS LE BANDEAU (demande de l'utilisateur, 2026-11-11) : au moins 16 px entre le bandeau et le premier contenu,
+      dans toutes les fenêtres. Mesuré sur 33 fenêtres : quatre étaient en dessous (sous-titre à 12 px, première carte du
+      fournisseur à 4 px, champ de recherche des ordres de travail collé au bandeau). */
+.fournisseur-modal > .fo-corps{padding-top:16px;}
+.overlay.otm-overlay .otm-tete + .otm-recherche{margin-top:16px;}
+.overlay.otm-overlay .otm-recherche input{min-height:44px;}   /* le champ de recherche ne faisait que 21 px de haut */
 
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
