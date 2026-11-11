@@ -1969,6 +1969,9 @@ function majStockLigneLog(ligne, magasinPrefere, cocher) {
   const caseSortie = bloc.querySelector('.log-piece-sortie');
   const sel = bloc.querySelector('.log-piece-magasin');
   const info = bloc.querySelector('.log-piece-stock-info');
+  const horsStock = ligne.querySelector('.log-piece-horsstock');
+  if (horsStock) horsStock.hidden = true;
+  info.hidden = false;
   if (!partId) { bloc.hidden = true; caseSortie.checked = false; return; }
   const piece = (UI.partsCatalog || []).find((p) => String(p.id) === String(partId));
   const unite = piece?.unit_of_measure && piece.unit_of_measure !== 'piece' ? ' ' + libelleUniteMesure(piece.unit_of_measure) : '';
@@ -1979,7 +1982,11 @@ function majStockLigneLog(ligne, magasinPrefere, cocher) {
     sel.hidden = true;
     caseSortie.checked = false;
     caseSortie.disabled = true;
-    info.textContent = tR('Stock : {n}', { n: '0' + unite }) + ' — ' + trad('rien à sortir');
+    // Pièce du catalogue sans stock libéré : ce n'est pas bloqué (achetée hors stock, stock pas encore à jour…), mais on le DIT
+    // clairement et on propose de régulariser tout de suite par une entrée de stock (décidé avec l'utilisateur le 2026-11-11).
+    info.textContent = '';
+    info.hidden = true;
+    if (horsStock) horsStock.hidden = false;
     return;
   }
   caseSortie.disabled = false;
@@ -2040,6 +2047,10 @@ function ligneLogPieceHtml(idx) {
         <label class="ui-case"><input type="checkbox" class="log-piece-sortie"> <span>${trad('Sortir du stock')}</span></label>
         <select class="log-piece-magasin" aria-label="${esc(trad('Magasin'))}"></select>
         <span class="log-piece-stock-info"></span>
+      </div>
+      <div class="log-piece-horsstock" role="note" hidden>
+        <span>${trad('Hors stock : la dépense est comptée, le stock ne bouge pas.')}</span>
+        <button type="button" class="log-piece-horsstock-lien" data-entree-stock>${trad('Faire une entrée de stock')}</button>
       </div>` : ''}
     </div>`;
 }
@@ -2935,6 +2946,18 @@ function openLogInterventionModal(machine, tache, options = {}) {
       recalcTotalPieces();
     });
     piecesListe?.addEventListener('click', (e) => {
+      const entree = e.target.closest('[data-entree-stock]');
+      if (entree) {
+        const ligne = entree.closest('.log-piece-ligne');
+        const partId = ligne?.querySelector('.log-piece-select')?.value;
+        if (!partId || typeof ouvrirNouveauMouvementModal !== 'function') return;
+        ouvrirNouveauMouvementModal({
+          type: 'entree', partId, quantity: Number(ligne.querySelector('.log-piece-qte')?.value) || 1,
+          reason: trad('Entrée de stock — pièce utilisée lors d\'une intervention'),
+          onSaved: () => majStockLigneLog(ligne, null, false),
+        });
+        return;
+      }
       const retirer = e.target.closest('.log-piece-retirer');
       if (!retirer) return;
       retirer.closest('.log-piece-ligne')?.remove();

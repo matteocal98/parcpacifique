@@ -3389,6 +3389,12 @@ html[data-theme="dark"]{
   .log-modal .log-piece-stock-info{white-space:nowrap;}
 }
 
+/* Pièce du catalogue sans stock : l'avertissement passe sous la ligne de la pièce (2026-11-11, option 2 choisie par l'utilisateur). */
+.log-piece-horsstock{flex:0 0 100%;grid-column:1 / -1;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:6px 10px;border-radius:var(--r-md);background:var(--late-bg);color:var(--late-texte);font-size:12px;font-weight:700;line-height:1.35;}
+.log-piece-horsstock[hidden]{display:none;}
+.log-piece-horsstock-lien{border:0;background:transparent;padding:0;font:inherit;font-weight:800;color:var(--late-texte);text-decoration:underline;cursor:pointer;}
+@media (min-width:901px){.log-modal .log-piece-horsstock{grid-column:2 / -1;grid-row:2;}}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
