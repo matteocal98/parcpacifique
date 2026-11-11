@@ -3270,7 +3270,7 @@ function ouvrirNouveauMouvementModal(prefill) {
     if (prefill.type !== 'entree' && prefill.prixIntervention > 0 && garni) {
       const pump = Number(garni.pump_unit_cost) || 0;
       if (Math.abs(pump - prefill.prixIntervention) > 0.005) {
-        overlay.querySelector('#mvt-motif').insertAdjacentHTML('afterend', `<p class="ui-aide" role="note" style="color:var(--late-texte)">${esc(tR('Écart de valeur : l\'intervention comptait cette pièce à {prix} {devise} l\'unité, le stock la sort à {pump} {devise} (coût moyen).', { prix: texteAvecSeparateurs(prefill.prixIntervention), pump: texteAvecSeparateurs(pump), devise: deviseCourte() }))}</p>`);
+        overlay.querySelector('#mvt-motif').insertAdjacentHTML('afterend', `<p class="ui-aide" role="note" style="color:var(--late-texte)">${esc(tR('Le coût de cette pièce dans l\'intervention (le coût de la machine) passera de {prix} {devise} à {pump} {devise} l\'unité, le coût du stock : l\'intervention et le stock concorderont.', { prix: texteAvecSeparateurs(prefill.prixIntervention), pump: texteAvecSeparateurs(pump), devise: deviseCourte() }))}</p>`);
       }
     }
   }
@@ -3327,9 +3327,30 @@ function ouvrirNouveauMouvementModal(prefill) {
         p_intervention_id: interventionId,
         p_reason: motif,
       };
+      // Régularisation d'une pièce utilisée hors stock : la fonction serveur fait la sortie ET aligne le coût de la pièce dans
+      // l'intervention sur le coût du stock (stock et coût de la machine concordent). Elle demande le réseau. Si le serveur ne la
+      // connaît pas encore (SQL pas exécuté), on retombe sur la sortie habituelle, sans alignement, et on le dit.
+      let regularise = false;
+      let alignementImpossible = false;
+      if (prefill && prefill.ligneId && type === 'sortie') {
+        try {
+          if (navigator.onLine === false) throw new Error('hors connexion');
+          const { error: errReg } = await sb.rpc('regulariser_piece_hors_stock', { p_ligne_id: prefill.ligneId, p_warehouse_id: warehouseId, p_reason: motif });
+          if (errReg) throw errReg;
+          regularise = true;
+        } catch (errReg) {
+          if (estErreurTransitoire(errReg)) { dire(trad('La régularisation demande le réseau : réessayez quand la connexion revient.'), true); geler(false); return; }
+          const absente = errReg && (errReg.code === 'PGRST202' || errReg.code === '42883' || /regulariser_piece_hors_stock/.test(errReg.message || '') && /not find|does not exist|schema cache/i.test(errReg.message || ''));
+          if (!absente) throw errReg;
+          alignementImpossible = true;
+        }
+      }
       try {
-        if (navigator.onLine === false) throw new Error('hors connexion');
-        await envoyerMouvementStock(argsMouvement, idOpMouvement);
+        if (regularise) { /* sortie et alignement déjà faits par la fonction de régularisation */ }
+        else {
+          if (navigator.onLine === false) throw new Error('hors connexion');
+          await envoyerMouvementStock(argsMouvement, idOpMouvement);
+        }
       } catch (errEnvoi) {
         // Sans réseau : le mouvement est gardé sur l'appareil (sauf un ajustement, qui change la valorisation et demande le réseau).
         if (!estErreurTransitoire(errEnvoi)) throw errEnvoi;
@@ -3349,7 +3370,9 @@ function ouvrirNouveauMouvementModal(prefill) {
         .eq('company_id', UI.companyId);
       UI.stockItems = soldes || [];
       UI.stockCounts = calculerStockCounts(UI.stockItems, UI.partsCatalog);
-      showToast(trad('Mouvement enregistré'));
+      showToast(alignementImpossible
+        ? trad('Sortie enregistrée, mais le coût de l\'intervention n\'a pas pu être aligné : mise à jour du serveur à faire.')
+        : (regularise ? trad('Régularisé : la sortie est enregistrée et le coût de l\'intervention est aligné sur le stock.') : trad('Mouvement enregistré')));
       overlay.remove();
       if (prefill && typeof prefill.onSaved === 'function') prefill.onSaved();
       renderApp();
@@ -5980,7 +6003,7 @@ VIEWS.stock = {
         const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
         const prixIntervention = Number(l.unit_price) || 0;   // prix unitaire compté dans l'intervention (donc dans le coût de la machine)
         const ouvrirSortie = () => ouvrirNouveauMouvementModal({
-          type: 'sortie', partId: l.part_id, quantity: quantite, prixIntervention,
+          type: 'sortie', partId: l.part_id, quantity: quantite, prixIntervention, ligneId: l.id,
           reason: tR('Régularisation — intervention du {date} sur {machine}', { date: formatShortDateAvecAnnee(String(l.intervention?.performed_at || '').slice(0, 10)), machine: machine ? machine.name : '' }) + ' [#' + String(l.id).slice(0, 8) + ']',
           onSaved: () => { horsStock = horsStock.filter((x) => String(x.id) !== String(l.id)); },
         });
