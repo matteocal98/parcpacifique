@@ -19,7 +19,7 @@ add('hover:bg-blue-100','background-color:rgba(35,111,224,.25)!important',':hove
 for (const [c,v] of [['bg-teal-50','rgba(36,181,168,.14)'],['bg-emerald-50','rgba(16,185,129,.14)'],['bg-blue-50','rgba(35,111,224,.16)'],['bg-amber-50','rgba(245,158,11,.14)'],['bg-amber-100/70','rgba(245,158,11,.18)'],['bg-red-100/70','rgba(239,68,68,.18)']]) add(c,'background-color:'+v+'!important');
 // Texte
 const T = [['text-brand-ink','#F5F7FF'],['text-[#0b1c30]','#F5F7FF'],['text-[#0E1333]','#F5F7FF'],['text-slate-700','#DCE2F4'],['text-slate-600','#C9D0E6'],['text-[#585e74]','#C9D0E6'],['text-slate-500','#AEB7D3'],
- ['text-[#5B52DF]','#9D97FF'],['text-brand-indigo','#9D97FF'],['text-[#236FE0]','#6FA6FF'],['text-brand-primary','#6FA6FF'],['text-[#006591]','#5CC8F5'],['text-[#006591]/70','rgba(92,200,245,.75)'],
+ ['text-[#5B52DF]','#9D97FF'],['text-brand-indigo','#9D97FF'],['text-[#236FE0]','#6FA6FF'],['text-brand-primary','#6FA6FF'],['text-[#006591]','#5CC8F5'],['text-[#0F766E]','#3CCBBE'],['text-[#006591]/70','rgba(92,200,245,.75)'],
  ['text-amber-700','#FBBF24'],['text-amber-800','#FCD34D'],['text-emerald-700','#6EE7B7'],['text-teal-700','#5EEAD4'],['text-red-600','#FCA5A5'],['text-emerald-600','#34D399'],['hover:text-blue-800','#93C5FD'],['hover:text-brand-primary','#8DB8FF'],['hover:text-[#0b1c30]','#FFFFFF']];
 for (const [c,v] of T) add(c,'color:'+v+'!important', c.startsWith('hover:')?':hover':'');
 // Bordures

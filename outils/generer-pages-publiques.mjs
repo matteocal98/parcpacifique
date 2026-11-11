@@ -127,7 +127,7 @@ function selecteurLangue(actif, urlFr, urlEn) {
   const classe = (on) => 'text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors ' + (on ? 'bg-brand-ink text-white' : 'text-slate-600 hover:text-brand-primary');
   return [
     '<!-- LANGUE:DEBUT -->',
-    `<div role="group" aria-label="Langue / Language" data-sans-traduction class="flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-200 bg-white p-0.5 ml-2 shrink-0">`,
+    `<div role="group" aria-label="Langue / Language" data-sans-traduction class="flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-200 bg-white p-0.5 ml-0 sm:ml-2 shrink-0">`,
     `<a href="${urlFr}" data-langue="fr" lang="fr" hreflang="fr" title="Français"${actif === 'fr' ? ' aria-current="true"' : ''} class="${classe(actif === 'fr')}">FR</a>`,
     `<a href="${urlEn}" data-langue="en" lang="en" hreflang="en" title="English"${actif === 'en' ? ' aria-current="true"' : ''} class="${classe(actif === 'en')}">EN</a>`,
     '</div>',
