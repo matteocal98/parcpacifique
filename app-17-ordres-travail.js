@@ -152,6 +152,7 @@ VIEWS.ordres = {
         <section class="ui-section">
           ${teteSectionKit('coche', trad('Ordres de travail'), '',
             `<span class="ui-tag" id="ot-compte"></span>
+             ${typeof boutonHabilitationsHtml === 'function' ? boutonHabilitationsHtml() : ''}
              ${peutGererOrdres() ? `<button type="button" class="ui-btn ui-btn-plein" id="ot-nouveau" aria-label="${esc(trad('Nouvel ordre'))}">${picto('croix')}<span>${trad('Nouvel ordre')}</span></button>` : ''}`)}
           <div class="ui-section-corps">
             <div class="ui-barre">
@@ -165,7 +166,6 @@ VIEWS.ordres = {
               <div class="ui-aide" id="ot-validation-msg" role="status" aria-live="polite"></div>
             </div>` : ''}
             ${typeof blocReglageSignatureHtml === 'function' ? blocReglageSignatureHtml() : ''}
-            ${typeof blocHabilitationsHtml === 'function' ? blocHabilitationsHtml() : ''}
           </div>
         </section>
       </div>`;

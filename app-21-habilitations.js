@@ -332,16 +332,32 @@ async function ouvrirMesHabilitations() {
 }
 
 // ── Le bouton d'entrée, dans la page des ordres de travail ──
-function blocHabilitationsHtml() {
+// Le bouton d'entrée vit EN HAUT de la page des ordres de travail, à côté de « Nouvel ordre » (il était tout en bas, sous la liste,
+// et on ne le voyait pas). Pour le gérant, un petit chiffre dit combien d'habilitations arrivent à échéance sous 60 jours.
+function boutonHabilitationsHtml() {
   if (!habilitationsActif()) return '';
-  return `<div class="ui-groupe ot-validation" id="hab-entree">
-    <button type="button" class="ui-btn ui-btn-pastille" data-hab-ouvrir>${estGerant() ? trad('Qualifications et habilitations') : trad('Mes habilitations')}</button>
-    <div class="ui-aide">${estGerant() ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Vos qualifications et leur date de validité.')}</div>
-  </div>`;
+  const gerant = estGerant();
+  const aide = gerant ? trad('Qui est habilité à intervenir sur quelle machine : catalogue, habilitations des personnes, exigences par machine.') : trad('Vos qualifications et leur date de validité.');
+  return `<button type="button" class="ui-btn ui-btn-pastille" data-hab-ouvrir title="${esc(aide)}" aria-label="${esc(gerant ? trad('Qualifications et habilitations') : trad('Mes habilitations'))}">${otSymbole('workspace_premium')}<span class="hab-lib-long">${gerant ? trad('Qualifications et habilitations') : trad('Mes habilitations')}</span><span class="hab-lib-court">${gerant ? trad('Habilitations') : trad('Mes habilitations')}</span><span class="ui-compte hab-compte" hidden></span></button>`;
+}
+function blocHabilitationsHtml() { return ''; }   // ancien emplacement (bas de page) : supprimé
+async function majCompteHabilitations(root) {
+  const pastille = root && root.querySelector('[data-hab-ouvrir] .hab-compte');
+  if (!pastille || !estGerant()) return;
+  try {
+    const { data, error } = await sb.rpc('habilitations_expirantes', { p_jours: 60 });
+    const n = error ? 0 : (data || []).length;
+    if (!n) return;
+    pastille.textContent = String(n);
+    pastille.hidden = false;
+    const bouton = pastille.closest('[data-hab-ouvrir]');
+    if (bouton) bouton.setAttribute('title', tR('{n} habilitation(s) à renouveler sous 60 jours', { n }));
+  } catch (e) { /* le compteur est un plus : sans lui, le bouton reste utilisable */ }
 }
 function brancherHabilitations(root) {
   const b = root && root.querySelector('[data-hab-ouvrir]');
   if (b) b.addEventListener('click', () => { if (estGerant()) ouvrirGestionHabilitations(); else ouvrirMesHabilitations(); });
+  majCompteHabilitations(root);
 }
 
 // ── À l'assignation d'un ordre : ce qui manque à la personne choisie pour cette machine ──

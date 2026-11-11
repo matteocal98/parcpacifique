@@ -3352,6 +3352,12 @@ html[data-theme="dark"]{
   .overlay.machine-modal-edit #add-form > div:last-child > div.justify-between{grid-template-columns:1fr 1fr;}
 }
 
+/* ── Page « Ordres de travail » : le bouton des qualifications et habilitations est en haut, à côté de « Nouvel ordre » (2026-11-11) ── */
+.hab-lib-court{display:none;}
+.hab-compte{margin-left:2px;background:var(--late-bg,rgba(240,144,47,.18));color:var(--late-texte,#8a4b00);}
+.hab-compte[hidden]{display:none;}
+@media (max-width:700px){.hab-lib-long{display:none;}.hab-lib-court{display:inline;}}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
