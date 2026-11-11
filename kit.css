@@ -3334,7 +3334,10 @@ html[data-theme="dark"]{
 .overlay.plan-modal > .modal > .modal-croix{top:calc((var(--mod-bandeau-h) - 44px) / 2);}
 
 /* Modifier une machine : le pied défile avec le formulaire (plus de bandeau figé en bas) et ses quatre boutons ont la même hauteur. */
-.overlay.machine-modal-edit #add-form{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow-y:auto;}
+/* Comme « Enregistrer une intervention » : la fenêtre n'est plus plafonnée à 88 % de la hauteur de l'écran avec un défilement interne,
+   elle « file vers le bas » (bandeau, formulaire et pied défilent ensemble avec la fenêtre). */
+.overlay.machine-modal-edit > .modal{max-height:none !important;overflow:visible !important;}
+.overlay.machine-modal-edit #add-form{display:flex;flex-direction:column;flex:0 0 auto;min-height:0;overflow:visible;}
 .overlay.machine-modal-edit #add-form > div:first-child{overflow:visible !important;flex:0 0 auto;max-height:none;}
 .overlay.machine-modal-edit #add-form > div:last-child{flex:0 0 auto;box-shadow:none !important;margin-top:auto;}
 .overlay.machine-modal-edit #add-form > div:last-child > div.justify-between{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
