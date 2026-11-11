@@ -97,6 +97,12 @@ async function habChargerGestion() {
 }
 
 // ── La fenêtre « Qualifications et habilitations » (gérant) ──
+// Le sous-titre sous le titre dit ce que montre l'onglet ouvert (Personnes / Catalogue / Exigences).
+function sousTitreHabilitations(onglet) {
+  if (onglet === 'catalogue') return trad('Les qualifications que votre société reconnaît et leur durée de validité.');
+  if (onglet === 'exigences') return trad('Les qualifications obligatoires pour chaque catégorie ou machine.');
+  return trad('Les qualifications de chaque membre de l\'équipe et leur date de validité.');
+}
 async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
   if (!habilitationsActif() || !estGerant()) return;
   const overlay = document.createElement('div');
@@ -106,7 +112,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
       <header class="otm-tete">
         <div class="otm-tuile">${otSymbole('workspace_premium')}</div>
         <div class="otm-tete-textes"><div class="otm-tete-ligne"><span class="otm-etape">${trad('Habilitations')}</span><span class="otm-marque">GMAO KALEA</span></div>
-          <h2 id="hab-g-titre">${trad('Qualifications et habilitations')}</h2><p>${trad('Qui peut intervenir sur quelle machine.')}</p></div>
+          <h2 id="hab-g-titre">${trad('Qualifications et habilitations')}</h2><p id="hab-g-sous">${esc(sousTitreHabilitations(ongletInitial))}</p></div>
         <button type="button" class="otm-fermer" data-hab-fermer aria-label="${esc(trad('Fermer'))}">${otSymbole('close')}</button>
       </header>
       <div class="otm-form-corps">
@@ -162,6 +168,7 @@ async function ouvrirGestionHabilitations(ongletInitial = 'personnes') {
   const dessiner = () => {
     const onglets = [['personnes', trad('Personnes')], ['catalogue', trad('Catalogue')], ['exigences', trad('Exigences')]];
     overlay.querySelector('#hab-onglets').innerHTML = onglets.map(([id, l]) => `<button type="button" class="ui-puce${onglet === id ? ' is-actif' : ''}" data-hab-onglet="${id}">${esc(l)}</button>`).join('');
+    const sous = overlay.querySelector('#hab-g-sous'); if (sous) sous.textContent = sousTitreHabilitations(onglet);
     overlay.querySelector('#hab-corps').innerHTML = onglet === 'personnes' ? vuePersonnes() : (onglet === 'catalogue' ? vueCatalogue() : vueExigences());
     overlay.querySelector('#hab-pied').innerHTML = `<div class="hab-mode"><label class="ui-etiquette" for="hab-mode">${trad('Règle de la société')}</label>
       <select id="hab-mode" class="ui-selecteur">${Object.entries(HAB_MODES()).map(([k, [l]]) => `<option value="${k}"${d.mode === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
