@@ -3358,6 +3358,19 @@ html[data-theme="dark"]{
 .hab-compte[hidden]{display:none;}
 @media (max-width:700px){.hab-lib-long{display:none;}.hab-lib-court{display:inline;}}
 
+/* ── Enregistrer une intervention, bloc « Coûts d'intervention & TCO » : les trois accès (Ajouter une pièce, Scanner une pièce,
+      Scanner une facture) tiennent sur UNE ligne et en plus petit : icône à gauche, texte à droite, 64 px de haut au lieu de 140. ── */
+@media (min-width:701px){
+  .log-modal .log-bloc-cout .log-bento-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
+  .log-modal .log-bloc-cout .log-bento-btn{height:auto !important;min-height:64px !important;padding:10px 14px !important;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;text-align:left;}
+  .log-modal .log-bloc-cout .log-bento-icone{width:36px;height:36px;flex:0 0 auto;}
+  .log-modal .log-bloc-cout .log-bento-icone svg{width:18px;height:18px;}
+  .log-modal .log-bloc-cout .log-bento-btn > span:not(.log-bento-icone){min-width:0;text-align:left;line-height:1.25;}
+  .log-modal .log-bloc-cout .log-bento-titre{font-size:14px;}
+  .log-modal .log-bloc-cout .log-bento-sub{display:inline;font-size:12px;}
+  .log-modal .log-bloc-cout .log-bento-badge{font-size:10px;margin-left:6px;}
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    THÈME SOMBRE — html[data-theme="dark"] (posé par theme.js : choix Auto / Clair / Sombre dans Mon compte).
    La structure ne change pas : page = éléments = --surface ; les SECTIONS sont teintées (--surface-soft) ; mais ici « teinté »
