@@ -2322,7 +2322,7 @@ function ligneHorsStockHtml(l) {
   const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
   const enStock = (UI.stockItems || []).filter((it) => String(it.part_id) === String(l.part_id) && statutLigneStock(it) === 'libere').reduce((s, it) => s + (Number(it.quantity) || 0), 0);
   return `
-    <div class="ui-ligne is-deux" data-hors-stock="${esc(l.id)}">
+    <div class="ui-ligne is-deux ligne-cliquable" data-hors-stock="${esc(l.id)}" title="${esc(trad('Cliquer pour régulariser : la fenêtre de mouvement s\'ouvre pré-remplie'))}">
       <div class="ui-ligne-id">
         <div class="ui-ligne-icone is-ambre">${picto('alerte')}</div>
         <div class="ui-ligne-textes">
@@ -5952,8 +5952,12 @@ VIEWS.stock = {
           rafraichirHorsStock();
           return;
         }
-        if (!reg) return;
-        const l = horsStock.find((x) => String(x.id) === reg.dataset.horsStockRegulariser);
+        // Un clic n'importe où sur la LIGNE d'une pièce à régulariser fait pareil que « Régulariser » : la fenêtre de mouvement s'ouvre,
+        // pièce, quantité et motif déjà remplis (demande de l'utilisateur, 2026-11-11).
+        const ligneCliquee = !reg ? e.target.closest('[data-hors-stock]') : null;
+        const idARegulariser = reg ? reg.dataset.horsStockRegulariser : (ligneCliquee ? ligneCliquee.dataset.horsStock : null);
+        if (!idARegulariser) return;
+        const l = horsStock.find((x) => String(x.id) === String(idARegulariser));
         if (!l) return;
         const machine = (UI.machines || []).find((m) => String(m.id) === String(l.intervention?.machine_id));
         const quantite = Number(l.quantity) || 1;
