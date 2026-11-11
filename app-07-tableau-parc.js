@@ -204,10 +204,16 @@ function calculerVigilance() {
   if (UI.role === 'achats') return lignes.filter((l) => ['pieces', 'seuil', 'commandes', 'couts'].includes(l.id));
   return lignes;
 }
+// Une tuile dont le compte est 0 est atténuée (.is-zero, voir kit.css) : elle reste à sa place et cliquable, mais ne pèse plus
+// autant que celles qui demandent une action. Un compte encore inconnu (« … ») n'est PAS un zéro.
+function classeTuileVigilance(etat, n) {
+  const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[etat] || '';
+  return n === 0 ? `${classe} is-zero` : classe;
+}
 function ligneVigilanceHtml(l) {
   const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[l.etat] || '';
   return `
-    <button type="button" class="vig-tuile ${classe}" data-vigilance="${l.id}" id="vig-${l.id}" title="${esc(l.libelle + ' : ' + l.aide)}" aria-label="${esc(l.libelle)}">
+    <button type="button" class="vig-tuile ${classeTuileVigilance(l.etat, l.n)}" data-vigilance="${l.id}" id="vig-${l.id}" title="${esc(l.libelle + ' : ' + l.aide)}" aria-label="${esc(l.libelle)}">
       <span class="vig-tete"><span class="vig-picto">${picto(l.picto)}</span><span class="vig-n ${classe}" data-vig-n>${l.n == null ? '…' : l.n}</span></span>
       <span class="vig-libelle">${esc(l.court || l.libelle)}</span>
       <span class="vig-aide" data-vig-aide>${esc(l.aide)}</span>
@@ -219,17 +225,21 @@ function vigilanceHtml() {
   const signaler = SCHEMA.hasPannes
     ? `<button type="button" class="ui-btn ui-btn-pastille" data-action-rapide="panne">${picto('alerte')}<span>${trad('Signaler une panne')}</span></button>`
     : '';
+  // Lignes équilibrées sur grand écran : jusqu'à 7 tuiles tiennent sur une ligne ; au-delà, deux lignes de même longueur
+  // (9 tuiles = 5 + 4) plutôt qu'une ligne pleine et deux tuiles orphelines.
+  const lignes = calculerVigilance();
+  const colonnes = lignes.length <= 7 ? lignes.length : Math.ceil(lignes.length / 2);
   return `
     <section class="ui-section" id="accueil-vigilance">
       ${teteSectionKit('alerte', trad('Points de vigilance'), '', signaler)}
-      <div class="ui-section-corps"><div class="vig-liste">${calculerVigilance().map(ligneVigilanceHtml).join('')}</div></div>
+      <div class="ui-section-corps"><div class="vig-liste" style="--vig-cols:${colonnes || 1};">${lignes.map(ligneVigilanceHtml).join('')}</div></div>
     </section>`;
 }
 function majLigneVigilance(root, id, n, etat, aide) {
   const el = root.querySelector(`#vig-${id}`);
   if (!el) return;
   const classe = { late: 'is-retard', soon: 'is-bientot', ok: 'is-ok' }[etat] || '';
-  el.className = `vig-tuile ${classe}`;
+  el.className = `vig-tuile ${classeTuileVigilance(etat, n)}`;
   const nEl = el.querySelector('[data-vig-n]');
   if (nEl) { nEl.textContent = String(n); nEl.className = `vig-n ${classe}`; }
   const aEl = el.querySelector('[data-vig-aide]');
@@ -368,14 +378,28 @@ VIEWS.dashboard = {
     // La maquette de bureau montre quatre échéances ; six lignes plus courtes
     // tenaient mal sous les quatre tuiles. Le dépli est piloté par
     // `UI.alerteOuverte` — un seul état, donc une seule ligne ouverte à la fois.
-    const affichees = alertsAVenir.slice(0, 4);
+    // ★ AUDIT DESIGN, PRIORITÉ 2 (2026-11-11) — UN RETARD S'ÉCRIT UNE FOIS, PAS TROIS.
+    // Avec des retards, l'écran les disait trois fois : la tuile « Retards », le bloc « À traiter en priorité », puis les
+    // premières lignes de « Échéances d'entretien » (qui les classe déjà en tête, avec leur bouton « Enregistrer l'entretien »).
+    // Le bloc du milieu disparaît donc QUAND IL Y A DES RETARDS, et la liste — qui garde TOUTES les machines, décision du lot 8 —
+    // devient l'endroit unique où on les traite. Deux garde-fous : son en-tête annonce le nombre de retards, et elle montre au
+    // moins tous les retards, même au-delà de quatre lignes. Sans retard, rien ne change (« Prochain entretien » / « Rien à signaler »).
+    const nRetardsListe = alertsAVenir.filter(x => x.info.state === 'late').length;
+    const affichees = alertsAVenir.slice(0, Math.max(4, nRetardsListe));
+    // Filet de sécurité : la liste classe par MACHINE, le bloc d'origine par TÂCHE. Si une tâche en retard appartenait à une machine
+    // que la liste ne classe pas « en retard », elle garderait son bloc « À traiter en priorité » — aucun retard ne peut disparaître.
+    const machinesEnRetardListe = new Set(affichees.filter(x => x.info.state === 'late').map(x => x.machine.id));
+    const retardsHorsListe = retards.filter(r => !machinesEnRetardListe.has(r.machine.id));
+    const enTeteEcheances = nRetardsListe
+      ? `<span class="ui-statut is-retard">${nRetardsListe} ${trad('EN RETARD')}</span>`
+      : (affichees.length ? `<span class="ui-tag">${tR('{n} échéance(s) prioritaire(s)', { n: affichees.length })}</span>` : '');
     return `
       <div class="ui-page accueil-page${estRoleTerrain() ? ' accueil-terrain' : ''}">
         ${estRoleTerrain() ? actionsRapidesSectionHtml() : vigilanceHtml()}
         ${estRoleTerrain() && typeof ordresActif === 'function' && ordresActif() ? '<section class="ui-section" id="accueil-mes-ordres" hidden></section>' : ''}
-        ${retards.length
-          ? prioritiesHtml(retards)
-          : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml())}
+        ${retardsHorsListe.length
+          ? prioritiesHtml(retardsHorsListe)
+          : (nRetardsListe ? '' : (first ? priorityCardHtml(first.machine, first.info) : emptyPriorityCardHtml()))}
 
         <section class="ui-section">
           <div class="ui-grille is-3${estRoleTerrain() ? ' tuiles-compactes' : ''}">
@@ -406,7 +430,7 @@ VIEWS.dashboard = {
           <div class="ui-colonne">
             <section class="ui-section">
               ${teteSectionKit('calendrier', trad('Échéances d\'entretien'), '',
-                `${affichees.length ? `<span class="ui-tag">${tR('{n} échéance(s) prioritaire(s)', { n: affichees.length })}</span>` : ''}<button type="button" class="ui-btn ui-btn-pastille" data-nav="agenda">${trad('Tout voir')} →</button>`)}
+                `${enTeteEcheances}<button type="button" class="ui-btn ui-btn-pastille" data-nav="agenda">${trad('Tout voir')} →</button>`)}
               <div class="ui-section-corps">
                 <div id="echeances-zone" class="ui-liste">
                 ${affichees.length
