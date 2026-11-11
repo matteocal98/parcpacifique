@@ -13,7 +13,10 @@
 (function () {
   const SUPABASE_URL = 'https://tiayvmnodsbygmuemeuy.supabase.co';
   const SUPABASE_KEY = 'sb_publishable__D5hSUJPHa9BQVrKzN2oqA_SlmhqDRg';
-  const DOMAINE_MEMBRES = 'membres.keeva.work'; // identifiant atelier sans arobase → adresse interne (comme l'application)
+  // identifiant atelier sans arobase → adresse interne (comme l'application). Migration du domaine (2026-11-12) : voir
+  // app-03-services.js ; on essaie le domaine actuel PUIS l'ancien pour les comptes pas encore migrés.
+  const DOMAINE_MEMBRES = 'membres.kalea.pro';
+  const ANCIEN_DOMAINE_MEMBRES = 'membres.keeva.work';
 
   const EN = /^en/i.test(navigator.language || '');
   const T = (fr, en) => (EN ? en : fr);
@@ -68,7 +71,14 @@
       if (!saisie || !mdp.value) { message(T('Saisissez votre identifiant et votre mot de passe.', 'Enter your login and password.'), true); return; }
       ok.disabled = true;
       const email = saisie.includes('@') ? saisie : saisie + '@' + DOMAINE_MEMBRES;
-      const { error } = await sb.auth.signInWithPassword({ email, password: mdp.value });
+      const adresses = [email];
+      const dom = email.match(/^(.+)@membres\.(kalea\.pro|keeva\.work)$/);
+      if (dom) adresses.push(dom[1] + '@' + (dom[2] === 'kalea.pro' ? ANCIEN_DOMAINE_MEMBRES : DOMAINE_MEMBRES));
+      let error = null;
+      for (const adresse of adresses) {
+        ({ error } = await sb.auth.signInWithPassword({ email: adresse, password: mdp.value }));
+        if (!error || !/invalid login credentials/i.test(String(error.message || ''))) break;
+      }
       if (error) { ok.disabled = false; message(T('Identifiants incorrects.', 'Incorrect login or password.'), true); return; }
       demarrer();
     };

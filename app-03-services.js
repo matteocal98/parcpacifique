@@ -1290,17 +1290,52 @@ function renderSocieteManquante(user, motif) {
 // L'ADRESSE TECHNIQUE DES MEMBRES D'ATELIER
 // ════════════════════════════════════════════════════════════════════════════
 // Le gérant crée un mécanicien sans e-mail : le serveur fabrique un compte à
-// adresse interne `<login>@membres.keeva.work`, qui ne sert JAMAIS à du
+// adresse interne `<login>@membres.kalea.pro`, qui ne sert JAMAIS à du
 // courrier. Ce domaine est donc ajouté ici, à la saisie, pour que la personne
 // n'ait qu'un login court à retenir — et il l'est d'un seul endroit : l'écran de
 // connexion, la ré-authentification de « Mon compte » et le verrou s'en servent.
-const DOMAINE_MEMBRES = 'membres.keeva.work';
+//
+// MIGRATION DU DOMAINE (2026-11-12) : jusqu'au renommage en KALEA les comptes de membres avaient l'adresse
+// `<login>@membres.keeva.work`. Les NOUVEAUX comptes (et les comptes migrés par migrations/membres-domaine-kalea.sql) ont
+// `@membres.kalea.pro`. Pendant la transition, la connexion essaie l'adresse actuelle PUIS l'autre : un compte pas encore migré,
+// ou un identifiant mémorisé avec l'ancien domaine, se connecte quand même. Quand tous les comptes sont migrés et les anciennes
+// applications remplacées, retirer ANCIEN_DOMAINE_MEMBRES et la seconde tentative.
+const DOMAINE_MEMBRES = 'membres.kalea.pro';
+const ANCIEN_DOMAINE_MEMBRES = 'membres.keeva.work';
 
 function emailDeConnexion(saisie) {
   const valeur = String(saisie == null ? '' : saisie).trim().toLowerCase();
   // Une adresse complète reste une adresse : on n'y touche pas.
   if (!valeur || valeur.includes('@')) return valeur;
   return valeur + '@' + DOMAINE_MEMBRES;
+}
+
+// Vrai pour l'adresse interne d'un membre créé par le gérant (nouveau ou ancien domaine) : ce n'est PAS une vraie boîte e-mail.
+function estAdresseTechniqueMembre(email) {
+  return /@membres\.(?:kalea\.pro|keeva\.work)$/i.test(String(email == null ? '' : email).trim());
+}
+
+// Les adresses à essayer, dans l'ordre : l'adresse « actuelle » d'abord, puis (comptes de membres seulement) la même sur l'autre domaine.
+function adressesDeConnexion(saisie) {
+  const v = emailDeConnexion(saisie);
+  if (!v) return [];
+  const m = v.match(/^(.+)@membres\.(kalea\.pro|keeva\.work)$/);
+  if (!m) return [v];
+  return [v, m[1] + '@' + (m[2] === 'kalea.pro' ? ANCIEN_DOMAINE_MEMBRES : DOMAINE_MEMBRES)];
+}
+
+// Connexion par mot de passe avec cette tolérance. Rend { data, error, email } où `email` est l'adresse qui a RÉUSSI (ou la première en cas d'échec).
+async function connexionParMotDePasse(saisie, motDePasse) {
+  const adresses = adressesDeConnexion(saisie);
+  let dernier = { data: null, error: { message: 'Identifiants incorrects.' } };
+  for (const email of adresses) {
+    const r = await sb.auth.signInWithPassword({ email, password: motDePasse });
+    if (!r.error) return { ...r, email };
+    dernier = r;
+    // Seul un mauvais couple adresse / mot de passe justifie la seconde tentative (pas une panne réseau, un compte bloqué…).
+    if (!/invalid login credentials/i.test(String(r.error.message || ''))) break;
+  }
+  return { ...dernier, email: adresses[0] || '' };
 }
 
 function renderLogin(errorMsg, horsLigne) {
@@ -1388,12 +1423,12 @@ function renderLogin(errorMsg, horsLigne) {
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     // ★ SOIT UNE ADRESSE, SOIT UN LOGIN COURT : le mécanicien tape
-    //   `jean.dupont`, jamais `<login>@membres.keeva.work`. Pas d'arobase → on
+    //   `jean.dupont`, jamais `<login>@membres.kalea.pro`. Pas d'arobase → on
     //   complète avec le domaine interne. Le serveur, lui, ne voit qu'une
-    //   adresse : rien à changer dans Supabase.
-    const email = emailDeConnexion(document.getElementById('email').value);
+    //   adresse : rien à changer dans Supabase. (Pendant la migration du domaine,
+    //   connexionParMotDePasse essaie aussi l'ancien domaine : voir plus haut.)
     const password = document.getElementById('password').value;
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    const { error, email } = await connexionParMotDePasse(document.getElementById('email').value, password);
     if (error) { renderLogin(error.message); return; }
     // L'utilisateur vient de saisir son mot de passe : le verrou de ce lancement
     // est donc levé — redemander une empreinte juste après serait absurde.

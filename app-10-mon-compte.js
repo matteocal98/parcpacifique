@@ -573,7 +573,7 @@ VIEWS.account = {
       // Ce qui s'affiche comme identité : le login court quand il existe,
       // l'adresse sinon. L'adresse TECHNIQUE n'est jamais montrée au gérant —
       // elle ne veut rien dire pour lui.
-      const estMembreCree = (m) => !!m.login || /@membres\.keeva\.work$/i.test(String(m.email || ''));
+      const estMembreCree = (m) => !!m.login || estAdresseTechniqueMembre(m.email);
       const identiteDe = (m) => m.login || (m.email ? String(m.email).split('@')[0] : trad('Membre'));
 
       // ── ★ L'ÉQUIPE, GROUPÉE PAR RÔLE : gérant → mécanicien → chauffeur ─────
@@ -1330,7 +1330,7 @@ VIEWS.account = {
         //   court d'un membre créé par le gérant (`jean.dupont`) : le renvoyer
         //   tel quel ferait échouer la ré-authentification, alors que l'écran
         //   affiche « jean.dupont ». Même fonction que l'écran de connexion.
-        const { error: authErr } = await sb.auth.signInWithPassword({ email: emailDeConnexion(UI.email), password: motDePasse });
+        const { error: authErr } = await connexionParMotDePasse(UI.email, motDePasse);
         if (authErr) throw new Error(trad('Mot de passe incorrect.'));
 
         btn.textContent = trad('Envoi du lien…');

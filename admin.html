@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-0G5yeCCt8o9k0VPOUoIJgOHk7zb3LxPgJub+aH10qb0='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-o7qjDMmba1aKwYf25mklqoKIY3qUSZFyIRwlrosSFRI='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -1558,8 +1558,17 @@ async function gererConnexion(ev) {
   bouton.disabled = true;
   bouton.textContent = 'Connexion…';
   const loginBrut = el('cx-login').value.trim();
-  const email = loginBrut.includes('@') ? loginBrut : `${loginBrut}@membres.keeva.work`;
-  const { error } = await sb.auth.signInWithPassword({ email, password: el('cx-mdp').value });
+  // Domaine interne des comptes sans e-mail : membres.kalea.pro depuis la migration du 2026-11-12 ; l'ancien (membres.keeva.work) est
+  // essayé ensuite pour un compte pas encore migré (voir app-03-services.js).
+  const email = loginBrut.includes('@') ? loginBrut : `${loginBrut}@membres.kalea.pro`;
+  const adresses = [email];
+  const dom = email.toLowerCase().match(/^(.+)@membres\.(kalea\.pro|keeva\.work)$/);
+  if (dom) adresses.push(dom[1] + '@' + (dom[2] === 'kalea.pro' ? 'membres.keeva.work' : 'membres.kalea.pro'));
+  let error = null;
+  for (const adresse of adresses) {
+    ({ error } = await sb.auth.signInWithPassword({ email: adresse, password: el('cx-mdp').value }));
+    if (!error || !/invalid login credentials/i.test(String(error.message || ''))) break;
+  }
   bouton.disabled = false;
   bouton.textContent = 'Se connecter';
   if (error) {
