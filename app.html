@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-tu3VmeQpKslf/nSk9e+/kqZzHoolUULWx+eYS++x2MY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-tu3VmeQpKslf/nSk9e+/kqZzHoolUULWx+eYS++x2MY='; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co https://tile.openstreetmap.org; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <meta name="kalea-empreinte" content="sha256-qMxPyTzAr3ahaHqLJRtOw74XJuIMPzMM2csywW2o7FU=">
 <!-- PAS de viewport-fit=cover, ET C'EST LA CORRECTION DU 19/09 : Capacitor 8
      (SystemBars.java) ne pose AUCUNE marge quand la page déclare « cover » et
@@ -38,20 +38,13 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icones/icone-192.png">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="icones/apple-touch-icon.png">
-<!-- Material Symbols + Plus Jakarta Sans — polices chargées depuis un CDN
-     externe (toutes les autres sont embarquées en base64 juste plus bas,
-     précisément pour éviter ça, voir le commentaire "POLICES EMBARQUÉES").
-     Exception assumée à la demande explicite de l'utilisateur pour les
-     écrans "Plan proposé par notre algorithme" ET pour "Modifier une
-     machine" (reprises Stitch demandées à l'octet près, la seconde SANS
-     aucun remap de couleur/police/icône) — CSP mise à jour en conséquence
-     (style-src/font-src). Instance variable ajoutée (même plage que
-     code.html) en plus de l'instance fixe déjà utilisée par pplan-* :
-     les deux coexistent, chaque écran choisit son propre poids d'icône
-     via font-variation-settings, scopé à sa propre modale. -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<!-- Material Symbols (icônes) + Plus Jakarta Sans : polices HÉBERGÉES SUR LE SITE depuis le 2026-11-11 (polices/polices-app.css), plus de CDN
+     Google. Avant, le navigateur téléchargeait une police d'icônes complète de 4 Mo ; le fichier local (101 Ko) ne contient que les icônes
+     utilisées, avec les mêmes axes (rendu identique). Ajout d'une icône : voir l'en-tête de polices/polices-app.css.
+     Les icônes sont pré-chargées (crossorigin obligatoire pour une police, même sur le même site). Plus Jakarta Sans ne sert que dans quelques
+     fenêtres (modifier/ajouter une machine, ordres de travail) : pas de pré-charge, elle arrive à la demande. -->
+<link rel="preload" href="polices/material-symbols-app.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="polices/polices-app.css">
 <script src="./vendor/supabase-js-2.118.0.umd.js"></script>
 <!-- pdf.js n'est plus chargé ici : il ne sert qu'à extraire la 1ère page d'un carnet PDF
      et représente ~350 Ko. Il est chargé à la demande (voir loadPdfLib). -->

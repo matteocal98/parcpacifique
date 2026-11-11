@@ -10,7 +10,7 @@
 // Les scripts et styles de l'application portent un « ?v=empreinte » : une nouvelle version = une nouvelle adresse, donc « cache d'abord » est sûr pour eux.
 // Les fichiers sans ?v (styles.css, kit.css, polices…) sont servis depuis la copie PUIS rafraîchis en arrière-plan.
 // Retour en arrière : « Mon compte » > refuser la copie locale désinscrit ce fichier et vide ses copies ; ou changer VERSION ci-dessous (l'ancien cache est supprimé).
-const VERSION = 'v2'; // v2 (2026-11-11) : purge l'ancienne copie de supabase-js venue du CDN
+const VERSION = 'v3'; // v2 (2026-11-11) : purge l'ancienne copie de supabase-js venue du CDN ; v3 (2026-11-11) : purge la police d'icônes Google de 4 Mo (polices désormais sur le site)
 const CACHE = 'kalea-appli-' + VERSION;
 const PAGE = 'app.html';
 const DELAI_RESEAU_MS = 4000;
@@ -53,7 +53,8 @@ async function toutGarderDepuis(html) {
   const attendues = new Set([...voulues, sansRecherche(urlPage())]);
   await Promise.all(gardees.filter((r) => {
     const href = r.url;
-    return !attendues.has(href) && !attendues.has(sansRecherche(href)) && new URL(href).origin === self.location.origin;
+    // Les polices (polices/) ne sont citées que par polices-app.css, pas par la page : on les garde une fois chargées (avant le 2026-11-11 elles venaient de Google, jamais effacées).
+    return !attendues.has(href) && !attendues.has(sansRecherche(href)) && new URL(href).origin === self.location.origin && !new URL(href).pathname.includes('/polices/');
   }).map((r) => cache.delete(r)));
 }
 

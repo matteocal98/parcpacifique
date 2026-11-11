@@ -33,7 +33,8 @@
 
 ## Commandes utiles
 - `node outils/maj-empreinte-csp.mjs [fichier.html]` — à lancer après TOUTE modification du `<script>` inline de `app.html` ou `admin.html`, OU d'un fichier `.js` de l'application (jamais pour du CSS seul), sinon la CSP bloque le chargement de la page. Pour `app.html` il met aussi à jour les `?v=` des fichiers `.js`, la balise `kalea-empreinte` et `version.json` (plus de copie manuelle). `--verifier` contrôle sans modifier.
-- Traductions anglaises de l'application : `traductions-en.js` (constante `TEXTES`), chargé avant le script d'`app.html` — plus dans `app.html`.
+- Traductions anglaises de l'application : `traductions-en.js` (constante `TEXTES`), chargé avant le script d'`app.html` — plus dans `app.html`. Depuis le 2026-11-11 il n'est téléchargé que pour les utilisateurs en anglais (balise inerte dans un `<template>`, réactivée par `app-00-langue.js`) : garder la balise sous sa forme exacte.
+- `node outils/icones-material.mjs --verifier` — à lancer après avoir ajouté une icône (Material Symbols) à l'application : l'application embarque une police d'icônes réduite (`polices/material-symbols-app.woff2`, ≈ 100 Ko au lieu de 4 Mo chez Google). `--maj` régénère la liste et le fichier de police (internet requis). Une icône manquante s'afficherait comme son nom en toutes lettres.
 - Déploiement d'une fonction serveur (depuis le dépôt `kalea-serveur`) :
   `npx supabase functions deploy <nom-de-la-fonction> --project-ref tiayvmnodsbygmuemeuy`
   (nécessite un token de compte `sbp_...`, généré sur supabase.com/dashboard/account/tokens — jamais la clé publique du projet).
