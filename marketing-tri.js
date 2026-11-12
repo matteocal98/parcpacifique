@@ -12,7 +12,11 @@
 // CIBLE (plan marketing) : entreprises de 5 à 250 salariés qui ont des engins ou des véhicules ; le décideur est le gérant, le dirigeant ou le
 // responsable de parc / de matériel / d'atelier / de maintenance.
 //
-// NIVEAUX : A = à contacter en priorité · B = bon contact · C = à garder en réserve · X = ne pas contacter (hors cible, concurrent, constructeur…).
+// NIVEAUX : A = à contacter en priorité · B = bon contact · C = à garder en réserve ou à qualifier · X = ne pas contacter (hors cible, concurrent, constructeur…).
+// RÈGLE DU DOUTE (décidée avec l'utilisateur le 2026-11-13) : une étiquette d'activité (code NAF, secteur déclaré, description d'un site) est souvent périmée ou ne décrit
+// pas le parc réel (un « bureau d'études » peut avoir des camions et des engins de manutention). Le niveau X n'est donc donné QUE sur un signal sûr : concurrent,
+// constructeur, secteur clairement hors cible, fonction sans rapport. Faute d'information, ou sur un simple doute (très petite structure, concessionnaire, grand groupe),
+// le contact reste en C, « à qualifier » : on le garde et on complète sa fiche (effectif, fonction, parc réel) au lieu de l'écarter.
 // Ce tri ne dit pas « publier » : la décision de contacter reste humaine, et tout message passe ensuite par le contrôleur de pertinence et de cohérence.
 
                                           
@@ -38,6 +42,7 @@ function evaluerContact(c               )           {
   let points = 0
   let plafond                = null
   let exclu = false
+  let signalSur = false   // un signal NÉGATIF SÛR (concurrent, constructeur, hors cible, fonction sans rapport) : seul lui autorise le niveau X
   const ajoute = (n        , texte        ) => { points += n; raisons.push(`${n > 0 ? '+' : n < 0 ? '−' : '='}${Math.abs(n)} ${texte}`) }
 
   // taille
@@ -54,20 +59,24 @@ function evaluerContact(c               )           {
   if (!fonction) raisons.push('= fonction inconnue')
   else if (DECIDEUR.test(fonction)) ajoute(3, 'décideur (gérant, dirigeant, propriétaire…)')
   else if (PARC.test(fonction)) ajoute(3, 'responsable de parc, de matériel ou de maintenance')
-  else if (FONCTION_ELOIGNEE.test(fonction)) ajoute(-3, 'fonction éloignée du choix d\'un outil de parc (chantier, achats, support…)')
+  else if (FONCTION_ELOIGNEE.test(fonction)) { ajoute(-3, 'fonction éloignée du choix d\'un outil de parc (chantier, achats, support…)'); signalSur = true }
   else raisons.push('= fonction sans lien clair avec le parc')
 
   // secteur et entreprise
   const texte = sansAccents(`${c.secteur || ''} ${c.entreprise || ''}`)
-  if (CONCURRENT.test(texte)) { ajoute(-5, 'gestion de flotte, GMAO ou télématique : concurrent ou prestataire, pas client'); exclu = true }
-  if (CONSTRUCTEUR.test(texte)) { ajoute(-3, 'constructeur de machines : partenaire possible, pas client'); plafond = plafond || 'C' }
+  if (CONCURRENT.test(texte)) { ajoute(-5, 'gestion de flotte, GMAO ou télématique : concurrent ou prestataire, pas client'); exclu = true; signalSur = true }
+  if (CONSTRUCTEUR.test(texte)) { ajoute(-3, 'constructeur de machines : partenaire possible, pas client'); plafond = plafond || 'C'; signalSur = true }
   else if (CONCESSIONNAIRE.test(texte)) ajoute(-1, 'concessionnaire ou distributeur : partenaire possible plutôt que client')
-  if (SECTEUR_HORS_CIBLE.test(texte) && !SECTEUR_CIBLE.test(texte)) ajoute(-3, 'secteur hors cible (conseil, association, commerce, services…)')
+  if (SECTEUR_HORS_CIBLE.test(texte) && !SECTEUR_CIBLE.test(texte)) { ajoute(-3, 'secteur hors cible (conseil, association, commerce, services…)'); signalSur = true }
   else if (SECTEUR_CIBLE.test(texte)) ajoute(2, 'secteur cible (engins, travaux, transport, agriculture, levage…)')
   else if (texte.trim()) raisons.push('= secteur sans lien clair avec les parcs d\'engins')
 
   let niveau         = points >= 7 ? 'A' : points >= 4 ? 'B' : points >= 1 ? 'C' : 'X'
   if (exclu) niveau = 'X'
+  else if (niveau === 'X' && !signalSur) {
+    niveau = 'C'
+    raisons.push('= aucun signal sûr pour l\'écarter : à qualifier (taille, fonction, parc réel)')
+  }
   if (plafond && (niveau === 'A' || niveau === 'B') && plafond === 'C') niveau = 'C'
   return { niveau, points, raisons }
 }
