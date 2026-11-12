@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-o7qjDMmba1aKwYf25mklqoKIY3qUSZFyIRwlrosSFRI='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ny1eoepfLJL3cvcb5ipB0mgs0NkcYD9siU5ZzIIriBA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -29,6 +29,7 @@
 <script src="./marketing-tri.js"></script>
 <script src="./marketing-sequences.js"></script>
 <script src="./marketing-semaine.js"></script>
+<script src="./marketing-prospection.js"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&amp;family=Space+Grotesk:wght@300..700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
@@ -1029,6 +1030,7 @@
           <button id="mk-onglet-contacts" type="button" data-onglet="contacts" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contacts</button>
           <button id="mk-onglet-contenus" type="button" data-onglet="contenus" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Contenus</button>
           <button id="mk-onglet-sequences" type="button" data-onglet="sequences" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Séquences</button>
+          <button id="mk-onglet-envoi" type="button" data-onglet="envoi" class="mk-onglet px-space-md py-space-xs rounded font-label-md text-label-md min-h-[40px]">Envoi</button>
         </div>
 
         <!-- Semaine : l'essentiel, ce qui ne va pas, ce qu'il y a à faire -->
@@ -1180,6 +1182,100 @@
                 <select id="mk-seq-langue" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"><option value="fr">Français</option><option value="en">Anglais</option></select>
               </div>
               <div id="mk-seq-apercu" class="rounded-xl p-space-md bg-surface-container-low flex flex-col gap-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Envoi : moteur d'envoi maison de la prospection à froid (migration marketing-envoi.sql ; textes : marketing-prospection.js) -->
+        <div id="mk-panneau-envoi" class="hidden flex flex-col gap-space-lg">
+          <div id="mk-alerte-envoi" class="hidden rounded-xl p-space-md font-body-sm text-body-sm bg-error-container text-on-error-container"></div>
+          <div id="mk-env-frein" class="hidden rounded-xl p-space-md bg-error-container text-on-error-container flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+            <p id="mk-env-frein-texte" class="font-body-sm text-body-sm"></p>
+            <button id="mk-env-lever-frein" type="button" class="h-10 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md shrink-0">Lever le frein</button>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+              <div class="max-w-3xl">
+                <h2 class="font-headline-md text-headline-md text-on-surface">Envoi à froid (moteur maison)</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Le moteur lit la boîte d'envoi toutes les heures (réponses, STOP, rebonds) et, <strong>s'il est allumé</strong>, envoie 3 messages au plus par passage aux contacts de niveau A ou B, dans leur fenêtre horaire locale (8 h 30-11 h 30 et 14 h-16 h, du lundi au vendredi), dans la limite du quota des 24 dernières heures. Une réponse arrête la séquence du contact ; un STOP le désinscrit définitivement. Un frein automatique stoppe tout en cas de rebonds, de plainte ou de blocage, et ne se lève que d'ici. <strong>Rien ne part tant que cet interrupteur est éteint.</strong></p>
+              </div>
+              <button id="mk-env-bascule" type="button" class="h-11 px-space-md rounded bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md shrink-0">Allumer l'envoi</button>
+            </div>
+            <p id="mk-env-etat" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Quota des 24 h</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">speed</span></div>
+              <span id="mk-env-quota" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-env-quota-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Messages envoyés</span><span class="p-1.5 rounded-lg bg-surface-container-low text-secondary material-symbols-outlined text-[20px]">send</span></div>
+              <span id="mk-env-envoyes" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-env-envoyes-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">Réponses</span><span class="p-1.5 rounded-lg bg-surface-container-low text-primary material-symbols-outlined text-[20px]">mark_email_read</span></div>
+              <span id="mk-env-reponses" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span id="mk-env-reponses-sous" class="font-body-sm text-body-sm text-on-surface-variant mt-1"></span>
+            </div>
+            <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-on-surface-variant"><span class="font-label-sm text-label-sm uppercase tracking-wider">En attente</span><span class="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant material-symbols-outlined text-[20px]">hourglass_top</span></div>
+              <span id="mk-env-attente" class="font-headline-md text-headline-md text-on-surface mt-space-md">—</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant mt-1">contacts éligibles (niveau A ou B, origine de l'adresse renseignée, pays autorisé)</span>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <div class="p-space-lg">
+              <h2 class="font-headline-md text-headline-md text-on-surface">À traiter</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Les réponses se lisent dans la boîte d'envoi (le texte n'est pas conservé dans KALEA). Après avoir répondu, marquez « traité ». Une plainte probable désinscrit le contact et engage le frein.</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left font-body-sm text-body-sm">
+                <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm"><th class="py-3 px-space-md">Contact</th><th class="py-3 px-space-md">Quoi</th><th class="py-3 px-space-md">Reçu le</th><th class="py-3 px-space-md text-right"></th></tr></thead>
+                <tbody id="mk-env-atraiter" class="divide-y divide-surface-container-low"></tbody>
+              </table>
+            </div>
+            <p id="mk-env-atraiter-vide" class="hidden p-space-lg font-body-sm text-body-sm text-on-surface-variant">Rien à traiter.</p>
+          </div>
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-space-lg">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div class="p-space-lg"><h2 class="font-headline-md text-headline-md text-on-surface">Par segment</h2></div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-body-sm text-body-sm">
+                  <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm"><th class="py-3 px-space-md">Segment</th><th class="py-3 px-space-md text-right">Envoyés</th><th class="py-3 px-space-md text-right">Réponses</th><th class="py-3 px-space-md text-right">STOP</th></tr></thead>
+                  <tbody id="mk-env-segments" class="divide-y divide-surface-container-low"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div class="p-space-lg"><h2 class="font-headline-md text-headline-md text-on-surface">Par zone</h2></div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left font-body-sm text-body-sm">
+                  <thead><tr class="bg-surface-container-low text-on-surface-variant uppercase font-label-sm text-label-sm"><th class="py-3 px-space-md">Zone</th><th class="py-3 px-space-md text-right">Envoyés</th><th class="py-3 px-space-md text-right">Réponses</th><th class="py-3 px-space-md text-right">STOP</th></tr></thead>
+                  <tbody id="mk-env-zones" class="divide-y divide-surface-container-low"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-space-lg">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-sm">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Réglages</h2>
+              <p id="mk-env-reglages" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+              <div class="flex flex-wrap items-center gap-space-sm">
+                <label for="mk-env-plafond" class="font-label-md text-label-md text-on-surface">Plafond par 24 h</label>
+                <input id="mk-env-plafond" type="number" min="0" max="200" step="1" style="width:6rem" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"/>
+                <button id="mk-env-plafond-ok" type="button" class="h-10 px-space-md rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-md text-label-md shadow-sm">Enregistrer</button>
+              </div>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Les pays autorisés et la montée en charge ne se changent que par script (ajouter un pays = relecture juridique préalable).</p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-sm">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Aperçu des messages</h2>
+              <div class="flex flex-wrap gap-space-sm">
+                <select id="mk-env-etape" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"><option value="e1">Étape 1 (J0)</option><option value="e2">Étape 2 (J+4)</option><option value="e3">Étape 3 (J+10)</option></select>
+                <select id="mk-env-langue" class="h-10 px-space-sm rounded bg-surface-container-low text-on-surface font-body-sm text-body-sm"><option value="fr">Français</option><option value="en">Anglais</option></select>
+              </div>
+              <div id="mk-env-apercu" class="rounded-xl p-space-md bg-surface-container-low flex flex-col gap-1"></div>
             </div>
           </div>
         </div>
@@ -2761,13 +2857,13 @@ const MK_ABSENT_TEXTE = "La mesure n'est pas encore installée dans la base : il
 async function chargerMarketing() {
   if (!MK_BRANCHE) { brancherMarketing(); MK_BRANCHE = true; }
   afficherOngletMarketing(MK_ONGLET);
-  if (MK_ONGLET === 'semaine') await chargerSemaineMk(); else if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else if (MK_ONGLET === 'sequences') await chargerSequencesMk(); else await chargerAudienceMk();
+  if (MK_ONGLET === 'semaine') await chargerSemaineMk(); else if (MK_ONGLET === 'contacts') await chargerContactsMk(); else if (MK_ONGLET === 'contenus') await chargerContenusMk(); else if (MK_ONGLET === 'sequences') await chargerSequencesMk(); else if (MK_ONGLET === 'envoi') await chargerEnvoiMk(); else await chargerAudienceMk();
 }
 
 function brancherMarketing() {
   document.querySelectorAll('.mk-onglet').forEach((b) => b.addEventListener('click', () => { MK_ONGLET = b.dataset.onglet; chargerMarketing(); }));
   el('mk-periode').addEventListener('change', () => { MK_PERIODES[MK_ONGLET] = el('mk-periode').value; if (MK_ONGLET === 'semaine') chargerSemaineMk(); else chargerAudienceMk(); });
-  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'semaine') chargerSemaineMk(); else if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else if (MK_ONGLET === 'sequences') chargerSequencesMk(); else chargerAudienceMk(); });
+  el('mk-rafraichir').addEventListener('click', () => { if (MK_ONGLET === 'semaine') chargerSemaineMk(); else if (MK_ONGLET === 'contacts') chargerContactsMk(); else if (MK_ONGLET === 'contenus') chargerContenusMk(); else if (MK_ONGLET === 'sequences') chargerSequencesMk(); else if (MK_ONGLET === 'envoi') chargerEnvoiMk(); else chargerAudienceMk(); });
   el('mk-filtre-statut').innerHTML = `<option value="">Tous les statuts</option>` + Object.entries(MK_STATUTS).map(([k, v]) => `<option value="${k}">${echapper(v)}</option>`).join('')
     + `<option value="desinscrit">Désinscrits</option>`;
   el('mk-recherche').addEventListener('input', rendreContactsMk);
@@ -2784,6 +2880,12 @@ function brancherMarketing() {
   el('mk-seq-bascule').addEventListener('click', basculerSequencesMk);
   el('mk-seq-etape').addEventListener('change', apercuSequenceMk);
   el('mk-seq-langue').addEventListener('change', apercuSequenceMk);
+  el('mk-env-bascule').addEventListener('click', basculerEnvoiMk);
+  el('mk-env-lever-frein').addEventListener('click', leverFreinEnvoiMk);
+  el('mk-env-plafond-ok').addEventListener('click', enregistrerPlafondEnvoiMk);
+  el('mk-env-etape').addEventListener('change', apercuEnvoiMk);
+  el('mk-env-langue').addEventListener('change', apercuEnvoiMk);
+  el('mk-env-atraiter').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-traiter]'); if (b) traiterEvenementEnvoiMk(b.dataset.traiter); });
   el('mk-liste-contenus').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContenuMk(tr.dataset.id); });
   el('mk-liste-contacts').addEventListener('click', (ev) => { const tr = ev.target.closest('tr[data-id]'); if (tr) ouvrirContactMk(tr.dataset.id); });
   el('mk-overlay').addEventListener('click', (ev) => { if (ev.target === el('mk-overlay')) fermerMk(); });
@@ -2792,7 +2894,7 @@ function brancherMarketing() {
 
 function afficherOngletMarketing(nom) {
   if (MK_PERIODES[nom]) el('mk-periode').value = MK_PERIODES[nom];
-  ['semaine', 'audience', 'contacts', 'contenus', 'sequences'].forEach((n) => {
+  ['semaine', 'audience', 'contacts', 'contenus', 'sequences', 'envoi'].forEach((n) => {
     el('mk-panneau-' + n).classList.toggle('hidden', n !== nom);
     const b = el('mk-onglet-' + n);
     b.classList.toggle('bg-surface-container-lowest', n === nom);
@@ -3275,6 +3377,105 @@ function apercuSequenceMk() {
   zone.innerHTML = `<p class="font-label-md text-label-md text-on-surface-variant">Objet</p><p class="font-body-md text-body-md text-on-surface font-semibold mb-space-xs">${echapper(message.sujet)}</p>`
     + message.corps.map((l) => `<p class="font-body-sm text-body-sm text-on-surface">${echapper(l)}</p>`).join('')
     + `<hr class="my-space-xs border-surface-container-high">` + pied.map((l) => `<p class="font-body-sm text-body-sm text-on-surface-variant">${echapper(l)}</p>`).join('');
+}
+
+// ── Marketing : envoi à froid, moteur maison (migration marketing-envoi.sql ; textes : marketing-prospection.js, généré depuis la source du serveur) ──
+// Interrupteur ÉTEINT par défaut + frein automatique (rebonds, plainte, blocage) qui ne se lève que d'ici. Le texte des réponses n'est jamais stocké : on le lit dans la boîte d'envoi.
+const MK_ENV_TYPES = {
+  reponse: 'Réponse reçue (à lire dans la boîte)',
+  plainte: 'Plainte probable : contact désinscrit, frein engagé',
+  blocage: 'Refus de la messagerie (réputation ou blocage)',
+  stop: 'STOP : contact désinscrit', absence: 'Message d’absence', rebond_dur: 'Adresse inexistante', rebond_mou: 'Rebond temporaire',
+};
+let MK_ENV = null;
+
+function mkEnvAlerte(texte) { const a = el('mk-alerte-envoi'); a.textContent = texte; a.classList.remove('hidden'); }
+
+async function chargerEnvoiMk() {
+  el('mk-alerte-envoi').classList.add('hidden');
+  const { data, error } = await sb.rpc('marketing_envoi_bilan');
+  if (error) {
+    mkEnvAlerte(mkAbsent(error) ? "L'envoi n'est pas encore installé dans la base : il manque le script marketing-envoi.sql." : 'Lecture impossible : ' + error.message);
+    return;
+  }
+  MK_ENV = data;
+  const r = data.reglages, q = data.quota;
+  const env = new Map((data.envoyes || []).map((e) => [e.etape, e.n]));
+  const ev = new Map((data.evenements || []).map((e) => [e.type, e.n]));
+  el('mk-env-frein').classList.toggle('hidden', !r.frein);
+  el('mk-env-frein-texte').textContent = r.frein ? `Frein engagé${r.frein_le ? ' le ' + mkDate(r.frein_le) : ''} : ${r.frein_motif || 'cause non précisée'}. Aucun message ne part. Cherchez la cause (rebonds, plainte, blocage) avant de le lever.` : '';
+  el('mk-env-etat').textContent = r.actif
+    ? (r.frein ? 'Allumé, mais le frein est engagé : aucun message ne part.' : 'Allumé : le moteur peut envoyer, dans la limite du quota (si la tâche planifiée est déployée et activée).')
+    : 'Éteint : aucun message ne part.';
+  el('mk-env-etat').className = 'font-body-sm text-body-sm ' + (r.actif && !r.frein ? 'text-on-surface font-semibold' : 'text-on-surface-variant');
+  el('mk-env-bascule').textContent = r.actif ? "Éteindre l'envoi" : "Allumer l'envoi";
+  el('mk-env-quota').textContent = `${nbFr(q.restant)} / ${nbFr(q.quota_jour)}`;
+  el('mk-env-quota-sous').textContent = `jour d'envoi n° ${nbFr(q.jour_n)} · plafond ${nbFr(q.plafond_max)}`;
+  const total = (env.get('e1') || 0) + (env.get('e2') || 0) + (env.get('e3') || 0);
+  el('mk-env-envoyes').textContent = nbFr(total);
+  el('mk-env-envoyes-sous').textContent = `étape 1 : ${nbFr(env.get('e1') || 0)} · étape 2 : ${nbFr(env.get('e2') || 0)} · étape 3 : ${nbFr(env.get('e3') || 0)}${data.annules ? ' · ' + nbFr(data.annules) + ' annulé(s)' : ''}`;
+  el('mk-env-reponses').textContent = nbFr(ev.get('reponse') || 0);
+  el('mk-env-reponses-sous').textContent = `${nbFr((ev.get('stop') || 0) + (ev.get('plainte') || 0))} STOP ou plainte(s) · ${nbFr(ev.get('rebond_dur') || 0)} adresse(s) inexistante(s)`;
+  el('mk-env-attente').textContent = nbFr(data.file_attente || 0);
+
+  const at = data.a_traiter || [];
+  el('mk-env-atraiter').innerHTML = at.map((a) => `<tr><td class="py-3 px-space-md">${echapper(a.nom || '(contact inconnu)')}${a.entreprise ? ' — ' + echapper(a.entreprise) : ''}</td><td class="py-3 px-space-md">${echapper(MK_ENV_TYPES[a.type] || a.type)}</td><td class="py-3 px-space-md">${echapper(mkDate(a.recu_le))}</td><td class="py-3 px-space-md text-right"><button type="button" data-traiter="${echapper(a.id)}" class="h-9 px-space-sm rounded bg-surface-container-low text-on-surface hover:bg-surface-container font-label-md text-label-md">Traité</button></td></tr>`).join('');
+  el('mk-env-atraiter-vide').classList.toggle('hidden', at.length > 0);
+  const ligne = (nom, x) => `<tr><td class="py-3 px-space-md">${echapper(nom)}</td><td class="py-3 px-space-md text-right">${nbFr(x.envoyes)}</td><td class="py-3 px-space-md text-right">${nbFr(x.reponses)}</td><td class="py-3 px-space-md text-right">${nbFr(x.stops)}</td></tr>`;
+  const vide = '<tr><td class="py-3 px-space-md text-on-surface-variant" colspan="4">Aucun envoi pour l\'instant.</td></tr>';
+  el('mk-env-segments').innerHTML = (data.par_segment || []).map((s) => ligne(s.segment, s)).join('') || vide;
+  el('mk-env-zones').innerHTML = (data.par_zone || []).map((z) => ligne(z.zone === '?' ? '(pays non reconnu)' : z.zone, z)).join('') || vide;
+  el('mk-env-reglages').textContent = `Pays autorisés : ${(r.pays_autorises || []).join(', ')} · expéditeur : ${r.expediteur_nom} <${r.expediteur_adresse}> · montée en charge (jour d'envoi → messages par 24 h) : ${(r.rampe || []).map((p) => `${p[0]} → ${p[1]}`).join(' ; ')}`;
+  el('mk-env-plafond').value = r.plafond_max;
+  apercuEnvoiMk();
+}
+
+async function basculerEnvoiMk() {
+  const allumer = !(MK_ENV && MK_ENV.reglages.actif);
+  const question = allumer
+    ? "Allumer l'envoi à froid ?\n\nLe moteur enverra de VRAIS messages aux contacts éligibles (niveau A ou B, origine de l'adresse renseignée, pays autorisé), dans la limite du quota, dès son prochain passage. Un contact qui répond STOP est désinscrit définitivement. Le frein automatique stoppe tout en cas de problème.\n\nVérifiez d'abord la liste de contrôle du lancement (communication/prospection-froid-2026-11.md) : réchauffement terminé, signature confirmée, relecture juridique."
+    : "Éteindre l'envoi à froid ?\n\nAucun message ne partira plus. Les réponses, STOP et rebonds continueront d'être lus et traités.";
+  if (!window.confirm(question)) return;
+  const { error } = await sb.rpc('marketing_envoi_definir_reglages', { p_actif: allumer });
+  if (error) { mkEnvAlerte('Impossible : ' + error.message); return; }
+  chargerEnvoiMk();
+}
+
+async function leverFreinEnvoiMk() {
+  if (!window.confirm("Lever le frein ?\n\nVérifiez d'abord la cause (rebonds, plainte, blocage) : le moteur reprendra ses envois, et ne comptera que ce qui arrive à partir de maintenant.")) return;
+  const { error } = await sb.rpc('marketing_envoi_definir_reglages', { p_lever_frein: true });
+  if (error) { mkEnvAlerte('Impossible : ' + error.message); return; }
+  chargerEnvoiMk();
+}
+
+async function enregistrerPlafondEnvoiMk() {
+  const n = Number(el('mk-env-plafond').value);
+  if (!Number.isInteger(n) || n < 0 || n > 200) { mkEnvAlerte('Le plafond est un nombre entier entre 0 et 200.'); return; }
+  const { error } = await sb.rpc('marketing_envoi_definir_reglages', { p_plafond: n });
+  if (error) { mkEnvAlerte('Impossible : ' + error.message); return; }
+  chargerEnvoiMk();
+}
+
+async function traiterEvenementEnvoiMk(id) {
+  const { error } = await sb.rpc('marketing_envoi_traiter', { p_evenement: id });
+  if (error) { mkEnvAlerte('Impossible : ' + error.message); return; }
+  chargerEnvoiMk();
+}
+
+function apercuEnvoiMk() {
+  const zone = el('mk-env-apercu');
+  const m = window.marketingProspection;
+  if (!m) { zone.innerHTML = '<p class="text-error font-body-sm text-body-sm">Les textes ne sont pas chargés (marketing-prospection.js).</p>'; return; }
+  const langue = el('mk-env-langue').value, etape = el('mk-env-etape').value;
+  const msg = m.construireMessage(etape, langue, m.CONTACT_EXEMPLE[langue]);
+  let verdict = '';
+  if (window.marketingControle) {
+    const f = window.marketingControle.controlerPublication({ texte: msg.texte, langue, canal: 'email_froid', faits_cites: msg.faits });
+    verdict = f.publiable ? `Contrôle : publiable${f.avertissements ? ', ' + f.avertissements + ' avertissement(s)' : ', sans avertissement'}.` : `Contrôle : BLOQUÉ (${f.bloquants} point(s) bloquant(s)) : ce message ne partirait pas.`;
+  }
+  zone.innerHTML = `<p class="font-label-md text-label-md text-on-surface-variant">Objet (exemple : un contact fictif)</p><p class="font-body-md text-body-md text-on-surface font-semibold mb-space-xs">${echapper(msg.objet)}</p>`
+    + `<p class="font-body-sm text-body-sm text-on-surface">${echapper(msg.texte).replace(/\n/g, '<br>')}</p>`
+    + (verdict ? `<hr class="my-space-xs border-surface-container-high"><p class="font-body-sm text-body-sm text-on-surface-variant">${echapper(verdict)}</p>` : '');
 }
 
 // ── Marketing : la semaine en clair (migration marketing-semaine.sql ; mots : marketing-semaine.js, généré depuis la source du serveur — les MÊMES que dans l'e-mail du lundi) ──

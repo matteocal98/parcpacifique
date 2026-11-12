@@ -1,6 +1,7 @@
 // Génère les versions NAVIGATEUR des modules marketing du serveur, à partir de leurs uniques sources :
 //   kalea-serveur/supabase/functions/_shared/marketing-controle.ts → parcpacifique/marketing-controle.js  (window.marketingControle : contrôle de pertinence et de cohérence)
 //   kalea-serveur/supabase/functions/_shared/marketing-tri.ts      → parcpacifique/marketing-tri.js       (window.marketingTri : tri des contacts par règles)
+//   kalea-serveur/supabase/functions/_shared/marketing-prospection-contenu.ts → parcpacifique/marketing-prospection.js (window.marketingProspection : e-mails de prospection, aperçu)
 // La console (admin.html) charge ces fichiers : le serveur et la console appliquent donc LES MÊMES règles.
 // Ne JAMAIS modifier les .js générés à la main : modifier le .ts puis relancer
 //   node outils/generer-controle-marketing.mjs
@@ -48,11 +49,18 @@ export function genererSemaineNavigateur(ts) {
     'La semaine marketing en clair (points, alertes, à faire), utilisée par l\'onglet Semaine de la console : les mêmes mots que dans le récapitulatif envoyé par e-mail.');
 }
 
+export function genererProspectionNavigateur(ts) {
+  return generer(ts, 'marketing-prospection-contenu.ts', 'marketingProspection',
+    ['ETAPES', 'MODELES', 'SIGNATURE', 'CONTACT_EXEMPLE', 'construireMessage', 'prenomDe', 'segmentSur'],
+    'Les 6 e-mails de prospection à froid (3 étapes × FR/EN), utilisés pour l\'aperçu dans l\'onglet Envoi de la page Marketing de la console.');
+}
+
 export const SORTIES = [
   { source: path.join(PARTAGE, 'marketing-controle.ts'), sortie: path.join(RACINE, 'marketing-controle.js'), generer: genererControleNavigateur },
   { source: path.join(PARTAGE, 'marketing-tri.ts'), sortie: path.join(RACINE, 'marketing-tri.js'), generer: genererTriNavigateur },
   { source: path.join(PARTAGE, 'marketing-sequences-contenu.ts'), sortie: path.join(RACINE, 'marketing-sequences.js'), generer: genererSequencesNavigateur },
   { source: path.join(PARTAGE, 'marketing-semaine-contenu.ts'), sortie: path.join(RACINE, 'marketing-semaine.js'), generer: genererSemaineNavigateur },
+  { source: path.join(PARTAGE, 'marketing-prospection-contenu.ts'), sortie: path.join(RACINE, 'marketing-prospection.js'), generer: genererProspectionNavigateur },
 ];
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
