@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { SITE, RESEAUX, IMAGE_PARTAGE, ACCUEIL, ORGANISATION, OFFRES, APPLICATION } from './seo-config.mjs';
+import { SITE, RESEAUX, IMAGE_PARTAGE, ACCUEIL, ORGANISATION, OFFRES, APPLICATION, BOUTIQUES } from './seo-config.mjs';
 import { PAGES } from './pages-contenu.mjs';
 
 const require = createRequire(import.meta.url);
@@ -29,6 +29,43 @@ const LIB = {
   en: { accueil: 'Home', essai: 'Sign up', tarifs: 'See pricing', langue: 'Langue / Language', ressources: 'Guides', suivez: 'Follow KALEA', fil: 'Breadcrumb', liees: 'Read next', faq: 'Frequently asked questions', bandeauTitre: 'Try KALEA for free', bandeauTexte: 'Free for 2 machines, no credit card. Upload a manual and watch the maintenance plan build itself.' },
 };
 
+// ───────────────────────────── boutiques d'applications (BOUTIQUES dans seo-config.mjs : seul endroit qui dit ce qui est en ligne)
+const BOUTIQUES_EN_LIGNE = Object.entries(BOUTIQUES).filter(([, b]) => b.enLigne).map(([nom, b]) => ({ nom, url: b.url }));
+const URL_BOUTIQUES = BOUTIQUES_EN_LIGNE.map((b) => b.url);
+
+// L'application lit ses propres réglages (BOUTIQUES_APPLI, app-10-mon-compte.js) : on s'arrête si elle n'est pas d'accord avec ce fichier-ci.
+function controlerCoherenceAvecApplication() {
+  const m = lire('app-10-mon-compte.js').match(/const BOUTIQUES_APPLI = (\{[\s\S]*?\n\});/);
+  if (!m) throw new Error('BOUTIQUES_APPLI introuvable dans app-10-mon-compte.js');
+  const appli = new Function('return ' + m[1])();
+  for (const nom of Object.keys(BOUTIQUES)) {
+    const a = appli[nom]; const b = BOUTIQUES[nom];
+    if (!a || a.enLigne !== b.enLigne || a.url !== b.url) throw new Error(`incohérence « ${nom} » entre seo-config.mjs (BOUTIQUES) et app-10-mon-compte.js (BOUTIQUES_APPLI) : les deux doivent porter les mêmes valeurs`);
+  }
+}
+
+// Badges officiels (dossier boutiques/, jamais modifiés). Hauteur d'ÉCRAN du badge visible = `h` ; le PNG de Google contient sa propre marge, plus large en anglais qu'en français.
+const LIB_BOUTIQUE = {
+  fr: { play: 'Télécharger KALEA sur Google Play', apple: 'Télécharger KALEA dans l\'App Store', aussi: 'Aussi sur mobile :' },
+  en: { play: 'Get KALEA on Google Play', apple: 'Download KALEA on the App Store', aussi: 'Also on mobile:' },
+};
+function badge(nom, lg, h) {
+  const b = BOUTIQUES[nom]; const t = LIB_BOUTIQUE[lg][nom === 'googlePlay' ? 'play' : 'apple'];
+  let src; let hauteur; let largeur;
+  if (nom === 'appStore') { src = `/boutiques/app-store-${lg}.svg`; hauteur = h; largeur = Math.round(h * (lg === 'fr' ? 126.50751 : 119.66407) / 40); }
+  else { src = `/boutiques/google-play-${lg}.png`; hauteur = Math.round(h * 250 / (lg === 'fr' ? 190 : 170)); largeur = Math.round(hauteur * 646 / 250); }
+  // Le PNG anglais de Google a une marge gauche de 40/646 de sa largeur (le français aucune) : on la compense pour aligner les badges sur le texte.
+  const decalage = (nom === 'googlePlay' && lg === 'en') ? `margin-left:-${Math.round(largeur * 40 / 646)}px;` : '';
+  return `<a href="${b.url}" target="_blank" rel="noopener" aria-label="${echapper(t)}" class="inline-flex items-center shrink-0"><img src="${src}" alt="${echapper(t)}" width="${largeur}" height="${hauteur}" loading="lazy" decoding="async" class="block" style="height:${hauteur}px;width:${largeur}px;${decalage}"></a>`;
+}
+const badgesEnLigne = (lg, h) => BOUTIQUES_EN_LIGNE.map((b) => badge(b.nom, lg, h)).join('');
+function blocBoutiquesAccueil(lg) {
+  if (!BOUTIQUES_EN_LIGNE.length) return '<!-- BOUTIQUES:DEBUT -->\n<!-- BOUTIQUES:FIN -->';
+  return ['<!-- BOUTIQUES:DEBUT -->',
+    `<div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3" data-sans-traduction><span class="text-xs sm:text-sm font-medium text-slate-500">${LIB_BOUTIQUE[lg].aussi}</span>${badgesEnLigne(lg, 40)}</div>`,
+    '<!-- BOUTIQUES:FIN -->'].join('\n');
+}
+
 // ───────────────────────────── balises SEO
 function jsonLdAccueil(lg, faq = []) {
   const org = SITE + '/#organisation';
@@ -37,16 +74,16 @@ function jsonLdAccueil(lg, faq = []) {
     '@graph': [
       {
         '@type': 'Organization', '@id': org, name: ORGANISATION.nom, url: SITE + '/', logo: SITE + ORGANISATION.logo, email: ORGANISATION.email,
-        description: ORGANISATION.description[lg], sameAs: [RESEAUX.facebook, RESEAUX.linkedin, APPLICATION.googlePlay],
+        description: ORGANISATION.description[lg], sameAs: [RESEAUX.facebook, RESEAUX.linkedin, ...URL_BOUTIQUES],
         areaServed: APPLICATION.zones,
         contactPoint: { '@type': 'ContactPoint', contactType: lg === 'fr' ? 'assistance' : 'customer support', email: ORGANISATION.email, availableLanguage: ['fr', 'en'] },
         address: { '@type': 'PostalAddress', addressLocality: ORGANISATION.adresse.ville, postalCode: ORGANISATION.adresse.codePostal, addressCountry: ORGANISATION.adresse.pays },
       },
       { '@type': 'WebSite', '@id': SITE + '/#site', url: SITE + '/', name: 'KALEA', publisher: { '@id': org }, inLanguage: ['fr', 'en'] },
       {
-        '@type': 'SoftwareApplication', name: 'KALEA', url: URL_ACCUEIL[lg], applicationCategory: 'BusinessApplication', operatingSystem: 'Web, Android',
+        '@type': 'SoftwareApplication', name: 'KALEA', url: URL_ACCUEIL[lg], applicationCategory: 'BusinessApplication', operatingSystem: ['Web', BOUTIQUES.googlePlay.enLigne && 'Android', BOUTIQUES.appStore.enLigne && 'iOS'].filter(Boolean).join(', '),
         description: ACCUEIL[lg].description, inLanguage: lg, publisher: { '@id': org },
-        downloadUrl: APPLICATION.googlePlay, installUrl: APPLICATION.googlePlay, screenshot: APPLICATION.captures.map((c) => SITE + c), featureList: APPLICATION.fonctions[lg],
+        ...(URL_BOUTIQUES.length ? { downloadUrl: URL_BOUTIQUES.length === 1 ? URL_BOUTIQUES[0] : URL_BOUTIQUES, installUrl: URL_BOUTIQUES.length === 1 ? URL_BOUTIQUES[0] : URL_BOUTIQUES } : {}), screenshot: APPLICATION.captures.map((c) => SITE + c), featureList: APPLICATION.fonctions[lg],
         offers: OFFRES.map((o) => ({ '@type': 'Offer', name: o.nom, price: String(o.prix), priceCurrency: 'EUR', description: lg === 'fr' ? 'Prix par mois, toutes taxes comprises' : 'Price per month, taxes included', url: URL_ACCUEIL[lg] + '#tarifs', availability: 'https://schema.org/InStock' })),
       },
       ...(faq.length ? [{
@@ -83,6 +120,8 @@ function balisesSeo({ lg, titre, description, canonique, alternates, jsonld }) {
     ...Object.entries(alternates).map(([code, url]) => `<link rel="alternate" hreflang="${code}" href="${url}">`),
     '<meta name="robots" content="index, follow, max-image-preview:large">',
     '<meta name="theme-color" content="#0E1333">',
+    // Bannière « Obtenir / Ouvrir » de Safari sur iPhone : seulement quand la fiche App Store est EN LIGNE (BOUTIQUES), sur les pages publiques uniquement.
+    ...(BOUTIQUES.appStore.enLigne ? [`<meta name="apple-itunes-app" content="app-id=${BOUTIQUES.appStore.idApple}">`] : []),
     '<link rel="icon" href="/favicon.ico" sizes="any">',
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
     '<link rel="apple-touch-icon" href="/icones/apple-touch-icon.png">',
@@ -165,6 +204,12 @@ function preparerSourceFrancaise() {
     if (!h.includes(ancre)) throw new Error('ancre du pied de page introuvable (contact)');
     h = h.replace(ancre, ancre + '\n<!-- RESEAUX:DEBUT -->\n<!-- RESEAUX:FIN -->');
   }
+  if (!h.includes('<!-- BOUTIQUES:DEBUT')) {
+    // sous la ligne « Gratuit pour 2 machines · … » de l'en-tête de page
+    const re = /(Gratuit pour 2 machines · Starter[^<]*<\/span>\s*<\/p>)/;
+    if (!re.test(h)) throw new Error('ancre introuvable pour les boutiques (ligne « Gratuit pour 2 machines »)');
+    h = h.replace(re, (m) => m + '\n<!-- BOUTIQUES:DEBUT -->\n<!-- BOUTIQUES:FIN -->');
+  }
   h = h.replace('<script src="./accueil-langue.js"></script>', '<script src="./selecteur-langue.js"></script>');
   h = h.replace('href="./decouvrir.html"', 'href="./"');   // le logo mène à la racine, pas à la copie decouvrir.html
   h = remplacerEntreMarqueurs(h, 'SEO', balisesSeo({
@@ -174,6 +219,7 @@ function preparerSourceFrancaise() {
   h = remplacerEntreMarqueurs(h, 'LANGUE', selecteurLangue('fr', '/', '/en/'));
   h = remplacerEntreMarqueurs(h, 'RESSOURCES', liensRessources('fr'));
   h = remplacerEntreMarqueurs(h, 'RESEAUX', liensReseaux());
+  h = remplacerEntreMarqueurs(h, 'BOUTIQUES', blocBoutiquesAccueil('fr'));
   return h;
 }
 
@@ -241,6 +287,7 @@ function sourceAnglaise(htmlFr, rapport) {
   h = remplacerEntreMarqueurs(h, 'SEO', seoEn([]));
   h = remplacerEntreMarqueurs(h, 'LANGUE', selecteurLangue('en', '/', '/en/'));
   h = remplacerEntreMarqueurs(h, 'RESSOURCES', liensRessources('en'));
+  h = remplacerEntreMarqueurs(h, 'BOUTIQUES', blocBoutiquesAccueil('en'));
   // 1re passe : traduction ; on lit les questions anglaises de la page traduite, puis on les met dans les données structurées
   const faqEn = faqDepuisHtml(versAnglais(h, {}));
   h = remplacerEntreMarqueurs(h, 'SEO', seoEn(faqEn));
@@ -309,6 +356,7 @@ ${header}
 <nav aria-label="${L.fil}" class="text-xs text-slate-500 mb-6"><a href="${base}" class="hover:text-brand-primary">${L.accueil}</a> <span aria-hidden="true">›</span> <span>${l.fil}</span></nav>
 <h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">${l.h1}</h1>
 <p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed [&_strong]:text-brand-ink">${p1(l.intro)}</p>
+${p.telechargement ? `<div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3" data-sans-traduction>${badgesEnLigne(lg, 56)}</div>` : ''}
 <div class="mt-8 flex flex-wrap gap-3">
 <a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-5 py-3 rounded-xl shadow-sm" href="/app.html?inscription=1">${L.essai}</a>
 <a class="border border-brand-borderMuted bg-white text-brand-ink text-sm font-bold px-5 py-3 rounded-xl hover:border-brand-primary" href="${base}#tarifs">${L.tarifs}</a>
@@ -346,6 +394,8 @@ function sitemap() {
 }
 
 // ───────────────────────────── exécution
+controlerCoherenceAvecApplication();
+if (!BOUTIQUES_EN_LIGNE.length && PAGES.some((p) => p.telechargement)) throw new Error('page « Télécharger » : aucune boutique n\'est en ligne (BOUTIQUES dans seo-config.mjs)');
 const rapport = {};
 const fr = preparerSourceFrancaise();
 ecrire('decouvrir.html', fr);

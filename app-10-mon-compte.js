@@ -11,6 +11,28 @@
  *   · Feuille « Plus » (mobile)
  */
 // ───────────────────────── début du code ─────────────────────────
+
+// Boutiques d'applications : MÊMES valeurs que BOUTIQUES dans outils/seo-config.mjs (le générateur des pages publiques le contrôle et s'arrête sinon).
+// `enLigne` ne passe à true que lorsque la fiche répond VRAIMENT au public. Voir aussi le bloc « Application mobile » de Mon compte.
+const BOUTIQUES_APPLI = {
+  googlePlay: { enLigne: true, url: 'https://play.google.com/store/apps/details?id=pro.kalea.app' },
+  appStore: { enLigne: false, url: 'https://apps.apple.com/app/id6831331713' },
+};
+
+// Liens de téléchargement proposés dans Mon compte. Rien dans l'application installée (inutile, et Apple n'admet pas qu'une appli iPhone renvoie vers une autre plateforme) ;
+// dans un navigateur de téléphone, seulement la boutique de CET appareil ; sur ordinateur, toutes celles qui sont en ligne.
+function boutiquesPourCompte() {
+  try {
+    if (dansApplication() || estAppliIOS()) return [];
+    const ua = navigator.userAgent || '';
+    const iphone = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const android = /Android/i.test(ua);
+    const liste = [];
+    if (BOUTIQUES_APPLI.googlePlay.enLigne && !iphone) liste.push({ nom: 'Google Play', url: BOUTIQUES_APPLI.googlePlay.url });
+    if (BOUTIQUES_APPLI.appStore.enLigne && !android) liste.push({ nom: 'App Store', url: BOUTIQUES_APPLI.appStore.url });
+    return liste;
+  } catch (err) { return []; }
+}
 // ── Vue : Mon compte ──────────────────────────────────────────
 // ★ TÉLÉMÉTRIE — menu à part (sorti de « Mon compte » le 2026-10-04 pour ne pas le
 // surcharger, et pour accueillir la carte GPS des machines — phase 3). Réservé à
@@ -346,6 +368,20 @@ VIEWS.account = {
           </div>` : ''}
         </div>
       </section>
+
+      ${boutiquesPourCompte().length ? `
+      <!-- ── APPLICATION MOBILE : liens de téléchargement, navigateur seulement (voir boutiquesPourCompte). -->
+      <section class="ui-section" id="acc-appli-mobile">
+        ${tete('telephone', trad('Application mobile'), trad('KALEA sur l\'écran d\'accueil de votre téléphone, avec le même compte.'))}
+        <div class="ui-section-corps">
+          <div class="ui-groupe">
+            <div class="ui-aide">${trad('Mêmes machines et mêmes plans d\'entretien que sur ordinateur : connectez-vous avec votre compte habituel.')}</div>
+            <div class="acc-boutiques" style="display:flex;flex-wrap:wrap;gap:8px">
+              ${boutiquesPourCompte().map((b) => `<a class="ui-btn ui-btn-pastille" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">${picto('telephone')}<span>${tR('Télécharger sur {boutique}', { boutique: b.nom })}</span></a>`).join('')}
+            </div>
+          </div>
+        </div>
+      </section>` : ''}
 
       <section class="ui-section">
         ${tete('alerte', trad('Zone sensible'), trad('Clôture d\'entreprise et suppression.'))}

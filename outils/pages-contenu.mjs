@@ -3,6 +3,17 @@
 // Dans les textes : {{lien:ID}} devient l'adresse de la page ID dans la langue de la page ; {{accueil}} la page d'accueil ;
 // {{essai}} le lien d'inscription. Mise en page : outils/generer-pages-publiques.mjs.
 
+import { BOUTIQUES } from './seo-config.mjs';
+
+// Ce que les textes disent des applications mobiles suit l'état RÉEL des boutiques (BOUTIQUES dans seo-config.mjs) : rien n'est annoncé avant sa mise en ligne.
+const IPHONE = BOUTIQUES.appStore.enLigne;
+const PLAY = BOUTIQUES.googlePlay.enLigne;
+const MOBILE = {
+  fr: { avec: IPHONE ? 'des applications Android et iPhone' : 'une application Android', en: IPHONE ? 'Android et iPhone' : 'Android', existe: IPHONE ? 'existe en applications Android et iPhone' : 'existe en application Android' },
+  en: { avec: IPHONE ? 'Android and iPhone apps' : 'an Android app', en: IPHONE ? 'Android and iPhone apps' : 'an Android app', existe: IPHONE ? 'there are also Android and iPhone apps' : 'there is also an Android app' },
+};
+const DISPO = { fr: IPHONE && PLAY ? 'Android et iPhone' : (IPHONE ? 'iPhone' : 'Android'), en: IPHONE && PLAY ? 'Android and iPhone' : (IPHONE ? 'iPhone' : 'Android') };
+
 export const PAGES = [
   // ───────────────────────────────────────────────────────── 1. GMAO
   {
@@ -26,7 +37,7 @@ export const PAGES = [
           '<strong>Compteurs automatiques</strong> (télémétrie) pour mettre à jour les heures et les kilomètres sans saisie.',
         ] },
         { h2: 'Pour qui ?', paras: [
-          'Pour les entreprises de travaux, les paysagistes, les loueurs de matériel, les transporteurs et les collectivités qui gèrent un parc d\'engins et de véhicules <strong>sans service maintenance dédié</strong>, ou avec un seul responsable d\'atelier. L\'application fonctionne sur ordinateur et sur téléphone, avec une application Android.',
+          'Pour les entreprises de travaux, les paysagistes, les loueurs de matériel, les transporteurs et les collectivités qui gèrent un parc d\'engins et de véhicules <strong>sans service maintenance dédié</strong>, ou avec un seul responsable d\'atelier. L\'application fonctionne sur ordinateur et sur téléphone, avec ' + MOBILE.fr.avec + '.',
         ] },
         { h2: 'Une GMAO pensée pour démarrer vite', paras: [
           'Pas de paramétrage interminable : <strong>vous importez le manuel, vous relisez le plan proposé, vous validez</strong>. Le plan reste modifiable ; chaque tâche peut avoir sa propre échéance. Si vous ne trouvez pas le carnet de votre modèle, nous pouvons établir le plan à votre place (29 € TTC par plan, sur demande).',
@@ -41,7 +52,7 @@ export const PAGES = [
       faq: [
         { q: 'Qu\'est-ce qu\'une GMAO ?', r: 'Une GMAO est un logiciel de gestion de la maintenance : il centralise les machines, les plans d\'entretien, les échéances, les interventions, les pièces et les coûts, pour éviter les entretiens oubliés et les pannes évitables.' },
         { q: 'KALEA est-elle une vraie GMAO ?', r: 'Oui, pour la maintenance préventive d\'un parc d\'engins, de véhicules et de machines : plans, échéances, rappels, interventions, pièces et coûts. Elle vise la simplicité plutôt que la couverture d\'un site industriel complet.' },
-        { q: 'Faut-il installer quelque chose ?', r: 'Non. KALEA fonctionne dans le navigateur, sur ordinateur et sur téléphone, et existe en application Android.' },
+        { q: 'Faut-il installer quelque chose ?', r: 'Non. KALEA fonctionne dans le navigateur, sur ordinateur et sur téléphone, et ' + MOBILE.fr.existe + '.' },
         { q: 'Puis-je l\'essayer gratuitement ?', r: 'Oui : l\'offre Gratuit couvre 2 machines, sans carte bancaire.' },
       ],
     },
@@ -64,7 +75,7 @@ export const PAGES = [
           '<strong>Automatic meters</strong> (telemetry) to update hours and kilometres without manual entry.',
         ] },
         { h2: 'Who is it for?', paras: [
-          'For construction companies, landscapers, equipment rental firms, carriers and local authorities that run a fleet of machines and vehicles <strong>without a dedicated maintenance department</strong>, or with a single workshop manager. It works on computer and phone, and there is an Android app.',
+          'For construction companies, landscapers, equipment rental firms, carriers and local authorities that run a fleet of machines and vehicles <strong>without a dedicated maintenance department</strong>, or with a single workshop manager. It works on computer and phone, and there is ' + MOBILE.en.avec + '.',
         ] },
         { h2: 'A CMMS designed to get started fast', paras: [
           'No endless set-up: <strong>you import the manual, review the proposed plan and validate it</strong>. The plan stays editable, and each task can have its own interval. If you can\'t find the manual for your model, we can build the plan for you (€29 including tax per plan, on request).',
@@ -79,7 +90,7 @@ export const PAGES = [
       faq: [
         { q: 'What is a CMMS?', r: 'A CMMS is maintenance management software: it centralises machines, maintenance plans, due dates, service jobs, parts and costs, to avoid forgotten services and avoidable breakdowns.' },
         { q: 'Is KALEA a real CMMS?', r: 'Yes, for preventive maintenance of a fleet of equipment, vehicles and machines: plans, intervals, reminders, service jobs, parts and costs. It favours simplicity over covering a full industrial site.' },
-        { q: 'Do I need to install anything?', r: 'No. KALEA runs in the browser, on computer and phone, and there is also an Android app.' },
+        { q: 'Do I need to install anything?', r: 'No. KALEA runs in the browser, on computer and phone, and ' + MOBILE.en.existe + '.' },
         { q: 'Can I try it for free?', r: 'Yes: the Free plan covers 2 machines, with no credit card.' },
       ],
     },
@@ -195,7 +206,7 @@ export const PAGES = [
         { q: 'Puis-je suivre des véhicules et des engins dans le même outil ?', r: 'Oui : chaque machine choisit son unité de suivi (heures ou kilomètres), avec un calendrier en plus si besoin.' },
         { q: 'Faut-il un boîtier sur chaque machine ?', r: 'Non. Le relevé manuel ou en photo suffit. Les compteurs automatiques sont une option (offre Enterprise, matériel en sus).' },
         { q: 'Les QR codes sont-ils inclus ?', r: 'Oui à partir de l\'offre Business. Vous imprimez l\'étiquette depuis l\'application.' },
-        { q: 'L\'application fonctionne-t-elle sur téléphone ?', r: 'Oui, dans le navigateur et en application Android. Le téléphone sert au relevé du compteur, au scan des QR codes et au signalement de panne.' },
+        { q: 'L\'application fonctionne-t-elle sur téléphone ?', r: 'Oui, dans le navigateur et en application ' + MOBILE.fr.en + '. Le téléphone sert au relevé du compteur, au scan des QR codes et au signalement de panne.' },
       ],
     },
     en: {
@@ -230,7 +241,69 @@ export const PAGES = [
         { q: 'Can I track vehicles and equipment in the same tool?', r: 'Yes: each machine picks its tracking unit (hours or kilometres), with a calendar on top if needed.' },
         { q: 'Do I need a box on every machine?', r: 'No. Manual or photo reading is enough. Automatic meters are an option (Enterprise plan, hardware extra).' },
         { q: 'Are QR codes included?', r: 'Yes, from the Business plan. You print the label from the application.' },
-        { q: 'Does it work on a phone?', r: 'Yes, in the browser and as an Android app. The phone is used for meter reading, QR code scanning and breakdown reporting.' },
+        { q: 'Does it work on a phone?', r: 'Yes, in the browser and as ' + MOBILE.en.en + '. The phone is used for meter reading, QR code scanning and breakdown reporting.' },
+      ],
+    },
+  },
+
+  // ───────────────────────────────────────────────────────── 4. Télécharger l'application (boutons des boutiques réellement en ligne : voir BOUTIQUES)
+  {
+    id: 'telecharger',
+    telechargement: true,
+    fr: {
+      fichier: 'telecharger.html',
+      titre: 'Télécharger l\'application KALEA (' + DISPO.fr + ') | KALEA',
+      description: 'Installez KALEA sur votre téléphone (' + DISPO.fr + ') ou utilisez-le dans le navigateur : même compte, mêmes machines. Gratuit pour 2 machines.',
+      fil: 'Télécharger l\'application',
+      h1: 'Télécharger l\'application KALEA',
+      intro: 'KALEA fonctionne <strong>dans le navigateur</strong>, sur ordinateur comme sur téléphone, sans rien installer. L\'application mobile vous donne en plus un <strong>accès direct depuis l\'écran d\'accueil</strong> de votre téléphone, avec le même compte.',
+      sections: [
+        { h2: 'Sur téléphone', paras: [
+          'Téléchargez l\'application depuis la boutique de votre téléphone avec les boutons ci-dessus, puis connectez-vous avec le compte que vous utilisez déjà : <strong>vos machines, vos plans d\'entretien et votre équipe sont retrouvés tels quels</strong>.',
+        ] },
+        { h2: 'Sur ordinateur, sans rien installer', paras: [
+          'KALEA s\'ouvre aussi dans le navigateur : <a href="/app.html">ouvrir KALEA dans le navigateur</a>.',
+        ] },
+        { h2: 'Gratuit pour commencer', paras: [
+          'L\'application se télécharge gratuitement. L\'offre Gratuit permet de suivre <strong>2 machines</strong> ; les offres payantes sont détaillées sur <a href="{{accueil}}#tarifs">la page des tarifs</a>.',
+        ] },
+        { h2: 'Pour aller plus loin', paras: [
+          'Pour voir ce que fait KALEA, lisez la présentation du <a href="{{lien:gmao}}">logiciel GMAO</a> ou celle du <a href="{{lien:suivi}}">suivi des engins de chantier</a>.',
+        ] },
+      ],
+      faq: [
+        { q: 'Faut-il l\'application pour utiliser KALEA ?', r: 'Non. KALEA fonctionne dans le navigateur, sur ordinateur et sur téléphone. L\'application ajoute un accès direct depuis l\'écran d\'accueil du téléphone.' },
+        { q: 'Le téléchargement est-il payant ?', r: 'Non, l\'application se télécharge gratuitement. L\'offre Gratuit permet de suivre 2 machines ; au-delà, un abonnement est nécessaire.' },
+        { q: 'Vais-je retrouver mes données dans l\'application ?', r: 'Oui, avec le même compte : l\'application et le navigateur affichent les mêmes machines et les mêmes plans d\'entretien.' },
+        ...(IPHONE ? [] : [{ q: 'Existe-t-il une application iPhone ?', r: 'Pas pour l\'instant. Sur iPhone, utilisez KALEA dans le navigateur Safari.' }]),
+      ],
+    },
+    en: {
+      fichier: 'en/download.html',
+      titre: 'Download the KALEA app (' + DISPO.en + ') | KALEA',
+      description: 'Install KALEA on your phone (' + DISPO.en + ') or use it in your browser: same account, same machines. Free for 2 machines.',
+      fil: 'Download the app',
+      h1: 'Download the KALEA app',
+      intro: 'KALEA works <strong>in the browser</strong>, on computer and phone, with nothing to install. The mobile app adds <strong>direct access from your phone\'s home screen</strong>, with the same account.',
+      sections: [
+        { h2: 'On your phone', paras: [
+          'Download the app from your phone\'s store with the buttons above, then sign in with the account you already use: <strong>your machines, maintenance plans and team are there as you left them</strong>.',
+        ] },
+        { h2: 'On a computer, with nothing to install', paras: [
+          'KALEA also opens in the browser: <a href="/app.html">open KALEA in the browser</a>.',
+        ] },
+        { h2: 'Free to start', paras: [
+          'The app is free to download. The Free plan lets you track <strong>2 machines</strong>; paid plans are detailed on <a href="{{accueil}}#tarifs">the pricing page</a>.',
+        ] },
+        { h2: 'Going further', paras: [
+          'To see what KALEA does, read about the <a href="{{lien:gmao}}">CMMS software</a> or about <a href="{{lien:suivi}}">construction equipment tracking</a>.',
+        ] },
+      ],
+      faq: [
+        { q: 'Do I need the app to use KALEA?', r: 'No. KALEA works in the browser, on computer and phone. The app adds direct access from your phone\'s home screen.' },
+        { q: 'Is the download paid?', r: 'No, the app is free to download. The Free plan lets you track 2 machines; beyond that, a subscription is required.' },
+        { q: 'Will I find my data in the app?', r: 'Yes, with the same account: the app and the browser show the same machines and maintenance plans.' },
+        ...(IPHONE ? [] : [{ q: 'Is there an iPhone app?', r: 'Not yet. On iPhone, use KALEA in the Safari browser.' }]),
       ],
     },
   },

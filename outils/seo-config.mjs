@@ -38,13 +38,23 @@ export const ORGANISATION = {
   },
 };
 
+// ★ BOUTIQUES D'APPLICATIONS — LE SEUL ENDROIT où l'on dit ce qui est en ligne.
+// `enLigne` ne passe à true que lorsque la fiche répond VRAIMENT au public (à vérifier le jour de la publication : page de la boutique
+// et, pour Apple, https://itunes.apple.com/lookup?id=6831331713&country=fr qui doit répondre resultCount 1).
+// Effets : lien dans l'en-tête de la page d'accueil, page « Télécharger », données structurées, bannière Apple de Safari.
+// L'application elle-même (app-10-mon-compte.js, BOUTIQUES_APPLI) doit porter les mêmes valeurs : le générateur le contrôle et s'arrête sinon.
+export const BOUTIQUES = {
+  googlePlay: { enLigne: true, url: 'https://play.google.com/store/apps/details?id=pro.kalea.app' },
+  appStore: { enLigne: false, url: 'https://apps.apple.com/app/id6831331713', idApple: '6831331713' },
+};
+
 // Données structurées de l'application (SoftwareApplication) : lien Google Play, captures (adresses sous kalea.pro), fonctions.
 export const APPLICATION = {
   googlePlay: 'https://play.google.com/store/apps/details?id=pro.kalea.app',
   captures: ['/captures-app/tableau-de-bord-v2.png', '/captures-app/plan-entretien.png', '/captures-app/stock.png', '/captures-app/tco.png', '/captures-app/agenda.png', '/captures-app/fiche-machine.png'],
   fonctions: {
-    fr: ['Plans d\'entretien générés à partir des manuels constructeur', 'Suivi aux heures, au kilomètre ou au calendrier', 'Rappels d\'échéance par notification', 'Stock de pièces détachées et commandes fournisseurs', 'Coût de possession (TCO) par machine', 'QR codes sur les machines', 'Application mobile Android'],
-    en: ['Maintenance plans built from manufacturer manuals', 'Tracking by hours, kilometres or calendar', 'Due-date reminders by notification', 'Spare-parts stock and supplier orders', 'Total cost of ownership (TCO) per machine', 'QR codes on machines', 'Android mobile app'],
+    fr: ['Plans d\'entretien générés à partir des manuels constructeur', 'Suivi aux heures, au kilomètre ou au calendrier', 'Rappels d\'échéance par notification', 'Stock de pièces détachées et commandes fournisseurs', 'Coût de possession (TCO) par machine', 'QR codes sur les machines', 'Application mobile ' + (BOUTIQUES.appStore.enLigne ? 'Android et iPhone' : 'Android')],
+    en: ['Maintenance plans built from manufacturer manuals', 'Tracking by hours, kilometres or calendar', 'Due-date reminders by notification', 'Spare-parts stock and supplier orders', 'Total cost of ownership (TCO) per machine', 'QR codes on machines', BOUTIQUES.appStore.enLigne ? 'Android and iPhone mobile apps' : 'Android mobile app'],
   },
   zones: ['NC', 'FR', 'PF', 'WF', 'VU'],
 };
