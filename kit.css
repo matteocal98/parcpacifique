@@ -3275,6 +3275,22 @@ html[data-theme="dark"]{
 @media (max-width:560px){.panne-liste-modal{max-height:none;overflow:visible;}}
 .overlay.otm-overlay{align-items:flex-start;align-items:safe center;}
 
+/* Ajouter un membre (Mon compte › Équipe) : même style C « bandeau encre » que les autres fenêtres. Son titre est dans un bloc (.equipe-ajout-tete),
+   pas un <h2> nu : les règles communes ne s'y appliquaient pas. Bandeau encre avec « Fermer » dedans, corps blanc, blocs teintés. (2026-11-13) */
+.overlay.equipe-ajout > .modal{background:var(--mod-corps) !important;padding:0 var(--mod-marge) var(--mod-marge);position:relative;overflow:hidden;border:0;}
+.overlay.equipe-ajout .equipe-ajout-tete{margin:0 calc(-1 * var(--mod-marge)) 16px;padding:13px var(--mod-marge);background:var(--mod-bandeau);color:var(--mod-sur-bandeau);align-items:center;}
+.overlay.equipe-ajout .equipe-ajout-tete h2{margin:0;font-size:18px;line-height:1.25;color:var(--mod-sur-bandeau);}
+.overlay.equipe-ajout .equipe-ajout-tete .ui-btn-pastille{background:var(--mod-sur-voile);color:var(--mod-sur-bandeau);box-shadow:none;}
+.overlay.equipe-ajout .equipe-ajout-tete .ui-btn-pastille:hover{background:var(--mod-sur-voile-fort);}
+.overlay.equipe-ajout > .modal :is(.ui-groupe,.ui-section-corps > .ui-groupe){background:var(--mod-element);}
+
+/* Fiche fournisseur (Nouveau fournisseur / Modifier) : même gabarit que les autres grandes fenêtres (largeur 56 rem comme « Ajouter une machine »),
+   cartes sur DEUX colonnes sur grand écran (le code les range déjà en deux colonnes, .fo-colonne), et elle file vers le bas : plus de zone qui défile
+   à l'intérieur ni de pied figé. (2026-11-13, demande de l'utilisateur) */
+.overlay > .modal.fournisseur-modal.export-modal{width:min(56rem,94vw);max-width:min(56rem,94vw) !important;max-height:none !important;}
+.fournisseur-modal > .fo-corps{overflow:visible;flex:0 0 auto;}
+@media (min-width:760px){.fournisseur-modal .fo-colonnes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;}}
+
 /* Modifier une machine. */
 .overlay.machine-modal-edit > .modal{background:var(--mod-corps) !important;border:0;}
 .overlay.machine-modal-edit > .modal > div:first-child{background:var(--mod-bandeau);padding-bottom:18px;border-radius:var(--r-card) var(--r-card) 0 0;}
