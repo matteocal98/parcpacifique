@@ -3256,6 +3256,13 @@ html[data-theme="dark"]{
 .overlay.machine-modal-add footer #cancel{background:var(--mod-corps) !important;box-shadow:inset 0 0 0 1px var(--mod-bord);}
 .overlay.machine-modal-add footer button[type="submit"]{background:var(--mod-bouton) !important;color:#fff !important;}
 
+/* Ajouter une machine (formulaire ET « Dernière étape ») : comme « Modifier une machine » et « Enregistrer une intervention », la fenêtre
+   « file vers le bas » — plus de plafond à 92 % de l'écran, plus de zone qui défile à l'intérieur, plus de pied figé qui masque la fin du
+   formulaire : bandeau, champs et boutons défilent ensemble avec la fenêtre (c'est .overlay qui défile). (2026-11-13, demande de l'utilisateur) */
+.overlay.machine-modal-add > .bg-modal-bg{max-height:none !important;overflow:visible !important;}
+.overlay.machine-modal-add > .bg-modal-bg > form{flex:0 0 auto;min-height:0;overflow:visible;}
+.overlay.machine-modal-add > .bg-modal-bg > form > main{flex:0 0 auto;overflow:visible !important;}
+
 /* Modifier une machine. */
 .overlay.machine-modal-edit > .modal{background:var(--mod-corps) !important;border:0;}
 .overlay.machine-modal-edit > .modal > div:first-child{background:var(--mod-bandeau);padding-bottom:18px;border-radius:var(--r-card) var(--r-card) 0 0;}
