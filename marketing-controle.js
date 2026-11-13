@@ -65,11 +65,12 @@ const FAITS         = [
     preuve: 'seo-config.mjs APPLICATION.fonctions[4] ; mémoire « TCO plan gating » (Business et Enterprise seulement)' },
   { id: 'qr-codes', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['qr'],
     fr: 'QR codes sur les machines.', en: 'QR codes on machines.', preuve: 'seo-config.mjs APPLICATION.fonctions[5]' },
-  // REPASSÉ « À VÉRIFIER » le 2026-11-12 : l'application Android n'est plus en ligne (compte Google Play désactivé le 2026-11-07, applications retirées ;
-  // iPhone : build Apple en attente). Ne plus la citer dans aucune publication ni aucun e-mail tant qu'elle n'est pas de nouveau disponible.
-  // Quand elle revient : remettre statut 'verifie' + la date du jour, puis relancer `node outils/generer-controle-marketing.mjs` (site).
-  { id: 'appli-android', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['android', 'google play', 'play store'],
-    fr: 'Application mobile Android.', en: 'Android mobile app.', preuve: 'HORS LIGNE depuis le 2026-11-07 (compte Google Play désactivé) — texte du site : seo-config.mjs APPLICATION.fonctions[6], encore publié' },
+  // Historique : repassé « à vérifier » le 2026-11-12 (compte Google Play désactivé le 2026-11-07, applications retirées), REMIS « vérifié » le 2026-11-13 :
+  // la fiche https://play.google.com/store/apps/details?id=pro.kalea.app répond de nouveau au public (HTTP 200, titre « KALEA – Applications sur Google Play »,
+  // éditeur « Matthieu COURTOIS »). Si elle disparaît de nouveau : remettre 'a_verifier', puis relancer `node outils/generer-controle-marketing.mjs` (site).
+  // L'application iPhone n'est PAS un fait vérifié (fiche App Store invisible en France au 2026-11-13) : ne pas la citer.
+  { id: 'appli-android', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-13', mots: ['android', 'google play', 'play store'],
+    fr: 'Application mobile Android.', en: 'Android mobile app.', preuve: 'fiche Google Play publique relue le 2026-11-13 (HTTP 200, éditeur Matthieu COURTOIS) ; seo-config.mjs BOUTIQUES.googlePlay.enLigne = true' },
   { id: 'telemetrie', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['télémétrie', 'telemetrie', 'telemetry', 'boîtier', 'boitier', 'tracker', 'gps'], offre_min: 'enterprise',
     fr: 'Télémétrie (compteur automatique et position des machines cochées « Localiser »), réservée à l\'offre Enterprise.', en: 'Telemetry (automatic counter and position of machines ticked “Track location”), Enterprise plan only.',
     preuve: 'parcpacifique/politique-confidentialite.html §2 et §3 (« option de l\'offre Enterprise »)' },
