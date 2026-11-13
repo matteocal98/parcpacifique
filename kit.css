@@ -3263,6 +3263,18 @@ html[data-theme="dark"]{
 .overlay.machine-modal-add > .bg-modal-bg > form{flex:0 0 auto;min-height:0;overflow:visible;}
 .overlay.machine-modal-add > .bg-modal-bg > form > main{flex:0 0 auto;overflow:visible !important;}
 
+/* TOUTES LES AUTRES FENÊTRES « filent vers le bas » (2026-11-13, demande de l'utilisateur après « Ajouter une machine ») :
+   1. le pied (Annuler / Enregistrer…) n'est plus collé en bas de l'écran par-dessus le contenu : il suit la fin du formulaire ;
+   2. plus de plafond de hauteur avec défilement interne (ordres de travail, import, fournisseur, fenêtres standard) : c'est la page qui défile.
+   Les listes qui ont leur propre défilement (choix d'une machine, liste de recherche) ne changent pas. */
+.modal.a-croix:not(.fournisseur-modal) > .modal-actions,
+.overlay > .modal:has(> h2) > .modal-actions:last-child,
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)) > :is(.modal-actions,.pe-pied,.jm-nav,.support-picker-pied):last-child{position:static;}
+.modal.a-croix:not(.fournisseur-modal),.ot-modal{max-height:none;overflow-y:visible;}
+.overlay .modal.otm,.import-modal .import-csv-modal,.fournisseur-modal{max-height:none !important;}
+@media (max-width:560px){.panne-liste-modal{max-height:none;overflow:visible;}}
+.overlay.otm-overlay{align-items:flex-start;align-items:safe center;}
+
 /* Modifier une machine. */
 .overlay.machine-modal-edit > .modal{background:var(--mod-corps) !important;border:0;}
 .overlay.machine-modal-edit > .modal > div:first-child{background:var(--mod-bandeau);padding-bottom:18px;border-radius:var(--r-card) var(--r-card) 0 0;}
