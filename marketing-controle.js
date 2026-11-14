@@ -77,9 +77,9 @@ const FAITS         = [
   // ── fonction vérifiée par l'utilisateur sur son appareil ──
   { id: 'saisie-hors-ligne', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-14', mots: ['hors ligne', 'sans réseau', 'offline'],
     fr: 'Saisie sans réseau, envoyée au retour de la connexion.', en: 'Entries without network, sent when the connection returns.', preuve: 'essai de l\'utilisateur (M. COURTOIS) le 2026-11-14 ; code : app-18-copie-locale.js' },
+  { id: 'signaler-panne', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-14', mots: ['panne', 'breakdown'],
+    fr: 'Signaler une panne depuis le terrain avec suivi par le gérant.', en: 'Report a breakdown from the field, followed by the manager.', preuve: 'validé sur appareil par l\'utilisateur le 2026-10-13 (signalement, suivi, notification au gérant) et revu le 2026-11-14' },
   // ── pistes à vérifier avant tout usage (une fonction ne se promet pas de mémoire) ──
-  { id: 'signaler-panne', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['panne', 'breakdown'],
-    fr: 'Signaler une panne depuis le terrain avec suivi par le gérant.', en: 'Report a breakdown from the field, followed by the manager.', preuve: 'mémoire « signaler une panne » (validé sur appareil le 2026-10-13) — à relire' },
   { id: 'ordres-travail', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['ordre de travail', 'ordres de travail', 'work order'],
     fr: 'Ordres de travail.', en: 'Work orders.', preuve: 'app-17-ordres-travail.js (à vérifier)' },
 ]
