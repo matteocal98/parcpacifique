@@ -74,9 +74,10 @@ const FAITS         = [
   { id: 'telemetrie', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['télémétrie', 'telemetrie', 'telemetry', 'boîtier', 'boitier', 'tracker', 'gps'], offre_min: 'enterprise',
     fr: 'Télémétrie (compteur automatique et position des machines cochées « Localiser »), réservée à l\'offre Enterprise.', en: 'Telemetry (automatic counter and position of machines ticked “Track location”), Enterprise plan only.',
     preuve: 'parcpacifique/politique-confidentialite.html §2 et §3 (« option de l\'offre Enterprise »)' },
+  // ── fonction vérifiée par l'utilisateur sur son appareil ──
+  { id: 'saisie-hors-ligne', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-14', mots: ['hors ligne', 'sans réseau', 'offline'],
+    fr: 'Saisie sans réseau, envoyée au retour de la connexion.', en: 'Entries without network, sent when the connection returns.', preuve: 'essai de l\'utilisateur (M. COURTOIS) le 2026-11-14 ; code : app-18-copie-locale.js' },
   // ── pistes à vérifier avant tout usage (une fonction ne se promet pas de mémoire) ──
-  { id: 'saisie-hors-ligne', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['hors ligne', 'sans réseau', 'offline'],
-    fr: 'Saisie sans réseau, envoyée au retour de la connexion.', en: 'Entries without network, sent when the connection returns.', preuve: 'app-18-copie-locale.js (à vérifier sur un appareil)' },
   { id: 'signaler-panne', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['panne', 'breakdown'],
     fr: 'Signaler une panne depuis le terrain avec suivi par le gérant.', en: 'Report a breakdown from the field, followed by the manager.', preuve: 'mémoire « signaler une panne » (validé sur appareil le 2026-10-13) — à relire' },
   { id: 'ordres-travail', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['ordre de travail', 'ordres de travail', 'work order'],
