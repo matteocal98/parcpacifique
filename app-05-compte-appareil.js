@@ -120,14 +120,38 @@ function estErreurReseau(erreur) {
 // courte pause, absorbe l'immense majorité des accrocs transitoires ; une
 // vraie colonne absente (erreur Postgres, pas réseau) échoue tout de suite,
 // sans attendre inutilement.
+//
+// ★ MÉMOIRE DES SONDES (2026-11-14). Même défaut, côté démarrage SANS réseau : en mode avion (ou sans couverture) toutes les sondes
+//   échouent par le réseau, et « je n'ai pas pu demander » devenait « la fonction n'existe pas » → le bouton « Panne » du « + »
+//   et d'autres fonctions disparaissaient, et la copie locale mémorisait cet état faux jusqu'au prochain démarrage réussi.
+//   Désormais, chaque réponse RÉELLE du serveur (colonne présente / vraie erreur de schéma) est retenue sur l'appareil ;
+//   quand le réseau ne répond pas, on garde la dernière réponse connue — on ne conclut jamais « absent » d'un simple silence.
+//   Sans réponse connue (tout premier démarrage sans réseau), le comportement reste prudent : fonction non proposée.
+const SONDES_MEMOIRE_CLE = 'kalea.sondes-schema.v1';
+function sondesMemoire() {
+  try {
+    const m = JSON.parse(localStorage.getItem(SONDES_MEMOIRE_CLE) || '{}');
+    return m && typeof m === 'object' ? m : {};
+  } catch (err) { return {}; }
+}
+function sondesRetenir(cle, valeur) {
+  try {
+    const m = sondesMemoire();
+    if (m[cle] === valeur) return;
+    m[cle] = valeur;
+    localStorage.setItem(SONDES_MEMOIRE_CLE, JSON.stringify(m));
+  } catch (err) { /* stockage indisponible : la sonde marche quand même, sans mémoire */ }
+}
 async function sonderColonne(table, colonne) {
+  const cle = `${table}.${colonne}`;
   for (let essai = 0; essai < 2; essai++) {
     const { error } = await sb.from(table).select(colonne).limit(1);
-    if (!error) return true;
-    if (!estErreurReseau(error) || essai === 1) return false;
+    if (!error) { sondesRetenir(cle, true); return true; }
+    if (!estErreurReseau(error)) { sondesRetenir(cle, false); return false; }   // vraie réponse du serveur : colonne absente
+    if (essai === 1 || navigator.onLine === false) break;                       // hors connexion déclarée : inutile d'attendre
     await new Promise((resolve) => setTimeout(resolve, 700));
   }
-  return false;
+  return sondesMemoire()[cle] === true;   // le réseau n'a pas répondu : dernière réponse connue, jamais « absent » par défaut
 }
 
 function bandeauHorsLigneHtml() {
