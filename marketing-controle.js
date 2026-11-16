@@ -57,9 +57,23 @@ const FAITS         = [
   { id: 'message-cle', sujet: 'message', statut: 'verifie', verifie_le: '2026-11-02', mots: [],
     fr: 'Évitez les pannes faute d\'un suivi efficace.', en: 'Avoid breakdowns caused by weak maintenance tracking.',
     preuve: 'formulation décidée par le propriétaire le 2026-11-02 pour remplacer « rappels avant panne » ; utilisée dans la description du site' },
-  { id: 'stock', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['stock', 'pièces', 'pieces', 'fournisseur', 'supplier'],
+  // Corrigé le 2026-11-17 : le module Stock (pièces, fournisseurs, commandes, inventaire) est réservé à l'offre ENTERPRISE (planCouvreStock() dans
+  // app-04-telemetrie-support.js, utilisé par navItemsVisibles) ; le fait n'avait pas de palier, donc rien n'empêchait « stock… gratuit pour 2 machines ».
+  { id: 'stock', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-17', mots: ['stock', 'pièces', 'pieces', 'fournisseur', 'supplier'], offre_min: 'enterprise',
     fr: 'Stock de pièces détachées et commandes fournisseurs.', en: 'Spare-parts stock and supplier orders.',
-    preuve: 'seo-config.mjs APPLICATION.fonctions[3]' },
+    preuve: 'RÉSERVÉ À ENTERPRISE (offre_min) — le libellé reste identique à la liste publiée du site (test d\'égalité) ; code : planCouvreStock() = Enterprise (app-04-telemetrie-support.js, app-06-etat-interface.js navItemsVisibles) ; simulateur-tarifs.js (palier 3 : Stocks & SAV) ; seo-config.mjs APPLICATION.fonctions[3]' },
+  { id: 'kits-entretien', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-17', mots: ['kit d\'entretien', 'kits d\'entretien', 'maintenance kit'], offre_min: 'enterprise',
+    fr: 'Kits d\'entretien : les pièces de chaque étape d\'un plan, comparées au stock (offre Enterprise).', en: 'Maintenance kits: the parts of each plan step, compared with stock (Enterprise plan).',
+    preuve: 'code : SCHEMA.hasKits && planCouvreStock() (app-13-fiche-machine.js) ; vidéo de démo « kits d\'entretien » enregistrée sur le compte Enterprise de démonstration' },
+  { id: 'habilitations', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-17', mots: ['habilitation', 'qualification'], offre_min: 'enterprise',
+    fr: 'Habilitations de l\'équipe : dates de validité et exigences par catégorie ou par machine (offre Enterprise).', en: 'Team qualifications: validity dates and requirements by machine category or machine (Enterprise plan).',
+    preuve: 'code : habilitationsActif() = SCHEMA.hasHabilitations && planCouvreSignature() = Enterprise (app-21-habilitations.js, app-20-signatures.js) ; vidéo de démo « habilitations » sur le compte Enterprise de démonstration' },
+  { id: 'statistiques', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-17', mots: ['statistique', 'statistics'], offre_min: 'business',
+    fr: 'Statistiques du parc (coûts, entretien, stock) à partir de l\'offre Business.', en: 'Fleet statistics (costs, maintenance, stock) from the Business plan.',
+    preuve: 'code : navItemsVisibles() item « stats » = tcoActif() = Business et Enterprise (app-06-etat-interface.js, app-03-services.js planCouvreTco) ; app-15-statistiques.js (l\'onglet Stock n\'apparaît qu\'en Enterprise)' },
+  { id: 'agenda', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-17', mots: ['agenda'],
+    fr: 'Agenda des échéances d\'entretien, coloré selon l\'état de chaque machine.', en: 'Calendar of maintenance due dates, colour-coded by each machine\'s status.',
+    preuve: 'code : vue « agenda » sans restriction d\'offre (navItemsVisibles) ; masquée seulement aux droits de saisie et d\'achat (VUES_MASQUEES_PAR_ROLE) ; reel de démo publié' },
   { id: 'tco', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['tco', 'coût de possession', 'cout de possession', 'cost of ownership'], offre_min: 'business',
     fr: 'Coût de possession (TCO) par machine, à partir de l\'offre Business.', en: 'Total cost of ownership (TCO) per machine, from the Business plan.',
     preuve: 'seo-config.mjs APPLICATION.fonctions[4] ; mémoire « TCO plan gating » (Business et Enterprise seulement)' },
@@ -181,6 +195,13 @@ function controlerPublication(e        )        {
         avert('offre-requise', 'coherence', `« ${f.id} » n'est disponible qu'à partir de l'offre ${f.offre_min === 'enterprise' ? 'Enterprise' : 'Business'} : le texte ne le précise pas.`)
       }
     }
+  }
+
+  // « Gratuit pour 2 machines » ne couvre aucune fonction réservée à une offre payante : un texte qui cite les deux laisse croire que c'est gratuit
+  // (cas du post « kits d'entretien… Free for 2 machines », corrigé le 2026-11-17).
+  if (/\bgratuit(?:e|es|s)?\b|\bfree\b/i.test(texte)) {
+    const payantes = FAITS.filter((f) => f.statut === 'verifie' && f.offre_min && f.mots.some((m) => norm.includes(sansAccents(m))))
+    if (payantes.length) avert('gratuit-fonction-payante', 'coherence', `« Gratuit » est cité avec ${payantes.map((f) => '« ' + f.id + ' »').join(', ')}, réservé(s) à une offre payante (${payantes.map((f) => f.offre_min === 'enterprise' ? 'Enterprise' : 'Business').join(', ')}) : séparez bien les deux messages.`)
   }
 
   // ── PERTINENCE
