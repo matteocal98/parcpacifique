@@ -79,9 +79,10 @@ const FAITS         = [
     fr: 'Saisie sans réseau, envoyée au retour de la connexion.', en: 'Entries without network, sent when the connection returns.', preuve: 'essai de l\'utilisateur (M. COURTOIS) le 2026-11-14 ; code : app-18-copie-locale.js' },
   { id: 'signaler-panne', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-14', mots: ['panne', 'breakdown'],
     fr: 'Signaler une panne depuis le terrain avec suivi par le gérant.', en: 'Report a breakdown from the field, followed by the manager.', preuve: 'validé sur appareil par l\'utilisateur le 2026-10-13 (signalement, suivi, notification au gérant) et revu le 2026-11-14' },
+  { id: 'ordres-travail', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-16', mots: ['ordre de travail', 'ordres de travail', 'work order'],
+    fr: 'Ordres de travail : qui fait quoi, et pour quand, sur chaque machine.', en: 'Work orders: who does what, and by when, for each machine.', preuve: 'confirmé par l\'utilisateur (M. COURTOIS) le 2026-11-16 ; code : app-17-ordres-travail.js' },
   // ── pistes à vérifier avant tout usage (une fonction ne se promet pas de mémoire) ──
-  { id: 'ordres-travail', sujet: 'fonction', statut: 'a_verifier', verifie_le: '', mots: ['ordre de travail', 'ordres de travail', 'work order'],
-    fr: 'Ordres de travail.', en: 'Work orders.', preuve: 'app-17-ordres-travail.js (à vérifier)' },
+  // (aucune piste en attente au 2026-11-16 ; y ranger toute nouvelle fonction annoncée avant de l'avoir vue fonctionner)
 ]
 
 const OFFRES = ['free', 'starter', 'business', 'enterprise']         
