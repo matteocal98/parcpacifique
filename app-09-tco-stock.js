@@ -5192,7 +5192,8 @@ async function genererBonDeCommandePdf(g, infos) {
     doc.setFontSize(7);
     doc.setTextColor(140, 140, 150);
     T(doc, tR('Page {n}/{total}', { n: p, total: pages }), MX, 292);
-    T(doc, `KALEA - ${formatShortDate(todayIso())}`, 195, 292, { align: 'right' });
+    T(doc, formatShortDate(todayIso()), 195, 289, { align: 'right' });
+    pdfMarqueKalea(doc, T, 195, 292, 'bon-commande', 'right');
   }
   return doc;
 }

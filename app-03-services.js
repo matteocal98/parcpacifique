@@ -351,12 +351,25 @@ function pdfEnTete(doc, donnees, T) {
   T(doc, tR('Rapport TCO — {periode} — {devise}', { periode: donnees.periodeLabel, devise: donnees.devise }), 195, 11.5, { align: 'right' });
   doc.setTextColor(14, 19, 51);
 }
+// Mention de marque discrète, commune à tous les documents produits par KALEA (PDF, étiquette QR imprimée) : « KALEA · kalea.pro ».
+// Sans phrase, donc sans traduction ; dans les PDF, le texte est aussi un lien (avec un utm pour mesurer ce que ça rapporte).
+const MARQUE_KALEA = 'KALEA · kalea.pro';
+function pdfMarqueKalea(doc, T, x, y, campagne, align) {
+  const texte = pdfTexteSain(MARQUE_KALEA);
+  T(doc, MARQUE_KALEA, x, y, align ? { align } : undefined);
+  try {
+    const l = doc.getTextWidth(texte);
+    const x0 = align === 'right' ? x - l : align === 'center' ? x - l / 2 : x;
+    doc.link(x0, y - 3, l, 4, { url: `https://kalea.pro/?utm_source=kalea-document&utm_medium=pdf&utm_campaign=${campagne}` });
+  } catch (_) { /* le lien est un plus : le texte reste lisible sans lui */ }
+}
 function pdfPiedDePage(doc, donnees, n, total, T) {
   doc.setFontSize(7);
   doc.setTextColor(140, 140, 150);
   doc.setFont('helvetica', 'normal');
   T(doc, tR('Page {n}/{total}', { n, total }), 15, 292);
   T(doc, tR('Généré par KALEA le {date} — chiffres calculés sur les données enregistrées par {societe}.', { date: formatShortDateAvecAnnee(donnees.dateIso), societe: donnees.societe }), 195, 292, { align: 'right' });
+  pdfMarqueKalea(doc, T, 195, 295.5, 'rapport-tco', 'right');
 }
 function pdfCarteKpi(doc, x, y, l, h, { eyebrow, valeur, sub1, sub2 }, T) {
   doc.setDrawColor(226, 232, 240);

@@ -169,6 +169,7 @@ function imprimerQr(dataUrl, machine) {
     <img src="${dataUrl}" alt="QR code">
     <div class="qr-impression-nom">${esc(machine.name)}</div>
     ${identifiantAffiche(machine) ? `<div class="qr-impression-id">${esc(identifiantAffiche(machine))}</div>` : ''}
+    <div class="qr-impression-marque">${esc(MARQUE_KALEA)}</div>
   `;
   document.body.appendChild(zone);
   window.print();

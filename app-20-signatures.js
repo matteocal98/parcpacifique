@@ -394,6 +394,8 @@ async function genererRapportInterventionPdf(d) {
     const mention = doc.splitTextToSize(pdfTexteSain(trad('Signature électronique simple (règlement européen eIDAS) : preuve de suivi interne, qui ne remplace pas une signature qualifiée.')), L - 25);
     doc.text(mention, MX, 288);
     T(tR('Page {p} / {n}', { p, n: pages }), MX + L, 288, { align: 'right' });
+    doc.setFontSize(7); doc.setTextColor(140, 146, 165);
+    pdfMarqueKalea(doc, (d2, s, x, y, o) => doc.text(pdfTexteSain(s), x, y, o), MX + L, 292.5, 'rapport-intervention', 'right');
   }
   const nomMachine = (d.machine ? d.machine.name : 'machine').replace(/[^a-z0-9]+/gi, '_').slice(0, 40);
   return { blob: doc.output('blob'), nomFichier: `rapport_intervention_${nomMachine}_${String(i.performed_at).slice(0, 10)}.pdf` };
