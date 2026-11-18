@@ -3127,10 +3127,10 @@ html[data-theme="dark"] .otm-machine.is-choisi .otm-radio{color:#0E1226;}
    fiche machine, ordres de travail) gardent leur style actuel jusqu'aux lots suivants.
    ════════════════════════════════════════════════════════════════════════════ */
 :root{
-  --mod-corps:#FFFFFF;--mod-bandeau:#0E1333;--mod-sur-bandeau:#FFFFFF;--mod-pied:#F0F2F8;--mod-element:#F0F2F8;
+  --mod-corps:#FFFFFF;--mod-bandeau:#00526A /* Couleurs 2026-11-18 — origine #0E1333 */;--mod-sur-bandeau:#FFFFFF;--mod-pied:#F0F2F8;--mod-element:#F0F2F8;
   --mod-bord:#B9BFD6;--mod-filet:#E1E4EE;--mod-voile:rgba(14,19,51,.45);--mod-marge:24px;
   /* Voiles blancs posés SUR le bandeau (pastilles, bouton de fermeture) : en jetons pour que le thème sombre les garde tels quels. */
-  --mod-sur-voile:rgba(255,255,255,.14);--mod-sur-voile-fort:rgba(255,255,255,.24);--mod-bouton:#0E1333;
+  --mod-sur-voile:rgba(255,255,255,.14);--mod-sur-voile-fort:rgba(255,255,255,.24);--mod-bouton:#00526A /* Couleurs 2026-11-18 — origine #0E1333 */;
 }
 html[data-theme="dark"]{
   --mod-corps:#141A33;--mod-bandeau:#070A18;--mod-sur-bandeau:#FFFFFF;--mod-pied:#1E2542;--mod-element:#2A3257;
@@ -3139,6 +3139,8 @@ html[data-theme="dark"]{
 @media (max-width:700px){:root{--mod-marge:14px;}}
 /* Le voile : 45 % au lieu de 10 %, pour que la fenêtre se détache de la page (toutes les fenêtres, tous les lots). */
 .overlay{background:var(--mod-voile);}
+/* Couleurs 2026-11-18 — liseré blanc dans l'angle haut des fenêtres : la bordure fine (1px, translucide) de .modal laissait voir le fond blanc du corps sous le bandeau coloré, sur le bord et dans les angles arrondis. Plus de bordure : l'ombre suffit à détacher la fenêtre. */
+.overlay .modal,.overlay .modal.otm{border:0;}
 /* Corps blanc ; le bandeau et le pied vont d'un bord à l'autre, d'où le padding horizontal seul et les marges négatives. */
 .overlay > .modal:has(> h2){background:var(--mod-corps) !important;padding:0 var(--mod-marge) var(--mod-marge);position:relative;}
 .overlay > .modal:has(> h2):has(> .modal-actions:last-child){padding-bottom:0;}
@@ -3990,3 +3992,18 @@ html[data-theme="dark"] [style*="background:#FFF" i],html[data-theme="dark"] [st
 html[data-theme="dark"] [style*="background:#FFFBEB" i],html[data-theme="dark"] [style*="background: #FFFBEB" i],html[data-theme="dark"] [style*="background-color:#FFFBEB" i]{background:var(--surface) !important}
 html[data-theme="dark"] [style*="background:#FFFFFF" i],html[data-theme="dark"] [style*="background: #FFFFFF" i],html[data-theme="dark"] [style*="background-color:#FFFFFF" i]{background:var(--surface) !important}
 /* SOMBRE-GENERE:FIN */
+
+/* Couleurs 2026-11-18 — liseré clair dans l'angle haut des fenêtres, 2e cause : sous le bandeau coloré, le fond clair de la fenêtre dépasse un peu dans la courbe de l'angle arrondi (anti-crénelage de deux coins superposés). On peint donc la bande du haut (24 px, plus que le rayon de 16 px) de la couleur du bandeau, SOUS le bandeau : plus rien de clair ne peut dépasser. Seulement les fenêtres qui ont un bandeau coloré en haut. Placé en toute fin de fichier : les règles « background » des fenêtres (en !important) sont plus haut et remettraient l'image à zéro sinon. */
+.overlay > .modal:has(> h2),
+.overlay > .modal:has(> :is(.support-tete,.mform-tete,.pe-tete,.jm-tete)),
+.overlay.plan-modal > .modal,
+.overlay .modal.otm,
+.overlay > .modal.fournisseur-modal,
+.overlay > .modal.import-csv-modal,
+.overlay.equipe-ajout > .modal,
+.overlay.machine-modal-edit > .modal,
+.overlay.offres-modal > .modal,
+.overlay.log-modal > .modal{background-image:linear-gradient(var(--mod-bandeau),var(--mod-bandeau)) !important;background-repeat:no-repeat !important;background-size:100% 24px !important;background-position:top left !important;}
+
+/* Couleurs 2026-11-18 — bouton « Planifier un entretien » (fenêtre d'un jour de l'agenda) en bleu-vert au lieu du violet. Fait en CSS (!important car le violet est écrit en style direct dans le bouton) pour ne pas toucher au JavaScript ni à la signature CSP. Origine : background:var(--primary-dark). */
+#agenda-jour-planifier{background:var(--mod-bouton) !important;}

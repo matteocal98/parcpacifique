@@ -10,7 +10,7 @@
 // Les scripts et styles de l'application portent un « ?v=empreinte » : une nouvelle version = une nouvelle adresse, donc « cache d'abord » est sûr pour eux.
 // Les fichiers sans ?v (styles.css, kit.css, polices…) sont servis depuis la copie PUIS rafraîchis en arrière-plan.
 // Retour en arrière : « Mon compte » > refuser la copie locale désinscrit ce fichier et vide ses copies ; ou changer VERSION ci-dessous (l'ancien cache est supprimé).
-const VERSION = 'v3'; // v2 (2026-11-11) : purge l'ancienne copie de supabase-js venue du CDN ; v3 (2026-11-11) : purge la police d'icônes Google de 4 Mo (polices désormais sur le site)
+const VERSION = 'v4'; // v4 (2026-11-18) : nouvelle couleur de marque #00526A, l'ancien cache (anciens styles) est purgé ; v2 (2026-11-11) : purge l'ancienne copie de supabase-js venue du CDN ; v3 (2026-11-11) : purge la police d'icônes Google de 4 Mo (polices désormais sur le site)
 const CACHE = 'kalea-appli-' + VERSION;
 const PAGE = 'app.html';
 const DELAI_RESEAU_MS = 4000;

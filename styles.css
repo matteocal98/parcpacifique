@@ -47,12 +47,12 @@
     --bg:var(--surface-soft);
     --surface:#FFFFFF;
     --surface-soft:rgba(14,19,51,.04);
-    --dark:#0D1424;
+    --dark:#00526A; /* Couleurs 2026-11-18 — valeur d'origine : #0D1424 */
     --dark-2:rgba(255,255,255,.10);
     --dark-ink:#94A3B8;
 
     /* Texte : l'encre de la charte, du plus dense au plus discret. */
-    --ink:#0E1333;
+    --ink:#00526A; /* Couleurs 2026-11-18 — valeur d'origine : #0E1333 */
     --ink-2:rgba(14,19,51,.74);
     --ink-3:rgba(14,19,51,.66);
     --ink-4:rgba(14,19,51,.60);
@@ -72,17 +72,18 @@
 
     /* Accent : indigo de la puce centrale, bleu roi et signature FR pour le
        texte (seules teintes, avec l'encre, à tenir 4,5:1 sur fond clair). */
-    --primary:#6366F1;
-    --primary-dark:#5B52DF;
-    --primary-tint:rgba(99,102,241,.10);
-    --primary-tint-2:rgba(99,102,241,.30);
-    --primary-line:rgba(99,102,241,.45);
+    /* Couleurs 2026-11-18 — violet remplacé par #00526A (rgb 0,82,106). Origine : --primary #6366F1, --primary-dark #5B52DF, tint rgba(99,102,241,.10), tint-2 .30, line .45 */
+    --primary:#00526A;
+    --primary-dark:#00526A;
+    --primary-tint:rgba(0,82,106,.10);
+    --primary-tint-2:rgba(0,82,106,.30);
+    --primary-line:rgba(0,82,106,.45);
     /* Texte discret posé sur la couleur d'action : du blanc, pas un indigo
        translucide (qui disparaissait sur l'indigo). */
     --sur-primaire:rgba(255,255,255,.92);
     --gold:#DE7A16;
     --gold-dark:#DE7A16;
-    --cyan:#24B5A8;
+    --cyan:#DE7A16; /* Couleurs 2026-11-18 — origine #24B5A8 */
 
     /* ★ LOT 8 — LE TEXTE QU'ON LIT EN ENTIER, MÊME QUAND IL EST LONG.
        Une ligne d'échéance portait `white-space:nowrap` + `text-overflow:ellipsis`
@@ -110,7 +111,7 @@
     --ok:#24B5A8;
     --ok-bg:rgba(36,181,168,.14);
     --ok-ink:#0E1333;
-    --ok-accent:#24B5A8;
+    --ok-accent:#DE7A16; /* Couleurs 2026-11-18 — origine #24B5A8 */
     /* ★ LISIBILITÉ (2026-11-11) — LES TEINTES DE STATUT QUI ÉCRIVENT DU PETIT TEXTE.
        --late / --soon / --ok restent les teintes des liserés, points et barres. Posées
        sur du texte de 11 à 14 px, elles tombaient à 2,2–3,7:1 (audit du 2026-11-11).
@@ -155,7 +156,7 @@
        Les NOMS ÉVITENT LES CHIFFRES : le contrôle des variables lit les jetons
        avec `[\w-]`, où un chiffre s'arrête — `--tint-cyan` se lisait `--tint-`. */
     --tint-action:rgba(91,82,223,.06);
-    --voile-cyan:rgba(36,181,168,.14);
+    --voile-cyan:rgba(222,122,22,.14); /* Couleurs 2026-11-18 — origine rgba(36,181,168,.14) */
     --voile-ambre:rgba(222,122,22,.14);
     --voile-olive:rgba(139,155,55,.16);
     --voile-indigo:rgba(99,102,241,.14);
