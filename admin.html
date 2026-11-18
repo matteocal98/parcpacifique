@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-ny1eoepfLJL3cvcb5ipB0mgs0NkcYD9siU5ZzIIriBA='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/wKL8aAcNXCSqg03vqo+5CsEKXfMobvc2PqlsifzWEc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -446,6 +446,18 @@
               <button data-filtre="ouvert" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">Ouverts</button>
               <button data-filtre="en_cours" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">En cours</button>
               <button data-filtre="resolu" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">Résolus</button>
+            </div>
+            <div class="flex flex-wrap items-center gap-space-sm" id="tickets-actions">
+              <button type="button" id="tickets-selection-bascule" aria-pressed="false" class="inline-flex items-center gap-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">
+                <span class="material-symbols-outlined text-[18px]">checklist</span><span id="tickets-selection-bascule-texte">Sélectionner</span>
+              </button>
+              <div id="tickets-selection-barre" class="hidden flex flex-wrap items-center gap-space-sm">
+                <button type="button" id="tickets-tout-selectionner" class="inline-flex items-center bg-surface-container hover:bg-surface-container-high text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">Tout sélectionner</button>
+                <span id="tickets-selection-compte" role="status" aria-live="polite" class="font-label-md text-label-md text-on-surface-variant">0 sélectionné</span>
+                <button type="button" id="tickets-supprimer-selection" disabled class="inline-flex items-center gap-space-xs bg-error text-on-error hover:opacity-90 px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  <span class="material-symbols-outlined text-[18px]">delete</span><span>Supprimer la sélection</span>
+                </button>
+              </div>
             </div>
             <div class="flex flex-col gap-space-sm" id="liste-tickets"></div>
             <p id="tickets-vide" class="hidden font-body-sm text-body-sm text-on-surface-variant text-center py-6">Aucun ticket pour ce filtre.</p>
@@ -1457,6 +1469,33 @@
   </div>
 </div>
 
+<div id="ticket-suppression-overlay" class="hidden fixed inset-0 z-[220] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md" role="dialog" aria-modal="true" aria-labelledby="ticket-suppression-titre">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
+    <div class="p-space-lg flex items-center gap-space-sm bg-error-container">
+      <span class="p-2 rounded bg-error text-on-error material-symbols-outlined text-[20px]">delete_forever</span>
+      <div>
+        <h3 id="ticket-suppression-titre" class="font-headline-sm text-headline-sm text-on-surface">Supprimer ce ticket</h3>
+        <p id="ticket-suppression-sous-titre" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+      </div>
+    </div>
+    <div class="p-space-lg flex flex-col gap-space-md">
+      <ul id="ticket-suppression-liste" class="font-body-sm text-body-sm text-on-surface flex flex-col gap-1 max-h-48 overflow-y-auto"></ul>
+      <ul class="font-body-sm text-body-sm text-on-surface-variant list-disc pl-5 flex flex-col gap-1">
+        <li>La conversation est supprimée <strong>définitivement</strong>, avec les brouillons de l'assistant et les marqueurs « lu / non lu » du client.</li>
+        <li>Le coût déjà dépensé par l'assistant reste compté dans le journal des jetons.</li>
+        <li>L'opération est inscrite dans le journal d'audit (sujet, société, nombre de messages).</li>
+      </ul>
+      <div id="ticket-suppression-msg" role="status" aria-live="polite" class="hidden font-label-sm text-label-sm"></div>
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+        <button id="ticket-suppression-annuler" type="button" class="min-h-[44px] px-space-md rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors">Annuler</button>
+        <button id="ticket-suppression-valider" type="button" class="min-h-[44px] px-space-lg rounded bg-error text-on-error hover:opacity-90 font-label-md text-label-md shadow-sm transition-all flex items-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-[18px]">delete_forever</span><span>Supprimer définitivement</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="suppression-overlay" class="hidden fixed inset-0 z-[200] bg-inverse-surface/60 backdrop-blur-sm flex items-center justify-center p-space-md">
   <div class="bg-surface-container-lowest rounded-xl shadow-xl max-w-lg w-full overflow-hidden">
     <div class="p-space-lg flex items-center gap-space-sm bg-error-container">
@@ -1541,6 +1580,9 @@ let SOCIETES = [];
 let TICKETS = [];
 let FILTRE_TICKET = 'all';
 let TICKET_OUVERT = null;
+let TICKETS_SELECTION_MODE = false;   // suppression de tickets : mode « Sélectionner » actif ?
+const TICKETS_SELECTION = new Set();  // ids cochés
+let TICKETS_A_SUPPRIMER = [];         // ids de la fenêtre de confirmation
 
 function el(id) { return document.getElementById(id); }
 function echapper(s) {
@@ -2251,6 +2293,7 @@ function rendreListeTickets() {
     carte.innerHTML = `
       <div class="flex items-start justify-between gap-space-sm">
         <div class="flex flex-wrap items-center gap-x-space-sm gap-y-1 min-w-0">
+          ${TICKETS_SELECTION_MODE ? `<input type="checkbox" class="ticket-coche w-5 h-5 shrink-0 accent-error cursor-pointer" ${TICKETS_SELECTION.has(t.id) ? 'checked' : ''} aria-label="Sélectionner le ticket ${refTicket(t.id)}">` : ''}
           <span class="w-2.5 h-2.5 rounded-full shrink-0 ${couleurPriorite[t.priority] || 'bg-outline-variant'}"></span>
           <span class="font-headline-sm text-headline-sm text-on-surface font-semibold break-words min-w-0">${echapper(t.companies?.name)}</span>
           <span class="px-space-xs py-0.5 rounded text-on-surface-variant bg-surface-container font-code-sm text-code-sm uppercase whitespace-nowrap">${echapper(libellePriorite[t.priority] || t.priority)}</span>
@@ -2266,10 +2309,112 @@ function rendreListeTickets() {
         <span>Créé par : ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
         <span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium ${t.status === 'resolu' ? 'bg-surface-container-highest text-tertiary' : t.status === 'en_cours' ? 'bg-secondary-fixed text-secondary' : 'bg-error-container text-error'}">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'}</span>
       </div>`;
-    carte.addEventListener('click', () => ouvrirTicket(t.id));
+    // En mode « Sélectionner », cliquer une carte la coche (au lieu d'ouvrir la conversation).
+    if (TICKETS_SELECTION_MODE && TICKETS_SELECTION.has(t.id)) carte.classList.add('ring-2', 'ring-error');
+    carte.addEventListener('click', () => { if (TICKETS_SELECTION_MODE) basculerSelectionTicket(t.id); else ouvrirTicket(t.id); });
     liste.appendChild(carte);
   });
+  majBarreSelectionTickets();
 }
+
+// ── Suppression de tickets (ménage des tickets de test) ──────────────────
+// Mode « Sélectionner » : cases à cocher sur la liste, puis « Supprimer la sélection ». Un ticket ouvert a aussi son propre bouton « Supprimer ».
+// La suppression passe par la fonction SQL admin_supprimer_tickets (réservée au personnel, journalisée) : le navigateur ne peut jamais effacer un ticket directement.
+// (variables TICKETS_SELECTION_MODE, TICKETS_SELECTION et TICKETS_A_SUPPRIMER déclarées avec TICKETS, en haut du script)
+
+function ticketsVisibles() { return TICKETS.filter((t) => FILTRE_TICKET === 'all' || t.status === FILTRE_TICKET); }
+
+function majBarreSelectionTickets() {
+  const barre = el('tickets-selection-barre');
+  if (!barre) return;
+  barre.classList.toggle('hidden', !TICKETS_SELECTION_MODE);
+  const bascule = el('tickets-selection-bascule');
+  bascule.setAttribute('aria-pressed', TICKETS_SELECTION_MODE ? 'true' : 'false');
+  el('tickets-selection-bascule-texte').textContent = TICKETS_SELECTION_MODE ? 'Terminer la sélection' : 'Sélectionner';
+  const n = TICKETS_SELECTION.size;
+  el('tickets-selection-compte').textContent = n === 0 ? '0 sélectionné' : (n === 1 ? '1 ticket sélectionné' : `${n} tickets sélectionnés`);
+  el('tickets-supprimer-selection').disabled = n === 0;
+  const visibles = ticketsVisibles();
+  const toutes = visibles.length > 0 && visibles.every((t) => TICKETS_SELECTION.has(t.id));
+  el('tickets-tout-selectionner').textContent = toutes ? 'Tout désélectionner' : 'Tout sélectionner';
+}
+
+function basculerSelectionTicket(id) {
+  if (TICKETS_SELECTION.has(id)) TICKETS_SELECTION.delete(id); else TICKETS_SELECTION.add(id);
+  rendreListeTickets();
+}
+
+el('tickets-selection-bascule')?.addEventListener('click', () => {
+  TICKETS_SELECTION_MODE = !TICKETS_SELECTION_MODE;
+  if (!TICKETS_SELECTION_MODE) TICKETS_SELECTION.clear();
+  rendreListeTickets();
+});
+el('tickets-tout-selectionner')?.addEventListener('click', () => {
+  const visibles = ticketsVisibles();
+  const toutes = visibles.length > 0 && visibles.every((t) => TICKETS_SELECTION.has(t.id));
+  visibles.forEach((t) => { if (toutes) TICKETS_SELECTION.delete(t.id); else TICKETS_SELECTION.add(t.id); });
+  rendreListeTickets();
+});
+el('tickets-supprimer-selection')?.addEventListener('click', () => ouvrirSuppressionTickets([...TICKETS_SELECTION]));
+
+function ouvrirSuppressionTickets(ids) {
+  const tickets = ids.map((id) => TICKETS.find((x) => x.id === id)).filter(Boolean);
+  if (!tickets.length) return;
+  TICKETS_A_SUPPRIMER = tickets.map((t) => t.id);
+  el('ticket-suppression-titre').textContent = tickets.length === 1 ? 'Supprimer ce ticket' : `Supprimer ces ${tickets.length} tickets`;
+  el('ticket-suppression-sous-titre').textContent = tickets.length === 1 ? refTicket(tickets[0].id) : 'Cette action est définitive.';
+  const liste = el('ticket-suppression-liste');
+  liste.innerHTML = '';
+  tickets.slice(0, 50).forEach((t) => {
+    const li = document.createElement('li');
+    li.className = 'flex flex-wrap items-baseline gap-x-2 border-b border-outline-variant/40 pb-1';
+    li.innerHTML = `<span class="font-mono text-xs text-ardoise">${echapper(refTicket(t.id))}</span><span class="font-semibold break-words">${echapper(t.subject)}</span><span class="text-on-surface-variant">— ${echapper(t.companies?.name || '')}</span>`;
+    liste.appendChild(li);
+  });
+  if (tickets.length > 50) {
+    const plus = document.createElement('li');
+    plus.className = 'text-on-surface-variant';
+    plus.textContent = `… et ${tickets.length - 50} autre(s).`;
+    liste.appendChild(plus);
+  }
+  el('ticket-suppression-msg').classList.add('hidden');
+  el('ticket-suppression-valider').disabled = false;
+  el('ticket-suppression-overlay').classList.remove('hidden');
+  el('ticket-suppression-annuler').focus();
+}
+
+function fermerSuppressionTickets() {
+  el('ticket-suppression-overlay').classList.add('hidden');
+  TICKETS_A_SUPPRIMER = [];
+}
+el('ticket-suppression-annuler')?.addEventListener('click', fermerSuppressionTickets);
+el('ticket-suppression-overlay')?.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermerSuppressionTickets(); });
+
+el('ticket-suppression-valider')?.addEventListener('click', async () => {
+  const ids = [...TICKETS_A_SUPPRIMER];
+  if (!ids.length) return;
+  const bouton = el('ticket-suppression-valider');
+  const msg = el('ticket-suppression-msg');
+  const annoncer = (texte, erreur) => { msg.textContent = texte; msg.className = 'font-label-sm text-label-sm ' + (erreur ? 'text-error' : 'text-on-surface'); };
+  bouton.disabled = true;
+  annoncer('Suppression en cours…', false);
+  const { data, error } = await sb.rpc('admin_supprimer_tickets', { p_ids: ids });
+  if (error) {
+    annoncer(/admin_supprimer_tickets/.test(error.message || '') && /does not exist|Could not find/i.test(error.message || '')
+      ? 'La fonction admin_supprimer_tickets n\'existe pas encore : le SQL admin-supprimer-tickets.sql doit d\'abord être exécuté.'
+      : 'Échec : ' + error.message, true);
+    bouton.disabled = false;
+    return;
+  }
+  const n = Number(data) || 0;
+  annoncer(n === 0 ? 'Rien à supprimer : ces tickets n\'existent déjà plus.' : (n === 1 ? '1 ticket supprimé.' : `${n} tickets supprimés.`), false);
+  if (ids.includes(TICKET_OUVERT)) fermerTicket();
+  if (ASUP_BROUILLON && ids.includes(ASUP_BROUILLON.ticketId)) ASUP_BROUILLON = null;
+  ids.forEach((id) => TICKETS_SELECTION.delete(id));
+  TICKETS_A_SUPPRIMER = [];
+  await chargerTickets();
+  setTimeout(fermerSuppressionTickets, 1400);
+});
 
 // Référence courte, dérivée du VRAI id (pas une numérotation fabriquée) :
 // aucune colonne "numéro de ticket" n'existe en base, seul un uuid. Les 6
@@ -2352,6 +2497,7 @@ async function ouvrirTicket(ticketId) {
         </div>
         <h2 id="ticket-modale-titre" class="text-[15px] font-display font-semibold text-encre break-words leading-snug mt-1">${echapper(t?.subject)}</h2>
       </div>
+      <button type="button" id="ticket-supprimer" class="shrink-0 w-11 h-11 rounded-lg hover:bg-error-container text-error flex items-center justify-center" aria-label="Supprimer ce ticket" title="Supprimer ce ticket"><span class="material-symbols-outlined text-[22px]">delete</span></button>
       <button type="button" id="ticket-fermer" class="shrink-0 w-11 h-11 rounded-lg hover:bg-surface-container text-on-surface flex items-center justify-center" aria-label="Fermer la conversation"><span class="material-symbols-outlined text-[24px]">close</span></button>
     </header>
     <div id="ticket-corps" class="flex-1 min-h-0 overflow-y-auto">
@@ -2432,6 +2578,7 @@ async function ouvrirTicket(ticketId) {
   rendreBrouillonAssistant(ticketId, boite);
 
   boite.querySelector('#ticket-fermer').addEventListener('click', fermerTicket);
+  boite.querySelector('#ticket-supprimer').addEventListener('click', () => ouvrirSuppressionTickets([ticketId]));
   boite.querySelector('#ticket-statut').addEventListener('change', async (ev) => {
     const nouveauStatut = ev.target.value;
     const { error: errMaj } = await sb.from('support_tickets').update({ status: nouveauStatut, assigned_to: MOI.id, resolved_at: nouveauStatut === 'resolu' ? new Date().toISOString() : null }).eq('id', ticketId);
