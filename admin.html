@@ -21,7 +21,7 @@
   conditions réelles.
 -->
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-/wKL8aAcNXCSqg03vqo+5CsEKXfMobvc2PqlsifzWEc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-bBWWrSe5xLVaHbcbHvpTFRVWj/8z7WgkmL+uzOGTPoU='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tiayvmnodsbygmuemeuy.supabase.co; connect-src 'self' https://tiayvmnodsbygmuemeuy.supabase.co wss://tiayvmnodsbygmuemeuy.supabase.co; manifest-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
 <link rel="stylesheet" href="./admin-sombre.css">
 <script src="./theme.js"></script>
@@ -448,6 +448,12 @@
               <button data-filtre="resolu" class="onglet-ticket px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors text-on-surface-variant hover:text-on-surface">Résolus</button>
             </div>
             <div class="flex flex-wrap items-center gap-space-sm" id="tickets-actions">
+              <button type="button" id="tickets-grouper-bascule" aria-pressed="true" class="inline-flex items-center gap-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">
+                <span class="material-symbols-outlined text-[18px]">groups</span><span>Regrouper par client</span>
+              </button>
+              <button type="button" id="tickets-replier-tout" class="inline-flex items-center gap-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">
+                <span class="material-symbols-outlined text-[18px]">unfold_less</span><span id="tickets-replier-tout-texte">Tout replier</span>
+              </button>
               <button type="button" id="tickets-selection-bascule" aria-pressed="false" class="inline-flex items-center gap-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface px-space-md py-space-xs rounded font-label-md text-label-md min-h-[44px] transition-colors">
                 <span class="material-symbols-outlined text-[18px]">checklist</span><span id="tickets-selection-bascule-texte">Sélectionner</span>
               </button>
@@ -1583,6 +1589,8 @@ let TICKET_OUVERT = null;
 let TICKETS_SELECTION_MODE = false;   // suppression de tickets : mode « Sélectionner » actif ?
 const TICKETS_SELECTION = new Set();  // ids cochés
 let TICKETS_A_SUPPRIMER = [];         // ids de la fenêtre de confirmation
+let TICKETS_GROUPER = (() => { try { return localStorage.getItem('kalea-admin-tickets-groupes') !== '0'; } catch (e) { return true; } })(); // regrouper par client (oui par défaut ; choix mémorisé dans ce navigateur)
+const TICKETS_GROUPES_REPLIES = new Set();  // clés des clients dont le groupe est replié (cette session seulement)
 
 function el(id) { return document.getElementById(id); }
 function echapper(s) {
@@ -2277,25 +2285,21 @@ async function chargerTickets() {
   rendreListeTickets();
 }
 
-function rendreListeTickets() {
-  const liste = el('liste-tickets');
-  liste.innerHTML = '';
-  const visibles = TICKETS.filter((t) => FILTRE_TICKET === 'all' || t.status === FILTRE_TICKET);
-  el('tickets-vide').classList.toggle('hidden', visibles.length > 0);
+// Une carte de ticket. `groupe` = true quand la carte est rangée sous l'en-tête d'un client : le nom de la société est alors déjà au-dessus, on ne le répète pas.
+function creerCarteTicket(t, groupe) {
   const couleurPriorite = { haute: 'bg-error', normale: 'bg-secondary', basse: 'bg-outline-variant' };
   const libellePriorite = { haute: 'Priorité Haute', normale: 'Normale', basse: 'Basse' };
-  visibles.forEach((t) => {
-    const carte = document.createElement('div');
-    // Ticket pas encore pris en charge (statut « ouvert ») : fond bleu clair pour le repérer d'un coup d'œil.
-    // Il redevient blanc dès qu'on répond ou qu'on change son statut (« en cours », « résolu »).
-    const fondCarte = t.status === 'ouvert' ? 'ticket-nouveau' : 'bg-surface-container-lowest carte-ticket';
-    carte.className = fondCarte + ' p-space-md rounded-xl shadow-sm cursor-pointer transition-all flex flex-col gap-space-xs';
-    carte.innerHTML = `
+  const carte = document.createElement('div');
+  // Ticket pas encore pris en charge (statut « ouvert ») : fond bleu clair pour le repérer d'un coup d'œil.
+  // Il redevient blanc dès qu'on répond ou qu'on change son statut (« en cours », « résolu »).
+  const fondCarte = t.status === 'ouvert' ? 'ticket-nouveau' : 'bg-surface-container-lowest carte-ticket';
+  carte.className = fondCarte + ' p-space-md rounded-xl shadow-sm cursor-pointer transition-all flex flex-col gap-space-xs';
+  carte.innerHTML = `
       <div class="flex items-start justify-between gap-space-sm">
         <div class="flex flex-wrap items-center gap-x-space-sm gap-y-1 min-w-0">
           ${TICKETS_SELECTION_MODE ? `<input type="checkbox" class="ticket-coche w-5 h-5 shrink-0 accent-error cursor-pointer" ${TICKETS_SELECTION.has(t.id) ? 'checked' : ''} aria-label="Sélectionner le ticket ${refTicket(t.id)}">` : ''}
           <span class="w-2.5 h-2.5 rounded-full shrink-0 ${couleurPriorite[t.priority] || 'bg-outline-variant'}"></span>
-          <span class="font-headline-sm text-headline-sm text-on-surface font-semibold break-words min-w-0">${echapper(t.companies?.name)}</span>
+          ${groupe ? '' : `<span class="font-headline-sm text-headline-sm text-on-surface font-semibold break-words min-w-0">${echapper(t.companies?.name)}</span>`}
           <span class="px-space-xs py-0.5 rounded text-on-surface-variant bg-surface-container font-code-sm text-code-sm uppercase whitespace-nowrap">${echapper(libellePriorite[t.priority] || t.priority)}</span>
         </div>
         <span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap shrink-0 pt-1">${ilYA(t.created_at)}</span>
@@ -2309,13 +2313,100 @@ function rendreListeTickets() {
         <span>Créé par : ${echapper(t.created_by_profile?.full_name || t.created_by_profile?.login || '')}</span>
         <span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm font-medium ${t.status === 'resolu' ? 'bg-surface-container-highest text-tertiary' : t.status === 'en_cours' ? 'bg-secondary-fixed text-secondary' : 'bg-error-container text-error'}">${t.status === 'resolu' ? 'Résolu' : t.status === 'en_cours' ? 'En cours' : 'Ouvert'}</span>
       </div>`;
-    // En mode « Sélectionner », cliquer une carte la coche (au lieu d'ouvrir la conversation).
-    if (TICKETS_SELECTION_MODE && TICKETS_SELECTION.has(t.id)) carte.classList.add('ring-2', 'ring-error');
-    carte.addEventListener('click', () => { if (TICKETS_SELECTION_MODE) basculerSelectionTicket(t.id); else ouvrirTicket(t.id); });
-    liste.appendChild(carte);
+  // En mode « Sélectionner », cliquer une carte la coche (au lieu d'ouvrir la conversation).
+  if (TICKETS_SELECTION_MODE && TICKETS_SELECTION.has(t.id)) carte.classList.add('ring-2', 'ring-error');
+  carte.addEventListener('click', () => { if (TICKETS_SELECTION_MODE) basculerSelectionTicket(t.id); else ouvrirTicket(t.id); });
+  return carte;
+}
+
+// Clé qui identifie un client dans le regroupement (l'identifiant de la société ; à défaut son nom).
+function cleGroupeTicket(t) { return t.company_id || ('inconnue-' + (t.companies?.name || '')); }
+
+// Un client = un en-tête (nom, nombre de tickets, « N ouvert(s) », « N en cours ») qui se replie, puis ses cartes.
+// En mode « Sélectionner », la case de l'en-tête coche (ou décoche) d'un coup tous les tickets visibles de ce client.
+function creerGroupeTickets(g) {
+  const replie = TICKETS_GROUPES_REPLIES.has(g.cle);
+  const nOuverts = g.tickets.filter((t) => t.status === 'ouvert').length;
+  const nEnCours = g.tickets.filter((t) => t.status === 'en_cours').length;
+  const toutCoche = g.tickets.every((t) => TICKETS_SELECTION.has(t.id));
+  const section = document.createElement('section');
+  section.className = 'flex flex-col gap-space-sm';
+  section.dataset.groupe = g.cle;
+  const entete = document.createElement('div');
+  entete.className = 'flex items-center gap-space-sm bg-surface-container-low rounded-lg px-space-sm';
+  entete.innerHTML = `
+      ${TICKETS_SELECTION_MODE ? `<input type="checkbox" class="groupe-coche w-5 h-5 shrink-0 accent-error cursor-pointer" ${toutCoche ? 'checked' : ''} aria-label="Sélectionner tous les tickets de ${echapper(g.nom)}">` : ''}
+      <button type="button" class="groupe-bascule flex flex-1 min-w-0 flex-wrap items-center gap-x-space-sm gap-y-1 min-h-[48px] text-left" aria-expanded="${replie ? 'false' : 'true'}">
+        <span class="material-symbols-outlined text-[22px] text-on-surface-variant shrink-0">${replie ? 'chevron_right' : 'expand_more'}</span>
+        <span class="font-headline-sm text-headline-sm text-on-surface font-semibold break-words min-w-0">${echapper(g.nom)}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">${g.tickets.length} ticket${g.tickets.length > 1 ? 's' : ''}</span>
+        ${nOuverts ? `<span class="px-space-xs py-0.5 rounded bg-error-container text-error font-label-sm text-label-sm font-medium whitespace-nowrap">${nOuverts} ouvert${nOuverts > 1 ? 's' : ''}</span>` : ''}
+        ${nEnCours ? `<span class="px-space-xs py-0.5 rounded bg-secondary-fixed text-secondary font-label-sm text-label-sm font-medium whitespace-nowrap">${nEnCours} en cours</span>` : ''}
+      </button>`;
+  entete.querySelector('.groupe-bascule').addEventListener('click', () => {
+    if (TICKETS_GROUPES_REPLIES.has(g.cle)) TICKETS_GROUPES_REPLIES.delete(g.cle); else TICKETS_GROUPES_REPLIES.add(g.cle);
+    rendreListeTickets();
   });
+  entete.querySelector('.groupe-coche')?.addEventListener('change', (ev) => {
+    g.tickets.forEach((t) => { if (ev.target.checked) TICKETS_SELECTION.add(t.id); else TICKETS_SELECTION.delete(t.id); });
+    rendreListeTickets();
+  });
+  section.appendChild(entete);
+  if (!replie) {
+    const cartes = document.createElement('div');
+    cartes.className = 'flex flex-col gap-space-sm pl-space-sm border-l-2 border-outline-variant/60';
+    g.tickets.forEach((t) => cartes.appendChild(creerCarteTicket(t, true)));
+    section.appendChild(cartes);
+  }
+  return section;
+}
+
+function rendreListeTickets() {
+  const liste = el('liste-tickets');
+  liste.innerHTML = '';
+  const visibles = ticketsVisibles();
+  el('tickets-vide').classList.toggle('hidden', visibles.length > 0);
+  if (!TICKETS_GROUPER) {
+    visibles.forEach((t) => liste.appendChild(creerCarteTicket(t, false)));
+  } else {
+    const groupes = new Map();
+    visibles.forEach((t) => {
+      const cle = cleGroupeTicket(t);
+      if (!groupes.has(cle)) groupes.set(cle, { cle, nom: t.companies?.name || 'Société inconnue', tickets: [] });
+      groupes.get(cle).tickets.push(t);
+    });
+    // Les clients qui ont du travail en attente d'abord (ouvert, puis en cours), puis le plus récent.
+    const rang = (g) => (g.tickets.some((t) => t.status === 'ouvert') ? 0 : g.tickets.some((t) => t.status === 'en_cours') ? 1 : 2);
+    const recent = (g) => Math.max(...g.tickets.map((t) => new Date(t.created_at).getTime() || 0));
+    [...groupes.values()]
+      .sort((a, b) => rang(a) - rang(b) || recent(b) - recent(a) || a.nom.localeCompare(b.nom, 'fr'))
+      .forEach((g) => liste.appendChild(creerGroupeTickets(g)));
+  }
   majBarreSelectionTickets();
 }
+
+// Interrupteur « Regrouper par client » : le choix est mémorisé dans ce navigateur (jamais en base).
+function majBoutonsGroupeTickets() {
+  const b = el('tickets-grouper-bascule');
+  if (!b) return;
+  b.setAttribute('aria-pressed', TICKETS_GROUPER ? 'true' : 'false');
+  b.classList.toggle('bg-primary-fixed', TICKETS_GROUPER);
+  el('tickets-replier-tout').classList.toggle('hidden', !TICKETS_GROUPER);
+  const cles = [...new Set(ticketsVisibles().map(cleGroupeTicket))];
+  const toutReplie = cles.length > 0 && cles.every((c) => TICKETS_GROUPES_REPLIES.has(c));
+  el('tickets-replier-tout-texte').textContent = toutReplie ? 'Tout déplier' : 'Tout replier';
+}
+el('tickets-grouper-bascule')?.addEventListener('click', () => {
+  TICKETS_GROUPER = !TICKETS_GROUPER;
+  try { localStorage.setItem('kalea-admin-tickets-groupes', TICKETS_GROUPER ? '1' : '0'); } catch (e) { /* navigation privée : le choix ne sera pas retenu */ }
+  rendreListeTickets();
+});
+el('tickets-replier-tout')?.addEventListener('click', () => {
+  const cles = [...new Set(ticketsVisibles().map(cleGroupeTicket))];
+  const toutReplie = cles.length > 0 && cles.every((c) => TICKETS_GROUPES_REPLIES.has(c));
+  cles.forEach((c) => { if (toutReplie) TICKETS_GROUPES_REPLIES.delete(c); else TICKETS_GROUPES_REPLIES.add(c); });
+  rendreListeTickets();
+});
 
 // ── Suppression de tickets (ménage des tickets de test) ──────────────────
 // Mode « Sélectionner » : cases à cocher sur la liste, puis « Supprimer la sélection ». Un ticket ouvert a aussi son propre bouton « Supprimer ».
@@ -2325,6 +2416,7 @@ function rendreListeTickets() {
 function ticketsVisibles() { return TICKETS.filter((t) => FILTRE_TICKET === 'all' || t.status === FILTRE_TICKET); }
 
 function majBarreSelectionTickets() {
+  majBoutonsGroupeTickets();
   const barre = el('tickets-selection-barre');
   if (!barre) return;
   barre.classList.toggle('hidden', !TICKETS_SELECTION_MODE);
