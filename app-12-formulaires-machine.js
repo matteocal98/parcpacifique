@@ -507,7 +507,7 @@ function openAddWizard(companyId, categories) {
 
             ${tcoActif() ? `
             <div class="pt-2 border-t border-slate-200/60">
-              <details class="group">
+              <details class="group" open>
                 <summary class="flex items-center justify-between cursor-pointer py-1.5 text-xs font-bold text-slate-600 hover:text-primary list-none select-none">
                   <span class="flex items-center gap-2"><span class="material-symbols-outlined text-base">payments</span>${trad('Acquisition & TCO (facultatif)')}</span>
                   <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform">expand_more</span>
@@ -515,7 +515,7 @@ function openAddWizard(companyId, categories) {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 mt-1">
                   <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-prix-achat">${tR('Prix d\'achat ({unite})', { unite: deviseCourte() })}</label>
-                    <input id="f-prix-achat" type="text" inputmode="decimal" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${trad('Ex. 25000')}" value="${esc(state.purchasePrice)}">
+                    <input id="f-prix-achat" type="text" inputmode="decimal" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${tR('Ex. {n}', { n: texteAvecSeparateurs(25000) })}" value="${esc(state.purchasePrice)}">
                   </div>
                   <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-date-achat">${trad('Date d\'achat')}</label>
@@ -523,7 +523,7 @@ function openAddWizard(companyId, categories) {
                   </div>
                   <div>
                     <label id="f-duree-vie-etiquette" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-duree-vie">${tR('Durée de vie ({unite})', { unite: trad('heures') })}</label>
-                    <input id="f-duree-vie" type="text" inputmode="numeric" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${trad('Ex. 10000')}" value="${state.lifespan != null ? texteAvecSeparateurs(state.lifespan) : ''}">
+                    <input id="f-duree-vie" type="text" inputmode="numeric" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${tR('Ex. {n}', { n: texteAvecSeparateurs(10000) })}" value="${state.lifespan != null ? texteAvecSeparateurs(state.lifespan) : ''}">
                   </div>
                 </div>
                 <div class="text-[11px] text-slate-500 pt-2" id="f-duree-vie-note"></div>

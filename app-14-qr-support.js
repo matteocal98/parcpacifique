@@ -459,7 +459,7 @@ function openMachineModal(companyId, categories, existing) {
             <div class="grid grid-cols-2 md:grid-cols-5 gap-space-sm">
               <div class="flex flex-col gap-space-xs">
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-prix-achat">${tR('Prix d\'achat ({unite})', { unite: deviseCourte() })}</label>
-                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-prix-achat" inputmode="decimal" placeholder="${trad('Ex. 25000')}" value="${isEdit && existing.purchase_price != null ? esc(existing.purchase_price) : ''}">
+                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-prix-achat" inputmode="decimal" placeholder="${tR('Ex. {n}', { n: texteAvecSeparateurs(25000) })}" value="${isEdit && existing.purchase_price != null ? esc(existing.purchase_price) : ''}">
               </div>
               <div class="flex flex-col gap-space-xs">
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-date-achat">${trad('Date d\'achat')}</label>
@@ -471,7 +471,7 @@ function openMachineModal(companyId, categories, existing) {
               </div>
               <div class="flex flex-col gap-space-xs">
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" id="f-duree-vie-etiquette" for="f-duree-vie" title="${esc(trad('Combien d\'heures (ou de km) la machine doit durer en tout : sert à afficher la part de vie déjà consommée.'))}">${tR('Durée de vie ({unite})', { unite: counterUnitOf(isEdit ? existing : { counter_unit: 'hours' }) === 'km' ? trad('km') : trad('heures') })}</label>
-                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-duree-vie" inputmode="numeric" placeholder="${trad('Ex. 10000')}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
+                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-duree-vie" inputmode="numeric" placeholder="${tR('Ex. {n}', { n: texteAvecSeparateurs(10000) })}" value="${isEdit && existing.expected_lifespan_counter != null ? esc(existing.expected_lifespan_counter) : ''}">
               </div>
               <div class="flex flex-col gap-space-xs col-span-2 md:col-span-1">
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-amortissement">${trad('Amortissement (ans)')}</label>
