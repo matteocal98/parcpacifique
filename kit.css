@@ -4018,3 +4018,40 @@ html[data-theme="dark"] [style*="background:#FFFFFF" i],html[data-theme="dark"] 
   .overlay.machine-modal-edit .machine-actions-sous > .machine-action-ligne,.overlay.machine-modal-edit .machine-actions-sous > .machine-action{flex:0 0 auto;width:100%;order:0;}
   .overlay.machine-modal-edit .machine-action-ligne .machine-action{flex:1 1 auto;min-width:0;}
 }
+
+/* ── Fiche machine sur tablette (iPad, 2026-11-23) : le bloc « Relevé / Seuil d'alerte » sortait du cadre.
+   Cause : colonnes `1fr` de .fm2-grid = « au moins la taille du contenu », donc la colonne d'informations
+   ne pouvait pas rétrécir. On autorise le rétrécissement et on laisse le compteur passer sous le titre
+   quand la place manque. ── */
+.fm2-grid{grid-template-columns:repeat(12,minmax(0,1fr));}
+.fm2-grid > *,.fm2-o2-main,.fm2-o1-body,.fm2-o1-side{min-width:0;}
+.fm2-o2-ligne1{flex-wrap:wrap;}
+.fm2-o2-titre-bloc{flex:1 1 240px;min-width:0;}
+.fm2-compteur-entete-o2{flex:0 1 auto;max-width:100%;box-sizing:border-box;}
+
+/* ── iPad (2026-11-23) ───────────────────────────────────────────────────────────────────────────
+   1) Paysage : le menu de gauche est collé en haut avec 100 % de la hauteur, mais une bande opaque (body::before, hauteur =
+      marge de la barre d'état, ≈ 30 px sur iPad) est posée par-dessus : le logo était coupé. Le menu commence donc sous la bande
+      et se raccourcit d'autant (il reste entièrement visible, « Se déconnecter » compris).
+   2) Cartes machine : de 640 à 1179 px (iPad portrait et paysage) elles s'empilaient à pleine largeur (≈ 700 px de large pour une
+      carte pensée pour un téléphone). Deux colonnes, comme sur téléphone en paysage. À partir de 1180 px, la carte en bandeau
+      horizontal d'origine reste inchangée ; le mode « Tuiles » a sa propre grille. ── */
+@media (min-width:900px){
+  .sidebar{margin-top:var(--safe-top);top:var(--safe-top);height:calc(100vh - var(--safe-top));}
+}
+@media (min-width:640px) and (max-width:1179px){
+  .mstrip-liste:not(.is-tuiles),#fleet-list:not(.is-tuiles){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;}
+  #fleet-list:not(.is-tuiles) > .fleet-count{grid-column:1 / -1;}
+}
+
+/* ── Tuiles sur tablette en portrait (640–899 px, iPad, 2026-11-23) ─────────────────────────────────
+   Sous 900 px, les tuiles prenaient les réglages du TÉLÉPHONE : deux colonnes de ≈ 340 px, photo de 84 px de haut en « cover » —
+   la photo était rognée et étirée. Sur tablette on retrouve la grille d'ordinateur (tuiles ≈ 180 px, autant qu'il en tient)
+   et la photo ENTIÈRE (« contain ») dans une zone de 112 px, comme au-dessus de 900 px. Le téléphone (< 640 px) ne change pas. ── */
+@media (min-width:640px) and (max-width:899px){
+  .mstrip-liste.is-tuiles,#fleet-list.is-tuiles{grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px;}
+  .mstrip-liste.is-tuiles .mstrip-corps{padding:12px;gap:10px;}
+  .mstrip-liste.is-tuiles .mstrip-photo{height:112px;}
+  .mstrip-liste.is-tuiles .mstrip-photo img{object-fit:contain;}
+  .mstrip-liste.is-tuiles .mstrip-nom{font-size:14px;}
+}

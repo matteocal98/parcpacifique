@@ -45,7 +45,7 @@ export const ORGANISATION = {
 // L'application elle-même (app-10-mon-compte.js, BOUTIQUES_APPLI) doit porter les mêmes valeurs : le générateur le contrôle et s'arrête sinon.
 export const BOUTIQUES = {
   googlePlay: { enLigne: true, url: 'https://play.google.com/store/apps/details?id=pro.kalea.app' },
-  appStore: { enLigne: true, url: 'https://apps.apple.com/app/id6831331713', idApple: '6831331713' },
+  appStore: { enLigne: true, url: 'https://apps.apple.com/fr/app/kalea/id6831331713', idApple: '6831331713' },
 };
 
 // Données structurées de l'application (SoftwareApplication) : lien Google Play, captures (adresses sous kalea.pro), fonctions.
