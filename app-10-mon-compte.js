@@ -16,7 +16,7 @@
 // `enLigne` ne passe à true que lorsque la fiche répond VRAIMENT au public. Voir aussi le bloc « Application mobile » de Mon compte.
 const BOUTIQUES_APPLI = {
   googlePlay: { enLigne: true, url: 'https://play.google.com/store/apps/details?id=pro.kalea.app' },
-  appStore: { enLigne: false, url: 'https://apps.apple.com/app/id6831331713' },
+  appStore: { enLigne: true, url: 'https://apps.apple.com/app/id6831331713' },
 };
 
 // Liens de téléchargement proposés dans Mon compte. Rien dans l'application installée (inutile, et Apple n'admet pas qu'une appli iPhone renvoie vers une autre plateforme) ;

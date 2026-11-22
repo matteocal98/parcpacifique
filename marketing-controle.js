@@ -82,7 +82,10 @@ const FAITS         = [
   // Historique : repassé « à vérifier » le 2026-11-12 (compte Google Play désactivé le 2026-11-07, applications retirées), REMIS « vérifié » le 2026-11-13 :
   // la fiche https://play.google.com/store/apps/details?id=pro.kalea.app répond de nouveau au public (HTTP 200, titre « KALEA – Applications sur Google Play »,
   // éditeur « Matthieu COURTOIS »). Si elle disparaît de nouveau : remettre 'a_verifier', puis relancer `node outils/generer-controle-marketing.mjs` (site).
-  // L'application iPhone n'est PAS un fait vérifié (fiche App Store invisible en France au 2026-11-13) : ne pas la citer.
+  // Application iPhone : VÉRIFIÉE le 2026-11-23 (Apple a validé la vérification de commerçant DSA ; la fiche répond au public en France et dans l'UE).
+  // Si la fiche disparaît de nouveau : remettre 'a_verifier', puis relancer `node outils/generer-controle-marketing.mjs` (site).
+  { id: 'appli-ios', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-23', mots: ['iphone', 'ios', 'app store', 'apple'],
+    fr: 'Application mobile iPhone.', en: 'iPhone mobile app.', preuve: 'fiche App Store publique relue le 2026-11-23 (iTunes lookup country=fr resultCount 1, page apps.apple.com/fr titre « App KALEA - App Store », version 1.0.1, vendeur Matthieu COURTOIS) ; seo-config.mjs BOUTIQUES.appStore.enLigne = true' },
   { id: 'appli-android', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-13', mots: ['android', 'google play', 'play store'],
     fr: 'Application mobile Android.', en: 'Android mobile app.', preuve: 'fiche Google Play publique relue le 2026-11-13 (HTTP 200, éditeur Matthieu COURTOIS) ; seo-config.mjs BOUTIQUES.googlePlay.enLigne = true' },
   { id: 'telemetrie', sujet: 'fonction', statut: 'verifie', verifie_le: '2026-11-02', mots: ['télémétrie', 'telemetrie', 'telemetry', 'boîtier', 'boitier', 'tracker', 'gps'], offre_min: 'enterprise',
