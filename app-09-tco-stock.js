@@ -2724,9 +2724,10 @@ function lireQrLigneStock(texte) {
 }
 // SVG du QR (zone de silence de 2 modules comprise). Correction d'erreur « Q » (25 %) : une étiquette collée sur un
 // rayon se salit et se plie ; c'est un bon compromis entre robustesse et densité (le lien est long).
-async function qrSvgPourTexte(texte) {
+// `niveau` : correction d'erreur 'L' | 'M' | 'Q' | 'H' (« Q » par défaut ; « H » pour une grande étiquette de machine).
+async function qrSvgPourTexte(texte, niveau = 'Q') {
   const lib = await loadQrCodeLib();
-  const qr = lib(0, 'Q');
+  const qr = lib(0, niveau);
   qr.addData(texte);
   qr.make();
   const n = qr.getModuleCount();

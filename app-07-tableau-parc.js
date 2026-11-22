@@ -1635,7 +1635,7 @@ VIEWS.machines = {
               <button type="button" data-parc-vue="cartes" class="${parcVueActive() === 'cartes' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'cartes'}">${trad('Cartes')}</button>
               <button type="button" data-parc-vue="tuiles" class="${parcVueActive() === 'tuiles' ? 'is-actif' : ''}" aria-pressed="${parcVueActive() === 'tuiles'}">${trad('Tuiles')}</button>
             </div>
-            ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('Scanner un QR'))}" title="${esc(trad('Scanner un QR'))}">${picto('qrcode')}<span>${trad('Scanner un QR')}</span></button>` : ''}
+            ${planPermetScannerQr() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-scanner" aria-label="${esc(trad('QR code'))}" title="${esc(trad('Scanner ou imprimer des QR codes'))}">${picto('qrcode')}<span>${trad('QR code')}</span></button>` : ''}
             ${peutImporterMachines() ? `<button type="button" class="ui-btn ui-btn-pastille" id="fleet-import" aria-label="${esc(trad('Importer des machines'))}" title="${esc(trad('Importer des machines'))}">${picto('televerser')}<span>${trad('Importer')}</span></button>` : ''}
             <button type="button" class="ui-btn ui-btn-pastille" id="fleet-export" aria-label="${esc(trad('Exporter (CSV)'))}" title="${esc(trad('Exporter (CSV)'))}">${picto('export')}<span>${trad('Exporter (CSV)')}</span></button>
             <button type="button" class="ui-btn ui-btn-plein fleet-ajouter" id="fleet-add" aria-label="${trad('Ajouter une machine')}">${picto('croix')}<span class="fa-long">${trad('Ajouter une machine')}</span><span class="fa-court">${trad('Ajouter')}</span></button>`)}
@@ -1678,12 +1678,14 @@ VIEWS.machines = {
     importBrancherBandeau(root);
     // Le scanner n'existe plus en offre Gratuit (bouton absent) ; la garde ci-dessous couvre un changement d'offre en
     // cours de session. Un QR d'une société tierce scanné ici résout silencieusement à rien.
+    // Bouton « QR code » : ouvre le choix scanner / imprimer en lot (ouvrirChoixQr, app-14-qr-support.js), qui porte les
+    // mêmes garde-fous d'offre (scanner dès Starter, impression Business+).
     root.querySelector('#fleet-scanner')?.addEventListener('click', () => {
       if (!planPermetScannerQr()) {
         openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
         return;
       }
-      ouvrirScannerQr();
+      ouvrirChoixQr();
     });
 
     const search = root.querySelector('#fleet-search');

@@ -176,6 +176,236 @@ function imprimerQr(dataUrl, machine) {
   zone.remove();
 }
 
+// ── BOUTON « QR CODE » DU PARC : scanner OU imprimer (demande du 2026-11-23) ───────────────────────────
+// Un seul bouton dans le menu Machines. Il ouvre un choix : scanner (l'appareil photo lit l'étiquette d'une machine ou
+// d'une pièce) ou imprimer des étiquettes QR en lot. Les garde-fous d'offre sont ceux d'avant : le scanner dès Starter
+// (planPermetScannerQr), la génération/impression Business+ (planCouvreQr) — comme le bouton « QR code » d'une fiche.
+function ouvrirChoixQr() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  overlay.innerHTML = `
+    <div class="modal export-modal qr-choix-modal" role="dialog" aria-modal="true" aria-labelledby="qr-choix-titre">
+      <h2 id="qr-choix-titre">${trad('QR code')}</h2>
+      <p class="sub">${trad('Que souhaitez-vous faire ?')}</p>
+      <div class="qr-choix">
+        <button type="button" class="qr-choix-btn" id="qr-choix-scanner">
+          ${picto('qrcode')}
+          <span><strong>${trad('Scanner un QR code')}</strong><small>${trad('Prendre en photo l\'étiquette d\'une machine ou d\'une pièce : sa fiche s\'ouvre.')}</small></span>
+        </button>
+        <button type="button" class="qr-choix-btn" id="qr-choix-imprimer">
+          ${picto('export')}
+          <span><strong>${trad('Imprimer des étiquettes')}</strong><small>${trad('Choisir des machines et imprimer leurs QR codes en lot (feuille A4 ou étiquette unitaire).')}</small></span>
+        </button>
+      </div>
+    </div>`;
+  ajouterCroixModale(overlay);
+  overlay.querySelector('#qr-choix-scanner').addEventListener('click', () => {
+    overlay.remove();
+    if (!planPermetScannerQr()) {
+      openUpgradeNotice(UI.companyId, trad('Le scanner de QR codes est inclus à partir de l\'offre Starter.'));
+      return;
+    }
+    ouvrirScannerQr();
+  });
+  overlay.querySelector('#qr-choix-imprimer').addEventListener('click', () => {
+    overlay.remove();
+    if (!planCouvreQr()) {
+      openUpgradeNotice(UI.companyId, trad('Les QR codes sont inclus à partir de l\'offre Business.'));
+      return;
+    }
+    ouvrirEtiquettesMachines();
+  });
+}
+
+// ── ÉTIQUETTES QR DES MACHINES, EN LOT ───────────────────────────────────────────────────────────────
+// Même mécanique que les étiquettes de stock (iframe masquée + @page dédié : l'impression du reste de l'appli n'est jamais
+// touchée). Le QR de chaque machine est EXACTEMENT celui de sa fiche (`<adresse de l'appli>?qr=<id>`) : les étiquettes déjà
+// collées continuent de fonctionner. `qr` = côté du QR en mm ; `niveau` = correction d'erreur (« H » sur les grandes étiquettes,
+// où il y a de la place : c'est celle de la fiche ; « Q » sur les petites, pour garder des modules assez gros).
+const FORMATS_ETIQUETTE_MACHINE = {
+  a4: { libelle: 'Feuille A4 — 24 étiquettes (3 × 8, 70 × 37 mm)', l: 70, h: 37, colonnes: 3, rangees: 8, qr: 22, niveau: 'Q', des: 9.5, ref: 8.5, aux: 7 },
+  a4grand: { libelle: 'Feuille A4 — 8 grandes étiquettes (2 × 4, 105 × 74 mm)', l: 105, h: 74, colonnes: 2, rangees: 4, qr: 46, niveau: 'H', des: 13, ref: 10.5, aux: 8 },
+  unitaire: { libelle: 'Étiquette unitaire (62 × 29 mm)', l: 62, h: 29, qr: 17, niveau: 'Q', des: 8, ref: 7.5, aux: 6.5 },
+};
+
+function urlQrMachine(machine) {
+  return `${urlBaseApp()}?qr=${encodeURIComponent(machine.id)}`;
+}
+
+function htmlUneEtiquetteMachine(m, qrSvg) {
+  const id = identifiantAffiche(m);
+  const cat = m.category?.name || '';
+  return `<div class="et"><div class="txt">`
+    + `<div class="des">${esc(m.name)}</div>`
+    + (id ? `<div class="ref">${esc(id)}</div>` : '')
+    + (cat ? `<div class="aux">${esc(cat)}</div>` : '')
+    + `<div class="marque">${esc(MARQUE_KALEA)}</div>`
+    + `</div><div class="qr">${qrSvg || ''}</div></div>`;
+}
+
+// machines : machines à imprimer (déjà répétées selon le nombre d'exemplaires) ; premiere : n° de la première case libre
+// de la 1re feuille (réutiliser une feuille entamée) ; qrParId : { id de machine : SVG du QR }.
+function documentEtiquettesMachines(machines, formatCle, premiere, qrParId) {
+  const f = FORMATS_ETIQUETTE_MACHINE[formatCle];
+  const feuille = !!f.colonnes;
+  const css = `
+    @page { size: ${feuille ? 'A4' : `${f.l}mm ${f.h}mm`}; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+    .feuille { width: 210mm; height: 297mm; display: grid; grid-template-columns: repeat(${f.colonnes || 1}, ${f.l}mm); grid-template-rows: repeat(${f.rangees || 1}, ${f.h}mm); break-after: page; page-break-after: always; }
+    .feuille:last-child { break-after: auto; page-break-after: auto; }
+    .page { width: ${f.l}mm; height: ${f.h}mm; break-after: page; page-break-after: always; overflow: hidden; }
+    .page:last-child { break-after: auto; page-break-after: auto; }
+    .et { width: ${f.l}mm; height: ${f.h}mm; padding: ${f.l > 100 ? 5 : (feuille ? 3 : 2)}mm; display: flex; gap: ${f.l > 100 ? 4 : 2}mm; overflow: hidden; }
+    .vide { width: ${f.l}mm; height: ${f.h}mm; }
+    .txt { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: .8mm; }
+    .des { font-weight: 700; font-size: ${f.des}pt; line-height: 1.12; max-height: 3.4em; overflow: hidden; overflow-wrap: anywhere; }
+    .ref { font-family: "Courier New", monospace; font-weight: 700; font-size: ${f.ref}pt; overflow-wrap: anywhere; }
+    .aux { font-size: ${f.aux}pt; line-height: 1.12; max-height: 2.3em; overflow: hidden; overflow-wrap: anywhere; }
+    .marque { margin-top: auto; font-size: ${f.aux - 1}pt; letter-spacing: .04em; color: #555; }
+    .qr { flex: 0 0 ${f.qr}mm; width: ${f.qr}mm; height: ${f.qr}mm; align-self: center; }
+    .qr svg, .qr img { width: 100%; height: 100%; display: block; }
+  `;
+  const qrDe = (m) => (qrParId || {})[m.id];
+  let corps = '';
+  if (feuille) {
+    const cases = [...Array(Math.max(0, (premiere || 1) - 1)).fill(null), ...machines];
+    const parFeuille = f.colonnes * f.rangees;
+    for (let i = 0; i < cases.length; i += parFeuille) {
+      corps += `<div class="feuille">${cases.slice(i, i + parFeuille).map((c) => (c ? htmlUneEtiquetteMachine(c, qrDe(c)) : '<div class="vide"></div>')).join('')}</div>`;
+    }
+  } else {
+    corps = machines.map((m) => `<div class="page">${htmlUneEtiquetteMachine(m, qrDe(m))}</div>`).join('');
+  }
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(trad('Étiquettes QR des machines'))}</title><style>${css}</style></head><body>${corps}</body></html>`;
+}
+
+function ouvrirEtiquettesMachines() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  const machines = (UI.machines || []).filter((m) => !m.archived)
+    .slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const categories = [...new Set(machines.map((m) => m.category?.name).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  // Rien n'est coché au départ : une feuille d'étiquettes autocollantes coûte, on n'imprime que ce qu'on choisit.
+  const selection = new Set();
+  overlay.innerHTML = `
+    <div class="modal export-modal etiquettes-modal" role="dialog" aria-modal="true" aria-labelledby="etqm-titre">
+      <h2 id="etqm-titre">${trad('Imprimer des étiquettes QR')}</h2>
+      <div class="etiquettes-haut">
+        <div class="ui-champ-groupe">
+          <strong>${trad('Format')}</strong>
+          ${Object.entries(FORMATS_ETIQUETTE_MACHINE).map(([cleFormat, f], i) => `<label class="ui-case"><input type="radio" name="etqm-format" value="${cleFormat}" ${i === 0 ? 'checked' : ''}> ${esc(trad(f.libelle))}</label>`).join('')}
+        </div>
+        <div class="etiquettes-nombres">
+          <div id="etqm-debut-bloc">
+            <label for="etqm-debut">${trad('Commencer à l\'étiquette n°')}</label>
+            <input id="etqm-debut" class="ui-champ" type="number" min="1" max="24" value="1" inputmode="numeric">
+          </div>
+          <div>
+            <label for="etqm-copies">${trad('Exemplaires par machine')}</label>
+            <input id="etqm-copies" class="ui-champ" type="number" min="1" max="10" value="1" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+      <div class="ui-champ-groupe">
+        <strong>${trad('Machines à étiqueter')}</strong>
+        <div class="etiquettes-filtres">
+          <input id="etqm-recherche" class="ui-champ" aria-label="${esc(trad('Rechercher une machine'))}" placeholder="${esc(trad('Rechercher par nom, marque, identifiant…'))}">
+          ${categories.length ? `<div class="ui-select-wrap">
+            <select id="etqm-categorie" class="ui-champ" aria-label="${esc(trad('Catégorie'))}">
+              <option value="">${trad('Toutes les catégories')}</option>
+              ${categories.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+            </select>
+            ${picto('chevronBas')}
+          </div>` : ''}
+        </div>
+        <label class="ui-case"><input type="checkbox" id="etqm-tout"> <span id="etqm-compte"></span></label>
+        <div class="etiquettes-liste" id="etqm-liste"></div>
+      </div>
+      <div id="etiquettes-msg" role="status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button type="button" class="ui-btn ui-btn-pastille" id="etqm-fermer">${trad('Annuler')}</button>
+        <button type="button" class="ui-btn ui-btn-plein" id="etqm-go">${picto('export')}<span>${trad('Imprimer')}</span></button>
+      </div>
+    </div>`;
+  ajouterCroixModale(overlay);
+  const liste = overlay.querySelector('#etqm-liste');
+  const msg = overlay.querySelector('#etiquettes-msg');
+  const caseTout = overlay.querySelector('#etqm-tout');
+  const compte = overlay.querySelector('#etqm-compte');
+  const visibles = () => {
+    const cat = overlay.querySelector('#etqm-categorie')?.value || '';
+    const terme = overlay.querySelector('#etqm-recherche').value.trim().toLowerCase();
+    return machines.filter((m) => {
+      if (cat && m.category?.name !== cat) return false;
+      if (!terme) return true;
+      return [m.name, machineBrandModel(m), identifiantAffiche(m), m.category?.name].filter(Boolean).join(' ').toLowerCase().includes(terme);
+    });
+  };
+  const coches = () => visibles().filter((m) => selection.has(String(m.id)));
+  const majCompte = () => {
+    const n = coches().length;
+    compte.textContent = tR('{n} machine(s) sélectionnée(s)', { n });
+    const nbVisibles = visibles().length;
+    caseTout.checked = nbVisibles > 0 && n === nbVisibles;
+  };
+  const rendre = () => {
+    const lignes = visibles();
+    liste.innerHTML = lignes.length
+      ? lignes.map((m) => `<label class="ui-case"><input type="checkbox" data-id="${esc(m.id)}" ${selection.has(String(m.id)) ? 'checked' : ''}> <span>${esc(m.name)} <small>— ${esc([identifiantAffiche(m), m.category?.name].filter(Boolean).join(' · ') || trad('Sans identifiant'))}</small></span></label>`).join('')
+      : `<div class="ui-aide">${trad('Aucune machine.')}</div>`;
+    liste.querySelectorAll('input[type=checkbox]').forEach((c) => c.addEventListener('change', () => {
+      const k = c.getAttribute('data-id');
+      if (c.checked) selection.add(k); else selection.delete(k);
+      majCompte();
+    }));
+    majCompte();
+  };
+  rendre();
+  overlay.querySelector('#etqm-recherche').addEventListener('input', rendre);
+  overlay.querySelector('#etqm-categorie')?.addEventListener('change', rendre);
+  caseTout.addEventListener('change', () => {
+    visibles().forEach((m) => { if (caseTout.checked) selection.add(String(m.id)); else selection.delete(String(m.id)); });
+    rendre();
+  });
+  const formatChoisi = () => overlay.querySelector('input[name="etqm-format"]:checked').value;
+  // « Commencer à l'étiquette n° » n'a de sens que sur une feuille ; son maximum suit le nombre de cases de la feuille.
+  const majFormat = () => {
+    const f = FORMATS_ETIQUETTE_MACHINE[formatChoisi()];
+    overlay.querySelector('#etqm-debut-bloc').hidden = !f.colonnes;
+    overlay.querySelector('#etqm-debut').max = String(f.colonnes ? f.colonnes * f.rangees : 1);
+  };
+  overlay.querySelectorAll('input[name="etqm-format"]').forEach((r) => r.addEventListener('change', majFormat));
+  majFormat();
+  overlay.querySelector('#etqm-fermer').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#etqm-go').addEventListener('click', async () => {
+    const boutonGo = overlay.querySelector('#etqm-go');
+    const choisies = coches();
+    if (!choisies.length) { msg.textContent = trad('Cochez au moins une machine.'); return; }
+    const formatCle = formatChoisi();
+    const f = FORMATS_ETIQUETTE_MACHINE[formatCle];
+    const copies = Math.max(1, Math.min(10, Math.round(Number(overlay.querySelector('#etqm-copies').value) || 1)));
+    const maxDebut = f.colonnes ? f.colonnes * f.rangees : 1;
+    const debut = Math.max(1, Math.min(maxDebut, Math.round(Number(overlay.querySelector('#etqm-debut').value) || 1)));
+    const lignes = choisies.flatMap((m) => Array(copies).fill(m));
+    // Un QR par machine (les exemplaires réutilisent le même). Générateur indisponible : on imprime quand même, sans QR.
+    boutonGo.disabled = true;
+    msg.textContent = trad('Préparation des étiquettes…');
+    const qrParId = {};
+    try {
+      for (const m of choisies) qrParId[m.id] = await qrSvgPourTexte(urlQrMachine(m), f.niveau);
+    } catch (err) {
+      msg.textContent = trad('QR code indisponible : les étiquettes sont imprimées sans QR.');
+    }
+    imprimerDocumentHtml(documentEtiquettesMachines(lignes, formatCle, f.colonnes ? debut : 1, qrParId));
+    overlay.remove();
+  });
+}
+
 // ── SCANNER QR : caméra en direct, décodage natif si possible ──────────
 // Gating de plan dans le clic sur #fleet-scanner (planPermetScannerQr : dès Starter) ; la génération
 // (§ ouvrirQrMachine) reste réservée Business+.
