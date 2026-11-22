@@ -4066,3 +4066,9 @@ html[data-theme="dark"] [style*="background:#FFFFFF" i],html[data-theme="dark"] 
 .qr-choix-btn > span{display:flex;flex-direction:column;gap:2px;min-width:0;}
 .qr-choix-btn strong{font-size:16px;font-weight:700;}
 .qr-choix-btn small{font-size:13px;font-weight:500;color:var(--ink-2);line-height:1.3;}
+
+/* ── Cartes machine sur tablette : plus de jauge d'échéance en double (2026-11-23) ──
+   Sur un appareil tactile, le bloc compteur est la carte « fusionnée » (compteur + échéance + barre + retard). La jauge d'échéance séparée,
+   prévue pour l'ordinateur et affichée dès 900 px, répétait la même information : on la masque dès que le bloc fusionné est là.
+   Inchangé : l'ordinateur (pas de bloc fusionné), les cartes sans compteur chiffré (calendaire), le mode « Tuiles » (qui montre la barre). ── */
+.mstrip-liste:not(.is-tuiles) .mstrip-corps:has(.compteur-carte) > .mstrip-jauge{display:none;}
