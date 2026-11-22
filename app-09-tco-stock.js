@@ -5267,6 +5267,9 @@ function ouvrirBonDeCommande(g) {
     </div>`;
   ajouterCroixModale(overlay);
   const q = (s) => overlay.querySelector(s);
+  // Date de livraison : même calendrier maison que partout ailleurs. Le champ natif de Safari (iPad) s'affichait plus large et plus
+  // haut que les autres champs et dépassait de la fenêtre. L'input d'origine reste dans le DOM (masqué) : infos() le lit toujours.
+  if (typeof habillerChampDate === 'function') habillerChampDate(q('#bon-livraison'), trad('Livraison souhaitée'));
   const infos = () => ({ reference: q('#bon-ref').value.trim() || referenceBon(g), livraison: q('#bon-livraison').value, adresse: q('#bon-adresse').value.trim(), note: q('#bon-note').value.trim() });
   // Aperçu du bon : les QUANTITÉS sont modifiables ici (champ par ligne). Elles sont mémorisées dans UI.achatsQuantites, la même réserve que les
   // champs de l'onglet Commandes : les deux restent d'accord. 0 ou vide = ligne ignorée. Les lignes ne sont redessinées qu'à l'ouverture
