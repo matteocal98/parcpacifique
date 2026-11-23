@@ -937,7 +937,7 @@ textarea:not([data-x]),
   /* sections : deux colonnes, comme sur ordinateur (le seuil d'origine, 880 px de colonne, n'était jamais atteint) */
   .ui-colonnes{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
   /* cartes machine du Parc : deux par ligne */
-  .mstrip-liste,#fleet-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;}
+  .mstrip-liste,#fleet-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch;}
   #fleet-list > .fleet-count{grid-column:1 / -1;}
   /* tuiles chiffrées : jusqu'à quatre par ligne */
   .ui-grille,.ui-grille.is-3{grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;}
@@ -2672,7 +2672,7 @@ html:not([data-theme="dark"]) .saisie-picker-ligne:hover{background:var(--primar
    et une fine barre d'échéance à la couleur de l'état. Activé par .is-tuiles sur #fleet-list (bascule Cartes / Tuiles,
    mémorisée dans localStorage). Un clic sur la tuile ouvre la fiche de la machine.
    ════════════════════════════════════════════════════════════════════════════ */
-.mstrip-liste.is-tuiles,#fleet-list.is-tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px;align-items:start;}
+.mstrip-liste.is-tuiles,#fleet-list.is-tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px;align-items:stretch;}
 #fleet-list.is-tuiles > .fleet-count{grid-column:1 / -1;}
 .mstrip-liste.is-tuiles .mstrip{flex-direction:column;cursor:pointer;transition:box-shadow .15s ease;}
 .mstrip-liste.is-tuiles .mstrip:hover{box-shadow:0 4px 14px rgba(14,19,51,.14);}
@@ -4040,7 +4040,7 @@ html[data-theme="dark"] [style*="background:#FFFFFF" i],html[data-theme="dark"] 
   .sidebar{margin-top:var(--safe-top);top:var(--safe-top);height:calc(100vh - var(--safe-top));}
 }
 @media (min-width:640px) and (max-width:1179px){
-  .mstrip-liste:not(.is-tuiles),#fleet-list:not(.is-tuiles){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;}
+  .mstrip-liste:not(.is-tuiles),#fleet-list:not(.is-tuiles){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch;}
   #fleet-list:not(.is-tuiles) > .fleet-count{grid-column:1 / -1;}
 }
 
@@ -4072,3 +4072,9 @@ html[data-theme="dark"] [style*="background:#FFFFFF" i],html[data-theme="dark"] 
    prévue pour l'ordinateur et affichée dès 900 px, répétait la même information : on la masque dès que le bloc fusionné est là.
    Inchangé : l'ordinateur (pas de bloc fusionné), les cartes sans compteur chiffré (calendaire), le mode « Tuiles » (qui montre la barre). ── */
 .mstrip-liste:not(.is-tuiles) .mstrip-corps:has(.compteur-carte) > .mstrip-jauge{display:none;}
+
+/* ── Cartes machine : même hauteur dans une rangée (2026-11-23) ──
+   Les grilles de cartes (téléphone en paysage, tablette, tuiles) s'étirent maintenant à la hauteur de la plus haute carte de la rangée
+   (align-items:stretch). Le corps de la carte remplit la carte, et le bouton « Intervention » + les pictos restent calés en bas,
+   pour que les boutons soient alignés d'une carte à l'autre. Inchangé : la liste à une colonne (téléphone, ordinateur). ── */
+.mstrip-liste:not(.is-tuiles) .mstrip-corps > .mstrip-actions{margin-top:auto;}
