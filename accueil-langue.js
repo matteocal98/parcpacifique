@@ -266,6 +266,9 @@
     [`30 analyses carnet · 500 lectures compteur`, `30 manual analyses · 500 counter readings`],
     [`5 000 analyses carnet · 2 000 lectures compteur`, `5,000 manual analyses · 2,000 counter readings`],
     [`Gratuit pour 2 machines · Starter 12 €/mois · Business 39 €/mois · Enterprise 79 €/mois`, `Free for 2 machines · Starter €12/month · Business €39/month · Enterprise €79/month`],
+    [`Gratuit pour 2 machines`, `Free for 2 machines`],
+    [`Au-delà : Starter 12 €/mois · Business 39 €/mois · Enterprise 79 €/mois`, `Beyond that: Starter €12/month · Business €39/month · Enterprise €79/month`],
+    [`L'application sur téléphone, avec des données de démonstration`, `The app on a phone, with demo data`],
     [`Sur-mesure`, `Tailor-made`],
     [`Parc sur mesure`, `Tailor-made fleet`],
     [`Tout ce qui est dans Business, plus :`, `Everything in Business, plus:`],
@@ -326,6 +329,7 @@
 
   // Attributs lus par les lecteurs d'écran : même principe, mêmes règles.
   var ATTRIBUTS = [
+    [`Tableau de bord KALEA sur téléphone : entretiens en retard, échéances proches et manuels analysés`, `KALEA dashboard on a phone: overdue maintenance, upcoming due dates and analysed manuals`],
     [`Accueil KALEA`, `KALEA home`],
     [`Se connecter`, `Log in`],
     [`Tableau de bord KALEA : machines, entretiens à venir et alertes`, `KALEA dashboard: machines, upcoming maintenance and alerts`],

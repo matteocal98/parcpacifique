@@ -1685,7 +1685,30 @@ async function enregistrerNomDuProfil(nomComplet) {
   } catch (err) { console.warn('Nom du profil non enregistré :', err && err.message); }
 }
 
+// MESURE : combien de personnes OUVRENT le formulaire de création de compte. Mêmes règles que mesure.js (pages publiques) : aucun cookie, rien d'écrit
+// dans le navigateur, « Ne pas me suivre » respecté, uniquement sur kalea.pro (jamais l'appli Android/iPhone ni les essais locaux, jamais un navigateur
+// piloté). Compté une seule fois par chargement, sous la page fictive /app.html/inscription. AUCUNE saisie n'est transmise. Jamais bloquant.
+let ouvertureInscriptionNotee = false;
+function noterOuvertureInscription() {
+  try {
+    if (ouvertureInscriptionNotee) return;
+    if (location.hostname !== 'kalea.pro' && location.hostname !== 'www.kalea.pro') return;
+    if (navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.webdriver === true) return;
+    ouvertureInscriptionNotee = true;
+    fetch(SUPABASE_URL + '/rest/v1/rpc/marketing_noter_visite', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY }, keepalive: true, credentials: 'omit',
+      body: JSON.stringify({
+        p_page: '/app.html/inscription',
+        p_source: ORIGINE_MARKETING.source || null, p_medium: ORIGINE_MARKETING.medium || null,
+        p_campagne: ORIGINE_MARKETING.campagne || null, p_referent: ORIGINE_MARKETING.referent || null,
+        p_langue: LANGUE === 'en' ? 'en' : 'fr',
+      }),
+    }).catch(() => {});
+  } catch (err) { /* la mesure ne doit JAMAIS gêner l'inscription */ }
+}
+
 function openSignupWizard() {
+  noterOuvertureInscription();
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   document.body.appendChild(overlay);

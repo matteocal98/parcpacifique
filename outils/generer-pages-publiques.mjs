@@ -288,6 +288,7 @@ function sourceAnglaise(htmlFr, rapport) {
   h = remplacerEntreMarqueurs(h, 'LANGUE', selecteurLangue('en', '/', '/en/'));
   h = remplacerEntreMarqueurs(h, 'RESSOURCES', liensRessources('en'));
   h = remplacerEntreMarqueurs(h, 'BOUTIQUES', blocBoutiquesAccueil('en'));
+  h = h.replace(/tableau-de-bord-tel-fr\.webp/g, 'tableau-de-bord-tel-en.webp');   // la capture montre l'application dans la langue de la page
   // 1re passe : traduction ; on lit les questions anglaises de la page traduite, puis on les met dans les données structurées
   const faqEn = faqDepuisHtml(versAnglais(h, {}));
   h = remplacerEntreMarqueurs(h, 'SEO', seoEn(faqEn));
