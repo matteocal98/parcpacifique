@@ -11,6 +11,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { SITE, RESEAUX, IMAGE_PARTAGE, ACCUEIL, ORGANISATION, OFFRES, APPLICATION, BOUTIQUES } from './seo-config.mjs';
 import { PAGES } from './pages-contenu.mjs';
+import { blocCalculateur } from './outil-cout-horaire.mjs';
 
 const require = createRequire(import.meta.url);
 const { parse, serialize } = require('./css-site/node_modules/parse5');
@@ -353,15 +354,15 @@ ${style}
 ${parties.sprite}
 ${header}
 <main class="flex-1">
-<article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+<article class="${p.outil ? 'max-w-5xl' : 'max-w-3xl'} mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
 <nav aria-label="${L.fil}" class="text-xs text-slate-500 mb-6"><a href="${base}" class="hover:text-brand-primary">${L.accueil}</a> <span aria-hidden="true">›</span> <span>${l.fil}</span></nav>
 <h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">${l.h1}</h1>
 <p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed [&_strong]:text-brand-ink">${p1(l.intro)}</p>
 ${p.telechargement ? `<div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3" data-sans-traduction>${badgesEnLigne(lg, 56)}</div>` : ''}
-<div class="mt-8 flex flex-wrap gap-3">
+${p.outil ? blocCalculateur(lg) : `<div class="mt-8 flex flex-wrap gap-3">
 <a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-5 py-3 rounded-xl shadow-sm" href="/app.html?inscription=1">${L.essai}</a>
 <a class="border border-brand-borderMuted bg-white text-brand-ink text-sm font-bold px-5 py-3 rounded-xl hover:border-brand-primary" href="${base}#tarifs">${L.tarifs}</a>
-</div>
+</div>`}
 ${sections}
 ${faq}
 <section class="mt-14 rounded-3xl bg-brand-ink text-white p-8 sm:p-10">

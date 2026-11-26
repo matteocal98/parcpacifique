@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Calculateur de coût horaire d'un engin, gratuit | KALEA</title>
+<!-- SEO:DEBUT (généré par outils/generer-pages-publiques.mjs : ne pas modifier à la main) -->
+<meta name="description" content="Calculez le coût à l'heure ou au km de votre engin : achat, revente, entretien, dépenses. Gratuit, sans compte, vos montants restent sur votre appareil.">
+<link rel="canonical" href="https://kalea.pro/calculateur-cout-horaire.html">
+<link rel="alternate" hreflang="fr" href="https://kalea.pro/calculateur-cout-horaire.html">
+<link rel="alternate" hreflang="en" href="https://kalea.pro/en/hourly-cost-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://kalea.pro/calculateur-cout-horaire.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0E1333">
+<meta name="apple-itunes-app" content="app-id=6831331713">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icones/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KALEA">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Calculateur de coût horaire d'un engin, gratuit | KALEA">
+<meta property="og:description" content="Calculez le coût à l'heure ou au km de votre engin : achat, revente, entretien, dépenses. Gratuit, sans compte, vos montants restent sur votre appareil.">
+<meta property="og:url" content="https://kalea.pro/calculateur-cout-horaire.html">
+<meta property="og:image" content="https://kalea.pro/partage-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KALEA : suivi d'entretien de parc, du manuel constructeur au plan d'entretien">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Calculateur de coût horaire d'un engin, gratuit | KALEA">
+<meta name="twitter:description" content="Calculez le coût à l'heure ou au km de votre engin : achat, revente, entretien, dépenses. Gratuit, sans compte, vos montants restent sur votre appareil.">
+<meta name="twitter:image" content="https://kalea.pro/partage-og.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://kalea.pro/calculateur-cout-horaire.html#page","url":"https://kalea.pro/calculateur-cout-horaire.html","name":"Calculateur de coût horaire d'un engin, gratuit | KALEA","description":"Calculez le coût à l'heure ou au km de votre engin : achat, revente, entretien, dépenses. Gratuit, sans compte, vos montants restent sur votre appareil.","inLanguage":"fr","isPartOf":{"@id":"https://kalea.pro/#site"},"publisher":{"@id":"https://kalea.pro/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://kalea.pro/"},{"@type":"ListItem","position":2,"name":"Calculateur de coût horaire","item":"https://kalea.pro/calculateur-cout-horaire.html"}]}]}</script>
+<!-- SEO:FIN -->
+<link rel="preload" href="/polices/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/polices/polices-site.css">
+<style data-purpose="custom-typography-and-helpers">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFBFC;
+      color: #0E1333;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Bilingual Switcher Classes */
+    html[data-lang="fr"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-fr { display: none !important; }
+
+    /* Custom Gradients */
+    /* Accroches tournantes — effet « tourbillon » (swirl) : chaque lettre du titre, puis chaque mot du sous-titre, bascule en 3D autour de l'axe horizontal, l'un après l'autre
+       (même mouvement que le titre animé d'Elementor de type « swirl » : 0,4 s, arrivée à 90°, léger dépassement à -10°, sortie de l'autre côté). Le découpage est fait par accroches.js.
+       Les accroches sont empilées dans la même cellule de grille. Sans JavaScript, la hauteur est celle de la plus longue ; avec, accroches.js règle la hauteur du bloc sur l'accroche affichée
+       (elle grandit tout de suite, rétrécit une fois la sortie terminée) : plus de vide sous les textes courts. */
+    .accroches { display: grid; transition: height .45s ease; }
+    .accroche { grid-area: 1 / 1; align-self: start; visibility: hidden; }
+    .accroche.is-actif, .accroche.is-sortant { visibility: visible; }
+    .accroche .mot { display: inline-block; white-space: nowrap; }
+    .accroche.lettrise .lettre, .accroche.lettrise .mot-anim { display: inline-block; backface-visibility: hidden; opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); }
+    .accroche.lettrise .lettre.entre, .accroche.lettrise .mot-anim.entre { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); }
+    .accroche.lettrise .entre-anim { animation: acc-swirl-in .4s ease forwards; }
+    .accroche.lettrise .sort-anim { animation: acc-swirl-out .4s ease forwards; }
+    /* Le dégradé de marque ne peut pas suivre des lettres qui basculent : accroches.js colore chaque lettre (même dégradé, lettre par lettre). */
+    .accroche.lettrise .brand-gradient-text { background: none; -webkit-text-fill-color: currentColor; }
+    @keyframes acc-swirl-in { 0% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(90deg); } 60% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(-10deg); } 100% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } }
+    @keyframes acc-swirl-out { 0% { opacity: 1; transform: perspective(300px) translateZ(-20px) rotateX(0deg); } 60% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-100deg); } 100% { opacity: 0; transform: perspective(300px) translateZ(-20px) rotateX(-90deg); } }
+    .accroches-pilote { display: flex; align-items: center; gap: 4px; min-height: 28px; margin-top: 4px; }
+    .accroches-pilote button { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: 9999px; }
+    .accroches-pilote button:focus-visible { outline: 2px solid #236FE0; outline-offset: 2px; }
+    .accroches-pilote .accroche-point { display: block; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; opacity: .25; transition: opacity .2s, transform .2s; }
+    .accroches-pilote button[aria-current="true"] .accroche-point { opacity: .9; transform: scale(1.25); }
+    .accroches-pilote .accroche-pause { margin-left: 8px; opacity: .7; }
+    .accroches-pilote .accroche-pause:hover { opacity: 1; }
+    .accroches-pilote .accroche-pause svg { width: 14px; height: 14px; }
+    @media (prefers-reduced-motion: reduce) { .accroches { transition: none; } .accroche.lettrise .entre-anim, .accroche.lettrise .sort-anim { animation: none; } }
+    .brand-gradient-text {
+      background: linear-gradient(135deg, #1868DB 0%, #20AFA1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-glow {
+      background: radial-gradient(circle at 80% 20%, rgba(36, 181, 168, 0.08) 0%, rgba(35, 111, 224, 0.04) 40%, transparent 70%);
+    }
+
+
+    /* Accordion transitions */
+    details > summary svg {
+      transition: transform 0.25s ease-in-out;
+    }
+    details[open] > summary svg {
+      transform: rotate(180deg);
+    }
+  
+    /* Impression du tableau comparatif : seule la section « comparatif-offres » sort, en paysage. */
+    @media print {
+      @page { size: A4 landscape; margin: 10mm; }
+      body > *:not(main), main > *:not(#comparatif-offres) { display: none !important; }
+      body { display: block !important; min-height: 0 !important; background: #fff !important; }
+      #comparatif-offres { background: #fff; padding: 0; }
+      #comparatif-offres > div { max-width: 1300px; margin: 0 auto; padding: 0; }
+      #comparatif-offres tr { break-inside: avoid; }
+      #comparatif-offres [onclick], #comparatif-offres a[download], #comparatif-offres tfoot { display: none !important; }
+      #comparatif-offres #simulateur { display: none !important; }
+      #comparatif-offres > div > div { display: block !important; }
+    }
+  </style>
+<link rel="stylesheet" href="/site.css?v=bbf23894dd4d">
+<link rel="stylesheet" href="/site-sombre.css">
+<script src="/theme.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Mes montants sont-ils envoyés ou enregistrés ?","acceptedAnswer":{"@type":"Answer","text":"Non. Le calcul se fait dans votre navigateur et rien de ce que vous saisissez n'est transmis. Seule la visite de la page est comptée, sans cookie."}},{"@type":"Question","name":"Que mettre dans la revente estimée ?","acceptedAnswer":{"@type":"Answer","text":"Le prix que vous pensez pouvoir obtenir aujourd'hui. C'est une estimation : le résultat change avec elle. Laissée vide, tout le prix d'achat est compté."}},{"@type":"Question","name":"Faut-il compter le carburant ?","acceptedAnswer":{"@type":"Answer","text":"Comme vous voulez, à condition de faire pareil pour toutes les machines que vous comparez. Le champ est facultatif."}}]}</script>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-brand-teal selection:text-white">
+<svg aria-hidden="true" height="0" style="position:absolute" width="0">
+<defs>
+<symbol id="picto-keeva" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#FFFFFF" stroke="#6864DF" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#18183A"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#6864DF"></circle></symbol>
+<symbol id="picto-keeva-nuit" viewBox="338 248 1228 1228"><circle cx="952" cy="862" r="598" fill="#18183A" stroke="#8F8FCB" stroke-width="31"></circle><rect x="694" y="528" width="92" height="700" rx="46" fill="#FFFFFF"></rect><path d="M742,872 C850,780 1000,660 1130,625 C1190,610 1225,630 1205,662 C1185,700 1140,725 1080,732 C960,745 850,800 742,872 Z" fill="#16B2CB"></path><path d="M742,872 C860,940 1000,1010 1110,1025 C1180,1035 1235,1055 1233,1080 C1230,1110 1170,1118 1120,1105 C1000,1075 870,960 742,872 Z" fill="#E78B20"></path><circle cx="946" cy="878" r="73" fill="#8F8FCB"></circle></symbol>
+</defs>
+</svg>
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-borderMuted">
+<div class="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Brand Logo -->
+<a aria-label="Accueil KALEA" class="flex items-center gap-1.5 sm:gap-3 group shrink-0" href="./"><div class="w-16 h-16 group-hover:scale-105 transition-transform"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-brand-ink">KALEA</span></a>
+<!-- Desktop Navigation Menu -->
+<nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+<a class="hover:text-brand-primary transition-colors" href="/#fonctionnalites">
+<span class="lang-fr">Fonctionnalités</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#comment-ca-marche">
+<span class="lang-fr">Comment ça marche</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#vos-donnees">
+<span class="lang-fr">Vos données</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#tarifs">
+<span class="lang-fr">Tarifs</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#simulateur">
+<span class="lang-fr">Simulateur</span>
+
+</a>
+<a class="hover:text-brand-primary transition-colors" href="/#faq">
+<span class="lang-fr">FAQ</span>
+
+</a>
+</nav>
+<!-- Language Switcher & Action CTA -->
+<div class="flex items-center gap-1.5 sm:gap-4">
+<!-- LANGUE:DEBUT -->
+<div role="group" aria-label="Langue / Language" data-sans-traduction class="flex items-center gap-0.5 sm:gap-1 rounded-lg border border-slate-200 bg-white p-0.5 ml-0 sm:ml-2 shrink-0">
+<a href="/calculateur-cout-horaire.html" data-langue="fr" lang="fr" hreflang="fr" title="Français" aria-current="true" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors bg-brand-ink text-white">FR</a>
+<a href="/en/hourly-cost-calculator.html" data-langue="en" lang="en" hreflang="en" title="English" class="text-[11px] sm:text-xs font-bold px-1.5 sm:px-2 py-1 rounded-md transition-colors text-slate-600 hover:text-brand-primary">EN</a>
+</div>
+<!-- LANGUE:FIN -->
+
+<a class="hidden sm:inline-block text-sm font-semibold text-slate-700 hover:text-brand-primary transition-colors px-2 py-1" href="./app.html">
+<span class="lang-fr">Se connecter</span>
+
+</a>
+<!-- Téléphone : « Se connecter » en icône (le lien texte ci-dessus n'apparaît qu'à partir de 640 px). Audit design 2026-11-11 : un client existant n'avait aucun accès à sa connexion depuis l'en-tête. -->
+<a class="sm:hidden inline-flex items-center justify-center w-9 h-9 shrink-0 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-brand-primary transition-colors" href="./app.html" aria-label="Se connecter" title="Se connecter"><svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+<a class="bg-brand-ink hover:bg-slate-900 text-white text-sm font-bold px-3 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow-md shrink-0 whitespace-nowrap" href="./app.html?inscription=1">
+<span class="lang-fr">S'inscrire</span>
+
+</a>
+</div>
+</div>
+</header>
+<main class="flex-1">
+<article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+<nav aria-label="Fil d'Ariane" class="text-xs text-slate-500 mb-6"><a href="/" class="hover:text-brand-primary">Accueil</a> <span aria-hidden="true">›</span> <span>Calculateur de coût horaire</span></nav>
+<h1 class="font-display font-extrabold text-3xl sm:text-4xl text-brand-ink tracking-tight leading-tight">Combien vous coûte votre engin à l'heure ?</h1>
+<p class="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed [&_strong]:text-brand-ink">Gratuit et sans compte. <strong>Les montants que vous saisissez restent sur votre appareil.</strong></p>
+
+<style>@media print{@page{size:A4 portrait;margin:10mm}main>article:not(#_){display:block!important;padding:0}header,footer,.sans-impression,article>section:not(#_),article>nav:not(#_){display:none!important}#calculateur{zoom:.85;margin-top:12px}.carte-resultat,.carte-resultat *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+<noscript><p class="mt-8 rounded-2xl bg-amber-50 p-4 text-sm font-semibold text-brand-ink">Le calculateur a besoin de JavaScript. La formule est expliquée ci-dessous.</p></noscript>
+<div id="calculateur" class="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 lg:items-start">
+<form class="rounded-3xl border border-brand-borderMuted bg-white p-5 sm:p-7 space-y-6" novalidate onsubmit="return false">
+<div class="sans-impression flex flex-wrap gap-3">
+<div class="inline-flex gap-1 rounded-xl bg-brand-subtleBg p-1" role="group" aria-label="Unité du compteur">
+<button type="button" data-choix="unite" data-valeur="h" aria-pressed="true" class="rounded-lg px-4 py-2 text-sm font-bold bg-brand-ink text-white">Heures</button>
+<button type="button" data-choix="unite" data-valeur="km" aria-pressed="false" class="rounded-lg px-4 py-2 text-sm font-bold text-slate-600">Kilomètres</button>
+</div>
+<div class="inline-flex gap-1 rounded-xl bg-brand-subtleBg p-1" role="group" aria-label="Devise">
+<button type="button" data-choix="devise" data-valeur="EUR" aria-pressed="true" class="rounded-lg px-4 py-2 text-sm font-bold bg-brand-ink text-white">€</button>
+<button type="button" data-choix="devise" data-valeur="XPF" aria-pressed="false" class="rounded-lg px-4 py-2 text-sm font-bold text-slate-600">F CFP</button>
+</div>
+</div>
+<fieldset><legend class="font-display font-bold text-lg text-brand-ink mb-3">La machine</legend>
+<div class="grid gap-3 sm:grid-cols-2">
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-achat">Prix d'achat</label>
+<div class="relative">
+<input id="cc-achat" type="text" inputmode="decimal" autocomplete="off" placeholder="30 000" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-devise></span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-revente">Revente estimée aujourd'hui</label>
+<div class="relative">
+<input id="cc-revente" type="text" inputmode="decimal" autocomplete="off" placeholder="12 000" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-devise></span>
+</div>
+</div>
+</div></fieldset>
+<fieldset><legend class="font-display font-bold text-lg text-brand-ink mb-3">Le compteur</legend>
+<div class="grid gap-3 sm:grid-cols-2">
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-compteur-achat">À l'achat</label>
+<div class="relative">
+<input id="cc-compteur-achat" type="text" inputmode="decimal" autocomplete="off" placeholder="3 000" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-unite></span>
+</div>
+<p class="mt-1 text-xs text-slate-500">0 si la machine était neuve</p>
+</div>
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-compteur-jour">Aujourd'hui</label>
+<div class="relative">
+<input id="cc-compteur-jour" type="text" inputmode="decimal" autocomplete="off" placeholder="5 400" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-unite></span>
+</div>
+</div>
+</div></fieldset>
+<fieldset><legend class="font-display font-bold text-lg text-brand-ink mb-3">Dépenses depuis l'achat</legend>
+<div class="grid gap-3 sm:grid-cols-2">
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-entretien">Entretien et réparations</label>
+<div class="relative">
+<input id="cc-entretien" type="text" inputmode="decimal" autocomplete="off" placeholder="4 500" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-devise></span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-autres">Assurance, transport, taxes</label>
+<div class="relative">
+<input id="cc-autres" type="text" inputmode="decimal" autocomplete="off" placeholder="3 000" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-devise></span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-semibold text-brand-ink mb-1.5" for="cc-carburant">Carburant (facultatif)</label>
+<div class="relative">
+<input id="cc-carburant" type="text" inputmode="decimal" autocomplete="off" placeholder="0" class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-14 py-3 text-base font-semibold text-brand-ink focus:border-brand-primary focus:ring-2 focus:ring-brand-primary">
+<span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm font-medium text-slate-500" data-devise></span>
+</div>
+</div>
+</div></fieldset>
+<div class="flex flex-wrap gap-3 sans-impression">
+<button type="button" id="cc-exemple" class="rounded-xl border border-brand-borderMuted bg-white px-4 py-2.5 text-sm font-bold text-brand-ink hover:border-brand-primary">Remplir avec un exemple</button>
+<button type="button" id="cc-effacer" class="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50">Effacer</button>
+</div>
+</form>
+<div class="carte-resultat rounded-3xl bg-brand-ink p-5 sm:p-7 text-white lg:sticky lg:top-24">
+<p class="text-sm font-semibold text-slate-300" id="cc-titre">Coût à l'heure</p>
+<p class="mt-2 flex flex-wrap items-baseline gap-2" aria-live="polite"><span class="font-display font-bold text-5xl" id="cc-resultat">—</span><span class="text-lg font-medium text-slate-400" id="cc-par">/ h</span></p>
+<p class="mt-3 text-sm text-slate-300" id="cc-phrase"></p>
+<div class="mt-4 flex h-3 gap-0.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true"><span class="bg-brand-teal" data-part="perte"></span><span class="bg-brand-amber" data-part="entretien"></span><span class="bg-brand-indigo" data-part="autres"></span><span class="bg-brand-primary" data-part="carburant"></span></div>
+<ul class="mt-4 space-y-2.5 text-sm">
+<li class="flex items-center gap-2.5" data-ligne="perte"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-brand-teal"></span><span class="flex-1 text-slate-300">Perte de valeur</span><span class="font-bold text-white" data-montant="perte">—</span></li>
+<li class="flex items-center gap-2.5" data-ligne="entretien"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-brand-amber"></span><span class="flex-1 text-slate-300">Entretien et réparations</span><span class="font-bold text-white" data-montant="entretien">—</span></li>
+<li class="flex items-center gap-2.5" data-ligne="autres"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-brand-indigo"></span><span class="flex-1 text-slate-300">Autres dépenses</span><span class="font-bold text-white" data-montant="autres">—</span></li>
+<li class="flex items-center gap-2.5" data-ligne="carburant"><span class="h-2.5 w-2.5 shrink-0 rounded-full bg-brand-primary"></span><span class="flex-1 text-slate-300">Carburant</span><span class="font-bold text-white" data-montant="carburant">—</span></li>
+</ul>
+<p class="mt-4 text-xs text-slate-400">Non compté : salaire du conducteur, intérêts d'emprunt, journées d'arrêt.</p>
+<button type="button" id="cc-imprimer" class="sans-impression mt-4 rounded-xl border border-white/30 px-5 py-3 text-sm font-bold text-white hover:bg-white/10">Imprimer le résultat</button>
+<div class="sans-impression mt-5 rounded-2xl bg-white/10 p-5">
+<p class="font-display font-bold text-lg">Suivre ce coût machine par machine</p>
+<p class="mt-2 text-sm text-slate-300">KALEA le recalcule à partir de vos interventions et dépenses enregistrées. Le suivi du coût (TCO) fait partie de l'offre Business, à partir de 39 €/mois.</p>
+<a class="mt-3 inline-block rounded-xl bg-brand-primary px-5 py-3 text-sm font-bold text-white" href="/#tarifs">Voir les offres</a>
+</div>
+</div>
+</div>
+<script src="/calculateur-cout.js" defer></script>
+<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink">
+<h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Comment le calcul est fait</h2>
+<p class="mt-3 text-slate-600 leading-relaxed"><strong>(prix d'achat − revente estimée + dépenses) ÷ (compteur aujourd'hui − compteur à l'achat)</strong></p>
+<p class="mt-3 text-slate-600 leading-relaxed">La perte de valeur est ce que vous avez payé, moins ce que vous pourriez en tirer aujourd'hui. On y ajoute vos dépenses depuis l'achat, puis on divise par les heures ou les kilomètres faits pendant que la machine est à vous.</p>
+
+</section>
+<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink">
+<h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Machine achetée d'occasion</h2>
+<p class="mt-3 text-slate-600 leading-relaxed">Seul votre usage compte. Une machine achetée à 3 000 h et affichant 5 400 h a fait <strong>2 400 h chez vous</strong> : diviser par 5 400 h donnerait un coût trop bas.</p>
+
+</section>
+<section class="mt-12 [&_a]:text-brand-primary [&_a]:font-semibold [&_a]:underline [&_strong]:text-brand-ink">
+<h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Bien comparer deux coûts</h2>
+<p class="mt-3 text-slate-600 leading-relaxed">Pour comparer deux machines, ou un coût avec un tarif de location, comptez les mêmes dépenses des deux côtés : carburant, assurance, transport, conducteur.</p>
+<p class="mt-3 text-slate-600 leading-relaxed">KALEA calcule ce coût machine par machine à partir de vos interventions : voir <a href="/logiciel-gmao-parc-engins.html">le logiciel GMAO</a>.</p>
+
+</section>
+<section class="mt-14">
+<h2 class="font-display font-bold text-2xl text-brand-ink tracking-tight">Questions fréquentes</h2>
+<div class="mt-4 divide-y divide-brand-borderMuted rounded-2xl border border-brand-borderMuted bg-white">
+<details class="p-5"><summary class="cursor-pointer font-semibold text-brand-ink">Mes montants sont-ils envoyés ou enregistrés ?</summary><p class="mt-3 text-slate-600 leading-relaxed">Non. Le calcul se fait dans votre navigateur et rien de ce que vous saisissez n'est transmis. Seule la visite de la page est comptée, sans cookie.</p></details>
+<details class="p-5"><summary class="cursor-pointer font-semibold text-brand-ink">Que mettre dans la revente estimée ?</summary><p class="mt-3 text-slate-600 leading-relaxed">Le prix que vous pensez pouvoir obtenir aujourd'hui. C'est une estimation : le résultat change avec elle. Laissée vide, tout le prix d'achat est compté.</p></details>
+<details class="p-5"><summary class="cursor-pointer font-semibold text-brand-ink">Faut-il compter le carburant ?</summary><p class="mt-3 text-slate-600 leading-relaxed">Comme vous voulez, à condition de faire pareil pour toutes les machines que vous comparez. Le champ est facultatif.</p></details>
+</div></section>
+<section class="mt-14 rounded-3xl bg-brand-ink text-white p-8 sm:p-10">
+<h2 class="font-display font-bold text-2xl tracking-tight">Essayez KALEA gratuitement</h2>
+<p class="mt-2 text-slate-300 leading-relaxed">Gratuit pour 2 machines, sans carte bancaire. Déposez un manuel et voyez le plan d'entretien se construire.</p>
+<a class="mt-5 inline-block bg-white text-brand-ink text-sm font-bold px-5 py-3 rounded-xl" href="/app.html?inscription=1">S'inscrire</a>
+</section>
+<nav aria-label="À lire aussi" class="mt-12"><h2 class="font-display font-bold text-lg text-brand-ink">À lire aussi</h2><ul class="mt-3 space-y-2"><li><a class="font-semibold text-brand-primary hover:underline" href="/logiciel-gmao-parc-engins.html">Logiciel GMAO</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/plan-entretien-automatique.html">Plan d'entretien automatique</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/suivi-engins-chantier.html">Suivi des engins de chantier</a></li><li><a class="font-semibold text-brand-primary hover:underline" href="/telecharger.html">Télécharger l'application</a></li></ul></nav>
+</article>
+</main>
+<footer class="bg-brand-dark text-white border-t border-slate-800 pt-12 pb-8">
+<div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800/80">
+<!-- Column 1: Brand details -->
+<div class="md:col-span-4 space-y-4">
+<div class="flex items-center gap-3"><div class="w-16 h-16"><svg aria-hidden="true" class="w-full h-full"><use href="#picto-keeva-nuit"></use></svg></div><span class="font-display font-black text-4xl sm:text-5xl tracking-tight text-white">KALEA</span></div>
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Suivi d'entretien des engins et véhicules : plans issus des manuels constructeur, échéances au calendrier ou au compteur, rappels et liste de pièces.</span>
+
+</p>
+<p class="text-[11px] text-slate-500 pt-2">
+<span class="lang-fr">Édité par SAMPORIA SAS — Nouvelle-Calédonie.</span>
+
+</p>
+</div>
+<!-- Column 2: Produit -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">PRODUIT</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="/#fonctionnalites">Fonctionnalités</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#vos-donnees">Vos données</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#tarifs">Tarification</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/#faq">FAQ</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./app.html">Se connecter</a></li>
+<!-- RESSOURCES:DEBUT -->
+<li class=""><a class="hover:text-white transition-colors" href="/logiciel-gmao-parc-engins.html" data-sans-traduction="">Logiciel GMAO</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/plan-entretien-automatique.html" data-sans-traduction="">Plan d'entretien automatique</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/suivi-engins-chantier.html" data-sans-traduction="">Suivi des engins de chantier</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/calculateur-cout-horaire.html" data-sans-traduction="">Calculateur de coût horaire</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="/telecharger.html" data-sans-traduction="">Télécharger l'application</a></li>
+<!-- RESSOURCES:FIN -->
+</ul>
+</div>
+<!-- Column 3: Légal -->
+<div class="md:col-span-2 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">LÉGAL</span>
+
+</p>
+<ul class="space-y-2 text-xs text-slate-400">
+<li class=""><a class="hover:text-white transition-colors" href="./mentions-legales.html">Mentions légales</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./cgu.html">CGU</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./politique-confidentialite.html">Confidentialité</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./suppression-compte.html">Suppression du compte</a></li>
+<li class=""><a class="hover:text-white transition-colors" href="./supprimer-mes-donnees.html">Supprimer mes données</a></li>
+</ul>
+</div>
+<!-- Column 4: Contact -->
+<div class="md:col-span-3 space-y-3">
+<p class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+<span class="lang-fr">CONTACT</span>
+
+</p>
+<p class="text-xs">support@kalea.pro</p>
+<!-- RESEAUX:DEBUT -->
+<p class="text-xs text-slate-400 flex items-center gap-4"><a class="hover:text-white transition-colors" href="https://www.linkedin.com/company/kalea-software/" rel="me noopener" target="_blank" data-sans-traduction="">LinkedIn</a><a class="hover:text-white transition-colors" href="https://www.facebook.com/kalea.pro" rel="me noopener" target="_blank" data-sans-traduction="">Facebook</a></p>
+<!-- RESEAUX:FIN -->
+<p class="text-xs text-slate-400 leading-relaxed">
+<span class="lang-fr">Une question, un manuel qui résiste ? Écrivez-nous.</span>
+
+</p>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+<p class="">© <span class="" id="year-placeholder">2026</span> KALEA. Tous droits réservés.</p>
+<div class="flex items-center gap-6">
+<a class="hover:text-slate-300" href="./politique-confidentialite.html">Politique de confidentialité</a>
+<a class="hover:text-slate-300" href="./cgu.html">Conditions générales</a>
+</div>
+</div>
+</div>
+</footer>
+<script src="/selecteur-langue.js"></script>
+<script src="/bouton-theme.js"></script>
+<script src="/mesure.js"></script>
+</body>
+</html>

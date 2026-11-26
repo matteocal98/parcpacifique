@@ -246,6 +246,63 @@ export const PAGES = [
     },
   },
 
+  // ───────────────────────────────────────────────────────── 4. Calculateur gratuit de coût horaire
+  {
+    id: 'calculateur',
+    outil: 'cout-horaire',
+    fr: {
+      fichier: 'calculateur-cout-horaire.html',
+      titre: 'Calculateur de coût horaire d\'un engin, gratuit | KALEA',
+      description: 'Calculez le coût à l\'heure ou au km de votre engin : achat, revente, entretien, dépenses. Gratuit, sans compte, vos montants restent sur votre appareil.',
+      fil: 'Calculateur de coût horaire',
+      h1: 'Combien vous coûte votre engin à l\'heure ?',
+      intro: 'Gratuit et sans compte. <strong>Les montants que vous saisissez restent sur votre appareil.</strong>',
+      sections: [
+        { h2: 'Comment le calcul est fait', paras: [
+          '<strong>(prix d\'achat − revente estimée + dépenses) ÷ (compteur aujourd\'hui − compteur à l\'achat)</strong>',
+          'La perte de valeur est ce que vous avez payé, moins ce que vous pourriez en tirer aujourd\'hui. On y ajoute vos dépenses depuis l\'achat, puis on divise par les heures ou les kilomètres faits pendant que la machine est à vous.',
+        ] },
+        { h2: 'Machine achetée d\'occasion', paras: [
+          'Seul votre usage compte. Une machine achetée à 3 000 h et affichant 5 400 h a fait <strong>2 400 h chez vous</strong> : diviser par 5 400 h donnerait un coût trop bas.',
+        ] },
+        { h2: 'Bien comparer deux coûts', paras: [
+          'Pour comparer deux machines, ou un coût avec un tarif de location, comptez les mêmes dépenses des deux côtés : carburant, assurance, transport, conducteur.',
+          'KALEA calcule ce coût machine par machine à partir de vos interventions : voir <a href="{{lien:gmao}}">le logiciel GMAO</a>.',
+        ] },
+      ],
+      faq: [
+        { q: 'Mes montants sont-ils envoyés ou enregistrés ?', r: 'Non. Le calcul se fait dans votre navigateur et rien de ce que vous saisissez n\'est transmis. Seule la visite de la page est comptée, sans cookie.' },
+        { q: 'Que mettre dans la revente estimée ?', r: 'Le prix que vous pensez pouvoir obtenir aujourd\'hui. C\'est une estimation : le résultat change avec elle. Laissée vide, tout le prix d\'achat est compté.' },
+        { q: 'Faut-il compter le carburant ?', r: 'Comme vous voulez, à condition de faire pareil pour toutes les machines que vous comparez. Le champ est facultatif.' },
+      ],
+    },
+    en: {
+      fichier: 'en/hourly-cost-calculator.html',
+      titre: 'Free equipment hourly cost calculator | KALEA',
+      description: 'Work out the cost per hour or per km of your machine: purchase, resale, maintenance, spending. Free, no account, your figures stay on your device.',
+      fil: 'Hourly cost calculator',
+      h1: 'What does your machine cost you per hour?',
+      intro: 'Free, no account needed. <strong>The figures you enter stay on your device.</strong>',
+      sections: [
+        { h2: 'How it is calculated', paras: [
+          '<strong>(purchase price − estimated resale value + spending) ÷ (today\'s reading − reading at purchase)</strong>',
+          'The loss of value is what you paid, minus what you could get for it today. Your spending since purchase is added, then divided by the hours or kilometres done while the machine has been yours.',
+        ] },
+        { h2: 'Bought second-hand', paras: [
+          'Only your own use counts. A machine bought at 3,000 h and now showing 5,400 h has done <strong>2,400 h with you</strong>: dividing by 5,400 h would give a cost that is too low.',
+        ] },
+        { h2: 'Comparing two costs fairly', paras: [
+          'To compare two machines, or a cost with a rental rate, count the same expenses on both sides: fuel, insurance, transport, operator.',
+          'KALEA works out this cost machine by machine from your maintenance records: see <a href="{{lien:gmao}}">the CMMS software</a>.',
+        ] },
+      ],
+      faq: [
+        { q: 'Are my figures sent or saved?', r: 'No. The calculation happens in your browser and nothing you type is transmitted. Only the page visit is counted, without cookies.' },
+        { q: 'What should I enter as the resale value?', r: 'The price you think you could get today. It is an estimate: the result moves with it. If left empty, the whole purchase price is counted.' },
+        { q: 'Should fuel be counted?', r: 'Your choice, as long as you do the same for every machine you compare. The field is optional.' },
+      ],
+    },
+  },
   // ───────────────────────────────────────────────────────── 4. Télécharger l'application (boutons des boutiques réellement en ligne : voir BOUTIQUES)
   {
     id: 'telecharger',
