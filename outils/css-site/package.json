@@ -3,7 +3,7 @@
   "private": true,
   "description": "Compile le CSS Tailwind des pages publiques (decouvrir/index/en/pages de contenu) : remplace le moteur Tailwind chargé depuis Internet par le navigateur.",
   "scripts": {
-    "build": "tailwindcss -c tailwind.config.cjs -i input.css -o ../../site.css --minify",
+    "build": "tailwindcss -c tailwind.config.cjs -i input.css -o ../../site.css --minify && node ../maj-version-css.mjs",
     "pages": "node ../generer-pages-publiques.mjs && npm run build"
   },
   "devDependencies": {
