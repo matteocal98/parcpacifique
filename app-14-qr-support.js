@@ -695,6 +695,10 @@ function openMachineModal(companyId, categories, existing) {
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-date-achat">${trad('Date d\'achat')}</label>
                 <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="f-date-achat" type="date" value="${isEdit && existing.purchase_date ? esc(existing.purchase_date) : ''}">
               </div>
+              ${SCHEMA.hasPurchaseCounter ? `<div class="flex flex-col gap-space-xs">
+                <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" id="f-compteur-achat-etiquette" for="f-compteur-achat">${tR('Compteur à l\'achat ({unite})', { unite: trad('heures') })}</label>
+                <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-compteur-achat" inputmode="decimal" placeholder="${esc(trad('Vide = machine neuve'))}" value="${isEdit && existing.purchase_counter != null ? esc(texteAvecSeparateurs(existing.purchase_counter)) : ''}">
+              </div>` : ''}
               <div class="flex flex-col gap-space-xs">
                 <label class="font-label-sm text-label-sm text-on-surface-variant font-semibold" for="f-revente-estimee">${tR('Revente estimée ({unite})', { unite: deviseCourte() })}</label>
                 <input class="h-10 px-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" type="text" id="f-revente-estimee" inputmode="decimal" placeholder="${trad('Ex. 5000')}" value="${isEdit && existing.estimated_resale_value != null ? esc(existing.estimated_resale_value) : ''}">
@@ -713,6 +717,8 @@ function openMachineModal(companyId, categories, existing) {
               </div>` : ''}
             </div>
             <div class="hint" id="f-duree-vie-note"></div>
+            ${SCHEMA.hasPurchaseCounter ? `<div class="hint">${trad('Compteur à l\'achat : à remplir pour une machine d\'occasion, pour que le coût à l\'heure ou au km ne compte que votre usage.')}</div>
+            <div id="f-compteur-achat-note" role="status"></div>` : ''}
             <div class="hint">${trad('L\'amortissement (en années) sert à comparer le coût d\'entretien à la dépréciation annuelle de la machine (jauge Garder/Remplacer) ; sans lui, la jauge se base sur le cumul entretien / prix d\'achat. La durée de vie (en heures ou en km) sert à afficher la part de vie déjà consommée de la machine.')}</div>
             <div class="hint">${trad('Sert au calcul du coût total de possession (TCO), visible sur la fiche de la machine — laissez vide ce que vous ne connaissez pas encore.')}</div>
           </div>` : ''}
@@ -938,10 +944,11 @@ function openMachineModal(companyId, categories, existing) {
   habillerChampDate(overlay.querySelector('#f-service-date'), trad('Date de mise en service'));
   habillerChampDate(overlay.querySelector('#f-date-achat'), trad('Date d\'achat'));
   if (tcoActif()) {
-    ['#f-prix-achat', '#f-revente-estimee', '#f-duree-vie'].forEach((sel) => {
+    ['#f-prix-achat', '#f-revente-estimee', '#f-duree-vie', '#f-compteur-achat'].forEach((sel) => {
       activerSeparateurMilliers(overlay.querySelector(sel));
     });
     brancherDureeVie(overlay, false);
+    brancherCompteurAchat(overlay, isEdit ? machineCounter(existing) : null);
   }
 
   overlay.querySelector('#cancel-add').addEventListener('click', () => overlay.remove());
@@ -1375,6 +1382,7 @@ function openMachineModal(companyId, categories, existing) {
         const dateAchat = overlay.querySelector('#f-date-achat')?.value || '';
         updatePayload.purchase_price = nombreDepuisTexte(overlay.querySelector('#f-prix-achat')?.value);
         updatePayload.purchase_date = dateAchat || null;
+        if (SCHEMA.hasPurchaseCounter) updatePayload.purchase_counter = nombreDepuisTexte(overlay.querySelector('#f-compteur-achat')?.value);
         updatePayload.estimated_resale_value = nombreDepuisTexte(overlay.querySelector('#f-revente-estimee')?.value);
         updatePayload.expected_lifespan_counter = nombreDepuisTexte(overlay.querySelector('#f-duree-vie')?.value);
         updatePayload.amortization_years = nombreDepuisTexte(overlay.querySelector('#f-amortissement')?.value);
@@ -1759,6 +1767,7 @@ function colonnesMachineLues() {
     ...(SCHEMA.hasTco
       ? ['purchase_price', 'purchase_date', 'estimated_resale_value', 'expected_lifespan_counter', 'amortization_years']
       : []),
+    ...(SCHEMA.hasTco && SCHEMA.hasPurchaseCounter ? ['purchase_counter'] : []),
     ...(SCHEMA.hasArretCout ? ['downtime_hourly_cost'] : []),
   ].join(', ');
   return colonnesMachine;
@@ -1992,7 +2001,7 @@ async function boot(toastMessage) {
   // jusqu'au prochain démarrage. Constaté en direct sur un vrai téléphone
   // (c'est la même faille qui faisait disparaître le TCO du tableau de
   // bord — voir keeva-redesign-project).
-  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt, hasArchived, hasImport] = await Promise.all([
+  const [hasCounter, hasCounter2, hasBrandModel, hasKindPlate, hasModelYear, hasCreatedAt, hasArchived, hasImport, hasPurchaseCounter] = await Promise.all([
     sonderColonne('machines', 'counter_unit'),
     // Second compteur : sondé séparément, la migration peut être appliquée
     // sans que l'autre le soit (voir SCHEMA.hasCounter2).
@@ -2008,8 +2017,11 @@ async function boot(toastMessage) {
     sonderColonne('machines', 'archived'),
     // Import de machines en masse (étape 1 du plan nouvelles fonctionnalités) : colonnes ajoutées par import-machines-journal-audit.sql ; absentes → pas de bouton.
     sonderColonne('machines', 'external_ref, import_batch_id'),
+    // Compteur à l'achat (coût à l'heure des machines d'occasion) : colonne ajoutée par machines-compteur-achat.sql.
+    sonderColonne('machines', 'purchase_counter'),
   ]);
   SCHEMA.hasCounter = hasCounter;
+  SCHEMA.hasPurchaseCounter = hasPurchaseCounter;
   SCHEMA.hasCounter2 = hasCounter2;
   SCHEMA.hasBrandModel = hasBrandModel;
   SCHEMA.hasKind = hasKindPlate;

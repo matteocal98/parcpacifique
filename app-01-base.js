@@ -441,6 +441,27 @@ function noteReferenceDureeVie(ref) {
     valeur: texteAvecSeparateurs(ref.duree_vie), unite, source,
   });
 }
+// « Compteur à l'achat » : étiquette dans l'unité suivie, et alerte si le chiffre dépasse le relevé actuel.
+function brancherCompteurAchat(overlay, releveConnu) {
+  const champ = overlay.querySelector('#f-compteur-achat');
+  const note = overlay.querySelector('#f-compteur-achat-note');
+  const etiquette = overlay.querySelector('#f-compteur-achat-etiquette');
+  if (!champ || !note) return;
+  // Style posé ici et note retirée de l'écran quand elle est vide : ni trou dans le formulaire, ni feuille de style à republier.
+  note.style.cssText = 'font-size:12px;font-weight:700;color:var(--late-ink)';
+  const maj = () => {
+    const mode = overlay.querySelector('input[name=tm]:checked')?.value || 'days';
+    if (etiquette && mode !== 'days') etiquette.textContent = tR('Compteur à l\'achat ({unite})', { unite: counterUnitFromMode(mode) === 'km' ? trad('km') : trad('heures') });
+    const saisi = nombreDepuisTexte(overlay.querySelector('#f-current-hours')?.value);
+    const releve = saisi != null ? saisi : releveConnu;
+    const achat = nombreDepuisTexte(champ.value);
+    note.textContent = (achat != null && releve != null && achat > releve) ? trad('Ce chiffre dépasse le relevé actuel du compteur : vérifiez-le.') : '';
+    note.style.display = note.textContent ? '' : 'none';
+  };
+  overlay.addEventListener('input', maj);
+  overlay.addEventListener('change', maj);
+  maj();
+}
 // Branche le champ « Durée de vie » d'un formulaire de machine sur les références.
 // auto = true (création) : la moyenne est écrite dans le champ tant que le client n'y a rien mis de son cru.
 // auto = false (fiche existante) : rien n'est écrit d'office ; un bouton « Utiliser la moyenne » est proposé.
@@ -757,6 +778,11 @@ SCHEMA.hasReferences = false;
 // n'a pas trouvé les colonnes, et aucun bloc TCO ne s'affiche ni ne s'écrit
 // alors — comportement d'avant inchangé pour qui n'a pas encore la migration.
 SCHEMA.hasTco = false;
+
+// Compteur relevé le jour de l'achat (machines.purchase_counter, kalea-serveur/migrations/machines-compteur-achat.sql) :
+// une machine achetée d'occasion a déjà des heures/km qui ne sont pas à notre charge. Faux tant que la colonne est absente :
+// ni champ, ni écriture, et le coût à l'unité reste calculé sur tout le compteur.
+SCHEMA.hasPurchaseCounter = false;
 
 // Stock avancé (kalea-serveur/migrations/stock-champs-etiquettes.sql) : parts_catalog.ean + unit_of_measure ET
 // stock_items.location + status. Faux tant que la sonde n'a pas trouvé les 4 colonnes : rien de ce qui en dépend

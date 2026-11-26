@@ -575,10 +575,10 @@ function ouvrirModaleExport() {
   });
 }
 function exporterClassementTcoCsv(flotte) {
-  const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('Coût d\'arrêt'), trad('Heures d\'arrêt'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
+  const header = [trad('Machine'), trad('Prix d\'achat'), trad('Date d\'achat'), trad('Compteur à l\'achat'), trad('Revente estimée'), trad('Coûts entretien'), trad('Coûts d\'exploitation'), trad('Coût d\'arrêt'), trad('Heures d\'arrêt'), trad('TCO total'), trad('Coût annualisé'), trad('Coût/unité'), trad('Ratio (%)'), trad('Base du ratio'), trad('État')];
   const escape = (v) => `"${csvCelluleSure(v).replace(/"/g, '""')}"`;
   const rows = flotte.lignes.map(({ machine, tco, decision }) => [
-    machine.name, machine.purchase_price ?? '', machine.purchase_date ?? '', machine.estimated_resale_value ?? '',
+    machine.name, machine.purchase_price ?? '', machine.purchase_date ?? '', machine.purchase_counter ?? '', machine.estimated_resale_value ?? '',
     Math.round(tco.parEntretien), Math.round(tco.parExploitation), Math.round(tco.parArret || 0), Math.round((tco.heuresArret || 0) * 10) / 10, Math.round(tco.total),
     tco.coutAnnuel != null ? Math.round(tco.coutAnnuel) : '', tco.coutParUnite != null ? Math.round(tco.coutParUnite) : '',
     decision ? Math.round(decision.ratio * 100) : '', decision ? (decision.base === 'amortissement' ? trad('Dépréciation') : trad('Prix d\'achat')) : '',

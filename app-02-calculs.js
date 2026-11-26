@@ -188,6 +188,31 @@ function partDureeDeVie(machine) {
     depassee: consomme > vie,
   };
 }
+// L'usage qui est à NOTRE charge : relevé actuel moins le compteur relevé le jour de l'achat (vide = 0, machine neuve).
+// `null` si le compteur est illisible ou s'il n'a pas avancé depuis l'achat : pas de coût à l'unité inventé.
+function usageDepuisAchat(machine) {
+  const compteur = machineCounter(machine);
+  if (compteur == null) return null;
+  const usage = Number(compteur) - (Number(machine.purchase_counter) || 0);
+  return usage > 0 ? usage : null;
+}
+// Sur la fiche : dit sur quel usage le coût à l'unité est calculé, et signale le cas d'une machine d'occasion.
+function noteUsageAchatHtml(machine, tco) {
+  if (!SCHEMA.hasPurchaseCounter) return '';
+  const unite = counterUnitOf(machine);
+  if (unite !== 'hours' && unite !== 'km') return '';
+  const achat = machine.purchase_counter;
+  let texte = '';
+  if (achat == null) {
+    if (tco.coutParUnite == null) return '';
+    texte = trad('Coût de revient calculé sur tout le compteur. Machine achetée d\'occasion ? Indiquez son compteur à l\'achat dans « Modifier la machine ».');
+  } else if (tco.usage == null) {
+    texte = trad('Le compteur n\'a pas dépassé son relevé à l\'achat : coût de revient à l\'unité non calculé.');
+  } else {
+    texte = tR('Coût de revient calculé sur {n} depuis l\'achat.', { n: formatCounter(tco.usage, unite) });
+  }
+  return `<div class="hint">${esc(texte)}</div>`;
+}
 // Le TCO d'une machine. Retourne `null` sans prix d'achat : c'est ce `null`
 // qui décide, partout, si un bloc TCO s'affiche — jamais un calcul sur une
 // base à moitié connue.
@@ -215,7 +240,7 @@ function tcoMachine(machine, interventions, operatingCosts, pannes) {
   const nbArretNonChiffres = arrets.filter((p) => p.downtime_cost == null).length;
   const arretInclus = tcoArretInclus();
   const total = achat + parEntretien + parExploitation + (arretInclus ? parArret : 0) - revente;
-  const usage = machineCounter(machine);
+  const usage = usageDepuisAchat(machine);
   const coutParUnite = usage ? total / usage : null;
   const ratioMaintenanceAchat = achat > 0 ? parEntretien / achat : null;
   // Phase 2 : dépréciation annuelle — le signal que le brief d'origine décrit
@@ -227,7 +252,7 @@ function tcoMachine(machine, interventions, operatingCosts, pannes) {
   const depreciation = depreciationAnnuelle(machine);
   const ratioAmortissement = (depreciation && coutEntretienAnnuel != null) ? coutEntretienAnnuel / depreciation : null;
   return {
-    total, parAcquisition: achat, parEntretien, parExploitation, parArret, heuresArret, nbArret: arrets.length, nbArretNonChiffres, arretInclus, revente, coutParUnite, ratioMaintenanceAchat,
+    total, parAcquisition: achat, parEntretien, parExploitation, parArret, heuresArret, nbArret: arrets.length, nbArretNonChiffres, arretInclus, revente, usage, coutParUnite, ratioMaintenanceAchat,
     coutAnnuel: annees ? total / annees : null, coutEntretienAnnuel, depreciationAnnuelle: depreciation, ratioAmortissement,
   };
 }
@@ -469,7 +494,7 @@ function coutUsageMoyenVsCible(flotte) {
   const parUnite = new Map();
   (flotte?.lignes || []).forEach(({ machine, tco }) => {
     if (tco.coutParUnite == null) return;
-    const usage = machineCounter(machine);
+    const usage = usageDepuisAchat(machine);
     if (!usage) return;
     const unit = counterUnitOf(machine);
     if (!parUnite.has(unit)) {
@@ -516,7 +541,7 @@ function depassementsSeuilAvecEcart(flotte) {
   const liste = au.map(({ machine, tco, decision }) => {
     const seuil = Number(machine.category.target_hourly_cost);
     const coutReel = tco.coutParUnite;
-    const usage = machineCounter(machine);
+    const usage = usageDepuisAchat(machine);
     const uniteCourte = counterShort(counterUnitOf(machine));
     const ecartUnitaire = coutReel - seuil;
     const ecartPct = seuil ? (ecartUnitaire / seuil) * 100 : null;

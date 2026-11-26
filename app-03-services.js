@@ -615,7 +615,7 @@ async function genererRapportTcoPdf(donnees) {
         ? trad('Coût d\'arrêt = heures d\'arrêt × coût horaire d\'arrêt, figé à la résolution de la panne ; affiché ici mais NON inclus dans le TCO total (réglage de l\'application).')
         : trad('Le TCO total inclut le coût d\'arrêt des pannes (heures d\'arrêt × coût horaire d\'arrêt, figé à la résolution de la panne).')]
       : []),
-    trad('Coût par unité d\'usage = TCO total / relevé du compteur (heures ou km).'),
+    trad('Coût par unité d\'usage = TCO total / (relevé du compteur − compteur à l\'achat), en heures ou en km.'),
     trad('Dépréciation annuelle = (prix d\'achat − revente estimée) / durée d\'amortissement.'),
     trad('Ratio garder/remplacer = entretien annualisé / dépréciation annuelle ; repli sur entretien cumulé / prix d\'achat quand la durée d\'amortissement n\'est pas renseignée (la base retenue est alors indiquée).'),
     trad('Seuils d\'alerte = 50 % puis 100 % de la dépréciation annuelle ; 30 % puis 50 % du prix d\'achat en mode repli.'),

@@ -156,7 +156,7 @@ function openAddWizard(companyId, categories) {
     // TCO, facultatif (voir tcoActif()) : strict minimum à la création,
     // le reste (revente estimée, durée de vie) se règle plus tard sur la
     // fiche machine — pas de formulaire interminable ici.
-    purchasePrice: '', purchaseDate: '',
+    purchasePrice: '', purchaseDate: '', purchaseCounter: null,
   };
 
   function shell(inner) { overlay.innerHTML = `<div class="modal">${inner}</div>`; }
@@ -521,12 +521,18 @@ function openAddWizard(companyId, categories) {
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-date-achat">${trad('Date d\'achat')}</label>
                     <input id="f-date-achat" type="date" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" value="${esc(state.purchaseDate || state.serviceDate)}">
                   </div>
+                  ${SCHEMA.hasPurchaseCounter ? `<div>
+                    <label id="f-compteur-achat-etiquette" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-compteur-achat">${tR('Compteur à l\'achat ({unite})', { unite: trad('heures') })}</label>
+                    <input id="f-compteur-achat" type="text" inputmode="decimal" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${esc(trad('Vide = machine neuve'))}" value="${state.purchaseCounter != null ? texteAvecSeparateurs(state.purchaseCounter) : ''}">
+                  </div>` : ''}
                   <div>
                     <label id="f-duree-vie-etiquette" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-duree-vie">${tR('Durée de vie ({unite})', { unite: trad('heures') })}</label>
                     <input id="f-duree-vie" type="text" inputmode="numeric" class="w-full h-10 px-3 rounded-xl bg-surface-container-lowest text-sm text-on-surface shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary border-0 transition-shadow font-medium" placeholder="${tR('Ex. {n}', { n: texteAvecSeparateurs(10000) })}" value="${state.lifespan != null ? texteAvecSeparateurs(state.lifespan) : ''}">
                   </div>
                 </div>
                 <div class="text-[11px] text-slate-500 pt-2" id="f-duree-vie-note"></div>
+                ${SCHEMA.hasPurchaseCounter ? `<div class="text-[11px] text-slate-500 pt-2">${trad('Compteur à l\'achat : à remplir pour une machine d\'occasion, pour que le coût à l\'heure ou au km ne compte que votre usage.')}</div>
+                <div id="f-compteur-achat-note" role="status"></div>` : ''}
                 <div class="text-[11px] text-slate-500 pt-2">${trad('Sert à calculer le coût total de possession (TCO) de la machine — laissez vide si vous ne le savez pas, vous pourrez le renseigner plus tard.')}</div>
               </details>
             </div>` : ''}
@@ -728,7 +734,9 @@ function openAddWizard(companyId, categories) {
     if (tcoActif()) {
       activerSeparateurMilliers(overlay.querySelector('#f-prix-achat'));
       activerSeparateurMilliers(overlay.querySelector('#f-duree-vie'));
+      activerSeparateurMilliers(overlay.querySelector('#f-compteur-achat'));
       brancherDureeVie(overlay, true);
+      brancherCompteurAchat(overlay, null);
     }
 
     // ★ Lit TOUS les champs du formulaire unique dans `state` — factorisé
@@ -794,6 +802,7 @@ function openAddWizard(companyId, categories) {
         state.purchasePrice = prix == null ? '' : prix;
         state.purchaseDate = overlay.querySelector('#f-date-achat')?.value || '';
         state.lifespan = nombreDepuisTexte(overlay.querySelector('#f-duree-vie')?.value);
+        state.purchaseCounter = nombreDepuisTexte(overlay.querySelector('#f-compteur-achat')?.value);
       }
       state.tasks = overlay.querySelector('#f-tasks').value.trim();
       state.items = overlay._aiItems || state.items || null;
@@ -1285,6 +1294,7 @@ function openAddWizard(companyId, categories) {
             purchase_date: state.purchaseDate || state.serviceDate,
           } : {}),
           ...(tcoActif() && state.trackingMode !== 'days' && state.lifespan != null && state.lifespan > 0 ? { expected_lifespan_counter: state.lifespan } : {}),
+          ...(tcoActif() && SCHEMA.hasPurchaseCounter && state.trackingMode !== 'days' && state.purchaseCounter != null && state.purchaseCounter >= 0 ? { purchase_counter: state.purchaseCounter } : {}),
         })
         .select('id')
         .single();

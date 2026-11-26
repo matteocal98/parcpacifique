@@ -1449,6 +1449,7 @@ function openPlanView(machine, companyId, categories, options = {}) {
         ${kpi(trad('Valeur résiduelle estimée'), formatMontant(tco.revente))}
         ${kpi(trad('Ratio entretien / achat'), tco.ratioMaintenanceAchat != null ? tR('{n} %', { n: Math.round(tco.ratioMaintenanceAchat * 100) }) : '—', '', tco.ratioMaintenanceAchat != null && tco.ratioMaintenanceAchat >= 0.5)}
       </div>
+      ${noteUsageAchatHtml(machine, tco)}
     `;
   };
   const nomOperateurTexte = (h) => (h.performed_by && nomsEquipe.has(h.performed_by)) ? nomsEquipe.get(h.performed_by) : '';
